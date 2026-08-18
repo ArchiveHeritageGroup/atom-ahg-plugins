@@ -1,0 +1,157 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Create authority records and site records from a site catalogue CSV.
+ *
+ * A site record extends an authority record, so importing sites means creating
+ * the actor first and hanging the site record off it. Actors are created through
+ * QubitActor rather than raw SQL: the table is a nested set with a base `object`
+ * row and a slug, and an INSERT that skips any of those produces a record that
+ * exists in the table and is unreachable in the interface.
+ *
+ * Expects the columns emitted by the catalogue parser:
+ *   title, site_number, map_sheet, latitude, longitude, period, site_type,
+ *   culture, farm, check
+ *
+ * Rows whose `check` is not confirmed/transposed keep their site record but get
+ * no coordinate - a disputed position is withheld rather than guessed.
+ *
+ * Dry run unless --apply is given.
+ *
+ *   php plugins/ahgSiteRecordPlugin/bin/import-site-catalogue --file=sites.csv
+ *   php plugins/ahgSiteRecordPlugin/bin/import-site-catalogue --file=sites.csv --apply
+ */
+$root = getcwd();
+if (!is_file($root . '/config/ProjectConfiguration.class.php')) {
+    fwrite(STDERR, "Run from the AtoM root.\n");
+
+    exit(2);
+}
+require_once $root . '/config/ProjectConfiguration.class.php';
+
+$opts = ['file' => null, 'apply' => false, 'limit' => 0];
+foreach (array_slice($argv, 1) as $a) {
+    if ('--apply' === $a) { $opts['apply'] = true; continue; }
+    if (0 === strpos($a, '--file=')) { $opts['file'] = substr($a, 7); continue; }
+    if (0 === strpos($a, '--limit=')) { $opts['limit'] = (int) substr($a, 8); continue; }
+}
+if (!$opts['file'] || !is_readable($opts['file'])) {
+    fwrite(STDERR, "--file must point at a readable CSV\n");
+
+    exit(2);
+}
+
+$configuration = ProjectConfiguration::getApplicationConfiguration('qubit', 'prod', false);
+sfContext::createInstance($configuration);
+
+// Bulk import must not index as it goes.
+//
+// QubitActor::save() calls straight into arElasticSearchPlugin, and on a fresh
+// actor serializeI18ns() receives null for the culture list and throws a
+// TypeError from inside base AtoM - so every single insert fails with an
+// in_array() error that says nothing about search. AtoM's own importBulkTask
+// disables indexing for exactly this reason; run search:populate afterwards.
+if (class_exists('QubitSearch')) {
+    QubitSearch::disable();
+}
+
+\AhgCore\Core\AhgDb::init();
+$db = \Illuminate\Database\Capsule\Manager::connection();
+
+$fh = fopen($opts['file'], 'r');
+$head = fgetcsv($fh);
+$col = array_flip($head);
+
+$created = $skipped = $withCoords = $held = $reused = 0;
+$errors = [];
+$n = 0;
+
+while (false !== ($r = fgetcsv($fh))) {
+    if ($opts['limit'] && $n >= $opts['limit']) { break; }
+    ++$n;
+
+    $get = function ($k) use ($r, $col) { return isset($col[$k]) ? trim((string) ($r[$col[$k]] ?? '')) : ''; };
+
+    $title = $get('title');
+    $siteNo = $get('site_number');
+    if ('' === $title) { ++$skipped; continue; }
+
+    $lat = $get('latitude');
+    $lon = $get('longitude');
+    $hasCoords = ('' !== $lat && '' !== $lon);
+    if (!$hasCoords && in_array($get('check'), ['conflict'], true)) { ++$held; }
+
+    // Match on the site number first - it is the identifier. Name alone collides.
+    $existing = null;
+    if ('' !== $siteNo) {
+        $existing = $db->table('ahg_site_record')->where('site_number', $siteNo)->first();
+    }
+
+    if ($existing) {
+        ++$reused;
+        if ($opts['apply'] && $hasCoords) {
+            $db->table('ahg_site_record')->where('id', $existing->id)->update([
+                'latitude' => $lat, 'longitude' => $lon,
+                'coordinate_datum' => 'WGS84', 'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+        if ($hasCoords) { ++$withCoords; }
+
+        continue;
+    }
+
+    ++$created;
+    if ($hasCoords) { ++$withCoords; }
+
+    if (!$opts['apply']) { continue; }
+
+    try {
+        $actor = new QubitActor();
+        $actor->parentId = QubitActor::ROOT_ID;
+        $actor->authorizedFormOfName = $title;
+        $actor->entityTypeId = null;
+        $actor->descriptionIdentifier = $siteNo ?: null;
+        $actor->save();
+
+        $notes = [];
+        foreach (['period' => 'Period', 'site_type' => 'Site type',
+                  'culture' => 'Industry/culture', 'farm' => 'Farm'] as $k => $label) {
+            if ('' !== $get($k)) { $notes[] = $label . ': ' . $get($k); }
+        }
+
+        $db->table('ahg_site_record')->insert([
+            'actor_id' => $actor->id,
+            'site_number' => $siteNo ?: null,
+            'map_sheet' => $get('map_sheet') ?: null,
+            'latitude' => $hasCoords ? $lat : null,
+            'longitude' => $hasCoords ? $lon : null,
+            'coordinate_datum' => 'WGS84',
+            // Sensitive by default. A site position is restricted until somebody
+            // decides otherwise, never the other way round.
+            'locality_sensitive' => 1,
+            'locality_original' => $get('map_sheet'),
+            'notes' => $notes ? implode("\n", $notes) : null,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    } catch (\Throwable $e) {
+        $errors[] = $title . ': ' . substr($e->getMessage(), 0, 100);
+        --$created;
+    }
+}
+fclose($fh);
+
+printf("\n    rows read              %6d\n", $n);
+printf("    would create / created %6d\n", $created);
+printf("    already present        %6d\n", $reused);
+printf("    skipped (no title)     %6d\n", $skipped);
+printf("    carrying coordinates   %6d\n", $withCoords);
+printf("    coordinate held back   %6d\n", $held);
+if ($errors) {
+    printf("    ERRORS                 %6d\n", count($errors));
+    foreach (array_slice($errors, 0, 5) as $e) { echo "      {$e}\n"; }
+}
+echo $opts['apply']
+    ? "\n    APPLIED - indexing was disabled, run: php symfony search:populate\n"
+    : "\n    Dry run - nothing written. Add --apply.\n";
