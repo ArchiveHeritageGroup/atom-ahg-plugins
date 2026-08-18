@@ -182,9 +182,24 @@ foreach (array_keys($ahgHelpers) as $ahgHelper) {
     }
 }
 ?>
-<?php if ($ahgHelpers['DigitalObjectViewer'] && 0 < count($resource->digitalObjectsRelatedByobjectId)) { // Multiple digital objects ?>
-	<?php foreach ($resource->digitalObjectsRelatedByobjectId as $obj) { ?>
-		<?php echo render_digital_object_viewer($resource, $obj); ?>
+<?php if (0 < count($resource->digitalObjectsRelatedByobjectId)) { ?>
+	<?php if ($ahgHelpers['DigitalObjectViewer']) { // AHG viewer: IIIF, 3D, media ?>
+		<?php foreach ($resource->digitalObjectsRelatedByobjectId as $obj) { ?>
+			<?php echo render_digital_object_viewer($resource, $obj); ?>
+		<?php } ?>
+	<?php } else { ?>
+		<?php
+        // ahgIiifPlugin is off, so fall back to AtoM's own renderer rather than
+        // showing nothing. A description with an image should show the image
+        // whether or not an optional viewer plugin is installed - this is the
+        // same principle as the table guards in issue #302, applied to a
+        // component instead of a query.
+        ?>
+		<?php echo get_component('digitalobject', 'show', [
+		    'link' => isset($digitalObjectLink) ? $digitalObjectLink : null,
+		    'resource' => $resource->digitalObjectsRelatedByobjectId[0],
+		    'usageType' => QubitTerm::REFERENCE_ID,
+		]); ?>
 	<?php } ?>
 <!-- Fix model-viewer containment -->
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
