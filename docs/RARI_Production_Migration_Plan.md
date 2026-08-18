@@ -174,6 +174,267 @@ a different table.
 The 30 TB image store is not part of this work. On the development copy every digital
 object resolves to a marked placeholder; production keeps its own files.
 
-No coordinates, visit dates, regions or condition assessments exist in RARI's current
-data. Those fields are available in the new modules and stay empty until fieldwork fills
-them.
+~~No coordinates exist in RARI's current data.~~ **Corrected 18 August 2026: 3,062 do.**
+See "Coordinates" below. Visit dates, regions and condition assessments genuinely are
+empty and stay so until fieldwork fills them.
+
+---
+
+# Cutover plan, revised 18 August 2026
+
+Everything below was established by doing it on the development copy. It supersedes
+the estimates above where the two disagree.
+
+## Coordinates - 3,062 of them, and the plan said there were none
+
+RARI's pre-AtoM export (`fulldump-orig.xml`, 519MB RMXML) carries
+`site_coordinates_latitude` and `site_coordinates_longtitude` on its 7,633 site
+records. **3,062 sites have both, and none of them reached AtoM** - the original
+migration carried the map sheet reference across but not the position.
+
+Two reasons this was missed, and both produce a confident wrong answer rather than
+an error:
+
+- the field is misspelt **longtitude** in the source, so a search on the correct
+  spelling matches nothing;
+- plain `grep` treats the file as binary (it is iso-8859-1) and returns **no matches
+  and exit 0**. `grep -a` is required.
+
+**Validate against the map sheet rather than trusting the parse.** Most records also
+carry a 1:50,000 sheet reference, which encodes its own position and is therefore an
+independent witness. Measured on the development copy:
+
+| Verdict | Count | Action |
+|---|---|---|
+| Confirmed - inside its own sheet cell | 2,515 | import |
+| Transposed lat/lon, corrected | 41 | import |
+| No sheet to check against | 416 | import, flagged |
+| Near-miss (outside by under 0.3 deg) | 64 | **hold** |
+| Conflicts outright | 24 | **hold** |
+| Ambiguous name | 2 | **hold** |
+
+**2,972 imported on the development copy, 90 held for RARI to decide.**
+
+Three ways this data is silently wrong if parsed naively: decimal commas
+(`25 12' 13,64''` - splitting on the comma drops the fractional seconds, ~20m);
+**Libya and Ethiopia are north of the equator** and mostly carry no N/S letter, so
+defaulting to south puts them ~5,500km out in the Kalahari; and 721 values have no
+hemisphere letter at all.
+
+Tooling: `siterecord:import-coordinates`, dry-run by default, plus
+`ahgSiteRecordPlugin/bin/import-coordinates`.
+
+⚠️ **Sequence matters.** The 2 ambiguous names collide with the duplicate authority
+records. **Run the duplicate merge before the coordinate import**, or positions
+attach to records that are then merged away.
+
+## What production needs that the development copy did not have
+
+### Plugins
+
+The development copy went from 24 to 67 plugins to match archaeology. Production
+needs the same set. Three things that cost time:
+
+- **A stale `extension.json` blocks installs that are actually fine.**
+  ahgSecurityClearancePlugin's manifest declared 29 tables including four watermark
+  ones owned by ahgDAMPlugin. The installer refuses when a dependency's tables are
+  absent, so that false claim blocked security clearance, which blocked workflow,
+  which blocked authority resolution. **Sync manifests from the repo before
+  reaching for `--force`** - forcing would have overridden a correct refusal driven
+  by wrong metadata.
+- **Three of four dependency declarations are wrong, one is right.** ahgAuthorityResolution,
+  ahgExtendedRights, ahgRdm and ahgThemeB5 declare dependencies archaeology does not
+  have. For three, `--force` is correct. For ahgAuthorityResolutionPlugin it is
+  genuine: `ahg_mention` has a foreign key to `ahg_ner_entity` (ahgAIPlugin).
+  Install that schema and leave the plugin disabled, as archaeology has it.
+- **Enabling the set white-screened the site**, from two causes - see below.
+
+### The two white-screen causes
+
+- **Fatal:** several plugins build `sf_root_dir . '/atom-framework/bootstrap.php'`.
+  RARI ships the framework as ahgRuntimePlugin, so the path does not exist and the
+  require is fatal - a blank page, not an error page. ahgRuntimePlugin does provide
+  `bootstrap.php`; symlink `atom-framework` to it at the AtoM root. The durable fix
+  is for those plugins to resolve the framework relative to themselves.
+- **Missing theme assets:** ahgThemeB5Plugin looks for bundles in the web root's
+  `dist/`, but they ship in the plugin's `web/dist/`. Nothing publishes them on
+  enable. Copy them, and check before declaring the theme working.
+
+### CLI tasks do not exist on production either
+
+RARI runs **stock** `config/ProjectConfiguration.class.php`: a hardcoded ten-plugin
+array that never reads the `plugins` setting. AHG plugins are enabled by the
+*application* configuration, but AtoM discovers CLI tasks at *project* level - so
+`php symfony siterecord:*` does not exist, while the task file sits present and
+correct. Base AtoM is locked, so use the runners in each plugin's `bin/`.
+
+Two traps when driving an `sfBaseTask` directly, both of which look like success:
+the constructor does not set `$this->configuration` (dies on
+`sfContext::createInstance(null)`), and `sfTask::log()` publishes to `command.log`
+with no listener outside `sfCommandApplication` - so the task **runs to completion
+and prints nothing**, indistinguishable from finding no data.
+
+### Elasticsearch breaks bulk actor writes, in two opposite ways
+
+- **On create:** `QubitActor::save()` throws `in_array(): Argument #2 must be of type
+  array, null given` from arElasticSearchPlugin. **The row is already inserted**, so
+  a failed batch leaves orphan actors. Fix: `QubitSearch::disable()` (what AtoM's own
+  `importBulkTask` does), then `search:populate`.
+- **On update:** `getDocument() on null`, and here the exception lands **before** the
+  write, so nothing persists and disabling search does not help. Fix: write
+  `actor_i18n.authorized_form_of_name` directly.
+
+⚠️ **Check whether the write landed, in both directions. An error count is not a
+statement about the database.**
+
+## Gate the heritage landing page before go-live
+
+ahgHeritagePlugin redirects unauthenticated visitors from the homepage to its landing
+page, and that page does not scale:
+
+| | Descriptions | Heritage page |
+|---|---|---|
+| archaeology | 133 | 1.2s |
+| RARI | 292,278 | **112s** |
+
+An instance large enough for it to be slow is exactly an instance where every
+anonymous visitor is sent to it. Set `heritage_homepage_redirect` to `0` on
+production (gated from v3.103.24; default stays on so other instances are
+unaffected). `/reports` at 24s and browse at 6s are the same problem, unaddressed.
+
+## Menus and the public landing page
+
+- ahgCorePlugin overrode AtoM's quick links component and blanked it, on the
+  assumption of a hardcoded theme template that only ahgThemeB5Plugin ships. On any
+  other theme, Home / About / Privacy Policy / Help / General Feedback vanish while
+  the menu rows sit in the database untouched. Fixed v3.103.24.
+- Menu rows outlive their plugins: **Service Provider** and **Registers** rendered as
+  dead links after those plugins were retired, and **Reports** pointed at the picker
+  rather than the dashboard. Correct these through `QubitMenu` - the table is a
+  **nested set** and raw DELETEs leave holes.
+
+## The researcher deliverable
+
+The spatial analysis export was returning far fewer records than ARADA shows, and
+the cause was not one bug:
+
+- the report defaults to **top-level records only**, and RARI's 5,703 top-level
+  records carry **zero** subject tags - every technique tag is at item level;
+- it read technique from taxonomy 35 (Subjects) only, while **taxonomy 78 (Genre)
+  holds most of it** - 34,247 descriptions against 7,216;
+- the place filter pre-selected four countries, and on RARI the coordinate-bearing
+  and country-tagged populations **do not overlap at all**;
+- `Country` emitted site names when no country matched.
+
+All fixed by v3.103.28. Technique is now classified by **term id**, not substring:
+the shipped substring list contained `Khoekhoen`, `Khoi` and `geometric`, which are
+a people and a design description rather than techniques, and `Khoekhoen` has 267
+uses in a taxonomy the report reads.
+
+⚠️ **At 111km cells, Lesotho and South Africa are not separable** - Lesotho is ~220km
+across and entirely enclosed by ZA. Any Lesotho-versus-ZA comparison needs the
+15-minute cell (~28km), which is a disclosure decision.
+
+## Structural finding for RARI to consider
+
+Technique is not modelled as its own thing. Taxonomy 78 "Genre" mixes medium (Slide,
+183,186 uses; Negative; Hasselblad) with technique (Rock Painting 21,926; Rock
+Engraving 12,139). Taxonomy 35 "Subjects" mixes provenance (RARI Main Slide
+Collection), people (Benjamin Smith), culture (San) and technique (Brush painted
+4,713; Finger painted 1,314). *Painting* exists as three separate terms.
+
+A dedicated Technique taxonomy - Genre for format, Subjects for provenance - would
+let any report ask "what technique" without guessing. That is a data migration and
+RARI's vocabulary decision, not a code change.
+
+## Revised cutover sequence
+
+1. Block `rock_forms/` and rotate its credentials. Independent of everything else.
+2. Install plugins to parity; sync manifests first; symlink `atom-framework`;
+   publish theme assets. Verify no white screen before proceeding.
+3. Set `heritage_homepage_redirect = 0`.
+4. Correct the menu rows through `QubitMenu`.
+5. **Merge duplicate authority records** - RARI reviews the dry run first.
+6. Import map sheet localities, then coordinates. Both dry-run first; 90 held rows
+   go back to RARI.
+7. Clear the ISAAR `internal_structures` field only after 6 verifies.
+8. `search:populate`, then check `ahg_error_log` is quiet.
+9. Decide the 877 parallel-name site codes (still open, see above).
+10. Rotate credentials; confirm `/uploads/r/` is blocked for unpublished masters.
+
+## Still open
+
+- **90 held coordinate rows** need RARI's decision.
+- **877 parallel-name site codes** - the original open decision, unchanged.
+- The duplicate merge itself has only ever been a dry run.
+
+## Technique and tradition - enrich, do not replace
+
+**The structure already exists in the raw data. The migration lost it, and it can be
+put back additively.**
+
+The dump's site records carry four separate, controlled fields. These are not free
+text - the whole vocabulary is a handful of values:
+
+| Source field | Sites | Distinct values | Values |
+|---|---|---|---|
+| `<technique>` | 7,011 | **3** | Painting 6,262 · Engraving 706 · Painted engraving 43 |
+| `<painting>` | 5,820 | 4 | Brush painted 4,713 · Finger painted 1,322 · Handprint 101 · Handprints 4 |
+| `<engraving>` | 733 | 3 | Pecking 601 · Scratching 100 · Incision 92 |
+| `<tradition>` | 5,544 | 14 | San 4,335 · Pygmy (Forest Hunter Gatherers, Batwa) 564 · KhoeKhoen (Khoi) 267 · Bantu 220 · Chewa 105 · Sahara pastoralists 75 |
+
+AtoM flattened all four into generic Subject and Genre access points, where they now
+sit beside collection names, institutions and people. That is why the spatial report
+had to guess technique by matching word fragments, and why `KhoeKhoen (Khoi)` ended
+up in an *engraved* term list: **the source files it correctly as a tradition, and
+those 267 records are the same 267 that the substring matcher was about to
+misclassify.** The distinction was never missing from the data - only from what
+survived the import.
+
+### Why this is additive
+
+`ahg_site_attribute` already exists and is the right home:
+`site_record_id, taxonomy, code, note`. It is empty on both instances (7 rows), so
+nothing is overwritten and no existing access point, description or authority record
+is touched. Records catalogued since the original import keep whatever they have;
+the enrichment only adds rows that were not there.
+
+    ahg_site_attribute
+      taxonomy = 'technique'            code = Painting | Engraving | Painted engraving
+      taxonomy = 'painting_technique'   code = Brush painted | Finger painted | Handprint
+      taxonomy = 'engraving_technique'  code = Pecking | Scratching | Incision
+      taxonomy = 'tradition'            code = San | KhoeKhoen (Khoi) | Bantu | ...
+
+### Sequence
+
+1. **Seed the vocabularies** into `ahg_dropdown` under the four taxonomies above, so
+   they are editable in the Dropdown Manager rather than hardcoded. Normalise the
+   obvious variants at this point - `Handprint`/`Handprints` are one term, and
+   `KhoeKhoen (Khoi)` should agree with however RARI writes it elsewhere. **Ask RARI
+   before merging any two values**; they are the vocabulary owners.
+2. **Dry run the enrichment**, matching dump site -> `ahg_site_record` by the same
+   name key the coordinate import uses (3,060 of 3,062 resolved to exactly one
+   actor, so the join is known-good). Report unmatched rather than guessing.
+3. **Apply.** Insert only; never update or delete an existing attribute row. A
+   re-run must be a no-op, so match on
+   `(site_record_id, taxonomy, code)` before inserting.
+4. **Leave the access points alone.** The Subject and Genre terms stay exactly as
+   they are. Nothing that currently works stops working, and the two can be
+   reconciled later once RARI has seen the structured version.
+
+### What this buys
+
+- The spatial report can ask for technique directly instead of matching word
+  fragments across two taxonomies - no `Khoekhoen`-as-engraving, no
+  `Paintshop Shelter` as painted rock art.
+- Andrew's question - brush painted versus finger painted versus engraved - becomes
+  a field lookup rather than a text search, and `Painted engraving` (43 sites) stops
+  having to be forced into one of two booleans.
+- Tradition becomes queryable in its own right, which it currently is not.
+
+### What it does not do
+
+It does not fix descriptions catalogued after the original import, which have no
+counterpart in the dump. Those keep only their access points until someone
+catalogues technique on them. Coverage is therefore the 7,633 sites in the dump, not
+the whole catalogue - state that plainly in any report built on it.
