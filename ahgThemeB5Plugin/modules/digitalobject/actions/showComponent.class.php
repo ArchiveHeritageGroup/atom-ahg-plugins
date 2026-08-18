@@ -78,7 +78,17 @@ class DigitalObjectShowComponent extends AhgComponents
 
         $this->accessWarning = '';
         if (isset($this->resource->object) && $this->resource->object instanceof QubitInformationObject) {
-            $this->accessWarning = QubitInformationObject::getAccessWarning($this->resource->object, $this->usageType);
+            // QubitInformationObject has no getAccessWarning() - the method is a
+            // PRIVATE static on QubitGrantedRight, so this call was a fatal on every
+            // digital object render that reached it. Base AtoM's own showComponent
+            // uses checkPremis(), which writes the warning into $denyReason.
+            $denyReason = '';
+            QubitGrantedRight::checkPremis(
+                $this->resource->object->id,
+                'readReference',
+                $denyReason
+            );
+            $this->accessWarning = (string) $denyReason;
         }
     }
 }
