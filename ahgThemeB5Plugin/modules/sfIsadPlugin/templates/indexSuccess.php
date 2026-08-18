@@ -289,7 +289,7 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
     <?php if ($favoriteId): ?>
       <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'remove', 'id' => $favoriteId]); ?>" class="btn btn-xs btn-outline-danger ahg-favorite-btn" title="<?php echo __('Remove from Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart-broken"></i></a>
     <?php else: ?>
-      <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-danger" title="<?php echo __('Add to Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart"></i></a>
+      <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'add', 'slug' => $resource->slug]); ?>" class="btn btn-xs btn-outline-danger ahg-favorite-btn" title="<?php echo __('Add to Favorites'); ?>" data-bs-toggle="tooltip"><i class="fas fa-heart"></i></a>
     <?php endif; ?>
   <?php endif; ?>
   <?php if (in_array('ahgFeedbackPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>

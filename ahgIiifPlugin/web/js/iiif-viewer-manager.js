@@ -175,8 +175,34 @@ export class IiifViewerManager {
     // Viewer Switching
     // ========================================================================
 
+    /**
+     * Map the values other layers use onto the ones this switch understands.
+     *
+     * The server sends whatever `viewer_type` holds, and 'mirador-plugin' is the
+     * ViewerInjector's label key - a different namespace from these cases. An
+     * unknown value used to fall through the switch silently: every viewer hidden,
+     * none shown, nothing thrown, so the openseadragon fallback never ran and the
+     * value was then persisted to localStorage. A blank viewer area that survived
+     * a reload.
+     */
+    static normaliseViewerType(viewerType) {
+        const aliases = {
+            'mirador-plugin': 'mirador',
+            'mirador3': 'mirador',
+            'osd': 'openseadragon',
+            'seadragon': 'openseadragon',
+            'openseadragon-plugin': 'openseadragon',
+            'pdf': 'pdfjs',
+            '3d': 'model-viewer',
+        };
+
+        return aliases[viewerType] || viewerType;
+    }
+
     async showViewer(viewerType) {
         const vid = this.viewerId;
+
+        viewerType = IiifViewerManager.normaliseViewerType(viewerType);
 
         // Hide all viewers
         this.hideElement(`osd-${vid}`);
@@ -212,6 +238,15 @@ export class IiifViewerManager {
 
             case 'av':
                 this.showElement(`av-wrapper-${vid}`);
+                break;
+
+            default:
+                // An unrecognised viewer must not leave the area blank. Show the
+                // image viewer, which works for anything with a IIIF service.
+                console.warn('Unknown viewer type "' + viewerType + '", using openseadragon');
+                await this.initOpenSeadragon();
+                this.showElement(`osd-${vid}`);
+                viewerType = 'openseadragon';
                 break;
         }
 
