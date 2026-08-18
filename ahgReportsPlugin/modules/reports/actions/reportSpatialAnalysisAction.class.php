@@ -27,6 +27,9 @@ class reportsReportSpatialAnalysisAction extends AhgController
             // without clearance get a coarsened position and no map sheet, exactly as
             // on the record view.
             'site_record' => 'Site Records (ahgSiteRecordPlugin, locality gated)',
+            // Where no coordinate was ever recorded but a 1:50,000 sheet reference was.
+            // Yields a ~25km cell, not a position - see applyMapSheetCell().
+            'map_sheet' => 'Map Sheet Cells (area, not a point)',
             'nmmz_site' => 'NMMZ Archaeological Site Table',
             'dam_metadata' => 'DAM IPTC Metadata (from images)',
             'contact_info' => 'Repository Contact Information',

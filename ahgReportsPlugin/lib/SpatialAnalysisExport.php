@@ -591,4 +591,97 @@ class SpatialAnalysisExport
 
         return $row;
     }
+
+    /**
+     * Turn a 1:50,000 map sheet reference into a bounding cell.
+     *
+     * The southern African sheet convention encodes position in the code itself:
+     * 3027AC means the one-degree square whose north-west corner is 30 S, 27 E,
+     * then each letter halves it - A/B/C/D as NW/NE/SW/SE - giving a 15-minute
+     * cell. So the reference is not a label for a position, it IS the position,
+     * at about 25km.
+     *
+     * Two things this must not become:
+     *
+     * - A point. A centroid rendered as a pin reads as "the site is here", which
+     *   is exactly the claim a sheet reference does not support. The cell bounds
+     *   are exported alongside the centroid and the precision column says so.
+     * - A way around the locality rule. The map sheet is withheld from non-staff
+     *   on the record view, so a report that printed sheet codes for everyone
+     *   would quietly reverse that decision. Instead the cell degrades: staff get
+     *   the 15-minute cell, everyone else gets the one-degree square (~111km) and
+     *   a truncated reference. That is coarser than the coarsening already applied
+     *   to real coordinates, so it cannot leak more than the existing rule allows.
+     */
+    protected function applyMapSheetCell(array $row): array
+    {
+        $sheet = trim((string) ($row['map_sheet'] ?? ''));
+        $row['coordinate_precision'] = 'withheld';
+        $row['latitude'] = null;
+        $row['longitude'] = null;
+        $row['cell_north'] = null;
+        $row['cell_south'] = null;
+        $row['cell_west'] = null;
+        $row['cell_east'] = null;
+        $row['cell_size_km'] = null;
+
+        if (!preg_match('/^(\d{2})(\d{2})([A-D])([A-D])$/i', $sheet, $m)) {
+            // Withheld means withheld: do not echo the raw reference back, or a sheet
+            // this parser simply failed to read becomes a disclosure of the sheet.
+            $row['map_sheet'] = '';
+
+            return $row;
+        }
+
+        $service = 'AhgSiteRecordPlugin\\Services\\LocalityVisibilityService';
+        $sensitive = !isset($row['locality_sensitive']) || (bool) $row['locality_sensitive'];
+        $exact = !$sensitive;
+
+        if ($sensitive) {
+            // A record marked sensitive gets the exact cell only on a positive answer
+            // from the service. An absent class, a renamed method or a thrown error all
+            // mean the question could not be asked, and an unasked question is not a yes.
+            //
+            // The earlier shape of this granted the exact cell whenever the service could
+            // not be consulted, which is a guard that fails towards disclosure - the one
+            // direction a locality rule must never fail in.
+            try {
+                if (class_exists($service) && method_exists($service, 'canSeeExact')) {
+                    $user = \sfContext::hasInstance() ? \sfContext::getInstance()->getUser() : null;
+                    $exact = (bool) $service::canSeeExact($user, (object) $row);
+                }
+            } catch (\Throwable $e) {
+                $exact = false;   // undecidable means coarser, never finer
+            }
+        }
+
+        $south = (float) $m[1];
+        $west = (float) $m[2];
+        $size = 1.0;
+
+        if ($exact) {
+            foreach ([strtoupper($m[3]), strtoupper($m[4])] as $q) {
+                $size /= 2;
+                if ('C' === $q || 'D' === $q) {
+                    $south += $size;
+                }
+                if ('B' === $q || 'D' === $q) {
+                    $west += $size;
+                }
+            }
+        }
+
+        // Latitude is south of the equator throughout this grid, hence negative.
+        $row['cell_north'] = round(-$south, 6);
+        $row['cell_south'] = round(-($south + $size), 6);
+        $row['cell_west'] = round($west, 6);
+        $row['cell_east'] = round($west + $size, 6);
+        $row['latitude'] = round(-($south + $size / 2), 6);
+        $row['longitude'] = round($west + $size / 2, 6);
+        $row['cell_size_km'] = (int) round($size * 111);
+        $row['map_sheet'] = $exact ? strtoupper($sheet) : substr($sheet, 0, 4);
+        $row['coordinate_precision'] = $exact ? 'map_sheet_cell_15min' : 'degree_square';
+
+        return $row;
+    }
 }
