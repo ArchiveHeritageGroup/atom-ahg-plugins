@@ -174,13 +174,74 @@ function is_iiif_available()
         $available = false;
         return false;
     }
-    $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', '');
+    $cantaloupeUrl = get_iiif_cantaloupe_url();
     if (empty($cantaloupeUrl)) {
         $available = false;
+
         return false;
     }
-    $available = true;
-    return true;
+
+    // A configured URL is not a running image server.
+    //
+    // This used to return true as soon as a URL was set. With Cantaloupe absent -
+    // which is the normal state of an install that has not deployed it - the
+    // viewer initialised anyway, the manifest yielded no usable tiles, and every
+    // record with an image showed "No images found in manifest". The manifest was
+    // never the problem; the image server was not there, and the message sent
+    // people looking in the wrong place.
+    //
+    // Probing costs one short request per process, cached below, and only matters
+    // on pages that are about to render a viewer. Where the server does not
+    // answer the caller falls back to render_standard_viewer(), which needs no
+    // tile server at all.
+    $available = iiif_image_server_responds($cantaloupeUrl);
+
+    return $available;
+}
+
+/**
+ * Does the IIIF image server answer?
+ *
+ * Deliberately generous about what counts as answering: any HTTP status means
+ * something is listening and able to reply. A 403 or 404 from Cantaloupe's root
+ * is still a working server - only a connection failure or timeout is treated as
+ * absent.
+ */
+function iiif_image_server_responds(string $baseUrl, float $timeout = 1.5): bool
+{
+    static $seen = [];
+
+    $key = rtrim($baseUrl, '/');
+    if (array_key_exists($key, $seen)) {
+        return $seen[$key];
+    }
+
+    $seen[$key] = false;
+
+    if (!function_exists('curl_init')) {
+        // Without curl, assume configured means available rather than disabling
+        // a viewer that may well work.
+        return $seen[$key] = true;
+    }
+
+    try {
+        $ch = curl_init($key.'/');
+        curl_setopt_array($ch, [
+            CURLOPT_NOBODY => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT_MS => (int) ($timeout * 1000),
+            CURLOPT_TIMEOUT_MS => (int) ($timeout * 1000),
+            CURLOPT_FOLLOWLOCATION => false,
+        ]);
+        curl_exec($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+        $seen[$key] = $status > 0;
+    } catch (\Throwable $e) {
+        $seen[$key] = false;
+    }
+
+    return $seen[$key];
 }
 
 /**
