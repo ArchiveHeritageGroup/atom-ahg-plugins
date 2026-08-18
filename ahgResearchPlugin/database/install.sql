@@ -3349,3 +3349,474 @@ CREATE TABLE IF NOT EXISTS `research_writing_version` (
   KEY `idx_doc_version` (`doc_id`,`version_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 SET FOREIGN_KEY_CHECKS=1;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/dmp.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- ahgResearchPlugin - Data Management Plans (DMP).
+--
+-- Funder-grade DMPs (Science Europe / Horizon Europe core structure) owned by a
+-- researcher and optionally tied to a research_project. Standalone tables, no
+-- ENUMs, no FK to core AtoM tables.
+
+CREATE TABLE IF NOT EXISTS `research_dmp` (
+    `id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `researcher_id`    BIGINT UNSIGNED NOT NULL,
+    `project_id`       BIGINT UNSIGNED DEFAULT NULL COMMENT 'Optional research_project.id (logical FK)',
+    `title`            VARCHAR(255) NOT NULL,
+    `funder`           VARCHAR(255) DEFAULT NULL,
+    `grant_number`     VARCHAR(128) DEFAULT NULL,
+    `status`           VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, active, final',
+    `version`          VARCHAR(20) NOT NULL DEFAULT '1.0',
+
+    -- Science Europe core sections.
+    `data_description`     TEXT DEFAULT NULL COMMENT '1. Data summary / description',
+    `fair_findable`        TEXT DEFAULT NULL COMMENT '2a. Making data findable',
+    `fair_accessible`      TEXT DEFAULT NULL COMMENT '2b. Making data accessible',
+    `fair_interoperable`   TEXT DEFAULT NULL COMMENT '2c. Making data interoperable',
+    `fair_reusable`        TEXT DEFAULT NULL COMMENT '2d. Increasing data re-use',
+    `resources_costs`      TEXT DEFAULT NULL COMMENT '3. Allocation of resources',
+    `data_security`        TEXT DEFAULT NULL COMMENT '4. Data security',
+    `ethics_legal`         TEXT DEFAULT NULL COMMENT '5. Ethical aspects',
+    `other_issues`         TEXT DEFAULT NULL COMMENT '6. Other issues',
+
+    `created_at`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_researcher` (`researcher_id`),
+    KEY `idx_project` (`project_id`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_dmp_dataset` (
+    `id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `dmp_id`           BIGINT UNSIGNED NOT NULL,
+    `name`             VARCHAR(255) NOT NULL,
+    `description`      TEXT DEFAULT NULL,
+    `data_type`        VARCHAR(120) DEFAULT NULL COMMENT 'e.g. images, interviews, survey, geospatial',
+    `formats`          VARCHAR(255) DEFAULT NULL COMMENT 'File formats',
+    `est_volume`       VARCHAR(64) DEFAULT NULL COMMENT 'Estimated volume e.g. 20 GB',
+    `sensitivity`      VARCHAR(20) NOT NULL DEFAULT 'open' COMMENT 'open, restricted, sensitive',
+    `personal_data`    TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Contains personal data',
+    `license`          VARCHAR(128) DEFAULT NULL,
+    `repository`       VARCHAR(255) DEFAULT NULL COMMENT 'Target repository for sharing/preservation',
+    `retention_period` VARCHAR(64) DEFAULT NULL,
+    `sharing_policy`   TEXT DEFAULT NULL,
+    `created_at`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_dmp` (`dmp_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/experience_level.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- ahgResearchPlugin — research mode / experience level (cloned from Heratio)
+-- Per-researcher mode (beginning/intermediate/advanced) that curates the
+-- research sidebar: Beginning = core essentials, Intermediate adds the working
+-- tools, Advanced reveals everything. Defaults to 'intermediate'.
+-- Run-once, additive. MySQL 8 ADD COLUMN is INSTANT.
+
+ALTER TABLE `research_researcher`
+    ADD COLUMN `experience_level` VARCHAR(20) NOT NULL DEFAULT 'intermediate'
+    COMMENT 'beginning, intermediate, advanced' AFTER `status`;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/journal_builder.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- =====================================================================
+-- ahgResearchPlugin :: Journal Builder + Manuscript Workspace (#115)
+-- =====================================================================
+-- Mirrors the Heratio ResearchJournalService schema. Two modes over one
+-- set of tables:
+--   * publication: institutional journal -> issues -> articles -> TOC -> publish
+--   * manuscript:  single article drafted toward an external target journal
+--                  (references research_target_journal from the #114 twin
+--                   when present; degrades gracefully when absent).
+--
+-- NOTE: This is DISTINCT from the legacy researcher logbook table
+--       `research_journal_entry` (managed by lib/Services/JournalService.php).
+--       Do not confuse the two; they coexist.
+--
+-- InnoDB / utf8mb4. No ENUM (VARCHAR + COMMENT). IF NOT EXISTS throughout.
+-- =====================================================================
+
+-- ── Journals (publication or manuscript container) ───────────────────
+CREATE TABLE IF NOT EXISTS `research_journal` (
+    `id`                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `researcher_id`     BIGINT UNSIGNED NULL,
+    `kind`              VARCHAR(20) NOT NULL DEFAULT 'publication' COMMENT 'publication, manuscript',
+    `title`             VARCHAR(255) NOT NULL DEFAULT 'Untitled journal',
+    `subtitle`          VARCHAR(255) NULL,
+    `issn`              VARCHAR(20) NULL,
+    `eissn`             VARCHAR(20) NULL,
+    `publisher`         VARCHAR(255) NULL,
+    `description`       TEXT NULL,
+    `aims_scope`        TEXT NULL,
+    `editor_name`       VARCHAR(255) NULL,
+    `editor_email`      VARCHAR(255) NULL,
+    `target_journal_id` BIGINT UNSIGNED NULL COMMENT 'FK (soft) to research_target_journal (#114) when manuscript mode',
+    `cover_object_id`   BIGINT UNSIGNED NULL COMMENT 'optional cover digital object (parity with Heratio schema)',
+    `doi`               VARCHAR(128) NULL,
+    `status`            VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, published, archived',
+    `created_at`        DATETIME NULL,
+    `updated_at`        DATETIME NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_rj_researcher` (`researcher_id`),
+    KEY `idx_rj_kind` (`kind`),
+    KEY `idx_rj_status` (`status`),
+    KEY `idx_rj_target` (`target_journal_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── Issues (volume / number / date) ──────────────────────────────────
+CREATE TABLE IF NOT EXISTS `research_journal_issue` (
+    `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `journal_id`  BIGINT UNSIGNED NOT NULL,
+    `volume`      VARCHAR(40) NULL,
+    `number`      VARCHAR(40) NULL,
+    `title`       VARCHAR(255) NULL,
+    `issue_date`  DATE NULL,
+    `description` TEXT NULL,
+    `status`      VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, published',
+    `sort_order`  INT NOT NULL DEFAULT 0,
+    `created_at`  DATETIME NULL,
+    `updated_at`  DATETIME NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_rji_journal` (`journal_id`),
+    KEY `idx_rji_sort` (`journal_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── Articles (placed in an issue, or unassigned manuscript draft) ────
+CREATE TABLE IF NOT EXISTS `research_journal_article` (
+    `id`                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `journal_id`        BIGINT UNSIGNED NOT NULL,
+    `issue_id`          BIGINT UNSIGNED NULL COMMENT 'NULL = unassigned / manuscript draft',
+    `title`             VARCHAR(500) NOT NULL DEFAULT 'Untitled article',
+    `authors`           TEXT NULL,
+    `abstract`          TEXT NULL,
+    `keywords`          VARCHAR(500) NULL,
+    `body_markdown`     LONGTEXT NULL,
+    `body_html`         LONGTEXT NULL,
+    `reference_style`   VARCHAR(40) NULL COMMENT 'APA, Harvard, Vancouver, Chicago, MLA, IEEE',
+    `target_journal_id` BIGINT UNSIGNED NULL COMMENT 'FK (soft) to research_target_journal (#114)',
+    `doi`               VARCHAR(128) NULL,
+    `word_count`        INT NOT NULL DEFAULT 0,
+    `status`            VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, submitted, published',
+    `sort_order`        INT NOT NULL DEFAULT 0,
+    `created_at`        DATETIME NULL,
+    `updated_at`        DATETIME NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_rja_journal` (`journal_id`),
+    KEY `idx_rja_issue` (`issue_id`),
+    KEY `idx_rja_sort` (`journal_id`, `sort_order`),
+    KEY `idx_rja_target` (`target_journal_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/lecture.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- =============================================================================
+-- ahgResearchPlugin — Lecture Builder (#116)
+-- PSIS-parity port of Heratio ResearchLectureService / ResearchLectureController.
+--
+-- One model, three uses via the `type` column:
+--   curriculum : teaching content that feeds the training curriculum
+--   talk       : public lecture/seminar record (speaker, schedule, recording)
+--   standalone : reusable authored lecture (ordered sections + media)
+--
+-- A lecture has ordered content SECTIONS (heading, Markdown body, optional media)
+-- and RESOURCES (reading / slides / video / link / file).
+--
+-- NEVER uses ENUM — VARCHAR + COMMENT listing valid values.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `research_lecture` (
+    `id`                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `researcher_id`       BIGINT UNSIGNED NULL,
+    `type`                VARCHAR(20)  NOT NULL DEFAULT 'standalone' COMMENT 'curriculum, talk, standalone',
+    `title`               VARCHAR(255) NOT NULL DEFAULT 'Untitled lecture',
+    `subtitle`            VARCHAR(255) NULL,
+    `summary`             TEXT NULL,
+    `speaker_name`        VARCHAR(255) NULL,
+    `speaker_affiliation` VARCHAR(255) NULL,
+    `scheduled_at`        DATETIME NULL,
+    `location`            VARCHAR(255) NULL,
+    `duration_minutes`    INT UNSIGNED NULL,
+    `recording_url`       VARCHAR(1000) NULL,
+    `slides_url`          VARCHAR(1000) NULL,
+    `curriculum_ref`      VARCHAR(255) NULL COMMENT 'free-text ref to a training curriculum item',
+    `status`              VARCHAR(20)  NOT NULL DEFAULT 'draft' COMMENT 'draft, scheduled, delivered, published, archived',
+    `created_at`          DATETIME NULL,
+    `updated_at`          DATETIME NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_lecture_type`         (`type`),
+    KEY `idx_lecture_status`       (`status`),
+    KEY `idx_lecture_researcher`   (`researcher_id`),
+    KEY `idx_lecture_scheduled_at` (`scheduled_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_lecture_section` (
+    `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `lecture_id`    BIGINT UNSIGNED NOT NULL,
+    `heading`       VARCHAR(255) NULL,
+    `body_markdown` MEDIUMTEXT NULL,
+    `body_html`     MEDIUMTEXT NULL,
+    `media_url`     VARCHAR(1000) NULL,
+    `media_type`    VARCHAR(20) NULL COMMENT 'image, video, audio, embed',
+    `sort_order`    INT NOT NULL DEFAULT 0,
+    `created_at`    DATETIME NULL,
+    `updated_at`    DATETIME NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_lecture_section_lecture` (`lecture_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `research_lecture_resource` (
+    `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `lecture_id`    BIGINT UNSIGNED NOT NULL,
+    `label`         VARCHAR(255) NOT NULL DEFAULT 'Resource',
+    `url`           VARCHAR(1000) NULL,
+    `resource_type` VARCHAR(20) NOT NULL DEFAULT 'link' COMMENT 'reading, slides, video, link, file',
+    `sort_order`    INT NOT NULL DEFAULT 0,
+    `created_at`    DATETIME NULL,
+    `updated_at`    DATETIME NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_lecture_resource_lecture` (`lecture_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migration_researcher_offline.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- Researcher Offline — sync-back targets for work done offline.
+--
+-- Extends the existing /research/mobile offline PWA + OfflineSyncService so a
+-- researcher can, while offline on their own collected records, capture metadata
+-- suggestions (curator-reviewed, never a live edit) and attach files, then sync
+-- them back. Notes/sources/annotations reuse existing tables (research_annotation,
+-- research_collection_item.notes) — no new table needed for those.
+--
+-- Additive only. Soft references (no FK to core tables). No ENUM. No atom_plugin insert.
+-- Run on both archive + archeology.
+
+-- Proposed metadata corrections/additions from offline work. These are PROPOSALS
+-- queued for a curator to review — they never touch the live catalogue directly.
+CREATE TABLE IF NOT EXISTS research_metadata_suggestion (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    researcher_id INT NOT NULL,
+    object_id INT NOT NULL COMMENT 'information_object.id the suggestion is about',
+    field VARCHAR(191) NOT NULL COMMENT 'e.g. Title, Dates, Scope and content',
+    suggestion TEXT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'open' COMMENT 'open, accepted, rejected',
+    reviewed_by INT DEFAULT NULL COMMENT 'user_id of the curator who actioned it',
+    reviewed_at DATETIME DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_rms_researcher (researcher_id),
+    KEY idx_rms_object (object_id),
+    KEY idx_rms_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Files a researcher attaches to a record while offline (e.g. field-work photos).
+-- Stored on disk under uploads/research-offline/; this row is the metadata + path.
+CREATE TABLE IF NOT EXISTS research_offline_attachment (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    researcher_id INT NOT NULL,
+    object_id INT DEFAULT NULL COMMENT 'information_object.id the file relates to (nullable)',
+    file_name VARCHAR(500) NOT NULL,
+    mime_type VARCHAR(255) DEFAULT NULL,
+    file_size BIGINT UNSIGNED DEFAULT 0,
+    file_path VARCHAR(1000) NOT NULL COMMENT 'relative path under the atom root',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_roa_researcher (researcher_id),
+    KEY idx_roa_object (object_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/target_journals.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- =============================================================================
+-- ahgResearchPlugin :: Target-journal directory (#114 / Heratio #1107)
+--
+-- Journals to publish TO, each with its subject scope and submission rules.
+-- The directory CORE is jurisdiction-neutral; the DHET accredited list is the
+-- South-African accreditation MODULE (accreditation_market = 'ZA'). Other
+-- markets seed from DOAJ / Scopus / Web of Science / ERIH-PLUS.
+--
+-- Mirrors the Heratio ResearchTargetJournalService data model.
+-- NEVER use ENUM (VARCHAR + COMMENT instead). InnoDB / utf8mb4.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `research_target_journal` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(300) NOT NULL,
+  `subtitle` VARCHAR(255) DEFAULT NULL,
+  `issn` VARCHAR(20) DEFAULT NULL,
+  `eissn` VARCHAR(20) DEFAULT NULL,
+  `publisher` VARCHAR(255) DEFAULT NULL,
+  `homepage_url` VARCHAR(1000) DEFAULT NULL,
+  `submission_url` VARCHAR(1000) DEFAULT NULL,
+  `languages` VARCHAR(120) DEFAULT NULL,
+  `subject_scope` TEXT DEFAULT NULL COMMENT 'what the journal mainly accepts',
+  `article_types` VARCHAR(255) DEFAULT NULL,
+  `accreditation` VARCHAR(255) DEFAULT NULL COMMENT 'DHET, IBSS, Scopus, WoS, DOAJ, Sabinet, ERIH-PLUS, ...',
+  `accreditation_market` VARCHAR(8) DEFAULT NULL COMMENT 'per-market module tag, e.g. ZA for DHET',
+  `reference_style` VARCHAR(40) DEFAULT NULL COMMENT 'APA, Harvard, Vancouver, Chicago, MLA, IEEE',
+  `structure_notes` TEXT DEFAULT NULL,
+  `max_words` INT DEFAULT NULL,
+  `abstract_max_words` INT DEFAULT NULL,
+  `peer_review` VARCHAR(40) DEFAULT NULL COMMENT 'double-blind, single-blind, open, none',
+  `open_access` TINYINT(1) NOT NULL DEFAULT 0,
+  `apc_amount` VARCHAR(60) DEFAULT NULL COMMENT 'article processing charge note',
+  `turnaround` VARCHAR(120) DEFAULT NULL,
+  `notes` TEXT DEFAULT NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'active, discontinued',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_issn` (`issn`),
+  KEY `idx_title` (`title`),
+  KEY `idx_market` (`accreditation_market`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/training.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- =============================================================================
+-- ahgResearchPlugin :: Training curriculum + LMS (#117)
+-- PSIS-parity port of Heratio ResearchTrainingService / ResearchTrainingController.
+--
+-- Institution-neutral training/LMS. A course defines audience/role, language and
+-- a configurable pass mark; its modules sequence content (each may REUSE a
+-- curriculum lecture from research_lecture, #116 twin, degrade gracefully if
+-- absent, or carry its own Markdown); learners enrol, work through modules
+-- (progress tracked), take a multiple-choice assessment, and on passing (with all
+-- modules complete) are issued a unique certificate.
+--
+-- Conventions: CREATE TABLE IF NOT EXISTS, InnoDB, utf8mb4. No ENUM (VARCHAR +
+-- COMMENT). No INSERT INTO atom_plugin. Mirrors the Heratio table names exactly.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS `training_course` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `researcher_id` int DEFAULT NULL COMMENT 'FK researcher (course author), nullable',
+  `title` varchar(255) NOT NULL,
+  `description` text,
+  `audience` varchar(255) DEFAULT NULL COMMENT 'audience / role the course targets (data, not hard-coded)',
+  `language` varchar(40) DEFAULT NULL COMMENT 'course language code/name (data)',
+  `pass_mark` int NOT NULL DEFAULT 80 COMMENT 'default pass mark percentage 0-100',
+  `status` varchar(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, published, archived',
+  `sort_order` int DEFAULT 0,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_training_course_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `training_module` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `course_id` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `lecture_id` int DEFAULT NULL COMMENT 'FK research_lecture (curriculum lecture, #116) - degrade gracefully if absent',
+  `body_markdown` mediumtext COMMENT 'own Markdown content when no lecture reused',
+  `body_html` mediumtext COMMENT 'rendered HTML cache of body_markdown',
+  `sort_order` int DEFAULT 0,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_training_module_course` (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `training_assessment` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `course_id` int NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `pass_mark` int DEFAULT NULL COMMENT 'overrides course pass_mark when set (0-100)',
+  `questions_json` longtext COMMENT 'JSON [{q, options:[...], answer:index}]',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_training_assessment_course` (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `training_enrolment` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `course_id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `learner_name` varchar(255) DEFAULT NULL,
+  `learner_email` varchar(255) DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'enrolled' COMMENT 'enrolled, in_progress, completed',
+  `score` int DEFAULT NULL COMMENT 'best assessment score percentage',
+  `enrolled_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_training_enrolment_course` (`course_id`),
+  KEY `idx_training_enrolment_user` (`user_id`),
+  KEY `idx_training_enrolment_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `training_progress` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `enrolment_id` int NOT NULL,
+  `module_id` int NOT NULL,
+  `completed` tinyint(1) NOT NULL DEFAULT 0,
+  `completed_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_training_progress_enrol_module` (`enrolment_id`,`module_id`),
+  KEY `idx_training_progress_enrol` (`enrolment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `training_certificate` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `enrolment_id` int NOT NULL,
+  `certificate_no` varchar(40) NOT NULL,
+  `score` int DEFAULT NULL,
+  `issued_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_training_certificate_no` (`certificate_no`),
+  KEY `idx_training_certificate_enrol` (`enrolment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

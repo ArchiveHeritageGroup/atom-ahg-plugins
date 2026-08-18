@@ -41,5 +41,12 @@
             "web/css/vendor/select2-bootstrap-5-theme.min.css",
             "web/css/vendor/tom-select.bootstrap5.min.css"
         ]
-    }
+    },
+    "tables": [
+        "ahg_dropdown",
+        "ahg_tts_settings",
+        "email_setting",
+        "ahg_workflow_queue",
+        "ahg_workflow_sla_policy"
+    ]
 }

@@ -27,7 +27,9 @@
             "label": "Condition Report",
             "icon": "bi-clipboard-check",
             "template": "ahgConditionPlugin/templates/display/_condition_report.php",
-            "contexts": ["informationobject"],
+            "contexts": [
+                "informationobject"
+            ],
             "permission": "update",
             "weight": 40
         }
@@ -35,12 +37,22 @@
     "display_panels": [],
     "display_badges": [],
     "tables": [
-        "condition_check",
-        "condition_check_i18n",
-        "condition_photo",
-        "condition_annotation",
-        "condition_template",
-        "condition_field"
+        "condition_assessment_schedule",
+        "condition_conservation_link",
+        "condition_damage",
+        "condition_event",
+        "condition_image",
+        "condition_report",
+        "condition_vocabulary",
+        "condition_vocabulary_term",
+        "spectrum_condition_check",
+        "spectrum_condition_check_data",
+        "spectrum_condition_photo",
+        "spectrum_condition_photo_comparison",
+        "spectrum_condition_photos",
+        "spectrum_condition_template",
+        "spectrum_condition_template_field",
+        "spectrum_condition_template_section"
     ],
     "shared_tables": [],
     "helpers": [],

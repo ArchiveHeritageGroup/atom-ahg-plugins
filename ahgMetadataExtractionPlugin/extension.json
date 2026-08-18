@@ -27,7 +27,6 @@
         "exiftool": "ExifTool must be installed on the system"
     },
     "tables": [
-        "extracted_metadata",
         "metadata_extraction_log",
         "ahg_embedded_metadata"
     ],

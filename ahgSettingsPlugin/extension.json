@@ -19,7 +19,13 @@
     "display_actions": [],
     "display_panels": [],
     "display_badges": [],
-    "tables": [],
+    "tables": [
+        "numbering_scheme",
+        "numbering_sequence_used",
+        "numbering_scheme_repository",
+        "ahg_error_log",
+        "level_of_description_sector"
+    ],
     "shared_tables": [],
     "helpers": [],
     "category": "admin",

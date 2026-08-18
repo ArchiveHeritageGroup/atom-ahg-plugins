@@ -13,5 +13,8 @@
     },
     "dependencies": [
         "ahgCorePlugin"
+    ],
+    "tables": [
+        "contact_information_extended"
     ]
 }

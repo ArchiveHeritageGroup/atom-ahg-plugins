@@ -17,9 +17,11 @@
     ],
     "tables": [
         "access_request",
-        "access_request_scope",
-        "access_request_log",
         "access_request_approver",
+        "access_request_justification",
+        "access_request_log",
+        "access_request_scope",
+        "security_access_request",
         "object_access_grant"
     ]
 }

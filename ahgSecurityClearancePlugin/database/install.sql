@@ -536,3 +536,115 @@ CREATE TABLE IF NOT EXISTS `user_compartment_access` (
   KEY `idx_expiry` (`expiry_date`,`active`),
   CONSTRAINT `user_compartment_access_ibfk_1` FOREIGN KEY (`compartment_id`) REFERENCES `security_compartment` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/acl_groups.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- ahgSecurityClearancePlugin: AtoM-native group ACL model (groups + permission matrix).
+-- Additive; run on the live archive DB. No core-table changes.
+-- acl_permission follows AtoM's QubitAclPermission: object_id NULL = root/class-level;
+-- `constants` holds JSON scope (e.g. {"repository":"slug"}); class derived via object.class_name join.
+
+CREATE TABLE IF NOT EXISTS `acl_group` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `parent_id` BIGINT UNSIGNED NULL,
+    `source_culture` VARCHAR(16) NOT NULL DEFAULT 'en',
+    `serial_number` INT NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `acl_group_i18n` (
+    `id` BIGINT UNSIGNED NOT NULL,
+    `culture` VARCHAR(16) NOT NULL,
+    `name` VARCHAR(255),
+    `description` TEXT,
+    `serial_number` INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`, `culture`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `acl_user_group` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `group_id` BIGINT UNSIGNED NOT NULL,
+    `serial_number` INT NOT NULL DEFAULT 0,
+    INDEX `idx_aug_user` (`user_id`),
+    INDEX `idx_aug_group` (`group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `acl_permission` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NULL,
+    `group_id` BIGINT UNSIGNED NULL,
+    `object_id` BIGINT UNSIGNED NULL,
+    `action` VARCHAR(40) NOT NULL,
+    `grant_deny` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=grant, 0=deny',
+    `conditional` TEXT NULL,
+    `constants` TEXT NULL COMMENT 'JSON scope, e.g. {"repository":"slug"}',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL,
+    `serial_number` INT NOT NULL DEFAULT 0,
+    INDEX `idx_ap_group` (`group_id`),
+    INDEX `idx_ap_user` (`user_id`),
+    INDEX `idx_ap_object` (`object_id`),
+    INDEX `idx_ap_action` (`action`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/add_audit_chain_columns.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- #126: tamper-evident hash chaining for the security access log.
+-- Also restores compartment_id + session_id (logAccess() writes them but the
+-- columns were missing, so every audit write silently failed).
+ALTER TABLE `security_access_log`
+  ADD COLUMN `compartment_id` INT UNSIGNED NULL AFTER `classification_id`,
+  ADD COLUMN `session_id` VARCHAR(255) NULL AFTER `user_agent`,
+  ADD COLUMN `prev_hash` CHAR(64) NULL COMMENT 'SHA-256 entry_hash of the previous entry',
+  ADD COLUMN `entry_hash` CHAR(64) NULL COMMENT 'SHA-256(prev_hash || canonical(content))',
+  ADD KEY `idx_sal_entry_hash` (`entry_hash`);
+
+-- An audit trail must be append-only and independent of the lifecycle of the
+-- things it records. Drop the FKs so deleting a described object (CASCADE) or
+-- a classification (RESTRICT) can neither erase nor block audit history — the
+-- ids remain as plain snapshot values and the hash chain stays intact.
+ALTER TABLE `security_access_log` DROP FOREIGN KEY `fk_sal_object`;
+ALTER TABLE `security_access_log` DROP FOREIGN KEY `fk_sal_classification`;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/add_webauthn_credential_table.sql on 2026-08-17.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php,
+-- so a clean install silently lacked whatever it defines. Our own instances
+-- had it because someone applied the file by hand. A plugin's schema is
+-- install.sql; there is no second file.
+-- ---------------------------------------------------------------------------
+
+-- #126 / #721: WebAuthn / FIDO2 passkey credentials (MFA second factor).
+CREATE TABLE IF NOT EXISTS `ahg_webauthn_credential` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `credential_id` VARBINARY(512) NOT NULL,
+  `public_key` MEDIUMBLOB NOT NULL COMMENT 'serialized PublicKeyCredentialSource (JSON)',
+  `attestation_type` VARCHAR(32) NOT NULL DEFAULT 'none',
+  `aaguid` CHAR(36) DEFAULT NULL,
+  `sign_count` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `transports` JSON DEFAULT NULL,
+  `label` VARCHAR(255) NOT NULL DEFAULT '',
+  `last_used_at` DATETIME DEFAULT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_webauthn_credential_id` (`credential_id`),
+  KEY `idx_webauthn_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

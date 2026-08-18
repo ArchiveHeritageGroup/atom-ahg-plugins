@@ -24,10 +24,11 @@
     },
     "install_sql": "database/install.sql",
     "tables": [
-        "ahg_audit_log",
-        "ahg_audit_authentication",
         "ahg_audit_access",
+        "ahg_audit_authentication",
+        "ahg_audit_log",
+        "ahg_audit_retention_policy",
         "ahg_audit_settings",
-        "ahg_audit_retention_policy"
+        "ahg_audit_chain_state"
     ]
 }

@@ -21,21 +21,31 @@
         ]
     },
     "tables": [
+        "display_collection_type",
+        "display_collection_type_i18n",
+        "display_field",
+        "display_field_i18n",
+        "display_level",
+        "display_level_i18n",
+        "display_mode_global",
+        "display_object_config",
+        "display_object_profile",
         "display_profile",
         "display_profile_i18n",
-        "display_object_config",
-        "display_collection_type",
-        "display_field",
-        "display_level",
-        "display_mode_global",
-        "user_display_preference"
+        "user_display_preference",
+        "user_browse_settings",
+        "display_facet_cache"
     ],
     "display_registry": {
         "description": "Other plugins can register display providers via their extension.json",
         "example": {
             "display_provider": {
                 "class": "MyPlugin\\DisplayProvider",
-                "provides": ["actions", "panels", "badges"]
+                "provides": [
+                    "actions",
+                    "panels",
+                    "badges"
+                ]
             }
         }
     }

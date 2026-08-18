@@ -15,7 +15,10 @@
     ],
     "category": "user-engagement",
     "tables": [
-        "request_to_publish"
+        "request_to_publish",
+        "request_to_publish_i18n",
+        "rtp_workflow",
+        "rtp_review"
     ],
     "shared_tables": [
         "information_object",
