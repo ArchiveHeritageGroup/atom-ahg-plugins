@@ -143,7 +143,13 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
     <!-- Profile Section -->
     <li><h6 class="dropdown-header"><i class="fas fa-user me-1"></i><?php echo __('Profile'); ?></h6></li>
     <li>
-      <a class="dropdown-item" href="<?php echo url_for('user/' . $sf_user->getAttribute('user_slug')); ?>">
+      <?php
+        // 'user/<slug>' has no route: Symfony reads it as module user, action
+        // <slug>, and every profile link 404s. AtoM addresses a user profile the
+        // way the base userProfile menu entry does - user/index with the slug as
+        // a parameter - which is also the form the sibling links here already use.
+      ?>
+      <a class="dropdown-item" href="<?php echo url_for(['module' => 'user', 'action' => 'index', 'slug' => $sf_user->getAttribute('user_slug')]); ?>">
         <i class="fas fa-id-card me-2"></i><?php echo $menuLabels['myProfile'] ?? __('My Profile'); ?>
       </a>
     </li>

@@ -4,7 +4,8 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage'); ?>">Home</a></li>
-          <li class="breadcrumb-item"><a href="<?php echo url_for('user/' . $sf_user->getAttribute('user_slug')); ?>">My Profile</a></li>
+          <?php // 'user/<slug>' resolves as module user, action <slug>, and 404s. ?>
+          <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'user', 'action' => 'index', 'slug' => $sf_user->getAttribute('user_slug')]); ?>">My Profile</a></li>
           <li class="breadcrumb-item active">Manage Approvers</li>
         </ol>
       </nav>
