@@ -166,7 +166,7 @@
                   <div class="input-group">
                     <input type="text" name="notes" class="form-control" placeholder="Approval notes (optional)">
                     <input type="date" name="expires_at" class="form-control" title="Expiration date">
-                    <button type="submit" class="btn btn-success" onclick="return confirm('Approve this request?');">
+                    <button type="submit" class="btn btn-success" data-ahg-confirm="Approve this request?">
                       <i class="fas fa-check me-1"></i> Approve
                     </button>
                   </div>
@@ -176,7 +176,7 @@
                 <form method="post" action="<?php echo url_for('@access_request_deny?id=' . $accessRequest->id); ?>">
                   <div class="input-group">
                     <input type="text" name="notes" class="form-control" placeholder="Denial reason (required)" required>
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Deny this request?');">
+                    <button type="submit" class="btn btn-danger" data-ahg-confirm="Deny this request?">
                       <i class="fas fa-times me-1"></i> Deny
                     </button>
                   </div>

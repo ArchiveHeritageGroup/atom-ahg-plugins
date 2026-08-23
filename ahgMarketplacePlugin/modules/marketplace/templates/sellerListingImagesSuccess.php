@@ -92,7 +92,7 @@
                   <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'sellerListingImages', 'id' => $listing->id]); ?>" class="d-inline">
                     <input type="hidden" name="form_action" value="delete">
                     <input type="hidden" name="image_id" value="<?php echo (int) $img->id; ?>">
-                    <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>" onclick="return confirm('<?php echo __('Delete this image?'); ?>');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>" data-ahg-confirm="<?php echo __('Delete this image?'); ?>">
                       <i class="fas fa-trash"></i>
                     </button>
                   </form>

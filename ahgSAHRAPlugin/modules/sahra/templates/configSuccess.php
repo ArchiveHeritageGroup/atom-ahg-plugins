@@ -71,7 +71,7 @@
                     <td><?php echo htmlspecialchars($r->authority ?? 'SAHRA'); ?></td>
                     <td class="text-end">
                       <form method="post" action="<?php echo url_for(['module' => 'sahra', 'action' => 'reviewerRemove', 'id' => $r->user_id]); ?>" class="d-inline">
-                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this SAHRA reviewer?');"><i class="fas fa-user-minus"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" data-ahg-confirm="Remove this SAHRA reviewer?"><i class="fas fa-user-minus"></i></button>
                       </form>
                     </td>
                   </tr>

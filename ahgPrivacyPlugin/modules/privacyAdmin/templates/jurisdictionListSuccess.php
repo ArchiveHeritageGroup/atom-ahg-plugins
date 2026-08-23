@@ -73,7 +73,7 @@
                             </a>
                             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionDelete', 'id' => $j->id]); ?>" 
                                class="btn btn-sm btn-outline-danger" 
-                               onclick="return confirm('<?php echo __('Delete this jurisdiction?'); ?>')"
+                               data-ahg-confirm="<?php echo __('Delete this jurisdiction?'); ?>"
                                title="<?php echo __('Delete'); ?>">
                                 <i class="fas fa-trash"></i>
                             </a>

@@ -117,7 +117,7 @@
                         </form>
                       </li>
                       <li>
-                        <form method="post" class="d-inline" onsubmit="return confirm('<?php echo __('Regenerate secret? The old secret will stop working immediately.'); ?>');">
+                        <form method="post" class="d-inline" data-ahg-confirm="<?php echo __('Regenerate secret? The old secret will stop working immediately.'); ?>">
                           <?php echo $form->renderHiddenFields(); ?>
                           <input type="hidden" name="action_type" value="regenerate">
                           <input type="hidden" name="webhook_id" value="<?php echo $webhook->id; ?>">
@@ -134,7 +134,7 @@
                       </li>
                       <li><hr class="dropdown-divider"></li>
                       <li>
-                        <form method="post" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this webhook?'); ?>');">
+                        <form method="post" class="d-inline" data-ahg-confirm="<?php echo __('Delete this webhook?'); ?>">
                           <?php echo $form->renderHiddenFields(); ?>
                           <input type="hidden" name="action_type" value="delete">
                           <input type="hidden" name="webhook_id" value="<?php echo $webhook->id; ?>">

@@ -28,7 +28,7 @@ $listUrl = url_for(['module' => 'aiActGovernance', 'action' => 'attestations']);
           <td><?php echo htmlspecialchars((string) ($r->next_review_date ?? '')); ?><?php if ($overdue): ?> <span class="badge bg-warning"><?php echo __('overdue'); ?></span><?php endif; ?></td>
           <td class="text-end">
             <a class="btn btn-outline-primary btn-sm" href="<?php echo url_for(['module' => 'aiActGovernance', 'action' => 'attestationEdit', 'id' => $r->id]); ?>"><i class="fas fa-pen"></i></a>
-            <form method="post" action="<?php echo $listUrl; ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this attestation?'); ?>');">
+            <form method="post" action="<?php echo $listUrl; ?>" class="d-inline" data-ahg-confirm="<?php echo __('Delete this attestation?'); ?>">
               <input type="hidden" name="id" value="<?php echo (int) $r->id; ?>">
               <button class="btn btn-outline-danger btn-sm" name="form_action" value="delete"><i class="fas fa-trash"></i></button>
             </form>

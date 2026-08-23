@@ -145,7 +145,7 @@
                     <td class="text-end">
                       <?php if (in_array($submission->status, ['draft', 'returned'])): ?>
                         <form method="post" action="<?php echo url_for(['module' => 'researcher', 'action' => 'deleteItem', 'id' => $submission->id, 'itemId' => $item->id]) ?>"
-                              style="display:inline" onsubmit="return confirm('Delete this item?')">
+                              style="display:inline" data-ahg-confirm="Delete this item?">
                           <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                             <i class="bi bi-trash"></i>
                           </button>
@@ -265,7 +265,7 @@
           <?php if ($submission->status === 'draft'): ?>
             <form method="post" action="<?php echo url_for(['module' => 'researcher', 'action' => 'submit', 'id' => $submission->id]) ?>">
               <button type="submit" class="btn btn-warning w-100" <?php echo count($items) === 0 ? 'disabled' : '' ?>
-                      onclick="return confirm('Submit this collection for archivist review?')">
+                      data-ahg-confirm="Submit this collection for archivist review?">
                 <i class="bi bi-send me-1"></i>Submit for Review
               </button>
             </form>
@@ -280,7 +280,7 @@
               <i class="bi bi-plus-lg me-1"></i>Add More Items
             </a>
             <form method="post" action="<?php echo url_for(['module' => 'researcher', 'action' => 'resubmit', 'id' => $submission->id]) ?>">
-              <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Resubmit for review?')">
+              <button type="submit" class="btn btn-warning w-100" data-ahg-confirm="Resubmit for review?">
                 <i class="bi bi-send me-1"></i>Resubmit
               </button>
             </form>

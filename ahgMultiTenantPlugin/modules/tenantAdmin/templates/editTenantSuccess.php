@@ -126,7 +126,7 @@
               <div class="d-flex flex-wrap gap-2">
                 <?php if ($tenant->status !== 'active'): ?>
                   <form action="<?php echo url_for('tenant_admin_activate', ['id' => $tenant->id]) ?>" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-success" onclick="return confirm('Activate this tenant?')">
+                    <button type="submit" class="btn btn-success" data-ahg-confirm="Activate this tenant?">
                       <i class="fas fa-check me-2"></i>Activate
                     </button>
                   </form>
@@ -145,7 +145,7 @@
                 <?php endif; ?>
 
                 <form action="<?php echo url_for('tenant_admin_delete', ['id' => $tenant->id]) ?>" method="post" class="d-inline">
-                  <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this tenant? This cannot be undone.')">
+                  <button type="submit" class="btn btn-danger" data-ahg-confirm="Delete this tenant? This cannot be undone.">
                     <i class="fas fa-trash me-2"></i>Delete
                   </button>
                 </form>
@@ -194,7 +194,7 @@
                         <form action="<?php echo url_for('tenant_admin_remove_user') ?>" method="post" class="d-inline">
                           <input type="hidden" name="tenant_id" value="<?php echo $tenant->id ?>">
                           <input type="hidden" name="user_id" value="<?php echo $user->id ?>">
-                          <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Remove this user from the tenant?')">
+                          <button type="submit" class="btn btn-outline-danger btn-sm" data-ahg-confirm="Remove this user from the tenant?">
                             <i class="fas fa-times"></i>
                           </button>
                         </form>

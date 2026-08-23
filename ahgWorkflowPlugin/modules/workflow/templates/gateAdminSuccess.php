@@ -77,7 +77,7 @@
                     <i class="fas fa-edit"></i>
                   </a>
                   <a href="<?php echo url_for("workflow/admin/gates/{$rule->id}/delete"); ?>" class="btn btn-sm btn-outline-danger" title="Delete"
-                     onclick="return confirm('Delete this rule?')">
+                     data-ahg-confirm="Delete this rule?">
                     <i class="fas fa-trash"></i>
                   </a>
                 </td>

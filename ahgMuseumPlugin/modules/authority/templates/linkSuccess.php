@@ -171,7 +171,7 @@
                         <?php endif; ?>
                         
                         <div class="authority-actions">
-                            <form method="post" class="unlink-form" onsubmit="return confirm('Unlink this authority?');">
+                            <form method="post" class="unlink-form" data-ahg-confirm="Unlink this authority?">
                                 <input type="hidden" name="action_type" value="unlink">
                                 <input type="hidden" name="unlink_source" value="<?php echo $sourceId; ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">

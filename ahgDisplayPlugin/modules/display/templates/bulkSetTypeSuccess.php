@@ -51,7 +51,7 @@
                     
                     <div class="d-flex justify-content-between">
                         <a href="<?php echo url_for(['module' => 'display', 'action' => 'index']); ?>" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary" onclick="return confirm('This will update ALL objects in this collection. Continue?')">
+                        <button type="submit" class="btn btn-primary" data-ahg-confirm="This will update ALL objects in this collection. Continue?">
                             <i class="fas fa-save me-1"></i> Apply to Collection
                         </button>
                     </div>

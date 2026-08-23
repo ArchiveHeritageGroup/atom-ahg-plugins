@@ -105,7 +105,7 @@
                 <td>
                   <a href="<?php echo url_for(['module' => 'rightsAdmin', 'action' => 'removeTkLabel', 'object_id' => $assign->object_id, 'label_id' => $assign->tk_label_id]); ?>" 
                      class="btn btn-sm btn-outline-danger"
-                     onclick="return confirm('Remove this TK Label assignment?');">
+                     data-ahg-confirm="Remove this TK Label assignment?">
                     <i class="fas fa-times"></i>
                   </a>
                 </td>

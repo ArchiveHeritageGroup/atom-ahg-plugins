@@ -73,7 +73,7 @@
                 <i class="fas fa-<?php echo $notifOn ? 'bell' : 'bell-slash'; ?>"></i>
               </button>
             </form>
-            <a href="<?php echo url_for(['module' => 'registry', 'action' => 'groupLeave', 'slug' => $detail->slug]); ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('<?php echo __('Are you sure you want to leave this group?'); ?>');">
+            <a href="<?php echo url_for(['module' => 'registry', 'action' => 'groupLeave', 'slug' => $detail->slug]); ?>" class="btn btn-outline-danger btn-sm" data-ahg-confirm="<?php echo __('Are you sure you want to leave this group?'); ?>">
               <i class="fas fa-sign-out-alt me-1"></i> <?php echo __('Leave'); ?>
             </a>
           <?php else: ?>

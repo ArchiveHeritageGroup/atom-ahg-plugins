@@ -119,7 +119,7 @@
                     </a>
                     <form method="post" action="<?php echo url_for("research/request/{$requestData->id}/close/{$requestType}") ?>" class="d-inline">
                         <input type="hidden" name="closure_reason" value="fulfilled">
-                        <button type="submit" class="btn btn-outline-success btn-sm w-100" onclick="return confirm('<?php echo __('Close this request as fulfilled?') ?>')">
+                        <button type="submit" class="btn btn-outline-success btn-sm w-100" data-ahg-confirm="<?php echo __('Close this request as fulfilled?') ?>">
                             <i class="fas fa-check-circle me-1" aria-hidden="true"></i><?php echo __('Close as Fulfilled') ?>
                         </button>
                     </form>

@@ -347,7 +347,7 @@ if ($users->isEmpty()) {
                         <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowStepsMode', 'slug' => $resource->slug]); ?>" class="d-inline">
 <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                             <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
-                            <button type="submit" class="btn btn-sm btn-link text-muted p-0" onclick="return confirm('<?php echo __('Switch step mode for this procedure?'); ?>');">
+                            <button type="submit" class="btn btn-sm btn-link text-muted p-0" data-ahg-confirm="<?php echo __('Switch step mode for this procedure?'); ?>">
                                 <i class="fas fa-exchange-alt me-1"></i><?php echo $stepsLinear ? __('Switch to checklist mode (any order)') : __('Switch to linear mode (ordered + gated)'); ?>
                             </button>
                         </form>

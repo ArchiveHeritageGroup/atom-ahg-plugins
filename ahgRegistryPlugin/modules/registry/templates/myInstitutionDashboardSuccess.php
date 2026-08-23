@@ -76,7 +76,7 @@
             <?php else: ?>
               <span class="badge bg-info me-1"><?php echo __('Current'); ?></span>
             <?php endif; ?>
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionUnlink']); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Unlink yourself from this institution?'); ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionUnlink']); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Unlink yourself from this institution?'); ?>">
               <input type="hidden" name="institution_id" value="<?php echo (int) $mi->id; ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Unlink'); ?>">
                 <i class="fas fa-unlink"></i>

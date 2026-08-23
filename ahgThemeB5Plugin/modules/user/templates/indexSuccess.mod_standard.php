@@ -206,7 +206,7 @@ $canManageClearance = $canManageClearance && $hasClearancePlugin;
               </button>
               <a href="<?php echo url_for('@security_clearance_revoke?id=' . $resource->id); ?>" 
                  class="btn btn-danger btn-sm"
-                 onclick="return confirm('<?php echo __('Are you sure you want to revoke this user\'s security clearance?'); ?>');">
+                 data-ahg-confirm="<?php echo __('Are you sure you want to revoke this user\'s security clearance?'); ?>">
                 <i class="fas fa-user-slash me-1"></i><?php echo __('Revoke Clearance'); ?>
               </a>
             <?php } else { ?>

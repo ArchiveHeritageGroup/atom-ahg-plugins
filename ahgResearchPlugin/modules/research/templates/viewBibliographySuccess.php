@@ -70,7 +70,7 @@
                                     <form method="post" class="d-inline">
                                         <input type="hidden" name="form_action" value="remove_entry">
                                         <input type="hidden" name="entry_id" value="<?php echo $entry->id; ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this entry?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Remove this entry?">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </form>
@@ -106,7 +106,7 @@
         <div class="card">
             <div class="card-header"><h6 class="mb-0"><i class="fas fa-cog me-2"></i>Actions</h6></div>
             <div class="card-body">
-                <form method="post" onsubmit="return confirm('Are you sure you want to delete this bibliography?')">
+                <form method="post" data-ahg-confirm="Are you sure you want to delete this bibliography?">
                     <input type="hidden" name="form_action" value="delete">
                     <button type="submit" class="btn btn-outline-danger w-100">
                         <i class="fas fa-trash me-1"></i> Delete Bibliography

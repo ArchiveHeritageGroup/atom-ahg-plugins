@@ -55,7 +55,7 @@
     <div class="d-flex flex-wrap gap-2 mt-2 mt-md-0">
       <?php if ($status === 'draft'): ?>
         <form method="post" action="<?php echo url_for('@accession_intake_submit?id=' . $accId); ?>" class="d-inline">
-          <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('<?php echo __('Submit this accession for review?'); ?>');">
+          <button type="submit" class="btn btn-primary btn-sm" data-ahg-confirm="<?php echo __('Submit this accession for review?'); ?>">
             <i class="fas fa-paper-plane me-1"></i><?php echo __('Submit'); ?>
           </button>
         </form>
@@ -71,7 +71,7 @@
 
       <?php if ($status === 'under_review'): ?>
         <form method="post" action="<?php echo url_for('@accession_intake_accept?id=' . $accId); ?>" class="d-inline">
-          <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('<?php echo __('Accept this accession?'); ?>');">
+          <button type="submit" class="btn btn-success btn-sm" data-ahg-confirm="<?php echo __('Accept this accession?'); ?>">
             <i class="fas fa-check me-1"></i><?php echo __('Accept'); ?>
           </button>
         </form>

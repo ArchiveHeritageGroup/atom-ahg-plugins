@@ -182,7 +182,7 @@
                         <input type="hidden" name="action" value="clear">
                         <input type="hidden" name="library_item_id" value="<?php echo $row->library_item_id; ?>">
                         <button type="submit" class="btn btn-xs btn-outline-danger btn-sm"
-                                onclick="return confirm('Clear this override?');">Clear</button>
+                                data-ahg-confirm="Clear this override?">Clear</button>
                       </form>
                     </td>
                   </tr>

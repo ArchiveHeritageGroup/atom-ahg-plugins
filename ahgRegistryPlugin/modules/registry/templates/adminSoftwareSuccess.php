@@ -129,7 +129,7 @@
               </button>
             </form>
 
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminSoftwareVerify']); ?>" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this software? This cannot be undone.');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminSoftwareVerify']); ?>" class="d-inline" data-ahg-confirm="Are you sure you want to delete this software? This cannot be undone.">
               <input type="hidden" name="form_action" value="delete">
               <input type="hidden" name="id" value="<?php echo (int) $item->id; ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>">

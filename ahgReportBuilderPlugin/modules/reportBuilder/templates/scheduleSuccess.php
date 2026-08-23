@@ -185,7 +185,7 @@
                                 <td>
                                     <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'scheduleDelete', 'id' => $report->id, 'scheduleId' => $schedule->id]); ?>"
                                        class="btn btn-sm btn-outline-danger"
-                                       onclick="return confirm('<?php echo __('Delete this schedule?'); ?>');">
+                                       data-ahg-confirm="<?php echo __('Delete this schedule?'); ?>">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </td>

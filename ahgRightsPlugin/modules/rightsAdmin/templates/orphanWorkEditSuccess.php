@@ -167,12 +167,12 @@
               <hr>
               <a href="<?php echo url_for(['module' => 'rightsAdmin', 'action' => 'completeOrphanSearch', 'id' => $orphanWork->id]); ?>" 
                  class="btn btn-success btn-sm w-100 mb-2"
-                 onclick="return confirm('Mark search as complete (no rights holder found)?');">
+                 data-ahg-confirm="Mark search as complete (no rights holder found)?">
                 <i class="fas fa-check me-1"></i>Complete Search
               </a>
               <a href="<?php echo url_for(['module' => 'rightsAdmin', 'action' => 'completeOrphanSearch', 'id' => $orphanWork->id, 'rights_holder_found' => 1]); ?>" 
                  class="btn btn-info btn-sm w-100"
-                 onclick="return confirm('Mark as rights holder found?');">
+                 data-ahg-confirm="Mark as rights holder found?">
                 <i class="fas fa-user-check me-1"></i>Rights Holder Found
               </a>
               <?php endif; ?>

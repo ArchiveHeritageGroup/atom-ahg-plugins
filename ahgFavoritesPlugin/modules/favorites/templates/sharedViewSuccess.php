@@ -28,7 +28,7 @@
   <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
           <input type="hidden" name="copy_to_favorites" value="1">
           <button type="submit" class="btn btn-sm btn-outline-light"
-                  onclick="return confirm('<?php echo __('Copy all items to your favorites?'); ?>');">
+                  data-ahg-confirm="<?php echo __('Copy all items to your favorites?'); ?>">
             <i class="fas fa-heart me-1"></i><?php echo __('Copy to My Favorites'); ?>
           </button>
         </form>

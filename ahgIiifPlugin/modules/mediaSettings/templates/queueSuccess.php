@@ -43,7 +43,7 @@
     <?php echo __('Process Next 5 Items') ?>
   </a>
   <a href="<?php echo url_for(['module' => 'mediaSettings', 'action' => 'clearQueue']) ?>" class="btn btn-outline-danger"
-     onclick="return confirm('<?php echo __('Clear all completed and failed items?') ?>')">
+     data-ahg-confirm="<?php echo __('Clear all completed and failed items?') ?>">
     <i class="fas fa-trash me-1"></i>
     <?php echo __('Clear Completed') ?>
   </a>

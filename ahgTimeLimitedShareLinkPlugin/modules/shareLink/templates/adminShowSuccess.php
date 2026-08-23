@@ -44,7 +44,7 @@ $publicUrl = $request->getUriPrefix() . '/share/' . $tokenRow->token;
   </h1>
   <?php if ($status === 'active' || $status === 'exhausted'): ?>
     <form action="<?php echo url_for(['module' => 'shareLink', 'action' => 'revoke', 'id' => $tokenRow->id]) ?>" method="post"
-          onsubmit="return confirm('<?php echo esc_entities(__('Revoke this share link? Recipients will no longer be able to view the record.')) ?>');">
+          data-ahg-confirm="<?php echo esc_entities(__('Revoke this share link? Recipients will no longer be able to view the record.')) ?>">
       <button type="submit" class="btn btn-outline-danger btn-sm">
         <i class="fas fa-ban me-1"></i><?php echo __('Revoke') ?>
       </button>

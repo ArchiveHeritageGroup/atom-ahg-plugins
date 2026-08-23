@@ -143,7 +143,7 @@ foreach ($backups as $backup) {
                                             <i class="fas <?php echo $sched->is_active ? 'fa-check' : 'fa-pause' ?>"></i>
                                         </button>
                                     </form>
-                                    <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'deleteSchedule']) ?>" class="d-inline" onsubmit="return confirm('Delete this schedule?')">
+                                    <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'deleteSchedule']) ?>" class="d-inline" data-ahg-confirm="Delete this schedule?">
 <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
                                         <input type="hidden" name="id" value="<?php echo $sched->id ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>

@@ -257,7 +257,7 @@
             <?php echo __('Unlinking removes the vendor association — this software will no longer appear under any vendor and cannot be managed via the vendor dashboard until a new vendor is set.'); ?>
           </p>
           <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myVendorSoftwareUnlink', 'id' => (int) $f->id]); ?>"
-                onsubmit="return confirm('<?php echo __('Unlink this software from the vendor? It will become unowned.'); ?>');">
+                data-ahg-confirm="<?php echo __('Unlink this software from the vendor? It will become unowned.'); ?>">
             <button type="submit" class="btn btn-outline-warning btn-sm">
               <i class="fas fa-unlink me-1"></i> <?php echo __('Unlink from Vendor'); ?>
             </button>

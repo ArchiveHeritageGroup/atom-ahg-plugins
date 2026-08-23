@@ -16,7 +16,7 @@ $cid = (int) ($course['id'] ?? 0);
   <h1><i class="fas fa-graduation-cap text-primary me-2"></i><?php echo htmlspecialchars((string) ($course['title'] ?? '')); ?></h1>
   <div class="d-flex gap-2">
     <a href="<?php echo url_for(['module' => 'training', 'action' => 'builder', 'id' => $cid]); ?>" class="btn btn-outline-secondary"><i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?></a>
-    <form method="post" action="<?php echo url_for(['module' => 'training', 'action' => 'destroy', 'id' => $cid]); ?>" onsubmit="return confirm('<?php echo __('Delete this course and all its data?'); ?>');">
+    <form method="post" action="<?php echo url_for(['module' => 'training', 'action' => 'destroy', 'id' => $cid]); ?>" data-ahg-confirm="<?php echo __('Delete this course and all its data?'); ?>">
       <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button>
     </form>
   </div>
@@ -126,7 +126,7 @@ $cid = (int) ($course['id'] ?? 0);
             <td class="text-center"><?php echo $e['score'] !== null ? ((int) $e['score'] . '%') : '-'; ?></td>
             <td class="text-end">
               <a class="btn btn-sm btn-outline-primary" href="<?php echo url_for(['module' => 'training', 'action' => 'learn', 'id' => $e['id']]); ?>"><?php echo __('Open'); ?></a>
-              <form method="post" action="<?php echo url_for(['module' => 'training', 'action' => 'destroyEnrolment', 'id' => $e['id']]); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove enrolment?'); ?>');">
+              <form method="post" action="<?php echo url_for(['module' => 'training', 'action' => 'destroyEnrolment', 'id' => $e['id']]); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Remove enrolment?'); ?>">
                 <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
               </form>
             </td>

@@ -60,8 +60,8 @@
 
     <div style="margin-bottom: 1rem; font-size: 0.85rem;">
       <strong><?php echo __('Show/Hide Columns'); ?>:</strong><br/>
-      <label><input type="checkbox" onclick="toggleColumn(0)" checked> Authorized Form Of Name</label>
-      <label><input type="checkbox" onclick="toggleColumn(1)" checked> Created</label>
+      <label><input type="checkbox" data-ahg-toggle-column="0" checked> Authorized Form Of Name</label>
+      <label><input type="checkbox" data-ahg-toggle-column="1" checked> Created</label>
     </div>
 
     <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

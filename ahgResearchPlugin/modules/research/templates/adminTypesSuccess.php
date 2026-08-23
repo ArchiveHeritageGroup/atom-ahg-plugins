@@ -64,7 +64,7 @@
                                     <a href="<?php echo url_for(['module' => 'research', 'action' => 'editResearcherType', 'id' => $type->id]); ?>" class="btn btn-outline-primary" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form method="post" class="d-inline" onsubmit="return confirm('Delete this researcher type?');">
+                                    <form method="post" class="d-inline" data-ahg-confirm="Delete this researcher type?">
                                         <input type="hidden" name="form_action" value="delete_type">
                                         <input type="hidden" name="type_id" value="<?php echo (int) $type->id; ?>">
                                         <button type="submit" class="btn btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>

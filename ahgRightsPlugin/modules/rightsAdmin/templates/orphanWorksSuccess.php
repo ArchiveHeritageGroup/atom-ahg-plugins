@@ -79,7 +79,7 @@
                     <?php if ('in_progress' === $work->status): ?>
                     <a href="<?php echo url_for(['module' => 'rightsAdmin', 'action' => 'completeOrphanSearch', 'id' => $work->id]); ?>" 
                        class="btn btn-outline-success" title="Mark Complete"
-                       onclick="return confirm('Mark this search as complete?');">
+                       data-ahg-confirm="Mark this search as complete?">
                       <i class="fas fa-check"></i>
                     </a>
                     <?php endif; ?>

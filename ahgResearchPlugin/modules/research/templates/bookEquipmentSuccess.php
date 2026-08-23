@@ -41,7 +41,7 @@ $bookedEquipment = isset($bookedEquipment) && is_array($bookedEquipment) ? $book
           <form method="post" class="d-inline">
             <input type="hidden" name="form_action" value="cancel">
             <input type="hidden" name="equipment_booking_id" value="<?php echo $eq->id; ?>">
-            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?php echo __('Cancel this equipment booking?'); ?>')"><i class="fas fa-times"></i></button>
+            <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="<?php echo __('Cancel this equipment booking?'); ?>"><i class="fas fa-times"></i></button>
           </form>
         </div>
         <?php endforeach; ?>

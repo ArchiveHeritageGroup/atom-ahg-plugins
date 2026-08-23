@@ -100,7 +100,7 @@
                     <li><hr class="dropdown-divider"></li>
                     <li>
                       <a class="dropdown-item text-danger" href="<?php echo url_for(['module' => 'federation', 'action' => 'editPeer', 'id' => $peer->id]) ?>"
-                         onclick="return confirm('Are you sure you want to delete this peer?')">
+                         data-ahg-confirm="Are you sure you want to delete this peer?">
                         <i class="bi bi-trash me-2"></i> Delete
                       </a>
                     </li>

@@ -71,11 +71,11 @@
 
     <div style="margin-bottom: 1rem; font-size: 0.85rem;">
       <strong><?php echo __('Show/Hide Columns'); ?>:</strong><br/>
-      <label><input type="checkbox" onclick="toggleColumn(0)" checked> <?php echo __('Type'); ?></label>
-      <label><input type="checkbox" onclick="toggleColumn(1)" checked> <?php echo __('Name'); ?></label>
-      <label><input type="checkbox" onclick="toggleColumn(2)" checked> <?php echo __('Identifier'); ?></label>
-      <label><input type="checkbox" onclick="toggleColumn(3)" checked> <?php echo __('Created'); ?></label>
-      <label><input type="checkbox" onclick="toggleColumn(4)" checked> <?php echo __('Updated'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="0" checked> <?php echo __('Type'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="1" checked> <?php echo __('Name'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="2" checked> <?php echo __('Identifier'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="3" checked> <?php echo __('Created'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="4" checked> <?php echo __('Updated'); ?></label>
     </div>
 
     <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

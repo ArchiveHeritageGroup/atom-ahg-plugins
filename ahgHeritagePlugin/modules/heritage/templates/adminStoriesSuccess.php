@@ -212,7 +212,7 @@ $editStory = (isset($editStory) && $editStory) ? $unwrap($editStory) : null;
                   </form>
                   <form class="d-inline" method="post"
                         action="<?php echo url_for(['module' => 'heritage', 'action' => 'adminStories']); ?>"
-                        onsubmit="return confirm('<?php echo __('Delete this story?'); ?>');">
+                        data-ahg-confirm="<?php echo __('Delete this story?'); ?>">
                     <input type="hidden" name="story_action" value="delete">
                     <input type="hidden" name="story_id" value="<?php echo (int) $s['id']; ?>">
                     <button class="btn btn-sm btn-outline-danger" type="submit"><?php echo __('Delete'); ?></button>

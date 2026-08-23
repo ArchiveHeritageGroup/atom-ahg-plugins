@@ -115,7 +115,7 @@
                     <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'myPurchases']); ?>" class="d-inline">
                       <input type="hidden" name="form_action" value="confirm_receipt">
                       <input type="hidden" name="transaction_id" value="<?php echo (int) $txn->id; ?>">
-                      <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('<?php echo __('Confirm you have received this item?'); ?>');">
+                      <button type="submit" class="btn btn-success btn-sm" data-ahg-confirm="<?php echo __('Confirm you have received this item?'); ?>">
                         <i class="fas fa-check me-1"></i><?php echo __('Confirm Receipt'); ?>
                       </button>
                     </form>

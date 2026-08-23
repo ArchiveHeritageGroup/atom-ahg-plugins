@@ -11,7 +11,7 @@
     <?php if ($count > 0): ?>
       <form action="<?php echo url_for(['module' => 'cart', 'action' => 'clear']); ?>" method="post" style="display: inline;">
         <button type="submit" class="btn btn-outline-danger btn-sm"
-                onclick="return confirm('<?php echo __('Clear all items from cart?'); ?>');">
+                data-ahg-confirm="<?php echo __('Clear all items from cart?'); ?>">
           <i class="fas fa-trash me-1"></i><?php echo __('Clear Cart'); ?>
         </button>
       </form>
@@ -87,7 +87,7 @@
             <a href="<?php echo url_for(['module' => 'cart', 'action' => 'remove', 'id' => $item->id]); ?>" 
                class="btn btn-sm btn-outline-light" 
                title="<?php echo __('Remove'); ?>"
-               onclick="return confirm('<?php echo __('Remove this item from cart?'); ?>');">
+               data-ahg-confirm="<?php echo __('Remove this item from cart?'); ?>">
               <i class="fas fa-trash"></i>
             </a>
           </div>
@@ -416,7 +416,7 @@
               <a href="<?php echo url_for(['module' => 'cart', 'action' => 'remove', 'id' => $item->id]); ?>" 
                  class="btn btn-sm btn-outline-danger" 
                  title="<?php echo __('Remove'); ?>"
-                 onclick="return confirm('<?php echo __('Remove this item?'); ?>');">
+                 data-ahg-confirm="<?php echo __('Remove this item?'); ?>">
                 <i class="fas fa-trash"></i>
               </a>
             </td>

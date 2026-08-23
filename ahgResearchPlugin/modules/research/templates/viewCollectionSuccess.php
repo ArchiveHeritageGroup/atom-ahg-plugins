@@ -92,7 +92,7 @@
           <td><small><?php echo date('M j, Y', strtotime($item->created_at)); ?></small></td>
           <td>
             <button type="button" class="btn btn-sm btn-outline-primary edit-notes-btn" data-id="<?php echo $item->object_id; ?>" data-bs-toggle="modal" data-bs-target="#editNotesModal"><i class="fas fa-edit"></i></button>
-            <form method="post" class="d-inline"><input type="hidden" name="booking_action" value="remove"><input type="hidden" name="object_id" value="<?php echo $item->object_id; ?>"><button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove?')"><i class="fas fa-times"></i></button></form>
+            <form method="post" class="d-inline"><input type="hidden" name="booking_action" value="remove"><input type="hidden" name="object_id" value="<?php echo $item->object_id; ?>"><button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Remove?"><i class="fas fa-times"></i></button></form>
           </td>
         </tr>
       <?php endforeach; ?>

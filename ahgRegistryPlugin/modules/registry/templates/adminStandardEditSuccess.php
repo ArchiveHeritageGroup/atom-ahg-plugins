@@ -182,7 +182,7 @@
                 <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminExtensionEdit', 'standardId' => (int) $standard->id, 'id' => (int) $ext->id]); ?>" class="btn btn-sm btn-outline-secondary" title="<?php echo __('Edit'); ?>">
                   <i class="fas fa-edit"></i>
                 </a>
-                <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminStandardEdit', 'id' => (int) $standard->id]); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Are you sure you want to delete this extension?'); ?>');">
+                <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminStandardEdit', 'id' => (int) $standard->id]); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Are you sure you want to delete this extension?'); ?>">
                   <input type="hidden" name="form_action" value="delete_extension">
                   <input type="hidden" name="extension_id" value="<?php echo (int) $ext->id; ?>">
                   <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>">

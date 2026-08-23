@@ -57,7 +57,7 @@
                                         <?php endif ?>
                                     </div>
                                 </div>
-                                <form method="post" class="d-inline" onsubmit="return confirm('Remove this restriction?');">
+                                <form method="post" class="d-inline" data-ahg-confirm="Remove this restriction?">
                                     <input type="hidden" name="form_action" value="remove">
                                     <input type="hidden" name="restriction_id" value="<?php echo $restriction->id ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">

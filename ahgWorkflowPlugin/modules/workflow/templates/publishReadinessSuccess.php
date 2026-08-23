@@ -23,7 +23,7 @@
     <div>
       <?php if ($canPublish): ?>
         <a href="<?php echo url_for("workflow/publish-execute/{$objectId}"); ?>" class="btn btn-success"
-           onclick="return confirm('Are you sure you want to publish this record?')">
+           data-ahg-confirm="Are you sure you want to publish this record?">
           <i class="fas fa-globe me-1"></i>Publish Now
         </a>
       <?php endif; ?>
@@ -150,7 +150,7 @@
         <p class="text-muted">As an administrator, you can force-publish this record despite blocker failures. This will be logged in the audit trail.</p>
         <a href="<?php echo url_for("workflow/publish-execute/{$objectId}"); ?>?force=1"
            class="btn btn-warning"
-           onclick="return confirm('WARNING: Force-publishing bypasses gate checks. This action will be logged. Continue?')">
+           data-ahg-confirm="WARNING: Force-publishing bypasses gate checks. This action will be logged. Continue?">
           <i class="fas fa-exclamation-triangle me-1"></i>Force Publish (Override Gates)
         </a>
       </div>

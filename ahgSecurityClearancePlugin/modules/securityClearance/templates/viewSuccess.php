@@ -142,7 +142,7 @@
                           <td>
                             <a href="<?php echo url_for("security/access/{$grant->id}/revoke?user_id={$targetUser->id}"); ?>" 
                                class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('Revoke this access?');">
+                               data-ahg-confirm="Revoke this access?">
                               <i class="fas fa-times"></i>
                             </a>
                           </td>

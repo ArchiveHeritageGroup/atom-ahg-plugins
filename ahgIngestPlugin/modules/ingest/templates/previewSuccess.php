@@ -124,13 +124,13 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
     <div>
         <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'cancel', 'id' => $session->id]) ?>"
            class="btn btn-outline-danger me-2"
-           onclick="return confirm('<?php echo __('Cancel this ingest?') ?>')">
+           data-ahg-confirm="<?php echo __('Cancel this ingest?') ?>">
             <i class="fas fa-times me-1"></i><?php echo __('Cancel') ?>
         </a>
         <form method="post" action="<?php echo url_for(['module' => 'ingest', 'action' => 'preview', 'id' => $session->id]) ?>" class="d-inline">
             <input type="hidden" name="form_action" value="approve">
             <button type="submit" class="btn btn-success"
-                    onclick="return confirm('<?php echo __('This will create records in AtoM. Proceed?') ?>')">
+                    data-ahg-confirm="<?php echo __('This will create records in AtoM. Proceed?') ?>">
                 <i class="fas fa-check me-1"></i><?php echo __('Approve & Commit') ?>
                 (<?php echo $rowCount ?> <?php echo __('records') ?>)
             </button>

@@ -64,7 +64,7 @@
             </button>
           </form>
           <form method="post" class="d-inline"
-                onsubmit="return confirm('<?php echo __('Remove this approver?') ?>')">
+                data-ahg-confirm="<?php echo __('Remove this approver?') ?>">
             <input type="hidden" name="form_action" value="remove">
             <input type="hidden" name="approver_id" value="<?php echo (int) $a->id ?>">
             <button class="btn btn-sm btn-outline-danger" type="submit"><?php echo __('Remove') ?></button>

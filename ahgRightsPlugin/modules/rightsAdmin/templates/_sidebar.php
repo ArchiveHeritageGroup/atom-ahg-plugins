@@ -59,7 +59,7 @@
     <ul class="nav flex-column mb-2">
       <li class="nav-item">
         <a class="nav-link" href="<?php echo url_for(['module' => 'rightsAdmin', 'action' => 'processExpired']); ?>"
-           onclick="return confirm('Process all expired embargoes?');">
+           data-ahg-confirm="Process all expired embargoes?">
           <i class="fas fa-sync me-2"></i> Process Expired
         </a>
       </li>

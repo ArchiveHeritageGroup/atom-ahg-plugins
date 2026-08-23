@@ -165,20 +165,20 @@ $regionIcons = [
                                     @if(!$j->is_installed)
                                     <a href="{{ url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionInstall', 'code' => $j->code]) }}"
                                        class="btn btn-outline-success" title="{{ __('Install') }}"
-                                       onclick="return confirm('{{ __('Install jurisdiction: ') }}{{ addslashes($j->name) }}?');">
+                                       data-ahg-confirm="{{ __('Install jurisdiction: ') }}{{ addslashes($j->name) }}?">
                                         <i class="fas fa-download"></i>
                                     </a>
                                     @else
                                     @if(!$activeJurisdiction || $activeJurisdiction->code !== $j->code)
                                     <a href="{{ url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionSetActive', 'code' => $j->code]) }}"
                                        class="btn btn-outline-primary" title="{{ __('Set as Active') }}"
-                                       onclick="return confirm('{{ __('Set as active jurisdiction: ') }}{{ addslashes($j->name) }}?');">
+                                       data-ahg-confirm="{{ __('Set as active jurisdiction: ') }}{{ addslashes($j->name) }}?">
                                         <i class="fas fa-check"></i>
                                     </a>
                                     @endif
                                     <a href="{{ url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionUninstall', 'code' => $j->code]) }}"
                                        class="btn btn-outline-danger" title="{{ __('Uninstall') }}"
-                                       onclick="return confirm('{{ __('Uninstall jurisdiction: ') }}{{ addslashes($j->name) }}? This will remove all jurisdiction-specific rules.');">
+                                       data-ahg-confirm="{{ __('Uninstall jurisdiction: ') }}{{ addslashes($j->name) }}? This will remove all jurisdiction-specific rules.">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                     @endif

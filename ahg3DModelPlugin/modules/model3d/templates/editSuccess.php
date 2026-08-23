@@ -272,7 +272,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                     <p class="small text-muted">Permanently delete this 3D model and all associated data.</p>
                     <a href="<?php echo url_for(['module' => 'model3d', 'action' => 'delete', 'id' => $model->id]) ?>" 
                        class="btn btn-danger btn-sm"
-                       onclick="return confirm('Are you sure you want to delete this 3D model? This cannot be undone.');">
+                       data-ahg-confirm="Are you sure you want to delete this 3D model? This cannot be undone.">
                         <i class="fas fa-trash me-1"></i>Delete Model
                     </a>
                 </div>

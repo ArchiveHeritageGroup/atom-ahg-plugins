@@ -124,7 +124,7 @@ $scopeLabels = [
                             </a>
                             <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'deleteTemplate', 'id' => $tpl->id, 'confirm' => 1]); ?>"
                                class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('<?php echo __('Are you sure you want to delete this template?'); ?>');">
+                               data-ahg-confirm="<?php echo __('Are you sure you want to delete this template?'); ?>">
                                 <i class="bi bi-trash me-1"></i><?php echo __('Delete'); ?>
                             </a>
                             <?php endif; ?>

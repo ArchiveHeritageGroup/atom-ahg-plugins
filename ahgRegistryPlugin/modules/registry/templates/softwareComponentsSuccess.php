@@ -91,7 +91,7 @@
                 <a href="<?php echo url_for(['module' => 'registry', 'action' => 'softwareComponentEdit', 'comp_id' => (int) $comp->id]); ?>" class="btn btn-sm btn-outline-primary me-1" title="<?php echo __('Edit'); ?>">
                   <i class="fas fa-edit"></i>
                 </a>
-                <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'softwareComponentDelete', 'comp_id' => (int) $comp->id]); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this component?'); ?>');">
+                <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'softwareComponentDelete', 'comp_id' => (int) $comp->id]); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Delete this component?'); ?>">
                   <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>">
                     <i class="fas fa-trash"></i>
                   </button>

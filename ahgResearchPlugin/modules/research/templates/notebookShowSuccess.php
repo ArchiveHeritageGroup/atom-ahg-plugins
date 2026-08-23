@@ -19,7 +19,7 @@ $items    = sfOutputEscaper::unescape($items ?? []);
     <div>
         <?php if (!$notebook->promoted_to_project_id): ?>
             <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'notebookPromote', 'id' => $notebook->id]); ?>" class="d-inline">
-                <button type="submit" class="btn btn-success" onclick="return confirm('Promote this notebook to a public research project?');">
+                <button type="submit" class="btn btn-success" data-ahg-confirm="Promote this notebook to a public research project?">
                     <i class="fas fa-rocket me-1"></i> Promote to project
                 </button>
             </form>
@@ -29,7 +29,7 @@ $items    = sfOutputEscaper::unescape($items ?? []);
             </a>
         <?php endif; ?>
         <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'notebookDelete', 'id' => $notebook->id]); ?>" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this notebook?');">
+            <button type="submit" class="btn btn-outline-danger" data-ahg-confirm="Delete this notebook?">
                 <i class="fas fa-trash me-1"></i> Delete
             </button>
         </form>
@@ -93,7 +93,7 @@ $items    = sfOutputEscaper::unescape($items ?? []);
                             <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'notebookShow', 'id' => $notebook->id]); ?>" class="d-inline ms-2">
                                 <input type="hidden" name="form_action" value="remove_item">
                                 <input type="hidden" name="item_id" value="<?php echo (int) $i['id']; ?>">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this item?');"><i class="fas fa-times"></i></button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Remove this item?"><i class="fas fa-times"></i></button>
                             </form>
                         </div>
                     </div>

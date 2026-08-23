@@ -75,7 +75,7 @@
             <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'sellerCollections']); ?>" class="d-inline">
               <input type="hidden" name="form_action" value="delete">
               <input type="hidden" name="collection_id" value="<?php echo (int) $col->id; ?>">
-              <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?php echo __('Delete this collection?'); ?>');">
+              <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="<?php echo __('Delete this collection?'); ?>">
                 <i class="fas fa-trash"></i>
               </button>
             </form>

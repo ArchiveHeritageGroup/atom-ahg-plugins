@@ -31,7 +31,7 @@ $actions = ['', 'destroy', 'transfer', 'retain_permanent', 'review'];
                     <td><?php echo (int) ($n->record_count ?? 0); ?></td>
                     <td class="text-end">
                         <a href="<?php echo url_for(['module' => 'recordsManage', 'action' => 'filePlan', 'edit' => $n->id]); ?>" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen"></i></a>
-                        <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'recordsManage', 'action' => 'filePlan']); ?>" onsubmit="return confirm('<?php echo __('Delete this node?'); ?>');">
+                        <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'recordsManage', 'action' => 'filePlan']); ?>" data-ahg-confirm="<?php echo __('Delete this node?'); ?>">
                             <input type="hidden" name="do" value="delete"><input type="hidden" name="id" value="<?php echo $n->id; ?>">
                             <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                         </form>

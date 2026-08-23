@@ -112,14 +112,14 @@ $sessions = $sf_data->getRaw('sessions') ?? [];
                             <?php if (in_array($statusLabel, ['configure', 'upload', 'map', 'validate', 'preview'])): ?>
                                 <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'cancel', 'id' => $s->id]) ?>"
                                    class="btn btn-sm btn-outline-danger" title="<?php echo __('Cancel') ?>"
-                                   onclick="return confirm('<?php echo __('Cancel this ingest session?') ?>')">
+                                   data-ahg-confirm="<?php echo __('Cancel this ingest session?') ?>">
                                     <i class="fas fa-times"></i>
                                 </a>
                             <?php endif ?>
                             <?php if ($statusLabel === 'completed'): ?>
                                 <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'rollback', 'id' => $s->id]) ?>"
                                    class="btn btn-sm btn-outline-danger" title="<?php echo __('Rollback') ?>"
-                                   onclick="return confirm('<?php echo __('This will DELETE all records created by this ingest. Are you sure?') ?>')">
+                                   data-ahg-confirm="<?php echo __('This will DELETE all records created by this ingest. Are you sure?') ?>">
                                     <i class="fas fa-undo"></i>
                                 </a>
                             <?php endif ?>

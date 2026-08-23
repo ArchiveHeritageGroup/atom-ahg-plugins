@@ -11,7 +11,7 @@
         <dt class="col-sm-3"><?php echo __('Last seen'); ?></dt><dd class="col-sm-9"><?php echo htmlspecialchars($mapping->last_seen_at ?? '—'); ?></dd>
     </dl>
 
-    <form method="post" onsubmit="return confirm('<?php echo __('Delete this mapping? The AtoM user account is NOT deleted.'); ?>');">
+    <form method="post" data-ahg-confirm="<?php echo __('Delete this mapping? The AtoM user account is NOT deleted.'); ?>">
         <input type="hidden" name="form_action" value="delete">
         <button type="submit" class="btn btn-danger"><?php echo __('Remove mapping'); ?></button>
         <a class="btn btn-link" href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'userMappings']); ?>"><?php echo __('Back'); ?></a>

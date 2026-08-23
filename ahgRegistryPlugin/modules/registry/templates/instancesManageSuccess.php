@@ -82,7 +82,7 @@
             <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceEdit', 'id' => $inst->id]); ?>" class="btn btn-sm btn-outline-primary" title="<?php echo __('Edit'); ?>">
               <i class="fas fa-edit"></i>
             </a>
-            <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceDelink', 'id' => $inst->id]); ?>" class="btn btn-sm btn-outline-warning" title="<?php echo __('De-link from institution'); ?>" onclick="return confirm('<?php echo __('De-link this instance from your institution? It will become an orphan and can be re-linked later.'); ?>');">
+            <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceDelink', 'id' => $inst->id]); ?>" class="btn btn-sm btn-outline-warning" title="<?php echo __('De-link from institution'); ?>" data-ahg-confirm="<?php echo __('De-link this instance from your institution? It will become an orphan and can be re-linked later.'); ?>">
               <i class="fas fa-unlink"></i>
             </a>
           </td>

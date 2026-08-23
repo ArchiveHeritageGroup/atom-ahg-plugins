@@ -66,7 +66,7 @@
                 <i class="fas fa-<?php echo $provider->enabled ? 'pause' : 'play'; ?>"></i>
               </a>
               <?php if (!in_array($provider->slug, ['openlibrary', 'googlebooks', 'worldcat'])): ?>
-              <a href="<?php echo url_for('library_isbn_provider_delete', ['id' => $provider->id]) ?>" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" onclick="return confirm('<?php echo __('Are you sure?'); ?>')">
+              <a href="<?php echo url_for('library_isbn_provider_delete', ['id' => $provider->id]) ?>" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" data-ahg-confirm="<?php echo __('Are you sure?'); ?>">
                 <i class="fas fa-trash"></i>
               </a>
               <?php endif; ?>

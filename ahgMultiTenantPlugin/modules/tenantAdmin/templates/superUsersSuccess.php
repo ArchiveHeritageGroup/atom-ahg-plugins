@@ -52,7 +52,7 @@
                       <form action="<?php echo url_for('tenant_admin_remove_super_user') ?>" method="post" class="d-inline">
                         <input type="hidden" name="repository_id" value="<?php echo $repository->id ?>">
                         <input type="hidden" name="user_id" value="<?php echo $user->id ?>">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this super user?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Remove this super user?">
                           <i class="fas fa-times"></i>
                         </button>
                       </form>

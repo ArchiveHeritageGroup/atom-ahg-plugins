@@ -101,7 +101,7 @@
                     </a>
                     <a href="{{ url_for(['module' => 'ahgSettings', 'action' => 'reset', 'section' => $currentSection]) }}"
                        class="btn btn-outline-danger btn-sm btn-block"
-                       onclick="return confirm('{{ __('Reset all settings in this section to defaults?') }}');">
+                       data-ahg-confirm="{{ __('Reset all settings in this section to defaults?') }}">
                         <i class="fas fa-undo"></i> {{ __('Reset to Defaults') }}
                     </a>
                 </div>

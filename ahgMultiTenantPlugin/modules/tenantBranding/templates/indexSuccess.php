@@ -48,7 +48,7 @@
                 </div>
                 <form action="<?php echo url_for('tenant_branding_logo_upload') ?>?delete=1" method="post" class="d-inline">
                   <input type="hidden" name="repository_id" value="<?php echo $repository->id ?>">
-                  <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete the logo?')">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Delete the logo?">
                     <i class="fas fa-trash me-1"></i> Delete Logo
                   </button>
                 </form>

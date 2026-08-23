@@ -104,7 +104,7 @@
                     </a>
                     <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'ruleDelete', 'id' => $rule->id]); ?>"
                        class="btn btn-outline-danger ms-auto"
-                       onclick="return confirm('Delete this rule?');">
+                       data-ahg-confirm="Delete this rule?">
                         <i class="fas fa-trash me-1"></i> Delete
                     </a>
                 </div>

@@ -207,7 +207,7 @@
           <hr>
           <a href="<?php echo url_for(['module' => 'requestToPublish', 'action' => 'delete', 'slug' => $resource->slug]) ?>" 
              class="btn btn-outline-danger"
-             onclick="return confirm('<?php echo __('Are you sure you want to delete this request?') ?>');">
+             data-ahg-confirm="<?php echo __('Are you sure you want to delete this request?') ?>">
             <i class="fas fa-trash me-1"></i><?php echo __('Delete Request') ?>
           </a>
         </div>

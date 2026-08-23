@@ -249,7 +249,7 @@ $formOptions = sfOutputEscaper::unescape($formOptions ?? []);
             <div class="col-md-4 mb-2">
               <a href="<?php echo url_for(['module' => 'rightsAdmin', 'action' => 'processExpired']); ?>" 
                  class="btn btn-outline-warning w-100"
-                 onclick="return confirm('Process all expired embargoes?');">
+                 data-ahg-confirm="Process all expired embargoes?">
                 <i class="fas fa-clock me-2"></i>Process Expired Embargoes
               </a>
             </div>

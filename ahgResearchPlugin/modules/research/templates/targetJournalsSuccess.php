@@ -12,7 +12,7 @@
       <i class="fas fa-plus me-1"></i><?php echo __('Add Journal'); ?>
     </a>
     <form action="<?php echo url_for(['module' => 'research', 'action' => 'targetJournalSeedDhet']); ?>" method="post"
-          onsubmit="return confirm('<?php echo __('Seed/refresh the DHET-accredited starter set (SA accreditation module)?'); ?>')">
+          data-ahg-confirm="<?php echo __('Seed/refresh the DHET-accredited starter set (SA accreditation module)?'); ?>">
       <button class="btn btn-outline-secondary"><i class="fas fa-seedling me-1"></i><?php echo __('Seed DHET starter'); ?></button>
     </form>
   </div>
@@ -69,7 +69,7 @@ $journals = isset($journals) && is_array($journals) ? $journals
             <td class="text-end">
               <a href="<?php echo url_for(['module' => 'research', 'action' => 'targetJournalBuilder', 'id' => $j['id']]); ?>" class="btn btn-sm btn-outline-secondary"><?php echo __('Edit'); ?></a>
               <form action="<?php echo url_for(['module' => 'research', 'action' => 'targetJournalDelete', 'id' => $j['id']]); ?>" method="post" class="d-inline"
-                    onsubmit="return confirm('<?php echo __('Remove from directory?'); ?>')">
+                    data-ahg-confirm="<?php echo __('Remove from directory?'); ?>">
                 <button class="btn btn-sm btn-outline-danger"><?php echo __('Delete'); ?></button>
               </form>
             </td>

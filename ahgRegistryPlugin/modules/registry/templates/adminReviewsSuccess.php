@@ -107,7 +107,7 @@
               </form>
             <?php endif; ?>
 
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => $filter ?? 'pending']); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Are you sure you want to delete this review?'); ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => $filter ?? 'pending']); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Are you sure you want to delete this review?'); ?>">
               <input type="hidden" name="form_action" value="delete">
               <input type="hidden" name="review_id" value="<?php echo (int) $item->id; ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Reject and delete'); ?>">

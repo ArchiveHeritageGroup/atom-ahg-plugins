@@ -22,7 +22,7 @@
     <i class="fas fa-link me-2"></i><?php echo __('Link to Item'); ?>
   </a>
   <form method="post" action="<?php echo url_for(['module' => 'authorityControl', 'action' => 'delete', 'id' => $auth->id]); ?>"
-        onsubmit="return confirm('<?php echo __('Delete this authority record? Linked items will be unlinked.'); ?>');">
+        data-ahg-confirm="<?php echo __('Delete this authority record? Linked items will be unlinked.'); ?>">
     <button type="submit" class="btn btn-outline-danger">
       <i class="fas fa-trash me-2"></i><?php echo __('Delete'); ?>
     </button>
@@ -82,7 +82,7 @@
               <td><code><?php echo esc_entities($item->source_tag ?? ''); ?></code></td>
               <td class="text-end">
                 <form method="post" action="<?php echo url_for(['module' => 'authorityControl', 'action' => 'unlink', 'linkId' => $item->link_id]); ?>"
-                      onsubmit="return confirm('<?php echo __('Remove this link?'); ?>');">
+                      data-ahg-confirm="<?php echo __('Remove this link?'); ?>">
                   <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Unlink'); ?>">
                     <i class="fas fa-unlink"></i>
                   </button>

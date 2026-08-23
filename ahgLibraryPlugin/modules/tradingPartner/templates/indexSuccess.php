@@ -85,7 +85,7 @@
                     <button type="submit" class="btn btn-outline-warning" title="<?php echo __('Toggle active'); ?>"><i class="fas fa-power-off"></i></button>
                   </form>
                   <form method="post" action="<?php echo url_for(['module' => 'tradingPartner', 'action' => 'delete', 'id' => $p->id]); ?>" class="d-inline"
-                        onsubmit="return confirm('<?php echo __('Delete this trading partner?'); ?>');">
+                        data-ahg-confirm="<?php echo __('Delete this trading partner?'); ?>">
                     <button type="submit" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>"><i class="fas fa-trash"></i></button>
                   </form>
                 </div>

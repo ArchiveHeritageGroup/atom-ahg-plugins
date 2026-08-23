@@ -154,7 +154,7 @@
 
         <hr>
 
-        <a href="<?php echo url_for(['module' => 'research', 'action' => 'adminResetPassword', 'id' => $researcher->id]); ?>" class="btn btn-outline-secondary w-100 mb-2" onclick="return confirm('<?php echo __('Generate a new password for this user?'); ?>')">
+        <a href="<?php echo url_for(['module' => 'research', 'action' => 'adminResetPassword', 'id' => $researcher->id]); ?>" class="btn btn-outline-secondary w-100 mb-2" data-ahg-confirm="<?php echo __('Generate a new password for this user?'); ?>">
           <i class="fas fa-key me-2"></i><?php echo __('Reset Password'); ?>
         </a>
       </div>

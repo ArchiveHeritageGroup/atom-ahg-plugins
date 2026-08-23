@@ -140,7 +140,7 @@
             <div class="col-md-6">
               <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'adminSellerVerify', 'id' => $seller->id]); ?>">
                 <input type="hidden" name="form_action" value="verify">
-                <button type="submit" class="btn btn-success w-100" onclick="return confirm('<?php echo __('Verify this seller?'); ?>');">
+                <button type="submit" class="btn btn-success w-100" data-ahg-confirm="<?php echo __('Verify this seller?'); ?>">
                   <i class="fas fa-check-circle me-1"></i> <?php echo __('Verify Seller'); ?>
                 </button>
               </form>
@@ -150,7 +150,7 @@
             <div class="col-md-6">
               <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'adminSellerVerify', 'id' => $seller->id]); ?>">
                 <input type="hidden" name="form_action" value="suspend">
-                <button type="submit" class="btn btn-warning w-100" onclick="return confirm('<?php echo __('Suspend this seller?'); ?>');">
+                <button type="submit" class="btn btn-warning w-100" data-ahg-confirm="<?php echo __('Suspend this seller?'); ?>">
                   <i class="fas fa-ban me-1"></i> <?php echo __('Suspend Seller'); ?>
                 </button>
               </form>

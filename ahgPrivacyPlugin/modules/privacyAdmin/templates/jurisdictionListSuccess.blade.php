@@ -74,7 +74,7 @@
                             </a>
                             <a href="{{ url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionDelete', 'id' => $j->id]) }}" 
                                class="btn btn-sm btn-outline-danger" 
-                               onclick="return confirm('{{ __('Delete this jurisdiction?') }}')"
+                               data-ahg-confirm="{{ __('Delete this jurisdiction?') }}"
                                title="{{ __('Delete') }}">
                                 <i class="fas fa-trash"></i>
                             </a>

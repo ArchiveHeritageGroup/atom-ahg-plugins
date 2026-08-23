@@ -63,7 +63,7 @@
                                 <strong><?php echo $s->name; ?></strong>
                                 <br><small class="text-muted"><?php echo $s->area_sqm ? $s->area_sqm . ' m²' : ''; ?><?php echo $s->wall_length_m ? ' • ' . $s->wall_length_m . 'm wall' : ''; ?></small>
                             </div>
-                            <form method="post" class="d-inline"><input type="hidden" name="do" value="delete_space"><input type="hidden" name="space_id" value="<?php echo $s->id; ?>"><button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this space?')"><i class="fas fa-trash"></i></button></form>
+                            <form method="post" class="d-inline"><input type="hidden" name="do" value="delete_space"><input type="hidden" name="space_id" value="<?php echo $s->id; ?>"><button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Delete this space?"><i class="fas fa-trash"></i></button></form>
                         </li>
                     <?php endforeach; ?>
                 </ul>

@@ -149,7 +149,7 @@ $taxonomyLabels = [
       <?php // Delete is POST with a token - never a link, which is what made the
             // legacy application deletable by anything that followed a URL. ?>
       <form method="post" action="<?php echo url_for('@site_record_delete?id='.$record->id); ?>"
-            onsubmit="return confirm('Delete this site record? Field observations cannot be recollected without revisiting the site.');">
+            data-ahg-confirm="Delete this site record? Field observations cannot be recollected without revisiting the site.">
       <?php // No CSRF field here on purpose.
        //
        // AhgController declares `public string $csrf_token` as a real property, so

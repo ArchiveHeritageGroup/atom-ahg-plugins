@@ -107,7 +107,7 @@ try {
                                             data-title="<?php echo htmlspecialchars($disc->title ?? $disc->subject ?? '', ENT_QUOTES); ?>"
                                             data-content="<?php echo htmlspecialchars($disc->content ?? '', ENT_QUOTES); ?>"
                                             title="Edit"><i class="fas fa-pencil-alt"></i></button>
-                                        <form method="post" class="d-inline" onsubmit="return confirm('Delete this discussion?');">
+                                        <form method="post" class="d-inline" data-ahg-confirm="Delete this discussion?">
                                             <input type="hidden" name="form_action" value="delete_discussion">
                                             <input type="hidden" name="discussion_id" value="<?php echo (int) $disc->id; ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
@@ -154,7 +154,7 @@ try {
                                             data-url="<?php echo htmlspecialchars($res->external_url ?? '', ENT_QUOTES); ?>"
                                             data-type="<?php echo htmlspecialchars($res->resource_type ?? '', ENT_QUOTES); ?>"
                                             title="Edit"><i class="fas fa-pencil-alt"></i></button>
-                                        <form method="post" class="d-inline" onsubmit="return confirm('Remove this resource?');">
+                                        <form method="post" class="d-inline" data-ahg-confirm="Remove this resource?">
                                             <input type="hidden" name="form_action" value="remove_resource">
                                             <input type="hidden" name="resource_id" value="<?php echo (int) $res->id; ?>">
                                             <button type="submit" class="btn btn-outline-danger" title="Remove"><i class="fas fa-times"></i></button>
@@ -214,7 +214,7 @@ try {
                                         <?php endforeach; ?>
                                     </select>
                                 </form>
-                                <form method="post" class="d-inline" onsubmit="return confirm('Remove this member?');">
+                                <form method="post" class="d-inline" data-ahg-confirm="Remove this member?">
                                     <input type="hidden" name="form_action" value="remove_member">
                                     <input type="hidden" name="member_id" value="<?php echo (int) $member->id; ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove"><i class="fas fa-times"></i></button>

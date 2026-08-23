@@ -113,7 +113,7 @@ $expiringEmbargoes = $toArray($expiringEmbargoes ?? []);
                             <?php endif; ?>
                         </td>
                         <td class="text-end">
-                            <form method="post" class="d-inline" onsubmit="return confirm('Remove this embargo?');">
+                            <form method="post" class="d-inline" data-ahg-confirm="Remove this embargo?">
                                 <input type="hidden" name="form_action" value="remove">
                                 <input type="hidden" name="embargo_id" value="<?php echo $embargo->id; ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">

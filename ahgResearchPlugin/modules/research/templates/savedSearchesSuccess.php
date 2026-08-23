@@ -54,7 +54,7 @@
                                     <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) . '?sq0=' . urlencode($s->search_query); ?>" class="btn btn-outline-primary" title="Run search"><i class="fas fa-search"></i></a>
                                     <button class="btn btn-outline-info diff-btn" data-id="<?php echo (int) $s->id; ?>" data-query="<?php echo htmlspecialchars($s->search_query); ?>" title="Diff results"><i class="fas fa-exchange-alt"></i></button>
                                     <button class="btn btn-outline-success snapshot-btn" data-id="<?php echo (int) $s->id; ?>" data-query="<?php echo htmlspecialchars($s->search_query); ?>" title="Snapshot current results"><i class="fas fa-camera"></i></button>
-                                    <form method="post" class="d-inline"><input type="hidden" name="booking_action" value="delete"><input type="hidden" name="id" value="<?php echo (int) $s->id; ?>"><button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this saved search?')"><i class="fas fa-trash"></i></button></form>
+                                    <form method="post" class="d-inline"><input type="hidden" name="booking_action" value="delete"><input type="hidden" name="id" value="<?php echo (int) $s->id; ?>"><button type="submit" class="btn btn-outline-danger" data-ahg-confirm="Delete this saved search?"><i class="fas fa-trash"></i></button></form>
                                 </div>
                             </td>
                         </tr>

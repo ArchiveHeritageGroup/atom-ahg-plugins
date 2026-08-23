@@ -137,7 +137,7 @@
               </td>
               <td>
                 <form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'removeException', 'id' => $exception['id'], 'embargo_id' => $embargo['id']]); ?>" style="display:inline;">
-                  <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?php echo __('Are you sure?'); ?>');">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="<?php echo __('Are you sure?'); ?>">
                     <i class="fas fa-trash"></i>
                   </button>
                 </form>

@@ -46,7 +46,7 @@
                             <td><small><?php echo htmlspecialchars($m->source_service ?? '-'); ?></small></td>
                             <td><small><?php echo $m->created_at; ?></small></td>
                             <td>
-                                <form method="post" class="d-inline" onsubmit="return confirm('Delete this metric?');">
+                                <form method="post" class="d-inline" data-ahg-confirm="Delete this metric?">
                                     <input type="hidden" name="form_action" value="delete_metric">
                                     <input type="hidden" name="metric_id" value="<?php echo (int) $m->id; ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>

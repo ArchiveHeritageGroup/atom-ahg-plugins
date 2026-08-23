@@ -92,7 +92,7 @@
                       <form action="<?php echo url_for('tenant_users_remove') ?>" method="post" class="d-inline">
                         <input type="hidden" name="repository_id" value="<?php echo $repository->id ?>">
                         <input type="hidden" name="user_id" value="<?php echo $user->id ?>">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this user from the repository?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Remove this user from the repository?">
                           <i class="fas fa-times"></i>
                         </button>
                       </form>

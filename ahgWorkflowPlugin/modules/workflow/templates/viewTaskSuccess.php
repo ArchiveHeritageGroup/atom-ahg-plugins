@@ -139,7 +139,7 @@
                                 <button type="submit" formaction="<?php echo url_for(['module' => 'workflow', 'action' => 'approveTask', 'id' => $task->id]) ?>" class="btn btn-success btn-lg">
                                     <i class="fas fa-check me-1" aria-hidden="true"></i>Approve
                                 </button>
-                                <button type="submit" formaction="<?php echo url_for(['module' => 'workflow', 'action' => 'rejectTask', 'id' => $task->id]) ?>" class="btn btn-danger btn-lg" onclick="return confirm('Are you sure you want to reject this task?');">
+                                <button type="submit" formaction="<?php echo url_for(['module' => 'workflow', 'action' => 'rejectTask', 'id' => $task->id]) ?>" class="btn btn-danger btn-lg" data-ahg-confirm="Are you sure you want to reject this task?">
                                     <i class="fas fa-times me-1" aria-hidden="true"></i>Reject
                                 </button>
                             </div>

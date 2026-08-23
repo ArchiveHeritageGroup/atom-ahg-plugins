@@ -97,7 +97,7 @@ $ro = $editable ? '' : 'readonly disabled';
     <div class="d-flex gap-2">
       <button type="submit" name="do" value="save" class="btn btn-outline-primary"><i class="fas fa-save me-1"></i><?php echo __('Save draft'); ?></button>
       <button type="submit" name="do" value="submit" class="btn btn-success"
-              onclick="return confirm('<?php echo __('Submit for archival review? You will not be able to edit it while it is under review.'); ?>')">
+              data-ahg-confirm="<?php echo __('Submit for archival review? You will not be able to edit it while it is under review.'); ?>">
         <i class="fas fa-paper-plane me-1"></i><?php echo __('Submit for review'); ?></button>
     </div>
     <?php endif ?>

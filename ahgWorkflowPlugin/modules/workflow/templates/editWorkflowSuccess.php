@@ -166,7 +166,7 @@
                                             <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'editStep', 'id' => $step->id]) ?>" class="btn btn-sm btn-outline-secondary">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'deleteStep', 'id' => $step->id]) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this step?');">
+                                            <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'deleteStep', 'id' => $step->id]) ?>" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Delete this step?">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </div>

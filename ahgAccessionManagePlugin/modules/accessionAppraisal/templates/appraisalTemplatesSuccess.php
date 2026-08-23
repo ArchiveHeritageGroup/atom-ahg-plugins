@@ -82,7 +82,7 @@
                   <span class="badge bg-info"><?php echo $criteriaCount; ?></span>
                 </td>
                 <td>
-                  <form method="post" action="<?php echo url_for('@accession_appraisal_templates'); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this template?'); ?>');">
+                  <form method="post" action="<?php echo url_for('@accession_appraisal_templates'); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Delete this template?'); ?>">
                     <input type="hidden" name="form_action" value="delete">
                     <input type="hidden" name="template_id" value="<?php echo htmlspecialchars($t->id); ?>">
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>">

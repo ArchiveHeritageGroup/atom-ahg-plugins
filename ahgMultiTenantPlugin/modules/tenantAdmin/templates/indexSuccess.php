@@ -168,13 +168,13 @@
                       </a>
                       <?php if ($tenant->status === 'suspended'): ?>
                         <form action="<?php echo url_for('tenant_admin_activate', ['id' => $tenant->id]) ?>" method="post" class="d-inline">
-                          <button type="submit" class="btn btn-outline-success" title="Activate" onclick="return confirm('Activate this tenant?')">
+                          <button type="submit" class="btn btn-outline-success" title="Activate" data-ahg-confirm="Activate this tenant?">
                             <i class="fas fa-check"></i>
                           </button>
                         </form>
                       <?php elseif ($tenant->status === 'trial'): ?>
                         <form action="<?php echo url_for('tenant_admin_activate', ['id' => $tenant->id]) ?>" method="post" class="d-inline">
-                          <button type="submit" class="btn btn-outline-success" title="Activate (End Trial)" onclick="return confirm('Activate this tenant (end trial)?')">
+                          <button type="submit" class="btn btn-outline-success" title="Activate (End Trial)" data-ahg-confirm="Activate this tenant (end trial)?">
                             <i class="fas fa-check"></i>
                           </button>
                         </form>
@@ -188,7 +188,7 @@
                         </button>
                       <?php endif; ?>
                       <form action="<?php echo url_for('tenant_admin_delete', ['id' => $tenant->id]) ?>" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Delete this tenant? This cannot be undone.')">
+                        <button type="submit" class="btn btn-outline-danger" title="Delete" data-ahg-confirm="Delete this tenant? This cannot be undone.">
                           <i class="fas fa-trash"></i>
                         </button>
                       </form>

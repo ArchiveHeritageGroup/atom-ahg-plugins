@@ -152,7 +152,7 @@ $archivalCollections = (array) $archivalCollections;
                                     <i class="fas <?php echo $item->is_enabled ? 'fa-pause' : 'fa-play'; ?>"></i>
                                 </button>
                             </form>
-                            <form action="<?php echo url_for(['module' => 'heritage', 'action' => 'adminFeaturedCollections']); ?>" method="post" class="d-inline" onsubmit="return confirm('Remove this collection from featured?');">
+                            <form action="<?php echo url_for(['module' => 'heritage', 'action' => 'adminFeaturedCollections']); ?>" method="post" class="d-inline" data-ahg-confirm="Remove this collection from featured?">
                                 <input type="hidden" name="featured_action" value="remove">
                                 <input type="hidden" name="featured_id" value="<?php echo $item->id; ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">

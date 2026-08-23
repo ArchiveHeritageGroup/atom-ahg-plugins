@@ -59,7 +59,7 @@
                 <td><small class="text-muted"><?php echo esc_entities($r->source) ?></small></td>
                 <td><small class="text-muted"><?php echo esc_entities($r->last_event_at) ?></small></td>
                 <td>
-                  <form method="post" action="<?php echo url_for(['module' => 'emailDelivery', 'action' => 'remove']) ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this suppression?') ?>');">
+                  <form method="post" action="<?php echo url_for(['module' => 'emailDelivery', 'action' => 'remove']) ?>" class="d-inline" data-ahg-confirm="<?php echo __('Remove this suppression?') ?>">
                     <input type="hidden" name="email" value="<?php echo esc_entities($r->email) ?>">
                     <button class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove') ?>"><i class="fas fa-trash"></i></button>
                   </form>

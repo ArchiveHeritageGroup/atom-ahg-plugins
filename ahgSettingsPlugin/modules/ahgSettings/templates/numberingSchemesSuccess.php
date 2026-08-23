@@ -112,12 +112,12 @@
             </a>
             <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'numberingSchemes', 'do' => 'resetSequence', 'id' => $scheme->id]); ?>"
                class="btn btn-outline-warning" title="<?php echo __('Reset sequence'); ?>"
-               onclick="return confirm('<?php echo __('Reset sequence to 0?'); ?>');">
+               data-ahg-confirm="<?php echo __('Reset sequence to 0?'); ?>">
               <i class="fas fa-redo"></i>
             </a>
             <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'numberingSchemes', 'do' => 'delete', 'id' => $scheme->id]); ?>"
                class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>"
-               onclick="return confirm('<?php echo __('Delete this scheme?'); ?>');">
+               data-ahg-confirm="<?php echo __('Delete this scheme?'); ?>">
               <i class="fas fa-trash"></i>
             </a>
           </div>

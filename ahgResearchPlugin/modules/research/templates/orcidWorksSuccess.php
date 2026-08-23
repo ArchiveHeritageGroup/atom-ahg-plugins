@@ -49,7 +49,7 @@ $works = sfOutputEscaper::unescape($works ?? []);
                     </form>
                     <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'orcidWorks']); ?>" class="d-inline">
                         <input type="hidden" name="form_action" value="unlink">
-                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Unlink this ORCID?');"><i class="fas fa-unlink me-1"></i>Unlink</button>
+                        <button type="submit" class="btn btn-outline-danger btn-sm" data-ahg-confirm="Unlink this ORCID?"><i class="fas fa-unlink me-1"></i>Unlink</button>
                     </form>
                 </div>
             </div>

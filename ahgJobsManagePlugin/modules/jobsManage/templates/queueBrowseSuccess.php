@@ -227,7 +227,7 @@
                     <form method="post" action="<?php echo url_for('@queue_cancel'); ?>" class="d-inline">
                       <input type="hidden" name="job_id" value="<?php echo (int) $job->id; ?>">
                       <button type="submit" class="btn btn-outline-danger btn-sm" title="<?php echo __('Cancel'); ?>"
-                              onclick="return confirm('<?php echo __('Cancel this job?'); ?>')">
+                              data-ahg-confirm="<?php echo __('Cancel this job?'); ?>">
                         <i class="fas fa-times"></i>
                       </button>
                     </form>

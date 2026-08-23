@@ -70,7 +70,7 @@ $viewUrl = url_for(['module' => 'research', 'action' => 'dmpView', 'id' => $d->i
           <td><?php echo htmlspecialchars((string) ($ds->license ?? '')); ?></td>
           <td><?php echo htmlspecialchars((string) ($ds->repository ?? '')); ?></td>
           <td class="text-end">
-            <form method="post" action="<?php echo $viewUrl; ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this dataset?'); ?>');">
+            <form method="post" action="<?php echo $viewUrl; ?>" class="d-inline" data-ahg-confirm="<?php echo __('Remove this dataset?'); ?>">
               <input type="hidden" name="form_action" value="delete_dataset">
               <input type="hidden" name="dataset_id" value="<?php echo (int) $ds->id; ?>">
               <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i></button>
@@ -83,7 +83,7 @@ $viewUrl = url_for(['module' => 'research', 'action' => 'dmpView', 'id' => $d->i
   </div>
 </div>
 
-<form method="post" action="<?php echo $viewUrl; ?>" class="mb-5" onsubmit="return confirm('<?php echo __('Delete this entire DMP?'); ?>');">
+<form method="post" action="<?php echo $viewUrl; ?>" class="mb-5" data-ahg-confirm="<?php echo __('Delete this entire DMP?'); ?>">
   <input type="hidden" name="form_action" value="delete_dmp">
   <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash me-1"></i><?php echo __('Delete DMP'); ?></button>
 </form>

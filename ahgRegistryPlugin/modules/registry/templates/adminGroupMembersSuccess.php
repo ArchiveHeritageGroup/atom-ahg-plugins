@@ -121,7 +121,7 @@
                 <i class="fas fa-<?php echo !empty($m->is_active) ? 'pause' : 'play'; ?>"></i>
               </button>
             </form>
-            <form method="post" action="/registry/admin/groups/<?php echo $gid; ?>/members" class="d-inline" onsubmit="return confirm('Remove this member?');">
+            <form method="post" action="/registry/admin/groups/<?php echo $gid; ?>/members" class="d-inline" data-ahg-confirm="Remove this member?">
               <input type="hidden" name="form_action" value="remove">
               <input type="hidden" name="member_id" value="<?php echo (int) $m->id; ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove'); ?>">
@@ -223,7 +223,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
-          <button type="submit" class="btn btn-success" onclick="return confirm('Send email to all active members?');"><i class="fas fa-paper-plane me-1"></i><?php echo __('Send Email'); ?></button>
+          <button type="submit" class="btn btn-success" data-ahg-confirm="Send email to all active members?"><i class="fas fa-paper-plane me-1"></i><?php echo __('Send Email'); ?></button>
         </div>
       </div>
     </form>

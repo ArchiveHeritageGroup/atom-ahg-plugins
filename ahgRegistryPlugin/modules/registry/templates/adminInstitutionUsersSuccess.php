@@ -115,7 +115,7 @@
               </td>
               <td><small class="text-muted"><?php echo !empty($lu->created_at) ? date('Y-m-d', strtotime($lu->created_at)) : '-'; ?></small></td>
               <td class="text-end">
-                <form method="post" class="d-inline" onsubmit="return confirm('Delink this user from the institution?');">
+                <form method="post" class="d-inline" data-ahg-confirm="Delink this user from the institution?">
                   <input type="hidden" name="form_action" value="delink">
                   <input type="hidden" name="link_id" value="<?php echo (int) $lu->link_id; ?>">
                   <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delink'); ?>">

@@ -133,7 +133,7 @@ slot('title', $title);
                                                     <i class="fas fa-<?php echo $target->is_active ? 'pause' : 'play'; ?>"></i>
                                                 </button>
                                             </form>
-                                            <form method="post" style="display:inline;" onsubmit="return confirm('<?php echo __('Delete this target?'); ?>');">
+                                            <form method="post" style="display:inline;" data-ahg-confirm="<?php echo __('Delete this target?'); ?>">
                                                 <input type="hidden" name="action_type" value="delete_target">
                                                 <input type="hidden" name="target_id" value="<?php echo $target->id; ?>">
                                                 <button type="submit" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>">

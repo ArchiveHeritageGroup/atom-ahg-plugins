@@ -18,7 +18,7 @@
     </div>
   <?php else: ?>
     <form method="post" action="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'destroy', 'slug' => $space->slug]) ?>"
-          onsubmit="return confirm('<?php echo __('Are you sure you want to delete this exhibition space?') ?>');">
+          data-ahg-confirm="<?php echo __('Are you sure you want to delete this exhibition space?') ?>">
       <button type="submit" class="btn btn-danger">
         <i class="fas fa-trash me-1"></i><?php echo __('Delete exhibition space') ?>
       </button>

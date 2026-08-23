@@ -19,7 +19,7 @@
                 <i class="fas fa-plus me-1"></i>Create Workflow
             </a>
             <?php /* Collections Procedures#B — install seed pack */ ?>
-            <form method="post" action="<?php echo url_for(['module' => 'workflow', 'action' => 'installSpectrumPack']) ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Install the Collections Procedures procedure starter pack? Tick Overwrite first to RESET existing seeded steps.') ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'workflow', 'action' => 'installSpectrumPack']) ?>" class="d-inline" data-ahg-confirm="<?php echo __('Install the Collections Procedures procedure starter pack? Tick Overwrite first to RESET existing seeded steps.') ?>">
                 <label class="me-1 small text-muted" title="<?php echo __('When ticked, existing Collections Procedures workflows have their steps replaced with the seed defaults.') ?>">
                     <input type="checkbox" name="overwrite" value="1"> <?php echo __('Overwrite') ?>
                 </label>
@@ -132,7 +132,7 @@
                                     <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'editWorkflow', 'id' => $wf->id]) ?>" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'deleteWorkflow', 'id' => $wf->id]) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this workflow?');">
+                                    <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'deleteWorkflow', 'id' => $wf->id]) ?>" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Delete this workflow?">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>

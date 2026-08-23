@@ -26,7 +26,7 @@
         </td>
         <td class="text-end">
           <a class="btn btn-outline-primary btn-sm" href="<?php echo url_for(['module' => 'label', 'action' => 'templateEdit', 'id' => $t->id]); ?>"><i class="fas fa-pen"></i></a>
-          <form method="post" action="<?php echo $listUrl; ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this template?'); ?>');">
+          <form method="post" action="<?php echo $listUrl; ?>" class="d-inline" data-ahg-confirm="<?php echo __('Delete this template?'); ?>">
             <input type="hidden" name="form_action" value="delete"><input type="hidden" name="id" value="<?php echo (int) $t->id; ?>">
             <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i></button>
           </form>

@@ -164,20 +164,20 @@
                                     <?php if (!$j->is_installed): ?>
                                     <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionInstall', 'code' => $j->code]); ?>"
                                        class="btn btn-outline-success" title="<?php echo __('Install'); ?>"
-                                       onclick="return confirm('<?php echo __('Install jurisdiction: '); ?><?php echo addslashes($j->name); ?>?');">
+                                       data-ahg-confirm="<?php echo __('Install jurisdiction: '); ?><?php echo addslashes($j->name); ?>?">
                                         <i class="fas fa-download"></i>
                                     </a>
                                     <?php else: ?>
                                     <?php if (!$activeJurisdiction || $activeJurisdiction->code !== $j->code): ?>
                                     <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionSetActive', 'code' => $j->code]); ?>"
                                        class="btn btn-outline-primary" title="<?php echo __('Set as Active'); ?>"
-                                       onclick="return confirm('<?php echo __('Set as active jurisdiction: '); ?><?php echo addslashes($j->name); ?>?');">
+                                       data-ahg-confirm="<?php echo __('Set as active jurisdiction: '); ?><?php echo addslashes($j->name); ?>?">
                                         <i class="fas fa-check"></i>
                                     </a>
                                     <?php endif; ?>
                                     <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionUninstall', 'code' => $j->code]); ?>"
                                        class="btn btn-outline-danger" title="<?php echo __('Uninstall'); ?>"
-                                       onclick="return confirm('<?php echo __('Uninstall jurisdiction: '); ?><?php echo addslashes($j->name); ?>? This will remove all jurisdiction-specific rules.');">
+                                       data-ahg-confirm="<?php echo __('Uninstall jurisdiction: '); ?><?php echo addslashes($j->name); ?>? This will remove all jurisdiction-specific rules.">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                     <?php endif; ?>

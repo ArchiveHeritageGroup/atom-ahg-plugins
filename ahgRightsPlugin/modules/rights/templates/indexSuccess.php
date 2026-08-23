@@ -222,7 +222,7 @@
                 </a>
                 <a href="<?php echo url_for(['module' => 'rights', 'action' => 'delete', 'slug' => $resource->slug, 'id' => $right->id]); ?>" 
                    class="btn btn-outline-danger" title="Delete"
-                   onclick="return confirm('Delete this rights record?');">
+                   data-ahg-confirm="Delete this rights record?">
                   <i class="fas fa-trash"></i>
                 </a>
               </div>

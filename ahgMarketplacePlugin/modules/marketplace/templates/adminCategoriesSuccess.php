@@ -131,7 +131,7 @@
                   <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'adminCategories']); ?>" class="d-inline">
                     <input type="hidden" name="form_action" value="delete">
                     <input type="hidden" name="category_id" value="<?php echo (int) $cat->id; ?>">
-                    <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>" onclick="return confirm('<?php echo __('Delete this category?'); ?>');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>" data-ahg-confirm="<?php echo __('Delete this category?'); ?>">
                       <i class="fas fa-trash"></i>
                     </button>
                   </form>

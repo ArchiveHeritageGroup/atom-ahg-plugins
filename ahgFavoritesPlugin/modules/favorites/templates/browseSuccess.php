@@ -143,7 +143,7 @@ $n = sfConfig::get('csp_nonce', '');
                 </button>
               <?php endif; ?>
               <form action="/favorites/folder/<?php echo $currentFolder->id; ?>/delete" method="post" class="d-inline"
-                    onsubmit="return confirm('<?php echo __('Delete this folder? Items will be moved to Unfiled.'); ?>');">
+                    data-ahg-confirm="<?php echo __('Delete this folder? Items will be moved to Unfiled.'); ?>">
   <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <button type="submit" class="btn btn-sm btn-outline-danger">
                   <i class="fas fa-trash"></i> <?php echo __('Delete'); ?>
@@ -210,7 +210,7 @@ $n = sfConfig::get('csp_nonce', '');
             </div>
             <?php if ($count > 0): ?>
               <form action="<?php echo url_for(['module' => 'favorites', 'action' => 'clear']); ?>" method="post"
-                    onsubmit="return confirm('<?php echo __('Are you sure you want to clear all favorites?'); ?>');">
+                    data-ahg-confirm="<?php echo __('Are you sure you want to clear all favorites?'); ?>">
   <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <button type="submit" class="btn btn-sm btn-outline-light">
                   <i class="fas fa-trash-alt me-1"></i><?php echo __('Clear All'); ?>
@@ -271,7 +271,7 @@ $n = sfConfig::get('csp_nonce', '');
             <div class="d-flex gap-2 align-items-center flex-wrap">
               <span id="selectedCount" class="text-muted small me-2">0 <?php echo __('selected'); ?></span>
               <button type="submit" name="bulk_action" value="remove" class="btn btn-sm btn-outline-danger"
-                      onclick="return confirm('<?php echo __('Remove selected favorites?'); ?>');">
+                      data-ahg-confirm="<?php echo __('Remove selected favorites?'); ?>">
                 <i class="fas fa-trash me-1"></i><?php echo __('Remove Selected'); ?>
               </button>
               <?php if (!empty($folders)): ?>
@@ -337,7 +337,7 @@ $n = sfConfig::get('csp_nonce', '');
                           <?php endif; ?>
                           <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'remove', 'id' => $favorite->id]); ?>"
                              class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove'); ?>"
-                             onclick="return confirm('<?php echo __('Remove from favorites?'); ?>');">
+                             data-ahg-confirm="<?php echo __('Remove from favorites?'); ?>">
                             <i class="fas fa-heart-broken"></i>
                           </a>
                         </div>
@@ -460,7 +460,7 @@ $n = sfConfig::get('csp_nonce', '');
                         <?php endif; ?>
                         <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'remove', 'id' => $favorite->id]); ?>"
                            class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove'); ?>"
-                           onclick="return confirm('<?php echo __('Remove from favorites?'); ?>');">
+                           data-ahg-confirm="<?php echo __('Remove from favorites?'); ?>">
                           <i class="fas fa-heart-broken"></i>
                         </a>
                       </td>
@@ -658,7 +658,7 @@ $n = sfConfig::get('csp_nonce', '');
       <div class="modal-footer">
         <form action="/favorites/folder/<?php echo $currentFolder->id; ?>/revoke-share" method="post" class="d-inline">
   <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
-          <button type="submit" class="btn btn-danger" onclick="return confirm('<?php echo __('Revoke sharing? The link will no longer work.'); ?>');">
+          <button type="submit" class="btn btn-danger" data-ahg-confirm="<?php echo __('Revoke sharing? The link will no longer work.'); ?>">
             <i class="fas fa-ban me-1"></i><?php echo __('Revoke Sharing'); ?>
           </button>
         </form>

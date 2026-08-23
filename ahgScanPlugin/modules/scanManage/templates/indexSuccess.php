@@ -57,7 +57,7 @@
                             <a class="btn btn-sm btn-outline-success" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'run', 'id' => $f->id]) ?>" title="Scan now"><i class="fas fa-play"></i></a>
                             <a class="btn btn-sm btn-outline-secondary" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'history', 'id' => $f->id]) ?>" title="History"><i class="fas fa-clock-rotate-left"></i></a>
                             <a class="btn btn-sm btn-outline-warning" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'toggle', 'id' => $f->id]) ?>" title="Toggle"><i class="fas fa-power-off"></i></a>
-                            <a class="btn btn-sm btn-outline-danger" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'delete', 'id' => $f->id]) ?>" onclick="return confirm('Remove this watched folder? Ingest history is retained.');" title="Delete"><i class="fas fa-trash"></i></a>
+                            <a class="btn btn-sm btn-outline-danger" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'delete', 'id' => $f->id]) ?>" data-ahg-confirm="Remove this watched folder? Ingest history is retained." title="Delete"><i class="fas fa-trash"></i></a>
                         </td>
                     </tr>
                 <?php endforeach ?>

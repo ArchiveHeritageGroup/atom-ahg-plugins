@@ -48,7 +48,7 @@
                                                     <?php endif ?>
                                                 </div>
                                             </div>
-                                            <form method="post" class="d-inline" onsubmit="return confirm('Remove this label?');">
+                                            <form method="post" class="d-inline" data-ahg-confirm="Remove this label?">
                                                 <input type="hidden" name="form_action" value="remove">
                                                 <input type="hidden" name="label_id" value="<?php echo $label->id ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">

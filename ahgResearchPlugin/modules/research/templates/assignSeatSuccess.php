@@ -31,7 +31,7 @@ $availableSeats = isset($availableSeats) && is_array($availableSeats) ? $availab
         <p class="mb-2"><strong><?php echo __('Seat'); ?>:</strong> <?php echo htmlspecialchars($currentAssignment->seat_label ?? 'Seat #' . $currentAssignment->seat_id); ?></p>
         <form method="post" class="d-inline">
           <input type="hidden" name="form_action" value="release">
-          <button type="submit" class="btn btn-outline-warning btn-sm" onclick="return confirm('<?php echo __('Release this seat?'); ?>')"><i class="fas fa-undo me-1"></i><?php echo __('Release Seat'); ?></button>
+          <button type="submit" class="btn btn-outline-warning btn-sm" data-ahg-confirm="<?php echo __('Release this seat?'); ?>"><i class="fas fa-undo me-1"></i><?php echo __('Release Seat'); ?></button>
         </form>
       </div>
     </div>

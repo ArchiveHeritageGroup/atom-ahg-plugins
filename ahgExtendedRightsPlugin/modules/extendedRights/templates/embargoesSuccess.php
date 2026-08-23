@@ -66,7 +66,7 @@
               <td>
                 <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'liftEmbargo', 'id' => $embargo->id]); ?>" 
                    class="btn btn-sm btn-success"
-                   onclick="return confirm('Are you sure you want to lift this embargo?');">
+                   data-ahg-confirm="Are you sure you want to lift this embargo?">
                   <i class="fas fa-unlock"></i> Lift
                 </a>
               </td>

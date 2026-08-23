@@ -18,13 +18,13 @@
             <?php if (!$jurisdiction->is_installed): ?>
             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionInstall', 'code' => $jurisdiction->code]); ?>"
                class="btn btn-success"
-               onclick="return confirm('<?php echo __('Install this jurisdiction?'); ?>');">
+               data-ahg-confirm="<?php echo __('Install this jurisdiction?'); ?>">
                 <i class="fas fa-download me-1"></i><?php echo __('Install'); ?>
             </a>
             <?php elseif (!$activeJurisdiction || $activeJurisdiction->code !== $jurisdiction->code): ?>
             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionSetActive', 'code' => $jurisdiction->code]); ?>"
                class="btn btn-primary"
-               onclick="return confirm('<?php echo __('Set as active jurisdiction?'); ?>');">
+               data-ahg-confirm="<?php echo __('Set as active jurisdiction?'); ?>">
                 <i class="fas fa-check me-1"></i><?php echo __('Set as Active'); ?>
             </a>
             <?php else: ?>

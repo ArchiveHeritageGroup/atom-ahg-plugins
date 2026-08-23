@@ -121,7 +121,7 @@
               <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminNewsletterForm', 'id' => $nl->id]); ?>" class="btn btn-sm btn-outline-primary" title="<?php echo __('Edit'); ?>">
                 <i class="fas fa-edit"></i>
               </a>
-              <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminNewsletterSend', 'id' => $nl->id]); ?>" class="d-inline" onsubmit="return confirm('Send this newsletter to all active subscribers?');">
+              <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminNewsletterSend', 'id' => $nl->id]); ?>" class="d-inline" data-ahg-confirm="Send this newsletter to all active subscribers?">
                 <button type="submit" class="btn btn-sm btn-outline-success" title="<?php echo __('Send Now'); ?>">
                   <i class="fas fa-paper-plane"></i>
                 </button>

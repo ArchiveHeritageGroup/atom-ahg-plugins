@@ -62,7 +62,7 @@
                                 <td>
                                     <a href="<?php echo url_for(['module' => 'forms', 'action' => 'assignmentDelete', 'id' => $assignment->id]) ?>"
                                        class="btn btn-outline-danger btn-sm"
-                                       onclick="return confirm('Delete this assignment?')">
+                                       data-ahg-confirm="Delete this assignment?">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </td>

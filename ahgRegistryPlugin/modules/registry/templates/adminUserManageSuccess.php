@@ -115,7 +115,7 @@
                   <i class="fas <?php echo $u->active ? 'fa-ban' : 'fa-check'; ?>"></i>
                 </button>
               </form>
-              <form method="post" action="/registry/admin/users/manage" class="d-inline" onsubmit="return confirm('Permanently delete this user? This cannot be undone.');">
+              <form method="post" action="/registry/admin/users/manage" class="d-inline" data-ahg-confirm="Permanently delete this user? This cannot be undone.">
                 <input type="hidden" name="user_id" value="<?php echo (int) $u->id; ?>">
                 <input type="hidden" name="form_action" value="delete">
                 <button type="submit" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>">

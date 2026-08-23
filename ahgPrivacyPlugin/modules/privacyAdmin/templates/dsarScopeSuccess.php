@@ -54,7 +54,7 @@ $objects = $sf_data->getRaw('objects');
                         <td class="small text-muted"><?php echo htmlspecialchars((string) $o->created_at); ?></td>
                         <td class="text-end">
                             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'redactionManage', 'id' => $o->information_object_id]); ?>" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen me-1"></i><?php echo __('Redact fields'); ?></a>
-                            <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'dsarScope', 'id' => $dsar->id]); ?>" onsubmit="return confirm('<?php echo __('Remove from scope?'); ?>');">
+                            <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'dsarScope', 'id' => $dsar->id]); ?>" data-ahg-confirm="<?php echo __('Remove from scope?'); ?>">
                                 <input type="hidden" name="do" value="remove"><input type="hidden" name="io_id" value="<?php echo (int) $o->information_object_id; ?>">
                                 <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
                             </form>

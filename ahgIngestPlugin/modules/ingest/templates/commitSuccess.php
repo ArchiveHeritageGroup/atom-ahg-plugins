@@ -150,7 +150,7 @@ $job = $sf_data->getRaw('job');
 
                     <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'rollback', 'id' => $session->id]) ?>"
                        class="btn btn-outline-danger"
-                       onclick="return confirm('<?php echo __('This will DELETE all records created by this ingest. This action cannot be undone. Are you sure?') ?>')">
+                       data-ahg-confirm="<?php echo __('This will DELETE all records created by this ingest. This action cannot be undone. Are you sure?') ?>">
                         <i class="fas fa-undo me-1"></i><?php echo __('Rollback') ?>
                     </a>
                 </div>
@@ -219,7 +219,7 @@ $job = $sf_data->getRaw('job');
             <p class="text-muted"><?php echo __('This will create records in AtoM based on your validated data.') ?></p>
             <form method="post" action="<?php echo url_for(['module' => 'ingest', 'action' => 'commit', 'id' => $session->id]) ?>">
                 <button type="submit" class="btn btn-lg btn-success"
-                        onclick="return confirm('<?php echo __('Start committing records to AtoM?') ?>')">
+                        data-ahg-confirm="<?php echo __('Start committing records to AtoM?') ?>">
                     <i class="fas fa-play me-1"></i><?php echo __('Start Commit') ?>
                 </button>
             </form>

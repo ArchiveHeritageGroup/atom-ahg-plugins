@@ -62,7 +62,7 @@
           </td>
           <td class="text-end">
             <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminDropdownEdit', 'id' => (int) $row->id]); ?>" class="btn btn-sm btn-outline-primary" title="<?php echo __('Edit'); ?>"><i class="fas fa-edit"></i></a>
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminDropdownDelete', 'id' => (int) $row->id]); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this dropdown value?'); ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminDropdownDelete', 'id' => (int) $row->id]); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Delete this dropdown value?'); ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>"><i class="fas fa-trash"></i></button>
             </form>
           </td>

@@ -134,7 +134,7 @@
                                 <i class="fas fa-{{ $target->is_active ? 'pause' : 'play' }}"></i>
                               </button>
                             </form>
-                            <form method="post" style="display:inline;" onsubmit="return confirm('{{ __('Delete this target?') }}');">
+                            <form method="post" style="display:inline;" data-ahg-confirm="{{ __('Delete this target?') }}">
                               <input type="hidden" name="action_type" value="delete_target">
                               <input type="hidden" name="target_id" value="{{ $target->id }}">
                               <button type="submit" class="btn btn-outline-danger" title="{{ __('Delete') }}">

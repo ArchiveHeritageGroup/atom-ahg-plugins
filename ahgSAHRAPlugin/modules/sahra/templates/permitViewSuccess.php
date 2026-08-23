@@ -104,7 +104,7 @@
                 <form method="post" action="<?php echo url_for(['module' => 'sahra', 'action' => 'endorse', 'id' => $p->id]); ?>">
                   <div class="input-group">
                     <input type="text" name="notes" class="form-control" placeholder="Endorsement notes (optional)">
-                    <button class="btn btn-success" onclick="return confirm('Endorse this application?');"><i class="fas fa-check me-1"></i> Endorse</button>
+                    <button class="btn btn-success" data-ahg-confirm="Endorse this application?"><i class="fas fa-check me-1"></i> Endorse</button>
                   </div>
                 </form>
               </div>
@@ -125,7 +125,7 @@
               <div class="input-group">
                 <input type="text" name="sahra_reference" class="form-control" placeholder="SAHRA case / reference no. (if known)">
                 <input type="text" name="notes" class="form-control" placeholder="Notes (optional)">
-                <button class="btn btn-primary" onclick="return confirm('Mark this application as lodged with SAHRA?');"><i class="fas fa-paper-plane me-1"></i> Mark as submitted</button>
+                <button class="btn btn-primary" data-ahg-confirm="Mark this application as lodged with SAHRA?"><i class="fas fa-paper-plane me-1"></i> Mark as submitted</button>
               </div>
             </form>
           <?php endif; ?>
@@ -158,7 +158,7 @@
 
           <?php if ($isApplicant && in_array($p->status, ['pending_supervisor', 'supervisor_rejected'], true)): ?>
             <form method="post" action="<?php echo url_for(['module' => 'sahra', 'action' => 'cancel', 'id' => $p->id]); ?>" class="mt-2">
-              <button class="btn btn-sm btn-outline-secondary" onclick="return confirm('Cancel this application?');"><i class="fas fa-ban me-1"></i> Cancel application</button>
+              <button class="btn btn-sm btn-outline-secondary" data-ahg-confirm="Cancel this application?"><i class="fas fa-ban me-1"></i> Cancel application</button>
             </form>
           <?php endif; ?>
         </div>
@@ -188,7 +188,7 @@
                     <td>
                       <?php if ($r->status === 'pending'): ?>
                         <form method="post" action="<?php echo url_for(['module' => 'sahra', 'action' => 'reportSubmit', 'id' => $r->id]); ?>" class="d-inline">
-                          <button class="btn btn-sm btn-outline-success" onclick="return confirm('Mark this report as submitted?');">Mark submitted</button>
+                          <button class="btn btn-sm btn-outline-success" data-ahg-confirm="Mark this report as submitted?">Mark submitted</button>
                         </form>
                       <?php endif; ?>
                     </td>
@@ -223,7 +223,7 @@
         <form method="post" action="<?php echo url_for(['module' => 'sahra', 'action' => 'revoke', 'id' => $p->id]); ?>" class="mb-4">
           <div class="input-group">
             <input type="text" name="notes" class="form-control" placeholder="Reason for revocation">
-            <button class="btn btn-outline-danger" onclick="return confirm('Revoke this permit?');"><i class="fas fa-ban me-1"></i> Revoke permit</button>
+            <button class="btn btn-outline-danger" data-ahg-confirm="Revoke this permit?"><i class="fas fa-ban me-1"></i> Revoke permit</button>
           </div>
         </form>
       <?php endif; ?>
@@ -244,7 +244,7 @@
                   </div>
                   <?php if ($isApplicant || $sf_user->hasCredential('administrator')): ?>
                     <form method="post" action="<?php echo url_for(['module' => 'sahra', 'action' => 'documentDelete', 'id' => $d->id]); ?>" class="d-inline">
-                      <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this document?');"><i class="fas fa-trash"></i></button>
+                      <button class="btn btn-sm btn-outline-danger" data-ahg-confirm="Remove this document?"><i class="fas fa-trash"></i></button>
                     </form>
                   <?php endif; ?>
                 </li>

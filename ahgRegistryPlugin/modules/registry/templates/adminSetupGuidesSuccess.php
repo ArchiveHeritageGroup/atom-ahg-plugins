@@ -70,7 +70,7 @@
             <a href="<?php echo url_for(['module' => 'registry', 'action' => 'setupGuideView', 'softwareSlug' => $guide->software_slug ?? '', 'slug' => $guide->slug ?? '']); ?>" class="btn btn-sm btn-outline-info" title="<?php echo __('View'); ?>">
               <i class="fas fa-eye"></i>
             </a>
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminSetupGuides']); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Are you sure you want to delete this setup guide? This cannot be undone.'); ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminSetupGuides']); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Are you sure you want to delete this setup guide? This cannot be undone.'); ?>">
               <input type="hidden" name="form_action" value="delete">
               <input type="hidden" name="id" value="<?php echo (int) ($guide->id ?? 0); ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>">

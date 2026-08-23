@@ -182,7 +182,7 @@
                       <input type="hidden" name="hold_id" value="<?php echo (int) $hold->id; ?>">
                       <input type="hidden" name="patron_id" value="<?php echo $rawPatron->id; ?>">
                       <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Cancel'); ?>"
-                              onclick="return confirm('<?php echo __('Cancel this hold?'); ?>');">
+                              data-ahg-confirm="<?php echo __('Cancel this hold?'); ?>">
                         <i class="fas fa-times"></i>
                       </button>
                     </form>
@@ -248,7 +248,7 @@
                         <input type="hidden" name="fine_id" value="<?php echo (int) $fine->id; ?>">
                         <input type="hidden" name="patron_id" value="<?php echo $rawPatron->id; ?>">
                         <button type="submit" class="btn btn-outline-warning" title="<?php echo __('Waive'); ?>"
-                                onclick="return confirm('<?php echo __('Waive this fine?'); ?>');">
+                                data-ahg-confirm="<?php echo __('Waive this fine?'); ?>">
                           <i class="fas fa-hand-holding-usd"></i>
                         </button>
                       </form>

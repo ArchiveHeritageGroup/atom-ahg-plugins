@@ -75,30 +75,30 @@
 
     <div style="margin-bottom: 1rem; font-size: 0.85rem;">
       <strong><?php echo __('Show/Hide Columns'); ?>:</strong><br/>
-      <label><input type="checkbox" onclick="toggleColumn(0)" checked> Identifier</label>
-      <label><input type="checkbox" onclick="toggleColumn(1)" checked> Title</label>
-      <label><input type="checkbox" onclick="toggleColumn(2)" checked> Alt Title</label>
-      <label><input type="checkbox" onclick="toggleColumn(3)" checked> Extent</label>
-      <label><input type="checkbox" onclick="toggleColumn(4)" checked> Archival History</label>
-      <label><input type="checkbox" onclick="toggleColumn(5)" checked> Acquisition</label>
-      <label><input type="checkbox" onclick="toggleColumn(6)" checked> Scope</label>
-      <label><input type="checkbox" onclick="toggleColumn(7)" checked> Appraisal</label>
-      <label><input type="checkbox" onclick="toggleColumn(8)" checked> Accruals</label>
-      <label><input type="checkbox" onclick="toggleColumn(9)" checked> Arrangement</label>
-      <label><input type="checkbox" onclick="toggleColumn(10)" checked> Access</label>
-      <label><input type="checkbox" onclick="toggleColumn(11)" checked> Reproduction</label>
-      <label><input type="checkbox" onclick="toggleColumn(12)" checked> Physical</label>
-      <label><input type="checkbox" onclick="toggleColumn(13)" checked> Finding Aids</label>
-      <label><input type="checkbox" onclick="toggleColumn(14)" checked> Originals</label>
-      <label><input type="checkbox" onclick="toggleColumn(15)" checked> Copies</label>
-      <label><input type="checkbox" onclick="toggleColumn(16)" checked> Related</label>
-      <label><input type="checkbox" onclick="toggleColumn(17)" checked> Institution</label>
-      <label><input type="checkbox" onclick="toggleColumn(18)" checked> Rules</label>
-      <label><input type="checkbox" onclick="toggleColumn(19)" checked> Sources</label>
-      <label><input type="checkbox" onclick="toggleColumn(20)" checked> Revision</label>
-      <label><input type="checkbox" onclick="toggleColumn(21)" checked> Culture</label>
-      <label><input type="checkbox" onclick="toggleColumn(22)" checked> Repository</label>
-      <label><input type="checkbox" onclick="toggleColumn(23)" checked> Created</label>
+      <label><input type="checkbox" data-ahg-toggle-column="0" checked> Identifier</label>
+      <label><input type="checkbox" data-ahg-toggle-column="1" checked> Title</label>
+      <label><input type="checkbox" data-ahg-toggle-column="2" checked> Alt Title</label>
+      <label><input type="checkbox" data-ahg-toggle-column="3" checked> Extent</label>
+      <label><input type="checkbox" data-ahg-toggle-column="4" checked> Archival History</label>
+      <label><input type="checkbox" data-ahg-toggle-column="5" checked> Acquisition</label>
+      <label><input type="checkbox" data-ahg-toggle-column="6" checked> Scope</label>
+      <label><input type="checkbox" data-ahg-toggle-column="7" checked> Appraisal</label>
+      <label><input type="checkbox" data-ahg-toggle-column="8" checked> Accruals</label>
+      <label><input type="checkbox" data-ahg-toggle-column="9" checked> Arrangement</label>
+      <label><input type="checkbox" data-ahg-toggle-column="10" checked> Access</label>
+      <label><input type="checkbox" data-ahg-toggle-column="11" checked> Reproduction</label>
+      <label><input type="checkbox" data-ahg-toggle-column="12" checked> Physical</label>
+      <label><input type="checkbox" data-ahg-toggle-column="13" checked> Finding Aids</label>
+      <label><input type="checkbox" data-ahg-toggle-column="14" checked> Originals</label>
+      <label><input type="checkbox" data-ahg-toggle-column="15" checked> Copies</label>
+      <label><input type="checkbox" data-ahg-toggle-column="16" checked> Related</label>
+      <label><input type="checkbox" data-ahg-toggle-column="17" checked> Institution</label>
+      <label><input type="checkbox" data-ahg-toggle-column="18" checked> Rules</label>
+      <label><input type="checkbox" data-ahg-toggle-column="19" checked> Sources</label>
+      <label><input type="checkbox" data-ahg-toggle-column="20" checked> Revision</label>
+      <label><input type="checkbox" data-ahg-toggle-column="21" checked> Culture</label>
+      <label><input type="checkbox" data-ahg-toggle-column="22" checked> Repository</label>
+      <label><input type="checkbox" data-ahg-toggle-column="23" checked> Created</label>
     </div>
 
     <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

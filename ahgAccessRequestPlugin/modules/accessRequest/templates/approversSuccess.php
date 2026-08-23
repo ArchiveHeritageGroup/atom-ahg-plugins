@@ -69,7 +69,7 @@
                           <td>
                             <a href="<?php echo url_for('@access_request_remove_approver?id=' . $approver->user_id); ?>"
                                class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('Remove this approver?');">
+                               data-ahg-confirm="Remove this approver?">
                               <i class="fas fa-trash"></i>
                             </a>
                           </td>

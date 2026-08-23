@@ -47,7 +47,7 @@
           <button type="submit" class="btn btn-outline-primary"><i class="fas fa-download me-1"></i><?php echo __('Pull profile from ORCID'); ?></button>
         </form>
         <a href="<?php echo url_for('research/orcidWorks'); ?>" class="btn btn-outline-secondary"><i class="fas fa-sync me-1"></i><?php echo __('Sync works'); ?></a>
-        <a href="<?php echo url_for('research/orcidDisconnect'); ?>" class="btn btn-outline-danger" onclick="return confirm('<?php echo __('Disconnect ORCID?'); ?>')"><?php echo __('Disconnect'); ?></a>
+        <a href="<?php echo url_for('research/orcidDisconnect'); ?>" class="btn btn-outline-danger" data-ahg-confirm="<?php echo __('Disconnect ORCID?'); ?>"><?php echo __('Disconnect'); ?></a>
       </div>
     <?php else: ?>
       <p class="text-muted"><?php echo __('Your account is not yet linked to an ORCID iD.'); ?></p>
@@ -77,7 +77,7 @@
         <i class="fas fa-key me-1"></i><?php echo $hasCredentials ? __('Edit credentials') : __('Add credentials'); ?>
       </a>
       <?php if ($hasCredentials): ?>
-        <form method="post" action="<?php echo url_for('research/orcidClearCredentials'); ?>" onsubmit="return confirm('<?php echo __('Remove your ORCID credentials?'); ?>')">
+        <form method="post" action="<?php echo url_for('research/orcidClearCredentials'); ?>" data-ahg-confirm="<?php echo __('Remove your ORCID credentials?'); ?>">
           <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash me-1"></i><?php echo __('Remove'); ?></button>
         </form>
       <?php endif; ?>

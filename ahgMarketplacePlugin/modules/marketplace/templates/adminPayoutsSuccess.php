@@ -60,7 +60,7 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0"><?php echo __('Payout Queue'); ?></h5>
-        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('<?php echo __('Process all selected payouts?'); ?>');">
+        <button type="submit" class="btn btn-sm btn-success" data-ahg-confirm="<?php echo __('Process all selected payouts?'); ?>">
           <i class="fas fa-check-double me-1"></i> <?php echo __('Process Selected'); ?>
         </button>
       </div>

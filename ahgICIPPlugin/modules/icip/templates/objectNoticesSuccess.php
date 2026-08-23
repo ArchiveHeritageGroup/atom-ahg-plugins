@@ -55,7 +55,7 @@
                                         <?php endif ?>
                                     </div>
                                 </div>
-                                <form method="post" class="d-inline" onsubmit="return confirm('Remove this notice?');">
+                                <form method="post" class="d-inline" data-ahg-confirm="Remove this notice?">
                                     <input type="hidden" name="form_action" value="remove">
                                     <input type="hidden" name="notice_id" value="<?php echo $notice->id ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">

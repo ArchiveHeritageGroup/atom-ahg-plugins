@@ -125,7 +125,7 @@ $badgeFor = function (object $row) use ($now): array {
           </a>
           <?php if (empty($t->revoked_at) && strtotime((string) $t->expires_at) > time()): ?>
             <form action="<?php echo url_for(['module' => 'shareLink', 'action' => 'revoke', 'id' => $t->id]) ?>" method="post" class="d-inline ms-1"
-                  onsubmit="return confirm('<?php echo esc_entities(__('Revoke this share link? Recipients will no longer be able to view the record.')) ?>');">
+                  data-ahg-confirm="<?php echo esc_entities(__('Revoke this share link? Recipients will no longer be able to view the record.')) ?>">
               <input type="hidden" name="back" value="<?php echo esc_entities($_SERVER['REQUEST_URI']) ?>">
               <button type="submit" class="btn btn-outline-danger btn-sm">
                 <i class="fas fa-ban me-1"></i><?php echo __('Revoke') ?>

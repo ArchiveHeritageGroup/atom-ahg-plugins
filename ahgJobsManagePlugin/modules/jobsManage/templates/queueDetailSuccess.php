@@ -37,7 +37,7 @@
     <?php if (in_array($rawJob->status, ['pending', 'reserved', 'running'])): ?>
       <form method="post" action="<?php echo url_for('@queue_cancel'); ?>" class="d-inline">
         <input type="hidden" name="job_id" value="<?php echo (int) $rawJob->id; ?>">
-        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('<?php echo __('Cancel this job?'); ?>')">
+        <button type="submit" class="btn btn-danger btn-sm" data-ahg-confirm="<?php echo __('Cancel this job?'); ?>">
           <i class="fas fa-times"></i> <?php echo __('Cancel'); ?>
         </button>
       </form>

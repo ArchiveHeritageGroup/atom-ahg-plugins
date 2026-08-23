@@ -139,14 +139,14 @@
                 </a>
                 <?php if ($listing->status === 'draft'): ?>
                   <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'sellerListingPublish', 'id' => $listing->id]); ?>" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-success" title="<?php echo __('Publish'); ?>" onclick="return confirm('<?php echo __('Publish this listing?'); ?>');">
+                    <button type="submit" class="btn btn-sm btn-outline-success" title="<?php echo __('Publish'); ?>" data-ahg-confirm="<?php echo __('Publish this listing?'); ?>">
                       <i class="fas fa-check"></i>
                     </button>
                   </form>
                 <?php endif; ?>
                 <?php if ($listing->status === 'active'): ?>
                   <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'sellerListingWithdraw', 'id' => $listing->id]); ?>" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Withdraw'); ?>" onclick="return confirm('<?php echo __('Withdraw this listing from the marketplace?'); ?>');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Withdraw'); ?>" data-ahg-confirm="<?php echo __('Withdraw this listing from the marketplace?'); ?>">
                       <i class="fas fa-times"></i>
                     </button>
                   </form>

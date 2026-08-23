@@ -323,7 +323,7 @@
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
                                         <small class="text-muted"><?php echo date('M j, Y', strtotime($resource->added_at)); ?></small>
-                                        <form method="post" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this resource?'); ?>');">
+                                        <form method="post" class="d-inline" data-ahg-confirm="<?php echo __('Remove this resource?'); ?>">
                                             <input type="hidden" name="form_action" value="remove_resource">
                                             <input type="hidden" name="resource_id" value="<?php echo $resource->id; ?>">
                                             <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1" title="<?php echo __('Remove'); ?>"><i class="fas fa-times fa-xs"></i></button>

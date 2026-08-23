@@ -83,7 +83,7 @@
                   </td>
                   <td><small class="text-muted"><?php echo esc_entities($rule->notes) ?></small></td>
                   <td>
-                    <form method="post" action="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumChainDelete']) ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this chain rule?') ?>');">
+                    <form method="post" action="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumChainDelete']) ?>" class="d-inline" data-ahg-confirm="<?php echo __('Delete this chain rule?') ?>">
                       <input type="hidden" name="id" value="<?php echo (int) $rule->id ?>">
                       <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                     </form>

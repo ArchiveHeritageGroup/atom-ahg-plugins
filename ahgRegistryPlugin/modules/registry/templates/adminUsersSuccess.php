@@ -48,7 +48,7 @@
                 <i class="fas fa-check"></i> <?php echo __('Approve'); ?>
               </button>
             </form>
-            <form method="post" action="/registry/admin/users" class="d-inline" onsubmit="return confirm('Reject and delete this user account?');">
+            <form method="post" action="/registry/admin/users" class="d-inline" data-ahg-confirm="Reject and delete this user account?">
               <input type="hidden" name="user_id" value="<?php echo (int) $u->id; ?>">
               <input type="hidden" name="form_action" value="reject">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Reject'); ?>">

@@ -194,7 +194,7 @@ foreach ($reports as $report) {
                                         <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'export', 'id' => $report->id, 'format' => 'docx']); ?>"><i class="bi bi-filetype-docx me-2"></i>Word</a></li>
                                     </ul>
                                 </div>
-                                <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'delete', 'id' => $report->id, 'confirm' => 1]); ?>" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" onclick="return confirm('<?php echo __('Are you sure you want to delete this report?'); ?>');">
+                                <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'delete', 'id' => $report->id, 'confirm' => 1]); ?>" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" data-ahg-confirm="<?php echo __('Are you sure you want to delete this report?'); ?>">
                                     <i class="bi bi-trash me-1"></i><?php echo __('Delete'); ?>
                                 </a>
                             </div>

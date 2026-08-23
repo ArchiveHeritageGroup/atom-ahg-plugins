@@ -59,7 +59,7 @@
                                                     <i class="fas fa-toggle-<?php echo $bot->is_active ? 'on' : 'off' ?>"></i>
                                                 </button>
                                             </form>
-                                            <form method="post" class="d-inline" onsubmit="return confirm('Delete this bot pattern?');">
+                                            <form method="post" class="d-inline" data-ahg-confirm="Delete this bot pattern?">
                                                 <input type="hidden" name="form_action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo $bot->id ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger">

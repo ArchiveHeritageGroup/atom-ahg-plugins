@@ -167,7 +167,7 @@
               </div>
             </div>
             <div class="card-footer p-1 text-center">
-              <button type="submit" name="delete_custom_watermark" value="<?php echo $cw->id; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this watermark?');">
+              <button type="submit" name="delete_custom_watermark" value="<?php echo $cw->id; ?>" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Delete this watermark?">
                 <i class="fas fa-trash"></i>
               </button>
             </div>

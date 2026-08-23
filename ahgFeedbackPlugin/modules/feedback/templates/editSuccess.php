@@ -59,7 +59,7 @@
         <?php endif; ?>
         <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'delete', 'id' => $feedback->id]) ?>"
            class="btn btn-outline-danger btn-sm"
-           onclick="return confirm('<?php echo __('Are you sure you want to delete this feedback?') ?>');">
+           data-ahg-confirm="<?php echo __('Are you sure you want to delete this feedback?') ?>">
             <i class="fas fa-trash me-1"></i> <?php echo __('Delete') ?>
         </a>
     </div>

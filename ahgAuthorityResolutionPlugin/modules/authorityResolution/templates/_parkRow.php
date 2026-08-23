@@ -55,7 +55,7 @@
     </a>
     <form method="post" action="<?php echo url_for('@ar_auth_res_unpark?id=' . (int) $row->mention_id); ?>"
           class="d-inline"
-          onsubmit="return confirm('<?php echo __('Un-park this mention? Candidates will be regenerated and the mention returns to the pending queue.'); ?>');">
+          data-ahg-confirm="<?php echo __('Un-park this mention? Candidates will be regenerated and the mention returns to the pending queue.'); ?>">
       <button type="submit" class="btn btn-sm btn-outline-success">
         <i class="fas fa-play me-1"></i><?php echo __('Un-park & re-review'); ?>
       </button>

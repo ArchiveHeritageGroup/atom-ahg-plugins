@@ -26,7 +26,7 @@
             <td class="small text-muted"><?php echo $k->last_used_at ? htmlspecialchars(substr($k->last_used_at, 0, 16)) : '<span class="text-muted">'.__('never').'</span>'; ?></td>
             <td class="small text-muted"><?php echo htmlspecialchars(substr((string) $k->created_at, 0, 10)); ?></td>
             <td class="text-end">
-                <form method="post" action="<?php echo url_for(['module' => 'securityClearance', 'action' => 'webauthnDelete', 'id' => $k->id]); ?>" onsubmit="return confirm('<?php echo __('Remove this passkey?'); ?>');">
+                <form method="post" action="<?php echo url_for(['module' => 'securityClearance', 'action' => 'webauthnDelete', 'id' => $k->id]); ?>" data-ahg-confirm="<?php echo __('Remove this passkey?'); ?>">
                     <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                 </form>
             </td>

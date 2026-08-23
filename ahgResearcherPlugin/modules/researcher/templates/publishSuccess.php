@@ -42,7 +42,7 @@
                    class="btn btn-outline-secondary">
                   <i class="bi bi-arrow-left me-1"></i>Cancel
                 </a>
-                <button type="submit" class="btn btn-primary" onclick="return confirm('Publish this submission? Records will be created in AtoM.')">
+                <button type="submit" class="btn btn-primary" data-ahg-confirm="Publish this submission? Records will be created in AtoM.">
                   <i class="bi bi-globe me-1"></i>Publish Now
                 </button>
               </div>

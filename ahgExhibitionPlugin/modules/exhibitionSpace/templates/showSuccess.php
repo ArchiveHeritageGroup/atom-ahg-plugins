@@ -82,7 +82,7 @@
                     <td><small class="text-muted"><?php echo esc_entities($p->notes) ?></small></td>
                     <?php if ($sf_user->isAuthenticated()): ?>
                     <td>
-                      <form method="post" action="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'removePlacement']) ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this placement?') ?>');">
+                      <form method="post" action="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'removePlacement']) ?>" class="d-inline" data-ahg-confirm="<?php echo __('Remove this placement?') ?>">
                         <input type="hidden" name="id" value="<?php echo (int) $p->id ?>">
                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
                       </form>

@@ -42,7 +42,7 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
             </a>
         <?php endif; ?>
         <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'studioDelete', 'projectId' => $project->id, 'artefactId' => $artefact->id]); ?>" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this artefact?');">
+            <button type="submit" class="btn btn-outline-danger" data-ahg-confirm="Delete this artefact?">
                 <i class="fas fa-trash me-1"></i> Delete
             </button>
         </form>

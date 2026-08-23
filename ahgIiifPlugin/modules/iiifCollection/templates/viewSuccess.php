@@ -169,7 +169,7 @@ foreach ($collection->items as $item) {
                 <i class="fas fa-folder-plus me-2"></i><?php echo __('Create Subcollection') ?>
             </a>
             <hr>
-            <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'delete', 'id' => $collection->id]) ?>" class="btn btn-danger w-100" onclick="return confirm('<?php echo __('Are you sure you want to delete this collection?') ?>')">
+            <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'delete', 'id' => $collection->id]) ?>" class="btn btn-danger w-100" data-ahg-confirm="<?php echo __('Are you sure you want to delete this collection?') ?>">
                 <i class="fas fa-trash me-2"></i><?php echo __('Delete Collection') ?>
             </a>
             <?php endif ?>
@@ -391,7 +391,7 @@ foreach ($collection->items as $item) {
                                 <?php if ($sf_user->isAuthenticated()): ?>
                                 <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'removeItem', 'item_id' => $item->id, 'collection_id' => $collection->id]) ?>"
                                    class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('<?php echo __('Remove this item from the collection?') ?>')"
+                                   data-ahg-confirm="<?php echo __('Remove this item from the collection?') ?>"
                                    title="<?php echo __('Remove') ?>">
                                     <i class="fas fa-times"></i>
                                 </a>

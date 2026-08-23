@@ -89,7 +89,7 @@ $activeTag = $sf_request->getParameter('tag', '');
               <form method="post" class="d-inline">
                 <input type="hidden" name="do" value="delete">
                 <input type="hidden" name="id" value="<?php echo $annotation->id; ?>">
-                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('<?php echo __('Delete this note?'); ?>')">
+                <button type="submit" class="dropdown-item text-danger" data-ahg-confirm="<?php echo __('Delete this note?'); ?>">
                   <i class="fas fa-trash me-2"></i><?php echo __('Delete'); ?>
                 </button>
               </form>

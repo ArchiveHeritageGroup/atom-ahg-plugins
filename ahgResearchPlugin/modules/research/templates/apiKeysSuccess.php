@@ -63,7 +63,7 @@
                             </td>
                             <td>
                                 <?php if ($key->is_active): ?>
-                                    <form method="post" class="d-inline" onsubmit="return confirm('Revoke this API key? This cannot be undone.')">
+                                    <form method="post" class="d-inline" data-ahg-confirm="Revoke this API key? This cannot be undone.">
                                         <input type="hidden" name="form_action" value="revoke">
                                         <input type="hidden" name="key_id" value="<?php echo $key->id; ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>

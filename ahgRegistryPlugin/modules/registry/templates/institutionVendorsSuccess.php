@@ -105,7 +105,7 @@
             <?php endif; ?>
           </td>
           <td class="text-end">
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionVendorRemove', 'id' => (int) $rel->relationship_id]); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this service provider relationship? The vendor will not be deleted, only de-linked from your institution.'); ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionVendorRemove', 'id' => (int) $rel->relationship_id]); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Remove this service provider relationship? The vendor will not be deleted, only de-linked from your institution.'); ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove relationship'); ?>">
                 <i class="fas fa-unlink me-1"></i><?php echo __('Remove'); ?>
               </button>

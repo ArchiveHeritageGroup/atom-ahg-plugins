@@ -41,7 +41,7 @@ $statusTone = ['valid' => 'success', 'duplicate' => 'warning', 'invalid' => 'dan
           <span class="badge bg-primary"><?php echo __('committed'); ?> → <?php echo __('order'); ?> #<?php echo (int) $ingest->order_id; ?></span>
         <?php elseif ((int) $ingest->valid_count > 0): ?>
           <form method="post" action="<?php echo url_for(['module' => 'library', 'action' => 'onix']); ?>" class="d-inline"
-                onsubmit="return confirm('<?php echo __('Create an acquisitions order from the valid lines?'); ?>');">
+                data-ahg-confirm="<?php echo __('Create an acquisitions order from the valid lines?'); ?>">
             <input type="hidden" name="form_action" value="commit">
             <input type="hidden" name="id" value="<?php echo (int) $ingest->id; ?>">
             <button class="btn btn-sm btn-primary"><i class="fas fa-check me-1"></i><?php echo __('Commit to acquisitions'); ?></button>

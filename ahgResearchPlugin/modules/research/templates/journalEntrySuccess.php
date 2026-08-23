@@ -139,7 +139,7 @@ $projects = isset($projects) && is_array($projects) ? $projects : (isset($projec
       <div class="card-body">
         <h6 class="card-title text-danger"><i class="fas fa-trash me-1"></i><?php echo __('Delete Entry'); ?></h6>
         <p class="small text-muted"><?php echo __('This action cannot be undone.'); ?></p>
-        <form method="post" onsubmit="return confirm('<?php echo __('Are you sure you want to delete this entry?'); ?>');">
+        <form method="post" data-ahg-confirm="<?php echo __('Are you sure you want to delete this entry?'); ?>">
           <input type="hidden" name="form_action" value="delete">
           <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash me-1"></i><?php echo __('Delete Entry'); ?></button>
         </form>

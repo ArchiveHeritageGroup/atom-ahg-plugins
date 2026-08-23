@@ -118,7 +118,7 @@
                   <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'myOffers']); ?>" class="d-inline">
                     <input type="hidden" name="form_action" value="accept_counter">
                     <input type="hidden" name="offer_id" value="<?php echo (int) $offer->id; ?>">
-                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('<?php echo __('Accept counter-offer of %1% %2%?', ['%1%' => esc_entities($offer->currency), '%2%' => number_format((float) $offer->counter_amount, 2)]); ?>');">
+                    <button type="submit" class="btn btn-success btn-sm" data-ahg-confirm="<?php echo __('Accept counter-offer of %1% %2%?', ['%1%' => esc_entities($offer->currency), '%2%' => number_format((float) $offer->counter_amount, 2)]); ?>">
                       <i class="fas fa-check me-1"></i><?php echo __('Accept Counter'); ?>
                     </button>
                   </form>
@@ -128,7 +128,7 @@
                   <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'myOffers']); ?>" class="d-inline">
                     <input type="hidden" name="form_action" value="withdraw">
                     <input type="hidden" name="offer_id" value="<?php echo (int) $offer->id; ?>">
-                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('<?php echo __('Withdraw this offer?'); ?>');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm" data-ahg-confirm="<?php echo __('Withdraw this offer?'); ?>">
                       <i class="fas fa-times me-1"></i><?php echo __('Withdraw'); ?>
                     </button>
                   </form>

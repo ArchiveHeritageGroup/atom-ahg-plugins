@@ -350,7 +350,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                                             </form>
                                             <form action="<?php echo url_for(['module' => 'heritage', 'action' => 'adminHeroSlides']); ?>"
                                                   method="post" class="d-inline"
-                                                  onsubmit="return confirm('Are you sure you want to delete this slide?');">
+                                                  data-ahg-confirm="Are you sure you want to delete this slide?">
                                                 <input type="hidden" name="slide_action" value="delete">
                                                 <input type="hidden" name="slide_id" value="<?php echo $slide['id']; ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger">

@@ -162,7 +162,7 @@
         <i class="fas fa-key me-1"></i> <?php echo __('Reset Password'); ?>
       </div>
       <div class="card-body">
-        <form method="post" action="/registry/admin/users/<?php echo (int) $eu->id; ?>/reset-password" onsubmit="return confirm('Reset password for this user?');">
+        <form method="post" action="/registry/admin/users/<?php echo (int) $eu->id; ?>/reset-password" data-ahg-confirm="Reset password for this user?">
           <div class="mb-3">
             <label class="form-label"><?php echo __('New Password'); ?></label>
             <input type="password" class="form-control" name="new_password" minlength="6" required placeholder="<?php echo __('Min. 6 characters'); ?>">

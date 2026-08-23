@@ -73,7 +73,7 @@
         <!-- Accept -->
         <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'sellerOfferRespond', 'id' => $offer->id]); ?>" class="mb-3">
           <input type="hidden" name="form_action" value="accept">
-          <button type="submit" class="btn btn-success btn-lg w-100" onclick="return confirm('<?php echo __('Accept this offer of %1% %2%?', ['%1%' => esc_entities($offer->currency), '%2%' => number_format((float) $offer->offer_amount, 2)]); ?>');">
+          <button type="submit" class="btn btn-success btn-lg w-100" data-ahg-confirm="<?php echo __('Accept this offer of %1% %2%?', ['%1%' => esc_entities($offer->currency), '%2%' => number_format((float) $offer->offer_amount, 2)]); ?>">
             <i class="fas fa-check me-1"></i> <?php echo __('Accept Offer (%1% %2%)', ['%1%' => esc_entities($offer->currency), '%2%' => number_format((float) $offer->offer_amount, 2)]); ?>
           </button>
         </form>
@@ -87,7 +87,7 @@
             <label for="reject_message" class="form-label"><?php echo __('Rejection Message'); ?> <span class="text-muted">(<?php echo __('optional'); ?>)</span></label>
             <textarea class="form-control" id="reject_message" name="seller_response" rows="2" placeholder="<?php echo __('Optional message to the buyer...'); ?>"></textarea>
           </div>
-          <button type="submit" class="btn btn-danger w-100" onclick="return confirm('<?php echo __('Reject this offer?'); ?>');">
+          <button type="submit" class="btn btn-danger w-100" data-ahg-confirm="<?php echo __('Reject this offer?'); ?>">
             <i class="fas fa-times me-1"></i> <?php echo __('Reject Offer'); ?>
           </button>
         </form>

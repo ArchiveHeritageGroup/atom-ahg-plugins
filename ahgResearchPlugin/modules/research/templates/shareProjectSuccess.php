@@ -110,7 +110,7 @@ $externalCollaborators = isset($externalCollaborators) && is_array($externalColl
                 <td><small class="text-muted"><?php echo date('M j, Y', strtotime($share->created_at)); ?></small></td>
                 <td class="text-end">
                   <?php if (($share->status ?? 'pending') !== 'revoked' && ($share->status ?? 'pending') !== 'expired'): ?>
-                  <form method="post" class="d-inline" onsubmit="return confirm('<?php echo __('Revoke this share link?'); ?>');">
+                  <form method="post" class="d-inline" data-ahg-confirm="<?php echo __('Revoke this share link?'); ?>">
                     <input type="hidden" name="form_action" value="revoke_share">
                     <input type="hidden" name="share_id" value="<?php echo $share->id; ?>">
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Revoke'); ?>"><i class="fas fa-ban"></i></button>

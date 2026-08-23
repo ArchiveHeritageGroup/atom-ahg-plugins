@@ -115,7 +115,7 @@
                             </form>
                           </li>
                           <li>
-                            <form method="post" class="d-inline" onsubmit="return confirm('{{ __('Regenerate secret? The old secret will stop working immediately.') }}');">
+                            <form method="post" class="d-inline" data-ahg-confirm="{{ __('Regenerate secret? The old secret will stop working immediately.') }}">
                               {!! $form->renderHiddenFields() !!}
                               <input type="hidden" name="action_type" value="regenerate">
                               <input type="hidden" name="webhook_id" value="{{ $webhook->id }}">
@@ -132,7 +132,7 @@
                           </li>
                           <li><hr class="dropdown-divider"></li>
                           <li>
-                            <form method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this webhook?') }}');">
+                            <form method="post" class="d-inline" data-ahg-confirm="{{ __('Delete this webhook?') }}">
                               {!! $form->renderHiddenFields() !!}
                               <input type="hidden" name="action_type" value="delete">
                               <input type="hidden" name="webhook_id" value="{{ $webhook->id }}">

@@ -73,7 +73,7 @@
                 </select>
               </form>
               <!-- Remove -->
-              <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'groupMembersManage', 'id' => $group->id]); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this member?'); ?>');">
+              <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'groupMembersManage', 'id' => $group->id]); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Remove this member?'); ?>">
                 <input type="hidden" name="form_action" value="remove">
                 <input type="hidden" name="member_email" value="<?php echo htmlspecialchars($m->email ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                 <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove'); ?>">

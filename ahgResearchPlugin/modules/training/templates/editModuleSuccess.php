@@ -50,7 +50,7 @@ $cid = (int) ($course['id'] ?? 0);
     </div>
   </div>
   <div class="card-footer d-flex justify-content-between">
-    <button type="submit" name="form_action" value="delete" class="btn btn-outline-danger" onclick="return confirm('<?php echo __('Delete this module?'); ?>');"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button>
+    <button type="submit" name="form_action" value="delete" class="btn btn-outline-danger" data-ahg-confirm="<?php echo __('Delete this module?'); ?>"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button>
     <span>
       <a href="<?php echo url_for(['module' => 'training', 'action' => 'show', 'id' => $cid]); ?>" class="btn btn-outline-secondary"><?php echo __('Cancel'); ?></a>
       <button type="submit" name="form_action" value="save" class="btn btn-primary"><?php echo __('Save module'); ?></button>

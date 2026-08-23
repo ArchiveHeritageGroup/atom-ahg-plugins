@@ -94,7 +94,7 @@
                             <input type="text" name="orcid_id" class="form-control" value="<?php echo $researcher->orcid_id; ?>" <?php echo ($researcher->orcid_verified ?? false) ? 'readonly' : ''; ?>>
                             <?php if ($researcher->orcid_verified ?? false): ?>
                                 <span class="input-group-text bg-success text-white"><i class="fas fa-check-circle me-1"></i> Verified</span>
-                                <a href="<?php echo url_for('research/orcidDisconnect'); ?>" class="btn btn-outline-danger" onclick="return confirm('Disconnect ORCID?')">Disconnect</a>
+                                <a href="<?php echo url_for('research/orcidDisconnect'); ?>" class="btn btn-outline-danger" data-ahg-confirm="Disconnect ORCID?">Disconnect</a>
                             <?php else: ?>
                                 <a href="<?php echo url_for('research/orcidConnect'); ?>" class="btn btn-outline-success"><i class="fab fa-orcid me-1"></i> Verify with ORCID</a>
                             <?php endif; ?>

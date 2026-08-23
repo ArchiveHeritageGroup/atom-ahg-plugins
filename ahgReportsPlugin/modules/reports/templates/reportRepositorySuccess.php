@@ -65,27 +65,27 @@
 
     <div style="margin-bottom: 1rem; font-size: 0.85rem;">
       <strong><?php echo __('Show/Hide Columns'); ?>:</strong><br/>
-      <label><input type="checkbox" onclick="toggleColumn(0)" checked> Identifier</label>
-      <label><input type="checkbox" onclick="toggleColumn(1)" checked> Name</label>
-      <label><input type="checkbox" onclick="toggleColumn(2)" checked> Desc Status</label>
-      <label><input type="checkbox" onclick="toggleColumn(3)" checked> Desc Detail</label>
-      <label><input type="checkbox" onclick="toggleColumn(4)" checked> Desc ID</label>
-      <label><input type="checkbox" onclick="toggleColumn(5)" checked> Geocultural</label>
-      <label><input type="checkbox" onclick="toggleColumn(6)" checked> Collecting</label>
-      <label><input type="checkbox" onclick="toggleColumn(7)" checked> Buildings</label>
-      <label><input type="checkbox" onclick="toggleColumn(8)" checked> Holdings</label>
-      <label><input type="checkbox" onclick="toggleColumn(9)" checked> Finding Aids</label>
-      <label><input type="checkbox" onclick="toggleColumn(10)" checked> Opening Times</label>
-      <label><input type="checkbox" onclick="toggleColumn(11)" checked> Access</label>
-      <label><input type="checkbox" onclick="toggleColumn(12)" checked> Disabled Access</label>
-      <label><input type="checkbox" onclick="toggleColumn(13)" checked> Research</label>
-      <label><input type="checkbox" onclick="toggleColumn(14)" checked> Reproduction</label>
-      <label><input type="checkbox" onclick="toggleColumn(15)" checked> Public Facilities</label>
-      <label><input type="checkbox" onclick="toggleColumn(16)" checked> Institution ID</label>
-      <label><input type="checkbox" onclick="toggleColumn(17)" checked> Rules</label>
-      <label><input type="checkbox" onclick="toggleColumn(18)" checked> Sources</label>
-      <label><input type="checkbox" onclick="toggleColumn(19)" checked> Revision</label>
-      <label><input type="checkbox" onclick="toggleColumn(20)" checked> Created</label>
+      <label><input type="checkbox" data-ahg-toggle-column="0" checked> Identifier</label>
+      <label><input type="checkbox" data-ahg-toggle-column="1" checked> Name</label>
+      <label><input type="checkbox" data-ahg-toggle-column="2" checked> Desc Status</label>
+      <label><input type="checkbox" data-ahg-toggle-column="3" checked> Desc Detail</label>
+      <label><input type="checkbox" data-ahg-toggle-column="4" checked> Desc ID</label>
+      <label><input type="checkbox" data-ahg-toggle-column="5" checked> Geocultural</label>
+      <label><input type="checkbox" data-ahg-toggle-column="6" checked> Collecting</label>
+      <label><input type="checkbox" data-ahg-toggle-column="7" checked> Buildings</label>
+      <label><input type="checkbox" data-ahg-toggle-column="8" checked> Holdings</label>
+      <label><input type="checkbox" data-ahg-toggle-column="9" checked> Finding Aids</label>
+      <label><input type="checkbox" data-ahg-toggle-column="10" checked> Opening Times</label>
+      <label><input type="checkbox" data-ahg-toggle-column="11" checked> Access</label>
+      <label><input type="checkbox" data-ahg-toggle-column="12" checked> Disabled Access</label>
+      <label><input type="checkbox" data-ahg-toggle-column="13" checked> Research</label>
+      <label><input type="checkbox" data-ahg-toggle-column="14" checked> Reproduction</label>
+      <label><input type="checkbox" data-ahg-toggle-column="15" checked> Public Facilities</label>
+      <label><input type="checkbox" data-ahg-toggle-column="16" checked> Institution ID</label>
+      <label><input type="checkbox" data-ahg-toggle-column="17" checked> Rules</label>
+      <label><input type="checkbox" data-ahg-toggle-column="18" checked> Sources</label>
+      <label><input type="checkbox" data-ahg-toggle-column="19" checked> Revision</label>
+      <label><input type="checkbox" data-ahg-toggle-column="20" checked> Created</label>
     </div>
 
     <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

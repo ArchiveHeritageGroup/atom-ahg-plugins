@@ -94,11 +94,11 @@
                 <i class="fas fa-eye"></i>
               </a>
               <?php if ($booking->booking_date === date('Y-m-d') && !$booking->checked_in_at): ?>
-              <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkIn', 'id' => $booking->id]); ?>" class="btn btn-sm btn-success" onclick="return confirm('<?php echo __('Check in this researcher?'); ?>')">
+              <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkIn', 'id' => $booking->id]); ?>" class="btn btn-sm btn-success" data-ahg-confirm="<?php echo __('Check in this researcher?'); ?>">
                 <i class="fas fa-sign-in-alt"></i>
               </a>
               <?php elseif ($booking->checked_in_at && !$booking->checked_out_at): ?>
-              <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkOut', 'id' => $booking->id]); ?>" class="btn btn-sm btn-warning" onclick="return confirm('<?php echo __('Check out this researcher?'); ?>')">
+              <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkOut', 'id' => $booking->id]); ?>" class="btn btn-sm btn-warning" data-ahg-confirm="<?php echo __('Check out this researcher?'); ?>">
                 <i class="fas fa-sign-out-alt"></i>
               </a>
               <?php endif; ?>

@@ -194,7 +194,7 @@
                         <?php if ($req->status === 'pending'): ?>
                           <a href="<?php echo url_for('security/request/' . $req->id . '/cancel'); ?>" 
                              class="btn btn-sm btn-outline-danger"
-                             onclick="return confirm('Cancel this request?');">
+                             data-ahg-confirm="Cancel this request?">
                             <i class="fas fa-times"></i>
                           </a>
                         <?php endif; ?>

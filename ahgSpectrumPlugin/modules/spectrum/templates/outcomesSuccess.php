@@ -44,7 +44,7 @@ echo ahg_style_block('.ahg-outcome-note { width: 14rem; }');
             <input type="text" class="form-control form-control-sm d-inline-block ahg-outcome-note"
                    name="note" placeholder="<?php echo __('Note (optional)') ?>">
             <button class="btn btn-sm btn-success" name="decision" value="accept"
-                    onclick="return confirm('<?php echo __('Write this to the record it belongs to?') ?>')">
+                    data-ahg-confirm="<?php echo __('Write this to the record it belongs to?') ?>">
               <?php echo __('Accept') ?>
             </button>
             <button class="btn btn-sm btn-outline-secondary" name="decision" value="reject">

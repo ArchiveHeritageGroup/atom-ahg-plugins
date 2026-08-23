@@ -142,7 +142,7 @@ $participants = isset($participants) && is_array($participants) ? $participants 
         </form>
         <?php endif; ?>
         <?php if (in_array($activity->status, ['requested', 'confirmed'])): ?>
-        <form method="post" onsubmit="return confirm('<?php echo __('Cancel this activity?'); ?>');">
+        <form method="post" data-ahg-confirm="<?php echo __('Cancel this activity?'); ?>">
           <input type="hidden" name="form_action" value="cancel">
           <div class="mb-2">
             <input type="text" name="cancellation_reason" class="form-control" placeholder="<?php echo __('Reason for cancellation...'); ?>">

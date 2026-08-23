@@ -137,7 +137,7 @@ $seatTypes = Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <?php if ($seat->is_active): ?>
-                                        <form method="post" class="d-inline" onsubmit="return confirm('Deactivate this seat?')">
+                                        <form method="post" class="d-inline" data-ahg-confirm="Deactivate this seat?">
                                             <input type="hidden" name="form_action" value="delete">
                                             <input type="hidden" name="seat_id" value="<?php echo $seat->id ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-danger">

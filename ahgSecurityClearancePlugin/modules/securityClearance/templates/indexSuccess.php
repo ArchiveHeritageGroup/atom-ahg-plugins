@@ -139,7 +139,7 @@
                         <?php if ($user->classification_id): ?>
                           <a href="<?php echo url_for('@security_clearance_revoke?id=' . $user->id); ?>" 
                              class="btn btn-outline-danger"
-                             onclick="return confirm('Revoke clearance for <?php echo htmlspecialchars($user->username); ?>?');"
+                             data-ahg-confirm="Revoke clearance for <?php echo htmlspecialchars($user->username); ?>?"
                              title="Revoke Clearance">
                             <i class="fas fa-ban"></i>
                           </a>

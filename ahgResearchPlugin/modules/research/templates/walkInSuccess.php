@@ -207,7 +207,7 @@ $idTypes = $taxonomyService->getIdTypes(true);
                                             <input type="hidden" name="form_action" value="checkout">
                                             <input type="hidden" name="visitor_id" value="<?php echo $visitor->id ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-success"
-                                                    onclick="return confirm('Check out this visitor?')">
+                                                    data-ahg-confirm="Check out this visitor?">
                                                 <i class="fas fa-sign-out-alt"></i> Check Out
                                             </button>
                                         </form>

@@ -101,7 +101,7 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
               </form>
               <?php endif; ?>
               <button type="button" class="btn btn-sm btn-outline-primary edit-section-btn" data-section-id="<?php echo $section->id; ?>" title="<?php echo __('Edit'); ?>"><i class="fas fa-edit"></i></button>
-              <form method="post" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this section?'); ?>');">
+              <form method="post" class="d-inline" data-ahg-confirm="<?php echo __('Delete this section?'); ?>">
                 <input type="hidden" name="form_action" value="delete_section">
                 <input type="hidden" name="section_id" value="<?php echo $section->id; ?>">
                 <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>"><i class="fas fa-trash"></i></button>
@@ -331,7 +331,7 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
       <div class="card-body">
         <h6 class="card-title text-danger"><i class="fas fa-trash me-1"></i><?php echo __('Delete Report'); ?></h6>
         <p class="small text-muted"><?php echo __('This will permanently delete the report and all its sections.'); ?></p>
-        <form method="post" onsubmit="return confirm('<?php echo __('Are you sure? This cannot be undone.'); ?>');">
+        <form method="post" data-ahg-confirm="<?php echo __('Are you sure? This cannot be undone.'); ?>">
           <input type="hidden" name="form_action" value="delete_report">
           <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash me-1"></i><?php echo __('Delete Report'); ?></button>
         </form>

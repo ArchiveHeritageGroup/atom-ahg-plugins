@@ -40,13 +40,13 @@
     </form>
     <form method="post" class="d-inline">
       <input type="hidden" name="resolve_all" value="1">
-      <button type="submit" class="btn btn-sm btn-outline-success" {{ $openCount === 0 ? 'disabled' : '' }} onclick="return confirm('Resolve all open errors?')">
+      <button type="submit" class="btn btn-sm btn-outline-success" {{ $openCount === 0 ? 'disabled' : '' }} data-ahg-confirm="Resolve all open errors?">
         <i class="fas fa-check-double me-1"></i>{{ __('Resolve All') }}
       </button>
     </form>
     <form method="post" class="d-inline">
       <input type="hidden" name="clear_old" value="30">
-      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete logs older than 30 days?')">
+      <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="Delete logs older than 30 days?">
         <i class="fas fa-trash me-1"></i>{{ __('Clear 30d+') }}
       </button>
     </form>
@@ -167,7 +167,7 @@
             </button>
             <form method="post" class="d-inline">
               <input type="hidden" name="delete_id" value="{{ $err->id }}">
-              <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('Delete') }}" onclick="return confirm('Delete this entry?')">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('Delete') }}" data-ahg-confirm="Delete this entry?">
                 <i class="fas fa-times"></i>
               </button>
             </form>

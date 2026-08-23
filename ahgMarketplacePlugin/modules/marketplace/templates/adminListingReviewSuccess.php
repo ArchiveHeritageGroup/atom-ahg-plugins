@@ -138,7 +138,7 @@
           <div class="col-md-4">
             <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'adminListingReview', 'id' => $listing->id]); ?>">
               <input type="hidden" name="form_action" value="approve">
-              <button type="submit" class="btn btn-success w-100" onclick="return confirm('<?php echo __('Approve this listing and make it active?'); ?>');">
+              <button type="submit" class="btn btn-success w-100" data-ahg-confirm="<?php echo __('Approve this listing and make it active?'); ?>">
                 <i class="fas fa-check me-1"></i> <?php echo __('Approve'); ?>
               </button>
             </form>
@@ -148,7 +148,7 @@
           <div class="col-md-4">
             <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'adminListingReview', 'id' => $listing->id]); ?>">
               <input type="hidden" name="form_action" value="suspend">
-              <button type="submit" class="btn btn-warning w-100" onclick="return confirm('<?php echo __('Suspend this listing?'); ?>');">
+              <button type="submit" class="btn btn-warning w-100" data-ahg-confirm="<?php echo __('Suspend this listing?'); ?>">
                 <i class="fas fa-pause me-1"></i> <?php echo __('Suspend'); ?>
               </button>
             </form>
@@ -158,7 +158,7 @@
           <div class="col-md-4">
             <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'adminListingReview', 'id' => $listing->id]); ?>">
               <input type="hidden" name="form_action" value="reject">
-              <button type="submit" class="btn btn-danger w-100" onclick="return confirm('<?php echo __('Reject this listing and return it to draft?'); ?>');">
+              <button type="submit" class="btn btn-danger w-100" data-ahg-confirm="<?php echo __('Reject this listing and return it to draft?'); ?>">
                 <i class="fas fa-times me-1"></i> <?php echo __('Reject'); ?>
               </button>
             </form>

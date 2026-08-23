@@ -46,7 +46,7 @@ $badge = function ($status) {
     </select>
     <button class="btn btn-sm btn-outline-primary" type="submit"><?php echo __('Set status'); ?></button>
   </form>
-  <form method="post" onsubmit="return confirm('<?php echo __('Delete this journal and all its issues/articles?'); ?>');">
+  <form method="post" data-ahg-confirm="<?php echo __('Delete this journal and all its issues/articles?'); ?>">
     <input type="hidden" name="form_action" value="delete">
     <button class="btn btn-sm btn-outline-danger" type="submit"><i class="fas fa-trash"></i></button>
   </form>
@@ -75,7 +75,7 @@ $badge = function ($status) {
             }
             ?>
             <?php if ($issue['id'] !== null): ?>
-              <form method="post" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this issue? Articles will be unassigned.'); ?>');">
+              <form method="post" class="d-inline" data-ahg-confirm="<?php echo __('Remove this issue? Articles will be unassigned.'); ?>">
                 <input type="hidden" name="form_action" value="delete_issue">
                 <input type="hidden" name="issue_id" value="<?php echo (int) $issue['id']; ?>">
                 <button class="btn btn-sm btn-link text-danger p-0 ms-2" type="submit"><i class="fas fa-times"></i></button>

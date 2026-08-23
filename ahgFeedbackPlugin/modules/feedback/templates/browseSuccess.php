@@ -148,7 +148,7 @@
                             </a>
                             <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'delete', 'id' => $item->id]) ?>" 
                                class="btn btn-outline-danger" title="<?php echo __('Delete') ?>"
-                               onclick="return confirm('<?php echo __('Are you sure?') ?>');">
+                               data-ahg-confirm="<?php echo __('Are you sure?') ?>">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </div>

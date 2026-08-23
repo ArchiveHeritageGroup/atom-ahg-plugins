@@ -19,13 +19,13 @@
             @if(!$jurisdiction->is_installed)
             <a href="{{ url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionInstall', 'code' => $jurisdiction->code]) }}"
                class="btn btn-success"
-               onclick="return confirm('{{ __('Install this jurisdiction?') }}');">
+               data-ahg-confirm="{{ __('Install this jurisdiction?') }}">
                 <i class="fas fa-download me-1"></i>{{ __('Install') }}
             </a>
             @elseif(!$activeJurisdiction || $activeJurisdiction->code !== $jurisdiction->code)
             <a href="{{ url_for(['module' => 'privacyAdmin', 'action' => 'jurisdictionSetActive', 'code' => $jurisdiction->code]) }}"
                class="btn btn-primary"
-               onclick="return confirm('{{ __('Set as active jurisdiction?') }}');">
+               data-ahg-confirm="{{ __('Set as active jurisdiction?') }}">
                 <i class="fas fa-check me-1"></i>{{ __('Set as Active') }}
             </a>
             @else

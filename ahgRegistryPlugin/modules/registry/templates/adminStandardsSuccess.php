@@ -97,7 +97,7 @@
             <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminStandardEdit', 'id' => (int) $standard->id]); ?>" class="btn btn-sm btn-outline-secondary" title="<?php echo __('Edit'); ?>">
               <i class="fas fa-edit"></i>
             </a>
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminStandards']); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Are you sure you want to delete this standard? This cannot be undone.'); ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminStandards']); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Are you sure you want to delete this standard? This cannot be undone.'); ?>">
               <input type="hidden" name="form_action" value="delete">
               <input type="hidden" name="id" value="<?php echo (int) $standard->id; ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>">

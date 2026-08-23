@@ -23,7 +23,7 @@ function formatBytes($bytes, $precision = 2) {
     <?php if ($summary['withoutModel'] > 0): ?>
     <hr>
     <form method="post" action="<?php echo url_for(['module' => 'threeDReports', 'action' => 'bulkCreateConfig']); ?>">
-        <button type="submit" class="btn btn-success btn-sm w-100" onclick="return confirm('Create configs for all <?php echo $summary['withoutModel']; ?> unconfigured 3D files?');">
+        <button type="submit" class="btn btn-success btn-sm w-100" data-ahg-confirm="Create configs for all <?php echo $summary['withoutModel']; ?> unconfigured 3D files?">
             <i class="fas fa-magic me-2"></i><?php echo __('Create All Configs'); ?>
         </button>
     </form>

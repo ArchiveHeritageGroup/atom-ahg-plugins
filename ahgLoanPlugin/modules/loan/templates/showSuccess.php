@@ -169,7 +169,7 @@
                     <?php endif; ?>
                   </td>
                   <td class="text-end">
-                    <form action="<?php echo url_for(['module' => 'loan', 'action' => 'removeObject', 'id' => $loan['id']]); ?>" method="post" style="display: inline;" onsubmit="return confirm('Remove this object from the loan?');">
+                    <form action="<?php echo url_for(['module' => 'loan', 'action' => 'removeObject', 'id' => $loan['id']]); ?>" method="post" style="display: inline;" data-ahg-confirm="Remove this object from the loan?">
                       <input type="hidden" name="object_id" value="<?php echo $obj['information_object_id']; ?>">
                       <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
                         <i class="fa-solid fa-times"></i>

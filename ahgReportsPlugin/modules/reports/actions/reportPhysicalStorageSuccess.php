@@ -83,13 +83,13 @@
 
     <div style="margin-bottom: 1rem; font-size: 0.85rem;">
       <strong><?php echo __('Show/Hide Columns'); ?>:</strong><br/>
-      <label><input type="checkbox" onclick="toggleColumn(0)" checked> <?php echo __('Name'); ?></label>
-      <label><input type="checkbox" onclick="toggleColumn(1)" checked> <?php echo __('Location'); ?></label>
-      <label><input type="checkbox" onclick="toggleColumn(2)" checked> <?php echo __('Repository'); ?></label>
-      <label><input type="checkbox" onclick="toggleColumn(3)" checked> <?php echo __('Culture'); ?></label>
-      <label><input type="checkbox" onclick="toggleColumn(4)" checked> <?php echo __('Created'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="0" checked> <?php echo __('Name'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="1" checked> <?php echo __('Location'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="2" checked> <?php echo __('Repository'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="3" checked> <?php echo __('Culture'); ?></label>
+      <label><input type="checkbox" data-ahg-toggle-column="4" checked> <?php echo __('Created'); ?></label>
       <?php if (isset($_GET['showLinkedIO']) && $_GET['showLinkedIO']) { ?>
-        <label><input type="checkbox" onclick="toggleColumn(5)" checked> <?php echo __('Linked Information Objects'); ?></label>
+        <label><input type="checkbox" data-ahg-toggle-column="5" checked> <?php echo __('Linked Information Objects'); ?></label>
       <?php } ?>
     </div>
 

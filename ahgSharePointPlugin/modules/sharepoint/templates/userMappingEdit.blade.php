@@ -9,7 +9,7 @@
         <dt class="col-sm-3">{{ __('Created by') }}</dt><dd class="col-sm-9">{{ $mapping->created_by }}</dd>
         <dt class="col-sm-3">{{ __('Last seen') }}</dt><dd class="col-sm-9">{{ $mapping->last_seen_at ?? '—' }}</dd>
     </dl>
-    <form method="post" onsubmit="return confirm('{{ __('Delete this mapping? The AtoM user account is NOT deleted.') }}');">
+    <form method="post" data-ahg-confirm="{{ __('Delete this mapping? The AtoM user account is NOT deleted.') }}">
         <input type="hidden" name="form_action" value="delete">
         <button type="submit" class="btn btn-danger">{{ __('Remove mapping') }}</button>
         <a class="btn btn-link" href="{{ url_for(['module' => 'sharepoint', 'action' => 'userMappings']) }}">{{ __('Back') }}</a>

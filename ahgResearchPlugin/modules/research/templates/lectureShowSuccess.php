@@ -40,7 +40,7 @@ $statuses = ['draft', 'scheduled', 'delivered', 'published', 'archived'];
                 <i class="fas fa-<?php echo $isPublished ? 'eye-slash' : 'globe'; ?> me-1"></i><?php echo $isPublished ? 'Unpublish' : 'Publish'; ?>
             </button>
         </form>
-        <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'lectureDelete', 'id' => $id]); ?>" class="d-inline" onsubmit="return confirm('Delete this lecture and all its sections and resources?');">
+        <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'lectureDelete', 'id' => $id]); ?>" class="d-inline" data-ahg-confirm="Delete this lecture and all its sections and resources?">
             <button class="btn btn-outline-danger" type="submit"><i class="fas fa-trash me-1"></i>Delete</button>
         </form>
     </div>
@@ -113,7 +113,7 @@ $statuses = ['draft', 'scheduled', 'delivered', 'published', 'archived'];
                         <span>
                             <span class="badge bg-light text-dark">#<?php echo (int) $sec['sort_order']; ?></span>
                             <a class="btn btn-sm btn-outline-primary" href="<?php echo url_for(['module' => 'research', 'action' => 'lectureSectionEdit', 'id' => $sec['id']]); ?>"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'lectureSectionDelete', 'id' => $sec['id']]); ?>" class="d-inline" onsubmit="return confirm('Remove this section?');">
+                            <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'lectureSectionDelete', 'id' => $sec['id']]); ?>" class="d-inline" data-ahg-confirm="Remove this section?">
                                 <button class="btn btn-sm btn-outline-danger" type="submit"><i class="fas fa-trash"></i></button>
                             </form>
                         </span>
@@ -177,7 +177,7 @@ $statuses = ['draft', 'scheduled', 'delivered', 'published', 'archived'];
                                 <?php echo htmlspecialchars($res['label']); ?>
                             <?php endif; ?>
                         </span>
-                        <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'lectureResourceDelete', 'id' => $res['id'], 'lecture_id' => $id]); ?>" class="d-inline" onsubmit="return confirm('Remove this resource?');">
+                        <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'lectureResourceDelete', 'id' => $res['id'], 'lecture_id' => $id]); ?>" class="d-inline" data-ahg-confirm="Remove this resource?">
                             <button class="btn btn-sm btn-link text-danger p-0" type="submit"><i class="fas fa-times"></i></button>
                         </form>
                     </li>

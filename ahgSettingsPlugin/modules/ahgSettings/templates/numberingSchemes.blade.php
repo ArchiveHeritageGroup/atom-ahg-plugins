@@ -112,12 +112,12 @@
                 </a>
                 <a href="{{ url_for(['module' => 'ahgSettings', 'action' => 'numberingSchemes', 'do' => 'resetSequence', 'id' => $scheme->id]) }}"
                    class="btn btn-outline-warning" title="{{ __('Reset sequence') }}"
-                   onclick="return confirm('{{ __('Reset sequence to 0?') }}');">
+                   data-ahg-confirm="{{ __('Reset sequence to 0?') }}">
                   <i class="fas fa-redo"></i>
                 </a>
                 <a href="{{ url_for(['module' => 'ahgSettings', 'action' => 'numberingSchemes', 'do' => 'delete', 'id' => $scheme->id]) }}"
                    class="btn btn-outline-danger" title="{{ __('Delete') }}"
-                   onclick="return confirm('{{ __('Delete this scheme?') }}');">
+                   data-ahg-confirm="{{ __('Delete this scheme?') }}">
                   <i class="fas fa-trash"></i>
                 </a>
               </div>

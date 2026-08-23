@@ -149,7 +149,7 @@ $val = function ($k) use ($a) { return htmlspecialchars((string) ($a[$k] ?? ''))
 </form>
 
 <?php if (!$isNew): ?>
-  <form method="post" class="mt-3" onsubmit="return confirm('<?php echo __('Delete this article?'); ?>');">
+  <form method="post" class="mt-3" data-ahg-confirm="<?php echo __('Delete this article?'); ?>">
     <input type="hidden" name="form_action" value="delete">
     <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash me-1"></i><?php echo __('Delete article'); ?></button>
   </form>

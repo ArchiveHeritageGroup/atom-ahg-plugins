@@ -177,7 +177,7 @@
                       <form method="post" action="<?php echo url_for(['module' => 'opac', 'action' => 'hold']); ?>" class="d-inline">
                         <input type="hidden" name="library_item_id" value="<?php echo (int) ($hold->library_item_id ?? 0); ?>">
                         <input type="hidden" name="cancel_hold" value="<?php echo (int) ($hold->id ?? 0); ?>">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?php echo __('Cancel this hold?'); ?>');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="<?php echo __('Cancel this hold?'); ?>">
                           <i class="fas fa-times me-1"></i><?php echo __('Cancel'); ?>
                         </button>
                       </form>

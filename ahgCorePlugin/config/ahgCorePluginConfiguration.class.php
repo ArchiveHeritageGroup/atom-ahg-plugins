@@ -126,6 +126,7 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
 
         // Apply data-ahg-style declarations. See injectStyleApplier().
         $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectStyleApplier']);
+        $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectHandlerShims']);
 
         // A route into registration from the login screen. Offers whichever
         // registrations the instance actually has, read from the routing table -
@@ -258,6 +259,93 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
      * Injected once from core rather than as a script in each of the 178 templates
      * that need it, so a template author writes data-ahg-style and nothing else.
      */
+    /**
+     * Bind the handler shims that replace inline event attributes.
+     *
+     * An inline handler (onclick, onsubmit) is an ATTRIBUTE, and a CSP nonce
+     * authorises a <script> ELEMENT - it can never cover an attribute. Under a
+     * nonce policy every inline handler silently does not run: the button is
+     * there, it looks right, and clicking it does nothing. On an enforcing
+     * instance that is 683 dead handlers across the suite.
+     *
+     * Same shape as injectStyleApplier, which already solves the style half of
+     * this problem with data-ahg-style.
+     *
+     * data-ahg-confirm="message"   - ask before proceeding; cancel stops the
+     *                                click or the form submit.
+     * data-ahg-toggle-column="n"   - toggle the nth column of the nearest table.
+     */
+    public static function injectHandlerShims($event, $content)
+    {
+        if (!is_string($content)) {
+            return $content;
+        }
+
+        if (false === stripos($content, 'data-ahg-confirm')
+            && false === stripos($content, 'data-ahg-toggle-column')) {
+            return $content;
+        }
+
+        if (false === stripos($content, '</body>')) {
+            return $content;
+        }
+
+        $nonce = sfConfig::get('csp_nonce', '');
+        $nonceAttr = $nonce ? ' '.preg_replace('/^nonce=/', 'nonce="', $nonce).'"' : '';
+
+        $js = <<<'SHIMS'
+(function () {
+  // Delegated, so it covers markup added after load without rebinding.
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest ? ev.target.closest('[data-ahg-confirm]') : null;
+    if (el && !window.confirm(el.getAttribute('data-ahg-confirm'))) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      return;
+    }
+    var col = ev.target.closest ? ev.target.closest('[data-ahg-toggle-column]') : null;
+    if (col) {
+      var idx = parseInt(col.getAttribute('data-ahg-toggle-column'), 10);
+      if (isNaN(idx)) { return; }
+
+      // Call the page's OWN toggleColumn where it exists. Those definitions live
+      // in nonced <script> blocks, so the function is defined and working - it was
+      // only the onclick ATTRIBUTE calling it that CSP dropped. Reimplementing its
+      // semantics here would change behaviour (they target #reportTable by id and
+      // toggle style.display) for no reason.
+      if ('function' === typeof window.toggleColumn) {
+        window.toggleColumn(idx);
+        return;
+      }
+
+      // Fallback for pages with no such function: named table, else the first one.
+      var sel = col.getAttribute('data-ahg-toggle-table');
+      var table = sel ? document.querySelector(sel) : document.querySelector('table');
+      if (!table) { return; }
+      table.querySelectorAll('tr').forEach(function (row) {
+        var cell = row.children[idx];
+        if (cell) { cell.style.display = 'none' === cell.style.display ? '' : 'none'; }
+      });
+    }
+  }, true);
+
+  // A form may carry the confirm itself, converted from an inline submit handler.
+  document.addEventListener('submit', function (ev) {
+    var form = ev.target.closest ? ev.target.closest('form[data-ahg-confirm]') : null;
+    if (form && !window.confirm(form.getAttribute('data-ahg-confirm'))) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+  }, true);
+})();
+SHIMS;
+
+        $block = '<script'.$nonceAttr.'>'.$js.'</script>';
+        $pos = strripos($content, '</body>');
+
+        return false === $pos ? $content.$block : substr_replace($content, $block."\n", $pos, 0);
+    }
+
     public static function injectStyleApplier($event, $content)
     {
         if (!is_string($content) || false === stripos($content, 'data-ahg-style')) {

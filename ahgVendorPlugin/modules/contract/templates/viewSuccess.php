@@ -314,7 +314,7 @@
             <a href="<?php echo url_for(['module' => 'contract', 'action' => 'edit', 'id' => $contract->id]) ?>" class="btn btn-primary">
               <i class="fas fa-edit me-1"></i> <?php echo __('Edit Contract') ?>
             </a>
-            <form method="post" action="<?php echo url_for(['module' => 'contract', 'action' => 'delete', 'id' => $contract->id]) ?>" onsubmit="return confirm('<?php echo __('Are you sure you want to delete this contract?') ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'contract', 'action' => 'delete', 'id' => $contract->id]) ?>" data-ahg-confirm="<?php echo __('Are you sure you want to delete this contract?') ?>">
               <button type="submit" class="btn btn-outline-danger w-100">
                 <i class="fas fa-trash me-1"></i> <?php echo __('Delete') ?>
               </button>

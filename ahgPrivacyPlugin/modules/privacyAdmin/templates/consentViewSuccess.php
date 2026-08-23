@@ -75,7 +75,7 @@
             <div class="card">
                 <div class="card-header bg-warning"><h5 class="mb-0"><i class="fas fa-ban me-2"></i><?php echo __('Withdraw Consent'); ?></h5></div>
                 <div class="card-body">
-                    <form method="post" action="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'consentWithdraw', 'id' => $consent->id]); ?>" onsubmit="return confirm('Are you sure?');">
+                    <form method="post" action="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'consentWithdraw', 'id' => $consent->id]); ?>" data-ahg-confirm="Are you sure?">
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Reason'); ?></label>
                             <textarea name="reason" class="form-control" rows="2"></textarea>

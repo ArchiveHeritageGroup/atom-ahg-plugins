@@ -191,7 +191,7 @@
               <?php if (!$isNew): ?>
               <hr>
               <button type="submit" name="delete" value="1" class="btn btn-outline-danger"
-                      onclick="return confirm('Are you sure you want to delete this peer? This will NOT delete harvested records.')">
+                      data-ahg-confirm="Are you sure you want to delete this peer? This will NOT delete harvested records.">
                 <i class="bi bi-trash me-1"></i> Delete Peer
               </button>
               <?php endif ?>

@@ -76,7 +76,7 @@ $_noteCount = count($_notes);
             </button>
           </form>
           <?php endif; ?>
-          <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'noteDelete', 'id' => $_note->id]); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Delete this note?'); ?>');">
+          <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'noteDelete', 'id' => $_note->id]); ?>" class="d-inline" data-ahg-confirm="<?php echo __('Delete this note?'); ?>">
             <input type="hidden" name="return_url" value="<?php echo htmlspecialchars($_returnUrl, ENT_QUOTES, 'UTF-8'); ?>#notes">
             <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1" title="<?php echo __('Delete'); ?>">
               <i class="fas fa-trash-alt"></i>
