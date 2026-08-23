@@ -22,6 +22,17 @@
       <?php echo $matrix['context_count']; ?> context<?php echo 1 === $matrix['context_count'] ? '' : 's'; ?>,
       <?php echo $matrix['relationship_count']; ?> stratigraphic relationship<?php echo 1 === $matrix['relationship_count'] ? '' : 's'; ?>.
       Cuts and interfaces are shown in square brackets, deposits and fills in round brackets.
+      <?php
+      // Say when the drawing is a reduction of what was recorded. A matrix that
+      // silently shows fewer edges than the record holds would leave a reader
+      // unable to tell a correct reduction from lost data.
+      $redundant = (int) ($matrix['redundant_count'] ?? 0);
+      if ($redundant > 0) { ?>
+        <?php echo $redundant; ?> relationship<?php echo 1 === $redundant ? ' is' : 's are'; ?>
+        implied by a longer path and <?php echo 1 === $redundant ? 'is' : 'are'; ?> not drawn;
+        only immediate relationships appear, as the method requires.
+        Nothing recorded has been deleted.
+      <?php } ?>
     </p>
 
     <h2 class="h5">Harris Matrix</h2>

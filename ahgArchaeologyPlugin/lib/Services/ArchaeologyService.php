@@ -973,14 +973,109 @@ class ArchaeologyService
             ksort($tiers);
         }
 
+        // Draw only the immediate relationships. Layering above deliberately uses
+        // the FULL edge set - reduction preserves reachability and longest-path
+        // distance, but computing tiers first means the reduction cannot move a
+        // context between tiers even if that reasoning is ever wrong.
+        $drawnEdges = $hasCycle ? $edges : $this->transitivelyReduce($edges);
+
         return [
             'tiers' => $tiers,
-            'edges' => $edges,
+            'edges' => $drawnEdges,
             'has_cycle' => $hasCycle,
-            'mermaid' => $this->mermaidSource($groups, $edges),
+            'mermaid' => $this->mermaidSource($groups, $drawnEdges),
             'context_count' => count($contexts),
             'relationship_count' => intdiv(count($rels), 2),
+            // Stated rather than silently discarded: a redundant relationship is
+            // still a real thing the excavator recorded, and the count is how a
+            // reader knows the diagram is a reduction of what was written down.
+            'redundant_count' => count($edges) - count($drawnEdges),
         ];
+    }
+
+    /**
+     * Remove edges implied by a longer path - the transitive reduction.
+     *
+     * Harris's Law of Stratigraphic Succession says a matrix shows only the
+     * IMMEDIATE relationships. Excavators routinely record all three of A above B,
+     * B above C and A above C; the third is implied by the first two, and drawing
+     * it is both wrong by the method and, on a real site, the difference between a
+     * readable diagram and a hairball.
+     *
+     * Keeping the recorded relationship and suppressing only the drawn edge is
+     * deliberate: the excavator's record is not edited, just read correctly.
+     *
+     * Only valid on a DAG - the caller must not pass a graph with a cycle, since
+     * "is there another path" has no stable answer once one exists.
+     *
+     * @param array<string, string> $edges keyed 'from|to'
+     *
+     * @return array<string, string> the same shape, minus the implied edges
+     */
+    private function transitivelyReduce(array $edges): array
+    {
+        $adjacency = [];
+
+        foreach (array_keys($edges) as $key) {
+            [$from, $to] = explode('|', $key);
+            $adjacency[$from][] = $to;
+        }
+
+        $kept = [];
+
+        foreach ($edges as $key => $type) {
+            [$from, $to] = explode('|', $key);
+
+            // Reachable from $from without using the direct $from -> $to hop. If
+            // $to still comes back, this edge says nothing the longer path did not
+            // already say.
+            if (!$this->reachesVia($adjacency, $from, $to)) {
+                $kept[$key] = $type;
+            }
+        }
+
+        return $kept;
+    }
+
+    /**
+     * Is $to reachable from $from by a path of length two or more?
+     *
+     * Iterative rather than recursive: a deep sequence is ordinary on a real site
+     * and PHP's default recursion limits are not something a dig should discover.
+     */
+    private function reachesVia(array $adjacency, string $from, string $to): bool
+    {
+        $stack = [];
+        $seen = [$from => true];
+
+        // Seed with the successors of $from, skipping the direct hop under test.
+        foreach ($adjacency[$from] ?? [] as $next) {
+            if ($next !== $to) {
+                $stack[] = $next;
+            }
+        }
+
+        while ($stack) {
+            $node = array_pop($stack);
+
+            if ($node === $to) {
+                return true;
+            }
+
+            if (isset($seen[$node])) {
+                continue;
+            }
+
+            $seen[$node] = true;
+
+            foreach ($adjacency[$node] ?? [] as $next) {
+                if (!isset($seen[$next])) {
+                    $stack[] = $next;
+                }
+            }
+        }
+
+        return false;
     }
 
     /** Mermaid flowchart source for the matrix, later pointing to earlier. */
