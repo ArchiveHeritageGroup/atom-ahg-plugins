@@ -117,7 +117,7 @@ class AhgSettingsResetAction extends AhgController
                 'photo_thumbnail_large' => '800',
                 'photo_watermark_enabled' => 'false',
                 'photo_watermark_text' => '',
-                'photo_exif_strip' => 'false',
+                'photo_exif_strip' => 'true',
                 'photo_auto_orient' => 'true',
             ],
             'jobs' => [

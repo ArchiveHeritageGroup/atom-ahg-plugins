@@ -385,6 +385,20 @@ class MetadataExtractionHandler
             return;
         }
 
+        // Writing the exact coordinate into scope_and_content publishes it: that
+        // field renders on the record page, is indexed for search, and is emitted
+        // in EAD and DC exports. Where locality is restricted - rock art above all -
+        // that hands out in prose the position the locality gate is coarsening to
+        // ~11 km, without ever touching the gate.
+        //
+        // So this is now opt-in and defaults to OFF. Extraction still happens; what
+        // changed is that a photograph's position is no longer published into a
+        // narrative field by default. An instance that genuinely wants coordinates
+        // in the description must say so.
+        if (!$this->getSetting('gps_write_to_scope_note', false)) {
+            return;
+        }
+
         $note = sprintf('GPS Coordinates: %s, %s', $gps['latitude'], $gps['longitude']);
 
         $i18n = DB::table('information_object_i18n')
