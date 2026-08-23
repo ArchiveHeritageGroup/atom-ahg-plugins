@@ -71,8 +71,12 @@ function render_mirador_viewer($iiifIdentifier, $objId, $root, $request)
 
     $viewerId = 'mirador-' . $objId;
 
-    $html = '<div id="' . $viewerId . '-wrapper" class="mirador-wrapper" style="position:relative;">';
-    $html .= '<div id="' . $viewerId . '" style="width:100%;height:' . $height . ';"></div>';
+    $n = sfConfig::get('csp_nonce', '');
+    $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
+
+    $html = '<style' . $nonceAttr . '>#' . $viewerId . '{height:' . esc_specialchars($height) . ';}</style>';
+    $html .= '<div id="' . $viewerId . '-wrapper" class="mirador-wrapper">';
+    $html .= '<div id="' . $viewerId . '" class="ahg-mirador-frame"></div>';
     $html .= '</div>';
 
     // JavaScript initialization
@@ -104,7 +108,12 @@ function render_openseadragon_viewer($iiifIdentifier, $objId, $cantaloupeUrl)
     $viewerId = 'osd-' . $objId;
     $infoUrl = rtrim($cantaloupeUrl, '/') . '/' . urlencode($iiifIdentifier) . '/info.json';
 
-    $html = '<div id="' . $viewerId . '" class="osd-viewer" style="width:100%;height:' . esc_specialchars($height) . ';background:' . esc_specialchars($bgColor) . ';border-radius:8px;"></div>';
+    $n2 = sfConfig::get('csp_nonce', '');
+    $nonceAttr2 = $n2 ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n2) . '"' : '';
+
+    $html = '<style' . $nonceAttr2 . '>#' . $viewerId . '{height:' . esc_specialchars($height)
+        . ';background:' . esc_specialchars($bgColor) . ';}</style>';
+    $html .= '<div id="' . $viewerId . '" class="osd-viewer"></div>';
 
     // JavaScript initialization
     $n = sfConfig::get('csp_nonce', '');

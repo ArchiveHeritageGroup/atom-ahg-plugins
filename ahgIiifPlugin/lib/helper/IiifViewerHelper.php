@@ -235,7 +235,27 @@ function iiif_image_server_responds(string $baseUrl, float $timeout = 1.5): bool
         ]);
         curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $errno = curl_errno($ch);
         curl_close($ch);
+
+        // Only DNS, connect and timeout failures mean "absent" - which is what the
+        // comment above always intended, but a bare status check did not deliver.
+        //
+        // A server can answer in ways curl reports as an error while still plainly
+        // being there: an HTTP/2 stream reset after the headers (errno 92) or an
+        // empty reply (errno 52). Measured on PSIS, where the site is HTTPS and the
+        // host cannot reach its own public :443 endpoint, so EVERY variant - HEAD,
+        // GET, HTTP/1.1, ranged GET - came back status 0. Cantaloupe was running
+        // and answering on :8182 the whole time, and every record silently showed
+        // the plain-image fallback instead of a viewer.
+        //
+        // 6 = COULDNT_RESOLVE_HOST, 7 = COULDNT_CONNECT, 28 = OPERATION_TIMEDOUT.
+        // Named constants are not used: CURLE_HTTP2 and CURLE_HTTP2_STREAM are not
+        // defined in every PHP build, and referencing an undefined constant is a
+        // fatal in PHP 8.
+        if (0 === $status && !in_array($errno, [6, 7, 28], true)) {
+            return $seen[$key] = true;
+        }
         $seen[$key] = $status > 0;
     } catch (\Throwable $e) {
         $seen[$key] = false;
@@ -270,10 +290,10 @@ function render_standard_viewer($resource, $options = [])
     $html = '<div class="digital-object-viewer">';
     if (strpos($mimeType, 'image') !== false) {
         $html .= '<a href="' . $displayPath . '" target="_blank">';
-        $html .= '<img src="' . $displayPath . '" alt="' . esc_entities($name) . '" class="img-fluid" style="max-height: 600px;">';
+        $html .= '<img src="' . $displayPath . '" alt="' . esc_entities($name) . '" class="img-fluid ahg-media-capped">';
         $html .= '</a>';
     } elseif (strpos($mimeType, 'video') !== false) {
-        $html .= '<video controls class="w-100" style="max-height: 600px;">';
+        $html .= '<video controls class="w-100 ahg-media-capped">';
         $html .= '<source src="' . $path . $name . '" type="' . $mimeType . '">';
         $html .= '</video>';
     } elseif (strpos($mimeType, 'audio') !== false) {
@@ -450,13 +470,19 @@ function render_iiif_viewer($resource, $options = [])
 
     // OpenSeadragon viewer (only for images)
     if ($hasImages) {
-        $html .= '<div id="osd-' . $viewerId . '" class="osd-viewer" style="width:100%;height:' . esc_specialchars($viewerHeight) . ';background:' . esc_specialchars($opts['background_color'] ?? '#1a1a1a') . ';border-radius:8px;"></div>';
+        // Geometry comes from viewer-switch.css; only the configured height and
+        // background vary, so only those go in a nonce-carrying style element.
+        $html .= ahg_iiif_viewer_style_block(
+            '#osd-' . $viewerId . '{height:' . esc_specialchars($viewerHeight)
+            . ';background:' . esc_specialchars($opts['background_color'] ?? '#1a1a1a') . ';}'
+        );
+        $html .= '<div id="osd-' . $viewerId . '" class="osd-viewer"></div>';
 
         // Mirador wrapper (hidden by default)
-        $html .= '<div id="mirador-wrapper-' . $viewerId . '" class="mirador-wrapper" style="display:none;position:relative;">';
-        $html .= '<button id="close-mirador-' . $viewerId . '" class="btn btn-sm btn-light" style="position:absolute;top:10px;right:10px;z-index:1000;">';
+        $html .= '<div id="mirador-wrapper-' . $viewerId . '" class="mirador-wrapper ahg-hidden">';
+        $html .= '<button id="close-mirador-' . $viewerId . '" class="btn btn-sm btn-light ahg-mirador-close">';
         $html .= '<i class="fas fa-times"></i> Close</button>';
-        $html .= '<div id="mirador-' . $viewerId . '" style="width:100%;height:700px;"></div>';
+        $html .= '<div id="mirador-' . $viewerId . '" class="ahg-mirador-frame"></div>';
         $html .= '</div>';
     }
 
@@ -610,6 +636,31 @@ function build_iiif_identifier($path, $name)
  * Render viewer toggle buttons
  * Only shows relevant buttons based on content type
  */
+
+/**
+ * A <style> element carrying the CSP nonce, for rules whose values are only known
+ * at runtime (configured viewer height, background colour).
+ *
+ * Static geometry belongs in web/css/viewer-switch.css. This exists for the values
+ * that cannot: a class cannot express "whatever height the administrator set".
+ *
+ * Why not a style="" attribute, which is what this replaces: a nonce covers style
+ * and script ELEMENTS, never style ATTRIBUTES. Under a policy without
+ * 'unsafe-inline' the attribute is dropped, the container gets no height, and the
+ * viewer collapses to nothing with no error explaining why.
+ */
+function ahg_iiif_viewer_style_block(string $css): string
+{
+    if ('' === trim($css)) {
+        return '';
+    }
+
+    $n = sfConfig::get('csp_nonce', '');
+    $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
+
+    return '<style' . $nonceAttr . '>' . $css . '</style>';
+}
+
 function ahg_iiif_render_viewer_toggle($viewerId, $defaultViewer, $has3D, $hasPdf, $hasAV, $hasImages = true)
 {
     // For PDF/AV/3D only content, don't show toggle - just show the appropriate viewer
@@ -656,7 +707,39 @@ function get_iiif_viewer_css($pluginPath)
 
     $cssIncluded = true;
 
-    $html = '<style>
+    // A <style> element with no nonce is blocked outright under this estate's CSP,
+    // taking the viewer layout with it. The nonce is not optional here.
+    $n = sfConfig::get('csp_nonce', '');
+    $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
+
+    // Mirador 3 styles itself at runtime through Material-UI's JSS, which creates
+    // <style> elements from JavaScript. Those are subject to style-src exactly
+    // like any other style element, so under a nonce policy they are all dropped
+    // and Mirador renders as unstyled dark blocks with working tiles - which reads
+    // as a broken viewer rather than as a CSP problem.
+    //
+    // JSS looks for this specific tag and stamps its content onto every sheet it
+    // creates. The selector is meta[property="csp-nonce"]; the name is not ours to
+    // choose. Without it there is no way to nonce styles that do not exist until
+    // runtime.
+    // The stylesheet must be linked HERE, not only from ViewerInjector.
+    //
+    // ViewerInjector links it only when it renders the viewer switcher. Where the
+    // viewer is emitted by this helper instead, the classes it defines have no
+    // stylesheet behind them: .ahg-mirador-frame computes height:0 and Mirador
+    // lays out at zero. OpenSeadragon escaped that only because its height comes
+    // from the per-id <style> block below rather than from a class - which is
+    // precisely why OSD worked and Mirador did not.
+    //
+    // A <link> is governed by style-src 'self', so it needs no nonce.
+    $html = '<link rel="stylesheet" href="/plugins/ahgIiifPlugin/web/css/viewer-switch.css">';
+
+    if ($n) {
+        $nonceValue = trim(preg_replace('/^nonce=/', '', $n), '"\'');
+        $html .= '<meta property="csp-nonce" content="' . esc_specialchars($nonceValue) . '">';
+    }
+
+    $html .= '<style' . $nonceAttr . '>
 .iiif-viewer-container { margin-bottom: 1rem; }
 .viewer-area { position: relative; }
 .osd-viewer { border-radius: 8px; }
@@ -721,9 +804,9 @@ function ahg_iiif_render_viewer_controls($viewerId, $manifestUrl, $objectId, $op
  */
 function ahg_iiif_render_pdf_viewer_html($viewerId, $pdfUrl, $height, $showByDefault = false)
 {
-    $displayStyle = $showByDefault ? '' : 'display:none;';
+    $hiddenClass = $showByDefault ? '' : ' ahg-hidden';
 
-    $html = '<div id="pdf-wrapper-' . $viewerId . '" class="pdf-wrapper" style="' . $displayStyle . '">';
+    $html = '<div id="pdf-wrapper-' . $viewerId . '" class="pdf-wrapper' . $hiddenClass . '">';
 
     // Toolbar with download and fullscreen
     $html .= '<div class="pdf-toolbar mb-2 d-flex justify-content-between align-items-center">';
@@ -736,9 +819,11 @@ function ahg_iiif_render_pdf_viewer_html($viewerId, $pdfUrl, $height, $showByDef
     $html .= '</div></div>';
 
     // Embedded PDF viewer using iframe (uses browser's native PDF viewer)
-    $html .= '<iframe id="pdf-frame-' . $viewerId . '" ';
+    $html .= ahg_iiif_viewer_style_block(
+        '#pdf-frame-' . $viewerId . '{height:' . esc_specialchars((string) $height) . ';background:#525659;}'
+    );
+    $html .= '<iframe id="pdf-frame-' . $viewerId . '" class="ahg-pdf-frame" ';
     $html .= 'src="' . htmlspecialchars($pdfUrl) . '" ';
-    $html .= 'style="width:100%;height:' . $height . ';border:none;border-radius:8px;background:#525659;" ';
     $html .= 'title="PDF Viewer"></iframe>';
 
     $html .= '</div>';
@@ -761,17 +846,21 @@ function ahg_iiif_render_3d_viewer_html($viewerId, $model, $height, $baseUrl, $s
     $bgColor = $model->background_color ?? '#f5f5f5';
     $poster = !empty($model->poster_image) ? 'poster="' . $baseUrl . $model->poster_image . '"' : '';
 
-    $displayStyle = $showByDefault ? '' : 'display:none;';
-    $html = '<div id="model-wrapper-' . $viewerId . '" class="model-wrapper" style="' . $displayStyle . '">';
+    $hiddenClass = $showByDefault ? '' : ' ahg-hidden';
+    $html = '<div id="model-wrapper-' . $viewerId . '" class="model-wrapper' . $hiddenClass . '">';
     $html .= '<model-viewer id="model-' . $viewerId . '" ';
     $html .= 'src="' . $modelUrl . '" ';
     $html .= $poster . ' ';
+    $html .= ahg_iiif_viewer_style_block(
+        'model-viewer#' . $viewerId . '-model{height:' . esc_specialchars((string) $height)
+        . ';background-color:' . esc_specialchars((string) $bgColor) . ';}'
+    );
     $html .= $arAttr . ' ';
     $html .= $autoRotate . ' ';
     $html .= 'camera-controls touch-action="pan-y" ';
     $html .= 'camera-orbit="' . $cameraOrbit . '" ';
-    $html .= 'style="width:100%;height:' . $height . ';background-color:' . $bgColor . ';border-radius:8px;">';
-    $html .= '<button slot="ar-button" class="btn btn-primary" style="position:absolute;bottom:16px;right:16px;">';
+    $html .= 'class="ahg-model-frame">';
+    $html .= '<button slot="ar-button" class="btn btn-primary ahg-ar-button">';
     $html .= '<i class="fas fa-cube me-1"></i>View in AR</button>';
     $html .= '</model-viewer></div>';
     
@@ -787,15 +876,18 @@ function ahg_iiif_render_av_viewer_html($viewerId, $digitalObject, $height, $bas
     $mimeType = $digitalObject->mimeType ?? 'video/mp4';
     $isAudio = stripos($mimeType, 'audio') !== false;
 
-    $displayStyle = $showByDefault ? '' : 'display:none;';
-    $html = '<div id="av-wrapper-' . $viewerId . '" class="av-wrapper" style="' . $displayStyle . '">';
+    $hiddenClass = $showByDefault ? '' : ' ahg-hidden';
+    $html = '<div id="av-wrapper-' . $viewerId . '" class="av-wrapper' . $hiddenClass . '">';
     
     if ($isAudio) {
-        $html .= '<audio id="audio-' . $viewerId . '" controls style="width:100%;">';
+        $html .= '<audio id="audio-' . $viewerId . '" controls class="ahg-av-audio">';
         $html .= '<source src="' . $mediaUrl . '" type="' . $mimeType . '">';
         $html .= 'Your browser does not support the audio element.</audio>';
     } else {
-        $html .= '<video id="video-' . $viewerId . '" controls style="width:100%;height:' . $height . ';background:#000;border-radius:8px;">';
+        $html .= ahg_iiif_viewer_style_block(
+            '#video-' . $viewerId . '{height:' . esc_specialchars((string) $height) . ';background:#000;}'
+        );
+        $html .= '<video id="video-' . $viewerId . '" controls class="ahg-av-video">';
         $html .= '<source src="' . $mediaUrl . '" type="' . $mimeType . '">';
         $html .= 'Your browser does not support the video element.</video>';
     }
@@ -810,15 +902,15 @@ function ahg_iiif_render_av_viewer_html($viewerId, $digitalObject, $height, $bas
  */
 function ahg_iiif_render_thumbnail_strip($viewerId, $digitalObjects, $cantaloupeUrl)
 {
-    $html = '<div class="thumbnail-strip mt-2" id="thumbs-' . $viewerId . '" style="display:flex;gap:8px;overflow-x:auto;padding:8px 0;">';
+    $html = '<div class="thumbnail-strip ahg-thumb-strip mt-2" id="thumbs-' . $viewerId . '">';
     
     foreach ($digitalObjects as $index => $do) {
         $iiifId = build_iiif_identifier($do->path, $do->name);
         $thumbUrl = $cantaloupeUrl . '/' . urlencode($iiifId) . '/full/100,/0/default.jpg';
         $activeClass = $index === 0 ? 'active' : '';
         
-        $html .= '<div class="thumb-item ' . $activeClass . '" data-index="' . $index . '" style="flex-shrink:0;cursor:pointer;border:2px solid transparent;border-radius:4px;">';
-        $html .= '<img src="' . $thumbUrl . '" alt="Page ' . ($index + 1) . '" style="height:80px;display:block;">';
+        $html .= '<div class="thumb-item ahg-thumb-item ' . $activeClass . '" data-index="' . $index . '">';
+        $html .= '<img src="' . $thumbUrl . '" alt="Page ' . ($index + 1) . '">';
         $html .= '</div>';
     }
     
@@ -950,5 +1042,9 @@ function render_iiif_image($identifier, $options = [])
     $class = $options['class'] ?? '';
     $style = $options['style'] ?? '';
     
-    return '<img src="' . htmlspecialchars($url) . '" alt="' . htmlspecialchars($alt) . '" class="' . $class . '" style="' . $style . '">';
+    // A style attribute is dropped under any enforcing CSP, so emit one only when a
+    // caller explicitly asks. Prefer passing 'class'.
+    $styleAttr = '' !== trim((string) $style) ? ' style="' . htmlspecialchars($style) . '"' : '';
+
+    return '<img src="' . htmlspecialchars($url) . '" alt="' . htmlspecialchars($alt) . '" class="' . $class . '"' . $styleAttr . '>';
 }

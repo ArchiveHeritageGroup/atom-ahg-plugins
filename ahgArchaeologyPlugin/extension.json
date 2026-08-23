@@ -1,0 +1,33 @@
+{
+    "name": "Archaeology",
+    "machine_name": "ahgArchaeologyPlugin",
+    "version": "0.1.0",
+    "description": "Archaeological site, find and stratigraphic context recording - single-context recording with Harris Matrix, for excavation archives",
+    "author": "The Archive and Heritage Group",
+    "license": "AGPL-3.0-or-later",
+    "category": "heritage",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional": {
+        "extensions": [
+            "ahgIcipPlugin",
+            "ahgSecurityClearancePlugin",
+            "ahgConditionPlugin"
+        ]
+    },
+    "tables": [
+        "archaeology_site",
+        "archaeology_object",
+        "archaeology_context",
+        "archaeology_context_relationship"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "load_order": 60
+}

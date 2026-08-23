@@ -930,9 +930,39 @@ class iiifActions extends AhgController
         $host = $_SERVER['HTTP_HOST'];
         $baseUrl = "{$protocol}://{$host}";
 
-        // Accept slugs= (comma-separated) or manifest= (multiple)
+        // Accept slugs= (comma-separated) or manifest= (repeated).
+        //
+        // Repeated parameters have to be read off the raw query string. PHP
+        // collapses ?manifest=A&manifest=B to just B, so getParameter() sees one
+        // manifest however many were sent - and a comparison of one image is not
+        // a comparison. The static page this replaced used
+        // URLSearchParams.getAll(), which is why repeated params appeared to work
+        // there and never did here. manifest[]= is accepted too.
         $slugs = array_filter(explode(',', $request->getParameter('slugs', '')));
-        $manifests = (array) ($request->getParameter('manifest', []));
+        $manifests = [];
+
+        foreach (explode('&', (string) ($_SERVER['QUERY_STRING'] ?? '')) as $pair) {
+            if ('' === $pair) {
+                continue;
+            }
+
+            $parts = explode('=', $pair, 2);
+            $key = urldecode($parts[0]);
+
+            if ('manifest' !== $key && 'manifest[]' !== $key) {
+                continue;
+            }
+
+            $value = trim(urldecode($parts[1] ?? ''));
+
+            // Only absolute http(s) URLs: this value is handed to Mirador to
+            // fetch, so anything else is either useless or an invitation.
+            if ('' !== $value && preg_match('#^https?://#i', $value)) {
+                $manifests[] = $value;
+            }
+        }
+
+        $manifests = array_values(array_unique($manifests));
 
         // Convert slugs to manifest URLs
         foreach ($slugs as $slug) {

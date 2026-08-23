@@ -35,6 +35,9 @@ class ViewerInjector
         'sfDcPlugin',
         'sfModsPlugin',
         'sfDacsPlugin',
+        // The DAM sector display serves records through its own module and does
+        // not emit AtoM's digital-object markup.
+        'dam',
     ];
 
     /** response.filter_content can fire more than once per request. */
@@ -65,13 +68,31 @@ class ViewerInjector
     {
         $response = $event->getSubject();
 
-        // Once per request, never on a themed install, never into content that
-        // already carries a viewer.
-        if (self::$injected || $this->themeProvidesViewer()) {
+        // Once per request, and never into content that already carries a viewer.
+        //
+        // WHY THE "IS THE THEME RENDERING THIS?" CHECK IS GONE
+        //
+        // This used to stand down whenever ahgThemeB5Plugin was installed, on the
+        // assumption the theme would render the viewer instead. That assumption is
+        // false for the DAM sector display: its template calls
+        // render_digital_object_viewer() and, where that helper is not loaded,
+        // falls back to a bare <a><img>. So on a themed install every DAM record
+        // showed a flat image and no viewer, with nothing logged - measured on
+        // PSIS /photo-3.
+        //
+        // The marker test below answers the same question by observation rather
+        // than by presumption: if a viewer is already in the response, stand down.
+        // It is correct per page, needs no list of renderer plugin names, and
+        // cannot be wrong about what some other plugin might do. Same correction
+        // ahgSiteRecordPlugin's SiteRecordPanelInjector already made.
+        if (self::$injected) {
             return $content;
         }
-        if (false !== stripos((string) $content, 'ahg-iiif-viewer')) {
-            return $content;
+
+        foreach (['ahg-iiif-viewer', 'osd-viewer', 'mirador-wrapper'] as $marker) {
+            if (false !== stripos((string) $content, $marker)) {
+                return $content;
+            }
         }
 
         if (!$this->isHtmlGet($response)) {
@@ -91,6 +112,15 @@ class ViewerInjector
 
         $digitalObject = $this->firstDigitalObject($resource);
         if (!$digitalObject) {
+            return $content;
+        }
+
+        // Respect the same availability check the helper path uses. Without an
+        // image server there is nothing for a tiling viewer to fetch, so injecting
+        // one produces a viewer that cannot load a single tile - worse than the
+        // plain image it replaced. PSIS has iiif_server_url empty, which is why
+        // its records should show the image and no viewer.
+        if (function_exists('is_iiif_available') && !is_iiif_available()) {
             return $content;
         }
 
@@ -268,6 +298,28 @@ class ViewerInjector
             1,
             $count
         );
+        if (null !== $replaced && $count > 0) {
+            return $replaced;
+        }
+
+        // The DAM sector display does not emit AtoM's digital-object-reference
+        // markup. Its template calls render_digital_object_viewer() and, when that
+        // helper is not loaded, falls back to a bare <a><img> inside its own
+        // "Digital Object" card. Without an anchor for that card the viewer is
+        // simply absent on every DAM record, which is what /photo-3 showed.
+        //
+        // Only the card BODY is replaced, so the card and its heading survive and
+        // the page keeps its structure. The body holds an anchor and an image and
+        // no nested div, so a non-greedy match to the first </div> is safe - the
+        // same reasoning as the AtoM branch above.
+        $replaced = preg_replace(
+            '#(<div class="card-body text-center">)\s*<a\b[^>]*>\s*<img\b[^>]*>\s*</a>\s*(</div>)#is',
+            '$1'.$block.'$2',
+            $content,
+            1,
+            $count
+        );
+
         if (null !== $replaced && $count > 0) {
             return $replaced;
         }

@@ -38,6 +38,23 @@
       </div>
       <div class="card-body text-center">
         <?php
+          // The helper has to be LOADED before function_exists() can see it.
+          // Symfony 1.4 does not autoload helpers: without this the check below is
+          // always false and every DAM record silently falls through to the plain
+          // <img> branch - a flat image, no viewer, nothing logged. Measured on
+          // PSIS /photo-3.
+          //
+          // ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php defines it,
+          // so the helper name is 'informationobject'.
+          if (!function_exists('render_digital_object_viewer')) {
+              try {
+                  use_helper('informationobject');
+              } catch (Exception $e) {
+                  // An instance without ahgUiOverridesPlugin keeps the fallback
+                  // below rather than fataling on a missing helper.
+              }
+          }
+
           // Use unified viewer dispatch for all format support
           // Pass $rawResource (unescaped) so render_iiif_viewer can access digitalObjectsRelatedByobjectId
           if (function_exists('render_digital_object_viewer')) {

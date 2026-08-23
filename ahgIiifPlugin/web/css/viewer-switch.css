@@ -29,3 +29,95 @@
 }
 
 .ahg-viewer-pane[hidden] { display: none; }
+
+/* ---------------------------------------------------------------------------
+   Viewer container geometry.
+   
+   These rules exist because the same declarations used to live in style=""
+   attributes on the viewer divs. A CSP nonce covers <style> and <script>
+   ELEMENTS but never style ATTRIBUTES, so under any policy without
+   'unsafe-inline' the containers received no width or height, collapsed to zero
+   and the viewer rendered nothing - silently, with no console error pointing at
+   the cause.
+
+   Values that vary at runtime (configured viewer height, background colour) are
+   emitted per viewer id in a nonce-carrying <style> element instead, which the
+   policy does allow. See ahg_iiif_viewer_style_block().
+   --------------------------------------------------------------------------- */
+
+.osd-viewer {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.mirador-wrapper {
+    position: relative;
+}
+
+/* Viewers that start hidden and are revealed by the viewer manager. The manager
+   sets element.style.display, a CSSOM write that CSP does not govern and that
+   overrides this class. */
+.ahg-hidden {
+    display: none;
+}
+
+.ahg-mirador-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+.ahg-mirador-frame {
+    width: 100%;
+    /* 700px fixed is taller than a phone viewport, which pushed the workspace
+       past the fold and made a correctly-rendered viewer look like a black slab.
+       Scale with the viewport, floor it so it stays usable, cap it at the old
+       value on desktop. */
+    height: clamp(320px, 70vh, 700px);
+}
+
+.ahg-pdf-frame,
+.ahg-av-video {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+}
+
+.ahg-av-audio {
+    width: 100%;
+}
+
+.ahg-thumb-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0;
+}
+
+.ahg-thumb-item {
+    flex-shrink: 0;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+
+.ahg-thumb-item img {
+    height: 80px;
+    display: block;
+}
+
+.ahg-media-capped {
+    max-height: 600px;
+}
+
+.ahg-model-frame {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.ahg-ar-button {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+}

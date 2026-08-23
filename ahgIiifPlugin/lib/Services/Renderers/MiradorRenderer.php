@@ -25,12 +25,22 @@ class MiradorRenderer implements RendererInterface
         $height = $config['options']['height'] ?? '600px';
         $manifestUrl = htmlspecialchars($config['manifestUrl'] ?? '');
 
-        $html = '<div id="mirador-wrapper-' . $vid . '" style="position:relative;">';
-        $html .= '<button id="close-mirador-' . $vid . '" class="btn btn-sm btn-outline-light" ';
-        $html .= 'style="position:absolute;top:8px;right:8px;z-index:1000;" title="Close Mirador">';
+        // Geometry lives in viewer-switch.css. Only the configured height varies,
+        // so only that is emitted here - in a <style> ELEMENT carrying the CSP
+        // nonce, because a nonce never covers a style="" ATTRIBUTE and the
+        // container would otherwise collapse to zero height under any policy.
+        $n = \sfConfig::get('csp_nonce', '');
+        $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
+
+        $html = '<style' . $nonceAttr . '>#mirador-' . $vid . '{height:' . htmlspecialchars((string) $height) . ';}</style>';
+        $html .= '<div id="mirador-wrapper-' . $vid . '" class="mirador-wrapper">';
+        $html .= '<button id="close-mirador-' . $vid . '" class="btn btn-sm btn-outline-light ahg-mirador-close" ';
+        $html .= 'title="Close Mirador">';
         $html .= '<i class="fas fa-times"></i></button>';
-        $html .= '<div id="mirador-' . $vid . '" ';
-        $html .= 'style="width:100%;height:' . $height . ';border-radius:8px;" ';
+        $html .= '<div id="mirador-' . $vid . '" class="ahg-mirador-frame" ';
+        // Required by ViewerInjector::renderViewers(); without it this renderer is
+        // silently discarded from the viewer list.
+        $html .= 'data-rendered-by="mirador" ';
         $html .= 'data-manifest="' . $manifestUrl . '"></div>';
         $html .= '</div>';
 

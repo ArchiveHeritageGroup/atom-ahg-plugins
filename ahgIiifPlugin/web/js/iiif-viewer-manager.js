@@ -214,26 +214,33 @@ export class IiifViewerManager {
         // Update button states
         this.updateButtonStates(viewerType);
 
-        // Show selected viewer
+        // Show the container BEFORE initialising it.
+        //
+        // Every wrapper was just hidden above, so initialising first means the
+        // viewer mounts inside a display:none element and measures zero in every
+        // dimension. Mirador lays its workspace out at that size and never
+        // re-measures when the wrapper is later shown: the window's title bar
+        // renders over a zero-height body and the rest is black. OpenSeadragon
+        // survived this only because it re-measures on resize.
         switch (viewerType) {
             case 'openseadragon':
-                await this.initOpenSeadragon();
                 this.showElement(`osd-${vid}`);
+                await this.initOpenSeadragon();
                 break;
 
             case 'mirador':
-                await this.initMirador();
                 this.showElement(`mirador-wrapper-${vid}`);
+                await this.initMirador();
                 break;
 
             case 'pdfjs':
-                await this.initPdfJs();
                 this.showElement(`pdf-wrapper-${vid}`);
+                await this.initPdfJs();
                 break;
 
             case 'model-viewer':
-                await this.initModelViewer();
                 this.showElement(`model-wrapper-${vid}`);
+                await this.initModelViewer();
                 break;
 
             case 'av':
@@ -244,8 +251,8 @@ export class IiifViewerManager {
                 // An unrecognised viewer must not leave the area blank. Show the
                 // image viewer, which works for anything with a IIIF service.
                 console.warn('Unknown viewer type "' + viewerType + '", using openseadragon');
-                await this.initOpenSeadragon();
                 this.showElement(`osd-${vid}`);
+                await this.initOpenSeadragon();
                 viewerType = 'openseadragon';
                 break;
         }
@@ -535,7 +542,22 @@ export class IiifViewerManager {
                     }
                 },
                 workspace: {
-                    showZoomControls: true
+                    showZoomControls: true,
+                    // MUST be 'mosaic' or 'elastic'. Those are the only two cases
+                    // in Mirador's workspace switch; anything else matches no case,
+                    // renders no workspace component, and leaves the window's title
+                    // bar with a zero-height body - which looks like a broken
+                    // viewer rather than a bad config value.
+                    //
+                    // 'single' is NOT a workspace type. It is window.defaultView,
+                    // the single-page-versus-book view mode, and it appears in the
+                    // bundle often enough to be mistaken for one.
+                    type: 'mosaic'
+                },
+                // The left-hand control panel is for juggling several windows;
+                // with one manifest it only costs width, which is scarce on mobile.
+                workspaceControlPanel: {
+                    enabled: false
                 },
                 osdConfig: {
                     crossOriginPolicy: 'Anonymous',
@@ -805,14 +827,23 @@ export class IiifViewerManager {
     }
 
     openInNewWindow() {
-        const path = this.options.pluginPath;
-        const manifest = encodeURIComponent(this.options.manifestUrl);
+        // Use the plugin's own /iiif/viewer/:id route, not the static HTML files
+        // under web/public/.
+        //
+        // Stock AtoM's nginx serves /plugins/**/*.{css,png,jpg,js,svg,ico,gif,pdf,
+        // woff,woff2,otf,ttf} and nothing else, so a .html file in that tree is
+        // 403 Forbidden on every standard install - the sibling .js and .css in
+        // the same directory load fine, which makes it look like a permissions
+        // fault rather than an extension allowlist. The PHP route needs no nginx
+        // change, and its template already carries the CSP nonces.
+        const objectId = this.options.objectId;
 
-        if (this.currentViewer === 'mirador') {
-            window.open(`${path}/public/mirador/viewer.html?manifest=${manifest}`, '_blank');
-        } else {
-            window.open(`${path}/public/openseadragon/viewer.html?manifest=${manifest}`, '_blank');
+        if (!objectId) {
+            console.error('Cannot open viewer in a new window: no objectId');
+            return;
         }
+
+        window.open(`/iiif/viewer/${encodeURIComponent(objectId)}`, '_blank');
     }
 
     downloadImage() {
