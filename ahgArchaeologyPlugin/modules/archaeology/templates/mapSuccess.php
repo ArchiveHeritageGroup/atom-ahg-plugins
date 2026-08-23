@@ -71,10 +71,18 @@ $CUT = '#B4472B';
   <?php } else { ?>
 
     <?php
+    // Symfony hands templates their variables wrapped in an output escaper, so
+    // $sites is a decorator rather than an array and array_map() on it is a fatal
+    // on PHP 8 - which took this whole page down. Unwrap once, here; every field
+    // read below still goes through esc_specialchars, so nothing is emitted raw.
+    $siteRows = $sites instanceof sfOutputEscaperArrayDecorator
+        ? $sites->getRawValue()
+        : (array) $sites;
+
     // Fit the drawing to the sites rather than to a fixed extent, so a single
     // country's worth of sites does not end up as one dot on a continent.
-    $lats = array_map(static fn ($s) => (float) $s->latitude, $sites);
-    $lngs = array_map(static fn ($s) => (float) $s->longitude, $sites);
+    $lats = array_map(static fn ($s) => (float) $s->latitude, $siteRows);
+    $lngs = array_map(static fn ($s) => (float) $s->longitude, $siteRows);
     $minLat = min($lats); $maxLat = max($lats);
     $minLng = min($lngs); $maxLng = max($lngs);
 
@@ -107,7 +115,7 @@ $CUT = '#B4472B';
           <text x="4" y="<?php echo $yFor($g) - 3; ?>" font-size="9" fill="#8a9a99"><?php echo round($g, 2); ?>&deg;</text>
         <?php } ?>
 
-        <?php foreach ($sites as $s) {
+        <?php foreach ($siteRows as $s) {
             $x = $xFor((float) $s->longitude);
             $y = $yFor((float) $s->latitude);
             // The accuracy radius is drawn to scale where one is recorded, so a
@@ -150,7 +158,7 @@ $CUT = '#B4472B';
         </tr>
       </thead>
       <tbody>
-        <?php foreach ($sites as $s) { ?>
+        <?php foreach ($siteRows as $s) { ?>
           <tr>
             <td><a href="<?php echo url_for('@archaeology_site?id='.$s->id); ?>"><?php echo esc_specialchars($s->site_number); ?></a></td>
             <td><?php echo esc_specialchars($s->title ?? ''); ?></td>

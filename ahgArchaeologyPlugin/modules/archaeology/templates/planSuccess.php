@@ -56,7 +56,17 @@ $CUT = '#B4472B';
             <tr><th scope="row" class="w-50">Latitude</th><td><?php echo esc_specialchars(number_format($position['lat'], 6)); ?></td></tr>
             <tr><th scope="row">Longitude</th><td><?php echo esc_specialchars(number_format($position['lng'], 6)); ?></td></tr>
             <tr><th scope="row">In degrees, minutes, seconds</th>
-                <td><?php echo esc_specialchars($position['lat_dms'].' '.$position['lng_dms']); ?></td></tr>
+                <?php
+                // Symfony escapes template variables before the template sees them,
+                // so these already read 25&deg;48&#039;21.1&quot;S. Escaping again
+                // turned the entities themselves into text and the row printed
+                // 25&deg;48&amp;#039;21.1&amp;quot;S on screen. Decode back to the
+                // real characters, then escape exactly once.
+                ?>
+                <td><?php echo esc_specialchars(
+                    sfOutputEscaper::unescape($position['lat_dms']).' '
+                    .sfOutputEscaper::unescape($position['lng_dms'])
+                ); ?></td></tr>
             <?php if (null !== $position['elevation_m']) { ?>
               <tr><th scope="row">Elevation</th><td><?php echo (int) $position['elevation_m']; ?> m</td></tr>
             <?php } ?>
