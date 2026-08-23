@@ -58,7 +58,11 @@ class SettingsFindingAidAction extends AhgController
         $setting = SettingService::getByName($name);
 
         if (isset($setting)) {
-            return $setting->getValue(['sourceCulture' => true]);
+            // A setting row can exist with no value for the culture being read,
+            // in which case getValue() returns null - and this method promises a
+            // string, so returning it directly was a TypeError that took the
+            // whole finding aid settings screen down rather than falling back.
+            return $setting->getValue(['sourceCulture' => true]) ?? $default;
         }
 
         return $default;

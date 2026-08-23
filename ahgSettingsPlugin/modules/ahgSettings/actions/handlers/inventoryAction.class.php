@@ -105,7 +105,12 @@ class SettingsInventoryAction extends AhgEditController
     {
         switch ($field->getName()) {
             case 'levels':
-                $levels = $this->form->getValue('levels') ?? [];
+                // A multi-select returns a bare string when exactly one option is
+                // chosen, and saveSerialized() is typed to array - so picking a
+                // single inventory level was a TypeError that lost the whole save.
+                // ?? only covers null, which is why the guard that was here missed it.
+                $levels = $this->form->getValue('levels');
+                $levels = (null === $levels || '' === $levels) ? [] : (array) $levels;
 
                 \AtomFramework\Services\Write\WriteServiceFactory::settings()
                     ->saveSerialized('inventory_levels', $levels);
