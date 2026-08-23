@@ -137,7 +137,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-            <button type="button" class="btn btn-success" onclick="createTaxonomy()">{{ __('Create') }}</button>
+            <button type="button" class="btn btn-success" data-ahg-call="createTaxonomy">{{ __('Create') }}</button>
           </div>
         </div>
       </div>
@@ -160,7 +160,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-            <button type="button" class="btn btn-warning" onclick="doRenameTaxonomy()">{{ __('Rename') }}</button>
+            <button type="button" class="btn btn-warning" data-ahg-call="doRenameTaxonomy">{{ __('Rename') }}</button>
           </div>
         </div>
       </div>
@@ -187,7 +187,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-            <button type="button" class="btn btn-primary" onclick="doMoveSection()">{{ __('Move') }}</button>
+            <button type="button" class="btn btn-primary" data-ahg-call="doMoveSection">{{ __('Move') }}</button>
           </div>
         </div>
       </div>

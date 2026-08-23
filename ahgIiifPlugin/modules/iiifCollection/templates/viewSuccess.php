@@ -285,7 +285,7 @@ foreach ($collection->items as $item) {
             <h5 class="mb-0"><i class="fas fa-images me-2"></i><?php echo __('Items') ?> (<?php echo count($collection->items) ?>)</h5>
             <?php if ($sf_user->isAuthenticated() && $warningCount > 0): ?>
             <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="hideProblematic" onchange="toggleProblematicItems(this.checked)">
+                <input class="form-check-input" type="checkbox" id="hideProblematic" data-ahg-call="toggleProblematicItems" data-ahg-on="change" data-ahg-arg="this.checked">
                 <label class="form-check-label" for="hideProblematic"><?php echo __('Hide non-displayable') ?></label>
             </div>
             <?php endif ?>

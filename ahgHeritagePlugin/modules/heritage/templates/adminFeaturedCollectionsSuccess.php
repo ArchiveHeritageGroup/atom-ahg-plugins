@@ -32,7 +32,7 @@ $archivalCollections = (array) $archivalCollections;
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="source_type" class="form-label">Collection Type</label>
-                    <select class="form-select" id="source_type" name="source_type" required onchange="toggleSourceOptions(this.value)">
+                    <select class="form-select" id="source_type" name="source_type" required data-ahg-call="toggleSourceOptions" data-ahg-on="change" data-ahg-arg="this.value">
                         <option value="">Select type...</option>
                         <option value="archival">Archival Collection (Fonds)</option>
                         <option value="iiif">IIIF Collection (Manifest)</option>

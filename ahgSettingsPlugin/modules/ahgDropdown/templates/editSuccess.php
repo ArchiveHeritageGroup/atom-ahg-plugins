@@ -58,7 +58,7 @@
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <span><i class="fas fa-grip-lines me-2"></i><?php echo __('Drag to reorder') ?></span>
             <div class="form-check form-switch mb-0">
-                <input class="form-check-input" type="checkbox" id="showInactive" onchange="toggleInactive()">
+                <input class="form-check-input" type="checkbox" id="showInactive" data-ahg-call="toggleInactive" data-ahg-on="change">
                 <label class="form-check-label" for="showInactive"><?php echo __('Show inactive') ?></label>
             </div>
         </div>
@@ -141,7 +141,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
-                <button type="button" class="btn btn-success" onclick="addTerm()"><?php echo __('Add') ?></button>
+                <button type="button" class="btn btn-success" data-ahg-call="addTerm"><?php echo __('Add') ?></button>
             </div>
         </div>
     </div>

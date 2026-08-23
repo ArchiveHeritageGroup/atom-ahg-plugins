@@ -564,7 +564,7 @@
           </div>
           <?php endforeach; ?>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addVersionRow()">
+        <button type="button" class="btn btn-sm btn-outline-primary" data-ahg-call="addVersionRow">
           <i class="fas fa-plus"></i> <?php echo __('Add Version'); ?>
         </button>
       </div>
@@ -623,7 +623,7 @@
           </div>
           <?php endforeach; ?>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addHoldingRow()">
+        <button type="button" class="btn btn-sm btn-outline-primary" data-ahg-call="addHoldingRow">
           <i class="fas fa-plus"></i> <?php echo __('Add Holding'); ?>
         </button>
       </div>
@@ -674,7 +674,7 @@
           </div>
           <?php endforeach; ?>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addLinkRow()">
+        <button type="button" class="btn btn-sm btn-outline-primary" data-ahg-call="addLinkRow">
           <i class="fas fa-plus"></i> <?php echo __('Add Link'); ?>
         </button>
       </div>

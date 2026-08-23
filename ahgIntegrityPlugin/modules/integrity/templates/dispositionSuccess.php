@@ -29,7 +29,7 @@ $filterPolicyId = $sf_data->getRaw('filterPolicyId') ?: '';
 
   <form class="row g-2 mb-3" method="get" action="<?php echo url_for(['module' => 'integrity', 'action' => 'disposition']); ?>">
     <div class="col-auto">
-      <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+      <select name="status" class="form-select form-select-sm" data-ahg-submit-form="1">
         <option value=""><?php echo __('All statuses'); ?></option>
         <?php foreach (['eligible', 'pending_review', 'approved', 'rejected', 'held', 'disposed'] as $s): ?>
           <option value="<?php echo $s; ?>" <?php echo $filterStatus === $s ? 'selected' : ''; ?>><?php echo $s; ?></option>
@@ -37,7 +37,7 @@ $filterPolicyId = $sf_data->getRaw('filterPolicyId') ?: '';
       </select>
     </div>
     <div class="col-auto">
-      <select name="policy_id" class="form-select form-select-sm" onchange="this.form.submit()">
+      <select name="policy_id" class="form-select form-select-sm" data-ahg-submit-form="1">
         <option value=""><?php echo __('All policies'); ?></option>
         <?php foreach ($policies as $p): ?>
           <option value="<?php echo $p->id; ?>" <?php echo $filterPolicyId == $p->id ? 'selected' : ''; ?>><?php echo htmlspecialchars($p->name); ?></option>

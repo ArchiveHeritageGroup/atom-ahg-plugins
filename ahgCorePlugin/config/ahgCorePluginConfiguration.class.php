@@ -282,7 +282,9 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         }
 
         if (false === stripos($content, 'data-ahg-confirm')
-            && false === stripos($content, 'data-ahg-toggle-column')) {
+            && false === stripos($content, 'data-ahg-toggle-column')
+            && false === stripos($content, 'data-ahg-submit-form')
+            && false === stripos($content, 'data-ahg-call')) {
             return $content;
         }
 
@@ -327,6 +329,44 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         if (cell) { cell.style.display = 'none' === cell.style.display ? '' : 'none'; }
       });
     }
+  }, true);
+
+  // Call a global function named by the element, for handlers that were a single
+  // call and nothing else. The functions themselves live in nonced <script>
+  // blocks, so they are defined and working - it was only the inline ATTRIBUTE
+  // calling them that CSP dropped, so binding the call is enough and
+  // reimplementing anything would be wrong.
+  //
+  // Deliberately NOT eval: the argument is a fixed sentinel, never arbitrary text.
+  function ahgDispatch(ev) {
+    var el = ev.target.closest ? ev.target.closest('[data-ahg-call]') : null;
+    if (!el) { return; }
+    if ((el.getAttribute('data-ahg-on') || 'click') !== ev.type) { return; }
+
+    var fn = window[el.getAttribute('data-ahg-call')];
+    if ('function' !== typeof fn) { return; }
+
+    switch (el.getAttribute('data-ahg-arg')) {
+      case 'this':         fn(el); break;
+      case 'this.value':   fn(el.value); break;
+      case 'this.checked': fn(el.checked); break;
+      default:             fn(); break;
+    }
+  }
+  ['click', 'change', 'input'].forEach(function (t) {
+    document.addEventListener(t, ahgDispatch, true);
+  });
+
+  // Submit the owning form on change. Converted from data-ahg-submit-form="1",
+  // the commonest inline handler in the suite after confirm - a select that filters
+  // a listing. requestSubmit() where available so any submit handlers and native
+  // validation still run; submit() is the fallback.
+  document.addEventListener('change', function (ev) {
+    var el = ev.target.closest ? ev.target.closest('[data-ahg-submit-form]') : null;
+    if (!el) { return; }
+    var form = el.form || (el.closest ? el.closest('form') : null);
+    if (!form) { return; }
+    if ('function' === typeof form.requestSubmit) { form.requestSubmit(); } else { form.submit(); }
   }, true);
 
   // A form may carry the confirm itself, converted from an inline submit handler.

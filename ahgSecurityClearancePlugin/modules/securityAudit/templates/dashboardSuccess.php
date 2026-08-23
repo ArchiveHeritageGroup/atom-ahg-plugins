@@ -12,7 +12,7 @@ $period = $sf_data->getRaw('period');
     <h1><i class="fas fa-chart-line me-2"></i><?php echo __('Security Audit Dashboard') ?></h1>
     <div>
         <form method="get" class="d-inline">
-            <select name="period" class="form-select form-select-sm d-inline-block" style="width: auto;" onchange="this.form.submit()">
+            <select name="period" class="form-select form-select-sm d-inline-block" style="width: auto;" data-ahg-submit-form="1">
                 <option value="24 hours" <?php echo $period === '24 hours' ? 'selected' : '' ?>>Last 24 Hours</option>
                 <option value="7 days" <?php echo $period === '7 days' ? 'selected' : '' ?>>Last 7 Days</option>
                 <option value="30 days" <?php echo $period === '30 days' ? 'selected' : '' ?>>Last 30 Days</option>

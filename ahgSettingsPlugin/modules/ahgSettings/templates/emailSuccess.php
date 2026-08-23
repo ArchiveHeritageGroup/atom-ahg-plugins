@@ -54,7 +54,7 @@
           <p class="small text-muted"><?php echo __('Save settings first, then send a test email to verify configuration.'); ?></p>
           <div class="input-group">
             <input type="email" name="test_email" class="form-control" placeholder="test@example.com" id="testEmailInput">
-            <button type="button" class="btn btn-outline-primary" onclick="sendTestEmail()">
+            <button type="button" class="btn btn-outline-primary" data-ahg-call="sendTestEmail">
               <i class="fas fa-paper-plane me-1"></i><?php echo __('Send Test'); ?>
             </button>
           </div>

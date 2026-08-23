@@ -16,7 +16,7 @@
 <div class="mb-4">
   <form method="get" class="d-inline-flex gap-2 align-items-center">
     <label class="form-label mb-0"><?php echo __('Time Period:') ?></label>
-    <select name="days" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+    <select name="days" class="form-select form-select-sm" style="width: auto;" data-ahg-submit-form="1">
       <option value="7" <?php echo $dateRangeRaw['days'] == 7 ? 'selected' : '' ?>><?php echo __('Last 7 days') ?></option>
       <option value="30" <?php echo $dateRangeRaw['days'] == 30 ? 'selected' : '' ?>><?php echo __('Last 30 days') ?></option>
       <option value="90" <?php echo $dateRangeRaw['days'] == 90 ? 'selected' : '' ?>><?php echo __('Last 90 days') ?></option>

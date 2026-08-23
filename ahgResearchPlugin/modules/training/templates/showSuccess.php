@@ -38,7 +38,7 @@ $cid = (int) ($course['id'] ?? 0);
   <div class="col-md-3">
     <strong><?php echo __('Status'); ?>:</strong>
     <form method="post" action="<?php echo url_for(['module' => 'training', 'action' => 'setStatus', 'id' => $cid]); ?>" class="d-inline">
-      <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+      <select name="status" class="form-select form-select-sm d-inline-block w-auto" data-ahg-submit-form="1">
         <?php foreach (['draft', 'published', 'archived'] as $st): ?>
           <option value="<?php echo $st; ?>" <?php echo ($course['status'] ?? '') === $st ? 'selected' : ''; ?>><?php echo __(ucfirst($st)); ?></option>
         <?php endforeach; ?>

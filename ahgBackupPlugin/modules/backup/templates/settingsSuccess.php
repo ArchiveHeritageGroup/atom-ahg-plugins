@@ -85,8 +85,8 @@ $settingsMap = $sf_data->getRaw('settingsMap') ?? [];
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-list me-2"></i><?php echo __('Custom Plugins to Backup') ?></h5>
                     <div>
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllPlugins()"><?php echo __('Select All') ?></button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllPlugins()"><?php echo __('Deselect All') ?></button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-ahg-call="selectAllPlugins"><?php echo __('Select All') ?></button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-ahg-call="deselectAllPlugins"><?php echo __('Deselect All') ?></button>
                     </div>
                 </div>
                 <div class="card-body">

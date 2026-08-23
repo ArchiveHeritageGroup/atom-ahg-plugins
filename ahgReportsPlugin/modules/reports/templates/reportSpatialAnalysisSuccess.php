@@ -27,7 +27,7 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label for="coordinate_source" class="form-label">Where are coordinates stored?</label>
-                            <select class="form-select" id="coordinate_source" name="coordinate_source" onchange="togglePropertyFields()">
+                            <select class="form-select" id="coordinate_source" name="coordinate_source" data-ahg-call="togglePropertyFields" data-ahg-on="change">
                                 <?php foreach ($coordinateSources as $value => $label): ?>
                                     <option value="<?php echo $value ?>"><?php echo esc_specialchars($label) ?></option>
                                 <?php endforeach ?>

@@ -38,7 +38,7 @@
         <form method="get" action="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="d-flex flex-wrap gap-2 align-items-end mb-3">
             <div class="flex-grow-1" style="max-width: 28rem;">
                 <label for="spectrum" class="form-label small mb-1"><?php echo __('Filter by Collections Procedures procedure') ?></label>
-                <select name="spectrum" id="spectrum" class="form-select form-select-sm" onchange="this.form.submit()">
+                <select name="spectrum" id="spectrum" class="form-select form-select-sm" data-ahg-submit-form="1">
                     <option value=""><?php echo __('All workflows') ?></option>
                     <?php foreach ($spectrumProcedures as $code => $label): ?>
                         <option value="<?php echo esc_entities($code) ?>" <?php echo (($spectrumFilter ?? '') === $code) ? 'selected' : '' ?>><?php echo esc_entities(__($label)) ?></option>

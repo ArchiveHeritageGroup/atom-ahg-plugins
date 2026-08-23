@@ -27,7 +27,7 @@ slot('title', $title);
                     <label class="form-label mb-0 me-2">Status:</label>
                 </div>
                 <div class="col-auto">
-                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <select name="status" class="form-select form-select-sm" data-ahg-submit-form="1">
                         <option value="">All</option>
                         <option value="pending" <?php echo $filterStatus === 'pending' ? 'selected' : ''; ?>>Pending</option>
                         <option value="queued" <?php echo $filterStatus === 'queued' ? 'selected' : ''; ?>>Queued</option>

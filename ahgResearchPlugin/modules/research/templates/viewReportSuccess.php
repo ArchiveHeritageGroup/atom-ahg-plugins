@@ -49,7 +49,7 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
           <input type="hidden" name="form_action" value="update_header">
           <div class="flex-grow-1">
             <label class="form-label small text-muted mb-0"><?php echo __('Status'); ?></label>
-            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <select name="status" class="form-select form-select-sm" data-ahg-submit-form="1">
               <?php foreach (['draft' => 'Draft', 'in_progress' => 'In Progress', 'review' => 'Review', 'completed' => 'Completed'] as $sKey => $sLabel): ?>
                 <option value="<?php echo $sKey; ?>" <?php echo ($report->status ?? 'draft') === $sKey ? 'selected' : ''; ?>><?php echo __($sLabel); ?></option>
               <?php endforeach; ?>

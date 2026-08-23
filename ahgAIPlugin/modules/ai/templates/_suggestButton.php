@@ -74,7 +74,7 @@
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         <span id="suggestErrorMsg"></span>
                     </div>
-                    <button class="btn btn-outline-primary" onclick="retrySuggest()">
+                    <button class="btn btn-outline-primary" data-ahg-call="retrySuggest">
                         <i class="bi bi-arrow-clockwise me-1"></i>Retry
                     </button>
                 </div>
@@ -82,10 +82,10 @@
             <div class="modal-footer" id="suggestFooter" style="display: none;">
                 <div class="me-auto small text-muted" id="suggestStats"></div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-danger" onclick="rejectSuggestion()">
+                <button type="button" class="btn btn-outline-danger" data-ahg-call="rejectSuggestion">
                     <i class="bi bi-x-circle me-1"></i>Reject
                 </button>
-                <button type="button" class="btn btn-success" onclick="approveSuggestion()">
+                <button type="button" class="btn btn-success" data-ahg-call="approveSuggestion">
                     <i class="bi bi-check-circle me-1"></i>Approve & Save
                 </button>
             </div>

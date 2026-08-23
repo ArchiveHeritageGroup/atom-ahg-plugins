@@ -112,7 +112,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
               </script>
             <?php endif; ?>
             <!-- Fullscreen button overlay -->
-            <button onclick="open3DFullscreen()" class="btn btn-sm btn-primary position-absolute" style="bottom:10px;right:10px;z-index:10;">
+            <button data-ahg-call="open3DFullscreen" class="btn btn-sm btn-primary position-absolute" style="bottom:10px;right:10px;z-index:10;">
               <i class="fas fa-expand me-1"></i><?php echo __('Fullscreen'); ?>
             </button>
           </div>
@@ -784,13 +784,13 @@ if ($digitalObject && in_array(strtolower(pathinfo($digitalObject->name, PATHINF
       <small class="text-muted"><?php echo esc_entities($digitalObject->name); ?></small>
     </div>
     <div>
-      <button class="btn btn-outline-light btn-sm me-2" onclick="reset3DCamera()" title="<?php echo __('Reset view'); ?>">
+      <button class="btn btn-outline-light btn-sm me-2" data-ahg-call="reset3DCamera" title="<?php echo __('Reset view'); ?>">
         <i class="fas fa-sync-alt"></i>
       </button>
-      <button class="btn btn-outline-light btn-sm me-2" onclick="toggle3DAutoRotate()" title="<?php echo __('Toggle auto-rotate'); ?>">
+      <button class="btn btn-outline-light btn-sm me-2" data-ahg-call="toggle3DAutoRotate" title="<?php echo __('Toggle auto-rotate'); ?>">
         <i class="fas fa-redo"></i>
       </button>
-      <button class="btn btn-light btn-sm" onclick="close3DFullscreen()">
+      <button class="btn btn-light btn-sm" data-ahg-call="close3DFullscreen">
         <i class="fas fa-times me-1"></i><?php echo __('Close'); ?>
       </button>
     </div>

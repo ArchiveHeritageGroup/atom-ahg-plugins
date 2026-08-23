@@ -35,7 +35,7 @@
             <label class="form-label"><?php echo __('Password'); ?></label>
             <input type="password" class="form-control" name="config[fuseki_password]" value="<?php echo htmlspecialchars($config['fuseki_password'] ?? ''); ?>">
           </div>
-          <button type="button" class="btn btn-outline-secondary" onclick="testConnection()"><i class="fa fa-plug"></i> <?php echo __('Test Connection'); ?></button>
+          <button type="button" class="btn btn-outline-secondary" data-ahg-call="testConnection"><i class="fa fa-plug"></i> <?php echo __('Test Connection'); ?></button>
         </div>
       </div>
     </div>

@@ -48,7 +48,7 @@ $filterRepositoryId = $sf_data->getRaw('filterRepositoryId');
     <div class="row g-2 align-items-end">
       <div class="col-auto">
         <label class="form-label small mb-0"><?php echo __('Filter by Repository'); ?></label>
-        <select name="repository_id" class="form-select form-select-sm" onchange="this.form.submit()">
+        <select name="repository_id" class="form-select form-select-sm" data-ahg-submit-form="1">
           <option value=""><?php echo __('All Repositories'); ?></option>
           <?php foreach ($repositories as $repo): ?>
             <option value="<?php echo $repo->id; ?>" <?php echo $filterRepositoryId == $repo->id ? 'selected' : ''; ?>><?php echo htmlspecialchars($repo->name); ?></option>

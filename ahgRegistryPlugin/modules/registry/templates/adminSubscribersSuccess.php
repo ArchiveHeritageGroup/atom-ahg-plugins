@@ -58,7 +58,7 @@
         </div>
       </div>
       <div class="col-md-3">
-        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+        <select name="status" class="form-select form-select-sm" data-ahg-submit-form="1">
           <option value=""><?php echo __('All Statuses'); ?></option>
           <option value="active" <?php echo 'active' === $sf_request->getParameter('status') ? 'selected' : ''; ?>><?php echo __('Active'); ?></option>
           <option value="unsubscribed" <?php echo 'unsubscribed' === $sf_request->getParameter('status') ? 'selected' : ''; ?>><?php echo __('Unsubscribed'); ?></option>

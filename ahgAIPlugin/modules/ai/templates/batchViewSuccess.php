@@ -78,7 +78,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-info-circle me-2"></i><?php echo __('Batch Overview'); ?></span>
         <?php if ($batch->status === 'running'): ?>
-            <button class="btn btn-sm btn-outline-primary" onclick="refreshProgress()" id="refreshBtn">
+            <button class="btn btn-sm btn-outline-primary" data-ahg-call="refreshProgress" id="refreshBtn">
                 <i class="fas fa-sync-alt me-1"></i><?php echo __('Refresh'); ?>
             </button>
         <?php endif; ?>
@@ -174,7 +174,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-list me-2"></i><?php echo __('Jobs'); ?> (<?php echo count($jobs); ?>)</span>
         <div>
-            <select id="statusFilter" class="form-select form-select-sm d-inline-block" style="width: auto" onchange="filterJobs()">
+            <select id="statusFilter" class="form-select form-select-sm d-inline-block" style="width: auto" data-ahg-call="filterJobs" data-ahg-on="change">
                 <option value=""><?php echo __('All Status'); ?></option>
                 <option value="pending"><?php echo __('Pending'); ?></option>
                 <option value="queued"><?php echo __('Queued'); ?></option>

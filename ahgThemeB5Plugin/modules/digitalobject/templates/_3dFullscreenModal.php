@@ -6,8 +6,8 @@
       <h5 class="mb-0"><i class="fas fa-cube me-2"></i><?php echo __('3D Model Viewer'); ?></h5>
     </div>
     <div>
-      <button class="btn btn-outline-light btn-sm me-2" onclick="toggle3DAutoRotate()"><i class="fas fa-redo"></i></button>
-      <button class="btn btn-light btn-sm" onclick="close3DFullscreen()"><i class="fas fa-times me-1"></i><?php echo __('Close'); ?></button>
+      <button class="btn btn-outline-light btn-sm me-2" data-ahg-call="toggle3DAutoRotate"><i class="fas fa-redo"></i></button>
+      <button class="btn btn-light btn-sm" data-ahg-call="close3DFullscreen"><i class="fas fa-times me-1"></i><?php echo __('Close'); ?></button>
     </div>
   </div>
   <div id="fullscreen-3d-container" class="w-100 h-100"></div>

@@ -335,7 +335,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
-                <button type="button" class="btn btn-primary" onclick="submitConsent()">
+                <button type="button" class="btn btn-primary" data-ahg-call="submitConsent">
                     <i class="fas fa-upload me-1"></i><?php echo __('Upload') ?>
                 </button>
             </div>
@@ -380,7 +380,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
-                <button type="button" class="btn btn-success" onclick="saveClient()"><?php echo __('Create') ?></button>
+                <button type="button" class="btn btn-success" data-ahg-call="saveClient"><?php echo __('Create') ?></button>
             </div>
         </div>
     </div>

@@ -47,7 +47,7 @@
                 <input type="url" class="form-control" id="base_url" name="base_url"
                        value="<?php echo esc_specialchars($peer->base_url ?? '') ?>"
                        placeholder="https://example.org/;oai" required>
-                <button type="button" class="btn btn-outline-secondary" onclick="testUrl()">
+                <button type="button" class="btn btn-outline-secondary" data-ahg-call="testUrl">
                   <i class="bi bi-plug me-1"></i> Test
                 </button>
               </div>

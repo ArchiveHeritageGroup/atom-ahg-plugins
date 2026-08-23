@@ -171,7 +171,7 @@ $savedSearches = $isAuthenticated ? $searchService->getSavedSearches($userId) : 
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
-        <button type="button" class="btn btn-primary" onclick="saveCurrentSearch()">
+        <button type="button" class="btn btn-primary" data-ahg-call="saveCurrentSearch">
           <i class="fa fa-save me-1"></i><?php echo __('Save Search'); ?>
         </button>
       </div>

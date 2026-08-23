@@ -3,7 +3,7 @@
 
 <form method="get" class="mb-3">
     <label for="status" class="me-2"><?php echo __('Filter by status'); ?>:</label>
-    <select name="status" id="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+    <select name="status" id="status" class="form-select form-select-sm d-inline-block w-auto" data-ahg-submit-form="1">
         <option value=""><?php echo __('All'); ?></option>
         <?php foreach (['received','queued','processing','completed','failed','skipped_duplicate','skipped_not_allowlisted'] as $s): ?>
             <option value="<?php echo $s; ?>" <?php echo $statusFilter === $s ? 'selected' : ''; ?>><?php echo $s; ?></option>

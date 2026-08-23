@@ -57,7 +57,7 @@
     <form method="get" action="" class="row g-2 align-items-end">
       <div class="col-auto">
         <label class="form-label small mb-0"><?php echo __('Status'); ?></label>
-        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+        <select name="status" class="form-select form-select-sm" data-ahg-submit-form="1">
           <option value=""><?php echo __('All'); ?></option>
           <?php foreach (['open', 'in_progress', 'resolved', 'closed', 'escalated'] as $s): ?>
             <option value="<?php echo $s; ?>"<?php echo ($filterStatus == $s) ? ' selected' : ''; ?>><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $s)), ENT_QUOTES, 'UTF-8'); ?></option>
@@ -66,7 +66,7 @@
       </div>
       <div class="col-auto">
         <label class="form-label small mb-0"><?php echo __('Type'); ?></label>
-        <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+        <select name="type" class="form-select form-select-sm" data-ahg-submit-form="1">
           <option value=""><?php echo __('All'); ?></option>
           <?php foreach (['call', 'email', 'meeting', 'support_ticket', 'site_visit', 'video_call', 'other'] as $t): ?>
             <option value="<?php echo $t; ?>"<?php echo ($filterType == $t) ? ' selected' : ''; ?>><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $t)), ENT_QUOTES, 'UTF-8'); ?></option>
@@ -75,7 +75,7 @@
       </div>
       <div class="col-auto">
         <label class="form-label small mb-0"><?php echo __('Priority'); ?></label>
-        <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+        <select name="priority" class="form-select form-select-sm" data-ahg-submit-form="1">
           <option value=""><?php echo __('All'); ?></option>
           <?php foreach (['low', 'medium', 'high', 'urgent'] as $p): ?>
             <option value="<?php echo $p; ?>"<?php echo ($filterPriority == $p) ? ' selected' : ''; ?>><?php echo htmlspecialchars(ucfirst($p), ENT_QUOTES, 'UTF-8'); ?></option>

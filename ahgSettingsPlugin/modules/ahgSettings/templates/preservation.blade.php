@@ -281,7 +281,7 @@ php symfony preservation:verify-backup --status</code></pre>
               </div>
               <div class="mb-3">
                 <label class="form-label">{{ __('Type') }} *</label>
-                <select name="target_type" class="form-select" id="targetType" required onchange="toggleFields()">
+                <select name="target_type" class="form-select" id="targetType" required data-ahg-call="toggleFields" data-ahg-on="change">
                   <option value="local">Local Directory</option>
                   <option value="rsync">Remote (rsync/SSH)</option>
                   <option value="sftp">SFTP</option>

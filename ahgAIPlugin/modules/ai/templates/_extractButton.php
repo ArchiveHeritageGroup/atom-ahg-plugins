@@ -13,7 +13,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-list-check me-1"></i>Extracted Entities</span>
-                <button class="btn btn-sm btn-success" onclick="approveAll()">Approve All</button>
+                <button class="btn btn-sm btn-success" data-ahg-call="approveAll">Approve All</button>
             </div>
             <div class="card-body" id="nerResultsBody"></div>
         </div>

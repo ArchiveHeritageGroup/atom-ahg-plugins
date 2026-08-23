@@ -3,7 +3,7 @@
 
 <form method="get" class="mb-3">
     <label for="status" class="me-2">{{ __('Filter by status') }}:</label>
-    <select name="status" id="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+    <select name="status" id="status" class="form-select form-select-sm d-inline-block w-auto" data-ahg-submit-form="1">
         <option value="">{{ __('All') }}</option>
         @foreach (['received','queued','processing','completed','failed','skipped_duplicate','skipped_not_allowlisted'] as $s)
             <option value="{{ $s }}" @selected($statusFilter === $s)>{{ $s }}</option>

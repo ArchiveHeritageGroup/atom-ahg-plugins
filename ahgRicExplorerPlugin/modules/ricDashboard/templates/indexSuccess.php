@@ -157,18 +157,18 @@
         <h5 class="mb-0"><?php echo __('Quick Actions'); ?></h5>
       </div>
       <div class="card-body">
-        <button type="button" class="btn btn-success w-100 mb-2" onclick="runManualSync()" id="sync-btn">
+        <button type="button" class="btn btn-success w-100 mb-2" data-ahg-call="runManualSync" id="sync-btn">
           <i class="fa fa-sync-alt"></i> <?php echo __('Sync to Fuseki'); ?>
         </button>
         <div id="sync-status" class="mb-2" style="display:none;"></div>
         <hr>
-        <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="runIntegrityCheck()">
+        <button type="button" class="btn btn-outline-primary w-100 mb-2" data-ahg-call="runIntegrityCheck">
           <i class="fa fa-check-circle"></i> <?php echo __('Run Integrity Check'); ?>
         </button>
-        <button type="button" class="btn btn-outline-warning w-100 mb-2" onclick="previewCleanup()">
+        <button type="button" class="btn btn-outline-warning w-100 mb-2" data-ahg-call="previewCleanup">
           <i class="fa fa-search"></i> <?php echo __('Preview Cleanup'); ?>
         </button>
-        <button type="button" class="btn btn-outline-danger w-100 mb-2" onclick="executeCleanup()" id="cleanup-btn" disabled>
+        <button type="button" class="btn btn-outline-danger w-100 mb-2" data-ahg-call="executeCleanup" id="cleanup-btn" disabled>
           <i class="fa fa-trash"></i> <?php echo __('Execute Cleanup'); ?>
         </button>
         <hr>

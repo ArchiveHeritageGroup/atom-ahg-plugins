@@ -46,7 +46,7 @@
           <input class="form-check-input" type="checkbox" role="switch"
                  id="frbrToggle" name="frbr_cluster" value="1"
                  <?php echo $frbrCluster ? 'checked' : ''; ?>
-                 onchange="this.form.submit()">
+                 data-ahg-submit-form="1">
         </div>
         <?php if ($frbrCluster && $totalWorks > 0): ?>
           <span class="badge bg-success ms-2">
@@ -84,7 +84,7 @@
       <input type="hidden" name="search_type" value="<?php echo esc_entities($searchType); ?>">
       <input type="hidden" name="material_type" value="<?php echo esc_entities($materialType); ?>">
       <input type="hidden" name="frbr_cluster" value="<?php echo $frbrCluster ? '1' : '0'; ?>">
-      <select name="sort" class="form-select form-select-sm d-inline-block" style="width: auto;" onchange="this.form.submit()">
+      <select name="sort" class="form-select form-select-sm d-inline-block" style="width: auto;" data-ahg-submit-form="1">
         <option value="relevance" <?php echo $sort === 'relevance' ? 'selected' : ''; ?>><?php echo __('Sort: Relevance'); ?></option>
         <option value="title" <?php echo $sort === 'title' ? 'selected' : ''; ?>><?php echo __('Sort: Title A-Z'); ?></option>
         <option value="date_desc" <?php echo $sort === 'date_desc' ? 'selected' : ''; ?>><?php echo __('Sort: Newest'); ?></option>

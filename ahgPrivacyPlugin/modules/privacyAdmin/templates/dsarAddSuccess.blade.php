@@ -20,7 +20,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('Jurisdiction') }} <span class="text-danger">*</span></label>
-                                <select name="jurisdiction" id="jurisdiction" class="form-select" required onchange="updateRequestTypes()">
+                                <select name="jurisdiction" id="jurisdiction" class="form-select" required data-ahg-call="updateRequestTypes" data-ahg-on="change">
                                     @foreach($jurisdictions as $code => $info)
                                     <option value="{{ $code }}" {{ $code === $defaultJurisdiction ? 'selected' : '' }}>
                                         {{ $info['name'] }} ({{ $info['country'] }})

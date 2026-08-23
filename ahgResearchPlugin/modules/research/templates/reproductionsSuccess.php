@@ -19,7 +19,7 @@
 <div class="row mb-3">
     <div class="col-md-4">
         <form method="get" class="d-flex gap-2">
-            <select name="status" class="form-select" onchange="this.form.submit()">
+            <select name="status" class="form-select" data-ahg-submit-form="1">
                 <option value="">All Statuses</option>
                 <?php foreach (['draft', 'submitted', 'quoted', 'approved', 'processing', 'in_production', 'completed', 'cancelled'] as $s): ?>
                     <option value="<?php echo $s; ?>" <?php echo $sf_request->getParameter('status') === $s ? 'selected' : ''; ?>><?php echo ucfirst(str_replace('_', ' ', $s)); ?></option>

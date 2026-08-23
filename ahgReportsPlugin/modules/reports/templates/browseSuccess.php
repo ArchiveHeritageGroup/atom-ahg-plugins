@@ -9,7 +9,7 @@
 <div id="add-new-criteria">
  
 	Strong Rooms :
-	<select name="dropd" id="dropd" onchange="myFunction()">
+	<select name="dropd" id="dropd" data-ahg-call="myFunction" data-ahg-on="change">
 	  <option value="Select">Select</option>}
 	  <option value="Vault 2">Vault 2</option>
 	  <option value="Bos">Bos</option>
@@ -19,7 +19,7 @@
 <div id="add-new-criteria">
  
 	Location :
-	<select name="dropl" id="dropl" onchange="myFunctionLoc()">
+	<select name="dropl" id="dropl" data-ahg-call="myFunctionLoc" data-ahg-on="change">
 	  <option value="Select">Select</option>}
 	  <option value="NARSSA floor 2">NARSSA floor 2</option>
 	  <option value="NARSSA 2nd floor">NARSSA 2nd floor</option>

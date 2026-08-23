@@ -177,7 +177,7 @@
                   <div class="input-group">
                     <input type="text" name="source_folder" id="sourceFolder" class="form-control" 
                            placeholder="' . sfConfig::get('sf_upload_dir') . '/preservica_export/">
-                    <button type="button" class="btn btn-outline-secondary" onclick="browseServerFolder()">
+                    <button type="button" class="btn btn-outline-secondary" data-ahg-call="browseServerFolder">
                       <i class="bi bi-folder"></i>
                     </button>
                   </div>

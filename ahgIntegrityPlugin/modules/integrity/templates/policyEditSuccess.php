@@ -40,7 +40,7 @@ $repositories = $sf_data->getRaw('repositories') ?: [];
           </div>
           <div class="col-md-4">
             <label class="form-label"><?php echo __('Scope Type'); ?></label>
-            <select name="scope_type" class="form-select" onchange="toggleScope(this.value)">
+            <select name="scope_type" class="form-select" data-ahg-call="toggleScope" data-ahg-on="change" data-ahg-arg="this.value">
               <?php foreach (['global', 'repository', 'hierarchy'] as $st): ?>
                 <option value="<?php echo $st; ?>" <?php echo ($policy->scope_type ?? 'global') === $st ? 'selected' : ''; ?>><?php echo $st; ?></option>
               <?php endforeach; ?>

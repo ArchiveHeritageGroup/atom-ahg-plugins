@@ -200,7 +200,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                         <label class="form-label fw-semibold">
                             <i class="fas fa-barcode me-1"></i><?php echo __('Barcode Source'); ?>
                         </label>
-                        <select class="form-select" id="barcodeSource" onchange="updateBarcodeSource()">
+                        <select class="form-select" id="barcodeSource" data-ahg-call="updateBarcodeSource" data-ahg-on="change">
                             <?php foreach ($barcodeSources as $key => $source): ?>
                                 <?php if (!empty($source['value'])): ?>
                                 <option value="<?php echo htmlspecialchars($source['value']); ?>"
@@ -215,7 +215,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <!-- Label Size -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold"><?php echo __('Label Size'); ?></label>
-                        <select class="form-select" id="labelSize" onchange="updateLabelSize()">
+                        <select class="form-select" id="labelSize" data-ahg-call="updateLabelSize" data-ahg-on="change">
                             <option value="200"><?php echo __('Small (50mm)'); ?></option>
                             <option value="300" selected><?php echo __('Medium (75mm)'); ?></option>
                             <option value="400"><?php echo __('Large (100mm)'); ?></option>
@@ -226,11 +226,11 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <div class="col-md-6 mb-3">
                         <label class="form-label"><?php echo __('Show'); ?></label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showBarcode" checked onchange="toggleBarcode()">
+                            <input class="form-check-input" type="checkbox" id="showBarcode" checked data-ahg-call="toggleBarcode" data-ahg-on="change">
                             <label class="form-check-label" for="showBarcode"><?php echo __('Linear Barcode'); ?></label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showQR" checked onchange="toggleQR()">
+                            <input class="form-check-input" type="checkbox" id="showQR" checked data-ahg-call="toggleQR" data-ahg-on="change">
                             <label class="form-check-label" for="showQR"><?php echo __('QR Code'); ?></label>
                         </div>
                     </div>
@@ -238,11 +238,11 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <div class="col-md-6 mb-3">
                         <label class="form-label"><?php echo __('Include'); ?></label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showTitle" checked onchange="toggleTitle()">
+                            <input class="form-check-input" type="checkbox" id="showTitle" checked data-ahg-call="toggleTitle" data-ahg-on="change">
                             <label class="form-check-label" for="showTitle"><?php echo __('Title'); ?></label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showRepo" checked onchange="toggleRepo()">
+                            <input class="form-check-input" type="checkbox" id="showRepo" checked data-ahg-call="toggleRepo" data-ahg-on="change">
                             <label class="form-check-label" for="showRepo"><?php echo __('Repository'); ?></label>
                         </div>
                     </div>
@@ -258,7 +258,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
             <button type="button" class="btn btn-primary" onclick="window.print()">
                 <i class="fas fa-print me-1"></i><?php echo __('Print Label'); ?>
             </button>
-            <button type="button" class="btn btn-secondary" onclick="downloadLabel()">
+            <button type="button" class="btn btn-secondary" data-ahg-call="downloadLabel">
                 <i class="fas fa-download me-1"></i><?php echo __('Download PNG'); ?>
             </button>
         </div>

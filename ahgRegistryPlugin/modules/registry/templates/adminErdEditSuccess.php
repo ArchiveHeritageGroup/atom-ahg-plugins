@@ -247,7 +247,7 @@
             <div class="d-flex justify-content-between align-items-start mb-2">
               <strong class="small"><?php echo __('Current file:'); ?></strong>
               <input type="hidden" name="remove_diagram_image" id="remove_diagram_image" value="0">
-              <button type="button" class="btn btn-outline-danger btn-sm" id="btnRemoveDiagram" onclick="toggleRemoveDiagram()">
+              <button type="button" class="btn btn-outline-danger btn-sm" id="btnRemoveDiagram" data-ahg-call="toggleRemoveDiagram">
                 <i class="fas fa-trash-alt me-1"></i><?php echo __('Remove'); ?>
               </button>
             </div>

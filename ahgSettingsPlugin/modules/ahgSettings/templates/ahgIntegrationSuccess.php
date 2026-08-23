@@ -63,7 +63,7 @@
                 <label for="ahg_central_api_key" class="form-label"><?php echo __('API Key'); ?></label>
                 <div class="input-group">
                     <?php echo $form['ahg_central_api_key']->render(['class' => 'form-control', 'id' => 'ahg_central_api_key']); ?>
-                    <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility()">
+                    <button type="button" class="btn btn-outline-secondary" data-ahg-call="togglePasswordVisibility">
                         <i class="fas fa-eye" id="toggleIcon"></i>
                     </button>
                 </div>

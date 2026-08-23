@@ -47,7 +47,7 @@ use ahgRequestToPublishPlugin\Services\WorkflowService;
         <td>
           <form method="post" action="<?php echo $inboxUrl; ?>" class="d-flex gap-1">
             <input type="hidden" name="form_action" value="triage"><input type="hidden" name="request_id" value="<?php echo (int) $it['request_id']; ?>">
-            <select name="triage_status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <select name="triage_status" class="form-select form-select-sm" data-ahg-submit-form="1">
               <?php foreach (WorkflowService::TRIAGE as $t): ?><option value="<?php echo $t; ?>"<?php echo ($it['triage_status'] ?? '') === $t ? ' selected' : ''; ?>><?php echo __(ucwords(str_replace('_', ' ', $t))); ?></option><?php endforeach; ?>
             </select>
           </form>
@@ -55,7 +55,7 @@ use ahgRequestToPublishPlugin\Services\WorkflowService;
         <td>
           <form method="post" action="<?php echo $inboxUrl; ?>">
             <input type="hidden" name="form_action" value="priority"><input type="hidden" name="request_id" value="<?php echo (int) $it['request_id']; ?>">
-            <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+            <select name="priority" class="form-select form-select-sm" data-ahg-submit-form="1">
               <?php foreach (WorkflowService::PRIORITIES as $p): ?><option value="<?php echo $p; ?>"<?php echo ($it['priority'] ?? '') === $p ? ' selected' : ''; ?>><?php echo __(ucfirst($p)); ?></option><?php endforeach; ?>
             </select>
           </form>

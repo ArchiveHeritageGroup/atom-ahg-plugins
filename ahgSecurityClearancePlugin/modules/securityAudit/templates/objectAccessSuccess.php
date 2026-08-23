@@ -18,7 +18,7 @@ $dailyAccess = $sf_data->getRaw('dailyAccess');
     <div>
         <form method="get" class="d-inline">
             <input type="hidden" name="object_id" value="<?php echo $object->id ?>">
-            <select name="period" class="form-select form-select-sm d-inline-block" style="width: auto;" onchange="this.form.submit()">
+            <select name="period" class="form-select form-select-sm d-inline-block" style="width: auto;" data-ahg-submit-form="1">
                 <option value="7 days" <?php echo $period === '7 days' ? 'selected' : '' ?>>Last 7 Days</option>
                 <option value="30 days" <?php echo $period === '30 days' ? 'selected' : '' ?>>Last 30 Days</option>
                 <option value="90 days" <?php echo $period === '90 days' ? 'selected' : '' ?>>Last 90 Days</option>

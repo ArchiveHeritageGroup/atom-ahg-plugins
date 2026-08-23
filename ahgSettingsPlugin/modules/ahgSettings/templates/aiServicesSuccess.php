@@ -56,7 +56,7 @@ $settings = $rawSettings;
                 <small class="text-muted">URL of the AI service (e.g., http://localhost:5004/ai/v1)</small>
             </div>
             <div class="col-sm-3">
-                <button type="button" class="btn btn-outline-info" onclick="testConnection()">
+                <button type="button" class="btn btn-outline-info" data-ahg-call="testConnection">
                     <i class="fas fa-plug me-1"></i>Test Connection
                 </button>
             </div>
@@ -69,7 +69,7 @@ $settings = $rawSettings;
                     value="<?php echo htmlspecialchars($settings['api_key'] ?? '') ?>">
             </div>
             <div class="col-sm-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="togglePassword()">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-ahg-call="togglePassword">
                     <i class="fas fa-eye"></i> Show
                 </button>
             </div>
@@ -276,7 +276,7 @@ $settings = $rawSettings;
                 <small class="text-muted">OPUS-MT translation server URL</small>
             </div>
             <div class="col-sm-3">
-                <button type="button" class="btn btn-outline-info" onclick="testTranslation()">
+                <button type="button" class="btn btn-outline-info" data-ahg-call="testTranslation">
                     <i class="fas fa-plug me-1"></i>Test
                 </button>
             </div>
@@ -331,7 +331,7 @@ $settings = $rawSettings;
         <div class="row mb-3">
             <label class="col-sm-3 col-form-label">Institution Sector</label>
             <div class="col-sm-4">
-                <select class="form-select" name="translation_sector" id="translation_sector" onchange="updateFieldsForSector()">
+                <select class="form-select" name="translation_sector" id="translation_sector" data-ahg-call="updateFieldsForSector" data-ahg-on="change">
                     <option value="archives" <?php echo ($settings['translation_sector'] ?? 'archives') === 'archives' ? 'selected' : '' ?>>
                         Archives (ISAD(G))
                     </option>
@@ -536,9 +536,9 @@ $settings = $rawSettings;
                 </div>
 
                 <div class="mt-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAllFields()">Select All</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllFields()">Deselect All</button>
-                    <button type="button" class="btn btn-sm btn-outline-info" onclick="resetTargetFields()">Reset Targets to Same Field</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-ahg-call="selectAllFields">Select All</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-ahg-call="deselectAllFields">Deselect All</button>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-ahg-call="resetTargetFields">Reset Targets to Same Field</button>
                 </div>
             </div>
         </div>

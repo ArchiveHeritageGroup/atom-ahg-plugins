@@ -93,7 +93,7 @@
                 <form method="post" class="d-inline">
                   <input type="hidden" name="form_action" value="update-role">
                   <input type="hidden" name="link_id" value="<?php echo (int) $lu->link_id; ?>">
-                  <select name="role" class="form-select form-select-sm d-inline-block" style="width:auto;" onchange="this.form.submit()">
+                  <select name="role" class="form-select form-select-sm d-inline-block" style="width:auto;" data-ahg-submit-form="1">
                     <?php foreach (['owner', 'manager', 'editor', 'viewer'] as $r): ?>
                       <option value="<?php echo $r; ?>"<?php echo ($lu->role ?? '') === $r ? ' selected' : ''; ?>><?php echo ucfirst($r); ?></option>
                     <?php endforeach; ?>

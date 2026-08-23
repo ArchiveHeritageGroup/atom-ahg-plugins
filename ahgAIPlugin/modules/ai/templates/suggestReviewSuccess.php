@@ -55,7 +55,7 @@
                     <label class="form-label mb-0 me-2">Repository:</label>
                 </div>
                 <div class="col-md-4">
-                    <select name="repository" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <select name="repository" class="form-select form-select-sm" data-ahg-submit-form="1">
                         <option value="">All Repositories</option>
                         <?php foreach ($repositories as $repo): ?>
                         <option value="<?php echo $repo->id; ?>" <?php echo $selectedRepository == $repo->id ? 'selected' : ''; ?>>

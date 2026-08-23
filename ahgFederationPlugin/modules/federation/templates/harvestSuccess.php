@@ -91,10 +91,10 @@
             </div>
 
             <div class="d-flex gap-2">
-              <button type="button" class="btn btn-primary" id="startHarvestBtn" onclick="startHarvest()">
+              <button type="button" class="btn btn-primary" id="startHarvestBtn" data-ahg-call="startHarvest">
                 <i class="bi bi-play-fill me-1"></i> Start Harvest
               </button>
-              <button type="button" class="btn btn-outline-secondary" disabled id="stopHarvestBtn" onclick="stopHarvest()" style="display: none;">
+              <button type="button" class="btn btn-outline-secondary" disabled id="stopHarvestBtn" data-ahg-call="stopHarvest" style="display: none;">
                 <i class="bi bi-stop-fill me-1"></i> Stop
               </button>
             </div>

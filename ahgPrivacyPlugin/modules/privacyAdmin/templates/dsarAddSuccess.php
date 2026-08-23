@@ -19,7 +19,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo __('Jurisdiction'); ?> <span class="text-danger">*</span></label>
-                                <select name="jurisdiction" id="jurisdiction" class="form-select" required onchange="updateRequestTypes()">
+                                <select name="jurisdiction" id="jurisdiction" class="form-select" required data-ahg-call="updateRequestTypes" data-ahg-on="change">
                                     <?php foreach ($jurisdictions as $code => $info): ?>
                                     <option value="<?php echo $code; ?>" <?php echo $code === $defaultJurisdiction ? 'selected' : ''; ?>>
                                         <?php echo $info['name']; ?> (<?php echo $info['country']; ?>)

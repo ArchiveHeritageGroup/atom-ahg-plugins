@@ -270,7 +270,7 @@ $metaRows = array_filter($metaRows, fn ($v) => $v !== '' && $v !== null);
         <div class="input-group">
             <input type="text" class="form-control" id="manifest-url" readonly 
                    value="<?php echo $baseUrl ?>/iiif/3d/<?php echo $model->id ?>/manifest.json">
-            <button class="btn btn-outline-secondary" type="button" onclick="copyManifestUrl()">
+            <button class="btn btn-outline-secondary" type="button" data-ahg-call="copyManifestUrl">
                 <i class="fas fa-copy"></i> Copy
             </button>
             <a href="<?php echo $baseUrl ?>/iiif/3d/<?php echo $model->id ?>/manifest.json" target="_blank" class="btn btn-outline-primary">

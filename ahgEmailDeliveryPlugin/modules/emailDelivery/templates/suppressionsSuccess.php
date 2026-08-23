@@ -29,7 +29,7 @@
       <form method="get" class="row g-2 mb-2">
         <div class="col"><input type="text" name="q" value="<?php echo esc_entities($search) ?>" class="form-control form-control-sm" placeholder="<?php echo __('Search address…') ?>"></div>
         <div class="col-auto">
-          <select name="reason" class="form-select form-select-sm" onchange="this.form.submit()">
+          <select name="reason" class="form-select form-select-sm" data-ahg-submit-form="1">
             <option value=""><?php echo __('All reasons') ?></option>
             <?php foreach ($reasons as $rk => $rl): ?>
               <option value="<?php echo $rk ?>" <?php echo $reasonFilter === $rk ? 'selected' : '' ?>><?php echo __($rl) ?></option>

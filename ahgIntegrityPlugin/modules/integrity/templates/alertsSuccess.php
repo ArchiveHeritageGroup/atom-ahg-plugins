@@ -17,7 +17,7 @@ $comparisons = ['lt' => '<', 'lte' => '<=', 'gt' => '>', 'gte' => '>=', 'eq' => 
       <a href="<?php echo url_for(['module' => 'integrity', 'action' => 'index']); ?>" class="btn btn-outline-secondary btn-sm me-1">
         <i class="fas fa-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
       </a>
-      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#alertModal" onclick="resetAlertForm()">
+      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#alertModal" data-ahg-call="resetAlertForm">
         <i class="fas fa-plus me-1"></i><?php echo __('New Alert'); ?>
       </button>
     </div>

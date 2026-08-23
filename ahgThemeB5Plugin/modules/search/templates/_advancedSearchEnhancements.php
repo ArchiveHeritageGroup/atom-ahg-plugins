@@ -127,7 +127,7 @@ try {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
-        <button type="button" class="btn btn-primary" onclick="saveCurrentSearch()"><?php echo __('Save'); ?></button>
+        <button type="button" class="btn btn-primary" data-ahg-call="saveCurrentSearch"><?php echo __('Save'); ?></button>
       </div>
     </div>
   </div>

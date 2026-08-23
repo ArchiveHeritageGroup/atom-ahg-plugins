@@ -88,7 +88,7 @@ try {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
-        <button type="button" class="btn btn-primary" onclick="saveGlamSearch()"><?php echo __('Save'); ?></button>
+        <button type="button" class="btn btn-primary" data-ahg-call="saveGlamSearch"><?php echo __('Save'); ?></button>
       </div>
     </div>
   </div>

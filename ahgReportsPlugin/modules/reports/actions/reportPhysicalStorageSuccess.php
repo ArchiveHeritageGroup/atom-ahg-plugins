@@ -62,7 +62,7 @@
       </section>
 
       <div style="margin-top: 1rem;">
-        <button type="button" onclick="exportTableToCSV()" class="c-btn" style="width:100%;">
+        <button type="button" data-ahg-call="exportTableToCSV" class="c-btn" style="width:100%;">
           <i class="fa fa-download"></i> <?php echo __('Export CSV'); ?>
         </button>
       </div>

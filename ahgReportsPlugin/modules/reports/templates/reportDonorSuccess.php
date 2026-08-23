@@ -49,7 +49,7 @@
       </section>
 
       <div>
-        <button type="button" onclick="exportTableToCSV()" class="btn btn-success w-100">
+        <button type="button" data-ahg-call="exportTableToCSV" class="btn btn-success w-100">
           <i class="fa fa-download me-1"></i> <?php echo __('Export CSV'); ?>
         </button>
       </div>

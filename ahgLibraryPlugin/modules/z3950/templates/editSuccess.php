@@ -165,7 +165,7 @@
       <input type="text" class="form-control" id="test-db" placeholder="Database"
              value="<?php echo esc_entities($target['database'] ?? ''); ?>">
       <button type="button" class="btn btn-outline-info" id="test-btn"
-              onclick="testZ3950()">
+              data-ahg-call="testZ3950">
         <i class="fas fa-plug me-1"></i><?php echo __('Test'); ?>
       </button>
     </div>

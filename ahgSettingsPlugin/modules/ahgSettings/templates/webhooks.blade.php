@@ -23,7 +23,7 @@
             <p class="mb-2">{{ __('This is your webhook secret for HMAC signature verification. Copy it now - it will not be shown again!') }}</p>
             <div class="input-group">
               <input type="text" class="form-control font-monospace" id="newWebhookSecret" value="{{ $sf_user->getFlash('new_webhook_secret') }}" readonly>
-              <button class="btn btn-outline-secondary" type="button" onclick="copySecret()">
+              <button class="btn btn-outline-secondary" type="button" data-ahg-call="copySecret">
                 <i class="bi bi-clipboard"></i> {{ __('Copy') }}
               </button>
             </div>

@@ -156,7 +156,7 @@
           <button type="submit" class="btn btn-primary"><?php echo __('Save Clearance') ?></button>
           
           <?php if ($clearance): ?>
-          <button type="button" class="btn btn-danger" onclick="revokeClearance()">
+          <button type="button" class="btn btn-danger" data-ahg-call="revokeClearance">
             <?php echo __('Revoke Clearance') ?>
           </button>
           <?php endif ?>

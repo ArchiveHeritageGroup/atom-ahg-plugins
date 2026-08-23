@@ -181,7 +181,7 @@
                         <form action="<?php echo url_for('tenant_admin_update_user_role') ?>" method="post" class="d-inline update-role-form">
                           <input type="hidden" name="tenant_id" value="<?php echo $tenant->id ?>">
                           <input type="hidden" name="user_id" value="<?php echo $user->id ?>">
-                          <select name="role" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                          <select name="role" class="form-select form-select-sm" style="width: auto;" data-ahg-submit-form="1">
                             <?php foreach ($roles as $roleValue => $roleLabel): ?>
                               <option value="<?php echo $roleValue ?>" <?php echo $user->role === $roleValue ? 'selected' : '' ?>>
                                 <?php echo $roleLabel ?>

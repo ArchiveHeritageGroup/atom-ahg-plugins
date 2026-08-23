@@ -14,7 +14,7 @@
         </div>
         <div class="col-auto">
             <form method="get" class="d-flex gap-2">
-                <select name="year" class="form-select" onchange="this.form.submit()">
+                <select name="year" class="form-select" data-ahg-submit-form="1">
                     <?php for ($y = date('Y'); $y >= date('Y') - 10; $y--): ?>
                         <option value="<?php echo $y; ?>" <?php echo ($year ?? date('Y')) == $y ? 'selected' : ''; ?>><?php echo $y; ?></option>
                     <?php endfor; ?>

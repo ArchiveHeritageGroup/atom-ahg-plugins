@@ -25,7 +25,7 @@
                     <label class="form-label mb-0 me-2"><?php echo __('Filter by Standard:'); ?></label>
                 </div>
                 <div class="col-md-4">
-                    <select name="standard_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <select name="standard_id" class="form-select form-select-sm" data-ahg-submit-form="1">
                         <option value=""><?php echo __('All Standards'); ?></option>
                         <?php foreach ($standards as $s): ?>
                         <option value="<?php echo $s->id; ?>" <?php echo $standardId == $s->id ? 'selected' : ''; ?>>

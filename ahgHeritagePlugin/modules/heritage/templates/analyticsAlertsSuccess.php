@@ -105,7 +105,7 @@ $stats = $alertData['stats'] ?? [];
     <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Active Alerts</h5>
         <div>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="dismissAllRead()">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-ahg-call="dismissAllRead">
                 <i class="fas fa-check-all me-1"></i>Dismiss All Read
             </button>
         </div>

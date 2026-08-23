@@ -24,7 +24,7 @@ $cs = $currentStatus ?? '';
     <div class="row align-items-center">
       <div class="col-md-6">
         <form method="get" class="d-flex gap-2">
-          <select name="status" class="form-select form-select-sm" data-ahg-style="width: auto;" onchange="this.form.submit()">
+          <select name="status" class="form-select form-select-sm" data-ahg-style="width: auto;" data-ahg-submit-form="1">
             <option value=""><?php echo __('All Status'); ?></option>
             <option value="pending" <?php echo $currentStatus === 'pending' ? 'selected' : ''; ?>><?php echo __('Pending'); ?></option>
             <option value="approved" <?php echo $currentStatus === 'approved' ? 'selected' : ''; ?>><?php echo __('Approved'); ?></option>

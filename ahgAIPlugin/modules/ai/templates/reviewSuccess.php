@@ -128,7 +128,7 @@
                     </button>
                 </div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="saveAllDecisions()">
+                <button type="button" class="btn btn-success" data-ahg-call="saveAllDecisions">
                     <i class="fas fa-save me-1"></i>Save All Decisions
                 </button>
             </div>

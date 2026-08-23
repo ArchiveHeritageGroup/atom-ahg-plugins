@@ -27,7 +27,7 @@
   <!-- Fiscal year filter -->
   <form method="get" action="<?php echo url_for(['module' => 'acquisition', 'action' => 'budgets']); ?>" class="d-flex gap-2 align-items-center">
     <label for="fy_filter" class="form-label mb-0"><?php echo __('Fiscal year'); ?>:</label>
-    <select class="form-select form-select-sm" id="fy_filter" name="fiscal_year" style="width:auto;" onchange="this.form.submit()">
+    <select class="form-select form-select-sm" id="fy_filter" name="fiscal_year" style="width:auto;" data-ahg-submit-form="1">
       <?php
         $currentYear = (int) date('Y');
         $selectedYear = $sf_data->getRaw('fiscalYear') ?? $currentYear;

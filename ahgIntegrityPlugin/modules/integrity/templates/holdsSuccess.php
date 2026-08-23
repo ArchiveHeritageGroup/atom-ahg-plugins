@@ -18,7 +18,7 @@ $filterStatus = $sf_data->getRaw('filterStatus') ?: '';
 
   <form class="row g-2 mb-3" method="get" action="<?php echo url_for(['module' => 'integrity', 'action' => 'holds']); ?>">
     <div class="col-auto">
-      <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+      <select name="status" class="form-select form-select-sm" data-ahg-submit-form="1">
         <option value=""><?php echo __('All statuses'); ?></option>
         <option value="active" <?php echo $filterStatus === 'active' ? 'selected' : ''; ?>>active</option>
         <option value="released" <?php echo $filterStatus === 'released' ? 'selected' : ''; ?>>released</option>

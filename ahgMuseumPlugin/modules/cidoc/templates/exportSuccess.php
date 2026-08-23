@@ -11,7 +11,7 @@
                 <label class="format-option <?php echo $format === $formatId ? 'active' : ''; ?>">
                     <input type="radio" name="format" value="<?php echo $formatId; ?>" 
                            <?php echo $format === $formatId ? 'checked' : ''; ?>
-                           onchange="updateFormat(this.value)">
+                           data-ahg-call="updateFormat" data-ahg-on="change" data-ahg-arg="this.value">
                     <span class="format-label"><?php echo $formatDef['label']; ?></span>
                     <span class="format-ext">.<?php echo $formatDef['extension']; ?></span>
                 </label>

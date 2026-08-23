@@ -72,7 +72,7 @@ foreach ($standardsAllFlat as $code => $info) {
 <form method="get" action="<?php echo url_for(['module' => 'sharepoint', 'action' => 'mappings']) ?>" class="row g-2 mb-3 align-items-end">
     <div class="col-md-5">
         <label class="form-label"><?php echo __('Drive') ?></label>
-        <select name="drive_id" class="form-select" onchange="this.form.submit()">
+        <select name="drive_id" class="form-select" data-ahg-submit-form="1">
             <option value="">— <?php echo __('Select drive') ?> —</option>
             <?php foreach ($drives as $d): ?>
                 <option value="<?php echo (int) $d->id ?>" <?php echo $selectedDriveId === (int) $d->id ? 'selected' : '' ?>>
@@ -84,7 +84,7 @@ foreach ($standardsAllFlat as $code => $info) {
     <?php if ($selectedDriveId): ?>
     <div class="col-md-5">
         <label class="form-label"><?php echo __('Template') ?></label>
-        <select name="template_id" class="form-select" onchange="this.form.submit()">
+        <select name="template_id" class="form-select" data-ahg-submit-form="1">
             <?php if ($templates->isEmpty()): ?>
                 <option value="">— <?php echo __('No templates yet — create one below') ?> —</option>
             <?php endif ?>
