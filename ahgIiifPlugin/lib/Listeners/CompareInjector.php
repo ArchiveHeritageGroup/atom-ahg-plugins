@@ -44,10 +44,17 @@ class CompareInjector
             $content,
             self::MARKER,
             static function (string $slug): string {
+                // Icon only, btn-xs, and hidden until Mirador is the active
+                // viewer. Comparison opens Mirador in mosaic mode, so offering it
+                // while another viewer is showing invites a click that switches
+                // the user somewhere they did not ask to go. The viewer manager
+                // toggles d-none in showViewer(); with no viewer on the page at
+                // all the button simply never appears, which is correct - there
+                // is nothing to compare.
                 return sprintf(
-                    '<button type="button" class="btn btn-sm btn-outline-secondary %s"'
-                    .' data-ahg-compare-slug="%s">'
-                    .'<i class="fas fa-clone me-1"></i>%s</button>',
+                    '<button type="button" class="btn btn-xs btn-outline-secondary d-none %s"'
+                    .' data-ahg-compare-slug="%s" title="%s" data-bs-toggle="tooltip">'
+                    .'<i class="fas fa-clone"></i></button>',
                     self::MARKER,
                     htmlspecialchars($slug, ENT_QUOTES),
                     htmlspecialchars(self::t('Compare'), ENT_QUOTES)
@@ -104,6 +111,7 @@ CSS;
         $js = <<<JS
 (function () {
   var KEY = 'ahgIiifCompare';
+
   var L = {$labels};
   var URL_BASE = '{$compareUrl}';
 
@@ -119,14 +127,22 @@ CSS;
       var on = list.indexOf(b.getAttribute('data-ahg-compare-slug')) !== -1;
       b.classList.toggle('btn-secondary', on);
       b.classList.toggle('btn-outline-secondary', !on);
-      b.lastChild.textContent = on ? L.added : L.add;
+      // The button is icon-only, so its lastChild is the <i>. Writing a label into
+      // it put text inside the icon element and produced a small coloured block.
+      // State goes on the tooltip instead.
+      b.setAttribute('title', on ? L.added : L.add);
     });
   }
 
   function paintBar(list) {
     var bar = document.getElementById('ahg-compare-bar');
     if (!bar) { return; }
-    bar.hidden = list.length === 0;
+    // Only offer the launcher where comparison can actually be started: that is,
+    // where a compare button is currently visible, which means Mirador is the
+    // active viewer. Otherwise a stored selection left a fixed-position bar
+    // floating over every page in the site, including records with no image.
+    var live = document.querySelector('.ahg-iiif-compare-btn:not(.d-none)');
+    bar.hidden = list.length === 0 || !live;
     bar.querySelector('.ahg-compare-count').textContent =
       list.length < 2 ? L.need : L.open.replace('%s', list.length);
     bar.querySelector('.ahg-compare-go').disabled = list.length < 2;
@@ -137,6 +153,10 @@ CSS;
     paintButtons(list);
     paintBar(list);
   }
+
+  // The viewer manager shows and hides the compare button as the active viewer
+  // changes, after this script has already painted. The bar has to follow it.
+  document.addEventListener('ahg:compare-repaint', refresh);
 
   document.addEventListener('click', function (ev) {
     var btn = ev.target.closest ? ev.target.closest('[data-ahg-compare-slug]') : null;

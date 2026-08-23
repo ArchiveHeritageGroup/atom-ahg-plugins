@@ -214,6 +214,16 @@ export class IiifViewerManager {
         // Update button states
         this.updateButtonStates(viewerType);
 
+        // Compare launches Mirador in mosaic mode, so it is only offered while
+        // Mirador is the active viewer. classList is a DOM API, not an inline
+        // style, so CSP does not touch it.
+        document.querySelectorAll('.ahg-iiif-compare-btn').forEach(function (btn) {
+            btn.classList.toggle('d-none', 'mirador' !== viewerType);
+        });
+        // Tell the compare script to re-evaluate: its launcher bar is only shown
+        // where a compare button is visible.
+        document.dispatchEvent(new CustomEvent('ahg:compare-repaint'));
+
         // Show the container BEFORE initialising it.
         //
         // Every wrapper was just hidden above, so initialising first means the
