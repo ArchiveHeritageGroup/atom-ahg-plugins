@@ -194,6 +194,12 @@ $canManage = $isAdmin || $isEditor;
             </div>
         </div>
 
+        <?php // Each entry here is gated on a sector plugin, so on a lean install
+              // every one of them is false and the card rendered as a header with an
+              // empty list - which reads as broken rather than as "not installed".
+              // Archaeology is not a library, gallery, museum or DAM; the card should
+              // simply not be there. Reported 2026-08-24. ?>
+        <?php if ($hasGrap || $hasDonor || $hasGallery || $hasDam || $hasMuseum): ?>
         <!-- Sector Dashboards Column -->
         <div class="col-md-4">
             <div class="card h-100">
@@ -221,6 +227,11 @@ $canManage = $isAdmin || $isEditor;
             </div>
         </div>
 
+        <?php endif; ?>
+
+        <?php // Same again: with none of ahgExportPlugin, ahgSpectrumPlugin or
+              // ahgHeritageAccountingPlugin installed there is nothing to list. ?>
+        <?php if ($hasExport || $hasSpectrum || $hasGrap): ?>
         <!-- Export Column -->
         <div class="col-md-4">
             <div class="card h-100">
@@ -243,6 +254,7 @@ $canManage = $isAdmin || $isEditor;
                 </ul>
             </div>
         </div>
+        <?php endif; ?>
 
     </div>
     <?php endif; ?>
