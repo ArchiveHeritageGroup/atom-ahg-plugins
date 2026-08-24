@@ -55,6 +55,11 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         // that guard's HTML fallback for authority modules is applied first.
         $this->dispatcher->connect('controller.change_action', ['ahgCorePluginConfiguration', 'refuseUnavailableFormat']);
 
+        // Sibling of the guard above, for the opposite case: no format asked for,
+        // and the module can only answer in XML. /:slug;ead with no sf_format=xml
+        // used to be a 500.
+        $this->dispatcher->connect('controller.change_action', ['ahgCorePluginConfiguration', 'defaultFormatForXmlOnlyAction']);
+
         // Base AtoM dereferences route-parse results without checking them in 53
         // places across 13 modules. See sanitisePostedResourceValues().
         //
@@ -810,6 +815,93 @@ APPLIER;
      * Returns true when it cannot be determined, so an unexpected condition
      * lets the request through rather than 404ing it.
      */
+    /**
+     * Serve XML when a module/action can ONLY render XML and no format was asked for.
+     *
+     * `/:slug;ead` resolves to sfEadPlugin/index, which ships indexSuccess.xml.php
+     * and no plain indexSuccess.php. With sf_format absent symfony defaults to
+     * html, finds no template and raises "The template indexSuccess.php does not
+     * exist or is unreadable in ''" - an HTTP 500 on a URL a crawler will happily
+     * follow. Observed on PSIS and archaeology, recurring in ahg_error_log.
+     *
+     * The record page's own link is correct - urlForEadExport() appends
+     * sf_format=xml - so this only affects hand-typed and crawled URLs. Answering
+     * with the EAD is better than the clean 404 the alternative would give.
+     *
+     * The complementary case (a format WAS asked for and no such template exists)
+     * belongs to refuseUnavailableFormat(), which returns early when the format is
+     * empty or html. The two cannot both act on one request.
+     *
+     * Cannot be fixed where it breaks: the template lives in plugins/sfEadPlugin
+     * and the routing in lib/, both base AtoM.
+     */
+    public static function defaultFormatForXmlOnlyAction($event)
+    {
+        try {
+            $module = $event['module'] ?? null;
+            $action = $event['action'] ?? null;
+            if (empty($module) || empty($action)) {
+                return;
+            }
+
+            $context = sfContext::getInstance();
+            $request = $context ? $context->getRequest() : null;
+            if (!$request) {
+                return;
+            }
+
+            $format = $request->getParameter('sf_format');
+            if (!empty($format) && 'html' !== $format) {
+                return; // an explicit format - refuseUnavailableFormat's business
+            }
+
+            // Only step in where HTML genuinely cannot be rendered but XML can.
+            // Checking the specific action, not the module: a module may hold an
+            // XML template for one action and HTML for another.
+            if (self::actionHasTemplate($module, $action, null)) {
+                return;
+            }
+            if (!self::actionHasTemplate($module, $action, 'xml')) {
+                return; // neither - let symfony report it as it always has
+            }
+
+            $request->setRequestFormat('xml');
+            $request->setParameter('sf_format', 'xml');
+        } catch (\Throwable $e) {
+            return; // never let this break a request
+        }
+    }
+
+    /**
+     * Does $module hold a template for $action in $format (null meaning plain HTML)?
+     */
+    private static function actionHasTemplate($module, $action, $format = null)
+    {
+        // Both go into a filesystem path; keep them to a safe character set.
+        if (!preg_match('/^[a-zA-Z0-9_]{1,64}$/', (string) $action)) {
+            return true;
+        }
+        if (null !== $format && !preg_match('/^[a-z0-9]{1,16}$/i', (string) $format)) {
+            return true;
+        }
+
+        $file = $action.'Success.'.(null === $format ? '' : $format.'.').'php';
+
+        try {
+            $dirs = sfContext::getInstance()->getConfiguration()->getTemplateDirs($module);
+        } catch (\Throwable $e) {
+            return true; // unknown - assume it exists rather than act on a guess
+        }
+
+        foreach ((array) $dirs as $dir) {
+            if (is_file(rtrim($dir, '/').'/'.$file)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static function moduleHasFormatTemplate($module, $format)
     {
         // Formats are used to build a glob; keep them to a safe character set.

@@ -1,0 +1,46 @@
+# export module access.
+#
+# exportActions::boot() already enforces this: authenticated, then administrator
+# or editor. This file states the same rule declaratively, because a missing
+# modules/<name>/config/security.yml inherits `default: is_secure: false` from
+# apps/qubit/config/security.yml and FAILS OPEN - so the posture would rest
+# entirely on boot() continuing to run for every action, including any action
+# added later or moved to another class.
+#
+# The restriction is not cosmetic: these actions dump full catalogue rows,
+# including UNPUBLISHED records and repository contact PII. See the comment in
+# actions.class.php.
+#
+# Double-bracket credentials are an OR.
+
+index:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+csv:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+ead:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+archival:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+authority:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+repository:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+accessionCsv:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
