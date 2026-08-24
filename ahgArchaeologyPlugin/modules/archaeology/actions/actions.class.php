@@ -155,6 +155,7 @@ class archaeologyActions extends AhgController
 
         $this->contexts = $this->service->contextsForSite($siteId);
         $this->matrix = $this->service->harrisMatrix($siteId);
+        $this->consistency = $this->service->consistencyReport($siteId);
         $this->service_ = $this->service;
     }
 

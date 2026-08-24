@@ -60,7 +60,57 @@
       <?php } ?>
     </p>
 
-    <h2 class="h5">Harris Matrix</h2>
+    <?php
+    // Checks sit ABOVE the matrix on purpose. A contradiction in the record is
+    // something to see before reading the diagram it produced, not a footnote
+    // after it. Every check is conservative - see consistencyReport() for why.
+    //
+    // UNWRAP ONCE. Symfony hands this template an sfOutputEscaperArrayDecorator,
+    // and array functions on it are fatals that kill the rest of the page - which
+    // is exactly what happened here: an implode() took out the matrix below.
+    // Guarding each call individually is how you miss the third one.
+    $report = $consistency instanceof sfOutputEscaperArrayDecorator
+        ? $consistency->getRawValue()
+        : (array) $consistency;
+
+    $findings = $report['findings'] ?? [];
+    $checkNames = $report['checked'] ?? [];
+    $errors = 0;
+
+    foreach ($findings as $finding) {
+        if ('error' === $finding['severity']) {
+            ++$errors;
+        }
+    }
+    ?>
+
+  <?php if (count($findings) > 0) { ?>
+    <details class="mb-3" <?php echo $errors > 0 ? 'open' : ''; ?>>
+      <summary class="<?php echo $errors > 0 ? 'text-danger fw-bold' : ''; ?>">
+        <?php echo count($findings); ?>
+        consistency <?php echo 1 === count($findings) ? 'finding' : 'findings'; ?>
+        <?php if ($errors > 0) { ?>(<?php echo $errors; ?> contradictory)<?php } ?>
+      </summary>
+      <ul class="mt-2 mb-0">
+        <?php foreach ($findings as $finding) { ?>
+          <li class="<?php echo 'error' === $finding['severity'] ? 'text-danger' : ''; ?>">
+            <?php echo esc_specialchars($finding['message']); ?>
+          </li>
+        <?php } ?>
+      </ul>
+      <p class="text-muted small mt-2 mb-0">
+        Checked: <?php echo esc_specialchars(implode(', ', $checkNames)); ?>.
+        Nothing here has been changed - these are observations about the record.
+      </p>
+    </details>
+  <?php } elseif (count($checkNames) > 0) { ?>
+    <p class="text-muted small">
+      <?php echo count($checkNames); ?> consistency checks found nothing:
+      <?php echo esc_specialchars(implode(', ', $checkNames)); ?>.
+    </p>
+  <?php } ?>
+
+  <h2 class="h5">Harris Matrix</h2>
 
     <?php if ($matrix['has_cycle']) { ?>
       <div class="alert alert-danger">

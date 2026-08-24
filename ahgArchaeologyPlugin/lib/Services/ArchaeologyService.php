@@ -999,6 +999,322 @@ class ArchaeologyService
     }
 
     /**
+     * Check the recorded stratigraphy for contradictions.
+     *
+     * Cycle detection alone only catches the one error that makes a matrix
+     * impossible to draw. These are the errors that leave a drawable matrix which
+     * happens to be wrong - the kind Le Stratifiant checks and we did not.
+     *
+     * Every check is CONSERVATIVE: it reports only what the recorded data makes
+     * unambiguous. A report that cried wolf on ordinary excavation messiness would
+     * be turned off within a week, and then it would catch nothing at all.
+     *
+     * @return array{findings: array<int, array{severity:string, kind:string, message:string}>, checked: array<int,string>}
+     */
+    public function consistencyReport(int $siteId): array
+    {
+        $findings = [];
+        $checked = [];
+
+        $contexts = $this->contextsForSite($siteId);
+
+        if (!$contexts) {
+            return ['findings' => [], 'checked' => []];
+        }
+
+        $byId = [];
+        $numberOf = [];
+
+        foreach ($contexts as $context) {
+            $byId[(int) $context->id] = $context;
+            $numberOf[(int) $context->id] = (string) $context->context_number;
+        }
+
+        $rels = $this->relationshipsForSite($siteId);
+
+        // --- cycle -----------------------------------------------------------
+        $checked[] = 'stratigraphic loops';
+        $matrix = $this->harrisMatrix($siteId);
+
+        if (!empty($matrix['has_cycle'])) {
+            $findings[] = [
+                'severity' => 'error',
+                'kind' => 'cycle',
+                'message' => 'The sequence contains a loop, so it cannot be ordered. '
+                    .'The matrix cannot be drawn until the contradicting relationships are corrected.',
+            ];
+        }
+
+        // --- contexts with nothing recorded about them -----------------------
+        $checked[] = 'contexts with no relationships';
+        $related = [];
+
+        foreach ($rels as $rel) {
+            $related[(int) $rel->context_id] = true;
+            $related[(int) $rel->related_context_id] = true;
+        }
+
+        $isolated = [];
+
+        foreach ($byId as $id => $context) {
+            if (!isset($related[$id])) {
+                $isolated[] = $numberOf[$id];
+            }
+        }
+
+        if ($isolated) {
+            sort($isolated);
+            $findings[] = [
+                'severity' => 'warning',
+                'kind' => 'isolated',
+                'message' => sprintf(
+                    '%d context%s no recorded relationship, so %s outside the sequence entirely: %s.',
+                    count($isolated),
+                    1 === count($isolated) ? ' has' : 's have',
+                    1 === count($isolated) ? 'it sits' : 'they sit',
+                    implode(', ', array_slice($isolated, 0, 12)).(count($isolated) > 12 ? ', ...' : '')
+                ),
+            ];
+        }
+
+        // --- disconnected pieces ---------------------------------------------
+        // Treated as undirected: the question is whether the record ties the dig
+        // together at all, not which way round any one relationship runs.
+        $checked[] = 'sequence split into unconnected pieces';
+        $adjacency = [];
+
+        foreach ($rels as $rel) {
+            $adjacency[(int) $rel->context_id][] = (int) $rel->related_context_id;
+            $adjacency[(int) $rel->related_context_id][] = (int) $rel->context_id;
+        }
+
+        $seen = [];
+        $components = 0;
+
+        foreach (array_keys($byId) as $id) {
+            if (isset($seen[$id]) || !isset($related[$id])) {
+                continue;   // isolated contexts are reported above, not counted here
+            }
+
+            ++$components;
+            $stack = [$id];
+
+            while ($stack) {
+                $node = array_pop($stack);
+
+                if (isset($seen[$node])) {
+                    continue;
+                }
+
+                $seen[$node] = true;
+
+                foreach ($adjacency[$node] ?? [] as $next) {
+                    if (!isset($seen[$next])) {
+                        $stack[] = $next;
+                    }
+                }
+            }
+        }
+
+        if ($components > 1) {
+            $findings[] = [
+                'severity' => 'warning',
+                'kind' => 'disconnected',
+                'message' => sprintf(
+                    'The sequence is in %d unconnected pieces. That is normal for separate '
+                    .'trenches with nothing correlated between them, and a problem if they '
+                    .'were meant to be tied together.',
+                    $components
+                ),
+            ];
+        }
+
+        // --- same_as that also asserts superposition -------------------------
+        $checked[] = 'contexts both correlated and superposed';
+        $laterPairs = [];
+
+        foreach ($rels as $rel) {
+            if (in_array($rel->relationship_type, self::LATER_THAN, true)) {
+                $laterPairs[(int) $rel->context_id.'|'.(int) $rel->related_context_id] = true;
+            }
+        }
+
+        foreach ($rels as $rel) {
+            if ('same_as' !== $rel->relationship_type) {
+                continue;
+            }
+
+            $a = (int) $rel->context_id;
+            $b = (int) $rel->related_context_id;
+
+            if ($a > $b) {
+                continue;   // symmetric, report once
+            }
+
+            if (isset($laterPairs[$a.'|'.$b]) || isset($laterPairs[$b.'|'.$a])) {
+                $findings[] = [
+                    'severity' => 'error',
+                    'kind' => 'same_as_superposed',
+                    'message' => sprintf(
+                        'Contexts %s and %s are recorded as the same feature AND one above the '
+                        .'other. They cannot be both.',
+                        $numberOf[$a] ?? $a,
+                        $numberOf[$b] ?? $b
+                    ),
+                ];
+            }
+        }
+
+        // --- elevation against superposition ---------------------------------
+        // ONLY 'above'. A cut extends downward from the surface it was cut from,
+        // so its top sitting exactly at the bottom of the deposit it cuts is
+        // correct archaeology, not a contradiction - and a fill sits inside that
+        // cut, below the surrounding deposit. Including cuts and fills here
+        // produced a false positive for every single one of them.
+        //
+        // Strict inequality, too: equal elevations are the normal case where one
+        // deposit sits directly on another.
+        $checked[] = 'elevations against superposition (above only)';
+
+        foreach ($rels as $rel) {
+            if ('above' !== $rel->relationship_type) {
+                continue;
+            }
+
+            $later = $byId[(int) $rel->context_id] ?? null;
+            $earlier = $byId[(int) $rel->related_context_id] ?? null;
+
+            if (!$later || !$earlier) {
+                continue;
+            }
+
+            if (null === $later->top_elevation_m || null === $earlier->bottom_elevation_m) {
+                continue;
+            }
+
+            if ((float) $later->top_elevation_m < (float) $earlier->bottom_elevation_m) {
+                $findings[] = [
+                    'severity' => 'warning',
+                    'kind' => 'elevation',
+                    'message' => sprintf(
+                        'Context %s is recorded as %s %s, but its top (%.2f m) is at or below '
+                        .'the bottom of %s (%.2f m) - it lies entirely underneath what it is '
+                        .'said to be later than.',
+                        $numberOf[(int) $rel->context_id],
+                        (string) $rel->relationship_type,
+                        $numberOf[(int) $rel->related_context_id],
+                        (float) $later->top_elevation_m,
+                        $numberOf[(int) $rel->related_context_id],
+                        (float) $earlier->bottom_elevation_m
+                    ),
+                ];
+            }
+        }
+
+        // --- phase against superposition -------------------------------------
+        // Which way phase numbers run is a SITE CONVENTION, not a universal: some
+        // schemes number the earliest phase 1, others the latest. Asserting either
+        // would generate a false positive for every relationship on half the sites
+        // in the world - as it did here on the first run.
+        //
+        // So infer the convention from the site's own data and report only the
+        // relationships that disagree with it. A site with no clear majority gets
+        // no finding, because there is nothing to be inconsistent with.
+        $phaseOrder = $this->phaseOrder();
+
+        if ($phaseOrder) {
+            $checked[] = 'phases against superposition';
+            $laterIsHigher = 0;
+            $laterIsLower = 0;
+            $pairs = [];
+
+            foreach ($rels as $rel) {
+                if (!in_array($rel->relationship_type, self::LATER_THAN, true)) {
+                    continue;
+                }
+
+                $later = $byId[(int) $rel->context_id] ?? null;
+                $earlier = $byId[(int) $rel->related_context_id] ?? null;
+
+                if (!$later || !$earlier) {
+                    continue;
+                }
+
+                $lp = $phaseOrder[(int) $later->phase_id] ?? null;
+                $ep = $phaseOrder[(int) $earlier->phase_id] ?? null;
+
+                if (null === $lp || null === $ep || $lp === $ep) {
+                    continue;   // same phase, or one of them unphased: says nothing
+                }
+
+                $lp > $ep ? ++$laterIsHigher : ++$laterIsLower;
+                $pairs[] = [$rel, $lp > $ep];
+            }
+
+            $total = $laterIsHigher + $laterIsLower;
+
+            // Need a clear majority before calling anything an outlier.
+            if ($total >= 4 && $laterIsHigher !== $laterIsLower) {
+                $convention = $laterIsHigher > $laterIsLower;
+                $outliers = [];
+
+                foreach ($pairs as [$rel, $isHigher]) {
+                    if ($isHigher !== $convention) {
+                        $outliers[] = sprintf(
+                            '%s later than %s',
+                            $numberOf[(int) $rel->context_id],
+                            $numberOf[(int) $rel->related_context_id]
+                        );
+                    }
+                }
+
+                if ($outliers) {
+                    $findings[] = [
+                        'severity' => 'warning',
+                        'kind' => 'phase',
+                        'message' => sprintf(
+                            'This site numbers phases so that a later context carries the %s phase '
+                            .'number (%d of %d relationships agree). %d disagree%s: %s.',
+                            $convention ? 'higher' : 'lower',
+                            max($laterIsHigher, $laterIsLower),
+                            $total,
+                            count($outliers),
+                            1 === count($outliers) ? 's' : '',
+                            implode(', ', array_slice($outliers, 0, 10)).(count($outliers) > 10 ? ', ...' : '')
+                        ),
+                    ];
+                }
+            }
+        }
+
+        return ['findings' => $findings, 'checked' => $checked];
+    }
+
+    /**
+     * Phase term id => order, from the taxonomy's nested set.
+     *
+     * "Unphased" is deliberately absent: it records that no phase was assigned,
+     * and treating it as the latest phase would generate contradictions out of
+     * missing data.
+     */
+    private function phaseOrder(): array
+    {
+        $terms = $this->vocabulary('phase');
+        $order = [];
+        $i = 0;
+
+        foreach ($terms as $term) {
+            if (0 === strcasecmp(trim((string) $term->name), 'Unphased')) {
+                continue;
+            }
+
+            $order[(int) $term->id] = ++$i;
+        }
+
+        return $order;
+    }
+
+    /**
      * Relationship words other tools use, mapped onto ours.
      *
      * An import that only accepted our own nine names would reject every file the
