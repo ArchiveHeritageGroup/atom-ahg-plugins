@@ -239,7 +239,7 @@ class IoFormHelper
         $action->eventTypes = $svc::getEventTypes($culture);
         $action->publicationStatuses = $svc::getPublicationStatuses();
         $action->noteTypes = self::getNoteTypes($culture);
-        $action->displayStandards = $svc::getDisplayStandards($culture);
+        $action->displayStandards = $svc::getDisplayStandards($culture, $dsId ?: null);
         $action->languageChoices = $svc::getLanguageChoices();
         $action->scriptChoices = $svc::getScriptChoices();
         $action->dcTypeTerms = $svc::getDcTypeTerms($culture);

@@ -191,7 +191,28 @@ class InformationObjectEditAction extends DefaultEditAction
 
                 $choices = [];
                 $choices[null] = null;
+
                 foreach (QubitTaxonomy::getTermsById(QubitTaxonomy::INFORMATION_OBJECT_TEMPLATE_ID) as $item) {
+                    // The taxonomy carries every descriptive standard the AHG
+                    // plugin set knows about, whether or not this instance has
+                    // the plugin that renders it. Offering one it cannot render
+                    // produced a description that returned 500 on its own
+                    // permalink - reported from the Wits archaeology instance
+                    // 2026-08-24, where Photo/DAM (IPTC/XMP) was on the list
+                    // without ahgDAMPlugin installed.
+                    //
+                    // The record's current standard always stays on the list:
+                    // dropping it would make the form save a different standard
+                    // than the one the record has, silently, on any edit.
+                    if (
+                        !empty($item->code)
+                        && $item->id != $this->resource->displayStandardId
+                        && class_exists('AhgSafeMetadataRoute')
+                        && !AhgSafeMetadataRoute::canRender($item->code)
+                    ) {
+                        continue;
+                    }
+
                     $choices[$item->id] = $item;
                 }
 

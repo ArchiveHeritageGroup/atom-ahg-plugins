@@ -819,19 +819,46 @@ class InformationObjectCrudService
 
     /**
      * Get display standard terms (taxonomy 70).
+     *
+     * Filtered to the standards this instance can actually render. The taxonomy
+     * carries every standard the AHG plugin set knows about, installed or not,
+     * and choosing one whose plugin is absent produced a description that
+     * returned 500 on its own permalink - reported from the Wits archaeology
+     * instance 2026-08-24, where Photo/DAM (IPTC/XMP) was offered without
+     * ahgDAMPlugin. See AhgSafeMetadataRoute, which repairs the read side.
+     *
+     * Fails open: without the routing class every standard is offered, which is
+     * the behaviour this replaces.
+     *
+     * @param int|null $keepId Always keep this term, even if it cannot be
+     *                         rendered - the record already carries it, and
+     *                         dropping it would have the form silently save a
+     *                         different standard than the record has
      */
-    public static function getDisplayStandards(string $culture = 'en'): array
+    public static function getDisplayStandards(string $culture = 'en', ?int $keepId = null): array
     {
-        return DB::table('term')
+        $terms = DB::table('term')
             ->leftJoin('term_i18n', function ($join) use ($culture) {
                 $join->on('term.id', '=', 'term_i18n.id')
                      ->where('term_i18n.culture', '=', $culture);
             })
             ->where('term.taxonomy_id', self::TAXONOMY_DISPLAY_STANDARD)
-            ->select(['term.id', 'term_i18n.name'])
+            ->select(['term.id', 'term_i18n.name', 'term.code'])
             ->orderBy('term_i18n.name')
             ->get()
             ->all();
+
+        if (!class_exists('AhgSafeMetadataRoute')) {
+            return $terms;
+        }
+
+        return array_values(array_filter($terms, static function ($term) use ($keepId) {
+            if (empty($term->code) || (null !== $keepId && (int) $term->id === $keepId)) {
+                return true;
+            }
+
+            return \AhgSafeMetadataRoute::canRender($term->code);
+        }));
     }
 
     /**

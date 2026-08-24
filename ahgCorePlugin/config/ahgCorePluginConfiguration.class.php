@@ -83,6 +83,11 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         // modules/ahgIoForm/actions/actions.class.php.
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadIoFormRoutes']);
 
+        // Re-register base AtoM's permalink routes on a class that degrades
+        // instead of returning 500 when the record's descriptive standard has
+        // no renderer here. See AhgSafeMetadataRoute.
+        $this->dispatcher->connect('routing.load_configuration', [$this, 'loadSafeMetadataRoutes']);
+
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
 
         if (!in_array('ahgIoForm', $enabledModules, true)) {
@@ -677,7 +682,7 @@ APPLIER;
             }
         }
 
-        foreach (['AhgMetadataRoute', 'AddActionRoute', 'SafeRequestRoute'] as $class) {
+        foreach (['AhgMetadataRoute', 'AhgSafeMetadataRoute', 'AddActionRoute', 'SafeRequestRoute'] as $class) {
             if (class_exists($class, false)) {
                 continue;
             }
@@ -1528,6 +1533,60 @@ APPLIER;
         }
 
         return $has = false;
+    }
+
+    /**
+     * Replace the permalink routes with ones that survive a missing renderer.
+     *
+     * Swapped in place under their existing names, carrying each route's own
+     * pattern, defaults, requirements and options across, so only the class
+     * changes: connect() assigns into $routes[$name], and PHP keeps an existing
+     * key where it is. Order is what makes routing correct here - prepending a
+     * second copy of '/:slug' would put a catch-all in front of every
+     * single-segment plugin route registered before this listener runs, which
+     * is how a static route once swallowed url generation site-wide.
+     *
+     * Generation is unaffected: the subclass inherits matchesParameters() and
+     * generate() untouched, so a url_for() that reached the base route reaches
+     * this one and produces the same URL.
+     *
+     * Only plain QubitMetadataRoute instances are swapped. A plugin that has
+     * already registered a GLAM-aware subclass keeps it - by the time this
+     * fires only the routing.yml routes exist anyway, since core loads before
+     * the plugins that register their own.
+     *
+     * @param sfEvent $event
+     */
+    public function loadSafeMetadataRoutes($event)
+    {
+        // Never take the site down over this. Without the class the base
+        // routes stay exactly as they are.
+        if (!class_exists('AhgSafeMetadataRoute')) {
+            return;
+        }
+
+        $routing = $event->getSubject();
+
+        if (!method_exists($routing, 'getRoutes') || !method_exists($routing, 'connect')) {
+            return;
+        }
+
+        foreach ($routing->getRoutes() as $name => $route) {
+            if (!$route instanceof QubitMetadataRoute || $route instanceof AhgMetadataRoute) {
+                continue;
+            }
+
+            if ($route instanceof AhgSafeMetadataRoute) {
+                continue;
+            }
+
+            $routing->connect($name, new AhgSafeMetadataRoute(
+                $route->getPattern(),
+                $route->getDefaults(),
+                $route->getRequirements(),
+                $route->getOptions()
+            ));
+        }
     }
 
     /**
