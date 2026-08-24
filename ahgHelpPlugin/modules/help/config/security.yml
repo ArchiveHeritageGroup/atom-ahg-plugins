@@ -1,0 +1,63 @@
+# help module access.
+#
+# A missing modules/<name>/config/security.yml inherits `default: is_secure: false`
+# from apps/qubit/config/security.yml - it FAILS OPEN. This plugin shipped without
+# one, so every action here was public by accident rather than by decision.
+#
+# The help centre IS meant to be public: /help renders anonymously on both
+# psis.theahg.co.za and heratio.theahg.co.za today, and securing it wholesale would
+# take down two live public help sites. So the read surface stays open DELIBERATELY,
+# written down here rather than inherited.
+#
+# Double-bracket credentials are an OR. `all:` is the fallback, secured, so any
+# action added later is private until someone decides otherwise.
+
+# --- public help centre: unchanged behaviour, now explicit -------------------
+index:
+  is_secure: false
+
+article:
+  is_secure: false
+
+category:
+  is_secure: false
+
+search:
+  is_secure: false
+
+apiSearch:
+  is_secure: false
+
+apiSearchIndex:
+  is_secure: false
+
+apiSuggest:
+  is_secure: false
+
+apiContextMap:
+  is_secure: false
+
+# --- not public -------------------------------------------------------------
+
+# Drives HelpChatbotService, which calls a language model. Left anonymous this is
+# an unmetered LLM endpoint open to the internet - a cost and abuse vector rather
+# than a data-disclosure one. Someone who wants a public help chatbot should turn
+# this back on as a decision, having priced it.
+apiChat:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]
+
+# The system map describes the shape of the installation - modules, routes and how
+# they connect. The HTML view is already refused to anonymous users; this makes the
+# JSON behind it agree with that rather than depending on it returning empty.
+systemMap:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+apiSystemMap:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+all:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]

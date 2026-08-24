@@ -77,6 +77,15 @@ class ahgHelpPluginConfiguration extends sfPluginConfiguration
         $response->addStylesheet('/plugins/ahgHelpPlugin/css/help.css', 'last');
         $response->addJavascript('/plugins/ahgHelpPlugin/js/help-search.js', 'last');
         $response->addJavascript('/plugins/ahgHelpPlugin/js/help-context.js', 'last');
-        $response->addJavascript('/plugins/ahgHelpPlugin/js/help-chatbot.js', 'last');
+
+        // The chatbot ships only where there is a model to answer it. Injecting it
+        // unconditionally put a chat widget on every page of every instance,
+        // including ones with no LLM at all, where it could only ever fall back to
+        // a keyword search wearing a chatbot's interface.
+        require_once __DIR__ . '/../lib/Services/HelpChatbotService.php';
+
+        if (\AhgHelp\Services\HelpChatbotService::isAiAvailable()) {
+            $response->addJavascript('/plugins/ahgHelpPlugin/js/help-chatbot.js', 'last');
+        }
     }
 }

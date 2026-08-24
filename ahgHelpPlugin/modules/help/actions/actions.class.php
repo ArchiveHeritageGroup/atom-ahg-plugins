@@ -304,6 +304,22 @@ class helpActions extends AhgController
         $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgHelpPlugin';
         require_once $pluginDir . '/lib/Services/HelpChatbotService.php';
 
+        // Refuse plainly when there is no model behind this. Previously the
+        // endpoint answered regardless, falling back to a keyword search, so an
+        // instance with no LLM still exposed a chat API that appeared to work -
+        // and it was reachable anonymously, which made it an open, unmetered
+        // endpoint into whatever the fallback did.
+        if (!\AhgHelp\Services\HelpChatbotService::isAiAvailable()) {
+            $this->getResponse()->setStatusCode(501);
+            $this->getResponse()->setContentType('application/json');
+            $this->getResponse()->setContent(json_encode([
+                'error' => 'Help chat is not available on this instance: no language model is configured.',
+                'ai_available' => false,
+            ]));
+
+            return sfView::NONE;
+        }
+
         // Parse JSON body or form params
         $message = '';
         $mode = 'search';

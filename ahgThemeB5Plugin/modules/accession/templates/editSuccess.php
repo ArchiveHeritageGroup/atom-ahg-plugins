@@ -169,6 +169,13 @@
                 );
             ?>
             <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+            <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+              /* TomSelect's default caps the results list at 200px, about four
+                 rows. Descriptions have long titles, so show a fuller list before
+                 it starts scrolling. A <style> ELEMENT, not a style attribute -
+                 the nonce covers this, and would not cover an attribute. */
+              .ts-dropdown .ts-dropdown-content { max-height: 360px; }
+            </style>
             <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
             <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgThemeB5Plugin/web/js/io-tom-select.js?v=1"></script>
           </div>

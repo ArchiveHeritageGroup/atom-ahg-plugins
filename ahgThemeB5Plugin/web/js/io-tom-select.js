@@ -66,6 +66,12 @@
       preload: false,
       create: false,
       persist: false,
+      // Render the results on <body> rather than inside the control. The field
+      // sits in a Bootstrap accordion, and `.accordion-item` carries
+      // overflow:hidden - measured at 168px tall - which clipped the absolutely
+      // positioned dropdown so only one result was ever visible. Same clipping
+      // problem the donor picker hit inside a scrollable modal.
+      dropdownParent: 'body',
       placeholder: el.getAttribute('data-placeholder') || 'Search archival descriptions',
       load: function (query, callback) {
         if (!query.length) {

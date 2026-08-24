@@ -229,32 +229,34 @@ class HelpChatbotService
     /**
      * Check if AI mode is available (ahgAIPlugin installed + LLM configured).
      */
+    /**
+     * Is there actually a language model behind the chat?
+     *
+     * The help chat must not present itself as a chatbot on an instance with no
+     * LLM. Falling back to a keyword search under a chat interface is worse than
+     * having no chat: it looks broken, or worse, looks like it understood.
+     *
+     * Enablement is read from the LOADED plugin list, not from `atom_plugin`.
+     * Stock AtoM instances enable plugins through the serialized settings row and
+     * leave `atom_plugin` inert, so querying that table reports "no AI" on exactly
+     * the instances most likely to be running a stock configuration.
+     */
     public static function isAiAvailable(): bool
     {
         try {
-            $aiPluginDir = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin';
-            if (!is_dir($aiPluginDir)) {
+            $plugins = \sfProjectConfiguration::getActive()->getPlugins();
+
+            if (!in_array('ahgAIPlugin', $plugins, true)) {
                 return false;
             }
 
-            // Check if plugin is enabled
-            $enabled = DB::table('atom_plugin')
-                ->where('name', 'ahgAIPlugin')
-                ->where('is_enabled', 1)
-                ->exists();
-
-            if (!$enabled) {
+            // Guarded: an instance can have the plugin without ever installing its
+            // schema, and a missing table is "no LLM", not an error.
+            if (!\AhgCore\Core\AhgDb::hasOptionalTable('ahg_llm_config')) {
                 return false;
             }
 
-            // Check if any LLM config exists
-            try {
-                $hasConfig = DB::table('ahg_llm_config')->where('is_active', 1)->exists();
-
-                return $hasConfig;
-            } catch (\Exception $e) {
-                return false;
-            }
+            return DB::table('ahg_llm_config')->where('is_active', 1)->exists();
         } catch (\Exception $e) {
             return false;
         }
