@@ -32,11 +32,11 @@
     <div class="accordion mb-3">
       <div class="accordion-item">
         <h2 class="accordion-header" id="basic-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#basic-collapse" aria-expanded="false" aria-controls="basic-collapse">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#basic-collapse" aria-expanded="true" aria-controls="basic-collapse">
             <?php echo __('Basic info'); ?>
           </button>
         </h2>
-        <div id="basic-collapse" class="accordion-collapse collapse" aria-labelledby="basic-heading">
+        <div id="basic-collapse" class="accordion-collapse collapse show" aria-labelledby="basic-heading">
           <div class="accordion-body">
             <?php echo render_field($form->identifier
                 ->help(__('Accession number should be a combination of values recorded in the field and should be a unique accession number for the repository'))
@@ -67,11 +67,11 @@
       </div>
       <div class="accordion-item">
         <h2 class="accordion-header" id="donor-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#donor-collapse" aria-expanded="false" aria-controls="donor-collapse">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#donor-collapse" aria-expanded="true" aria-controls="donor-collapse">
             <?php echo __('Donor/Transferring body area'); ?>
           </button>
         </h2>
-        <div id="donor-collapse" class="accordion-collapse collapse" aria-labelledby="donor-heading">
+        <div id="donor-collapse" class="accordion-collapse collapse show" aria-labelledby="donor-heading">
           <div class="accordion-body">
             <?php echo get_partial('relatedDonor', $sf_data->getRaw('relatedDonorComponent')->getVarHolder()->getAll()); ?>
           </div>
@@ -79,11 +79,11 @@
       </div>
       <div class="accordion-item">
         <h2 class="accordion-header" id="admin-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#admin-collapse" aria-expanded="false" aria-controls="admin-collapse">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#admin-collapse" aria-expanded="true" aria-controls="admin-collapse">
             <?php echo __('Administrative area'); ?>
           </button>
         </h2>
-        <div id="admin-collapse" class="accordion-collapse collapse" aria-labelledby="admin-heading">
+        <div id="admin-collapse" class="accordion-collapse collapse show" aria-labelledby="admin-heading">
           <div class="accordion-body">
             <?php echo render_field($form->acquisitionType
                 ->help(__('Term describing the type of accession transaction and referring to the way in which the accession was acquired.'))
@@ -152,11 +152,11 @@
       </div>
       <div class="accordion-item">
         <h2 class="accordion-header" id="io-heading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#io-collapse" aria-expanded="false" aria-controls="io-collapse">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#io-collapse" aria-expanded="true" aria-controls="io-collapse">
             <?php echo __('%1% area', ['%1%' => sfConfig::get('app_ui_label_informationobject')]); ?>
           </button>
         </h2>
-        <div id="io-collapse" class="accordion-collapse collapse" aria-labelledby="io-heading">
+        <div id="io-collapse" class="accordion-collapse collapse show" aria-labelledby="io-heading">
           <?php // Searchable lookup (TomSelect remote) mirroring the donor field -
                 // the legacy form-autocomplete never enhanced in the BS5 theme, so
                 // this was free text. The endpoint returns the same HTML the JS parses. ?>
@@ -170,7 +170,7 @@
             ?>
             <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
             <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
-            <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/atom-framework/public/js/io-tom-select.js?v=1"></script>
+            <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgThemeB5Plugin/web/js/io-tom-select.js?v=1"></script>
           </div>
         </div>
       </div>
