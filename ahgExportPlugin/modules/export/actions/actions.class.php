@@ -15,12 +15,6 @@ class exportActions extends AhgController
         if (!$this->getUser()->isAdministrator() && !$this->getUser()->hasCredential('editor')) {
             \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
-
-        // Load AhgDb for database access
-        $ahgDbFile = $this->config('sf_plugins_dir') . '/ahgCorePlugin/lib/Core/AhgDb.php';
-        if (file_exists($ahgDbFile)) {
-            require_once $ahgDbFile;
-        }
     }
 
     /**
