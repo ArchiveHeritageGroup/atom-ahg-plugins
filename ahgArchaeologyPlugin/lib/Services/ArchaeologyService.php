@@ -731,7 +731,12 @@ class ArchaeologyService
         $now = date('Y-m-d H:i:s');
         $userId = $this->userId();
 
-        DB::table('archaeology_context_relationship')->insertOrIgnore([
+        // uk_arch_ctxrel makes this idempotent, so re-running an import cannot
+        // duplicate the stratigraphy. The affected-row count is kept because
+        // "already recorded" and "newly recorded" are different things to report:
+        // telling an operator 22 relationships were added when nothing changed is
+        // a lie about what the run did.
+        $inserted = DB::table('archaeology_context_relationship')->insertOrIgnore([
             'context_id' => $contextId,
             'related_context_id' => $relatedId,
             'relationship_type' => $type,
@@ -751,7 +756,7 @@ class ArchaeologyService
             'created_by' => $userId,
         ]);
 
-        return ['ok' => true];
+        return ['ok' => true, 'existed' => 0 === (int) $inserted];
     }
 
     /** Remove a relationship and its mirror. */
@@ -991,6 +996,303 @@ class ArchaeologyService
             // reader knows the diagram is a reduction of what was written down.
             'redundant_count' => count($edges) - count($drawnEdges),
         ];
+    }
+
+    /**
+     * Relationship words other tools use, mapped onto ours.
+     *
+     * An import that only accepted our own nine names would reject every file the
+     * rest of the field produces. Everything here is a synonym with the SAME
+     * meaning - nothing is coerced into a near-enough type.
+     */
+    public const RELATIONSHIP_SYNONYMS = [
+        'later' => 'above',
+        'later than' => 'above',
+        'over' => 'above',
+        'overlies' => 'above',
+        'earlier' => 'below',
+        'earlier than' => 'below',
+        'under' => 'below',
+        'underlies' => 'below',
+        'cut by' => 'cut_by',
+        'filled by' => 'filled_by',
+        'same as' => 'same_as',
+        'equal' => 'same_as',
+        'equal to' => 'same_as',
+        'equals' => 'same_as',
+        'correlates with' => 'same_as',
+        'bonds with' => 'bonds_with',
+        'butts' => 'abuts',
+        'abuts against' => 'abuts',
+    ];
+
+    /**
+     * Words that name a real archaeological idea we do not model.
+     *
+     * `contemporary_with` is the important one: ArchEd and Stratify use it for
+     * units of the same period that are not physically joined. Our closest types
+     * are bonds_with and abuts, and both assert PHYSICAL contact - so mapping it
+     * would invent an observation the excavator never made. Better to say so.
+     */
+    public const RELATIONSHIP_UNSUPPORTED = [
+        'contemporary' => 'contemporary_with has no equivalent here - bonds_with and abuts both assert physical contact, which "contemporary" does not claim',
+        'contemporary with' => 'contemporary_with has no equivalent here - bonds_with and abuts both assert physical contact, which "contemporary" does not claim',
+    ];
+
+    /**
+     * Import stratigraphic relationships between contexts that already exist.
+     *
+     * Accepts rows of source / type / target, which is the shape both PHASER's
+     * four-column CSV and an LST file reduce to. Contexts are matched by number
+     * within the site and are NEVER created here: a relationship naming a context
+     * that does not exist is a data problem the importer should report, not paper
+     * over by inventing a context nobody recorded.
+     *
+     * Every row goes through addRelationship(), so reciprocity, the self-reference
+     * check and the cycle guard apply exactly as they do to typed entry. An import
+     * cannot introduce a contradiction the form would have refused.
+     *
+     * Wrapped in a transaction rolled back unless $commit, so a preview reports
+     * real counts and real warnings from a real run without writing anything.
+     *
+     * @param array<int, array{source: string, type: string, target: string, line?: int}> $rows
+     *
+     * @return array{added:int, duplicate:int, skipped:int, warnings:array<int,string>, committed:bool}
+     */
+    public function importRelationshipsCsv(int $siteId, array $rows, bool $commit): array
+    {
+        $result = ['added' => 0, 'duplicate' => 0, 'skipped' => 0, 'warnings' => [], 'committed' => false];
+
+        if (!$this->installed()) {
+            $result['warnings'][] = 'The archaeology tables are not installed.';
+
+            return $result;
+        }
+
+        $idByNumber = [];
+
+        foreach ($this->contextsForSite($siteId) as $context) {
+            $idByNumber[(string) $context->context_number] = (int) $context->id;
+        }
+
+        if (!$idByNumber) {
+            $result['warnings'][] = 'This site has no contexts, so there is nothing to relate. Import the contexts first.';
+
+            return $result;
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($rows as $i => $row) {
+                $line = (int) ($row['line'] ?? $i + 2);
+                $source = trim((string) ($row['source'] ?? ''));
+                $target = trim((string) ($row['target'] ?? ''));
+                $raw = strtolower(trim((string) ($row['type'] ?? '')));
+
+                if ('' === $source || '' === $target || '' === $raw) {
+                    ++$result['skipped'];
+                    $result['warnings'][] = "Line {$line}: source, relationship and target are all required.";
+
+                    continue;
+                }
+
+                // Normalise separators before matching, so "cut by", "cut_by" and
+                // "Cut-By" are one thing.
+                $key = str_replace(['_', '-'], ' ', $raw);
+                $key = preg_replace('/\s+/', ' ', $key);
+
+                if (isset(self::RELATIONSHIP_UNSUPPORTED[$key])) {
+                    ++$result['skipped'];
+                    $result['warnings'][] = "Line {$line}: ".self::RELATIONSHIP_UNSUPPORTED[$key].'.';
+
+                    continue;
+                }
+
+                $type = self::RELATIONSHIP_SYNONYMS[$key] ?? str_replace(' ', '_', $key);
+
+                if (!isset(self::REL_TYPES[$type])) {
+                    ++$result['skipped'];
+                    $result['warnings'][] = "Line {$line}: unknown relationship '{$raw}'.";
+
+                    continue;
+                }
+
+                if (!isset($idByNumber[$source]) || !isset($idByNumber[$target])) {
+                    $missing = !isset($idByNumber[$source]) ? $source : $target;
+                    ++$result['skipped'];
+                    $result['warnings'][] = "Line {$line}: context '{$missing}' is not recorded on this site.";
+
+                    continue;
+                }
+
+                $outcome = $this->addRelationship($idByNumber[$source], $idByNumber[$target], $type);
+
+                if (!empty($outcome['ok'])) {
+                    if (!empty($outcome['existed'])) {
+                        ++$result['duplicate'];
+                    } else {
+                        ++$result['added'];
+                    }
+
+                    continue;
+                }
+
+                // An already-recorded relationship is not a failure - re-importing
+                // the same file should be safe and say so.
+                if (false !== stripos((string) ($outcome['error'] ?? ''), 'already')) {
+                    ++$result['duplicate'];
+
+                    continue;
+                }
+
+                ++$result['skipped'];
+                $result['warnings'][] = "Line {$line}: {$source} {$raw} {$target} - ".($outcome['error'] ?? 'refused');
+            }
+
+            if ($commit) {
+                DB::commit();
+                $result['committed'] = true;
+            } else {
+                DB::rollBack();
+            }
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $result['warnings'][] = 'Import failed: '.$e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Parse PHASER's four-column CSV into import rows.
+     *
+     * siteCode, sourceID, stratRelationship, targetID. siteCode is read but not
+     * used to choose the site - the operator picked that already, and silently
+     * importing into whatever a file names would be a good way to write another
+     * dig's stratigraphy into this one.
+     *
+     * @return array{rows: array, error: ?string, other_sites: array<string,int>}
+     */
+    public function parsePhaserCsv(string $path, ?string $expectedSiteCode = null): array
+    {
+        $parsed = $this->parseCsv($path, 'sourceid');
+
+        if (!empty($parsed['error'])) {
+            return ['rows' => [], 'error' => $parsed['error'], 'other_sites' => []];
+        }
+
+        $rows = [];
+        $otherSites = [];
+
+        foreach ($parsed['rows'] as $i => $row) {
+            $lower = [];
+
+            foreach ($row as $k => $v) {
+                $lower[strtolower(trim((string) $k))] = $v;
+            }
+
+            $code = trim((string) ($lower['sitecode'] ?? ''));
+
+            if (null !== $expectedSiteCode && '' !== $code && 0 !== strcasecmp($code, $expectedSiteCode)) {
+                $otherSites[$code] = ($otherSites[$code] ?? 0) + 1;
+
+                continue;
+            }
+
+            $rows[] = [
+                'source' => (string) ($lower['sourceid'] ?? ''),
+                'type' => (string) ($lower['stratrelationship'] ?? ''),
+                'target' => (string) ($lower['targetid'] ?? ''),
+                'line' => $i + 2,
+            ];
+        }
+
+        return ['rows' => $rows, 'error' => null, 'other_sites' => $otherSites];
+    }
+
+    /**
+     * Parse an LST file - the format BASP Harris, Stratify and ArchEd write.
+     *
+     * Structure: the first three lines are ignored, the first unit name is on line
+     * four, and every unit name is followed by exactly FOUR relationship lines, in
+     * this order, each a comma-separated list that may be empty:
+     *
+     *   above, contemporary_with, equal_to, below
+     *
+     * All four lines are always present, so the parser advances in blocks of five
+     * rather than trying to guess which line it is looking at.
+     *
+     * `contemporary_with` is collected and reported rather than imported - see
+     * RELATIONSHIP_UNSUPPORTED for why mapping it would be an invention.
+     *
+     * @return array{rows: array, error: ?string, contemporary: int, units: int}
+     */
+    public function parseLst(string $path): array
+    {
+        if (!is_readable($path)) {
+            return ['rows' => [], 'error' => 'The uploaded file could not be read.', 'contemporary' => 0, 'units' => 0];
+        }
+
+        $raw = file_get_contents($path);
+
+        if (false === $raw) {
+            return ['rows' => [], 'error' => 'The uploaded file could not be read.', 'contemporary' => 0, 'units' => 0];
+        }
+
+        // LST files are ASCII or ANSI and often carry CRLF.
+        $lines = preg_split('/\r\n|\r|\n/', $raw);
+
+        // The first three lines are a header the format tells us to ignore.
+        $lines = array_slice($lines, 3);
+
+        $rows = [];
+        $contemporary = 0;
+        $units = 0;
+        $count = count($lines);
+
+        for ($i = 0; $i < $count; $i += 5) {
+            $name = trim((string) ($lines[$i] ?? ''));
+
+            if ('' === $name) {
+                continue;   // trailing blank lines at end of file
+            }
+
+            ++$units;
+
+            $above = $this->lstList($lines[$i + 1] ?? '');
+            $contemporaryWith = $this->lstList($lines[$i + 2] ?? '');
+            $equalTo = $this->lstList($lines[$i + 3] ?? '');
+            $below = $this->lstList($lines[$i + 4] ?? '');
+
+            $contemporary += count($contemporaryWith);
+
+            foreach ($above as $other) {
+                $rows[] = ['source' => $name, 'type' => 'above', 'target' => $other, 'line' => $i + 5];
+            }
+
+            foreach ($below as $other) {
+                $rows[] = ['source' => $name, 'type' => 'below', 'target' => $other, 'line' => $i + 8];
+            }
+
+            foreach ($equalTo as $other) {
+                $rows[] = ['source' => $name, 'type' => 'same_as', 'target' => $other, 'line' => $i + 7];
+            }
+        }
+
+        return ['rows' => $rows, 'error' => null, 'contemporary' => $contemporary, 'units' => $units];
+    }
+
+    /** One LST relationship line into a list of unit names. */
+    private function lstList(string $line): array
+    {
+        $line = trim($line);
+
+        if ('' === $line) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('trim', explode(',', $line)), static fn ($v) => '' !== $v));
     }
 
     /**
@@ -1743,7 +2045,15 @@ class ArchaeologyService
      *
      * @return array{rows: array<int, array<string, string>>, error: ?string}
      */
-    public function parseCsv(string $path): array
+    /**
+     * Read a headered CSV into rows keyed by lower-cased column name.
+     *
+     * $required names the column the file must have. It defaults to
+     * context_number because that is what the context importer needs, but the
+     * relationship importers read different files - the check exists to give a
+     * clear error on the wrong file, not to tie this reader to one format.
+     */
+    public function parseCsv(string $path, string $required = 'context_number'): array
     {
         if (!is_readable($path)) {
             return ['rows' => [], 'error' => 'The uploaded file could not be read.'];
@@ -1766,10 +2076,10 @@ class ArchaeologyService
         $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $header[0]);
         $header = array_map(static fn ($h) => strtolower(trim((string) $h)), $header);
 
-        if (!in_array('context_number', $header, true)) {
+        if ('' !== $required && !in_array($required, $header, true)) {
             fclose($handle);
 
-            return ['rows' => [], 'error' => 'The file has no context_number column.'];
+            return ['rows' => [], 'error' => "The file has no {$required} column."];
         }
 
         $rows = [];

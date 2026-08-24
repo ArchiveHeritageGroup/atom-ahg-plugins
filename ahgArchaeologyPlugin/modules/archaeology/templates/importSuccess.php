@@ -22,10 +22,44 @@
         <?php echo $summary['committed'] ? 'Imported.' : 'Preview only - nothing was written.'; ?>
       </strong>
       <?php echo (int) $rowCount; ?> row<?php echo 1 === (int) $rowCount ? '' : 's'; ?> read.
-      <?php echo (int) $summary['created']; ?> context<?php echo 1 === (int) $summary['created'] ? '' : 's'; ?> created,
-      <?php echo (int) $summary['updated']; ?> updated,
-      <?php echo (int) $summary['relationships']; ?> relationship<?php echo 1 === (int) $summary['relationships'] ? '' : 's'; ?> recorded.
+      <?php // isset(), not array_key_exists(): $summary arrives wrapped in Symfony's
+            // output escaper, which is an ArrayAccess object rather than an array, and
+            // array_key_exists() on an object is a TypeError that silently emptied this
+            // whole block. Same trap as the map page and the DMS row.
+            if (isset($summary['added'])) { ?>
+        <?php // Relationship import. "Already recorded" is reported separately
+              // from "added" because re-running a file is a normal thing to do,
+              // and it must be possible to see that nothing changed. ?>
+        <?php echo (int) $summary['added']; ?> relationship<?php echo 1 === (int) $summary['added'] ? '' : 's'; ?> added,
+        <?php echo (int) $summary['duplicate']; ?> already recorded,
+        <?php echo (int) $summary['skipped']; ?> skipped.
+      <?php } else { ?>
+        <?php echo (int) $summary['created']; ?> context<?php echo 1 === (int) $summary['created'] ? '' : 's'; ?> created,
+        <?php echo (int) $summary['updated']; ?> updated,
+        <?php echo (int) $summary['relationships']; ?> relationship<?php echo 1 === (int) $summary['relationships'] ? '' : 's'; ?> recorded.
+      <?php } ?>
     </div>
+
+    <?php // count(), not !empty(): the output escaper wraps even an empty array in
+          // an object, and an object is always truthy - so !empty() rendered this
+          // warning with nothing in it. The decorator is Countable.
+          if (count($otherSites) > 0) { ?>
+      <div class="alert alert-warning">
+        Rows for other site codes were ignored, because the site is chosen here rather
+        than taken from the file:
+        <?php $bits = []; foreach ($otherSites as $code => $n) { $bits[] = esc_specialchars($code).' ('.(int) $n.')'; } echo implode(', ', $bits); ?>.
+      </div>
+    <?php } ?>
+
+    <?php if (!empty($lstContemporary)) { ?>
+      <div class="alert alert-warning">
+        <?php echo (int) $lstUnits; ?> unit<?php echo 1 === (int) $lstUnits ? '' : 's'; ?> read.
+        <?php echo (int) $lstContemporary; ?> <code>contemporary_with</code> relationship<?php echo 1 === (int) $lstContemporary ? ' was' : 's were'; ?>
+        not imported: it means units of the same period that are not physically joined, and
+        our nearest types (<code>bonds_with</code>, <code>abuts</code>) both assert physical
+        contact. Mapping it would record an observation nobody made.
+      </div>
+    <?php } ?>
 
     <?php if ($summary['warnings']) { ?>
       <details class="mb-3" open>
@@ -47,8 +81,22 @@
     <?php // No CSRF field - ahgCorePlugin injects it. See contextEditSuccess.php. ?>
 
     <div class="mb-3">
-      <label class="form-label" for="csv">Spreadsheet (CSV)</label>
-      <input type="file" class="form-control" id="csv" name="csv" accept=".csv,text/csv" required>
+      <label class="form-label" for="kind">What is in the file?</label>
+      <select class="form-select" id="kind" name="kind">
+        <option value="contexts">Contexts (our CSV)</option>
+        <option value="relationships">Relationships (Phaser CSV: siteCode, sourceID, stratRelationship, targetID)</option>
+        <option value="lst">Relationships (LST: BASP Harris, Stratify, ArchEd)</option>
+      </select>
+      <div class="form-text">
+        The relationship formats bring stratigraphy from a dig archive that already
+        exists elsewhere. Contexts must be imported first - a relationship naming a
+        context this site does not have is reported, never invented.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="csv">File</label>
+      <input type="file" class="form-control" id="csv" name="csv" accept=".csv,text/csv,.lst,text/plain" required>
       <div class="form-text">
         One row per context. <code>context_number</code> is the only required column.
         Relationship columns (<code>above</code>, <code>below</code>, <code>cuts</code>,

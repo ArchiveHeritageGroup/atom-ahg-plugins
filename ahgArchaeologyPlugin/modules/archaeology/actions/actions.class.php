@@ -217,12 +217,54 @@ class archaeologyActions extends AhgController
 
         $this->summary = null;
         $this->error = null;
+        $this->kind = 'contexts';
+        $this->otherSites = [];
+        $this->lstUnits = 0;
+        $this->lstContemporary = 0;
 
         if ($request->isMethod('post')) {
             $file = $request->getFiles('csv');
 
             if (empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
                 $this->error = 'No file was uploaded.';
+
+                return;
+            }
+
+            // Three shapes of file land here. Contexts is the original; the other
+            // two bring relationships from tools that already hold a dig's
+            // stratigraphy, which we could previously only export, never ingest.
+            $kind = (string) $request->getParameter('kind', 'contexts');
+            $commit = (bool) $request->getParameter('commit');
+            $this->kind = $kind;
+
+            if ('relationships' === $kind || 'lst' === $kind) {
+                if ('lst' === $kind) {
+                    $parsed = $this->service->parseLst($file['tmp_name']);
+                    $this->lstUnits = $parsed['units'];
+                    $this->lstContemporary = $parsed['contemporary'];
+                } else {
+                    $parsed = $this->service->parsePhaserCsv(
+                        $file['tmp_name'],
+                        (string) $this->site->site_number
+                    );
+                    $this->otherSites = $parsed['other_sites'];
+                }
+
+                if ($parsed['error']) {
+                    $this->error = $parsed['error'];
+
+                    return;
+                }
+
+                if (!$parsed['rows']) {
+                    $this->error = 'No relationships were found in the file.';
+
+                    return;
+                }
+
+                $this->summary = $this->service->importRelationshipsCsv($siteId, $parsed['rows'], $commit);
+                $this->rowCount = count($parsed['rows']);
 
                 return;
             }
@@ -244,7 +286,7 @@ class archaeologyActions extends AhgController
             $this->summary = $this->service->importContextsCsv(
                 $siteId,
                 $parsed['rows'],
-                (bool) $request->getParameter('commit')
+                $commit
             );
             $this->rowCount = count($parsed['rows']);
         }
