@@ -12,6 +12,31 @@
     <a class="btn btn-outline-secondary btn-sm" href="<?php echo url_for('@archaeology_plan?siteId='.$site->id); ?>">Dig plan and map</a>
     <a class="btn btn-outline-secondary btn-sm" href="<?php echo url_for('@archaeology_import?siteId='.$site->id); ?>">Import CSV</a>
     <a class="btn btn-primary btn-sm" href="<?php echo url_for('@archaeology_context_add').'?siteId='.$site->id; ?>">Add context</a>
+
+    <?php // Export is only meaningful once there is a sequence to export. ?>
+    <?php if ($contexts) { ?>
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                id="export-menu" data-bs-toggle="dropdown" aria-expanded="false">Export</button>
+        <ul class="dropdown-menu" aria-labelledby="export-menu">
+          <li>
+            <a class="dropdown-item" href="<?php echo url_for('@archaeology_export?siteId='.$site->id.'&format=datapackage'); ?>">
+              Data package (zip)
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="<?php echo url_for('@archaeology_export?siteId='.$site->id.'&format=dot'); ?>">
+              GraphViz DOT
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="<?php echo url_for('@archaeology_export?siteId='.$site->id.'&format=phaser'); ?>">
+              Phaser CSV
+            </a>
+          </li>
+        </ul>
+      </div>
+    <?php } ?>
   </div>
 
   <?php if (!$contexts) { ?>

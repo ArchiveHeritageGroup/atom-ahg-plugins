@@ -281,6 +281,79 @@ class archaeologyActions extends AhgController
      * where it is not, so an instance without the library still produces
      * something printable instead of an error.
      */
+    /**
+     * Export a site's stratigraphy.
+     *
+     * Three formats, because they answer different questions. The data package is
+     * the interchange an archaeologist can hand to another tool; DOT is for anyone
+     * who wants to draw it themselves; the Phaser CSV is for the MATRIX project's
+     * analysis tool.
+     */
+    public function executeExport($request)
+    {
+        $this->guardInstalled();
+
+        $siteId = (int) $request->getParameter('siteId');
+        $site = $this->service->site($siteId);
+
+        if (!$site) {
+            $this->forward404('No such site.');
+
+            return sfView::NONE;
+        }
+
+        $format = (string) $request->getParameter('format', 'datapackage');
+        $stem = preg_replace('/[^A-Za-z0-9_-]/', '', (string) $site->site_number) ?: 'site';
+        $response = $this->getResponse();
+
+        if ('dot' === $format) {
+            return $this->sendFile($response, $this->service->exportDot($siteId), 'text/vnd.graphviz', $stem.'.dot');
+        }
+
+        if ('phaser' === $format) {
+            return $this->sendFile($response, $this->service->exportPhaserCsv($siteId), 'text/csv', $stem.'-phaser.csv');
+        }
+
+        $files = $this->service->exportDataPackage($siteId);
+
+        // A data package is several files, so it has to travel as one. ZipArchive
+        // needs a real path, hence the temp file - removed on the way out whatever
+        // happens, so a failed export does not leave the stratigraphy in /tmp.
+        if (!class_exists('\ZipArchive')) {
+            $this->getUser()->setFlash('error', 'The zip extension is not available, so the data package cannot be assembled.');
+            $this->redirect('@archaeology_contexts?siteId='.$siteId);
+
+            return sfView::NONE;
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'hmdp');
+
+        try {
+            $zip = new \ZipArchive();
+            $zip->open($tmp, \ZipArchive::OVERWRITE);
+
+            foreach ($files as $name => $contents) {
+                $zip->addFromString($name, $contents);
+            }
+
+            $zip->close();
+
+            return $this->sendFile($response, (string) file_get_contents($tmp), 'application/zip', $stem.'-datapackage.zip');
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    private function sendFile($response, string $body, string $type, string $filename)
+    {
+        $response->setContentType($type);
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $response->setContent($body);
+        $response->send();
+
+        return sfView::NONE;
+    }
+
     public function executeContextPdf($request)
     {
         $this->guardInstalled();

@@ -76,6 +76,12 @@ contextPdf:
   is_secure:   true
   credentials: [[ contributor, editor, administrator ]]
 
+# Export carries the whole sequence, and for a gated sector the coordinates with
+# it, so it is no more public than the pages it exports.
+export:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]
+
 relationshipStore:
   is_secure:   true
   credentials: [[ editor, administrator ]]

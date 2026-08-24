@@ -109,6 +109,7 @@ class ahgArchaeologyPluginConfiguration extends sfPluginConfiguration
         // Contexts, which always belong to a site.
         $router->get('archaeology_contexts', '/archaeology/site/:siteId/contexts', 'contexts', ['siteId' => '\d+']);
         $router->get('archaeology_plan', '/archaeology/site/:siteId/plan', 'plan', ['siteId' => '\d+']);
+        $router->get('archaeology_export', '/archaeology/site/:siteId/export/:format', 'export', ['siteId' => '\d+', 'format' => 'datapackage|dot|phaser']);
 
         // CSV import of contexts and their relationships.
         $router->any('archaeology_import', '/archaeology/site/:siteId/import', 'import', ['siteId' => '\d+']);

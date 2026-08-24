@@ -994,6 +994,349 @@ class ArchaeologyService
     }
 
     /**
+     * Context types that are INTERFACES in Harris's sense, not deposits.
+     *
+     * Harris divides stratigraphic units into deposits and interfaces, and a cut
+     * is an interface - it is the surface left by an act of removal, not a body of
+     * material. Everything else we record (fill, layer, masonry, skeleton,
+     * structure, surface) is a deposit for this purpose.
+     */
+    public const INTERFACE_TYPES = ['Cut', 'Interface'];
+
+    /**
+     * Export a site as a Harris Matrix Data Package.
+     *
+     * Follows the table schema Thomas Dye defined for the `hm` package, which the
+     * Harris Matrix Data Package specification builds on:
+     *
+     *   contexts      label, unit-type, position, period, phase, url
+     *   observations  younger, older, url
+     *
+     * `observations` carries NO relation-type column - it records superposition
+     * and nothing else, so our nine relation types reduce to the later-than pairs
+     * and the rest is not expressible. That is the format's design, not a loss on
+     * our side: cuts and fills are both statements that one context is younger.
+     *
+     * `position` is left empty. hm uses it to mark surface and basal contexts, and
+     * while we could infer it from the graph's top and bottom tiers, "surface" is a
+     * claim about the ground, not about a diagram. Inferring it and writing it as
+     * recorded data would put a guess where an excavator's observation belongs.
+     *
+     * same_as correlations have no home in those two tables, so rather than drop
+     * them they go into a `correlations` resource, named in the descriptor as an
+     * AHG extension so no consumer mistakes it for part of the specification.
+     *
+     * @return array<string, string> filename => contents
+     */
+    public function exportDataPackage(int $siteId): array
+    {
+        $site = $this->site($siteId);
+        $contexts = $this->contextsForSite($siteId);
+        $rels = $this->relationshipsForSite($siteId);
+
+        $byId = [];
+
+        foreach ($contexts as $context) {
+            $byId[(int) $context->id] = $context;
+        }
+
+        // contexts.csv
+        $contextRows = [['label', 'unit-type', 'position', 'period', 'phase', 'url']];
+
+        foreach ($contexts as $context) {
+            $contextRows[] = [
+                (string) $context->context_number,
+                in_array((string) $context->type_name, self::INTERFACE_TYPES, true) ? 'interface' : 'deposit',
+                '',
+                '',
+                (string) ($context->phase_name ?? ''),
+                '',
+            ];
+        }
+
+        // observations.csv - one row per later-than statement, deduplicated.
+        // Reciprocals are stored in both directions, so iterating raw rows would
+        // emit each superposition twice.
+        $observations = [];
+
+        foreach ($rels as $rel) {
+            if (!in_array($rel->relationship_type, self::LATER_THAN, true)) {
+                continue;
+            }
+
+            $younger = $byId[(int) $rel->context_id]->context_number ?? null;
+            $older = $byId[(int) $rel->related_context_id]->context_number ?? null;
+
+            if (null === $younger || null === $older) {
+                continue;
+            }
+
+            $observations[$younger.'|'.$older] = [$younger, $older, ''];
+        }
+
+        $observationRows = array_merge([['younger', 'older', 'url']], array_values($observations));
+
+        // correlations.csv - AHG extension, see the note above.
+        $correlations = [];
+
+        foreach ($rels as $rel) {
+            if ('same_as' !== $rel->relationship_type) {
+                continue;
+            }
+
+            $a = $byId[(int) $rel->context_id]->context_number ?? null;
+            $b = $byId[(int) $rel->related_context_id]->context_number ?? null;
+
+            if (null === $a || null === $b) {
+                continue;
+            }
+
+            // Symmetric, so store one row per pair rather than both directions.
+            $key = strcmp((string) $a, (string) $b) <= 0 ? $a.'|'.$b : $b.'|'.$a;
+            $correlations[$key] = explode('|', $key);
+        }
+
+        $correlationRows = array_merge([['context', 'same-as']], array_values($correlations));
+
+        $files = [
+            'contexts.csv' => $this->toCsv($contextRows),
+            'observations.csv' => $this->toCsv($observationRows),
+        ];
+
+        if (count($correlationRows) > 1) {
+            $files['correlations.csv'] = $this->toCsv($correlationRows);
+        }
+
+        $files['datapackage.json'] = $this->dataPackageDescriptor($site, array_keys($files));
+
+        return $files;
+    }
+
+    /**
+     * Export the sequence as GraphViz DOT.
+     *
+     * The drawn edges, so what comes out is the reduced matrix rather than every
+     * relationship recorded - the same diagram the page shows.
+     */
+    public function exportDot(int $siteId): string
+    {
+        $site = $this->site($siteId);
+        $matrix = $this->harrisMatrix($siteId);
+        $contexts = $this->contextsForSite($siteId);
+
+        $label = [];
+
+        foreach ($contexts as $context) {
+            $label[(int) $context->id] = (string) $context->context_number;
+        }
+
+        $name = preg_replace('/[^A-Za-z0-9_]/', '_', (string) ($site->site_number ?? 'site'));
+        $out = 'digraph '.$name." {\n";
+        $out .= "  rankdir=TB;\n";
+        $out .= "  node [shape=box, fontname=\"Helvetica\"];\n";
+
+        foreach ($contexts as $context) {
+            $isInterface = in_array((string) $context->type_name, self::INTERFACE_TYPES, true);
+            $out .= sprintf(
+                "  \"%s\" [label=\"%s\\n%s\"%s];\n",
+                addslashes((string) $context->context_number),
+                addslashes((string) $context->context_number),
+                addslashes((string) ($context->type_name ?? '')),
+                $isInterface ? ', style=dashed' : ''
+            );
+        }
+
+        foreach (array_keys($matrix['edges']) as $key) {
+            [$from, $to] = explode('|', $key);
+            $out .= sprintf(
+                "  \"%s\" -> \"%s\";\n",
+                addslashes($label[(int) $from] ?? $from),
+                addslashes($label[(int) $to] ?? $to)
+            );
+        }
+
+        return $out."}\n";
+    }
+
+    /**
+     * Export relationships as PHASER's four-column CSV.
+     *
+     * siteCode, sourceID, stratRelationship, targetID - the interchange the MATRIX
+     * project's Phaser tool reads.
+     */
+    public function exportPhaserCsv(int $siteId): string
+    {
+        $site = $this->site($siteId);
+        $contexts = $this->contextsForSite($siteId);
+        $rels = $this->relationshipsForSite($siteId);
+
+        $byId = [];
+
+        foreach ($contexts as $context) {
+            $byId[(int) $context->id] = (string) $context->context_number;
+        }
+
+        $siteCode = (string) ($site->site_number ?? '');
+        $rows = [['siteCode', 'sourceID', 'stratRelationship', 'targetID']];
+        $seen = [];
+
+        foreach ($rels as $rel) {
+            $source = $byId[(int) $rel->context_id] ?? null;
+            $target = $byId[(int) $rel->related_context_id] ?? null;
+
+            if (null === $source || null === $target) {
+                continue;
+            }
+
+            $type = (string) $rel->relationship_type;
+            $direction = self::REL_TYPES[$type]['dir'] ?? 'none';
+
+            // One row per LOGICAL relationship. Reciprocals are stored in both
+            // directions, so emitting every row would hand a consumer 44 statements
+            // where the excavator recorded 22 - and 'A above B' plus 'B below A'
+            // are one observation written twice, not two observations.
+            //
+            // Keep the later-than direction, which is the one that carries the
+            // sequence; its reciprocal says the same thing backwards.
+            if ('earlier' === $direction) {
+                continue;
+            }
+
+            // Symmetric relations (same_as, bonds_with, abuts) have no direction to
+            // prefer, so canonicalise on the pair instead.
+            $key = 'none' === $direction
+                ? $type.'|'.(strcmp($source, $target) <= 0 ? $source.'|'.$target : $target.'|'.$source)
+                : $source.'|'.$type.'|'.$target;
+
+            if (isset($seen[$key])) {
+                continue;
+            }
+
+            $seen[$key] = true;
+            $rows[] = [$siteCode, $source, $type, $target];
+        }
+
+        return $this->toCsv($rows);
+    }
+
+    /** Every relationship row for a site, both directions as stored. */
+    private function relationshipsForSite(int $siteId): array
+    {
+        if (!AhgDb::hasOptionalTable('archaeology_context_relationship')) {
+            return [];
+        }
+
+        $ids = array_map(
+            static fn ($c) => (int) $c->id,
+            $this->contextsForSite($siteId)
+        );
+
+        if (!$ids) {
+            return [];
+        }
+
+        return DB::table('archaeology_context_relationship')
+            ->whereIn('context_id', $ids)
+            ->whereIn('related_context_id', $ids)
+            ->get(['context_id', 'related_context_id', 'relationship_type'])
+            ->all();
+    }
+
+    /** RFC 4180 CSV, written through a stream so quoting is not hand-rolled. */
+    private function toCsv(array $rows): string
+    {
+        $handle = fopen('php://temp', 'r+');
+
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+
+        rewind($handle);
+        $out = stream_get_contents($handle);
+        fclose($handle);
+
+        return $out;
+    }
+
+    /** Frictionless tabular-data-package descriptor for the exported resources. */
+    private function dataPackageDescriptor(?object $site, array $filenames): string
+    {
+        $schemas = [
+            'contexts.csv' => [
+                'name' => 'contexts',
+                'fields' => [
+                    ['name' => 'label', 'type' => 'string', 'description' => 'context identifier (primary key)'],
+                    ['name' => 'unit-type', 'type' => 'string', 'description' => 'interface or deposit'],
+                    ['name' => 'position', 'type' => 'string', 'description' => 'surface, basal or other; left empty - not recorded'],
+                    ['name' => 'period', 'type' => 'string', 'description' => 'period identifier (foreign key)'],
+                    ['name' => 'phase', 'type' => 'string', 'description' => 'phase identifier (foreign key)'],
+                    ['name' => 'url', 'type' => 'string', 'description' => 'node link (svg output only)'],
+                ],
+                'primaryKey' => 'label',
+            ],
+            'observations.csv' => [
+                'name' => 'observations',
+                'fields' => [
+                    ['name' => 'younger', 'type' => 'string', 'description' => 'stratigraphically superior context label'],
+                    ['name' => 'older', 'type' => 'string', 'description' => 'stratigraphically inferior context label'],
+                    ['name' => 'url', 'type' => 'string', 'description' => 'arc link (svg output only)'],
+                ],
+            ],
+            'correlations.csv' => [
+                'name' => 'correlations',
+                'fields' => [
+                    ['name' => 'context', 'type' => 'string'],
+                    ['name' => 'same-as', 'type' => 'string'],
+                ],
+                'description' => 'AHG EXTENSION, not part of the Harris Matrix Data Package specification. '
+                    .'same_as correlations have no home in the contexts or observations tables; they are '
+                    .'emitted here so the information is not lost, and named so no consumer mistakes them '
+                    .'for standard content.',
+            ],
+        ];
+
+        $resources = [];
+
+        foreach ($filenames as $filename) {
+            if (!isset($schemas[$filename])) {
+                continue;
+            }
+
+            $schema = $schemas[$filename];
+            $resource = [
+                'name' => $schema['name'],
+                'path' => $filename,
+                'profile' => 'tabular-data-resource',
+                'format' => 'csv',
+                'mediatype' => 'text/csv',
+                'encoding' => 'utf-8',
+                'schema' => array_filter([
+                    'fields' => $schema['fields'],
+                    'primaryKey' => $schema['primaryKey'] ?? null,
+                ]),
+            ];
+
+            if (isset($schema['description'])) {
+                $resource['description'] = $schema['description'];
+            }
+
+            $resources[] = $resource;
+        }
+
+        return json_encode([
+            'profile' => 'tabular-data-package',
+            'name' => strtolower(preg_replace('/[^a-z0-9-]/i', '-', (string) ($site->site_number ?? 'site'))),
+            'title' => trim(sprintf('%s stratigraphy', (string) ($site->site_number ?? ''))),
+            'description' => 'Stratigraphic data exported from AtoM (ahgArchaeologyPlugin), following the '
+                .'table schema used by the Harris Matrix Data Package. observations records superposition '
+                .'only; the source records nine relation types, of which the later-than ones (above, cuts, '
+                .'fills) are expressible here.',
+            'created' => gmdate('c'),
+            'resources' => $resources,
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
      * Remove edges implied by a longer path - the transitive reduction.
      *
      * Harris's Law of Stratigraphic Succession says a matrix shows only the
