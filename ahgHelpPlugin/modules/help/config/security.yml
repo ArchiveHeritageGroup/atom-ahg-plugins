@@ -37,15 +37,21 @@ apiSuggest:
 apiContextMap:
   is_secure: false
 
-# --- not public -------------------------------------------------------------
-
-# Drives HelpChatbotService, which calls a language model. Left anonymous this is
-# an unmetered LLM endpoint open to the internet - a cost and abuse vector rather
-# than a data-disclosure one. Someone who wants a public help chatbot should turn
-# this back on as a decision, having priced it.
+# Drives HelpChatbotService, which calls a language model. PUBLIC BY DECISION
+# (Johan, 2026-08-24): psis.theahg.co.za runs a public help chatbot and it must
+# keep working for anonymous visitors. This previously worked only because the
+# missing security.yml failed open - now it is a written choice.
+#
+# Note what that choice costs: this is an unmetered LLM endpoint reachable from
+# the internet. The exposure is spend and abuse, not data disclosure - the
+# chatbot answers from help content. Instances with no LLM configured are inert
+# regardless, because HelpChatbotService::isAiAvailable() gates the call. If
+# usage needs bounding, rate-limit it at nginx rather than securing the action,
+# which would take the public help chat down again.
 apiChat:
-  is_secure:   true
-  credentials: [[ contributor, editor, administrator ]]
+  is_secure: false
+
+# --- not public -------------------------------------------------------------
 
 # The system map describes the shape of the installation - modules, routes and how
 # they connect. The HTML view is already refused to anonymous users; this makes the
