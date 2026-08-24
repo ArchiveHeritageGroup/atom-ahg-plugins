@@ -18,6 +18,9 @@ class helpImportTask extends arBaseTask
 {
     /** @var array Subcategory keyword mappings */
     protected static $subcategoryMap = [
+        // Archaeology first: these keywords are distinctive and must not be
+        // shadowed by a generic later entry (first-match-wins, see $pluginMap).
+        'Archaeology' => ['archaeology-', 'harris-', 'stratigraph'],
         'Research' => ['researcher-', 'research-'],
         'GLAM Sectors' => ['glam-', 'dam-', 'gallery-', 'museum-', 'library-'],
         'AI & Automation' => ['ai-', 'ner-', 'semantic-', 'translation-', 'duplicate-', 'dedupe-', 'fuzzy-'],
@@ -49,6 +52,7 @@ class helpImportTask extends arBaseTask
         'ahg-settings' => 'ahgSettingsPlugin',
         'ai-tools' => 'ahgAIPlugin',
         'api-' => 'ahgAPIPlugin',
+        'archaeology' => 'ahgArchaeologyPlugin',
         'audio-player' => 'ahgIiifPlugin',
         'audit-trail' => 'ahgAuditTrailPlugin',
         'backup-restore' => 'ahgBackupPlugin',
