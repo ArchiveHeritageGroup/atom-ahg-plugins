@@ -43,8 +43,19 @@
               <input type="range" class="form-range" id="tts_rate"
                      name="tts[all][default_rate]"
                      min="0.5" max="2.0" step="0.1"
-                     value="<?php echo htmlspecialchars($settings['all']['default_rate'] ?? '1.0') ?>"
-                     oninput="document.getElementById('tts_rate_val').textContent=this.value">
+                     value="<?php echo htmlspecialchars($settings['all']['default_rate'] ?? '1.0') ?>">
+              <?php // Bound below rather than oninput="": an enforcing CSP blocks
+                    // inline handlers, and a nonce cannot apply to an attribute. ?>
+              <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+                (function () {
+                  var range = document.getElementById('tts_rate');
+                  var out = document.getElementById('tts_rate_val');
+                  if (!range || !out) { return; }
+                  range.addEventListener('input', function () {
+                    out.textContent = this.value;
+                  });
+                })();
+              </script>
               <div class="form-text"><?php echo __('Playback speed (0.5 = slow, 2.0 = fast).') ?></div>
             </div>
 

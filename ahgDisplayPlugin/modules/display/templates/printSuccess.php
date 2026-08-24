@@ -29,9 +29,20 @@
 </head>
 <body>
   <div class="no-print">
-    <button class="print-btn" onclick="window.print()">Print this page</button>
-    <button class="print-btn" onclick="window.close()">Close</button>
+    <?php // Handlers bound below rather than inline: an enforcing CSP blocks
+          // onclick="", and a nonce cannot apply to an attribute. ?>
+    <button class="print-btn" id="print-page">Print this page</button>
+    <button class="print-btn" id="close-window">Close</button>
   </div>
+
+  <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+    document.getElementById('print-page').addEventListener('click', function () {
+      window.print();
+    });
+    document.getElementById('close-window').addEventListener('click', function () {
+      window.close();
+    });
+  </script>
 
   <h1>
     <?php if (isset($parent) && $parent): ?>
