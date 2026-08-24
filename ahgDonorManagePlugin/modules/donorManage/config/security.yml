@@ -1,0 +1,32 @@
+# donorManage module access.
+#
+# A missing modules/<name>/config/security.yml inherits `default: is_secure: false`
+# from apps/qubit/config/security.yml - it FAILS OPEN. This plugin shipped without
+# one, and on PSIS that left the donor browse - names of people and institutions, and their
+# contact records - readable by anyone who knew the URL.
+#
+# Double-bracket credentials are an OR. A single bracket is an AND, which would lock
+# out an administrator who does not also hold the other roles.
+#
+# `all:` is the fallback for any action not named here, so a new action is secured
+# by default rather than public by default.
+
+browse:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]
+
+delete:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+edit:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+view:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]
+
+all:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]

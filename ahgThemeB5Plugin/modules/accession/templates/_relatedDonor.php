@@ -209,7 +209,14 @@
 </div>
 
 <?php // TomSelect library (JS + CSS) - donor-tom-select.js bails if it isn't loaded,
-      // which left the donor dropdown inert ("not filling"). ?>
+      // which left the donor dropdown inert ("not filling").
+      //
+      // All three assets must sit under a path stock AtoM's nginx will serve. Its
+      // static rule is ^/(css|dist|js|images|plugins|vendor)/.*\.(css|js|png|...)$ -
+      // so /atom-framework/public/js/... is 403 on a standard install, and the
+      // initialiser silently never ran while the library beside it loaded fine.
+      // The framework is required to work with stock nginx, so the file is served
+      // from the plugin rather than the nginx config being widened. ?>
 <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   /* The donor dropdown is rendered on <body> (dropdownParent) to escape the
@@ -218,4 +225,4 @@
   .ts-dropdown { z-index: 1060 !important; }
 </style>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/atom-framework/public/js/donor-tom-select.js?v=2"></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgThemeB5Plugin/web/js/donor-tom-select.js?v=3"></script>
