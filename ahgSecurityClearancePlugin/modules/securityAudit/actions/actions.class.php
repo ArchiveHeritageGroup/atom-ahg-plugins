@@ -3,12 +3,59 @@
 use AtomFramework\Http\Controllers\AhgController;
 class securityAuditActions extends AhgController
 {
+    /**
+     * Stop here if the Spectrum audit log is not installed.
+     *
+     * Every screen in this module reads `spectrum_audit_log`, which belongs to
+     * ahgSpectrumPlugin. This plugin does not declare that one as a dependency,
+     * so on an instance without it the query throws
+     *
+     *     SQLSTATE[42S02]: Base table or view not found: 1146
+     *     Table '<db>.spectrum_audit_log' doesn't exist
+     *
+     * and the screen returns HTTP 500. Logged 2x on archaeology before
+     * /security/report stopped resolving to this module at all.
+     *
+     * Same fault, same plugin, as the object_rights_holder guard in
+     * accessFilter/components.class.php - a module must not 500 because an
+     * unrelated plugin is absent. A missing audit table means there is no audit
+     * history to show, which is a message, not an error.
+     *
+     * Redirect rather than render empty: the four templates here each expect
+     * their own variables, and an audit screen showing zeros would read as "no
+     * security events" when the truth is "nothing is recording them".
+     *
+     * Cached per request - four of the five actions call this, and hasTable()
+     * hits information_schema each time.
+     */
+    private function requireAuditLog()
+    {
+        static $present = null;
+
+        if (null === $present) {
+            try {
+                $present = \Illuminate\Database\Capsule\Manager::schema()->hasTable('spectrum_audit_log');
+            } catch (Exception $e) {
+                // Cannot tell - let the action run and fail as it did before
+                // rather than hide a working screen behind a broken check.
+                $present = true;
+            }
+        }
+
+        if (!$present) {
+            $this->getUser()->setFlash('error', 'The Spectrum audit log is not installed on this instance, so there is no audit history to report on. Enable ahgSpectrumPlugin to start recording one.');
+            $this->redirect('@homepage');
+        }
+    }
+
     public function executeDashboard($request)
     {
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
+
+        $this->requireAuditLog();
 
         $period = $request->getParameter('period', '7 days');
         $since = date('Y-m-d H:i:s', strtotime("-{$period}"));
@@ -23,6 +70,8 @@ class securityAuditActions extends AhgController
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
+
+        $this->requireAuditLog();
 
         $db = \Illuminate\Database\Capsule\Manager::class;
 
@@ -133,6 +182,8 @@ class securityAuditActions extends AhgController
             $this->redirect('@homepage');
         }
 
+        $this->requireAuditLog();
+
         $db = \Illuminate\Database\Capsule\Manager::class;
 
         $logs = $db::table('spectrum_audit_log as sal')
@@ -183,6 +234,8 @@ class securityAuditActions extends AhgController
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
             $this->redirect('@homepage');
         }
+
+        $this->requireAuditLog();
 
         $db = \Illuminate\Database\Capsule\Manager::class;
         $objectId = $request->getParameter('object_id');
@@ -250,6 +303,8 @@ class securityAuditActions extends AhgController
             $this->getUser()->setFlash('error', 'Administrator access required.');
             $this->redirect('@homepage');
         }
+
+        $this->requireAuditLog();
 
         require_once dirname(__DIR__, 3) . '/lib/Services/SecurityClearanceService.php';
         $this->result = \SecurityClearanceService::verifyAuditChain();
