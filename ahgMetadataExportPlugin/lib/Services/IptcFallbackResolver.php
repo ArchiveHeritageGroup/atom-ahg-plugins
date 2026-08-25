@@ -233,7 +233,7 @@ class IptcFallbackResolver
             return;
         }
         try {
-            DB::table('ahg_error_log')->insert([
+            \AtomFramework\Services\ErrorLogWriter::record([
                 'level'      => 'info',
                 'message'    => sprintf('IPTC fallback fired for information_object.id=%d field=%s value="%s"', $objectId, $field, mb_substr($value, 0, 200)),
                 'created_at' => date('Y-m-d H:i:s'),

@@ -595,7 +595,7 @@ class SharePointAutoIngestService
     private function logError(int $ruleId, \Throwable $e): void
     {
         if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_error_log')) {
-            DB::table('ahg_error_log')->insert([
+            \AtomFramework\Services\ErrorLogWriter::record([
                 'level' => 'error',
                 'message' => substr('sharepoint_auto_ingest rule=' . $ruleId . ': ' . $e->getMessage(), 0, 65000),
                 'file' => substr($e->getFile(), 0, 500),

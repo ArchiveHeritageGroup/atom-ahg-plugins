@@ -104,11 +104,15 @@ CREATE TABLE IF NOT EXISTS `ahg_error_log` (
   `resolved_at` datetime DEFAULT NULL,
   `resolved_by` int DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `signature` char(32) DEFAULT NULL COMMENT 'md5(file:line:message) - groups repeats of one fault',
+  `occurrences` int NOT NULL DEFAULT '1' COMMENT 'times this signature was seen in the window',
+  `last_seen_at` datetime DEFAULT NULL COMMENT 'most recent occurrence; NULL means it happened once, at created_at',
   PRIMARY KEY (`id`),
   KEY `idx_error_log_created` (`created_at`),
   KEY `idx_error_log_read` (`is_read`),
   KEY `idx_error_log_level` (`level`),
-  KEY `idx_error_log_resolved` (`resolved_at`)
+  KEY `idx_error_log_resolved` (`resolved_at`),
+  KEY `idx_signature` (`signature`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------

@@ -343,7 +343,15 @@ class ErrorNotificationService
                 $userId = (int) str_replace('user_id:', '', $contextData['user_info']);
             }
 
-            \Illuminate\Database\Capsule\Manager::table('ahg_error_log')->insert([
+            // One writer for this table: AtomFramework\Services\ErrorLogWriter.
+            // It owns the repeat-collapsing (signature + occurrences + last_seen_at)
+            // so that every service logging an error behaves the same way. This
+            // used to insert directly, as four other services also did, and each
+            // wrote a row per event.
+            //
+            // Falls back to a direct insert if the framework is not present, so
+            // a plugins-only install still logs.
+            $row = [
                 'level' => $level,
                 'status_code' => $statusCode,
                 'message' => mb_substr($message, 0, 65000),
@@ -360,7 +368,15 @@ class ErrorNotificationService
                 'trace' => $trace ? mb_substr($trace, 0, 65000) : null,
                 'is_read' => 0,
                 'created_at' => date('Y-m-d H:i:s'),
-            ]);
+            ];
+
+            if (class_exists('\\AtomFramework\\Services\\ErrorLogWriter')) {
+                \AtomFramework\Services\ErrorLogWriter::record($row);
+
+                return;
+            }
+
+            \Illuminate\Database\Capsule\Manager::table('ahg_error_log')->insert($row);
         } catch (\Throwable $e) {
             // Never let logging cause an error
             error_log('ErrorNotificationService: DB log failed: ' . $e->getMessage());

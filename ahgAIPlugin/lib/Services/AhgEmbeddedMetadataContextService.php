@@ -177,7 +177,7 @@ class AhgEmbeddedMetadataContextService
         try {
             $db = \Illuminate\Database\Capsule\Manager::class;
             if ($db::schema()->hasTable('ahg_error_log')) {
-                $db::table('ahg_error_log')->insert([
+                \AtomFramework\Services\ErrorLogWriter::record([
                     'level'      => 'info',
                     'message'    => sprintf('inference_context_used service=%s io=%d hints=%s', $service, $ioId, json_encode($hints->toArray())),
                     'created_at' => date('Y-m-d H:i:s'),
