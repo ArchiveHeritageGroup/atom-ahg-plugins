@@ -1,10 +1,10 @@
-# Wits authority record names - what is actually wrong with them
+# Site catalogue authority record names - what is actually wrong with them
 
 Date: 2026-08-24
-Source: `stuff/Wits Archaeology Collection catalogue.xlsx`, sheet `Site Catalogue WITS`,
+Source: the source site-catalogue spreadsheet,
 4,708 data rows - the file the site records were imported from.
 
-Prompted by Stefan du Toit reporting an authority-record autocomplete "full of
+Prompted by a cataloguer reporting an authority-record autocomplete "full of
 question marks". That turned out not to be a bug: the widget opens before you
 type and shows page 1 of 2,623 records in alphabetical order, and the head of
 that order is punctuation. The names really are `? Part 1` and `# 28 field camp`.
@@ -22,14 +22,14 @@ Chasing it surfaced a larger problem in the same field.
 285 names are reused. The worst offenders:
 
 ```
-78x  Den Staat        24x  Greefswald      19x  Mashatu
-33x  Harts River      20x  Little Muck     19x  Samaria
-25x  Maramami                              19x  Nylsvlei 1 - 19
+78x  <name-1>        24x  <name-4>      19x  <name-5>
+33x  <name-2>      20x  <name-6>     19x  <name-7>
+25x  <name-3>                              19x  <name-8> 1 - 19
 ```
 
 An authority record exists to identify an entity. Seventy-eight records called
-`Den Staat`, each a different site, do not. This is a more serious problem than
-the punctuation Stefan noticed, and it is invisible in an autocomplete - every
+`<name-1>`, each a different site, do not. This is a more serious problem than
+the punctuation the cataloguer noticed, and it is invisible in an autocomplete - every
 one of those 78 looks like a correct, plausible choice.
 
 **Map No. + Site No. resolves it.** Tested against every combination in the file:
@@ -54,20 +54,20 @@ with it.
 | Class | Rows | Example | Worth changing? |
 |---|---:|---|---|
 | Blank name | 744 | - | Already handled: titled from farm + site no at import |
-| Duplicate name | 1,243 | `Den Staat` x78 | **Yes** - append map + site no |
-| Starts with punctuation or digit | 120 | `? Part 1`, `# 14`, `(Site 43) Samaria IX` | Yes - this is what surfaces first everywhere |
-| Uncertainty marker `?` | 67 | `Matapuza Hill?`, `Field Hut?` | Yes - strip, keep the uncertainty in the text |
-| Parenthetical | 161 | `Den Staat Kraal A(2)`, `T40 (height marker 1917), Botswana` | **Partly** - see below |
-| Slash | 74 | `K2/ Bambandyanalo`, `Mojale/Limpopo` | Partly - some are alternate names |
+| Duplicate name | 1,243 | `<name-1>` x78 | **Yes** - append map + site no |
+| Starts with punctuation or digit | 120 | `? Part 1`, `# 14`, `(Site 43) <name-7> IX` | Yes - this is what surfaces first everywhere |
+| Uncertainty marker `?` | 67 | `<Hill name>?`, `Field Hut?` | Yes - strip, keep the uncertainty in the text |
+| Parenthetical | 161 | `<Farm> Kraal A(2)`, `T40 (height marker 1917), <country>` | **Partly** - see below |
+| Slash | 74 | `<NameA>/ <NameB>`, `<NameC>/<NameD>` | Partly - some are alternate names |
 | ALL CAPS | 152 | `TP 1`, `ATTEN 99` | Probably not - see below |
 
-**Parentheticals are not one thing.** `Den Staat Kraal A(2)` is a name; the
+**Parentheticals are not one thing.** `<Farm> Kraal A(2)` is a name; the
 bracket is part of how the site is designated. `T40 (height marker 1917),
-Botswana` is a name plus a locational note. `(Site 43) Samaria IX` is a name with
+Botswana` is a name plus a locational note. `(Site 43) <name-7> IX` is a name with
 a cross-reference bolted to the front. Only the second and third want moving, and
 telling them apart needs an archaeologist, not a regex.
 
-**Slashes are often alternate names.** `K2/ Bambandyanalo` is one site with two
+**Slashes are often alternate names.** `<NameA>/ <NameB>` is one site with two
 accepted names - which is what ISAAR's parallel form of name is for, not
 something to discard.
 
@@ -111,14 +111,14 @@ Do not:
 
 ## Boundaries of this analysis
 
-**This profiles the source spreadsheet, not the live instance.** The Wits
+**This profiles the source spreadsheet, not the live instance.** The client
 instance reports 2,623 authority records; the source has 4,708 rows and 3,964
 named sites. Those numbers do not reconcile, so the per-class counts here will
 not match that instance exactly. Confirming them needs a query against it, and
-`146.141.9.111` is unreachable from our network - 443, 80 and 22 all refused
+the client instance is unreachable from our network - 443, 80 and 22 all refused
 today, from 112 and from .131.
 
-**The data is no longer on the archaeology instance either.** Memory records
+**The data is no longer on the instance B instance either.** Memory records
 4,682 sites imported to .131 on 2026-08-18, but that host today holds 1
 `ahg_site_record`, 1 `archaeology_site` and 26 actors. Whatever happened since,
-any cleanup targets the Wits box.
+any cleanup targets the client instance.

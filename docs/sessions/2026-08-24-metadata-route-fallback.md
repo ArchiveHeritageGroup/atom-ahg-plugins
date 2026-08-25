@@ -2,7 +2,7 @@
 
 Date: 2026-08-24
 Releases: atom-framework v2.18.13, atom-ahg-plugins v3.106.21
-Reported by: Stefan du Toit, from the Wits archaeology instance (146.141.9.111)
+Reported by: a cataloguer, from the client instance
 
 ## Symptom
 
@@ -30,7 +30,7 @@ The display-standard picker offered every term in taxonomy 70 regardless of what
 was installed, so an editor could choose a standard the instance could not render
 and make the record unreachable at its own URL.
 
-Reproduced on archaeology, which runs stock base routing:
+Reproduced on instance B, which runs stock base routing:
 
 ```
 ;isad 200   ;dam 500   ;museum 500   ;library 500
@@ -61,20 +61,20 @@ open - without the routing class every standard is offered, as before.
 
 ## Verified
 
-PSIS (all sector plugins present): every probe 200, sector records still render in
+instance A (all sector plugins present): every probe 200, sector records still render in
 their own module (`body class` reads `dam index`, `museum index`, `gallery index`),
 all ten standards survive the filter, no new `ahg_error_log` rows.
 
-Archaeology (no sector plugins): `;dam`, `;museum`, `;library`, `;gallery` and an
+Instance B (no sector plugins): `;dam`, `;museum`, `;library`, `;gallery` and an
 invented code all 200, error log clean, and the picker now offers exactly the five
 archival standards whose modules exist - `isad`, `dc`, `dacs`, `mods`, `rad`.
 
 ## Notes
 
-- `ric` resolves to `sfIsadPlugin` on PSIS and is filtered out on archaeology.
-  Both match existing behaviour: PSIS's patched base already maps it that way.
+- `ric` resolves to `sfIsadPlugin` on instance A and is filtered out on instance B.
+  Both match existing behaviour: instance A's patched base already maps it that way.
 - `symfony cc` before the fpm workers respawn leaves old workers running new event
   wiring against a stale class in opcache - six errors in a four-second window on
-  the first PSIS reload. Reload first, then clear.
-- The Wits instance still needs this deployed; it was diagnosed entirely from
-  archaeology's error log, without reaching 146.141.9.111.
+  the first instance A reload. Reload first, then clear.
+- The client instance still needs this deployed; it was diagnosed entirely from
+  instance B's error log, without reaching the client instance.

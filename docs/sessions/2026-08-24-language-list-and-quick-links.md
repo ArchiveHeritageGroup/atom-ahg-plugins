@@ -2,7 +2,7 @@
 
 Date: 2026-08-24
 Releases: atom-framework v2.18.14, atom-ahg-plugins v3.106.23
-Reported by: Stefan du Toit, from the Wits archaeology instance (146.141.9.111)
+Reported by: a cataloguer, from the client instance
 
 ## Language preference offered nothing
 
@@ -11,13 +11,13 @@ The Language preference select on the authority record contact form showed only
 
 `LanguageService::getAll()` queried `taxonomy_id = 12`. AtoM's own taxonomy ids
 begin at 30 (`QubitTaxonomy::ROOT_ID`) and it has no language taxonomy at all:
-zero terms measured on both PSIS and archaeology, and no taxonomy whose name even
+zero terms measured on both instance A and instance B, and no taxonomy whose name even
 contains "language". The query could only ever return an empty collection.
 
 `getAll()` now returns the service's own 90-entry ISO 639-1 table, sorted by name,
 with the ISO code as `id`. The code is also what the consumer wants:
 `contact_information_extended.language_preference` is `varchar(16)`, and the one
-value stored on PSIS is an ISO code - the old shape would have written a numeric
+value stored on instance A is an ISO code - the old shape would have written a numeric
 term id into that column had it ever returned a row.
 
 `findByCode()`, `findByName()` and `getTermIdFromCode()` still query the same
@@ -29,7 +29,7 @@ docblock rather than left silent.
 The "i" dropdown is hardcoded in `_quickLinksMenu.php` and linked to a static page
 with slug `contact`. Base AtoM ships `home`, `about` and `privacy` - there is no
 contact page - so on any install where nobody had created one by hand the link
-404s. Archaeology reproduced it; PSIS happens to have one, which is why it had
+404s. Instance B reproduced it; instance A happens to have one, which is why it had
 never surfaced here.
 
 The menu now lists only pages that exist, and picks up `privacy`, which base ships
@@ -57,10 +57,10 @@ deployed.** `ReflectionClass::getFileName()` settles it in one line.
 
 ## Verified
 
-PSIS: quick links render About, Contact and Privacy, all three resolve 200;
+instance A: quick links render About, Contact and Privacy, all three resolve 200;
 90 languages returned; error log clean.
 
-Archaeology after rebuild: 90 languages, quick links show About and Privacy with
+Instance B after rebuild: 90 languages, quick links show About and Privacy with
 Contact correctly absent, home and browse 200, `;dam` still 200.
 
 ## Still open
@@ -68,14 +68,14 @@ Contact correctly absent, home and browse 200, `;dam` still 200.
 The "Authorized form of name" dropdown rendering rows of `?` is NOT fixed. The
 widget is base AtoM's YUI autocomplete, which builds each row from
 `$('td a', this).html()` of the table returned by `/actor/autocomplete`. Running
-that action's exact query on archaeology returns correct labels for all 12 actors,
+that action's exact query on instance B returns correct labels for all 12 actors,
 the AHG template is byte-identical to base's, and no actor name in the database
-contains a `?`. The fault is either Wits-specific data or the response body not
+contains a `?`. The fault is either instance-specific data or the response body not
 being the table the parser expects, and the raw response from that instance is
 what separates them:
 
 ```
-http://146.141.9.111/index.php/actor/autocomplete?showOnlyActors=true&query=a
+<client-instance>/index.php/actor/autocomplete?showOnlyActors=true&query=a
 ```
 
-The Wits instance also still needs every fix from today deployed.
+The client instance also still needs every fix from today deployed.
