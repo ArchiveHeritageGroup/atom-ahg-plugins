@@ -167,6 +167,24 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
             ['module' => 'accession', 'action' => 'edit']
         ));
 
+        // The edit form publishes this URL in a hidden field for its
+        // identifier-availability check (editAction, identifierAvailableCheckUrl).
+        //
+        // Base AtoM never needed a route for it: qtAccessionPlugin ships no
+        // routing.yml and the action was reached through symfony's generic
+        // module/action route. Prepending '/accession/:slug' above shadows that,
+        // so the check URL matched the slug route instead, looked for an
+        // accession slugged "checkIdentifierAvailable", found none and returned
+        // 404 - which the form's JavaScript reports to the cataloguer as
+        // "Server error while checking identifer availability" on every save.
+        //
+        // Registered after the slug routes so it is CHECKED BEFORE them: this
+        // loader prepends, so the last one registered is the first one matched.
+        $routing->prependRoute('accession_check_identifier_available', new \sfRoute(
+            '/accession/checkIdentifierAvailable',
+            ['module' => 'accession', 'action' => 'checkIdentifierAvailable']
+        ));
+
         // =====================================================================
         // accessionManage module routes (browse)
         // =====================================================================
