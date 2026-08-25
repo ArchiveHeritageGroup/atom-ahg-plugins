@@ -472,6 +472,12 @@
     // Create editor
     var editor = new Editor({
       element: editorEl,
+      // TipTap appends a <style> element of its own when it starts. Scripts do
+      // not inherit the page nonce, so without this the element carries none
+      // and a CSP with style-src 'self' plus a nonce refuses it. injectCSS()
+      // passes this straight to the element. Published by _tiptapScripts.php;
+      // undefined where no CSP nonce is in play, which TipTap treats as before.
+      injectNonce: window.AHG_CSP_NONCE || undefined,
       extensions: extensions,
       content: initialContent || '',
       editorProps: {
