@@ -345,6 +345,110 @@
             </div>
         </div>
 
+        <!-- External sources and uploaded documents -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-book-open me-2"></i><?php echo __('External sources and documents'); ?></h5>
+                <?php
+                    $externals = array_filter($resources ?? [], static function ($r) {
+                        return in_array($r->resource_type ?? '', ['external_link', 'document'], true);
+                    });
+                ?>
+                <span class="badge bg-primary"><?php echo count($externals); ?></span>
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <h6 class="small text-uppercase text-muted"><?php echo __('Link an external source'); ?></h6>
+                        <form method="post" action="<?php echo url_for('research/project/' . $project->id . '/link'); ?>">
+                            <div class="mb-2">
+                                <input type="url" name="external_url" class="form-control form-control-sm" required placeholder="https://..." aria-label="<?php echo __('Source address'); ?>">
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="title" class="form-control form-control-sm" placeholder="<?php echo __('Title (optional - defaults to the address)'); ?>">
+                            </div>
+                            <div class="mb-2">
+                                <select name="link_type" class="form-select form-select-sm" aria-label="<?php echo __('Source type'); ?>">
+                                    <option value="academic"><?php echo __('Academic'); ?></option>
+                                    <option value="archive"><?php echo __('Archive'); ?></option>
+                                    <option value="database"><?php echo __('Database'); ?></option>
+                                    <option value="government"><?php echo __('Government'); ?></option>
+                                    <option value="website" selected><?php echo __('Website'); ?></option>
+                                    <option value="social_media"><?php echo __('Social media'); ?></option>
+                                    <option value="other"><?php echo __('Other'); ?></option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="tags" class="form-control form-control-sm" placeholder="<?php echo __('Tags, comma separated (optional)'); ?>">
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-link me-1"></i><?php echo __('Link source'); ?></button>
+                        </form>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="small text-uppercase text-muted"><?php echo __('Upload a document'); ?></h6>
+                        <form method="post" enctype="multipart/form-data" action="<?php echo url_for('research/project/' . $project->id . '/document'); ?>">
+                            <?php // Mirrors the server limit so the browser can refuse early; the action enforces it regardless. ?>
+                            <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo (int) ($documentMaxBytes ?? 0); ?>">
+                            <div class="mb-2">
+                                <input type="file" name="document" class="form-control form-control-sm" required aria-describedby="project-document-help">
+                                <div id="project-document-help" class="form-text">
+                                    <?php echo __('Maximum %1% per file.', ['%1%' => $documentMaxLabel ?? '']); ?>
+                                    <?php echo __('PDF, Word, OpenDocument, spreadsheets, presentations, images, text or zip.'); ?>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="title" class="form-control form-control-sm" placeholder="<?php echo __('Title (optional - defaults to the filename)'); ?>">
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="tags" class="form-control form-control-sm" placeholder="<?php echo __('Tags, comma separated (optional)'); ?>">
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-upload me-1"></i><?php echo __('Upload'); ?></button>
+                        </form>
+                    </div>
+                </div>
+
+                <?php if (!empty($externals)): ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($externals as $res): ?>
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="me-2">
+                                        <?php if ('document' === $res->resource_type && !empty($res->file_path)): ?>
+                                            <a href="/<?php echo htmlspecialchars(ltrim($res->file_path, '/'), ENT_QUOTES); ?>" download="<?php echo htmlspecialchars($res->file_name ?? '', ENT_QUOTES); ?>"><i class="fas fa-file me-1"></i><?php echo htmlspecialchars($res->title ?? $res->file_name ?? ''); ?></a>
+                                            <span class="badge bg-secondary ms-1"><?php echo __('Document'); ?></span>
+                                            <?php if (!empty($res->file_size)): ?>
+                                                <small class="text-muted ms-1"><?php echo $res->file_size >= 1048576 ? round($res->file_size / 1048576, 1) . ' MB' : round($res->file_size / 1024) . ' KB'; ?></small>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <a href="<?php echo htmlspecialchars($res->external_url ?? '', ENT_QUOTES); ?>" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt me-1"></i><?php echo htmlspecialchars($res->title ?? $res->external_url ?? ''); ?></a>
+                                            <?php if (!empty($res->link_type)): ?>
+                                                <span class="badge bg-secondary ms-1"><?php echo htmlspecialchars($res->link_type); ?></span>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                        <?php if (!empty($res->tags)): ?>
+                                            <small class="text-muted d-block"><?php echo htmlspecialchars($res->tags); ?></small>
+                                        <?php endif; ?>
+                                        <?php if (!empty($res->description)): ?>
+                                            <small class="text-muted d-block"><?php echo htmlspecialchars($res->description); ?></small>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <form method="post" action="<?php echo url_for('research/project/' . $project->id . '/resource/remove'); ?>" onsubmit="return confirm('<?php echo __('Remove this item?'); ?>');">
+                                        <input type="hidden" name="resource_id" value="<?php echo (int) $res->id; ?>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="<?php echo __('Remove'); ?>"><i class="fas fa-times"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p class="text-muted mb-0"><?php echo __('No external sources or documents yet.'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <!-- Clipboard Items -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">

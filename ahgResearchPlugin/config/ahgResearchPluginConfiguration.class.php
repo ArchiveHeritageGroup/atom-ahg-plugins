@@ -148,6 +148,12 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_project_collaborators', '/research/project/:id/collaborators', 'projectCollaborators', ['id' => '\d+']);
         $research->any('research_project_activity', '/research/project/:id/activity', 'projectActivity', ['id' => '\d+']);
         $research->any('research_project_edit', '/research/project/:id/edit', 'editProject', ['id' => '\d+']);
+        // External sources and uploaded documents on a project. Three segments,
+        // so they cannot be shadowed by '/research/project/:id' below, which
+        // matches two.
+        $research->any('research_project_add_link', '/research/project/:id/link', 'projectAddLink', ['id' => '\d+']);
+        $research->any('research_project_upload_document', '/research/project/:id/document', 'projectUploadDocument', ['id' => '\d+']);
+        $research->any('research_project_remove_resource', '/research/project/:id/resource/remove', 'projectRemoveResource', ['id' => '\d+']);
         $research->any('research_view_project', '/research/project/:id', 'viewProject', ['id' => '\d+']);
         $research->any('research_projects', '/research/projects', 'projects');
         $research->any('research_save_experience_level', '/research/experience-level', 'saveExperienceLevel');

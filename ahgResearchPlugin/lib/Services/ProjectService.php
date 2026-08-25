@@ -470,6 +470,11 @@ class ProjectService
             'description' => $data['description'] ?? null,
             'notes' => $data['notes'] ?? null,
             'tags' => $data['tags'] ?? null,
+            // Set only for resource_type = document. A link row leaves these null.
+            'file_path' => $data['file_path'] ?? null,
+            'file_name' => $data['file_name'] ?? null,
+            'file_size' => $data['file_size'] ?? null,
+            'mime_type' => $data['mime_type'] ?? null,
             'added_by' => $addedBy,
             'sort_order' => $maxOrder + 1,
             'added_at' => date('Y-m-d H:i:s'),
@@ -484,6 +489,25 @@ class ProjectService
      */
     public function removeResource(int $resourceId): bool
     {
+        // Delete the file before the row, not after: if the delete fails the row
+        // still points at something, whereas an orphaned file with no row is
+        // invisible and accumulates silently.
+        $row = DB::table('research_project_resource')->where('id', $resourceId)->first();
+
+        if (null !== $row && !empty($row->file_path)) {
+            $path = sfConfig::get('sf_root_dir') . '/' . ltrim($row->file_path, '/');
+
+            // Confined to the upload directory. file_path comes from our own
+            // insert, but a path check costs nothing and a traversal here would
+            // unlink an arbitrary file.
+            $base = realpath(sfConfig::get('sf_root_dir') . '/uploads/research');
+            $real = realpath($path);
+
+            if (false !== $base && false !== $real && 0 === strpos($real, $base . '/')) {
+                @unlink($real);
+            }
+        }
+
         return DB::table('research_project_resource')
             ->where('id', $resourceId)
             ->delete() > 0;

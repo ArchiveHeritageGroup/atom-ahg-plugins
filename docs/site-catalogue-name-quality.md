@@ -122,3 +122,5 @@ today, from 112 and from .131.
 4,682 sites imported to .131 on 2026-08-18, but that host today holds 1
 `ahg_site_record`, 1 `archaeology_site` and 26 actors. Whatever happened since,
 any cleanup targets the client instance.
+
+Tracked as ArchiveHeritageGroup/atom-extensions-catalog#310 (filed 2026-08-25, de-identified - this internal copy keeps the institution and the real examples).

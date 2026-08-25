@@ -2393,6 +2393,12 @@ class researchActions extends AhgController
         $odrl = $this->enforceOdrl('project', $projectId, $this->researcher->id, 'use');
         if ($odrl && !$odrl['permitted']) { $this->redirect('research/dashboard'); }
 
+        // The template shows the ceiling on the upload box, so it must come from
+        // the same place the action enforces it - a form advertising 20 MB while
+        // php.ini caps at 8 sends people into a failure with no explanation.
+        $this->documentMaxBytes = $this->projectDocumentMaxBytes();
+        $this->documentMaxLabel = $this->formatBytes($this->documentMaxBytes);
+
         $this->collaborators = $projectService->getCollaborators($projectId);
         $this->resources = DB::table('research_project_resource')
             ->where('project_id', $projectId)
@@ -2459,6 +2465,293 @@ class researchActions extends AhgController
     /**
      * Edit project.
      */
+    /**
+     * The largest document a researcher may attach to a project, in bytes.
+     *
+     * Admin-settable (AHG Settings > Research), because the right ceiling is a
+     * local policy question - disk, what researchers actually deposit, and what
+     * the PHP config permits - not something to hardcode.
+     *
+     * Clamped to what PHP will actually accept: a limit above upload_max_filesize
+     * or post_max_size is a promise the interface cannot keep, and the failure
+     * mode is the ugly one - the request never reaches this action, so the
+     * cataloguer gets an empty POST rather than a size message.
+     */
+    private function projectDocumentMaxBytes(): int
+    {
+        $configuredMb = 20;
+
+        if (class_exists('\AtomFramework\Services\AhgSettingsService')) {
+            $configuredMb = (int) \AtomFramework\Services\AhgSettingsService::getInt('research_document_max_mb', 20);
+        }
+
+        if ($configuredMb < 1) {
+            $configuredMb = 1;
+        }
+
+        $limit = $configuredMb * 1024 * 1024;
+
+        foreach (['upload_max_filesize', 'post_max_size'] as $directive) {
+            $bytes = $this->phpSizeToBytes((string) ini_get($directive));
+
+            if ($bytes > 0 && $bytes < $limit) {
+                $limit = $bytes;
+            }
+        }
+
+        return $limit;
+    }
+
+    /**
+     * "8M" / "512K" / "1G" as a byte count. ini_get returns the shorthand.
+     */
+    private function phpSizeToBytes(string $value): int
+    {
+        $value = trim($value);
+
+        if ('' === $value) {
+            return 0;
+        }
+
+        $unit = strtolower($value[strlen($value) - 1]);
+        $number = (int) $value;
+
+        return match ($unit) {
+            'g' => $number * 1024 * 1024 * 1024,
+            'm' => $number * 1024 * 1024,
+            'k' => $number * 1024,
+            default => (int) $value,
+        };
+    }
+
+    /**
+     * Resolve the researcher and project, or stop.
+     *
+     * getProject() returns null when this researcher may not see the project,
+     * so it is the authorisation gate as well as the fetch - the same one
+     * executeViewProject relies on.
+     *
+     * @return array{0: object, 1: object, 2: ProjectService}
+     */
+    private function requireProjectAccess($request): array
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $researcher = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+
+        if (!$researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $projectService = new ProjectService();
+
+        $projectId = (int) $request->getParameter('id');
+        $project = $projectService->getProject($projectId, $researcher->id);
+
+        if (!$project) {
+            $this->forward404('Project not found');
+        }
+
+        return [$researcher, $project, $projectService];
+    }
+
+    /**
+     * Attach an external source to a project by URL.
+     *
+     * research_project_resource already modelled this - external_url, link_type,
+     * link_metadata have been on the table all along - but nothing in the
+     * interface ever wrote them, so a researcher could not cite anything that
+     * was not already in the archive.
+     */
+    public function executeProjectAddLink($request)
+    {
+        [$researcher, $project, $projectService] = $this->requireProjectAccess($request);
+
+        if (!$request->isMethod('post')) {
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        $url = trim((string) $request->getParameter('external_url'));
+
+        // Accept only http(s). filter_var alone would pass javascript: and
+        // data:, which are stored and then rendered as an href.
+        $valid = filter_var($url, FILTER_VALIDATE_URL)
+            && in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true);
+
+        if (!$valid) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('Enter a valid http or https address.'));
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        $projectService->addResource($project->id, [
+            'resource_type' => 'external_link',
+            'external_url' => mb_substr($url, 0, 1000),
+            'link_type' => $request->getParameter('link_type') ?: 'other',
+            'title' => mb_substr(trim((string) $request->getParameter('title')) ?: $url, 0, 500),
+            'description' => trim((string) $request->getParameter('description')) ?: null,
+            'tags' => mb_substr(trim((string) $request->getParameter('tags')), 0, 500) ?: null,
+        ], $researcher->id);
+
+        $projectService->logActivity($project->id, $researcher->id, 'resource_added', 'Linked an external source');
+        $this->getUser()->setFlash('notice', $this->context->i18n->__('External source linked.'));
+        $this->redirect('research/project/' . $project->id);
+    }
+
+    /**
+     * Attach an uploaded document to a project.
+     *
+     * Validation is the framework's FileValidationService, not a hand-rolled
+     * check: it tests the extension allowlist, the size, and the MIME from magic
+     * bytes rather than the browser's claim. Written by hand here it would be
+     * the sixth copy of that logic in this repository.
+     */
+    public function executeProjectUploadDocument($request)
+    {
+        [$researcher, $project, $projectService] = $this->requireProjectAccess($request);
+
+        if (!$request->isMethod('post')) {
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        $maxBytes = $this->projectDocumentMaxBytes();
+        $file = $_FILES['document'] ?? null;
+
+        // An empty $_FILES with a POST that arrived is the signature of a body
+        // over post_max_size: PHP discards it before the script runs. Say so,
+        // rather than "no file selected", which sends the researcher looking in
+        // the wrong place.
+        if (null === $file || UPLOAD_ERR_NO_FILE === ($file['error'] ?? UPLOAD_ERR_NO_FILE)) {
+            $message = empty($_POST) && 'POST' === ($_SERVER['REQUEST_METHOD'] ?? '')
+                ? $this->context->i18n->__('That file was too large for the server to accept. The limit is %1%.', ['%1%' => $this->formatBytes($maxBytes)])
+                : $this->context->i18n->__('Choose a file to upload.');
+
+            $this->getUser()->setFlash('error', $message);
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        if (UPLOAD_ERR_OK !== $file['error']) {
+            $this->getUser()->setFlash('error', in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
+                ? $this->context->i18n->__('That file is larger than the %1% limit.', ['%1%' => $this->formatBytes($maxBytes)])
+                : $this->context->i18n->__('The upload did not complete. Please try again.'));
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        $allowed = ['pdf', 'doc', 'docx', 'odt', 'rtf', 'txt', 'md', 'csv', 'xls', 'xlsx', 'ods', 'ppt', 'pptx', 'odp', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'tif', 'tiff', 'zip'];
+
+        if (class_exists('\AtomFramework\Services\FileValidationService')) {
+            $check = \AtomFramework\Services\FileValidationService::validateUpload($file, [
+                'allowed_extensions' => $allowed,
+                'max_size' => $maxBytes,
+                'validate_mime' => true,
+            ]);
+
+            if (empty($check['valid'])) {
+                $this->getUser()->setFlash('error', implode(' ', $check['errors'] ?? [$this->context->i18n->__('That file was refused.')]));
+                $this->redirect('research/project/' . $project->id);
+            }
+        } elseif ($file['size'] > $maxBytes) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('That file is larger than the %1% limit.', ['%1%' => $this->formatBytes($maxBytes)]));
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        $uploadDir = sfConfig::get('sf_root_dir') . '/uploads/research/project-documents/' . $project->id;
+
+        if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('The upload directory could not be created.'));
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        // Stored name is generated, never the browser's: the original is kept in
+        // file_name for display and download only.
+        $ext = strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION));
+        $stored = 'doc_' . $researcher->id . '_' . time() . '_' . bin2hex(random_bytes(4)) . ($ext ? '.' . $ext : '');
+
+        if (!move_uploaded_file($file['tmp_name'], $uploadDir . '/' . $stored)) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('The file could not be saved.'));
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        $mime = null;
+
+        if (function_exists('finfo_open') && false !== $finfo = finfo_open(FILEINFO_MIME_TYPE)) {
+            $mime = finfo_file($finfo, $uploadDir . '/' . $stored) ?: null;
+            finfo_close($finfo);
+        }
+
+        $original = (string) $file['name'];
+
+        if (class_exists('\AtomFramework\Services\FileValidationService')) {
+            $original = \AtomFramework\Services\FileValidationService::sanitizeFilename($original);
+        }
+
+        $projectService->addResource($project->id, [
+            'resource_type' => 'document',
+            'title' => mb_substr(trim((string) $request->getParameter('title')) ?: $original, 0, 500),
+            'description' => trim((string) $request->getParameter('description')) ?: null,
+            'tags' => mb_substr(trim((string) $request->getParameter('tags')), 0, 500) ?: null,
+            'file_path' => 'uploads/research/project-documents/' . $project->id . '/' . $stored,
+            'file_name' => mb_substr($original, 0, 255),
+            'file_size' => (int) $file['size'],
+            'mime_type' => $mime ? mb_substr($mime, 0, 127) : null,
+        ], $researcher->id);
+
+        $projectService->logActivity($project->id, $researcher->id, 'resource_added', 'Uploaded a document');
+        $this->getUser()->setFlash('notice', $this->context->i18n->__('Document uploaded.'));
+        $this->redirect('research/project/' . $project->id);
+    }
+
+    /**
+     * Detach a linked source or uploaded document from a project.
+     *
+     * The resource is re-checked against the project rather than trusted from
+     * the request: without that, any researcher with access to any project could
+     * delete a resource belonging to another by guessing its id.
+     */
+    public function executeProjectRemoveResource($request)
+    {
+        [$researcher, $project, $projectService] = $this->requireProjectAccess($request);
+
+        if (!$request->isMethod('post')) {
+            $this->redirect('research/project/' . $project->id);
+        }
+
+        $resourceId = (int) $request->getParameter('resource_id');
+
+        $owned = DB::table('research_project_resource')
+            ->where('id', $resourceId)
+            ->where('project_id', $project->id)
+            ->exists();
+
+        if (!$owned) {
+            $this->forward404('No such resource on this project.');
+        }
+
+        $projectService->removeResource($resourceId);
+        $projectService->logActivity($project->id, $researcher->id, 'resource_removed', 'Removed a project resource');
+        $this->getUser()->setFlash('notice', $this->context->i18n->__('Removed.'));
+        $this->redirect('research/project/' . $project->id);
+    }
+
+    /**
+     * Bytes as something a person reads. Mirrors FileValidationService's own
+     * formatting so a limit reads the same wherever it is shown.
+     */
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes >= 1024 * 1024 * 1024) {
+            return round($bytes / (1024 * 1024 * 1024), 1) . ' GB';
+        }
+
+        if ($bytes >= 1024 * 1024) {
+            return round($bytes / (1024 * 1024)) . ' MB';
+        }
+
+        return round($bytes / 1024) . ' KB';
+    }
+
     public function executeEditProject($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
