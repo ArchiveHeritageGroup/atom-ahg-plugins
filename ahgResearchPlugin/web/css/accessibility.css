@@ -1,0 +1,34 @@
+/*
+ * Accessibility helpers - focus indicator and screen-reader-only text.
+ * Issue #182 (WCAG 2.1 AA).
+ *
+ * A stylesheet rather than a runtime-injected <style> element. The injector
+ * this replaces built the same two rules in JavaScript and appended them to
+ * head with no nonce, which a Content-Security-Policy carrying style-src
+ * 'self' plus a per-request nonce refuses: an element without the nonce fails
+ * style-src-elem, and style-src-attr does not apply to elements. It accounted
+ * for every remaining CSP violation on archaeology after the 2026-08-24 fix
+ * (v3.106.19) - 9 exercised across 3 pages, on 20 templates that include the
+ * partial.
+ *
+ * Both rules are static, so there is nothing to inject: a stylesheet needs no
+ * nonce, cannot double-apply, and does not break again the next time the CSP
+ * tightens.
+ */
+
+*:focus-visible {
+    outline: 3px solid #0d6efd !important;
+    outline-offset: 2px;
+}
+
+.ahg-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

@@ -7,6 +7,11 @@
  *   include_partial('workflow/accessibilityHelpers')
  */
 ?>
+<!-- Focus indicator + screen-reader-only helper. A stylesheet, not an injected
+     <style> element: an element built in JavaScript carries no nonce, and CSP
+     refuses it under style-src. See web/css/accessibility.css. -->
+<link rel="stylesheet" href="/plugins/ahgWorkflowPlugin/web/css/accessibility.css">
+
 <!-- Skip Navigation -->
 <a href="#main-content" class="visually-hidden-focusable position-absolute top-0 start-0 p-2 bg-primary text-white z-3">
     <?php echo __('Skip to main content') ?>
@@ -45,15 +50,7 @@
         }
     };
 
-    // Focus indicator CSS (injected once)
-    if (!document.getElementById('ahgA11yStyles')) {
-        var style = document.createElement('style');
-        style.id = 'ahgA11yStyles';
-        style.textContent =
-            '*:focus-visible { outline: 3px solid #0d6efd !important; outline-offset: 2px; }' +
-            '.ahg-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }';
-        document.head.appendChild(style);
-    }
+    // Focus indicator CSS now ships as web/css/accessibility.css, linked above.
 
     // Keyboard: Escape closes modals / dropdowns opened by JS
     document.addEventListener('keydown', function(e) {
