@@ -39,7 +39,24 @@ class ProvenanceService
         
         $events = $this->repository->getEvents($record->id, $culture);
         $documents = $this->repository->getDocuments($record->id);
-        
+
+        // A chain of custody may be held as owner spans in provenance_entry
+        // rather than as transfers in provenance_event. Where the record has no
+        // events, build the timeline from those entries but keep the record's
+        // own certainty and gap flags - the entries carry the chain, the record
+        // carries its assessment. Without this, creating a provenance_record row
+        // for an entry-based chain silently empties the panel.
+        if (empty($events)) {
+            $entries = $this->repository->getLegacyMuseumEntries($objectId);
+            if (!empty($entries)) {
+                $display = $this->buildLegacyMuseumDisplay($entries);
+                $display['record'] = $record;
+                $display['documents'] = $documents;
+
+                return $display;
+            }
+        }
+
         return [
             'exists' => true,
             'record' => $record,
@@ -55,6 +72,31 @@ class ProvenanceService
      * Read-only synthesis (no data is written/migrated) so soft-retired museum
      * provenance still shows in the unified, sector-agnostic panel.
      */
+    /**
+     * Weakest certainty across a set of entries. A chain is only as certain as
+     * its least certain link, so the panel must not report "certain" because
+     * most of the links are.
+     */
+    private static function weakestCertainty(array $entries): string
+    {
+        $rank = ['certain' => 0, 'probable' => 1, 'possible' => 2, 'uncertain' => 3, 'unknown' => 4];
+        $worst = 'certain';
+        $seen = false;
+
+        foreach ($entries as $e) {
+            $c = $e['certainty'] ?? null;
+            if (!$c || !isset($rank[$c])) {
+                continue;
+            }
+            $seen = true;
+            if ($rank[$c] > $rank[$worst]) {
+                $worst = $c;
+            }
+        }
+
+        return $seen ? $worst : 'unknown';
+    }
+
     private function buildLegacyMuseumDisplay(array $entries): array
     {
         $timeline = [];
@@ -64,7 +106,9 @@ class ProvenanceService
         foreach ($entries as $e) {
             $start = $e['start_date'] ?? null;
             $end = $e['end_date'] ?? null;
-            if ($start && $end) {
+            if ($start && $end && $start === $end) {
+                $dateDisplay = $start;
+            } elseif ($start && $end) {
                 $dateDisplay = $start . '–' . $end;
             } elseif ($start) {
                 $dateDisplay = $start;
@@ -86,6 +130,7 @@ class ProvenanceService
                 'location' => $e['owner_location'] ?? null,
                 'certainty' => $e['certainty'] ?? 'unknown',
                 'description' => $e['notes'] ?? '',
+                'is_gap' => !empty($e['is_gap']),
             ];
 
             if (!empty($e['is_gap'])) {
@@ -97,7 +142,7 @@ class ProvenanceService
         }
 
         $record = (object) [
-            'certainty_level' => 'unknown',
+            'certainty_level' => self::weakestCertainty($entries),
             'has_gaps' => $hasGaps ? 1 : 0,
             'nazi_era_provenance_checked' => 0,
             'nazi_era_provenance_clear' => null,
