@@ -1200,9 +1200,19 @@ class privacyAdminActions extends AhgController
         $result = $service->getRedactedPdf($objectId, $originalPath);
 
         if (!$result['success']) {
-            // Log error and serve original (fallback)
+            // Fail CLOSED. This action is public (see boot()) and execution only
+            // reaches here when the caller was NOT entitled to bypass redaction,
+            // so serving the original hands an unredacted document to exactly the
+            // person who must not receive one - and it happens silently, on the
+            // paths most likely to break (missing tool, unwritable cache, damaged
+            // PDF). RedactionAccess fails closed for this reason; so must this.
             error_log('PDF redaction failed for object ' . $objectId . ': ' . ($result['error'] ?? 'Unknown error'));
-            $this->servePdf($originalPath, $digitalObject->name ?? 'document.pdf');
+
+            $response = $this->getResponse();
+            $response->setStatusCode(503);
+            $response->setContentType('text/plain; charset=utf-8');
+            $response->setContent('This document cannot be served at present: redaction could not be applied.');
+
             return sfView::NONE;
         }
 
