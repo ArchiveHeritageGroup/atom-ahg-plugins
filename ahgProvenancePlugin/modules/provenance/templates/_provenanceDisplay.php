@@ -71,7 +71,7 @@ $certaintyClass = function ($c) {
           <?php echo __('Certainty') ?>: <?php echo ucfirst($record->certainty_level ?? 'unknown') ?>
         </span>
       </div>
-      <?php if (!empty($provenance['timeline'])): ?>
+      <?php if (count($provenance['timeline']) > 0): ?>
       <div class="col-auto">
         <span class="badge bg-light text-dark border">
           <?php echo count($provenance['timeline']) ?> <?php echo __('in chain of custody') ?>
@@ -94,7 +94,7 @@ $certaintyClass = function ($c) {
 
     <!-- Chain of custody, drawn in full. Every link is shown: a chain that is
          summarised away to a count is not a provenance display. -->
-    <?php if (!empty($provenance['timeline'])): ?>
+    <?php if (count($provenance['timeline']) > 0): ?>
     <small class="text-muted d-block mb-2"><?php echo __('Chain of custody') ?></small>
     <ol class="ahg-prov-chain">
       <?php foreach ($provenance['timeline'] as $i => $event): ?>
@@ -114,7 +114,7 @@ $certaintyClass = function ($c) {
       </li>
       <?php endforeach ?>
     </ol>
-    <?php elseif (!empty($provenance['summary'])): ?>
+    <?php elseif ('' !== trim((string) $provenance['summary'])): ?>
     <p class="mb-0"><?php echo nl2br(htmlspecialchars($provenance['summary'])) ?></p>
     <?php endif ?>
 
