@@ -87,12 +87,22 @@ class AccessionEditAction extends AhgEditController
     {
         parent::execute($request);
 
-        // Parameter "accession" is sent when creating an accrual
+        // Parameter "accession" is sent when creating an accrual, and carries the
+        // URL of the source accession.
+        //
+        // A route can match without carrying a resource - the identifier
+        // availability check URL is exactly such a route, and it does turn up in
+        // this parameter. Base AtoM dereferences ->resource unconditionally and
+        // dies with "Call to a member function isAccrual() on null", taking the
+        // whole add form down. A malformed or resourceless accession parameter is
+        // simply not an accrual source; treat it as a plain add rather than a
+        // fatal.
         if (isset($request->accession)) {
             $params = $this->context->routing->parse(Qubit::pathInfo($request->accession));
+            $source = isset($params['_sf_route']) ? ($params['_sf_route']->resource ?? null) : null;
 
-            if (isset($params['_sf_route'])) {
-                $this->accession = $params['_sf_route']->resource;
+            if ($source instanceof \QubitAccession) {
+                $this->accession = $source;
 
                 if ($this->accession->isAccrual()) {
                     throw new sfException('This accession can\'t be created.');

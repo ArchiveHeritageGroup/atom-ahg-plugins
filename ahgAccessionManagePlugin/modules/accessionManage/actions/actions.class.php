@@ -123,4 +123,70 @@ class accessionManageActions extends AhgController
 
         // Use Success.php template (Symfony default)
     }
+
+    /**
+     * Identifier-availability check for the accession edit form.
+     *
+     * Lives here rather than in modules/accession because base AtoM's
+     * qtAccessionPlugin is enabled from the hardcoded $corePlugins list in
+     * ProjectConfiguration, which array_merge()s core BEFORE anything read from
+     * atom_plugin. Its modules/accession therefore always wins resolution and
+     * plugin load_order cannot change that, so our override of that module is
+     * never reached. accessionManage is a module base does not ship, so this is.
+     *
+     * What base does here is call QubitAcl::check($this->resource, ...) - but
+     * $this->resource is never populated for this action, because it is reached
+     * directly rather than through a route carrying a resource. The null lands in
+     * QubitAcl::checkAccessByClass(), which calls get_class() on it and dies:
+     * "Argument #1 ($object) must be of type object, null given". Every
+     * availability check was a 500.
+     */
+    public function executeCheckIdentifierAvailable($request)
+    {
+        // Resolve a real subject: the accession being edited, or a new one while
+        // the record is still an unsaved add.
+        $subject = null;
+
+        if (!empty($request->accession_id)) {
+            $subject = \QubitAccession::getById($request->accession_id);
+        }
+
+        if (null === $subject) {
+            $subject = \AtomFramework\Services\Write\WriteServiceFactory::accession()->newAccession();
+        }
+
+        $this->resource = $subject;
+
+        if (!\AtomExtensions\Services\AclService::check($subject, 'create')
+            && !\AtomExtensions\Services\AclService::check($subject, 'update')) {
+            $this->getResponse()->setStatusCode(401);
+
+            return \sfView::NONE;
+        }
+
+        $this->getResponse()->setContentType('application/json');
+
+        $valid = $this->identifierIsAvailable($request->identifier, $subject);
+        $this->getResponse()->setContent(json_encode([
+            'allowable' => $valid,
+            'message' => $valid
+                ? $this->context->i18n->__('Identifier available.')
+                : $this->context->i18n->__('Identifier unavailable.'),
+        ]));
+
+        return \sfView::NONE;
+    }
+
+    private function identifierIsAvailable($identifier, $resource): bool
+    {
+        $validator = new \QubitValidatorAccessionIdentifier(['required' => true, 'resource' => $resource]);
+
+        try {
+            $validator->clean($identifier);
+
+            return true;
+        } catch (\sfValidatorError $e) {
+            return false;
+        }
+    }
 }

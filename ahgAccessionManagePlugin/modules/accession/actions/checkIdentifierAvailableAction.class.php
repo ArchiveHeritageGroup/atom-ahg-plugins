@@ -24,8 +24,29 @@ class AccessionCheckIdentifierAvailableAction extends AhgController
 {
     public function execute($request)
     {
+        // This action is reached directly by the edit form's availability check,
+        // not through a route that carries a resource, so $this->resource is
+        // never populated. Passing null on to the ACL check reaches
+        // QubitAcl::checkAccessByClass(), which calls get_class() on it and dies
+        // with "Argument #1 ($object) must be of type object, null given" -
+        // a 500 on every availability check.
+        //
+        // Resolve the subject the same way the validator below does: the
+        // accession being edited, or a new one while the record is still unsaved.
+        $subject = null;
+
+        if (!empty($request->accession_id)) {
+            $subject = QubitAccession::getById($request->accession_id);
+        }
+
+        if (null === $subject) {
+            $subject = WriteServiceFactory::accession()->newAccession();
+        }
+
+        $this->resource = $subject;
+
         // Check user authorization
-        if (!\AtomExtensions\Services\AclService::check($this->resource, 'create') && !\AtomExtensions\Services\AclService::check($this->resource, 'update')) {
+        if (!\AtomExtensions\Services\AclService::check($subject, 'create') && !\AtomExtensions\Services\AclService::check($subject, 'update')) {
             $this->getResponse()->setStatusCode(401);
 
             return sfView::NONE;

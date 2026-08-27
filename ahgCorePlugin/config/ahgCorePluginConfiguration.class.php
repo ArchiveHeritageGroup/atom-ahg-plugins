@@ -1130,6 +1130,13 @@ APPLIER;
      * could be preserved. Dropping it loses nothing that base would have kept:
      * base would have crashed and lost the entire form.
      */
+    /**
+     * Reference fields base reads from the QUERY STRING and dereferences blind.
+     */
+    protected const QUERY_RESOURCE_FIELDS = [
+        'accession',                // accrual source on /accession/add
+    ];
+
     protected const RESOURCE_FIELDS = [
         'resource',                 // accession donor, relation targets
         'type', 'geographicSubregion', 'thematicArea',
@@ -1394,7 +1401,19 @@ APPLIER;
             $context = sfContext::getInstance();
             $request = $context->getRequest();
 
-            if (!$request instanceof sfWebRequest || !$request->isMethod('post')) {
+            if (!$request instanceof sfWebRequest) {
+                return;
+            }
+
+            // GET carries the same references. Base's accrual entry point is
+            // /accession/add?accession=<url of the source accession>, and it feeds
+            // that value straight into routing->parse()->resource without checking
+            // - so a value that resolves to nothing is "isAccrual() on null" and a
+            // 500 on the add form. The POST branch below cannot see it, because
+            // there is no POST.
+            self::guardQueryResourceValues($request, $context);
+
+            if (!$request->isMethod('post')) {
                 return;
             }
 
@@ -1428,6 +1447,40 @@ APPLIER;
             }
         } catch (Throwable $ignored) {
             // A guard that throws is worse than the crash it prevents.
+        }
+    }
+
+    /**
+     * Drop query-string references that base would dereference into a fatal.
+     *
+     * Deliberately narrower than the POST guard. RESOURCE_FIELDS are form fields;
+     * applying that whole list to the query string would reach browse filters and
+     * other places where a non-resolving value is ordinary and meaningful. Only
+     * fields that base actually feeds to routing->parse() from GET belong here,
+     * and there is one: the accrual source on the accession add form.
+     */
+    protected static function guardQueryResourceValues($request, $context): void
+    {
+        $holder = $request->getParameterHolder();
+
+        foreach (self::QUERY_RESOURCE_FIELDS as $key) {
+            $value = $holder->get($key);
+
+            if (!is_string($value) || '' === trim($value)) {
+                continue;
+            }
+
+            // A bare id is a primary key, not a route reference.
+            if (ctype_digit(trim($value))) {
+                continue;
+            }
+
+            if (self::routeResolves($context, $value)) {
+                continue;
+            }
+
+            $holder->remove($key);
+            self::noteDrop($key, $value);
         }
     }
 

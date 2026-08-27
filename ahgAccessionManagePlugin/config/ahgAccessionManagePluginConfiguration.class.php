@@ -182,7 +182,10 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
         // loader prepends, so the last one registered is the first one matched.
         $routing->prependRoute('accession_check_identifier_available', new \sfRoute(
             '/accession/checkIdentifierAvailable',
-            ['module' => 'accession', 'action' => 'checkIdentifierAvailable']
+            // Dispatched to accessionManage, not accession: base's qtAccessionPlugin
+            // always wins the 'accession' module (core plugins are merged ahead of
+            // database ones), and its action crashes on a null ACL subject.
+            ['module' => 'accessionManage', 'action' => 'checkIdentifierAvailable']
         ));
 
         // =====================================================================
