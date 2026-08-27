@@ -141,8 +141,26 @@ class physicalobjectActions extends AhgController
 
     public function executeDelete($request)
     {
-        $action = new PhysicalObjectDeleteAction($this->context, 'physicalobject', 'delete');
-        return $action->execute($request);
+        // A physical object that no longer exists has no resource on the route,
+        // and base dereferences it blind ($this->resource->id) two lines in. That
+        // is a 500 for what is simply a gone record - and it is the ordinary case
+        // here, because deleting one and then revisiting its confirmation URL is
+        // exactly what a person (or a test run) does. Answer 404.
+        $route = $this->getRoute();
+
+        if (!$route || !isset($route->resource) || null === $route->resource) {
+            $this->forward404('Physical object not found.');
+        }
+
+        // Must delegate, not just execute. Running the base action on its own
+        // instance leaves form, resource and informationObjects in THAT object's
+        // varHolder, while deleteSuccess.php renders from this one's - so the
+        // template got a null $form and died on renderGlobalErrors(), 500ing every
+        // delete-confirmation page. The siblings below already do this correctly.
+        return $this->delegateToBaseAction(
+            new PhysicalObjectDeleteAction($this->context, 'physicalobject', 'delete'),
+            $request
+        );
     }
 
     // AtoM resolves actions plugin-first (qubitConfiguration::getControllerDirs) and
