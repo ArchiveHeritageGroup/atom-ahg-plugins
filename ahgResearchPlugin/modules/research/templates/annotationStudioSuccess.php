@@ -563,7 +563,12 @@ document.addEventListener('DOMContentLoaded', function() {
             var sel;
             try { sel = JSON.parse(selectorStr); } catch(e) { return; }
             var xywh = sel.value || '';
-            var match = xywh.match(/xywh=pixel:(\d+),(\d+),(\d+),(\d+)/);
+            // -?\d+ rather than \d+: a shape drawn from right to left, or one
+            // whose bounding box starts above or left of the origin, stores a
+            // negative coordinate. The stricter pattern refused to match it and
+            // returned early, so that annotation simply never appeared - listed
+            // in the sidebar, absent from the image, with nothing logged.
+            var match = xywh.match(/xywh=pixel:(-?\d+),(-?\d+),(-?\d+),(-?\d+)/);
             if (!match) return;
 
             var shapeType = sel.shapeType || 'rect';
@@ -784,11 +789,31 @@ document.addEventListener('DOMContentLoaded', function() {
         return r + ',' + g + ',' + b;
     }
 
-    // Get the shape to save - prefer active object, fall back to last drawn
+    // Get the shape to save.
+    //
+    // The shape just drawn wins over the canvas's active object. Clicking an
+    // annotation in the sidebar calls canvas.setActiveObject() on the shape it
+    // was loaded as, and drawing afterwards does not clear that selection - so
+    // preferring "active" saved the OLD annotation's geometry for the NEW one.
+    // Every annotation after the first then stored the first one's region, and
+    // they all rendered stacked in the same place: the studio looked like it was
+    // showing only the first annotation, however many had been saved.
+    //
+    // An already-saved shape is never a candidate: it carries savedAnnotationId,
+    // and re-saving its region as a new annotation is what produced the duplicate
+    // regions in the first place.
     function getShapeForSave() {
+        if (lastDrawnShape
+            && canvas.getObjects().indexOf(lastDrawnShape) !== -1
+            && !(lastDrawnShape.annotationData && lastDrawnShape.annotationData.savedAnnotationId)) {
+            return lastDrawnShape;
+        }
+
         var active = canvas.getActiveObject();
-        if (active && active.annotationData) return active;
-        if (lastDrawnShape && canvas.getObjects().indexOf(lastDrawnShape) !== -1) return lastDrawnShape;
+        if (active && active.annotationData && !active.annotationData.savedAnnotationId) {
+            return active;
+        }
+
         return null;
     }
 
