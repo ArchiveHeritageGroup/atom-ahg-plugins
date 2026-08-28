@@ -2489,8 +2489,19 @@ class researchActions extends AhgController
     {
         $configuredMb = 20;
 
-        if (class_exists('\AtomFramework\Services\AhgSettingsService')) {
-            $configuredMb = (int) \AtomFramework\Services\AhgSettingsService::getInt('research_document_max_mb', 20);
+        // AtomExtensions, not AtomFramework. The class really is
+        // AtomExtensions\Services\AhgSettingsService - getting the namespace wrong
+        // here did two things, neither of them visibly:
+        //
+        //   class_exists() returned false, so the admin-configurable limit was never
+        //   read and 20 MB was used regardless of the setting; and
+        //
+        //   on an instance running the generated ahgRuntimePlugin, the autoload
+        //   attempt re-included a file whose class that plugin had already declared,
+        //   fataling with "Cannot declare class ... because the name is already in
+        //   use" - a 500 on the whole project page, not a quiet default.
+        if (class_exists('\AtomExtensions\Services\AhgSettingsService')) {
+            $configuredMb = (int) \AtomExtensions\Services\AhgSettingsService::getInt('research_document_max_mb', 20);
         }
 
         if ($configuredMb < 1) {
