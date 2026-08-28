@@ -350,9 +350,19 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-book-open me-2"></i><?php echo __('External sources and documents'); ?></h5>
                 <?php
-                    $externals = array_filter($resources ?? [], static function ($r) {
-                        return in_array($r->resource_type ?? '', ['external_link', 'document'], true);
-                    });
+                    // Symfony hands templates an sfOutputEscaperArrayDecorator, not
+                    // an array. It is iterable and countable, so a foreach reads
+                    // normally - but array_filter() type-errors on it, and that is a
+                    // 500 on the whole project page rather than a missing badge.
+                    // Unescape before any array_* call.
+                    $externals = array_filter(
+                        (array) sfOutputEscaper::unescape($resources ?? []),
+                        static function ($r) {
+                            $type = is_object($r) ? ($r->resource_type ?? '') : ($r['resource_type'] ?? '');
+
+                            return in_array($type, ['external_link', 'document'], true);
+                        }
+                    );
                 ?>
                 <span class="badge bg-primary"><?php echo count($externals); ?></span>
             </div>
