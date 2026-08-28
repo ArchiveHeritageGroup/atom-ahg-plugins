@@ -14,6 +14,34 @@ class ReportExportService
 {
     protected $reportService;
 
+    /**
+     * Make a vendored class available without re-registering an autoloader.
+     *
+     * Instances running the generated ahgRuntimePlugin carry a SECOND copy of the
+     * framework's vendor/, and its composer autoloader is already registered by
+     * the time this runs. Both copies were built from the same composer.lock, so
+     * the generated ComposerAutoloaderInit<hash> class has the SAME NAME in both -
+     * and requiring the second fatals with "Cannot declare class ... because the
+     * name is already in use". require_once cannot prevent that: the file paths
+     * differ, only the class inside collides. Every journal export 500'd on those
+     * instances while working fine on instances that load the framework directly.
+     *
+     * Asking whether the class is reachable answers the real question. Where the
+     * runtime plugin has already provided it, nothing more is loaded.
+     */
+    protected static function ensureVendorClass(string $class): void
+    {
+        if (class_exists($class)) {
+            return;
+        }
+
+        $autoload = sfConfig::get('sf_root_dir').'/atom-framework/vendor/autoload.php';
+
+        if (is_readable($autoload)) {
+            require_once $autoload;
+        }
+    }
+
     public function __construct()
     {
         $pluginsDir = sfConfig::get('sf_plugins_dir');
@@ -357,8 +385,7 @@ class ReportExportService
 
     protected function buildPdfFromHtml(string $html, string $title): string
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
-        require_once $frameworkPath . '/vendor/autoload.php';
+        self::ensureVendorClass('\\Dompdf\\Dompdf');
 
         $rootDir = sfConfig::get('sf_root_dir');
 
@@ -402,8 +429,7 @@ class ReportExportService
 
     protected function buildDocxFromSections(object $report): string
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
-        require_once $frameworkPath . '/vendor/autoload.php';
+        self::ensureVendorClass('\\PhpOffice\\PhpWord\\PhpWord');
 
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
         $phpWord->getDocInfo()->setTitle($report->title);
@@ -610,8 +636,7 @@ class ReportExportService
 
     protected function buildNotesDocx(array $annotations, ?object $researcher): string
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
-        require_once $frameworkPath . '/vendor/autoload.php';
+        self::ensureVendorClass('\\PhpOffice\\PhpWord\\PhpWord');
 
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
         $phpWord->setDefaultFontName('Calibri');
@@ -674,8 +699,7 @@ class ReportExportService
 
     protected function buildJournalDocx(array $entries, ?object $researcher): string
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
-        require_once $frameworkPath . '/vendor/autoload.php';
+        self::ensureVendorClass('\\PhpOffice\\PhpWord\\PhpWord');
 
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
         $phpWord->setDefaultFontName('Calibri');
@@ -746,8 +770,7 @@ class ReportExportService
 
     protected function buildFindingAidDocx(object $collection, array $items, ?object $researcher): string
     {
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework';
-        require_once $frameworkPath . '/vendor/autoload.php';
+        self::ensureVendorClass('\\PhpOffice\\PhpWord\\PhpWord');
 
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
         $phpWord->setDefaultFontName('Calibri');

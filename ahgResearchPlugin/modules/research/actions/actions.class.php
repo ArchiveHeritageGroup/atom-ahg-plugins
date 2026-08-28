@@ -2095,8 +2095,16 @@ class researchActions extends AhgController
 
         $this->link           = $orcid->getLink($this->researcher->id);
         $this->isConfigured   = $orcid->isConfiguredFor($this->researcher->id);
-        $this->cred           = \Illuminate\Database\Capsule\Manager::table('researcher_orcid_credential')
-            ->where('researcher_id', $this->researcher->id)->first();
+        // researcher_orcid_credential ships with this plugin's migration, which
+        // has not run on every instance. Querying it unguarded is a hard 500 on
+        // /research/orcid - and only when signed in, so an anonymous check sees
+        // the login page at HTTP 200 and reads as healthy. A feature list is the
+        // right fallback here: no credentials stored is exactly what an absent
+        // table means to this page.
+        $this->cred = \AhgCore\Core\AhgDb::hasOptionalTable('researcher_orcid_credential')
+            ? \Illuminate\Database\Capsule\Manager::table('researcher_orcid_credential')
+                ->where('researcher_id', $this->researcher->id)->first()
+            : null;
         $this->hasCredentials = (bool) $this->cred;
     }
 
@@ -3623,13 +3631,27 @@ class researchActions extends AhgController
             $this->redirect('research/dashboard');
         }
 
-        // List keys from ahg_api_key (the real API key table)
-        $this->apiKeys = DB::table('ahg_api_key')
-            ->where('user_id', $userId)
-            ->orderByDesc('created_at')
-            ->get()->toArray();
+        // ahg_api_key belongs to ahgAPIPlugin's migration and is absent on
+        // instances where that has not run - a hard 500 on /research/profile/api-keys,
+        // signed in only. An empty list is the honest answer: no table, no keys.
+        $this->apiKeysAvailable = \AhgCore\Core\AhgDb::hasOptionalTable('ahg_api_key');
+
+        $this->apiKeys = $this->apiKeysAvailable
+            ? DB::table('ahg_api_key')
+                ->where('user_id', $userId)
+                ->orderByDesc('created_at')
+                ->get()->toArray()
+            : [];
 
         if ($request->isMethod('post')) {
+            // A write against a table that is not there is the same 500 the read
+            // above used to cause. Refuse the action and say why, rather than
+            // letting the user submit a form whose backing store does not exist.
+            if (!$this->apiKeysAvailable) {
+                $this->getUser()->setFlash('error', 'API keys are unavailable on this instance: the API key store is not installed.');
+                $this->redirect('research/apiKeys');
+            }
+
             $action = $request->getParameter('form_action');
 
             if ($action === 'generate') {

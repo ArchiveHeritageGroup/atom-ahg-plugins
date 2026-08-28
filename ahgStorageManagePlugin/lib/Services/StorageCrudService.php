@@ -17,6 +17,28 @@ class StorageCrudService
     /**
      * Get a physical object by ID with all related data.
      */
+    /**
+     * Numeric-or-null, for the decimal and int columns on physical_object_extended.
+     *
+     * These values went to the database raw. With MySQL strict mode that is a 500
+     * when someone types text into a width; without strict mode it is a silent
+     * coercion to 0.00, which is worse - a wrong dimension that nothing reports.
+     * On an instance where physical_object_extended is absent entirely the field
+     * is accepted and discarded. Three behaviours for one form field, and not a
+     * validation message among them.
+     *
+     * Empty means "not supplied" and becomes null. Non-numeric is refused rather
+     * than quietly turned into a number.
+     */
+    private static function numericOrNull($value)
+    {
+        if (null === $value || '' === trim((string) $value)) {
+            return null;
+        }
+
+        return is_numeric($value) ? $value + 0 : null;
+    }
+
     public static function getById(int $id, string $culture = 'en'): ?array
     {
         $row = DB::table('physical_object')
@@ -278,19 +300,19 @@ class StorageCrudService
                 'position' => $data['position'] ?? null,
                 'barcode' => $data['barcode'] ?? null,
                 'reference_code' => $data['referenceCode'] ?? null,
-                'width' => $data['width'] ?? null,
-                'height' => $data['height'] ?? null,
-                'depth' => $data['depth'] ?? null,
-                'total_capacity' => $data['totalCapacity'] ?? null,
-                'used_capacity' => $data['usedCapacity'] ?? null,
+                'width' => self::numericOrNull($data['width'] ?? null),
+                'height' => self::numericOrNull($data['height'] ?? null),
+                'depth' => self::numericOrNull($data['depth'] ?? null),
+                'total_capacity' => self::numericOrNull($data['totalCapacity'] ?? null),
+                'used_capacity' => self::numericOrNull($data['usedCapacity'] ?? null),
                 'capacity_unit' => $data['capacityUnit'] ?? null,
-                'total_linear_metres' => $data['totalLinearMetres'] ?? null,
-                'used_linear_metres' => $data['usedLinearMetres'] ?? null,
+                'total_linear_metres' => self::numericOrNull($data['totalLinearMetres'] ?? null),
+                'used_linear_metres' => self::numericOrNull($data['usedLinearMetres'] ?? null),
                 'climate_controlled' => $data['climateControlled'] ?? null,
-                'temperature_min' => $data['temperatureMin'] ?? null,
-                'temperature_max' => $data['temperatureMax'] ?? null,
-                'humidity_min' => $data['humidityMin'] ?? null,
-                'humidity_max' => $data['humidityMax'] ?? null,
+                'temperature_min' => self::numericOrNull($data['temperatureMin'] ?? null),
+                'temperature_max' => self::numericOrNull($data['temperatureMax'] ?? null),
+                'humidity_min' => self::numericOrNull($data['humidityMin'] ?? null),
+                'humidity_max' => self::numericOrNull($data['humidityMax'] ?? null),
                 'security_level' => $data['securityLevel'] ?? null,
                 'access_restrictions' => $data['accessRestrictions'] ?? null,
                 'status' => $data['status'] ?? null,
