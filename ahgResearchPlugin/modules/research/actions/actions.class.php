@@ -2590,7 +2590,7 @@ class researchActions extends AhgController
         [$researcher, $project, $projectService] = $this->requireProjectAccess($request);
 
         if (!$request->isMethod('post')) {
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         $url = trim((string) $request->getParameter('external_url'));
@@ -2602,7 +2602,7 @@ class researchActions extends AhgController
 
         if (!$valid) {
             $this->getUser()->setFlash('error', $this->context->i18n->__('Enter a valid http or https address.'));
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         $projectService->addResource($project->id, [
@@ -2616,7 +2616,7 @@ class researchActions extends AhgController
 
         $projectService->logActivity($project->id, $researcher->id, 'resource_added', 'Linked an external source');
         $this->getUser()->setFlash('notice', $this->context->i18n->__('External source linked.'));
-        $this->redirect('research/project/' . $project->id);
+        $this->redirect('research/viewProject?id=' . $project->id);
     }
 
     /**
@@ -2632,7 +2632,7 @@ class researchActions extends AhgController
         [$researcher, $project, $projectService] = $this->requireProjectAccess($request);
 
         if (!$request->isMethod('post')) {
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         $maxBytes = $this->projectDocumentMaxBytes();
@@ -2648,14 +2648,14 @@ class researchActions extends AhgController
                 : $this->context->i18n->__('Choose a file to upload.');
 
             $this->getUser()->setFlash('error', $message);
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         if (UPLOAD_ERR_OK !== $file['error']) {
             $this->getUser()->setFlash('error', in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
                 ? $this->context->i18n->__('That file is larger than the %1% limit.', ['%1%' => $this->formatBytes($maxBytes)])
                 : $this->context->i18n->__('The upload did not complete. Please try again.'));
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         $allowed = ['pdf', 'doc', 'docx', 'odt', 'rtf', 'txt', 'md', 'csv', 'xls', 'xlsx', 'ods', 'ppt', 'pptx', 'odp', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'tif', 'tiff', 'zip'];
@@ -2676,18 +2676,18 @@ class researchActions extends AhgController
 
             if (empty($check['valid'])) {
                 $this->getUser()->setFlash('error', implode(' ', $check['errors'] ?? [$this->context->i18n->__('That file was refused.')]));
-                $this->redirect('research/project/' . $project->id);
+                $this->redirect('research/viewProject?id=' . $project->id);
             }
         } elseif ($file['size'] > $maxBytes) {
             $this->getUser()->setFlash('error', $this->context->i18n->__('That file is larger than the %1% limit.', ['%1%' => $this->formatBytes($maxBytes)]));
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         $uploadDir = sfConfig::get('sf_root_dir') . '/uploads/research/project-documents/' . $project->id;
 
         if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
             $this->getUser()->setFlash('error', $this->context->i18n->__('The upload directory could not be created.'));
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         // Stored name is generated, never the browser's: the original is kept in
@@ -2697,7 +2697,7 @@ class researchActions extends AhgController
 
         if (!move_uploaded_file($file['tmp_name'], $uploadDir . '/' . $stored)) {
             $this->getUser()->setFlash('error', $this->context->i18n->__('The file could not be saved.'));
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         $mime = null;
@@ -2726,7 +2726,7 @@ class researchActions extends AhgController
 
         $projectService->logActivity($project->id, $researcher->id, 'resource_added', 'Uploaded a document');
         $this->getUser()->setFlash('notice', $this->context->i18n->__('Document uploaded.'));
-        $this->redirect('research/project/' . $project->id);
+        $this->redirect('research/viewProject?id=' . $project->id);
     }
 
     /**
@@ -2741,7 +2741,7 @@ class researchActions extends AhgController
         [$researcher, $project, $projectService] = $this->requireProjectAccess($request);
 
         if (!$request->isMethod('post')) {
-            $this->redirect('research/project/' . $project->id);
+            $this->redirect('research/viewProject?id=' . $project->id);
         }
 
         $resourceId = (int) $request->getParameter('resource_id');
@@ -2758,7 +2758,7 @@ class researchActions extends AhgController
         $projectService->removeResource($resourceId);
         $projectService->logActivity($project->id, $researcher->id, 'resource_removed', 'Removed a project resource');
         $this->getUser()->setFlash('notice', $this->context->i18n->__('Removed.'));
-        $this->redirect('research/project/' . $project->id);
+        $this->redirect('research/viewProject?id=' . $project->id);
     }
 
     /**
