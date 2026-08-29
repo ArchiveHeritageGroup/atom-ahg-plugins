@@ -371,7 +371,7 @@
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <h6 class="small text-uppercase text-muted"><?php echo __('Link an external source'); ?></h6>
-                        <form method="post" action="<?php echo url_for('research/project/' . $project->id . '/link'); ?>">
+                        <form method="post" action="<?php echo url_for('@research_project_add_link?id=' . $project->id); ?>">
                             <div class="mb-2">
                                 <input type="url" name="external_url" class="form-control form-control-sm" required placeholder="https://..." aria-label="<?php echo __('Source address'); ?>">
                             </div>
@@ -398,7 +398,7 @@
 
                     <div class="col-md-6">
                         <h6 class="small text-uppercase text-muted"><?php echo __('Upload a document'); ?></h6>
-                        <form method="post" enctype="multipart/form-data" action="<?php echo url_for('research/project/' . $project->id . '/document'); ?>">
+                        <form method="post" enctype="multipart/form-data" action="<?php echo url_for('@research_project_upload_document?id=' . $project->id); ?>">
                             <?php // Mirrors the server limit so the browser can refuse early; the action enforces it regardless. ?>
                             <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo (int) ($documentMaxBytes ?? 0); ?>">
                             <div class="mb-2">
@@ -445,7 +445,7 @@
                                         <?php endif; ?>
                                     </div>
 
-                                    <form method="post" action="<?php echo url_for('research/project/' . $project->id . '/resource/remove'); ?>" onsubmit="return confirm('<?php echo __('Remove this item?'); ?>');">
+                                    <form method="post" action="<?php echo url_for('@research_project_remove_resource?id=' . $project->id); ?>" onsubmit="return confirm('<?php echo __('Remove this item?'); ?>');">
                                         <input type="hidden" name="resource_id" value="<?php echo (int) $res->id; ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="<?php echo __('Remove'); ?>"><i class="fas fa-times"></i></button>
                                     </form>
