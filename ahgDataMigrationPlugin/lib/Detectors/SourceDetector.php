@@ -36,6 +36,13 @@ class SourceDetector
             'xml_root' => 'collection',
             'namespaces' => ['http://www.loc.gov/MARC21/slim'],
         ],
+        // Calm exports the tree inside RefNo and pairs it with AltRefNo; that
+        // pair is what distinguishes a Calm extract from a generic archival
+        // CSV. Level and AdminHistory are listed to raise confidence, not to
+        // carry the match on their own - both are common to other sources.
+        'calm' => [
+            'columns' => ['refno', 'altrefno', 'level', 'adminhistory'],
+        ],
         'atom_csv' => [
             'columns' => ['legacyId', 'parentId', 'identifier', 'title', 'levelOfDescription'],
         ],
@@ -58,6 +65,7 @@ class SourceDetector
         'ead3' => 'EAD3',
         'dc' => 'Dublin Core XML',
         'marc' => 'MARC XML',
+        'calm' => 'Axiell Calm',
         'atom_csv' => 'AtoM CSV',
         'generic_csv' => 'Generic CSV',
         'preservica_opex' => 'Preservica OPEX',
