@@ -2660,8 +2660,15 @@ class researchActions extends AhgController
 
         $allowed = ['pdf', 'doc', 'docx', 'odt', 'rtf', 'txt', 'md', 'csv', 'xls', 'xlsx', 'ods', 'ppt', 'pptx', 'odp', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'tif', 'tiff', 'zip'];
 
-        if (class_exists('\AtomFramework\Services\FileValidationService')) {
-            $check = \AtomFramework\Services\FileValidationService::validateUpload($file, [
+        // AtomExtensions, not AtomFramework. src/Services carries BOTH namespaces
+        // (38 classes under one, 30 under the other), so it has to be checked per
+        // class rather than assumed. Naming the wrong one made class_exists() false
+        // here, which skipped validation silently - and on an instance running the
+        // generated runtime plugin the autoload attempt re-declared a class that
+        // plugin already had, fataling AFTER the file was moved into place but
+        // BEFORE the row was written. An orphaned upload with no record of it.
+        if (class_exists('\AtomExtensions\Services\FileValidationService')) {
+            $check = \AtomExtensions\Services\FileValidationService::validateUpload($file, [
                 'allowed_extensions' => $allowed,
                 'max_size' => $maxBytes,
                 'validate_mime' => true,
@@ -2702,8 +2709,8 @@ class researchActions extends AhgController
 
         $original = (string) $file['name'];
 
-        if (class_exists('\AtomFramework\Services\FileValidationService')) {
-            $original = \AtomFramework\Services\FileValidationService::sanitizeFilename($original);
+        if (class_exists('\AtomExtensions\Services\FileValidationService')) {
+            $original = \AtomExtensions\Services\FileValidationService::sanitizeFilename($original);
         }
 
         $projectService->addResource($project->id, [
