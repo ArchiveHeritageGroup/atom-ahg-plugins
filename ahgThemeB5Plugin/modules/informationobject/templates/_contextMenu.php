@@ -565,3 +565,46 @@ function scanForPii(objectId) {
   </ul>
 </section>
 <?php endif; ?>
+
+<?php
+// ── QR code for this record ────────────────────────────────────────────────
+// Scan to open this record on a phone: useful on a reading-room screen, and it
+// is the same URL a printed label carries, so the two agree by construction.
+//
+// Generated on this server. Nothing is sent to a third party, and it works in
+// an offline or air-gapped deployment - which the previous implementation,
+// an <img> pointing at chart.googleapis.com, could not (and which now 404s).
+if (isset($resource) && \AtomExtensions\Services\AhgSettingsService::getBool('show_record_qr', true)) {
+    try {
+        $qrRaw = $resource instanceof sfOutputEscaper ? sfOutputEscaper::unescape($resource) : $resource;
+        $qrSlug = $qrRaw->slug ?? null;
+
+        if ($qrSlug) {
+            require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/QrCodeService.php';
+
+            $qrBase = rtrim((string) sfConfig::get('app_siteBaseUrl', ''), '/');
+            if ('' === $qrBase) {
+                $qrBase = rtrim($sf_request->getUriPrefix(), '/');
+            }
+            $qrUrl = $qrBase . '/index.php/' . $qrSlug;
+
+            $qrSvg = (new \AtomExtensions\Services\QrCodeService())->svg($qrUrl, 3, 2);
+            ?>
+            <section class="mb-3" aria-labelledby="record-qr-heading">
+              <h5 id="record-qr-heading" class="h6"><?php echo __('Scan this record'); ?></h5>
+              <div class="text-center p-2 bg-white border rounded">
+                <?php echo $qrSvg; ?>
+                <div class="small text-muted mt-1"><?php echo __('Scan to open on a phone'); ?></div>
+              </div>
+            </section>
+            <?php
+        }
+    } catch (Throwable $e) {
+        // A record view must not 500 because a QR could not be drawn - for
+        // instance a slug longer than version 10 can encode. Log and move on.
+        if (function_exists('error_log')) {
+            error_log('record QR: ' . $e->getMessage());
+        }
+    }
+}
+?>

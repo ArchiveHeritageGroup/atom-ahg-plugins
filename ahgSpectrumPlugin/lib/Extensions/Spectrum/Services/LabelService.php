@@ -57,14 +57,18 @@ class LabelService
             'storage' => [
                 'name' => 'Storage Label',
                 'width' => 50,
-                'height' => 25,
-                'fields' => ['identifier', 'location', 'barcode']
+                // Taller than the original 25mm: a QR needs room, and a
+                // label that clips the code is worse than one without it.
+                'height' => 35,
+                // A box label scanned during a stocktake is the strongest
+                // case for a QR anywhere in the system.
+                'fields' => ['identifier', 'location', 'barcode', 'qr_code']
             ],
             'exhibition' => [
                 'name' => 'Exhibition Label',
                 'width' => 200,
                 'height' => 150,
-                'fields' => ['title', 'creator', 'date', 'materials', 'dimensions', 'credit_line', 'accession_number']
+                'fields' => ['title', 'creator', 'date', 'materials', 'dimensions', 'credit_line', 'accession_number', 'qr_code']
             ],
             'loan' => [
                 'name' => 'Loan Label',
@@ -323,11 +327,22 @@ class LabelService
      */
     private function generateQrCode(string $slug): string
     {
-        $baseUrl = $this->getSetting('site_base_url', 'https://archives.theahg.co.za');
-        $url = $baseUrl . '/index.php/' . $slug;
-        
-        // Using Google Charts API (or could use local library like phpqrcode)
-        return "https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=" . urlencode($url);
+        // The base URL is configuration, not a constant. The previous default
+        // was a hardcoded hostname, so an instance that had not set
+        // site_base_url printed labels pointing at somebody else's site.
+        $baseUrl = rtrim((string) $this->getSetting('site_base_url', ''), '/');
+        if ('' === $baseUrl && class_exists('\\sfConfig')) {
+            $baseUrl = rtrim((string) \sfConfig::get('app_siteBaseUrl', ''), '/');
+        }
+        $url = $baseUrl . '/index.php/' . ltrim($slug, '/');
+
+        // Generated locally. This used to call chart.googleapis.com, which now
+        // returns 404 - so every label carried a broken image - and which sent
+        // the URL of every record to a third party on each render.
+        require_once \sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/QrCodeService.php';
+        $qr = new \AtomExtensions\Services\QrCodeService();
+
+        return $qr->pngDataUri($url, 4, 4);
     }
     
     /**

@@ -133,10 +133,11 @@ class identifierApiActions extends AhgController
                             'svg' => $this->generateSimpleSvg($identifier['value']),
                         ],
                         'qr' => [
-                            'svg' => sprintf(
-                                '<img src="https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=%s" alt="QR" />',
-                                urlencode($qrUrl)
-                            ),
+                            // Real SVG, generated locally. This returned an <img>
+                            // pointing at chart.googleapis.com, which now 404s -
+                            // so an API consumer received markup for an image
+                            // that could never load, under the key 'svg'.
+                            'svg' => $this->qrSvg($qrUrl),
                         ],
                     ],
                 ],
@@ -170,6 +171,29 @@ class identifierApiActions extends AhgController
             ]);
         } catch (\Exception $e) {
             return $this->jsonError($e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * QR as inline SVG, generated on this server.
+     *
+     * Returns an empty string rather than throwing: an identifier response is
+     * still useful without its QR, and a barcode endpoint should not 500
+     * because a URL was too long to encode.
+     */
+    protected function qrSvg(string $url): string
+    {
+        try {
+            require_once \sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/QrCodeService.php';
+            $qr = new \AtomExtensions\Services\QrCodeService();
+
+            return $qr->svg($url, 3, 4);
+        } catch (\Throwable $e) {
+            if (function_exists('error_log')) {
+                error_log('identifierApi: QR generation failed - ' . $e->getMessage());
+            }
+
+            return '';
         }
     }
 

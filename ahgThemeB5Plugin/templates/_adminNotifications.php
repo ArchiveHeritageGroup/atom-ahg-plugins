@@ -106,8 +106,31 @@ try {
         }
     }
 
-    // Check for open (unresolved) error log entries (admin only)
-    if ($isAdmin) {
+    // Check for open (unresolved) error log entries (admin only).
+    //
+    // Suppressible via `hide_error_notifications`. A red "N open system
+    // error(s)" banner is right for an operator and wrong in front of an
+    // audience, and the demand to hide it arrives at the worst possible moment
+    // - minutes before someone presents the site.
+    //
+    // It hides the BANNER ONLY. Errors are still recorded and still readable at
+    // Admin > AHG Settings > Error Log, because the alternative people reach for
+    // otherwise is clearing the log, which destroys the evidence to remove the
+    // symptom.
+    $hideSystemErrors = false;
+    try {
+        // The settings form writes the STRING "true"; SQL or a script would
+        // write "1". (int) "true" is 0, so a numeric cast would read a ticked
+        // box as off - the setting would save cleanly and do nothing.
+        $raw = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+            ->where('setting_key', 'hide_error_notifications')
+            ->value('setting_value');
+        $hideSystemErrors = in_array(strtolower(trim((string) $raw)), ['1', 'true', 'yes', 'on'], true);
+    } catch (Exception $e) {
+        // Settings table absent on an older install - show the banner.
+    }
+
+    if ($isAdmin && !$hideSystemErrors) {
         try {
             $openErrors = (int) \Illuminate\Database\Capsule\Manager::table('ahg_error_log')
                 ->whereNull('resolved_at')

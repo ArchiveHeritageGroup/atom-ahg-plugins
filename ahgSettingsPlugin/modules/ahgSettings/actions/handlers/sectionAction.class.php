@@ -61,7 +61,7 @@ class AhgSettingsSectionAction extends AhgController
     ];
 
     protected $checkboxFields = [
-        'general' => ['ahg_theme_enabled', 'ahg_show_branding'],
+        'general' => ['ahg_theme_enabled', 'ahg_show_branding', 'hide_error_notifications'],
         'multi_tenant' => ['tenant_enabled', 'tenant_enforce_filter', 'tenant_show_switcher', 'tenant_allow_branding'],
         'metadata' => [
             'meta_extract_on_upload', 'meta_auto_populate',

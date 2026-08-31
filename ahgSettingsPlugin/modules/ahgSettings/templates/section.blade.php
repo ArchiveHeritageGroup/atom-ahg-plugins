@@ -278,6 +278,17 @@
                                         </div>
                                     </div>
 
+                                        <div class="form-group row">
+                                            <label class="col-sm-3 col-form-label">{{ __('Hide Error Banner') }}</label>
+                                            <div class="col-sm-9">
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" class="custom-control-input" id="hide_error_notifications" name="settings[hide_error_notifications]" value="true" {{ in_array(strtolower((string)($settings['hide_error_notifications'] ?? '')), ['1','true','yes','on'], true) ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="hide_error_notifications">{{ __('Hide the "open system errors" banner from administrators') }}</label>
+                                                </div>
+                                                <small class="form-text text-muted">{{ __('Hides the banner only. Errors are still recorded and remain readable under Error Log.') }}</small>
+                                            </div>
+                                        </div>
+
                                     <div class="form-group row">
                                         <label class="col-sm-3 col-form-label">{{ __('Show Branding') }}</label>
                                         <div class="col-sm-9">
