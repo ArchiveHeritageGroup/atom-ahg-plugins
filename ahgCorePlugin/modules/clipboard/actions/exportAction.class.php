@@ -142,7 +142,67 @@ class ClipboardExportAction extends DefaultEditAction
             $this->response->setStatusCode(400);
             $message = $this->context->i18n->__('Invalid export options.');
 
-            return $this->renderText(json_encode(['error' => $message]));
+            // Name the field that failed, in the response AND in the log.
+            //
+            // This used to return the sentence above and nothing else, and threw
+            // the error schema away. A user saw "Invalid export options" for
+            // every export type and every option, with no way to tell which
+            // field was rejected; nothing was written to ahg_error_log either,
+            // so there was no record to read afterwards. Diagnosing it meant
+            // guessing field combinations against a live server.
+            //
+            // sfForm rejects a bound field that has no validator with
+            // "Unexpected extra form field", so the field NAMES matter as much
+            // as the messages: a name that appears here but is absent from
+            // addField() is the whole answer.
+            $fieldErrors = [];
+
+            try {
+                foreach ($this->form->getErrorSchema()->getErrors() as $field => $error) {
+                    $fieldErrors[(string) $field] = (string) $error;
+                }
+
+                $globalError = (string) $this->form->getErrorSchema()->getMessage();
+                if ('' !== $globalError && empty($fieldErrors)) {
+                    $fieldErrors['_'] = $globalError;
+                }
+            } catch (\Throwable $e) {
+                // A diagnostic must never become the failure it reports on.
+                $fieldErrors = ['_' => 'error schema unavailable: ' . $e->getMessage()];
+            }
+
+            try {
+                $detail = [];
+                foreach ($fieldErrors as $field => $error) {
+                    $detail[] = $field . ': ' . $error;
+                }
+
+                \AtomFramework\Services\ErrorLogWriter::record([
+                    'level' => 'warning',
+                    'status_code' => 400,
+                    'message' => substr(
+                        'clipboard/export rejected the form - '
+                        . 'type=' . $this->objectType
+                        . ' format=' . $this->formatType
+                        . ' posted=[' . implode(', ', array_keys($request->getPostParameters())) . ']'
+                        . ' errors=[' . implode('; ', $detail) . ']',
+                        0,
+                        65000
+                    ),
+                    'file' => substr(__FILE__, 0, 500),
+                    'line' => __LINE__,
+                    'url' => substr($request->getUri(), 0, 2000),
+                    'http_method' => 'POST',
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            } catch (\Throwable $e) {
+                // Logging is best effort; the response below still carries the detail.
+            }
+
+            return $this->renderText(json_encode([
+                'error' => $message,
+                'fields' => $fieldErrors,
+            ]));
         }
 
         $slugs = $request->getPostParameter('slugs', []);
