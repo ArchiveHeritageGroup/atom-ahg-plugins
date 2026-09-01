@@ -385,6 +385,11 @@ class TiffPdfMergeJob
             'id' => $digitalObjectId,
             'object_id' => $informationObjectId,
             'usage_id' => 140, // QubitTerm::MASTER_ID
+            // Without media_type_id, QubitDigitalObject::createRepresentations()
+            // matches no case in its switch and returns having done nothing, so
+            // derivatives never generate and regen-derivatives reports success in
+            // 0.02s. A PDF is TEXT_ID (137), not IMAGE_ID.
+            'media_type_id' => 137, // QubitTerm::TEXT_ID
             'mime_type' => 'application/pdf',
             'byte_size' => filesize($destPath),
             'checksum' => $checksum,

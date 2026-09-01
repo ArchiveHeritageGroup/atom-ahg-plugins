@@ -44,6 +44,34 @@ class DigitalObjectViewAction extends sfAction
             $this->forward404();
         }
 
+        // The check above cannot be trusted for text masters on an instance that
+        // declines base patches. Upstream qbAclPlugin returns true for readMaster
+        // on any TEXT media object BEFORE both the ACL check and the PREMIS
+        // granted-rights check (artefactual/atom#1724), so every PDF master -
+        // drafts and embargoed records included - is anonymously downloadable.
+        // Measured on a client instance 1 Sep 2026: 2045 exposed text masters.
+        //
+        // Re-tested here because this action is ours and base is not modified.
+        // Mirrors patches/qbAclPlugin: the exception is off unless
+        // allow_public_text_masters is set, and resolving the setting fails
+        // closed. This can only deny - it never grants what the ACL withheld.
+        if ('readMaster' == $action && QubitTerm::TEXT_ID == $this->resource->mediaTypeId) {
+            try {
+                $allowPublicTextMasters = \AtomExtensions\Services\AhgSettingsService::getBool(
+                    'allow_public_text_masters',
+                    false
+                );
+            } catch (\Throwable $e) {
+                $allowPublicTextMasters = false;
+            }
+
+            if (!$allowPublicTextMasters
+                && (!$this->context->user->isAuthenticated()
+                    || !QubitGrantedRight::checkPremis($obj->id, $action))) {
+                $this->forward404();
+            }
+        }
+
         if ($this->needsPopup($action)) {
             $this->resource = $this->resource->object;
 
