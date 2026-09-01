@@ -287,6 +287,10 @@ function render_standard_viewer($resource, $options = [])
         }
     }
     $displayPath = $refPath ?: $path . $name;
+    // Every branch serves $displayPath, which is the reference copy when one
+    // exists and the master only as a fallback. An anonymous visitor is denied
+    // readMaster by digitalobject/view, so linking the master here renders an
+    // empty viewer for logged-out users even on a published record.
     $html = '<div class="digital-object-viewer">';
     if (strpos($mimeType, 'image') !== false) {
         $html .= '<a href="' . $displayPath . '" target="_blank">';
@@ -294,16 +298,16 @@ function render_standard_viewer($resource, $options = [])
         $html .= '</a>';
     } elseif (strpos($mimeType, 'video') !== false) {
         $html .= '<video controls class="w-100 ahg-media-capped">';
-        $html .= '<source src="' . $path . $name . '" type="' . $mimeType . '">';
+        $html .= '<source src="' . $displayPath . '" type="' . $mimeType . '">';
         $html .= '</video>';
     } elseif (strpos($mimeType, 'audio') !== false) {
         $html .= '<audio controls class="w-100">';
-        $html .= '<source src="' . $path . $name . '" type="' . $mimeType . '">';
+        $html .= '<source src="' . $displayPath . '" type="' . $mimeType . '">';
         $html .= '</audio>';
     } elseif (strpos($mimeType, 'pdf') !== false) {
-        $html .= '<iframe src="' . $path . $name . '" width="100%" height="600px"></iframe>';
+        $html .= '<iframe src="' . $displayPath . '" width="100%" height="600px"></iframe>';
     } else {
-        $html .= '<a href="' . $path . $name . '" target="_blank" class="btn btn-primary">';
+        $html .= '<a href="' . $displayPath . '" target="_blank" class="btn btn-primary">';
         $html .= '<i class="fas fa-download me-2"></i>Download ' . esc_entities($name);
         $html .= '</a>';
     }
