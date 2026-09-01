@@ -441,6 +441,14 @@ function render_iiif_viewer($resource, $options = [])
     // Build HTML
     $html = '';
 
+    // Geometry for every viewer below comes from viewer-switch.css, and the
+    // classes it defines are useless without it. The PDF branch returns before
+    // the image path, so linking the stylesheet only down there left
+    // .ahg-pdf-frame with no width rule at all: the iframe fell back to the
+    // 300px CSS default and rendered as a tall narrow strip in a field twice
+    // its width. Link it before the branch, not after.
+    $html .= get_iiif_viewer_css($pluginPath);
+
     // For PDF content - use simple embedded viewer without IIIF complexity
     if ($hasPdf) {
         $pdfUrl = get_digital_object_url($primaryDo);
@@ -451,7 +459,6 @@ function render_iiif_viewer($resource, $options = [])
     }
 
     // For images - use full IIIF viewer
-    $html .= get_iiif_viewer_css($pluginPath);
     $html .= '<div class="iiif-viewer-container" id="container-' . $viewerId . '">';
 
     // Determine if we have actual images (not just PDF/AV/3D)
