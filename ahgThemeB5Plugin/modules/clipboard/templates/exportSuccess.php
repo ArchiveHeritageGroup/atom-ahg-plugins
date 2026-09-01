@@ -42,7 +42,7 @@
           </h2>
           <div id="export-collapse" class="accordion-collapse collapse" aria-labelledby="export-heading">
             <div class="accordion-body">
-              <?php echo render_field($form->type); ?>
+              <?php echo render_field($form->exportType); ?>
               <?php echo render_field($form->format); ?>
               <?php if ($showOptions) { ?>
                 <div id="exportOptions">

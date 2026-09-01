@@ -11,7 +11,7 @@ class ClipboardExportAction extends DefaultEditAction
     // Arrays not allowed in class constants
     public static $NAMES = [
         'levels',
-        'type',
+        'exportType',
         'format',
         'includeDescendants',
         'includeAllLevels',
@@ -25,7 +25,24 @@ class ClipboardExportAction extends DefaultEditAction
     public function execute($request)
     {
         // Get object type and validate
-        $this->objectType = trim(strtolower($request->getParameter('type')));
+        // The form posts this as `exportType`, not `type`.
+        //
+        // A POST field named exactly `type` never reaches $_POST on this
+        // application - measured: `Type`, `xtype` and `typex` all arrive from
+        // the same request body, `type` does not, and the mechanism was never
+        // identified. The required `type` validator could therefore never be
+        // satisfied, so EVERY clipboard export failed with "Invalid export
+        // options", and objectType silently fell through to the default, which
+        // is why the Type dropdown never worked either.
+        //
+        // Same family as the documented `name="action"` bug: the house
+        // workaround is to rename the posted field. GET links still use
+        // `?type=`, which works and is used across the site, so read both.
+        $requestedType = $request->getParameter('exportType');
+        if (null === $requestedType || '' === $requestedType) {
+            $requestedType = $request->getParameter('type');
+        }
+        $this->objectType = trim(strtolower((string) $requestedType));
 
         switch ($this->objectType) {
             case 'actor':
@@ -369,14 +386,14 @@ class ClipboardExportAction extends DefaultEditAction
     protected function addField($name)
     {
         switch ($name) {
-            case 'type':
-                $this->form->setValidator('type', new sfValidatorString(
+            case 'exportType':
+                $this->form->setValidator('exportType', new sfValidatorString(
                     ['required' => true]
                 ));
-                $this->form->setWidget('type', new sfWidgetFormSelect(
+                $this->form->setWidget('exportType', new sfWidgetFormSelect(
                     ['label' => __('Type'), 'choices' => $this->typeChoices]
                 ));
-                $this->form->setDefault('type', $this->objectType);
+                $this->form->setDefault('exportType', $this->objectType);
 
                 break;
 
@@ -541,7 +558,7 @@ class ClipboardExportAction extends DefaultEditAction
 
                 break;
 
-            case 'type':
+            case 'exportType':
             case 'format':
                 $this->{$name} = $this->form->getValue($name);
 
