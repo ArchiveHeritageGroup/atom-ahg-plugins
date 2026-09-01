@@ -8,17 +8,30 @@ $clearanceName = 'None';
 $clearanceColor = 'secondary';
 
 try {
-    if (class_exists('SecurityClearanceService')) {
+    if (class_exists(SecurityClearanceService::class) || class_exists('SecurityClearanceService')) {
         $clearanceInfo = SecurityClearanceService::getUserClearance($resource->id);
 
         if ($clearanceInfo) {
             $userClearance = $clearanceInfo;
             $clearanceLevel = $clearanceInfo->level ?? 0;
-            $clearanceName = $clearanceInfo->classificationName ?? $clearanceInfo->name ?? 'Unknown';
+            // TWO classes answer to SecurityClearanceService and they return
+            // DIFFERENT column names: the framework's AtomExtensions\Services copy
+            // selects `sc.name as classification_name`, the plugin's global copy
+            // selects `sc.name as classificationName`. The `use` above binds to the
+            // framework one while the class_exists() guard below tested the global
+            // one, so the guard passed, the framework answered, neither camelCase
+            // property existed and every user read "Unknown" while holding a valid
+            // clearance. Accept both spellings rather than depend on which class wins.
+            $clearanceName = $clearanceInfo->classificationName
+                ?? $clearanceInfo->classification_name
+                ?? $clearanceInfo->name
+                ?? 'Unknown';
 
             // Use classification color if available, otherwise derive from level
             if (isset($clearanceInfo->classificationColor) && $clearanceInfo->classificationColor) {
                 $clearanceColor = $clearanceInfo->classificationColor;
+            } elseif (isset($clearanceInfo->classification_color) && $clearanceInfo->classification_color) {
+                $clearanceColor = $clearanceInfo->classification_color;
             } elseif (isset($clearanceInfo->color) && $clearanceInfo->color) {
                 $clearanceColor = $clearanceInfo->color;
             } else {
