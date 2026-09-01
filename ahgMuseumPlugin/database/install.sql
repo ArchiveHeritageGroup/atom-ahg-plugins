@@ -303,7 +303,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @creator_role_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@creator_role_taxonomy_id, 'Creator roles for museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -440,7 +440,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @attribution_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@attribution_taxonomy_id, 'Attribution qualifiers for museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -522,7 +522,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @date_qualifier_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@date_qualifier_taxonomy_id, 'Date qualifiers for museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -594,7 +594,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @condition_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@condition_taxonomy_id, 'Condition terms for museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -656,7 +656,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @subject_type_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@subject_type_taxonomy_id, 'Subject types for museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -698,7 +698,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @inscription_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@inscription_taxonomy_id, 'Inscription types for museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -770,7 +770,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @related_work_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@related_work_taxonomy_id, 'Related work relationship types', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -847,7 +847,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @rights_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@rights_taxonomy_id, 'Rights types for museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -899,7 +899,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @work_type_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@work_type_taxonomy_id, 'Work types for museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -936,7 +936,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @materials_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@materials_taxonomy_id, 'Materials used in museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
@@ -1008,7 +1008,7 @@ INSERT IGNORE INTO object (class_name, created_at, updated_at)
 VALUES ('QubitTaxonomy', NOW(), NOW());
 SET @techniques_taxonomy_id = LAST_INSERT_ID();
 
-INSERT IGNORE INTO taxonomy (id, usage, parent_id, source_culture) 
+INSERT IGNORE INTO taxonomy (id, `usage`, parent_id, source_culture) 
 VALUES (@techniques_taxonomy_id, 'Techniques used in creating museum objects', 30, 'en');
 
 INSERT IGNORE INTO taxonomy_i18n (id, culture, name, note) 
