@@ -175,7 +175,12 @@ class PhysicalObjectEditAction extends AhgEditController
             case 'type':
                 $this->form->setDefault('type', $this->context->routing->generate(null, [$this->resource->type, 'module' => 'term']));
                 $this->form->setValidator('type', new sfValidatorString());
-                $this->form->setWidget('type', new sfWidgetFormSelect(['choices' => QubitTerm::getIndentedChildTree(QubitTerm::CONTAINER_ID, '&nbsp;', ['returnObjectInstances' => true])]));
+                // Indent with a real U+00A0, not the HTML entity. getIndentedChildTree
+                // defaults to '&nbsp;' and base AtoM passes it too, which only works
+                // where the option labels render as raw HTML. The B5 theme escapes
+                // them, so the entity was displayed literally in front of every
+                // indented container type - reported from Wits archaeology 2026-09-02.
+                $this->form->setWidget('type', new sfWidgetFormSelect(['choices' => QubitTerm::getIndentedChildTree(QubitTerm::CONTAINER_ID, "\u{00A0}", ['returnObjectInstances' => true])]));
 
                 break;
 
