@@ -5,7 +5,7 @@ namespace ahgPrivacyPlugin\Service;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * PrivacyRedactionService — field-level structured redaction for archival
+ * PrivacyRedactionService - field-level structured redaction for archival
  * description metadata (#130). Holds the redaction ENGINE (full / partial /
  * pseudonymised) + the per-IO profile/field management + audit. The display
  * layer calls applyRedaction() for public/unauthorised viewers only; an
@@ -15,7 +15,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class PrivacyRedactionService
 {
-    public const FULL_PLACEHOLDER = '[REDACTED — personal data removed]';
+    public const FULL_PLACEHOLDER = '[REDACTED - personal data removed]';
     public const PARTIAL_PLACEHOLDER = '[PARTIALLY REDACTED]';
 
     // ── Profile / field management ──────────────────────────────────────
