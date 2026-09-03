@@ -815,17 +815,23 @@ class PiiDetectionService
                 'object_id' => $objectId,
                 'entity_type' => $entity['type'],
                 'entity_value' => $entity['value'],
-                // NOTE (unresolved, needs a cross-plugin decision): this writes
-                // the UNMASKED value. entity_value is masked, so masking here is
-                // presentational only and ahg_ner_entity becomes a second
-                // cleartext copy of the PII the scan exists to control, at
-                // whatever ACL that table carries. It is not dead weight -
-                // ahgAIPlugin's NerTrainingSync reads original_value (falling
-                // back to entity_value) - so dropping it would silently feed
-                // MASKED text into NER training. ahg_ner_entity is owned by
-                // ahgAIPlugin, so resolving this properly means changing that
-                // plugin too, not quietly changing the contract from here.
-                'original_value' => $entity['raw_value'],
+                // original_value is deliberately NOT written here.
+                //
+                // The column belongs to ahgAIPlugin and means "the value before a
+                // human corrected it": the review UI sets it from entity_value on
+                // an edit, and NerTrainingSync exports it as original_value paired
+                // with corrected_value, pushing both to the AHG Central training
+                // server. Writing the unmasked scan value into it was wrong twice
+                // over. It recorded a correction that never happened, and it made
+                // ahg_ner_entity a cleartext copy of the very data the scan exists
+                // to control - one that leaves the site as soon as a reviewer
+                // approves or rejects the finding, because that sets
+                // correction_type and reviewed_at and makes the row export
+                // eligible.
+                //
+                // A fresh scan has no correction, so NULL is the correct value.
+                // NerTrainingSync already falls back to entity_value, which is the
+                // masked form, so nothing downstream breaks.
                 'confidence' => $entity['confidence'],
                 'status' => $entity['risk_level'] === 'high' || $entity['risk_level'] === 'critical'
                     ? 'flagged' : 'pending',
