@@ -117,6 +117,254 @@ class PiiDetectionService
         return \AhgCore\Taxonomy\AhgTaxonomy::getId('places') ?? 42;
     }
 
+    // ── Pure decision logic ─────────────────────────────────────────────
+    //
+    // These statics take primitives and return primitives: no database, no
+    // settings, no Symfony. The instance methods below keep the I/O and call
+    // these for the judgement. That split exists because the severity-accounting
+    // bugs this class carried (a whole risk band silently discarded) are pure
+    // logic, and pure logic is testable without standing up a harness.
+
+    /**
+     * The risk bands, in descending severity. SINGLE SOURCE OF TRUTH.
+     *
+     * This constant exists because the bands were previously enumerated in four
+     * separate places - the detectPii() summary initialiser, the scanObject()
+     * initialiser, two hardcoded aggregation lists, and an isset() guard - which
+     * were free to disagree, and did. 'critical' was missing from all of them, so
+     * a detected credit card (the only critical type) incremented 'total' and
+     * nothing else: it scored zero and never reached the data inventory, while an
+     * unvalidated ten-digit reference number scored 40. Anything that enumerates
+     * bands must derive from here.
+     */
+    public const RISK_BANDS = ['critical', 'high', 'medium', 'low'];
+
+    /** Points contributed to the 0-100 risk score by one finding in each band. */
+    public const RISK_WEIGHTS = ['critical' => 30, 'high' => 20, 'medium' => 5, 'low' => 1];
+
+    /** A zeroed summary carrying every band. */
+    public static function emptySummary(): array
+    {
+        $summary = ['total' => 0];
+        foreach (self::RISK_BANDS as $band) {
+            $summary[$band . '_risk'] = 0;
+        }
+
+        return $summary;
+    }
+
+    /**
+     * Count one finding of $riskLevel into $summary.
+     *
+     * An unrecognised band is counted as medium rather than dropped - the
+     * previous isset() guard discarded such findings silently, which is how a
+     * whole band went missing unnoticed. Definition-time consistency is asserted
+     * by the unit tests instead, where a mismatch is loud.
+     */
+    public static function countEntity(array $summary, string $riskLevel): array
+    {
+        $summary += self::emptySummary();
+        $summary['total'] = (int) $summary['total'] + 1;
+
+        $key = $riskLevel . '_risk';
+        if (!array_key_exists($key, $summary)) {
+            $key = 'medium_risk';
+        }
+        $summary[$key] = (int) $summary[$key] + 1;
+
+        return $summary;
+    }
+
+    /** Add two summaries band-by-band, preserving bands present in either. */
+    public static function mergeSummary(array $base, array $add): array
+    {
+        $out = $base + self::emptySummary();
+        foreach ($add as $key => $value) {
+            $out[$key] = (int) ($out[$key] ?? 0) + (int) $value;
+        }
+
+        return $out;
+    }
+
+    /** Overall risk score (0-100), weighted across every band. */
+    public static function calculateRiskScore(array $summary): int
+    {
+        $score = 0;
+        foreach (self::RISK_WEIGHTS as $band => $weight) {
+            $score += (int) ($summary[$band . '_risk'] ?? 0) * $weight;
+        }
+
+        return min($score, 100);
+    }
+
+    /** True when the summary carries any finding in a high or critical band. */
+    public static function isHighRisk(array $summary): bool
+    {
+        return (int) ($summary['high_risk'] ?? 0) > 0
+            || (int) ($summary['critical_risk'] ?? 0) > 0;
+    }
+
+    /**
+     * True when at least one finding is severe AND validated.
+     *
+     * Gate for anything that PERSISTS AS A COMPLIANCE ASSERTION. A privacy data
+     * inventory entry declares that this record contains a category of personal
+     * data; a pattern-only match - an eleven-digit accession number matching the
+     * NIN shape, say - must never manufacture that declaration. Unvalidated
+     * findings are still surfaced to the reviewer, they just do not speak for the
+     * institution.
+     *
+     * @param array<int,array<string,mixed>> $entities
+     */
+    public static function hasReportableFinding(array $entities): bool
+    {
+        foreach ($entities as $entity) {
+            if (empty($entity['validated'])) {
+                continue;
+            }
+            if (in_array($entity['risk_level'] ?? '', ['high', 'critical'], true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Drop findings whose span is claimed by a more authoritative detector.
+     *
+     * Two defects motivate this. BANK_ACCOUNT (\d{10,11}) and TAX_NUMBER
+     * ([0-9]{10}) are in a subset relationship, so every ten-digit number was
+     * emitted twice, both 'high' - 40 risk points from one number; PHONE_SA and
+     * PHONE_INTL collided the same way on +27 numbers. Beyond double-counting,
+     * an overlap resolved the wrong way MISCLASSIFIES: a broad detector can
+     * swallow a span a specific one should have claimed and relabel it as a more
+     * severe category of data than it is.
+     *
+     * Authority order: validated beats unvalidated, then type precedence, then
+     * the longer match, then confidence.
+     *
+     * @param array<int,array<string,mixed>> $candidates
+     * @return array<int,array<string,mixed>>
+     */
+    public static function resolveOverlaps(array $candidates): array
+    {
+        $kept = [];
+        foreach ($candidates as $candidate) {
+            $superseded = false;
+            foreach ($candidates as $other) {
+                if ($candidate === $other || !self::spansOverlap($candidate, $other)) {
+                    continue;
+                }
+                if (self::authorityOf($other) > self::authorityOf($candidate)) {
+                    $superseded = true;
+                    break;
+                }
+            }
+            if (!$superseded) {
+                $kept[] = $candidate;
+            }
+        }
+
+        return $kept;
+    }
+
+    /** @param array<string,mixed> $a @param array<string,mixed> $b */
+    private static function spansOverlap(array $a, array $b): bool
+    {
+        $aStart = (int) ($a['position'] ?? 0);
+        $bStart = (int) ($b['position'] ?? 0);
+
+        return $aStart < $bStart + (int) ($b['length'] ?? 0)
+            && $bStart < $aStart + (int) ($a['length'] ?? 0);
+    }
+
+    /**
+     * Specificity of each detector, used to resolve overlapping spans. Higher
+     * wins. A checksum-backed type outranks a shape-only one.
+     */
+    private const TYPE_PRECEDENCE = [
+        'SA_ID' => 100, 'CREDIT_CARD' => 90, 'EMAIL' => 80, 'NG_NIN' => 60,
+        'PASSPORT' => 55, 'TAX_NUMBER' => 50, 'BANK_ACCOUNT' => 45,
+        'PHONE_SA' => 40, 'PHONE_INTL' => 30,
+    ];
+
+    /** Sort key for overlap resolution; larger is more authoritative. */
+    private static function authorityOf(array $candidate): float
+    {
+        return (empty($candidate['validated']) ? 0.0 : 1000000.0)
+            + (float) (self::TYPE_PRECEDENCE[$candidate['type'] ?? ''] ?? 0) * 1000.0
+            + (float) ($candidate['length'] ?? 0) * 10.0
+            + (float) ($candidate['confidence'] ?? 0);
+    }
+
+    /** Luhn check over the digits of a value. */
+    public static function passesLuhn(string $value): bool
+    {
+        $digits = preg_replace('/\D/', '', $value);
+        if (null === $digits || strlen($digits) < 2) {
+            return false;
+        }
+        $sum = 0;
+        $double = false;
+        for ($i = strlen($digits) - 1; $i >= 0; $i--) {
+            $digit = (int) $digits[$i];
+            if ($double) {
+                $digit *= 2;
+                if ($digit > 9) {
+                    $digit -= 9;
+                }
+            }
+            $sum += $digit;
+            $double = !$double;
+        }
+
+        return $sum % 10 === 0;
+    }
+
+    /**
+     * Select detection patterns for a set of jurisdiction codes.
+     *
+     * Universal patterns always apply; jurisdiction-specific ones apply when
+     * their jurisdiction is among $codes. An EMPTY $codes means "no jurisdiction
+     * configured", which returns EVERY pattern - never none. A configured
+     * jurisdiction for which no specific pattern exists likewise widens to the
+     * universal set rather than narrowing to nothing. Silently detecting nothing
+     * while reporting success is the worst available outcome for a privacy scan.
+     *
+     * @param array<int,string> $codes
+     * @return array<string,string> type => regex
+     */
+    public static function patternsForJurisdictions(array $codes): array
+    {
+        if (empty($codes)) {
+            return self::$patterns;
+        }
+        $codes = array_map('strtolower', $codes);
+
+        $selected = [];
+        foreach (self::$patterns as $type => $pattern) {
+            $required = self::$jurisdictionPatterns[$type] ?? null;
+            if (null === $required || array_intersect($required, $codes)) {
+                $selected[$type] = $pattern;
+            }
+        }
+
+        return empty($selected) ? self::$patterns : $selected;
+    }
+
+    /**
+     * Jurisdiction-specific detectors. Types absent from this map are universal
+     * (email, cards, international dialling) and always apply.
+     */
+    private static array $jurisdictionPatterns = [
+        'SA_ID' => ['popia'],
+        'PHONE_SA' => ['popia'],
+        'NG_NIN' => ['ndpa'],
+    ];
+
+    // ── Detection ───────────────────────────────────────────────────────
+
     /**
      * Scan text for PII using regex patterns
      */
@@ -124,14 +372,11 @@ class PiiDetectionService
     {
         $results = [
             'entities' => [],
-            'summary' => [
-                'total' => 0,
-                'high_risk' => 0,
-                'medium_risk' => 0,
-                'low_risk' => 0,
-            ],
+            'summary' => self::emptySummary(),
             'categories' => [],
         ];
+
+        $candidates = [];
 
         foreach (self::$patterns as $type => $pattern) {
             if (preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE)) {
@@ -139,9 +384,30 @@ class PiiDetectionService
                     $value = $match[0];
                     $position = $match[1];
 
-                    // Validate specific patterns
-                    if ($type === 'SA_ID' && !$this->validateSaId($value)) {
-                        continue;
+                    // A finding is "validated" only when something beyond its
+                    // shape confirms it: a checksum, or a format parse. That flag
+                    // gates every downstream compliance assertion.
+                    $validated = false;
+
+                    if ($type === 'SA_ID') {
+                        if (!$this->validateSaId($value)) {
+                            continue;
+                        }
+                        $validated = true;
+                    }
+
+                    // The comment here used to claim "Luhn-eligible patterns"
+                    // while no Luhn ran, so any four groups of four digits was
+                    // scored critical on shape alone. It runs now.
+                    if ($type === 'CREDIT_CARD') {
+                        if (!self::passesLuhn($value)) {
+                            continue;
+                        }
+                        $validated = true;
+                    }
+
+                    if ($type === 'EMAIL') {
+                        $validated = (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
                     }
 
                     // Skip if looks like a generic number (not PII)
@@ -149,28 +415,43 @@ class PiiDetectionService
                         continue;
                     }
 
+                    // Bare-shape identity patterns need the same treatment: an
+                    // eleven-digit run and a letter-plus-digits run are the shape
+                    // of half the reference codes in an archive, and were being
+                    // emitted at 'high' with nothing to back them.
+                    if (in_array($type, ['NG_NIN', 'PASSPORT'], true)
+                        && !$this->looksLikeIdentityDocument($text, $position, $type)) {
+                        continue;
+                    }
+
                     $risk = self::$riskLevels[$type] ?? 'medium';
                     $category = self::$categoryMap[$type] ?? 'personal';
 
-                    $results['entities'][] = [
+                    $candidates[] = [
                         'type' => $type,
                         'value' => $this->maskPii($value, $type),
                         'raw_value' => $value,
                         'position' => $position,
+                        'length' => strlen($value),
                         'risk_level' => $risk,
                         'category' => $category,
-                        'confidence' => $this->calculateConfidence($type, $value, $text),
+                        'validated' => $validated,
+                        'confidence' => $this->calculateConfidence($type, $value, $text, $position),
                     ];
-
-                    $results['summary']['total']++;
-                    $results['summary'][$risk . '_risk']++;
-
-                    if (!isset($results['categories'][$category])) {
-                        $results['categories'][$category] = 0;
-                    }
-                    $results['categories'][$category]++;
                 }
             }
+        }
+
+        // Two detectors claiming the same characters is one finding, not two.
+        foreach (self::resolveOverlaps($candidates) as $entity) {
+            $results['entities'][] = $entity;
+            $results['summary'] = self::countEntity($results['summary'], $entity['risk_level']);
+
+            $category = $entity['category'];
+            if (!isset($results['categories'][$category])) {
+                $results['categories'][$category] = 0;
+            }
+            $results['categories'][$category]++;
         }
 
         return $results;
@@ -204,11 +485,13 @@ class PiiDetectionService
                     'risk_level' => $risk,
                     'category' => $category,
                     'confidence' => 0.85, // NER confidence
+                    // Statistical, not checksum-confirmed: surfaced for review,
+                    // but never on its own the basis of a compliance assertion.
+                    'validated' => false,
                     'source' => 'ner',
                 ];
 
-                $piiEntities['summary']['total']++;
-                $piiEntities['summary'][$risk . '_risk']++;
+                $piiEntities['summary'] = self::countEntity($piiEntities['summary'], $risk);
 
                 if (!isset($piiEntities['categories'][$category])) {
                     $piiEntities['categories'][$category] = 0;
@@ -224,8 +507,7 @@ class PiiDetectionService
             'entities' => $allEntities,
             'summary' => $piiEntities['summary'],
             'categories' => $piiEntities['categories'],
-            'has_high_risk' => $piiEntities['summary']['high_risk'] > 0 ||
-                              ($piiEntities['summary']['critical_risk'] ?? 0) > 0,
+            'has_high_risk' => self::isHighRisk($piiEntities['summary']),
         ];
     }
 
@@ -239,7 +521,7 @@ class PiiDetectionService
             'scanned_at' => date('Y-m-d H:i:s'),
             'fields_scanned' => [],
             'entities' => [],
-            'summary' => ['total' => 0, 'high_risk' => 0, 'medium_risk' => 0, 'low_risk' => 0],
+            'summary' => self::emptySummary(),
             'categories' => [],
             'risk_score' => 0,
         ];
@@ -281,10 +563,8 @@ class PiiDetectionService
                 $results['entities'][] = $entity;
             }
 
-            // Aggregate summaries
-            foreach (['total', 'high_risk', 'medium_risk', 'low_risk'] as $key) {
-                $results['summary'][$key] += $scan['summary'][$key] ?? 0;
-            }
+            // Aggregate every band, not a hardcoded subset of them.
+            $results['summary'] = self::mergeSummary($results['summary'], $scan['summary']);
 
             foreach ($scan['categories'] as $cat => $count) {
                 if (!isset($results['categories'][$cat])) {
@@ -303,9 +583,7 @@ class PiiDetectionService
                     $entity['field'] = 'digital_object';
                     $results['entities'][] = $entity;
                 }
-                foreach (['total', 'high_risk', 'medium_risk', 'low_risk'] as $key) {
-                    $results['summary'][$key] += $pdfScan['summary'][$key] ?? 0;
-                }
+                $results['summary'] = self::mergeSummary($results['summary'], $pdfScan['summary']);
             }
         }
 
@@ -315,16 +593,12 @@ class PiiDetectionService
             $results['fields_scanned'][] = 'isad_access_points';
             foreach ($isadEntities as $entity) {
                 $results['entities'][] = $entity;
-                $results['summary']['total']++;
-                $riskKey = $entity['risk_level'] . '_risk';
-                if (isset($results['summary'][$riskKey])) {
-                    $results['summary'][$riskKey]++;
-                }
+                $results['summary'] = self::countEntity($results['summary'], (string) $entity['risk_level']);
             }
         }
 
         // Calculate risk score (0-100)
-        $results['risk_score'] = $this->calculateRiskScore($results['summary']);
+        $results['risk_score'] = self::calculateRiskScore($results['summary']);
 
         return $results;
     }
@@ -464,6 +738,7 @@ class PiiDetectionService
                 'category' => 'personal',
                 'confidence' => 1.0, // Access points are definitive
                 'source' => 'isad_access_point',
+                'validated' => true,
                 'field' => 'subject_access_points',
             ];
         }
@@ -479,6 +754,7 @@ class PiiDetectionService
                 'category' => 'personal',
                 'confidence' => 1.0,
                 'source' => 'isad_access_point',
+                'validated' => true,
                 'field' => 'place_access_points',
             ];
         }
@@ -494,6 +770,7 @@ class PiiDetectionService
                 'category' => 'personal',
                 'confidence' => 1.0,
                 'source' => 'isad_access_point',
+                'validated' => true,
                 'field' => 'name_access_points',
             ];
         }
@@ -509,6 +786,7 @@ class PiiDetectionService
                 'category' => 'personal',
                 'confidence' => 1.0,
                 'source' => 'isad_access_point',
+                'validated' => true,
                 'field' => 'date_access_points',
             ];
         }
@@ -537,6 +815,16 @@ class PiiDetectionService
                 'object_id' => $objectId,
                 'entity_type' => $entity['type'],
                 'entity_value' => $entity['value'],
+                // NOTE (unresolved, needs a cross-plugin decision): this writes
+                // the UNMASKED value. entity_value is masked, so masking here is
+                // presentational only and ahg_ner_entity becomes a second
+                // cleartext copy of the PII the scan exists to control, at
+                // whatever ACL that table carries. It is not dead weight -
+                // ahgAIPlugin's NerTrainingSync reads original_value (falling
+                // back to entity_value) - so dropping it would silently feed
+                // MASKED text into NER training. ahg_ner_entity is owned by
+                // ahgAIPlugin, so resolving this properly means changing that
+                // plugin too, not quietly changing the contract from here.
                 'original_value' => $entity['raw_value'],
                 'confidence' => $entity['confidence'],
                 'status' => $entity['risk_level'] === 'high' || $entity['risk_level'] === 'critical'
@@ -545,8 +833,14 @@ class PiiDetectionService
             ]);
         }
 
-        // Update or create data inventory entry if high-risk PII found
-        if ($results['summary']['high_risk'] > 0) {
+        // A privacy data inventory row is a COMPLIANCE ASSERTION: it declares
+        // that this record holds a category of personal data. It previously fired
+        // on high_risk > 0, so an unvalidated pattern hit - an accession number
+        // shaped like a NIN - could manufacture that declaration. It now requires
+        // at least one severe finding that something other than its shape
+        // confirms. Unvalidated findings still reach the reviewer via the entity
+        // rows written above.
+        if (self::hasReportableFinding($results['entities'] ?? [])) {
             $this->createDataInventoryEntry($objectId, $results);
         }
 
@@ -653,7 +947,7 @@ class PiiDetectionService
                 ];
             }
 
-            if ($scan['summary']['high_risk'] > 0) {
+            if (self::isHighRisk($scan['summary'])) {
                 $results['high_risk']++;
             }
 
@@ -745,11 +1039,41 @@ class PiiDetectionService
      */
     protected function looksLikeFinancial(string $text, int $position, string $value): bool
     {
-        $context = strtolower(substr($text, max(0, $position - 50), 100));
-        $financialKeywords = ['account', 'bank', 'tax', 'vat', 'payment', 'invoice', 'ref'];
+        return self::contextMentions($text, $position, ['account', 'bank', 'tax', 'vat', 'payment', 'invoice', 'ref']);
+    }
 
-        foreach ($financialKeywords as $keyword) {
-            if (strpos($context, $keyword) !== false) {
+    /**
+     * Context gate for the bare-shape identity patterns (#1). Without it, NG_NIN
+     * ('\b\d{11}\b') and PASSPORT ('[A-Z]{1,2}\d{6,9}') match reference codes,
+     * box numbers and accession numbers throughout ordinary archival metadata,
+     * and were scored 'high' on that basis alone.
+     */
+    protected function looksLikeIdentityDocument(string $text, int $position, string $type): bool
+    {
+        $keywords = 'PASSPORT' === $type
+            ? ['passport', 'travel document', 'travel doc']
+            : ['nin', 'national identity', 'national id', 'identity number', 'identity no', 'id number', 'id no'];
+
+        return self::contextMentions($text, $position, $keywords);
+    }
+
+    /**
+     * True when any keyword appears as a WHOLE WORD within +/-50 characters of
+     * $position.
+     *
+     * Whole-word matching is the point. These gates previously used strpos(), so
+     * the keyword 'ref' matched inside 'reference' - a word present in very nearly
+     * every archival description. The gate that existed specifically to suppress
+     * false positives was therefore open almost always.
+     *
+     * @param array<int,string> $keywords
+     */
+    private static function contextMentions(string $text, int $position, array $keywords): bool
+    {
+        $context = strtolower(substr($text, max(0, $position - 50), 100));
+
+        foreach ($keywords as $keyword) {
+            if (preg_match('/\b' . preg_quote(strtolower($keyword), '/') . '\b/u', $context)) {
                 return true;
             }
         }
@@ -786,7 +1110,7 @@ class PiiDetectionService
     /**
      * Calculate confidence score for detection
      */
-    protected function calculateConfidence(string $type, string $value, string $text): float
+    protected function calculateConfidence(string $type, string $value, string $text, ?int $position = null): float
     {
         $baseConfidence = 0.7;
 
@@ -799,8 +1123,12 @@ class PiiDetectionService
             return 0.95;
         }
 
-        // Context-based confidence boost
-        $context = strtolower(substr($text, max(0, strpos($text, $value) - 30), 60));
+        // Context-based confidence boost, scored against THIS occurrence. The
+        // offset is supplied by the caller, which already holds it from
+        // PREG_OFFSET_CAPTURE; re-deriving it with strpos() scored every later
+        // occurrence of a repeated value against the first one's surroundings.
+        $offset = $position ?? strpos($text, $value);
+        $context = strtolower(substr($text, max(0, (int) $offset - 30), 60));
         $contextKeywords = [
             'SA_ID' => ['id', 'identity', 'number', 'document'],
             'EMAIL' => ['email', 'contact', 'mail', '@'],
@@ -816,20 +1144,6 @@ class PiiDetectionService
         }
 
         return min($baseConfidence, 0.95);
-    }
-
-    /**
-     * Calculate overall risk score (0-100)
-     */
-    protected function calculateRiskScore(array $summary): int
-    {
-        $score = 0;
-        $score += ($summary['critical_risk'] ?? 0) * 30;
-        $score += ($summary['high_risk'] ?? 0) * 20;
-        $score += ($summary['medium_risk'] ?? 0) * 5;
-        $score += ($summary['low_risk'] ?? 0) * 1;
-
-        return min($score, 100);
     }
 
     /**

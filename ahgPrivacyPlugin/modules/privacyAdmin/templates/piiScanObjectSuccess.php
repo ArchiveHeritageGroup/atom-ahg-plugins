@@ -44,10 +44,13 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card <?php echo ($scanResult['summary']['high_risk'] ?? 0) > 0 ? 'bg-danger text-white' : 'bg-light'; ?>">
+<?php // Critical is a band in its own right; counting only high_risk here
+      // under-reports the most severe findings (a validated card number). ?>
+<?php $severeCount = ($scanResult['summary']['high_risk'] ?? 0) + ($scanResult['summary']['critical_risk'] ?? 0); ?>
+            <div class="card <?php echo $severeCount > 0 ? 'bg-danger text-white' : 'bg-light'; ?>">
                 <div class="card-body text-center">
-                    <h2 class="display-5"><?php echo $scanResult['summary']['high_risk'] ?? 0; ?></h2>
-                    <p class="mb-0">High Risk</p>
+                    <h2 class="display-5"><?php echo $severeCount; ?></h2>
+                    <p class="mb-0">High / Critical Risk</p>
                 </div>
             </div>
         </div>

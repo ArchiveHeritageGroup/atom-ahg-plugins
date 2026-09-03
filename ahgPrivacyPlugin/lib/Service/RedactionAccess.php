@@ -5,16 +5,31 @@ namespace ahgPrivacyPlugin\Service;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * RedactionAccess — single authority for "may this viewer see the unredacted
- * record?" (#130 refinement 3). Used by both the web content filter and the
- * REST API so the bypass rule is defined in exactly one place.
+ * RedactionAccess - authority for "may this WEB viewer see the unredacted
+ * record?" (#130 refinement 3).
  *
  * Rule: staff (administrator / editor) always bypass. In addition, an
  * authenticated user holding an APPROVED, unexpired research_researcher
  * agreement (the AtoM-AHG "active access agreement") sees the full record.
- * Everyone else — anonymous, or authenticated without an active agreement —
+ * Everyone else - anonymous, or authenticated without an active agreement -
  * is served the redacted view. Fail-closed: any error, or the research plugin
  * not being installed, means "redact".
+ *
+ * ## Scope: this is NOT the only bypass rule in the system
+ *
+ * An earlier version of this docblock claimed the web filter and the REST API
+ * shared this class so the rule lived in exactly one place. They do not, and it
+ * did not. RedactionContentFilter calls this class; the apiv2 description
+ * actions in ahgAPIPlugin gate on hasScope('admin') instead and never reach
+ * here. The two rules therefore disagree by construction: a researcher with an
+ * approved agreement is served the full record on the web and a redacted one
+ * through the API.
+ *
+ * That divergence is arguably correct - an API key is not a person and cannot
+ * hold a research agreement - but it must be stated, because a docblock
+ * asserting a single authority is how the two drift further apart unnoticed.
+ * Converging them (or deliberately keying API access to the agreement of the
+ * key's owner) requires changes in ahgAPIPlugin, not here.
  *
  * @package ahgPrivacyPlugin
  */
