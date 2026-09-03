@@ -29,13 +29,29 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
     {
         try {
             $context = sfContext::getInstance();
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyRedactionService.php';
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/RedactionContentFilter.php';
+            $dir = sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/';
+
+            // These classes are namespaced and nothing autoloads that namespace in
+            // the Symfony context, so every one of them must be required here.
+            // RedactionAccess was missing, and it is the FIRST thing filter()
+            // touches: the resulting "class not found" was swallowed by the catch
+            // below, so redaction silently never ran on any page. Adding a service
+            // without adding it here disables redaction rather than breaking it
+            // visibly, so keep this list complete.
+            require_once $dir . 'PrivacyRedactionService.php';
+            require_once $dir . 'RedactionAccess.php';
+            require_once $dir . 'RedactionContentFilter.php';
 
             return \ahgPrivacyPlugin\Service\RedactionContentFilter::filter(
                 $content, $context->getRequest(), $context->getUser()
             );
         } catch (\Throwable $e) {
+            // Serving the page is the right call here, because a failure at this
+            // level means we never established whether the record is protected.
+            // But it must never be silent again: swallowing this is what hid a
+            // total redaction failure.
+            error_log('[ahgPrivacy] field redaction did not run: ' . $e->getMessage());
+
             return $content;
         }
     }
