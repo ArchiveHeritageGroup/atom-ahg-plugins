@@ -26,11 +26,15 @@ class apiv2DescriptionsReadAction extends AhgApiController
             return $this->error(404, 'Not Found', "Description '{$slug}' not found");
         }
 
-        // #130 refinement 2 - field-level redaction on the REST layer. Admin-
-        // scoped keys see the full record; every other key gets the same
-        // redacted view as the public web view. No-ops for IOs with no rules.
-        if (!$this->hasScope('admin')) {
-            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyRedactionService.php';
+        // #130 refinement 2 - field-level redaction on the REST layer, using the
+        // same authority as the web view so the two cannot drift. Both service
+        // files must be required: the namespace is not autoloaded here, and a
+        // missing require surfaces as a fatal that silently disables redaction.
+        $dir = sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/';
+        require_once $dir . 'RedactionAccess.php';
+        require_once $dir . 'PrivacyRedactionService.php';
+
+        if (!\ahgPrivacyPlugin\Service\RedactionAccess::apiMaySeeUnredacted($this->getUser(), $this->hasScope('admin'))) {
             $result = (new \ahgPrivacyPlugin\Service\PrivacyRedactionService())->redactPayload($result);
         }
 

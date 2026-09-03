@@ -15,21 +15,18 @@ use Illuminate\Database\Capsule\Manager as DB;
  * is served the redacted view. Fail-closed: any error, or the research plugin
  * not being installed, means "redact".
  *
- * ## Scope: this is NOT the only bypass rule in the system
+ * ## Both surfaces now resolve here
  *
- * An earlier version of this docblock claimed the web filter and the REST API
- * shared this class so the rule lived in exactly one place. They do not, and it
- * did not. RedactionContentFilter calls this class; the apiv2 description
- * actions in ahgAPIPlugin gate on hasScope('admin') instead and never reach
- * here. The two rules therefore disagree by construction: a researcher with an
- * approved agreement is served the full record on the web and a redacted one
- * through the API.
+ * The web content filter calls userMaySeeUnredacted(). The apiv2 description
+ * actions call apiMaySeeUnredacted(), which is the same rule plus one documented
+ * addition for administratively issued keys. They previously disagreed by
+ * construction - the API gated on hasScope('admin') alone and never reached this
+ * class - so a researcher holding an approved agreement saw the full record on
+ * the web and a redacted one through the API. That is fixed.
  *
- * That divergence is arguably correct - an API key is not a person and cannot
- * hold a research agreement - but it must be stated, because a docblock
- * asserting a single authority is how the two drift further apart unnoticed.
- * Converging them (or deliberately keying API access to the agreement of the
- * key's owner) requires changes in ahgAPIPlugin, not here.
+ * Keep it that way. If a third surface needs to make this decision, add a method
+ * here rather than re-deriving the rule at the call site, which is how the two
+ * drifted apart in the first place.
  *
  * @package ahgPrivacyPlugin
  */
@@ -48,6 +45,24 @@ class RedactionAccess
         $uid = $user->getAttribute('user_id');
 
         return self::hasActiveAgreement($uid ? (int) $uid : null);
+    }
+
+    /**
+     * REST path: the same rule as the web, plus an admin-scoped key.
+     *
+     * AhgApiController::authenticate() signs the key's owner in, so the sfUser
+     * passed here carries that person's credentials and userMaySeeUnredacted()
+     * answers correctly for them. An admin-scoped key bypasses on its own
+     * because such keys are issued deliberately by an administrator and need not
+     * belong to someone who could hold a research agreement.
+     */
+    public static function apiMaySeeUnredacted(\sfUser $user, bool $hasAdminScope): bool
+    {
+        if ($hasAdminScope) {
+            return true;
+        }
+
+        return self::userMaySeeUnredacted($user);
     }
 
     /**
