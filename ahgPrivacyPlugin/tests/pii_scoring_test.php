@@ -119,6 +119,33 @@ check('a jurisdiction with no specific patterns still detects', count($gdpr) > 0
 $popia = PiiDetectionService::patternsForJurisdictions(['popia']);
 check('a configured jurisdiction adds its own patterns', isset($popia['SA_ID'], $popia['PHONE_SA']), true);
 
+section('Unimplemented jurisdictions are reportable, not silent');
+
+check(
+    'a jurisdiction with patterns is not reported missing',
+    PiiDetectionService::jurisdictionsWithoutPatterns(['popia']),
+    []
+);
+check(
+    'a jurisdiction with no patterns is reported',
+    PiiDetectionService::jurisdictionsWithoutPatterns(['kenya_dpa']),
+    ['kenya_dpa']
+);
+check(
+    'mixed set reports only the uncovered ones',
+    PiiDetectionService::jurisdictionsWithoutPatterns(['popia', 'kenya_dpa', 'ndpa', 'lgpd']),
+    ['kenya_dpa', 'lgpd']
+);
+check('matching is case insensitive', PiiDetectionService::jurisdictionsWithoutPatterns(['POPIA']), []);
+check('an empty set reports nothing', PiiDetectionService::jurisdictionsWithoutPatterns([]), []);
+
+// Reading the registry must never be able to narrow detection.
+check(
+    'an unreadable registry falls back to every pattern',
+    count(PiiDetectionService::patternsForJurisdictions(PiiDetectionService::installedJurisdictionCodes())),
+    count(PiiDetectionService::patternsForJurisdictions([]))
+);
+
 // ── End to end through detectPii (still no database) ────────────────────
 section('Detection: overlaps, context gates, validation');
 

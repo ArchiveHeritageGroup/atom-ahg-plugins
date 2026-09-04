@@ -353,6 +353,66 @@ class PiiDetectionService
         return empty($selected) ? self::$patterns : $selected;
     }
 
+    /** Per-request cache of the installed jurisdiction codes. */
+    private static ?array $installedJurisdictions = null;
+
+    /**
+     * Codes of the jurisdictions installed on this instance.
+     *
+     * Fails OPEN by design: a missing or unreadable registry returns an empty
+     * list, which patternsForJurisdictions() treats as "no jurisdiction
+     * configured" and answers with every pattern. Detection breadth must never
+     * be reduced by an error reading configuration.
+     */
+    public static function installedJurisdictionCodes(): array
+    {
+        if (null !== self::$installedJurisdictions) {
+            return self::$installedJurisdictions;
+        }
+
+        try {
+            self::$installedJurisdictions = DB::table('privacy_jurisdiction_registry')
+                ->where('is_installed', 1)
+                ->pluck('code')
+                ->all();
+        } catch (\Throwable $e) {
+            self::$installedJurisdictions = [];
+        }
+
+        return self::$installedJurisdictions;
+    }
+
+    /**
+     * Installed jurisdictions for which no specific pattern exists.
+     *
+     * These still scan, because the universal patterns always apply, but nothing
+     * detects their national identifiers. A Kenyan ID number, for instance, is
+     * seven or eight digits and no pattern here has that shape. Silence is
+     * indistinguishable from coverage unless someone is told, which is what this
+     * method exists to allow.
+     *
+     * @param array<int,string> $codes
+     * @return array<int,string>
+     */
+    public static function jurisdictionsWithoutPatterns(array $codes): array
+    {
+        $implemented = [];
+        foreach (self::$jurisdictionPatterns as $required) {
+            foreach ($required as $code) {
+                $implemented[$code] = true;
+            }
+        }
+
+        $missing = [];
+        foreach ($codes as $code) {
+            if (!isset($implemented[strtolower((string) $code)])) {
+                $missing[] = $code;
+            }
+        }
+
+        return $missing;
+    }
+
     /**
      * Jurisdiction-specific detectors. Types absent from this map are universal
      * (email, cards, international dialling) and always apply.
@@ -378,7 +438,10 @@ class PiiDetectionService
 
         $candidates = [];
 
-        foreach (self::$patterns as $type => $pattern) {
+        // Patterns are selected from the installed jurisdictions. The selector
+        // widens rather than narrows: no jurisdiction configured, or one with no
+        // specific patterns, still yields the full universal set.
+        foreach (self::patternsForJurisdictions(self::installedJurisdictionCodes()) as $type => $pattern) {
             if (preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE)) {
                 foreach ($matches[0] as $match) {
                     $value = $match[0];
