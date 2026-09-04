@@ -125,9 +125,6 @@ if ($isAdmin && $hasResearcher) {
     <li><h6 class="dropdown-header"><?php echo __('Settings'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('AHG Settings'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgDropdown', 'action' => 'index']); ?>"><i class="fas fa-list-alt fa-fw me-1"></i><?php echo __('Dropdown Manager'); ?></a></li>
-    <?php if (ahgIsPluginEnabled('ahgPrivacyPlugin')): ?>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'privacy']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Privacy & PII Scanner'); ?></a></li>
-    <?php endif; ?>
 
     <?php if ($hasSecurityClearance): ?>
     <li><hr class="dropdown-divider"></li>

@@ -278,6 +278,13 @@ class AhgSettingsIndexAction extends AhgController
                 'description' => 'POPIA, NDPA, GDPR compliance - DSARs, Breaches, ROPA, PAIA',
                 'url' => 'privacyAdmin'
             ];
+
+            $this->sections['pii_scanner'] = [
+                'label' => 'Privacy & PII Scanner',
+                'icon' => 'fa-search-minus',
+                'description' => 'Which installed jurisdictions the PII scanner can detect national identifiers for',
+                'url' => 'admin/ahg-settings/section?section=privacy'
+            ];
         }
 
         // ICIP - show when ahgICIPPlugin is enabled
