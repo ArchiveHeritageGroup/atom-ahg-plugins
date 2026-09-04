@@ -548,6 +548,27 @@ class PiiDetectionService
     }
 
     /**
+     * The identifier pattern types implemented for one jurisdiction.
+     *
+     * Universal patterns (email, cards, IBAN, international dialling) are not
+     * listed: they run everywhere and would make every jurisdiction look covered.
+     *
+     * @return array<int,string>
+     */
+    public static function patternTypesForJurisdiction(string $code): array
+    {
+        $code = strtolower($code);
+        $types = [];
+        foreach (self::$jurisdictionPatterns as $type => $required) {
+            if (in_array($code, $required, true)) {
+                $types[] = $type;
+            }
+        }
+
+        return $types;
+    }
+
+    /**
      * Installed jurisdictions for which no specific pattern exists.
      *
      * These still scan, because the universal patterns always apply, but nothing

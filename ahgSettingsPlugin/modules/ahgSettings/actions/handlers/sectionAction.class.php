@@ -13,6 +13,7 @@ class AhgSettingsSectionAction extends AhgController
         'iiif' => ['label' => 'IIIF Viewer', 'icon' => 'fa-images'],
         'spectrum' => ['label' => 'Collections Procedures', 'icon' => 'fa-archive'],
         'data_protection' => ['label' => 'Data Protection', 'icon' => 'fa-shield-alt'],
+        'privacy' => ['label' => 'Privacy & PII Scanner', 'icon' => 'fa-user-shield', 'description' => 'Which installed jurisdictions the PII scanner can detect national identifiers for'],
         'faces' => ['label' => 'Face Detection', 'icon' => 'fa-user-circle'],
         'media' => ['label' => 'Media Player', 'icon' => 'fa-play-circle'],
         'photos' => ['label' => 'Condition Photos', 'icon' => 'fa-camera'],
@@ -159,6 +160,7 @@ class AhgSettingsSectionAction extends AhgController
     protected $sectionPluginMap = [
         'spectrum' => 'ahgSpectrumPlugin',
         'data_protection' => 'ahgDataProtectionPlugin',
+        'privacy' => 'ahgPrivacyPlugin',
         'photos' => 'ahgConditionPlugin',
         'fuseki' => 'ahgRicExplorerPlugin',
         'ingest' => 'ahgIngestPlugin',
@@ -247,7 +249,51 @@ class AhgSettingsSectionAction extends AhgController
             'sections' => $this->sections,
             'currentSection' => $this->currentSection,
             'settings' => $this->settings,
+            'jurisdictionCoverage' => 'privacy' === $this->currentSection
+                ? $this->getJurisdictionCoverage()
+                : [],
         ];
+    }
+
+    /**
+     * Per-jurisdiction identifier coverage for the Privacy section.
+     *
+     * Read-only status, not settings. Installing a jurisdiction reads as
+     * coverage and mostly is not: the scanner implements national identifier
+     * patterns for some of them, and the universal patterns (email, payment
+     * cards, IBAN, international dialling) run everywhere regardless, so an
+     * unsupported jurisdiction still returns findings and looks supported.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    protected function getJurisdictionCoverage(): array
+    {
+        try {
+            require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiDetectionService.php';
+
+            $rows = DB::table('privacy_jurisdiction_registry')
+                ->where('is_installed', 1)
+                ->orderBy('code')
+                ->get();
+
+            $out = [];
+            foreach ($rows as $row) {
+                $types = \ahgPrivacyPlugin\Service\PiiDetectionService::patternTypesForJurisdiction((string) $row->code);
+                $out[] = [
+                    'code' => $row->code,
+                    'name' => $row->name,
+                    'country' => $row->country ?? '',
+                    'types' => $types,
+                    'covered' => !empty($types),
+                ];
+            }
+
+            return $out;
+        } catch (\Throwable $e) {
+            error_log('[ahgSettings] jurisdiction coverage unavailable: ' . $e->getMessage());
+
+            return [];
+        }
     }
 
     protected function processSettings($request)

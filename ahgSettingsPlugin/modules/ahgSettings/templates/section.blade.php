@@ -557,6 +557,68 @@
                                 </fieldset>
                             @break
 
+                            @case('privacy')
+                                <fieldset class="mb-4">
+                                    <legend>{{ __('PII Scanner Coverage') }}</legend>
+
+                                    <p class="text-muted">
+                                        {{ __('Installing a jurisdiction does not by itself mean the scanner can recognise its national identifiers. Email addresses, payment cards, IBANs and international telephone numbers are detected for every jurisdiction, so a scan always returns findings. The table below shows which installed jurisdictions additionally have a national identifier pattern.') }}
+                                    </p>
+
+                                    @if(empty($jurisdictionCoverage))
+                                    <div class="alert alert-secondary">
+                                        {{ __('No installed jurisdictions were found, or the registry could not be read.') }}
+                                    </div>
+                                    @else
+                                    @php $uncovered = array_filter($jurisdictionCoverage, function ($j) { return !$j['covered']; }); @endphp
+
+                                    @if(count($uncovered) > 0)
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-search-minus me-2"></i>
+                                        {{ __('%1% of %2% installed jurisdictions have no national identifier pattern.', ['%1%' => count($uncovered), '%2%' => count($jurisdictionCoverage)]) }}
+                                    </div>
+                                    @endif
+
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>{{ __('Code') }}</th>
+                                                    <th>{{ __('Jurisdiction') }}</th>
+                                                    <th>{{ __('Country') }}</th>
+                                                    <th>{{ __('National identifier patterns') }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($jurisdictionCoverage as $j)
+                                                <tr>
+                                                    <td><code>{{ $j['code'] }}</code></td>
+                                                    <td>{{ $j['name'] }}</td>
+                                                    <td>{{ $j['country'] }}</td>
+                                                    <td>
+                                                        @if($j['covered'])
+                                                        @foreach($j['types'] as $t)
+                                                        <span class="badge bg-success me-1">{{ $t }}</span>
+                                                        @endforeach
+                                                        @else
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-search-minus me-1"></i>{{ __('None') }}
+                                                        </span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <p class="text-muted small mb-0">
+                                        {{ __('GDPR is expected to show none: it is a regulation across 27 member states with no identifier of its own, so each state would need its own pattern. Jurisdictions are installed and removed under Admin > Privacy > Jurisdictions.') }}
+                                    </p>
+                                    @endif
+                                </fieldset>
+                            @break
+
                             @case('data_protection')
                                 <!-- Data Protection Settings -->
                                 <fieldset class="mb-4">
