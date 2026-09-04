@@ -385,9 +385,18 @@ class VisualRedactionService
         $outputPath = $this->cacheDir . '/' . $objectId . '_' . $regionsHash . '.' .
             ($docInfo['is_pdf'] ? 'pdf' : pathinfo($docInfo['name'], PATHINFO_EXTENSION));
 
-        $result = $docInfo['is_pdf']
-            ? $this->applyPdfRedactions($docInfo['path'], $outputPath, $regions)
-            : $this->applyImageRedactions($docInfo['path'], $outputPath, $regions);
+        try {
+            $result = $docInfo['is_pdf']
+                ? $this->applyPdfRedactions($docInfo['path'], $outputPath, $regions)
+                : $this->applyImageRedactions($docInfo['path'], $outputPath, $regions);
+        } catch (\Throwable $e) {
+            // A refused region must not become an uncaught fatal, and must not
+            // become a redacted-looking file either. Reported as failure, which
+            // callers already treat as "do not serve this".
+            error_log('[ahgPrivacy] visual redaction refused for object ' . $objectId . ': ' . $e->getMessage());
+
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
 
         if ($result['success']) {
             // Cache the result
@@ -419,6 +428,55 @@ class VisualRedactionService
     }
 
     /**
+     * Read a region's coordinates, or refuse.
+     *
+     * These values are burned into a derivative file. Defaulting a missing one to
+     * zero, as this used to, does not degrade gracefully: it paints the mask at the
+     * origin at whatever size survived, so the file LOOKS redacted while the
+     * sensitive area is untouched. A mask in the wrong place is worse than no mask,
+     * because no mask is obvious. Zero-area is refused for the same reason - it
+     * hides nothing while reporting success.
+     *
+     * @throws \RuntimeException when the region cannot be trusted
+     */
+    private static function requireCoordinates($raw, $regionId): array
+    {
+        $coords = is_string($raw) ? json_decode($raw, true) : $raw;
+
+        if (!is_array($coords)) {
+            throw new \RuntimeException(sprintf(
+                'Redaction region %s has unreadable coordinates; refusing to burn in a mask from them.',
+                $regionId
+            ));
+        }
+
+        $out = [];
+        foreach (['x', 'y', 'width', 'height'] as $key) {
+            if (!array_key_exists($key, $coords) || !is_numeric($coords[$key])) {
+                throw new \RuntimeException(sprintf(
+                    'Redaction region %s has no numeric "%s" coordinate; refusing to guess it.',
+                    $regionId,
+                    $key
+                ));
+            }
+            $out[$key] = (float) $coords[$key];
+        }
+
+        foreach (['width', 'height'] as $key) {
+            if ($out[$key] <= 0) {
+                throw new \RuntimeException(sprintf(
+                    'Redaction region %s has a %s of %s, which would mask nothing while reporting success.',
+                    $regionId,
+                    $key,
+                    $out[$key]
+                ));
+            }
+        }
+
+        return $out;
+    }
+
+    /**
      * Apply PDF redactions using Python script
      */
     protected function applyPdfRedactions(string $inputPath, string $outputPath, Collection $regions): array
@@ -432,13 +490,13 @@ class VisualRedactionService
         $regionsData = [];
         foreach ($regionsByPage as $page => $pageRegions) {
             foreach ($pageRegions as $region) {
-                $coords = json_decode($region->coordinates, true);
+                $coords = self::requireCoordinates($region->coordinates, $region->id ?? '?');
                 $regionsData[] = [
                     'page' => (int)$page,
-                    'x' => (float)($coords['x'] ?? 0),
-                    'y' => (float)($coords['y'] ?? 0),
-                    'width' => (float)($coords['width'] ?? 0),
-                    'height' => (float)($coords['height'] ?? 0),
+                    'x' => $coords['x'],
+                    'y' => $coords['y'],
+                    'width' => $coords['width'],
+                    'height' => $coords['height'],
                     'color' => $region->color ?? '#000000',
                     'normalized' => (bool)$region->normalized,
                 ];
@@ -475,12 +533,12 @@ class VisualRedactionService
         // Prepare regions JSON
         $regionsData = [];
         foreach ($regions as $region) {
-            $coords = json_decode($region->coordinates, true);
+            $coords = self::requireCoordinates($region->coordinates, $region->id ?? '?');
             $regionsData[] = [
-                'x' => (float)($coords['x'] ?? 0),
-                'y' => (float)($coords['y'] ?? 0),
-                'width' => (float)($coords['width'] ?? 0),
-                'height' => (float)($coords['height'] ?? 0),
+                'x' => $coords['x'],
+                'y' => $coords['y'],
+                'width' => $coords['width'],
+                'height' => $coords['height'],
                 'color' => $region->color ?? '#000000',
                 'normalized' => (bool)$region->normalized,
             ];
