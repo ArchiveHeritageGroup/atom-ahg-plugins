@@ -1,0 +1,48 @@
+name: Tests
+
+# Pure-logic test suites. They require no database, no Symfony bootstrap, no
+# composer install and no fixtures - each test file requires the class under test
+# and nothing else. That is why they can run here at all: the decisions they cover
+# were deliberately extracted as pure statics so they could be tested without the
+# harness this repository does not have.
+#
+# Every runner exits non-zero on failure, so a broken assertion fails the build.
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PHP_VERSION: '8.3'
+
+jobs:
+  privacy:
+    name: ahgPrivacyPlugin
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, json
+
+      # PII detection: risk banding, scoring, overlap resolution, checksum
+      # validation against published test values, jurisdiction selection.
+      - name: PII scoring
+        run: php ahgPrivacyPlugin/tests/pii_scoring_test.php
+
+      # Field-level redaction: substitution across the forms a theme renders, and
+      # the verification that withholds a record when it cannot prove the value is
+      # gone rather than reporting it clean.
+      - name: Redaction filter
+        run: php ahgPrivacyPlugin/tests/redaction_filter_test.php
+
+      # Visual redaction coordinates: refuse a malformed region rather than
+      # defaulting it to the origin, which burns a mask into the wrong part of a
+      # file and makes it look redacted.
+      - name: Visual redaction coordinates
+        run: php ahgPrivacyPlugin/tests/visual_redaction_coords_test.php
