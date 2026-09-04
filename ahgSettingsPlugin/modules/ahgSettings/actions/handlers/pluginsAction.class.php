@@ -74,6 +74,16 @@ class AhgSettingsPluginsAction extends AhgController
             $userId = $this->getUser()->getAttribute('user_id');
 
             if ($action === 'enable') {
+                // A plugin enabled without files on disk stops Symfony booting on
+                // the next request, web and CLI together, with no route back except
+                // editing atom_plugin by hand. Checked before the write, not after.
+                $enableCheck = (new \AtomFramework\Extensions\ExtensionProtection())->canEnable($pluginName);
+                if (!$enableCheck['can_enable']) {
+                    $this->getUser()->setFlash('error', "Cannot enable '$pluginName': " . $enableCheck['reason']);
+
+                    return;
+                }
+
                 DB::table('atom_plugin')
                     ->where('name', $pluginName)
                     ->update(['is_enabled' => 1, 'updated_at' => DB::raw('NOW()')]);
@@ -228,9 +238,21 @@ class AhgSettingsPluginsAction extends AhgController
             }
 
             return ['can_disable' => true, 'reason' => null];
-        } catch (Exception $e) {
-            error_log("Plugin Protection check error: " . $e->getMessage());
-            return ['can_disable' => true, 'reason' => null];
+        } catch (\Throwable $e) {
+            // Fail CLOSED. This previously returned can_disable => true, so any
+            // error reading atom_plugin or running a record-check query silently
+            // waived the core and locked protections entirely - the one path where
+            // a core plugin could be switched off and take the site down. Refusing
+            // on error is recoverable; wrongly allowing it is not.
+            //
+            // \Throwable rather than Exception: a TypeError or Error raised in the
+            // record-check query is not an Exception and was not caught here at all.
+            error_log('[ahgSettings] plugin protection check failed for ' . $pluginName . ': ' . $e->getMessage());
+
+            return [
+                'can_disable' => false,
+                'reason' => 'Protection status could not be verified, so the plugin was not disabled. See the error log.',
+            ];
         }
     }
 
