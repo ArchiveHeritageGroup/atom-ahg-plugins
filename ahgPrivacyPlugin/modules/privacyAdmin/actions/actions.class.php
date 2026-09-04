@@ -59,6 +59,29 @@ class privacyAdminActions extends AhgController
     /**
      * Dashboard
      */
+    /**
+     * The active jurisdiction in the shape every template expects.
+     *
+     * JurisdictionManager::getActiveJurisdiction() returns the
+     * privacy_institution_config row - jurisdiction_code plus the institution's own
+     * response days and retention defaults - with the matching registry row nested
+     * under ->jurisdiction. The templates all read name, full_name, country and
+     * code, which exist only on the registry row. So the active-jurisdiction banner
+     * rendered as "Active Jurisdiction: ()" however correctly the choice had been
+     * saved, and the comparison `$activeJurisdiction->code === $j->code` was always
+     * false, so no row was ever marked ACTIVE and "Set as active" showed on the
+     * jurisdiction that already was.
+     *
+     * Normalised here rather than in the manager, whose return shape other callers
+     * may depend on.
+     */
+    private function activeJurisdictionForDisplay(): ?object
+    {
+        $config = $this->getJurisdictionManager()->getActiveJurisdiction();
+
+        return $config->jurisdiction ?? null;
+    }
+
     public function executeIndex($request)
     {
         $service = $this->getService();
@@ -70,7 +93,7 @@ class privacyAdminActions extends AhgController
         $this->notificationCount = $service->getNotificationCount($this->getUserId());
 
         // Get active jurisdiction from regional architecture
-        $this->activeJurisdiction = $this->getJurisdictionManager()->getActiveJurisdiction();
+        $this->activeJurisdiction = $this->activeJurisdictionForDisplay();
     }
 
     // =====================
@@ -1934,7 +1957,7 @@ class privacyAdminActions extends AhgController
     {
         $manager = $this->getJurisdictionManager();
         $this->jurisdictions = $manager->getAvailableJurisdictions();
-        $this->activeJurisdiction = $manager->getActiveJurisdiction();
+        $this->activeJurisdiction = $this->activeJurisdictionForDisplay();
 
         // Installing a jurisdiction reads as coverage, and for most of them it is
         // not: the PII scanner implements national-identifier patterns for only a
@@ -2078,7 +2101,7 @@ class privacyAdminActions extends AhgController
             $this->forward404('Jurisdiction not found');
         }
 
-        $this->activeJurisdiction = $manager->getActiveJurisdiction();
+        $this->activeJurisdiction = $this->activeJurisdictionForDisplay();
 
         // Get installed components if installed
         if ($this->jurisdiction->is_installed) {
