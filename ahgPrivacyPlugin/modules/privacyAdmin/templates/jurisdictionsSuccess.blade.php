@@ -35,6 +35,25 @@
     </div>
     @endif
 
+    @if(!empty($patternGaps))
+    <div class="alert alert-warning" role="alert">
+        <div class="d-flex">
+            <i class="fas fa-search-minus fa-2x me-3"></i>
+            <div>
+                <h5 class="mb-1">{{ __('No identifier patterns for %1% of these jurisdictions', ['%1%' => count($patternGaps)]) }}</h5>
+                <p class="mb-2">
+                    {{ __('The PII scanner has no national-identifier pattern for the jurisdictions listed below. Scanning still runs for them, because email addresses, payment cards and international telephone numbers are detected everywhere, but their national ID formats are not recognised and will not be reported.') }}
+                </p>
+                <p class="mb-0">
+                    @foreach($patternGaps as $gap)
+                    <code class="me-1">{{ $gap }}</code>
+                    @endforeach
+                </p>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Active Jurisdiction Banner -->
     @if($activeJurisdiction)
     <div class="alert alert-primary mb-4">
@@ -154,6 +173,11 @@ $regionIcons = [
                                 <span class="badge bg-info">{{ __('Installed') }}</span>
                                 @else
                                 <span class="badge bg-secondary">{{ __('Not Installed') }}</span>
+                                @endif
+                                @if($j->is_installed && isset($patternGapCodes[strtolower($j->code)]))
+                                <br><span class="badge bg-warning text-dark mt-1" title="{{ __('The scanner detects universal identifiers here, but no national ID pattern is implemented for this jurisdiction.') }}">
+                                    <i class="fas fa-search-minus me-1"></i>{{ __('No ID pattern') }}
+                                </span>
                                 @endif
                             </td>
                             <td class="text-end">

@@ -1936,6 +1936,24 @@ class privacyAdminActions extends AhgController
         $this->jurisdictions = $manager->getAvailableJurisdictions();
         $this->activeJurisdiction = $manager->getActiveJurisdiction();
 
+        // Installing a jurisdiction reads as coverage, and for most of them it is
+        // not: the PII scanner implements national-identifier patterns for only a
+        // few. The universal patterns (email, cards, international dialling) still
+        // run everywhere, so such a jurisdiction detects something rather than
+        // nothing, which is exactly why the shortfall is invisible without saying
+        // so here.
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiDetectionService.php';
+
+        $installedCodes = [];
+        foreach ($this->jurisdictions as $j) {
+            if (!empty($j->is_installed)) {
+                $installedCodes[] = $j->code;
+            }
+        }
+
+        $this->patternGaps = \ahgPrivacyPlugin\Service\PiiDetectionService::jurisdictionsWithoutPatterns($installedCodes);
+        $this->patternGapCodes = array_flip(array_map('strtolower', $this->patternGaps));
+
         // Group by region
         $this->byRegion = [];
         foreach ($this->jurisdictions as $j) {

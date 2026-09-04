@@ -34,6 +34,25 @@
     </div>
     <?php endif; ?>
 
+    <?php if (!empty($patternGaps)): ?>
+    <div class="alert alert-warning" role="alert">
+        <div class="d-flex">
+            <i class="fas fa-search-minus fa-2x me-3"></i>
+            <div>
+                <h5 class="mb-1"><?php echo __('No identifier patterns for %1% of these jurisdictions', ['%1%' => count($patternGaps)]); ?></h5>
+                <p class="mb-2">
+                    <?php echo __('The PII scanner has no national-identifier pattern for the jurisdictions listed below. Scanning still runs for them, because email addresses, payment cards and international telephone numbers are detected everywhere, but their national ID formats are not recognised and will not be reported.'); ?>
+                </p>
+                <p class="mb-0">
+                    <?php foreach ($patternGaps as $gap): ?>
+                    <code class="me-1"><?php echo htmlspecialchars((string) $gap); ?></code>
+                    <?php endforeach; ?>
+                </p>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Active Jurisdiction Banner -->
     <?php if ($activeJurisdiction): ?>
     <div class="alert alert-primary mb-4">
@@ -153,6 +172,11 @@
                                 <span class="badge bg-info"><?php echo __('Installed'); ?></span>
                                 <?php else: ?>
                                 <span class="badge bg-secondary"><?php echo __('Not Installed'); ?></span>
+                                <?php endif; ?>
+                                <?php if ($j->is_installed && isset($patternGapCodes[strtolower($j->code)])): ?>
+                                <br><span class="badge bg-warning text-dark mt-1" title="<?php echo __('The scanner detects universal identifiers here, but no national ID pattern is implemented for this jurisdiction.'); ?>">
+                                    <i class="fas fa-search-minus me-1"></i><?php echo __('No ID pattern'); ?>
+                                </span>
                                 <?php endif; ?>
                             </td>
                             <td class="text-end">
