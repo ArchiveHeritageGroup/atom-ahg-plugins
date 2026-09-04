@@ -12,7 +12,6 @@ class AhgSettingsSectionAction extends AhgController
         'metadata' => ['label' => 'Metadata Extraction', 'icon' => 'fa-database'],
         'iiif' => ['label' => 'IIIF Viewer', 'icon' => 'fa-images'],
         'spectrum' => ['label' => 'Collections Procedures', 'icon' => 'fa-archive'],
-        'data_protection' => ['label' => 'Data Protection', 'icon' => 'fa-shield-alt'],
         'privacy' => ['label' => 'Privacy & PII Scanner', 'icon' => 'fa-user-shield', 'description' => 'Which installed jurisdictions the PII scanner can detect national identifiers for'],
         'faces' => ['label' => 'Face Detection', 'icon' => 'fa-user-circle'],
         'media' => ['label' => 'Media Player', 'icon' => 'fa-play-circle'],
@@ -77,7 +76,6 @@ class AhgSettingsSectionAction extends AhgController
         ],
         'spectrum' => ['spectrum_enabled', 'spectrum_auto_create_movement', 'spectrum_require_photos', 'spectrum_email_notifications'],
         'iiif' => ['iiif_enabled', 'iiif_show_navigator', 'iiif_show_rotation', 'iiif_show_fullscreen'],
-        'data_protection' => ['dp_enabled', 'dp_notify_overdue', 'dp_anonymize_on_delete', 'dp_audit_logging', 'dp_consent_required'],
         'faces' => ['face_detect_enabled', 'face_auto_match', 'face_auto_link', 'face_blur_unmatched', 'face_store_embeddings'],
         'media' => ['media_autoplay', 'media_show_controls', 'media_loop', 'media_show_waveform', 'media_transcription_enabled'],
         'photos' => ['photo_create_thumbnails', 'photo_extract_exif', 'photo_auto_rotate'],
@@ -159,7 +157,6 @@ class AhgSettingsSectionAction extends AhgController
     // Map sections to required plugins - section only shows if plugin is enabled
     protected $sectionPluginMap = [
         'spectrum' => 'ahgSpectrumPlugin',
-        'data_protection' => 'ahgDataProtectionPlugin',
         'privacy' => 'ahgPrivacyPlugin',
         'photos' => 'ahgConditionPlugin',
         'fuseki' => 'ahgRicExplorerPlugin',
