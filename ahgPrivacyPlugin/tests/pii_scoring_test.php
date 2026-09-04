@@ -126,15 +126,25 @@ check(
     PiiDetectionService::jurisdictionsWithoutPatterns(['popia']),
     []
 );
+// GDPR is reported deliberately and permanently: it is a regulation across 27
+// member states with no national identifier of its own, so there is no pattern to
+// implement for it. Every other installed jurisdiction now has one.
 check(
-    'a jurisdiction with no patterns is reported',
-    PiiDetectionService::jurisdictionsWithoutPatterns(['kenya_dpa']),
-    ['kenya_dpa']
+    'gdpr is reported, having no identifier of its own',
+    PiiDetectionService::jurisdictionsWithoutPatterns(['gdpr']),
+    ['gdpr']
 );
 check(
     'mixed set reports only the uncovered ones',
-    PiiDetectionService::jurisdictionsWithoutPatterns(['popia', 'kenya_dpa', 'ndpa', 'lgpd']),
-    ['kenya_dpa', 'lgpd']
+    PiiDetectionService::jurisdictionsWithoutPatterns(['popia', 'gdpr', 'ndpa', 'lgpd']),
+    ['gdpr']
+);
+check(
+    'the seven jurisdictions with identifiers are all covered',
+    PiiDetectionService::jurisdictionsWithoutPatterns(
+        ['uk_gdpr', 'pipeda', 'ccpa', 'kenya_dpa', 'lgpd', 'australia_privacy', 'pdpa_sg']
+    ),
+    []
 );
 check('matching is case insensitive', PiiDetectionService::jurisdictionsWithoutPatterns(['POPIA']), []);
 check('an empty set reports nothing', PiiDetectionService::jurisdictionsWithoutPatterns([]), []);
@@ -144,6 +154,55 @@ check(
     'an unreadable registry falls back to every pattern',
     count(PiiDetectionService::patternsForJurisdictions(PiiDetectionService::installedJurisdictionCodes())),
     count(PiiDetectionService::patternsForJurisdictions([]))
+);
+
+section('Jurisdiction identifier checksums (published test values)');
+
+check('NHS number validates',            PiiDetectionService::passesNhsCheck('9434765919'), true);
+check('NHS rejects an altered digit',    PiiDetectionService::passesNhsCheck('9434765918'), false);
+check('CPF validates',                   PiiDetectionService::passesCpfCheck('111.444.777-35'), true);
+check('CPF rejects an altered digit',    PiiDetectionService::passesCpfCheck('111.444.777-36'), false);
+check('CPF rejects repeated digits',     PiiDetectionService::passesCpfCheck('111.111.111-11'), false);
+check('IBAN validates',                  PiiDetectionService::passesIbanCheck('GB82 WEST 1234 5698 7654 32'), true);
+check('IBAN rejects an altered digit',   PiiDetectionService::passesIbanCheck('GB82WEST12345698765433'), false);
+check('TFN validates',                   PiiDetectionService::passesTfnCheck('123456782'), true);
+check('TFN rejects an altered digit',    PiiDetectionService::passesTfnCheck('123456789'), false);
+check('SIN validates via Luhn',          PiiDetectionService::passesLuhn('046454286'), true);
+check('SIN rejects an altered digit',    PiiDetectionService::passesLuhn('046454287'), false);
+check('SSN structure accepted',          PiiDetectionService::isPlausibleSsn('123-45-6789'), true);
+check('SSN rejects excluded area 666',   PiiDetectionService::isPlausibleSsn('666-45-6789'), false);
+check('SSN rejects a zero group',        PiiDetectionService::isPlausibleSsn('123-00-6789'), false);
+
+section('Jurisdiction identifiers end to end');
+
+$svc2 = new PiiDetectionService();
+$typesIn = function (string $text) use ($svc2): array {
+    $out = [];
+    foreach ($svc2->detectPii($text)['entities'] as $e) {
+        $out[] = $e['type'] . (!empty($e['validated']) ? '*' : '');
+    }
+    sort($out);
+
+    return $out;
+};
+
+check('Canadian SIN in context',   $typesIn('His social insurance number is 046 454 286.'), ['CA_SIN*']);
+check('Australian TFN in context', $typesIn('Tax file number 123 456 782 on record.'), ['AU_TFN*']);
+check('Brazilian CPF',             $typesIn('CPF 111.444.777-35 recorded.'), ['BR_CPF*']);
+check('UK NHS number',             $typesIn('NHS 9434765919 appears in the file.'), ['UK_NHS*']);
+check('UK NINO',                   $typesIn('NI number AB123456C on file.'), ['UK_NINO']);
+check('Singapore NRIC',            $typesIn('NRIC S1234567A on the form.'), ['SG_NRIC']);
+check('IBAN, printed grouping',    $typesIn('Payment to GB82 WEST 1234 5698 7654 32 was made.'), ['IBAN*']);
+check('IBAN, compact',             $typesIn('Account GB82WEST12345698765432 noted.'), ['IBAN*']);
+check('an altered IBAN is dropped',$typesIn('Account GB82WEST12345698765433 noted.'), []);
+check('SSN needs its separators',  $typesIn('SSN 123-45-6789 noted.'), ['US_SSN']);
+check('a bare 9-digit run is not an SSN', $typesIn('Reference 123456789 in the box list.'), []);
+check('Kenyan ID needs context',   $typesIn('Accession 12345678 transferred.'), []);
+check('Kenyan ID with context',    $typesIn('National ID 12345678 recorded.'), ['KE_ID']);
+check(
+    'an unvalidated Kenyan ID cannot assert a category',
+    PiiDetectionService::hasReportableFinding($svc2->detectPii('National ID 12345678 recorded.')['entities']),
+    false
 );
 
 // ── End to end through detectPii (still no database) ────────────────────

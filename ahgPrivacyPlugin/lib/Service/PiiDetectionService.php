@@ -51,6 +51,50 @@ class PiiDetectionService
 
         // Credit card (basic Luhn-eligible patterns)
         'CREDIT_CARD' => '/\b(?:\d{4}[\s-]?){3}\d{4}\b/',
+
+        // ── Jurisdiction identifiers ────────────────────────────────────
+        // Every mostly-numeric pattern below is either checksum validated or
+        // context gated. A bare run of digits scored as a national ID is the
+        // defect this class already carried once with NG_NIN.
+
+        // UK National Insurance number: 2 letters (with excluded prefixes),
+        // 6 digits, 1 suffix letter A-D. Distinctive enough to stand alone.
+        'UK_NINO' => '/\b[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\s?\d{2}\s?\d{2}\s?\d{2}\s?[A-D]\b/i',
+
+        // UK NHS number: 10 digits, mod 11 check digit. Validated.
+        'UK_NHS' => '/\b\d{3}[\s-]?\d{3}[\s-]?\d{4}\b/',
+
+        // Canadian Social Insurance Number: 9 digits, Luhn. Validated.
+        'CA_SIN' => '/\b\d{3}[\s-]\d{3}[\s-]\d{3}\b/',
+
+        // US Social Security Number. Separators are required deliberately: a
+        // bare 9-digit run is far too common in archival metadata to claim.
+        'US_SSN' => '/\b\d{3}-\d{2}-\d{4}\b/',
+
+        // Kenyan national ID: 7-8 digits, no checksum exists. Context gated.
+        'KE_ID' => '/\b\d{7,8}\b/',
+
+        // Kenyan KRA PIN: letter, 9 digits, letter. Context gated.
+        'KE_KRA_PIN' => '/\b[A-Z]\d{9}[A-Z]\b/i',
+
+        // Brazilian CPF: 11 digits with two mod 11 check digits. Validated.
+        'BR_CPF' => '/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/',
+
+        // Australian Tax File Number: 8-9 digits, weighted mod 11. Validated.
+        'AU_TFN' => '/\b\d{3}\s?\d{3}\s?\d{2,3}\b/',
+
+        // Singapore NRIC/FIN: prefix letter, 7 digits, suffix letter. The
+        // suffix is a checksum, but the letter tables are not implemented here,
+        // so this is treated as format-only and never counts as validated.
+        'SG_NRIC' => '/\b[STFGM]\d{7}[A-Z]\b/i',
+
+        // IBAN: country, 2 check digits, up to 30 alphanumerics, mod 97.
+        // International rather than tied to one jurisdiction. Validated.
+        // Two alternatives: the compact form, and the standard printed form in
+        // groups of four. A single permissive run that allowed spaces would keep
+        // swallowing following words in prose, and the checksum would then reject
+        // the whole thing, losing the IBAN rather than finding it.
+        'IBAN' => '/\b[A-Z]{2}\d{2}(?:[A-Z0-9]{11,30}|(?:\s[A-Z0-9]{4}){2,7}(?:\s[A-Z0-9]{1,4})?)\b/i',
     ];
 
     /**
@@ -67,6 +111,16 @@ class PiiDetectionService
         'BANK_ACCOUNT' => 'financial',
         'TAX_NUMBER' => 'financial',
         'CREDIT_CARD' => 'financial',
+        'UK_NINO' => 'personal',
+        'UK_NHS' => 'personal',
+        'CA_SIN' => 'personal',
+        'US_SSN' => 'personal',
+        'KE_ID' => 'personal',
+        'KE_KRA_PIN' => 'financial',
+        'BR_CPF' => 'personal',
+        'AU_TFN' => 'financial',
+        'SG_NRIC' => 'personal',
+        'IBAN' => 'financial',
         'DATE' => 'personal',
         'ORG' => 'personal',
         'GPE' => 'personal',
@@ -87,6 +141,16 @@ class PiiDetectionService
         'CREDIT_CARD' => 'critical',
         'BANK_ACCOUNT' => 'high',
         'TAX_NUMBER' => 'high',
+        'UK_NINO' => 'high',
+        'UK_NHS' => 'high',
+        'CA_SIN' => 'high',
+        'US_SSN' => 'high',
+        'KE_ID' => 'high',
+        'KE_KRA_PIN' => 'high',
+        'BR_CPF' => 'high',
+        'AU_TFN' => 'high',
+        'SG_NRIC' => 'high',
+        'IBAN' => 'high',
         'EMAIL' => 'medium',
         'PHONE_SA' => 'medium',
         'PHONE_INTL' => 'medium',
@@ -284,9 +348,11 @@ class PiiDetectionService
      * wins. A checksum-backed type outranks a shape-only one.
      */
     private const TYPE_PRECEDENCE = [
-        'SA_ID' => 100, 'CREDIT_CARD' => 90, 'EMAIL' => 80, 'NG_NIN' => 60,
-        'PASSPORT' => 55, 'TAX_NUMBER' => 50, 'BANK_ACCOUNT' => 45,
-        'PHONE_SA' => 40, 'PHONE_INTL' => 30,
+        'SA_ID' => 100, 'SG_NRIC' => 98, 'UK_NINO' => 97, 'BR_CPF' => 96,
+        'IBAN' => 95, 'AU_TFN' => 94, 'CA_SIN' => 93, 'UK_NHS' => 92,
+        'US_SSN' => 91, 'CREDIT_CARD' => 90, 'EMAIL' => 80, 'KE_KRA_PIN' => 70,
+        'NG_NIN' => 60, 'KE_ID' => 58, 'PASSPORT' => 55, 'TAX_NUMBER' => 50,
+        'BANK_ACCOUNT' => 45, 'PHONE_SA' => 40, 'PHONE_INTL' => 30,
     ];
 
     /** Sort key for overlap resolution; larger is more authoritative. */
@@ -320,6 +386,105 @@ class PiiDetectionService
         }
 
         return $sum % 10 === 0;
+    }
+
+    /** UK NHS number: 10 digits, weighted mod 11 check digit. */
+    public static function passesNhsCheck(string $value): bool
+    {
+        $d = preg_replace('/\\D/', '', $value);
+        if (10 !== strlen((string) $d)) {
+            return false;
+        }
+        $sum = 0;
+        for ($i = 0; $i < 9; $i++) {
+            $sum += (int) $d[$i] * (10 - $i);
+        }
+        $check = 11 - ($sum % 11);
+        if (11 === $check) {
+            $check = 0;
+        }
+        if (10 === $check) {
+            return false;
+        }
+
+        return $check === (int) $d[9];
+    }
+
+    /** Brazilian CPF: 11 digits with two mod 11 check digits. */
+    public static function passesCpfCheck(string $value): bool
+    {
+        $d = preg_replace('/\\D/', '', $value);
+        if (11 !== strlen((string) $d) || preg_match('/^(\\d)\\1{10}$/', $d)) {
+            return false;
+        }
+        for ($t = 9; $t < 11; $t++) {
+            $sum = 0;
+            for ($i = 0; $i < $t; $i++) {
+                $sum += (int) $d[$i] * (($t + 1) - $i);
+            }
+            $r = $sum % 11;
+            $check = $r < 2 ? 0 : 11 - $r;
+            if ($check !== (int) $d[$t]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** Australian Tax File Number: weighted sum divisible by 11. */
+    public static function passesTfnCheck(string $value): bool
+    {
+        $d = preg_replace('/\\D/', '', $value);
+        $len = strlen((string) $d);
+        if (8 !== $len && 9 !== $len) {
+            return false;
+        }
+        $weights = [1, 4, 3, 7, 5, 8, 6, 9, 10];
+        $sum = 0;
+        for ($i = 0; $i < $len; $i++) {
+            $sum += (int) $d[$i] * $weights[$i];
+        }
+
+        return 0 === $sum % 11;
+    }
+
+    /** IBAN: rearrange, letters to digits, mod 97 must equal 1. */
+    public static function passesIbanCheck(string $value): bool
+    {
+        $v = strtoupper((string) preg_replace('/[^A-Za-z0-9]/', '', $value));
+        if (strlen($v) < 15 || strlen($v) > 34) {
+            return false;
+        }
+        $rearranged = substr($v, 4) . substr($v, 0, 4);
+        $numeric = '';
+        foreach (str_split($rearranged) as $ch) {
+            $numeric .= ctype_alpha($ch) ? (string) (ord($ch) - 55) : $ch;
+        }
+        // mod 97 in chunks, because the number exceeds native integer range.
+        $remainder = 0;
+        foreach (str_split($numeric, 7) as $chunk) {
+            $remainder = (int) (((string) $remainder . $chunk) % 97);
+        }
+
+        return 1 === $remainder;
+    }
+
+    /**
+     * US SSN structural rules: area not 000/666/900-999, group not 00, serial
+     * not 0000. These exclusions are real but they are not a checksum, so a
+     * passing value is still reported as unvalidated and cannot on its own
+     * create a compliance assertion.
+     */
+    public static function isPlausibleSsn(string $value): bool
+    {
+        if (!preg_match('/^(\\d{3})-(\\d{2})-(\\d{4})$/', trim($value), $m)) {
+            return false;
+        }
+        $area = (int) $m[1];
+
+        return !(0 === $area || 666 === $area || $area >= 900)
+            && '00' !== $m[2] && '0000' !== $m[3];
     }
 
     /**
@@ -421,6 +586,24 @@ class PiiDetectionService
         'SA_ID' => ['popia'],
         'PHONE_SA' => ['popia'],
         'NG_NIN' => ['ndpa'],
+        'UK_NINO' => ['uk_gdpr'],
+        'UK_NHS' => ['uk_gdpr'],
+        'CA_SIN' => ['pipeda'],
+        'US_SSN' => ['ccpa'],
+        'KE_ID' => ['kenya_dpa'],
+        'KE_KRA_PIN' => ['kenya_dpa'],
+        'BR_CPF' => ['lgpd'],
+        'AU_TFN' => ['australia_privacy'],
+        'SG_NRIC' => ['pdpa_sg'],
+        // IBAN is deliberately absent: it is international rather than the
+        // identifier of any one jurisdiction, so it belongs to the universal
+        // set and runs everywhere.
+        //
+        // 'gdpr' is deliberately absent too. GDPR is a regulation across 27
+        // member states and has no national identifier of its own; each state's
+        // identifier would need its own pattern. It will therefore continue to
+        // appear in jurisdictionsWithoutPatterns(), which is accurate rather
+        // than a gap waiting to be filled.
     ];
 
     // ── Detection ───────────────────────────────────────────────────────
@@ -473,6 +656,27 @@ class PiiDetectionService
                         $validated = (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
                     }
 
+                    // Checksum-backed jurisdiction identifiers: a value that
+                    // fails its own check digit is not a finding at all.
+                    $checksums = [
+                        'UK_NHS' => 'passesNhsCheck',
+                        'CA_SIN' => 'passesLuhn',
+                        'BR_CPF' => 'passesCpfCheck',
+                        'AU_TFN' => 'passesTfnCheck',
+                        'IBAN' => 'passesIbanCheck',
+                    ];
+                    if (isset($checksums[$type])) {
+                        if (!self::{$checksums[$type]}($value)) {
+                            continue;
+                        }
+                        $validated = true;
+                    }
+
+                    // Structural rules only, so deliberately not "validated".
+                    if ($type === 'US_SSN' && !self::isPlausibleSsn($value)) {
+                        continue;
+                    }
+
                     // Skip if looks like a generic number (not PII)
                     if (in_array($type, ['BANK_ACCOUNT', 'TAX_NUMBER']) && !$this->looksLikeFinancial($text, $position, $value)) {
                         continue;
@@ -482,7 +686,7 @@ class PiiDetectionService
                     // eleven-digit run and a letter-plus-digits run are the shape
                     // of half the reference codes in an archive, and were being
                     // emitted at 'high' with nothing to back them.
-                    if (in_array($type, ['NG_NIN', 'PASSPORT'], true)
+                    if (in_array($type, ['NG_NIN', 'PASSPORT', 'KE_ID', 'KE_KRA_PIN'], true)
                         && !$this->looksLikeIdentityDocument($text, $position, $type)) {
                         continue;
                     }
@@ -1119,9 +1323,25 @@ class PiiDetectionService
      */
     protected function looksLikeIdentityDocument(string $text, int $position, string $type): bool
     {
-        $keywords = 'PASSPORT' === $type
-            ? ['passport', 'travel document', 'travel doc']
-            : ['nin', 'national identity', 'national id', 'identity number', 'identity no', 'id number', 'id no'];
+        switch ($type) {
+            case 'PASSPORT':
+                $keywords = ['passport', 'travel document', 'travel doc'];
+
+                break;
+
+            case 'KE_KRA_PIN':
+                $keywords = ['kra', 'pin', 'tax', 'taxpayer'];
+
+                break;
+
+            case 'KE_ID':
+                $keywords = ['id', 'identity', 'national id', 'id number', 'id no', 'huduma'];
+
+                break;
+
+            default:
+                $keywords = ['nin', 'national identity', 'national id', 'identity number', 'identity no', 'id number', 'id no'];
+        }
 
         return self::contextMentions($text, $position, $keywords);
     }
@@ -1170,7 +1390,19 @@ class PiiDetectionService
                 return '****-****-****-' . substr(preg_replace('/\D/', '', $value), -4);
             case 'BANK_ACCOUNT':
             case 'TAX_NUMBER':
-                return substr($value, 0, 3) . str_repeat('*', strlen($value) - 5) . substr($value, -2);
+            case 'UK_NHS':
+            case 'CA_SIN':
+            case 'US_SSN':
+            case 'KE_ID':
+            case 'KE_KRA_PIN':
+            case 'BR_CPF':
+            case 'AU_TFN':
+            case 'UK_NINO':
+            case 'SG_NRIC':
+            case 'IBAN':
+                return strlen($value) > 5
+                    ? substr($value, 0, 3) . str_repeat('*', strlen($value) - 5) . substr($value, -2)
+                    : str_repeat('*', strlen($value));
             default:
                 return $value;
         }
