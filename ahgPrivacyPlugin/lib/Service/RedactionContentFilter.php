@@ -175,6 +175,15 @@ class RedactionContentFilter
             }
 
             $leaked = self::detectLeaks($content, $values, $redacted);
+
+            // null means the page could not be normalised for comparison, so the
+            // absence of the value was never established. Withhold.
+            if (null === $leaked) {
+                self::reportFailure($ioId, $user, [], 'rendered page could not be normalised for verification');
+
+                return self::withheldNotice();
+            }
+
             if (!empty($leaked)) {
                 self::reportFailure($ioId, $user, $leaked, 'value still present after substitution');
 
@@ -239,9 +248,13 @@ class RedactionContentFilter
      * @param array<string,mixed> $redacted redacted values
      * @return array<int,string> leaking field names
      */
-    private static function detectLeaks(string $content, array $values, array $redacted): array
+    private static function detectLeaks(string $content, array $values, array $redacted): ?array
     {
         $haystack = self::normalise($content);
+        if (null === $haystack) {
+            return null;
+        }
+
         $leaks = [];
 
         foreach ($values as $field => $orig) {
@@ -267,15 +280,31 @@ class RedactionContentFilter
         return $leaks;
     }
 
-    /** Reduce HTML to comparable visible text. */
-    private static function normalise(string $html): string
+    /**
+     * Reduce HTML to comparable visible text, or null when that is not possible.
+     *
+     * Returning null matters. preg_replace() yields null on failure - invalid
+     * UTF-8 in the rendered page is enough, and the /u collapse below is exactly
+     * where that surfaces. Casting that null to a string produced an EMPTY
+     * haystack, in which nothing is ever found, so detectLeaks() reported no leak
+     * and the record was served. A verification step that answers "clean" when it
+     * could not read the page is worse than none, because it is trusted.
+     */
+    private static function normalise(string $html): ?string
     {
         $text = preg_replace('#<br\s*/?>#i', "\n", $html);
-        $text = strip_tags((string) $text);
-        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $text = preg_replace('/\s+/u', ' ', $text);
+        if (null === $text) {
+            return null;
+        }
 
-        return trim((string) $text);
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        $collapsed = preg_replace('/\s+/u', ' ', $text);
+        if (null === $collapsed) {
+            return null;
+        }
+
+        return trim($collapsed);
     }
 
     /**

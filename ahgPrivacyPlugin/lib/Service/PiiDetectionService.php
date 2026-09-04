@@ -646,7 +646,26 @@ class PiiDetectionService
         // widens rather than narrows: no jurisdiction configured, or one with no
         // specific patterns, still yields the full universal set.
         foreach (self::patternsForJurisdictions(self::installedJurisdictionCodes()) as $type => $pattern) {
-            if (preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE)) {
+            // preg_match_all() returns false on failure, which is falsy, so an
+            // aborted match was indistinguishable from "found nothing". A pattern
+            // that exhausts the backtrack limit on a long description, or hits
+            // invalid UTF-8, therefore dropped out of the scan silently and the
+            // report looked clean. Skipping is still the only option; being quiet
+            // about it is not.
+            $matchCount = preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE);
+
+            if (false === $matchCount || PREG_NO_ERROR !== preg_last_error()) {
+                error_log(sprintf(
+                    '[ahgPrivacy] pattern %s could not be evaluated (%s). Any %s in this text is NOT reported by this scan.',
+                    $type,
+                    preg_last_error_msg(),
+                    $type
+                ));
+
+                continue;
+            }
+
+            if ($matchCount > 0) {
                 foreach ($matches[0] as $match) {
                     $value = $match[0];
                     $position = $match[1];
