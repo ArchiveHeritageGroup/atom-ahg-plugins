@@ -2414,6 +2414,49 @@
                         @case('security')
                             {{-- Security & Access Control Settings --}}
                             <div class="card mb-4">
+                                <div class="card-header"><i class="fas fa-shield-alt me-2"></i>{{ __('Cross-Site Request Forgery (CSRF)') }}</div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3">
+                                        {{ __('How CsrfService treats a POST that arrives without a valid token. Requests carrying an X-API-Key, and base AtoM forms carrying their own _csrf_token, are exempt in every mode and are never affected by this setting.') }}
+                                    </p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="csrf_enforcement" class="form-label">
+                                                <strong>{{ __('Enforcement mode') }}</strong>
+                                            </label>
+                                            @php $csrfMode = $settings['csrf_enforcement'] ?? 'enforce'; @endphp
+                                            <select class="form-select" id="csrf_enforcement" name="settings[csrf_enforcement]">
+                                                <option value="enforce" {{ 'enforce' === $csrfMode ? 'selected' : '' }}>{{ __('Enforce - reject the request with 403 (recommended)') }}</option>
+                                                <option value="log" {{ 'log' === $csrfMode ? 'selected' : '' }}>{{ __('Log only - allow the request, record the violation') }}</option>
+                                                <option value="off" {{ 'off' === $csrfMode ? 'selected' : '' }}>{{ __('Off - no checking and no logging') }}</option>
+                                            </select>
+                                            <div class="form-text">
+                                                {{ __('Log only is an observation mode: violations appear in the error log but the request still succeeds, so the site is not protected. Review them under Error Log before switching to Enforce.') }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            @if('log' === $csrfMode)
+                                            <div class="alert alert-warning mb-0 mt-4">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                {{ __('Currently in log-only mode, so CSRF violations are recorded but not blocked.') }}
+                                            </div>
+                                            @elseif('off' === $csrfMode)
+                                            <div class="alert alert-danger mb-0 mt-4">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                {{ __('Currently off: violations are neither blocked nor recorded.') }}
+                                            </div>
+                                            @else
+                                            <div class="alert alert-success mb-0 mt-4">
+                                                <i class="fas fa-check-circle me-2"></i>
+                                                {{ __('Currently enforcing: requests without a valid token are rejected.') }}
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
                                 <div class="card-header"><i class="fas fa-key me-2"></i>{{ __('Password Policy') }}</div>
                                 <div class="card-body">
                                     <p class="text-muted mb-3">{{ __('Configure password expiry and history requirements. These settings are enforced by the PasswordPolicyService (ISO 27001 A.9.4.3).') }}</p>
