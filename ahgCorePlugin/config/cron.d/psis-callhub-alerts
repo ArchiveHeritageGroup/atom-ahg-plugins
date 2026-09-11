@@ -1,0 +1,43 @@
+# ahgCorePlugin - CallHub error alerts
+#
+# Install: sudo install -m 644 -o root -g root \
+#   /usr/share/nginx/archive/plugins/ahgCorePlugin/config/cron.d/psis-callhub-alerts \
+#   /etc/cron.d/psis-callhub-alerts
+#
+# cron picks /etc/cron.d up without a reload. Nothing else is needed.
+#
+# Raises a CallHub ticket for each open error-level row in ahg_error_log, via the
+# workbench notification spool. No-ops entirely unless callhub_alerts_enabled is on,
+# so installing this on an instance that has not enabled it is harmless.
+#
+# RUNS AS www-data, NOT root and not a login user. Two reasons, both already bitten
+# on this host:
+#   - log/ is drwxr-xr-x www-data:www-data and Symfony's sfFileLogger throws on
+#     !is_writable($dir), so every `php symfony` task dies on startup under any
+#     other user. central:sync-errors fails identically.
+#   - a root run can leave root-owned files in cache/, which then 500s the site for
+#     www-data. See the 2026-05-08 incident note in ahg-discovery-prune.
+#
+# The absolute php path and the `cd` are both required: /etc/cron.d commands run with
+# cwd=/ and a bare PATH, and `php symfony` only resolves from the AtoM root.
+#
+# flock -n so a slow run cannot pile up. A skipped tick costs nothing - the drain
+# claims each fault in ahg_error_alert before sending, so the next tick picks up
+# whatever this one missed.
+#
+# Duplicate tickets are prevented by UNIQUE (signature, period) on ahg_error_alert,
+# claimed BEFORE the notification is written. One ticket per fault per ISO week; a
+# recurrence the following week raises a fresh one deliberately.
+#
+# Requires: ahg_error_alert (ahgCorePlugin/database/add_error_alert_table.sql) and
+# /var/log/atom to exist.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+
+# Hourly at 7 past. Errors only - warnings and notices stay in the error log.
+#
+# The root is spelled out rather than carried in a variable. $ATOM_ROOT does survive
+# into flock's inner shell, but only because cron exports it and the single quotes
+# defer expansion to that inner sh - two levels of quoting holding up a path is the
+# kind of subtlety that breaks silently the next time someone edits this line.
+7 * * * * www-data flock -n /run/lock/psis-callhub-alerts.lock -c 'cd /usr/share/nginx/archive && /usr/bin/php symfony callhub:alerts >> /var/log/atom/callhub-alerts.log 2>&1'
