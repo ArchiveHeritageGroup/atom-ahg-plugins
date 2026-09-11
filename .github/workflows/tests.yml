@@ -30,19 +30,21 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           extensions: mbstring, json
 
-      # PII detection: risk banding, scoring, overlap resolution, checksum
-      # validation against published test values, jurisdiction selection.
-      - name: PII scoring
-        run: php ahgPrivacyPlugin/tests/pii_scoring_test.php
-
-      # Field-level redaction: substitution across the forms a theme renders, and
-      # the verification that withholds a record when it cannot prove the value is
-      # gone rather than reporting it clean.
-      - name: Redaction filter
-        run: php ahgPrivacyPlugin/tests/redaction_filter_test.php
-
-      # Visual redaction coordinates: refuse a malformed region rather than
-      # defaulting it to the origin, which burns a mask into the wrong part of a
-      # file and makes it look redacted.
-      - name: Visual redaction coordinates
-        run: php ahgPrivacyPlugin/tests/visual_redaction_coords_test.php
+      # Every suite under any plugin's tests/ directory. A glob rather than a
+      # hardcoded list: the list version silently skipped a new suite the day it
+      # was added, which is the failure this replaces. nullglob so an empty match
+      # is not treated as a literal path, and `|| exit 1` so one failure fails the
+      # build rather than being swallowed by the loop.
+      - name: Plugin test suites
+        run: |
+          shopt -s nullglob
+          found=0
+          for t in ahg*Plugin/tests/*_test.php; do
+            found=$((found + 1))
+            echo "--- $t"
+            php "$t" || exit 1
+          done
+          echo "ran $found suite(s)"
+          # A glob that matches nothing must fail: it means the suites moved or the
+          # naming changed, and a green build proving nothing is worse than a red one.
+          if [ "$found" -eq 0 ]; then echo "no test suites matched - refusing to pass"; exit 1; fi
