@@ -39,6 +39,17 @@ class CallHubAlertService
     /** Only these levels warrant a ticket. Warnings stay in the log. */
     public const TICKET_LEVELS = ['error'];
 
+    /** Accepted by CallHub. Anything else is coerced to DEFAULT_PRIORITY. */
+    public const PRIORITIES = ['critical', 'high', 'medium', 'low'];
+
+    /**
+     * Medium, not high. High as a default means nobody ever chose it. PSIS
+     * overrides this per instance via the callhub_priority setting - a fatal on a
+     * live archive is high, the same fatal on a testbed is low, and only this side
+     * knows which instance raised it.
+     */
+    public const DEFAULT_PRIORITY = 'medium';
+
     /** Identifies this instance in the reference and the ticket title. */
     public const SOURCE = 'psis';
 
@@ -116,10 +127,30 @@ class CallHubAlertService
         return $title;
     }
 
+    /**
+     * Priority is OURS to declare, and the workbench honours it only as a literal
+     * "Priority: x" line in the body (callhubTickets.ts priorityFor). A spool file
+     * has no priority field - the watcher drops unknown keys - so this line IS the
+     * channel. Without it every PSIS ticket comes out high, which is the exact
+     * flattening Johan objected to on 11 September 2026.
+     *
+     * Anything unrecognised becomes the house default rather than being passed
+     * through, so a typo in a setting cannot produce a ticket with no priority.
+     */
+    public static function priority(?string $configured): string
+    {
+        $p = strtolower(trim((string) $configured));
+
+        return in_array($p, self::PRIORITIES, true) ? $p : self::DEFAULT_PRIORITY;
+    }
+
     /** Summary plus a link back to the log. The detail stays on our side. */
-    public static function message(object $row, string $externalRef, ?string $link = null): string
+    public static function message(object $row, string $externalRef, ?string $link = null, ?string $priority = null): string
     {
         $lines = [
+            // Must stay on its own line and first: the workbench matches it with
+            // an anchored per-line regex.
+            'Priority: ' . self::priority($priority),
             'Level: ' . (string) ($row->level ?? '?'),
             'Occurrences: ' . (string) ($row->occurrences ?? 1),
             'First seen: ' . (string) ($row->created_at ?? '?'),
@@ -231,18 +262,34 @@ class CallHubAlertService
     }
 
     /** Build the spool payload for one error row. */
-    public static function payload(object $row, string $externalRef, string $project, string $username): array
+    /**
+     * $project is a WORKBENCH projects.id uuid, not a client name. It is the join
+     * between a ticket and a workbench project, and CallHub assigns the client
+     * itself - so "AHG Internal" (a client) must never be sent here.
+     *
+     * Omitted entirely when unset. A wrong uuid sends whoever clicks through into
+     * the wrong project tree, which is worse than no link at all, so this field is
+     * absent until someone names the workbench project a PSIS fault is fixed in.
+     */
+    public static function payload(object $row, string $externalRef, string $project, string $username, ?string $priority = null): array
     {
-        return [
+        $payload = [
             'username' => $username,
             'title' => self::title($row),
-            'message' => self::message($row, $externalRef, self::link($row)),
+            'message' => self::message($row, $externalRef, self::link($row), $priority),
             'eventType' => 'alert',
             'entityId' => self::entityId($externalRef),
             'webLink' => self::link($row),
             'source' => self::SOURCE,
             'externalRef' => $externalRef,
-            'projectId' => $project,
         ];
+
+        // Only a uuid is a project. Anything else is a misconfiguration, and sending
+        // it would be silently wrong rather than visibly absent.
+        if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', trim($project))) {
+            $payload['projectId'] = strtolower(trim($project));
+        }
+
+        return $payload;
     }
 }

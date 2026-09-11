@@ -69,8 +69,11 @@ EOF;
             return 1;
         }
 
-        $project = $this->setting('callhub_project', 'AHG Internal');
+        // A workbench projects.id uuid, or empty. NOT a client name - CallHub
+        // assigns the client. Empty means the ticket carries no project link.
+        $project = $this->setting('callhub_project', '');
         $username = $this->setting('callhub_notify_username', 'johan');
+        $priority = \AhgCore\Services\CallHubAlertService::priority($this->setting('callhub_priority', ''));
         $period = \AhgCore\Services\CallHubAlertService::period();
 
         try {
@@ -94,7 +97,7 @@ EOF;
             $ref = \AhgCore\Services\CallHubAlertService::externalRef($signature, $period);
 
             if ($dryRun) {
-                $this->logSection('callhub', sprintf('would raise %s - %s', $ref, \AhgCore\Services\CallHubAlertService::title($row)));
+                $this->logSection('callhub', sprintf('would raise %s [%s] - %s', $ref, $priority, \AhgCore\Services\CallHubAlertService::title($row)));
                 ++$sent;
 
                 continue;
@@ -107,7 +110,7 @@ EOF;
                 continue;
             }
 
-            $payload = \AhgCore\Services\CallHubAlertService::payload($row, $ref, $project, $username);
+            $payload = \AhgCore\Services\CallHubAlertService::payload($row, $ref, $project, $username, $priority);
 
             if (\AhgCore\Services\CallHubAlertService::writeSpool($payload)) {
                 ++$sent;
