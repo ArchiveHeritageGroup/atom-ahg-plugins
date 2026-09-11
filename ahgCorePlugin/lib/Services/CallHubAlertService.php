@@ -50,6 +50,44 @@ class CallHubAlertService
      */
     public const DEFAULT_PRIORITY = 'medium';
 
+    /**
+     * Paths where a fatal means archival data may have been lost or corrupted, not
+     * merely that an operation failed. A fatal here is critical regardless of the
+     * configured priority.
+     *
+     * Why a hand-kept list of paths and not a pattern over the error text: the code
+     * path is a fact about what the process was doing, where the message is only
+     * words. "Failed to delete" in a message proves nothing; a fatal raised inside a
+     * chunked delete loop can genuinely leave a half-pruned table.
+     *
+     * Why these six and not the sixty-seven files that contain a delete. A fatal in a
+     * user's single delete click means the delete did NOT happen - nothing is lost.
+     * The danger is bulk or unattended destruction, and mid-write corruption. Counted
+     * 11 September 2026: 29 files mention purge/prune/retention/truncate, 8 actually
+     * issue DELETE/TRUNCATE/unlink, and only 3 of those destroy archival data rather
+     * than caches, settings or demo seed data. The other three are the write paths
+     * where a crash corrupts rather than deletes.
+     *
+     * Deliberately NOT extended to the unauthenticated-exposure axis. That would need
+     * an allowlist over ~150 public browse and view actions, which would rot on the
+     * next route added and is the false confidence this list exists to avoid.
+     *
+     * An empty list degrades to exactly the configured priority. Paths are matched as
+     * suffixes because the log stores absolute paths, and they span BOTH repos.
+     * criticalPathsMissing() proves each one still exists - a rename must fail a test,
+     * not silently demote a critical path to high.
+     */
+    public const CRITICAL_PATHS = [
+        // Destroys archival data in bulk or unattended.
+        'atom-framework/src/Console/Commands/Tools/ExpireDataCommand.php',
+        'atom-framework/src/Console/Commands/PhysicalObject/PhysicalObjectDeleteUnlinkedCommand.php',
+        'atom-ahg-plugins/ahgVersionControlPlugin/lib/task/versionPruneTask.class.php',
+        // Corrupts rather than deletes if it dies mid-write.
+        'atom-ahg-plugins/ahgPreservationPlugin/lib/PreservationService.php',
+        'atom-ahg-plugins/ahgPreservationPlugin/lib/Commands/FixityCommand.php',
+        'atom-ahg-plugins/ahgIntegrityPlugin/lib/Services/IntegrityService.php',
+    ];
+
     /** Identifies this instance in the reference and the ticket title. */
     public const SOURCE = 'psis';
 
@@ -142,6 +180,57 @@ class CallHubAlertService
         $p = strtolower(trim((string) $configured));
 
         return in_array($p, self::PRIORITIES, true) ? $p : self::DEFAULT_PRIORITY;
+    }
+
+    /**
+     * True when the fatal was raised in a path where archival data is at stake.
+     *
+     * Suffix match, but only on a path boundary: a file called
+     * MyExpireDataCommand.php must not match ExpireDataCommand.php.
+     */
+    public static function isCriticalPath(?string $file): bool
+    {
+        $file = str_replace('\\', '/', trim((string) $file));
+
+        if ('' === $file) {
+            return false;
+        }
+
+        foreach (self::CRITICAL_PATHS as $path) {
+            if ($file === $path || str_ends_with($file, '/' . $path)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The priority actually sent: critical when the code path puts data at risk,
+     * otherwise whatever was configured.
+     *
+     * Escalation only. A configured 'critical' is never demoted by this.
+     */
+    public static function priorityFor(object $row, ?string $configured): string
+    {
+        return self::isCriticalPath($row->file ?? null) ? 'critical' : self::priority($configured);
+    }
+
+    /**
+     * Which listed paths no longer exist. A rename or a move must surface here rather
+     * than silently turning a critical path into an ordinary one.
+     */
+    public static function criticalPathsMissing(string $atomRoot): array
+    {
+        $missing = [];
+
+        foreach (self::CRITICAL_PATHS as $path) {
+            if (!file_exists(rtrim($atomRoot, '/') . '/' . $path)) {
+                $missing[] = $path;
+            }
+        }
+
+        return $missing;
     }
 
     /** Summary plus a link back to the log. The detail stays on our side. */

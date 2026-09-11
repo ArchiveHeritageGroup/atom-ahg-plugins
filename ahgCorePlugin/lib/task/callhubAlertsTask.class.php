@@ -73,7 +73,7 @@ EOF;
         // assigns the client. Empty means the ticket carries no project link.
         $project = $this->setting('callhub_project', '');
         $username = $this->setting('callhub_notify_username', 'johan');
-        $priority = \AhgCore\Services\CallHubAlertService::priority($this->setting('callhub_priority', ''));
+        $configuredPriority = $this->setting('callhub_priority', '');
         $period = \AhgCore\Services\CallHubAlertService::period();
 
         try {
@@ -97,7 +97,12 @@ EOF;
             $ref = \AhgCore\Services\CallHubAlertService::externalRef($signature, $period);
 
             if ($dryRun) {
-                $this->logSection('callhub', sprintf('would raise %s [%s] - %s', $ref, $priority, \AhgCore\Services\CallHubAlertService::title($row)));
+                $this->logSection('callhub', sprintf(
+                    'would raise %s [%s] - %s',
+                    $ref,
+                    \AhgCore\Services\CallHubAlertService::priorityFor($row, $configuredPriority),
+                    \AhgCore\Services\CallHubAlertService::title($row)
+                ));
                 ++$sent;
 
                 continue;
@@ -110,7 +115,7 @@ EOF;
                 continue;
             }
 
-            $payload = \AhgCore\Services\CallHubAlertService::payload($row, $ref, $project, $username, $priority);
+            $payload = \AhgCore\Services\CallHubAlertService::payload($row, $ref, $project, $username, \AhgCore\Services\CallHubAlertService::priorityFor($row, $configuredPriority));
 
             if (\AhgCore\Services\CallHubAlertService::writeSpool($payload)) {
                 ++$sent;

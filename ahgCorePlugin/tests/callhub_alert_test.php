@@ -162,5 +162,51 @@ check('a uuid is normalised to lower case',
     C::payload($prow, 'r', '9CA93D45-4523-4DE8-AF72-E2A42B93D1AE', 'johan')['projectId'] ?? null,
     '9ca93d45-4523-4de8-af72-e2a42b93d1ae');
 
+// --- critical-path escalation (workbench proposal, 11 Sep 2026) ---
+// The list is a fact about the code path, not a reading of the message. These assert
+// the boundary behaviour, because a sloppy suffix match is the way this goes wrong.
+$crit = (object) ['file' => '/usr/share/nginx/archive/atom-framework/src/Console/Commands/Tools/ExpireDataCommand.php'];
+$safe = (object) ['file' => '/usr/share/nginx/archive/atom-ahg-plugins/ahgCorePlugin/lib/Services/CallHubAlertService.php'];
+
+check('a listed path is critical', C::isCriticalPath($crit->file), true);
+check('an unlisted path is not', C::isCriticalPath($safe->file), false);
+check('a relative listed path matches too',
+    C::isCriticalPath('atom-ahg-plugins/ahgIntegrityPlugin/lib/Services/IntegrityService.php'), true);
+check('null file is not critical', C::isCriticalPath(null), false);
+check('empty file is not critical', C::isCriticalPath(''), false);
+
+// The failure this guards: a suffix match that ignores the path boundary would
+// escalate any file whose NAME merely ends with a listed basename.
+check('a same-named file elsewhere does NOT match',
+    C::isCriticalPath('/usr/share/nginx/archive/vendor/evil/ExpireDataCommand.php'), false);
+check('a longer basename does NOT match',
+    C::isCriticalPath('/usr/share/nginx/archive/atom-framework/src/Console/Commands/Tools/MyExpireDataCommand.php'), false);
+
+// Escalation only, never demotion.
+check('a critical path overrides a configured high', C::priorityFor($crit, 'high'), 'critical');
+check('a critical path overrides a configured low', C::priorityFor($crit, 'low'), 'critical');
+check('a critical path overrides an unset priority', C::priorityFor($crit, ''), 'critical');
+check('an ordinary path keeps the configured priority', C::priorityFor($safe, 'high'), 'high');
+check('an ordinary path with no config gets the default', C::priorityFor($safe, ''), 'medium');
+check('a configured critical is never demoted', C::priorityFor($safe, 'critical'), 'critical');
+check('a row with no file at all keeps the configured priority',
+    C::priorityFor((object) ['level' => 'error'], 'high'), 'high');
+
+// And it reaches the body the workbench actually reads.
+$critBody = C::message($crit, 'psis:x:2026-W37', null, C::priorityFor($crit, 'medium'));
+check('an escalated ticket says critical in the body',
+    preg_match('/^\s*Priority:\s*(\w+)\s*$/im', $critBody, $mc) ? $mc[1] : null, 'critical');
+
+// THE GUARD THAT MATTERS: a rename must break this test, not silently demote the path.
+$atomRoot = dirname(dirname(dirname(__DIR__)));
+$missing = C::criticalPathsMissing($atomRoot);
+check(
+    'every listed critical path still exists (a rename must fail here, not demote silently): '
+        . ($missing ? implode(', ', $missing) : 'all present'),
+    $missing,
+    []
+);
+check('the list is small enough to maintain by hand (<= 12)', count(C::CRITICAL_PATHS) <= 12, true);
+
 printf("\n%d passed, %d failed\n", $passed, $failed);
 exit(0 === $failed ? 0 : 1);
