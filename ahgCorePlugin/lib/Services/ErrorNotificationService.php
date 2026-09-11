@@ -25,6 +25,97 @@ class ErrorNotificationService
     private static bool $configLoaded = false;
 
     /**
+     * Severity thresholds for handleError(), widest last.
+     *
+     * The setting `error_trap_level` in ahg_settings selects one. Each threshold
+     * includes every level above it, so 'notice' also traps warnings and errors.
+     *
+     * Default is 'error', which is exactly the behaviour before this was
+     * configurable: E_USER_ERROR and E_RECOVERABLE_ERROR and nothing else. That
+     * default is deliberate. AtoM sets error_reporting to E_ALL | E_STRICT in
+     * apps/qubit/config/settings.yml, so PHP reports everything and it is this
+     * filter, not error_reporting, that has been keeping the log quiet. How much
+     * volume the wider settings produce on this stack is UNMEASURED - Symfony 1.4
+     * on PHP 8.3 generates deprecations from many distinct sites, and only repeats
+     * of the SAME signature collapse into one row. Widen one step at a time and
+     * watch the table.
+     */
+    private const TRAP_LEVELS = [
+        'off' => [],
+        'error' => [
+            E_USER_ERROR => 'error',
+            E_RECOVERABLE_ERROR => 'error',
+        ],
+        'warning' => [
+            E_USER_ERROR => 'error',
+            E_RECOVERABLE_ERROR => 'error',
+            E_WARNING => 'warning',
+            E_USER_WARNING => 'warning',
+            E_CORE_WARNING => 'warning',
+            E_COMPILE_WARNING => 'warning',
+        ],
+        'notice' => [
+            E_USER_ERROR => 'error',
+            E_RECOVERABLE_ERROR => 'error',
+            E_WARNING => 'warning',
+            E_USER_WARNING => 'warning',
+            E_CORE_WARNING => 'warning',
+            E_COMPILE_WARNING => 'warning',
+            E_NOTICE => 'notice',
+            E_USER_NOTICE => 'notice',
+        ],
+        'all' => [
+            E_USER_ERROR => 'error',
+            E_RECOVERABLE_ERROR => 'error',
+            E_WARNING => 'warning',
+            E_USER_WARNING => 'warning',
+            E_CORE_WARNING => 'warning',
+            E_COMPILE_WARNING => 'warning',
+            E_NOTICE => 'notice',
+            E_USER_NOTICE => 'notice',
+            E_DEPRECATED => 'notice',
+            E_USER_DEPRECATED => 'notice',
+        ],
+    ];
+
+    /** Resolved once per request: handleError runs too often to read settings each time. */
+    private static ?array $trapMap = null;
+
+    /**
+     * The active level map.
+     *
+     * Resolved once and cached. Any failure reading the setting falls back to
+     * 'error', the previous behaviour - a broken settings read must not silently
+     * widen what is trapped, and must not silently stop trapping either.
+     */
+    public static function trapMap(): array
+    {
+        if (null !== self::$trapMap) {
+            return self::$trapMap;
+        }
+
+        $name = 'error';
+        try {
+            if (class_exists('\AtomExtensions\Services\AhgSettingsService')) {
+                $candidate = \AtomExtensions\Services\AhgSettingsService::get('error_trap_level', 'error');
+                if (is_string($candidate) && isset(self::TRAP_LEVELS[$candidate])) {
+                    $name = $candidate;
+                }
+            }
+        } catch (\Throwable $e) {
+            // keep 'error'
+        }
+
+        return self::$trapMap = self::TRAP_LEVELS[$name];
+    }
+
+    /** Names of the available thresholds, widest last. For a settings UI. */
+    public static function trapLevelNames(): array
+    {
+        return array_keys(self::TRAP_LEVELS);
+    }
+
+    /**
      * Register error/exception/shutdown handlers.
      *
      * Captures: uncaught exceptions, fatal errors, PHP warnings/notices,
@@ -60,11 +151,9 @@ class ErrorNotificationService
             return false;
         }
 
-        // Only log errors (skip warnings, notices, deprecations, strict)
-        $logTypes = [
-            E_USER_ERROR => 'error',
-            E_RECOVERABLE_ERROR => 'error',
-        ];
+        // Which levels are trapped is configurable via `error_trap_level`.
+        // Default 'error' reproduces the original behaviour exactly.
+        $logTypes = self::trapMap();
 
         if (!isset($logTypes[$errno])) {
             return false;

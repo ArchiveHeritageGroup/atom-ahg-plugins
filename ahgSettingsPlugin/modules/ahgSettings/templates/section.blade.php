@@ -2457,6 +2457,49 @@
                             </div>
 
                             <div class="card mb-4">
+                                <div class="card-header"><i class="fas fa-bug me-2"></i>{{ __('Error Trapping') }}</div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3">
+                                        {{ __('Which PHP diagnostic levels are recorded to the error log. Uncaught exceptions and fatal errors are always recorded and are not affected by this setting. Repeats of the same fault collapse into one entry with an occurrence count, so a recurring problem does not flood the log.') }}
+                                    </p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="error_trap_level" class="form-label"><strong>{{ __('Record down to') }}</strong></label>
+                                            @php $trapLevel = $settings['error_trap_level'] ?? 'error'; @endphp
+                                            <select class="form-select" id="error_trap_level" name="settings[error_trap_level]">
+                                                <option value="off" {{ 'off' === $trapLevel ? 'selected' : '' }}>{{ __('Off - handled PHP diagnostics are not recorded') }}</option>
+                                                <option value="error" {{ 'error' === $trapLevel ? 'selected' : '' }}>{{ __('Errors only (default)') }}</option>
+                                                <option value="warning" {{ 'warning' === $trapLevel ? 'selected' : '' }}>{{ __('Errors and warnings') }}</option>
+                                                <option value="notice" {{ 'notice' === $trapLevel ? 'selected' : '' }}>{{ __('Errors, warnings and notices') }}</option>
+                                                <option value="all" {{ 'all' === $trapLevel ? 'selected' : '' }}>{{ __('Everything, including deprecations') }}</option>
+                                            </select>
+                                            <div class="form-text">
+                                                {{ __('Widen one step at a time. This stack reports every level to PHP already, so it is this setting rather than error_reporting that has kept the log quiet, and the volume of the wider settings has not been measured here.') }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            @if('off' === $trapLevel)
+                                            <div class="alert alert-warning mb-0 mt-4">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                {{ __('Handled diagnostics are not being recorded. Fatal errors and uncaught exceptions still are.') }}
+                                            </div>
+                                            @elseif('all' === $trapLevel)
+                                            <div class="alert alert-info mb-0 mt-4">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                {{ __('Widest setting. Watch the error log size after enabling this.') }}
+                                            </div>
+                                            @else
+                                            <div class="alert alert-success mb-0 mt-4">
+                                                <i class="fas fa-check-circle me-2"></i>
+                                                {{ __('Recording down to: ') }}<strong>{{ $trapLevel }}</strong>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
                                 <div class="card-header"><i class="fas fa-key me-2"></i>{{ __('Password Policy') }}</div>
                                 <div class="card-body">
                                     <p class="text-muted mb-3">{{ __('Configure password expiry and history requirements. These settings are enforced by the PasswordPolicyService (ISO 27001 A.9.4.3).') }}</p>
