@@ -1,6 +1,7 @@
 # Only track AHG plugins
 /*
 !/.gitignore
+!/LICENSE
 !/README.md
 !/ahg*/
 !/docs/
