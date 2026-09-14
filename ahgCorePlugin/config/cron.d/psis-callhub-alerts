@@ -47,6 +47,16 @@
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 
+# Anything this job prints is mailed here. It should print nothing: with the redirect
+# outside flock -c (see below) both the task's output and flock's own errors go to the
+# log, so mail means something failed before either could be written.
+#
+# Set to a real person deliberately. Cron's default recipient is the job's user,
+# www-data, which this host's Graph mail shim rejects as unresolvable - so for two days
+# in September 2026 every hourly failure was mailed into a 400 and nobody saw one. A job
+# whose only failure channel is undeliverable fails invisibly.
+MAILTO=johan@theahg.co.za
+
 # Hourly at 7 past. Errors only - warnings and notices stay in the error log.
 #
 # The root is spelled out rather than carried in a variable. $ATOM_ROOT does survive
