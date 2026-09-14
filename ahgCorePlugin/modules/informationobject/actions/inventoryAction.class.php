@@ -82,7 +82,25 @@ class InformationObjectInventoryAction extends DefaultBrowseAction
         return $resultSet->getTotalHits() > 0;
     }
 
-    private static function getLevels()
+    /**
+     * Configured inventory levels, ALWAYS an array.
+     *
+     * It used to `return;` - null - on three paths: no setting row, a failed
+     * unserialize, and an empty or non-array value. showInventory() tested that with
+     * empty() and coped, but execute() passes the result straight to
+     * Elastica\Query\Terms, whose second argument is typed array, so on PHP 8 a null
+     * is a TypeError rather than an empty query.
+     *
+     * That is what took /informationobject/inventory down on 13 September 2026:
+     * inventory_levels has never been set on this instance. The tab is hidden by
+     * showInventory(), so the page is only reachable by typing the URL - which is why
+     * it sat unnoticed until someone did.
+     *
+     * Returning [] keeps every caller's meaning intact: empty([]) is still true for
+     * showInventory(), and a Terms query on an empty list simply matches nothing,
+     * which is the honest answer when no levels are configured.
+     */
+    private static function getLevels(): array
     {
         if (null !== self::$levels) {
             return self::$levels;
@@ -93,11 +111,11 @@ class InformationObjectInventoryAction extends DefaultBrowseAction
         // instantiation so a crafted value cannot trigger a destructor chain.
         if (null === $setting
             || false === $value = unserialize($setting->getValue(), ['allowed_classes' => false])) {
-            return;
+            return self::$levels = [];
         }
 
         if (!is_array($value) || 0 === count($value)) {
-            return;
+            return self::$levels = [];
         }
 
         self::$levels = $value;

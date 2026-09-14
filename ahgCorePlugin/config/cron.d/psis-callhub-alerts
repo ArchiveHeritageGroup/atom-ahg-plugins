@@ -25,6 +25,19 @@
 # claims each fault in ahg_error_alert before sending, so the next tick picks up
 # whatever this one missed.
 #
+# THE REDIRECT IS OUTSIDE -c ON PURPOSE. With it inside, it covers only the php
+# command, so flock's OWN errors escape to cron and the log file is never created -
+# a total failure that looks exactly like "cron never fired". That happened here on
+# 11-12 September 2026: a verification run as johanpiet left
+# /run/lock/psis-callhub-alerts.lock owned johanpiet:johanpiet 0664, www-data could
+# not open it, and two days of hourly ticks failed silently while cron tried to mail
+# the error to the unresolvable recipient "www-data". Outside -c, flock's failure
+# lands in the log where it can be read.
+#
+# Never run this command as another user: whoever creates the lock file owns it, and
+# a lock www-data cannot open stops the job dead. If that happens, delete the lock
+# and let the next tick recreate it.
+#
 # Duplicate tickets are prevented by UNIQUE (signature, period) on ahg_error_alert,
 # claimed BEFORE the notification is written. One ticket per fault per ISO week; a
 # recurrence the following week raises a fresh one deliberately.
@@ -40,4 +53,4 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 # into flock's inner shell, but only because cron exports it and the single quotes
 # defer expansion to that inner sh - two levels of quoting holding up a path is the
 # kind of subtlety that breaks silently the next time someone edits this line.
-7 * * * * www-data flock -n /run/lock/psis-callhub-alerts.lock -c 'cd /usr/share/nginx/archive && /usr/bin/php symfony callhub:alerts >> /var/log/atom/callhub-alerts.log 2>&1'
+7 * * * * www-data flock -n /run/lock/psis-callhub-alerts.lock -c 'cd /usr/share/nginx/archive && /usr/bin/php symfony callhub:alerts' >> /var/log/atom/callhub-alerts.log 2>&1
