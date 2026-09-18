@@ -30,6 +30,14 @@ class InformationObjectIndexAction extends sfAction
     {
         $this->resource = $this->getRoute()->resource;
 
+        // Guard the class before touching the resource: the catch-all route
+        // /:slug/:module/:action resolves any object's slug with no class check, so a
+        // repository or actor slug reaches this information-object action. See
+        // CH-000066 and docs/sessions/2026-09-18-informationobject-reports-slug-class-guard.md
+        if (!$this->resource instanceof QubitInformationObject) {
+            $this->forward404();
+        }
+
         // Check that this isn't the root
         if (!isset($this->resource->parent)) {
             $this->forward404();

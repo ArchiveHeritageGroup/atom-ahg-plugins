@@ -23,8 +23,12 @@ class InformationObjectGenerateFindingAidAction extends sfAction
     {
         $this->resource = $this->getRoute()->resource;
 
-        // Check that object exists and that it is not the root
-        if (!isset($this->resource) || !isset($this->resource->parent)) {
+        // Guard the class before touching the resource: the catch-all route
+        // /:slug/:module/:action resolves any object's slug with no class check, so a
+        // repository or actor slug reaches this information-object action. See
+        // CH-000066 and docs/sessions/2026-09-18-informationobject-reports-slug-class-guard.md
+        // instanceof also subsumes the isset() this check used to make.
+        if (!$this->resource instanceof QubitInformationObject || !isset($this->resource->parent)) {
             $this->forward404();
         }
 

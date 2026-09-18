@@ -23,6 +23,14 @@ class InformationObjectTreeViewAction extends sfAction
     {
         $this->resource = $this->getRoute()->resource;
 
+        // Guard the class before touching the resource: the catch-all route
+        // /:slug/:module/:action resolves any object's slug with no class check, so a
+        // repository or actor slug reaches this information-object action. See
+        // CH-000066 and docs/sessions/2026-09-18-informationobject-reports-slug-class-guard.md
+        if (!$this->resource instanceof QubitInformationObject) {
+            $this->forward404();
+        }
+
         // Number of siblings that we are showing above and below the current node
         // It's good to keep this number small since getTreeViewSiblings can be very
         // slow (when sorting by title or identifierTitle)
