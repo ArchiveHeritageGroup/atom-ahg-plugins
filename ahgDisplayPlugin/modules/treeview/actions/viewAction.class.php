@@ -16,6 +16,17 @@ class treeviewViewAction extends AhgController
     {
         $this->resource = $this->getRoute()->resource;
 
+        // Guard the class: /:slug/treeView and the catch-all /:slug/:module/:action
+        // both resolve any object's slug with no class check, so a repository, actor,
+        // user or static page slug lands here. getTreeViewSiblings() and
+        // getTreeViewChildren() are implemented only on QubitInformationObject and
+        // QubitTerm; every other class falls through to BaseObject::__get and throws.
+        // See CH-000066 and docs/sessions/2026-09-18-informationobject-reports-slug-class-guard.md
+        if (!$this->resource instanceof QubitInformationObject
+            && !$this->resource instanceof QubitTerm) {
+            $this->forward404();
+        }
+
         // Number of siblings shown above and below the current node.
         // Keep small since getTreeViewSiblings can be slow with title sorting.
         $numberOfPreviousOrNextSiblings = 4;
