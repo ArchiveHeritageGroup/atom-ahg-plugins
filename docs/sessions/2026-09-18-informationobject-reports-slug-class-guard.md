@@ -95,11 +95,81 @@ returns 200.
 Separate from the bug: the inventory feature is inert on PSIS because no levels are
 configured. Admin > Settings > Inventory would enable it. Config decision, not a defect.
 
+## The sibling map - 3 open, 7 gated, 11 not exposed
+
+Mapped statically from routes and ACL, on 2026-09-18. Production was not crawled.
+
+### The mechanism is wider than one error message
+
+`BaseObject::__call` routes **any** `get*`/`set*` call into `__get`/`__set` and only
+throws for other names. `BaseObject::__get` (line 561) then throws
+`Unknown record property "x" on "QubitRepository"`.
+
+⚠️ **A wrong-class resource therefore produces two different messages.** A non-get/set
+member gives `Call to undefined method` - CH-66's signature. A get/set member gives
+`Unknown record property`. Searching the log for only the first misses most of the
+family.
+
+Discriminating columns, from `information_schema`: `lft`, `rgt`, `title`,
+`scope_and_content`, `level_of_description_id`, `repository_id` and
+`display_standard_id` exist **only** on the information_object tables. `parent_id`,
+`source_standard` and `identifier` also exist on actor/repository - which is why
+`reportsAction`'s `$this->resource->sourceStandard` on line 62 survived and
+`containsLevelOfDescription()` on line 65 did not.
+
+### Open to an anonymous crawler - fixed in v3.106.103
+
+| action | gate | first unsafe member |
+|---|---|---|
+| `treeView` | none at all | `getTreeViewSiblings` / `getTreeViewChildren` |
+| `generateFindingAid` | none at all | `getTitle` |
+| `index` | `QubitAcl::check(..., 'read')` only | `getScopeAndContent` |
+
+`index` is the instructive one. It **has** a gate, but `read` passes for a publicly
+readable repository, so the gate checks permission and never class. That is exactly
+how `reports` failed: its only gates were `isMethod('post')` and `isAuthenticated()`,
+neither of which stops an anonymous GET. **An ACL check is not a class check.**
+
+`generateFindingAid` queues `arFindingAidJob`, but `getTitle` threw first, so a crawler
+got a 500 rather than a way to queue jobs.
+
+Verified after the fix: `pieterse-fonds` (repository) and `pieterse-family` (actor)
+return 404 on all three; `engelbrecht-family-fonds` returns 200 on index and treeView;
+`mobrey-family-archive` returns 403 on index, which is `forwardToSecureAction()` on an
+unpublished record - proof the guard passes real information objects through to ACL
+rather than swallowing them. No new `ahg_error_log` rows from twelve requests.
+
+### Gated - left unchanged
+
+Reachable only by a signed-in user following a malformed URL: `calculateDates` (ACL
+update), `delete` (ACL delete), `deleteFindingAid` (isAuthenticated), `edit` (ACL
+update/translate in `earlyExecute`), `treeViewSort` (ACL update),
+`updatePublicationStatus` (ACL publish in `earlyExecute`), `uploadFindingAid` (ACL
+update). A guard here is defensible tidiness but protects nobody who is not already
+authenticated.
+
+### No wrong-class exposure
+
+They touch only `id`, `parent` and members present on every Qubit class: `boxLabel`,
+`fullWidthTreeView`, `fullWidthTreeViewMove`, `fullWidthTreeViewSync`, `inventory`,
+`itemOrFileList`, `modifications`, `multiFileUpdate`, `physicalObjects`, `slugPreview`,
+`storageLocations`.
+
+⚠️ **Line order alone gives the wrong answer.** In `edit` and `updatePublicationStatus`
+the unsafe members sit in helper methods *above* `execute()` in the file but run
+*after* the ACL check in `earlyExecute()`. A first pass flagged both as open; they are
+not.
+
 ## Still open
 
-Every action in the `informationobject` module reads `getRoute()->resource` with no
-class guard - 22 files, of which `reports` is now the only one fixed. There is no cheap
-chokepoint: 21 of 25 extend `sfAction` directly, with no shared information-object
-ancestor to hook. Most need auth or POST, so `reports` may be the only anonymously
-reachable one, but that has not been mapped. Map it from the routes and ACL rather than
-by crawling production, which would manufacture the very error rows being cleared.
+Nothing in this module. Two things reasoned rather than measured, recorded so the next
+session does not mistake them for verified facts:
+
+- `QubitAcl::check($repository, 'read')` returning true for anonymous. Confirming it
+  would have meant firing the failing request at production.
+- The pre-fix 500 on `index`, `treeView` and `generateFindingAid` was predicted from
+  the code, not observed. Only `reports` was reproduced.
+
+The underlying cause - a catch-all route that pairs any slug with any module - is
+untouched and lives in locked base routing. Every other module in AtoM has the same
+shape of exposure; only `informationobject` has been examined.
