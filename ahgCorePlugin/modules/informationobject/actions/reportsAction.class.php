@@ -33,12 +33,21 @@ class InformationObjectReportsAction extends sfAction
             'boxLabel' => $this->context->i18n->__('Box label'),
         ];
 
+        // The catch-all route /:slug/:module/:action resolves a slug to whatever
+        // object owns it, with no check that the class matches the module. A
+        // repository or actor slug therefore reaches this information-object
+        // action, and containsLevelOfDescription() below is undefined on that
+        // class - which is how Bingbot took the page down on 15 September 2026
+        // with /pieterse-fonds/informationobject/reports, pieterse-fonds being a
+        // repository. Guard before anything reads the resource;
+        // getExistingReports() reads it too, so it moves below the guard.
         $this->resource = $this->getRoute()->resource;
-        $this->getExistingReports();
 
-        if (!isset($this->resource)) {
+        if (!$this->resource instanceof QubitInformationObject) {
             $this->forward404();
         }
+
+        $this->getExistingReports();
 
         $this->form = new sfForm();
 
