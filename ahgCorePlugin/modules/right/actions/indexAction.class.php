@@ -23,6 +23,15 @@ class RightIndexAction extends sfAction
     {
         $this->resource = $this->getRoute()->resource;
 
+        // Guard the class: the catch-all route /:slug/:module/:action resolves any
+        // object's slug with no class check, and the members read below exist only on
+        // QubitRights. Any other class reaches BaseObject::__get / __isset and throws.
+        // See CH-000066 and
+        // docs/sessions/2026-09-18-informationobject-reports-slug-class-guard.md
+        if (!$this->resource instanceof QubitRights) {
+            $this->forward404();
+        }
+
         $value = [];
 
         if (isset($this->resource->act)) {
