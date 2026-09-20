@@ -82,4 +82,41 @@ class InformationObjectFullWidthTreeViewAction extends DefaultFullTreeViewAction
 
         return $this->renderText(json_encode($data));
     }
+
+    /**
+     * Count children without calling IndexWrapper::count(), which does not exist.
+     *
+     * CH-000104. Base's DefaultFullTreeViewAction::countChildren()
+     * (apps/qubit/modules/default/actions/fullTreeViewAction.class.php:241) ends in
+     * ->getIndex('QubitInformationObject')->count(...). The OpenSearch migration
+     * replaced Elastica with arOpenSearchPlugin's IndexWrapper, which exposes
+     * search() but never got a count(), so every call raised
+     * "Call to undefined method IndexWrapper::count()". It logged while the page
+     * still returned HTTP 200, which is why nobody reported it.
+     *
+     * Both the caller and IndexWrapper are locked base AtoM. This class already
+     * extends DefaultFullTreeViewAction, so overriding the one broken method here
+     * fixes it from the plugin side without touching base or shadowing a module.
+     *
+     * search() with limit 0 returns no documents and a populated total, which is
+     * exactly what count() was being asked for.
+     *
+     * @param mixed $id
+     * @param array $options
+     *
+     * @return int number of children
+     */
+    protected function countChildren($id, $options = [])
+    {
+        $term = new \Elastica\Query\Term(['parentId' => $id]);
+        $options['limit'] = 0;
+
+        $query = $this->getElasticSearchQuery($term, $options);
+
+        return QubitSearch::getInstance()
+            ->index
+            ->getIndex('QubitInformationObject')
+            ->search($query->getQuery(false, false))
+            ->getTotalHits();
+    }
 }
