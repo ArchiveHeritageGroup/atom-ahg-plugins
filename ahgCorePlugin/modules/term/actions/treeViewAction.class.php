@@ -90,6 +90,20 @@ class TermTreeViewAction extends sfAction
 
             case 'item':
             default:
+                // QubitTerm::getTreeViewChildren() (lib/model/QubitTerm.php:801) takes
+                // the first child with QubitTerm::getOne() and calls
+                // getTreeViewSiblings() on it WITHOUT a null check, so any leaf term
+                // fatals. It logs while still returning HTTP 200, which is why it went
+                // unnoticed. The method is in locked base AtoM, so the call site
+                // guards instead: a leaf has no children and the honest answer is an
+                // empty list. CH-000091.
+                if ($this->resource instanceof QubitTerm && !$this->resource->hasChildren()) {
+                    $this->items = [];
+                    $this->hasNextSiblings = false;
+
+                    break;
+                }
+
                 list($this->items, $this->hasNextSiblings) = $this->resource->getTreeViewChildren(['numberOfPreviousOrNextSiblings' => $numberOfPreviousOrNextSiblings]);
 
                 break;

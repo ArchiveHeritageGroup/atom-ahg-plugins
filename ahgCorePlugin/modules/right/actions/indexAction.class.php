@@ -34,11 +34,24 @@ class RightIndexAction extends sfAction
 
         $value = [];
 
-        if (isset($this->resource->act)) {
-            $value['act'] = $this->context->routing->generate(null, [$this->resource->act, 'module' => 'term']);
-        }
+        // act and restriction live on `granted_right`, not `rights` - they moved there
+        // in AtoM 2.x and this action was never updated, so __isset threw
+        // Unknown record property "act" and the endpoint 500d for EVERY QubitRights,
+        // not just for a wrong-class slug. CH-000105 / CH-000108.
+        //
+        // Base's own right/_right.php template shows the correct source: iterate
+        // $resource->grantedRights and read ->act and ->restriction off each one.
+        // A right may carry several; this endpoint's JSON shape holds a single value,
+        // so the first is emitted rather than silently changing the contract.
+        foreach ($this->resource->grantedRights as $grantedRight) {
+            if (isset($grantedRight->act)) {
+                $value['act'] = $this->context->routing->generate(null, [$grantedRight->act, 'module' => 'term']);
+            }
 
-        $value['restriction'] = $this->resource->restriction;
+            $value['restriction'] = $grantedRight->restriction;
+
+            break;
+        }
 
         $value['startDate'] = Qubit::renderDate($this->resource->startDate);
 
@@ -74,8 +87,12 @@ class RightIndexAction extends sfAction
         }
 
         // Basis: license.
-        if (isset($this->resource->licenseIdentifier)) {
-            $value['licenseIdentifier'] = $this->resource->licenseIdentifier;
+        // The column is identifier_value, not license_identifier - base's own
+        // right/_right.php renders "License identifier" from getIdentifierValue().
+        // Reading licenseIdentifier threw and 500d the endpoint. The JSON key is kept
+        // as licenseIdentifier so the response contract does not change. CH-000105.
+        if (isset($this->resource->identifierValue)) {
+            $value['licenseIdentifier'] = $this->resource->identifierValue;
         }
 
         if (isset($this->resource->licenseTerms)) {
