@@ -39,19 +39,26 @@ class ActorIndexAction extends sfAction
             $this->forward404();
         }
 
-        // Check user authorization
-        if (!QubitAcl::check($this->resource, 'read')) {
-            QubitAcl::forwardUnauthorized();
-        }
-
-        $this->dispatcher->notify(new sfEvent($this, 'access_log.view', ['object' => $this->resource]));
-
-        $criteria = new Criteria();
-        $criteria->add(QubitRelation::OBJECT_ID, $this->resource->id);
-        $criteria->addJoin(QubitRelation::SUBJECT_ID, QubitFunctionObject::ID);
-
-        $this->functions = QubitFunctionObject::get($criteria);
-
-        $this->digitalObjectLink = $this->resource->getDigitalObjectUrl();
+        // actor/index has never had an indexSuccess.php template. The base actor
+        // module ships browse, delete and autocomplete templates but not index, so
+        // everything that used to sit here ran and then fatalled on the missing
+        // template - a 500 for EVERY actor, not only for a wrong-class slug.
+        // CH-000106 / CH-000107.
+        //
+        // The action is reachable only through the catch-all route
+        // /:slug/:module/:action - nothing links to it, and the canonical actor page
+        // is the bare slug, which QubitMetadataRoute dispatches by class.
+        //
+        // A redirect was tried first and rejected. The routing generator only does
+        // object-aware generation when a module is supplied, and the module differs
+        // per subclass: QubitActor admits QubitRepository, QubitDonor and
+        // QubitRightsHolder, which render through sfIsdiahPlugin, donor and
+        // rightsholder. Hardcoding that mapping would duplicate what
+        // QubitMetadataRoute already knows and would send three of four classes to
+        // the wrong page. 404 is the honest answer for a URL that is not a page.
+        //
+        // The ACL check, access-log event and related-function lookup that used to
+        // follow are dropped with it - they only ever fed the missing template.
+        $this->forward404();
     }
 }
