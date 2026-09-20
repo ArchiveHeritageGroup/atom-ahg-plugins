@@ -102,3 +102,35 @@ failing; and an anonymous INSERT succeeds silently. It was found by reading code
 the CH-000066 arc, not by anything reporting it - the same point as the rest of that
 work, in its sharpest form: the call queue measures which broken URLs received traffic,
 not what is broken.
+
+## Outcome - deleted (2026-09-20, Johan approved)
+
+The hardening above was the right immediate step but the wrong end state. All eight
+actions, plus three orphaned `*Success.php` templates in ahgThemeB5Plugin, were
+**deleted**. Nothing referenced them anywhere in the codebase - no templates, no routes,
+no JavaScript - and ahgCartPlugin and ahgFavoritesPlugin ship the working features.
+
+This closes CH-000112's siblings together:
+
+- **CH-000113** - the `removeCart` class-name mismatch. Deleting the file resolves it
+  without reviving a destructive action nobody links to.
+- **CH-000114** - CSRF and the POST requirement. An action that no longer exists needs
+  neither. Had the duplicates been kept, this would have meant inventing a form for
+  eight actions nothing reaches.
+
+⚠️ **Deciding CH-000113 first made CH-000114 disappear rather than be solved.** Working
+them in the order they were raised would have produced CSRF tokens on code that was
+about to be deleted.
+
+Verified after deletion: all four URLs return 404; `cart/browse` and `favorites/browse`
+return 200; the information-object page and fullWidthTreeView return 200; cart and
+favorites row counts unchanged at 1855 and 15; no new error-log rows.
+
+## The general lesson
+
+Four actions existed in two plugins, duplicating a feature that already had two
+dedicated plugins of its own. They were unreachable by navigation, unreferenced by
+anything, and accepted unauthenticated writes. **Nothing in the estate would ever have
+surfaced them** - not the call queue, not monitoring, not a user - because nothing
+pointed at them in the first place. They were found by reading code outward from an
+unrelated bug.
