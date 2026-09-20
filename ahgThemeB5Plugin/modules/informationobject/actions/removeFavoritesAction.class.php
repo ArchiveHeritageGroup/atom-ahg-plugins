@@ -32,11 +32,31 @@ class InformationObjectRemoveFavoritesAction extends AhgEditController
         $this->resource = $this->getRoute()->resource;
         $this->informationObject = QubitInformationObject::getById($this->resource->id);
         // Add to favorites table
+        // Nothing links to this action - the working cart/favourites feature lives in
+        // ahgCartPlugin and ahgFavoritesPlugin - so it was reachable only through the
+        // catch-all route /:slug/:module/:action, which resolves any object's slug
+        // with no class check and does not require a login or a POST.
+        //
+        // That meant an anonymous GET could write: rows landed with a null user_id
+        // that nobody could ever retrieve, and a crawler could create unbounded
+        // object + cart/favorites rows. Bingbot is demonstrably walking these
+        // combinations on this site.
+        if (!$this->resource instanceof QubitInformationObject) {
+            $this->forward404();
+        }
+
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+
         $userId = $this->context->user->getAttribute('user_id');
 
-        $sql = 'DELETE FROM favorites WHERE user_id = "'.$userId.'" AND archival_description_id="'.$this->resource->id.'";';
-
-        DB::statement($sql);
+        // Was a concatenated DELETE via DB::statement(). Uses the query builder the
+        // file already imports, so the values are bound rather than interpolated.
+        DB::table('favorites')
+            ->where('user_id', $userId)
+            ->where('archival_description_id', $this->resource->id)
+            ->delete();
 
         $this->redirect([$this->resource, 'module' => 'informationobject']);
     }

@@ -31,9 +31,35 @@ class removeCartAction extends AhgEditController
     {
         $this->resource = $this->getRoute()->resource;
 
-        $sql = 'DELETE FROM cart WHERE id = "'.$this->resource->id.';';
+        // Nothing links to this action - the working cart/favourites feature lives in
+        // ahgCartPlugin and ahgFavoritesPlugin - so it was reachable only through the
+        // catch-all route /:slug/:module/:action, which resolves any object's slug
+        // with no class check and does not require a login or a POST.
+        //
+        // That meant an anonymous GET could write: rows landed with a null user_id
+        // that nobody could ever retrieve, and a crawler could create unbounded
+        // object + cart/favorites rows. Bingbot is demonstrably walking these
+        // combinations on this site.
+        if (!$this->resource instanceof QubitInformationObject) {
+            $this->forward404();
+        }
 
-        DB::statement($sql);
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+
+        // Was: DELETE FROM cart WHERE id = "<information object id>;
+        // Two faults. The string literal is unterminated, so the statement always
+        // errored - the only reason this never deleted anything. And cart.id is the
+        // cart row's own object id, not the information object's, so had it parsed it
+        // would have deleted an arbitrary row belonging to any user. Scope it the way
+        // removeFavorites does, with bound values.
+        DB::table('cart')
+            ->where('user_id', $userId)
+            ->where('archival_description_id', $this->resource->id)
+            ->delete();
 
         $this->redirect([$this->resource, 'module' => 'cart', 'action' => 'browse']);
     }
