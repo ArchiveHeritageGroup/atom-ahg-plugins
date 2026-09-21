@@ -69,5 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="/plugins/ahgHelpPlugin/js/help-search.js?v=1.1.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php } ?>
 
+<?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_whatsappBubble.php'); ?>
+
 </body>
 </html>

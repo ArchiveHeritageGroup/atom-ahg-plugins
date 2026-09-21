@@ -122,6 +122,47 @@
                     <form method="post" action="{{ url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => $currentSection]) }}" id="settings-form">
 
                         @switch($currentSection)
+                            @case('whatsapp')
+                                <fieldset class="mb-4">
+                                    <legend>{{ __('WhatsApp Bubble') }}</legend>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label">{{ __('Enable') }}</label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="whatsapp_bubble_enabled" name="settings[whatsapp_bubble_enabled]" value="true" {{ ($settings['whatsapp_bubble_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="custom-control-label" for="whatsapp_bubble_enabled">{{ __('Show the floating WhatsApp button') }}</label>
+                                            </div>
+                                            <small class="form-text text-muted">{{ __('Visible to every visitor, including those who are not logged in. It stays hidden until a number is set below.') }}</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="whatsapp_bubble_number">{{ __('WhatsApp number') }}</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="whatsapp_bubble_number" name="settings[whatsapp_bubble_number]" value="{{ e($settings['whatsapp_bubble_number'] ?? '') }}" placeholder="27648830533">
+                                            <small class="form-text text-muted">{{ __('Country code first, digits only. 27648830533 for +27 64 883 0533. Spaces, dashes and a leading plus are stripped automatically.') }}</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="whatsapp_bubble_message">{{ __('Pre-filled message') }}</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="whatsapp_bubble_message" name="settings[whatsapp_bubble_message]" value="{{ e($settings['whatsapp_bubble_message'] ?? '') }}">
+                                            <small class="form-text text-muted">{{ __('Optional. Text the visitor starts with, which is useful for telling enquiries apart. Leave empty for a blank chat.') }}</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="whatsapp_bubble_label">{{ __('Button label') }}</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="whatsapp_bubble_label" name="settings[whatsapp_bubble_label]" value="{{ e($settings['whatsapp_bubble_label'] ?? '') }}">
+                                            <small class="form-text text-muted">{{ __('Tooltip and screen-reader label. Defaults to "Chat with us on WhatsApp".') }}</small>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                @break
+
                             @case('general')
                                 <!-- General Settings -->
                                 <fieldset class="mb-4">

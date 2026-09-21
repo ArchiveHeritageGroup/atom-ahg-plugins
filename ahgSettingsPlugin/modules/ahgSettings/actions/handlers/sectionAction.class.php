@@ -8,6 +8,7 @@ class AhgSettingsSectionAction extends AhgController
 {
     protected $sections = [
         'general' => ['label' => 'General Settings', 'icon' => 'fa-cog'],
+        'whatsapp' => ['label' => 'WhatsApp Bubble', 'icon' => 'fa-comment-dots', 'description' => 'Floating WhatsApp contact button, shown to every visitor including those not logged in'],
         'multi_tenant' => ['label' => 'Multi-Tenancy', 'icon' => 'fa-building', 'description' => 'Repository-based multi-tenancy with user hierarchy'],
         'metadata' => ['label' => 'Metadata Extraction', 'icon' => 'fa-database'],
         'iiif' => ['label' => 'IIIF Viewer', 'icon' => 'fa-images'],
@@ -62,6 +63,7 @@ class AhgSettingsSectionAction extends AhgController
 
     protected $checkboxFields = [
         'general' => ['ahg_theme_enabled', 'ahg_show_branding', 'hide_error_notifications'],
+        'whatsapp' => ['whatsapp_bubble_enabled'],
         'multi_tenant' => ['tenant_enabled', 'tenant_enforce_filter', 'tenant_show_switcher', 'tenant_allow_branding'],
         'metadata' => [
             'meta_extract_on_upload', 'meta_auto_populate',
