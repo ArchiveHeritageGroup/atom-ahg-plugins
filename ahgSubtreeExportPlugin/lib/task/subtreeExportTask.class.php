@@ -23,6 +23,7 @@ class subtreeExportTask extends sfBaseTask
             new sfCommandOption('estimate-only', null, sfCommandOption::PARAMETER_NONE, 'Report what would be exported and stop'),
             new sfCommandOption('resume', null, sfCommandOption::PARAMETER_OPTIONAL, 'Continue an existing job by id'),
             new sfCommandOption('force', null, sfCommandOption::PARAMETER_NONE, 'Proceed even if the destination looks too small'),
+            new sfCommandOption('clean', null, sfCommandOption::PARAMETER_NONE, 'Empty the destination directory before exporting'),
         ]);
 
         $this->namespace = 'subtree';
@@ -136,6 +137,21 @@ EOF;
             return 0;
         }
 
+        if ($options['clean']) {
+            $target = rtrim($options['output'], '/');
+
+            // Only ever the three things this task creates. NOT a recursive delete
+            // of whatever --output points at: a mistyped path with rm -rf behind it
+            // is how an export tool eats someone's drive.
+            if (!SubtreeExportRunner::clean($target, $log = function ($m) {
+                $this->logSection('subtree', $m);
+            })) {
+                $this->logSection('subtree', 'Could not clear '.$target.'. Nothing was exported.');
+
+                return 1;
+            }
+        }
+
         $id = SubtreeExportRunner::createJob([
             'slug' => $options['slug'],
             'start' => $start,
@@ -176,12 +192,20 @@ EOF;
                 $r['items'], $r['files'], SubtreeExportService::humanBytes($r['bytes']),
                 $r['missing'] ? sprintf(', %d MISSING on disk', $r['missing']) : '',
                 // Surfaced, not buried: a file whose size disagrees with the
-                // catalogue is the signal that a copy was short or a record stale.
-                !empty($r['mismatched']) ? sprintf(', %d SIZE MISMATCH', $r['mismatched']) : ''
+                // catalogue is the signal that a copy was short or a record stale,
+                // and a FAILED file means the destination refused the write. Neither
+                // was in this line before, so a run that copied nothing because the
+                // output directory was not writable reported a clean completion.
+                (!empty($r['mismatched']) ? sprintf(', %d SIZE MISMATCH', $r['mismatched']) : '')
+                    .(!empty($r['failed']) ? sprintf(', %d FAILED', $r['failed']) : '')
             ));
 
             $job = SubtreeExportRunner::job($id);
         } while (!$r['done'] && 0 === (int) $job->batch_size && $r['items'] > 0);
+
+        if ('failed' === $job->status) {
+            $this->logSection('subtree', 'JOB FAILED - files were expected and none were written. Check the destination is writable.');
+        }
 
         $this->logSection('subtree', sprintf(
             'job %d %s - %d/%d records, %d files, %s written, %d missing',

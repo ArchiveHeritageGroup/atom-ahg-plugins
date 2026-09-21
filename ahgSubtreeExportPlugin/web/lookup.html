@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Export lookup</title>
+<!--
+  Reads manifest.js, NOT manifest.json. Browsers refuse fetch() on file://, so a
+  page that fetched the JSON would load nothing from a drive - which is the whole
+  point of this package. The exporter writes both; the .json is for machines and
+  the .js is what this page uses.
+
+  No CDN, no external font, no build step. Everything needed is in this file.
+-->
+<style>
+  :root {
+    --gold: #e1b34f; --green: #10373e; --cream: #f2ede6;
+    --body: #262626; --muted: #6b7280; --line: #d8d2c8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 Arial, Helvetica, sans-serif; color: var(--body); background: #fff; }
+  header { background: var(--green); color: var(--cream); padding: 1rem 1.25rem; }
+  header h1 { margin: 0 0 .25rem; font-size: 1.15rem; color: var(--gold); }
+  header .meta { font-size: .85rem; opacity: .85; }
+  .bar { position: sticky; top: 0; background: var(--cream); border-bottom: 1px solid var(--line);
+         padding: .75rem 1.25rem; display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+  input[type=search] { flex: 1 1 18rem; min-width: 12rem; padding: .5rem .65rem;
+         border: 1px solid var(--line); border-radius: 4px; font-size: 1rem; }
+  .count { color: var(--muted); font-size: .9rem; white-space: nowrap; }
+  main { padding: 0 1.25rem 3rem; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--green); color: #fff; position: sticky; top: 3.6rem; font-size: .85rem; }
+  tr:hover td { background: #faf8f5; }
+  .slug { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; }
+  .files a { display: block; font-size: .85rem; text-decoration: none; color: #653332; }
+  .files a:hover { text-decoration: underline; }
+  .tag { display: inline-block; font-size: .7rem; padding: .05rem .35rem; border-radius: 3px;
+         background: var(--gold); color: #3a2c08; margin-right: .3rem; }
+  .missing, .failed { background: #b00020; color: #fff; }
+  .empty { padding: 2rem 0; color: var(--muted); }
+  @media (max-width: 640px) { th:nth-child(3), td:nth-child(3) { display: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Export lookup</h1>
+  <div class="meta" id="meta"></div>
+</header>
+
+<div class="bar">
+  <input type="search" id="q" placeholder="Filter by identifier, slug or file name" autocomplete="off" aria-label="Filter records">
+  <span class="count" id="count"></span>
+</div>
+
+<main>
+  <table id="tbl">
+    <thead><tr><th>Identifier</th><th>Slug</th><th>Files</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="empty" id="empty" hidden>No records match that filter.</div>
+</main>
+
+<script src="manifest.js"></script>
+<script>
+(function () {
+  var m = window.SUBTREE_MANIFEST;
+  if (!m) {
+    document.getElementById('meta').textContent =
+      'manifest.js is missing or did not load. It must sit beside this file.';
+    return;
+  }
+
+  var recs = m.records || [];
+  var c = m.counts || {};
+
+  document.getElementById('title').textContent =
+    'Export lookup: ' + ((m.scope && m.scope.start_slug) || '');
+  document.getElementById('meta').textContent =
+    [c.records + ' records', c.files + ' files', bytes(c.bytes_written || 0),
+     'within ' + ((m.scope && m.scope.bound_slug) || 'unknown'),
+     'created ' + (m.created_at || '').slice(0, 10)].join('  |  ');
+
+  function bytes(n) {
+    var u = ['B','KB','MB','GB','TB'], i = 0;
+    while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+    return n.toFixed(1) + ' ' + u[i];
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+    });
+  }
+
+  var rows = document.getElementById('rows');
+  var empty = document.getElementById('empty');
+  var countEl = document.getElementById('count');
+
+  function render(filter) {
+    var f = (filter || '').toLowerCase();
+    var html = '', shown = 0;
+
+    for (var i = 0; i < recs.length; i++) {
+      var r = recs[i];
+      if (f) {
+        var hay = (r.identifier || '') + ' ' + (r.slug || '') + ' ' +
+                  (r.files || []).map(function (x) { return x.path || ''; }).join(' ');
+        if (hay.toLowerCase().indexOf(f) === -1) { continue; }
+      }
+      shown++;
+
+      var files = (r.files || []).map(function (x) {
+        var bad = x.status && x.status !== 'copied';
+        // Link straight at the file on the drive. Relative, so it works wherever
+        // the package is mounted.
+        return '<a href="' + esc(x.path) + '">' +
+               '<span class="tag' + (bad ? ' ' + esc(x.status) : '') + '">' +
+               esc(bad ? x.status : (x.usage || '')) + '</span>' +
+               esc((x.path || '').split('/').pop()) +
+               ' <span class="count">' + bytes(x.byte_size || 0) + '</span></a>';
+      }).join('');
+
+      html += '<tr><td>' + esc(r.identifier) + '</td>' +
+              '<td class="slug">' + esc(r.slug) + '</td>' +
+              '<td class="files">' + files + '</td></tr>';
+    }
+
+    rows.innerHTML = html;
+    empty.hidden = shown > 0;
+    countEl.textContent = shown + ' of ' + recs.length + ' shown';
+  }
+
+  var q = document.getElementById('q');
+  var t;
+  q.addEventListener('input', function () {
+    clearTimeout(t);
+    // Debounced: a thousand records re-rendered on every keystroke is visibly slow
+    // on the sort of machine a reading room actually has.
+    t = setTimeout(function () { render(q.value); }, 120);
+  });
+
+  render('');
+})();
+</script>
+</body>
+</html>

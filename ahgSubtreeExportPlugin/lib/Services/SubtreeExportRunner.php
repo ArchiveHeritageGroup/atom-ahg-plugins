@@ -8,6 +8,159 @@
  */
 class SubtreeExportRunner
 {
+    /**
+     * Empty a previous export from the destination, so a re-run starts clean.
+     *
+     * ⚠️ Removes ONLY what this task creates: objects/, metadata/, manifest.json,
+     * manifest.js and lookup.html. It deliberately does NOT recursively delete the
+     * --output directory itself. An export tool with an unbounded rm -rf behind a
+     * path argument is one mistyped --output away from eating a drive, and the
+     * destination here is external storage that may hold other things.
+     *
+     * @return bool false when something could not be removed, so the caller can
+     *              stop rather than export on top of a half-cleared package
+     */
+    public static function clean(string $path, ?callable $log = null): bool
+    {
+        // rtrim turns "/" into "", which previously hit the early return below and
+        // reported success without the guard ever running. Keep root as "/" so it
+        // reaches safeToClean and is refused there.
+        $root = '/' === $path ? '/' : rtrim($path, '/');
+
+        if ('' === $root) {
+            return false;
+        }
+
+        // Guard BEFORE the is_dir check: a refusal must be reported as a refusal,
+        // never as "nothing to do".
+        if (!self::safeToClean($root, $log)) {
+            return false;
+        }
+
+        if (!is_dir($root)) {
+            return true;
+        }
+
+        $ok = true;
+
+        foreach (['objects', 'metadata'] as $dir) {
+            $target = $root.'/'.$dir;
+
+            if (is_dir($target) && !self::removeTree($target)) {
+                $ok = false;
+                if ($log) {
+                    $log('could not remove '.$target);
+                }
+            }
+        }
+
+        foreach (['manifest.json', 'manifest.js', 'lookup.html'] as $file) {
+            $target = $root.'/'.$file;
+
+            if (is_file($target) && !@unlink($target)) {
+                $ok = false;
+                if ($log) {
+                    $log('could not remove '.$target);
+                }
+            }
+        }
+
+        if ($ok && $log) {
+            $log('cleared previous export in '.$root);
+        }
+
+        return $ok;
+    }
+
+    /**
+     * Refuse to clean anywhere that could destroy the installation or the system.
+     *
+     * ⚠️ The destination is operator-supplied on the command line. A typo such as
+     * --output=/usr/share/nginx/atom would otherwise delete objects/ and metadata/
+     * out of a live AtoM tree, and --output=/ would try the whole machine.
+     *
+     * Four refusals, each for a different way of getting it wrong:
+     *  - the target IS the AtoM root
+     *  - the target is INSIDE the AtoM root (so /usr/share/nginx/atom/uploads too)
+     *  - the target CONTAINS the AtoM root (so /usr/share/nginx, or /)
+     *  - the target is a shallow system path with fewer than two levels
+     *
+     * Uses strpos rather than str_starts_with: this must run on PHP 7.4, which is
+     * what the AtoM 2.8 host it was written for has.
+     */
+    private static function safeToClean(string $root, ?callable $log = null): bool
+    {
+        $real = realpath($root);
+
+        if (false === $real) {
+            return true;
+        }
+
+        // Same trap as above: rtrim would reduce "/" to "" and slip past every check.
+        $real = '/' === $real ? '/' : rtrim($real, '/');
+        $atomRoot = realpath((string) sfConfig::get('sf_root_dir'));
+        $atomRoot = false === $atomRoot ? '' : rtrim($atomRoot, '/');
+
+        $refuse = function ($why) use ($log, $real) {
+            if ($log) {
+                $log('REFUSING to clean '.$real.': '.$why);
+            }
+
+            return false;
+        };
+
+        if ('' !== $atomRoot) {
+            if ($real === $atomRoot) {
+                return $refuse('that is the AtoM root.');
+            }
+
+            if (0 === strpos($real.'/', $atomRoot.'/')) {
+                return $refuse('that is inside the AtoM root.');
+            }
+
+            if (0 === strpos($atomRoot.'/', $real.'/')) {
+                return $refuse('that contains the AtoM root.');
+            }
+        }
+
+        $forbidden = [
+            '/', '/bin', '/boot', '/data', '/dev', '/etc', '/home', '/lib', '/media',
+            '/mnt', '/opt', '/proc', '/root', '/run', '/sbin', '/srv', '/sys', '/tmp',
+            '/usr', '/usr/local', '/usr/share', '/usr/share/nginx', '/var', '/var/www',
+        ];
+
+        if (in_array($real, $forbidden, true)) {
+            return $refuse('that is a system directory.');
+        }
+
+        // Fewer than two levels deep is almost always a typo, never a chosen
+        // export destination.
+        if ('/' === $real || substr_count(trim($real, '/'), '/') < 1) {
+            return $refuse('that is too close to the filesystem root.');
+        }
+
+        return true;
+    }
+
+    /** Depth-first removal, files before their directory. */
+    private static function removeTree(string $dir): bool
+    {
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($items as $item) {
+            $done = $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+
+            if (!$done) {
+                return false;
+            }
+        }
+
+        return @rmdir($dir);
+    }
+
     public static function createJob(array $opts): int
     {
         QubitPdo::modify(
@@ -118,7 +271,7 @@ class SubtreeExportRunner
         $ids = array_map(static function ($r) { return (int) $r->id; }, $items);
         $files = SubtreeExportService::filesFor($ids, $usages);
 
-        $bytes = $copied = $missing = $mismatched = 0;
+        $bytes = $copied = $missing = $mismatched = $failed = 0;
 
         foreach ($files as $f) {
             $src = SubtreeExportService::absolutePath($atomRoot, $f);
@@ -139,7 +292,11 @@ class SubtreeExportRunner
             }
 
             if (!is_dir(dirname($dst)) && !@mkdir(dirname($dst), 0775, true) && !is_dir(dirname($dst))) {
+                ++$failed;
                 self::recordFile($job->id, $f, $src, $rel, 'failed');
+                if ($log) {
+                    $log('cannot create '.dirname($dst).' - check the destination is writable');
+                }
 
                 continue;
             }
@@ -172,7 +329,11 @@ class SubtreeExportRunner
 
                 self::recordFile($job->id, $f, $src, $rel, 'copied', $actual);
             } else {
+                ++$failed;
                 self::recordFile($job->id, $f, $src, $rel, 'failed');
+                if ($log) {
+                    $log('copy failed: '.$rel);
+                }
             }
         }
 
@@ -195,15 +356,145 @@ class SubtreeExportRunner
         $done = (int) $fresh->items_done >= (int) $fresh->max_items;
 
         if ($done) {
-            self::finish($job->id, 'completed');
+            // Written before finish() so the index reflects the final counters.
+            self::writeIndex(self::job((int) $job->id));
+
+            // Files were expected and none arrived: that is a failed run, whatever
+            // the counters say. Reporting "completed" for a job that wrote nothing
+            // is how an operator walks away believing 20 GB moved.
+            self::finish($job->id, (count($files) > 0 && 0 === $copied) ? 'failed' : 'completed');
         } elseif ((int) $job->batch_size > 0) {
             QubitPdo::modify("UPDATE subtree_export SET status='paused' WHERE id = ?", [$job->id]);
         }
 
         return [
             'items' => count($items), 'files' => $copied, 'bytes' => $bytes,
-            'missing' => $missing, 'mismatched' => $mismatched, 'done' => $done,
+            'missing' => $missing, 'mismatched' => $mismatched, 'failed' => $failed,
+            'done' => $done,
         ];
+    }
+
+
+    /**
+     * One lookup file for the whole export, written when the job finishes.
+     *
+     * The per-batch files are a record of each pass; this is the thing you actually
+     * search. Built from subtree_export_file rather than from those batch files, so
+     * it describes what HAPPENED - including anything missing or failed - rather
+     * than what was selected.
+     *
+     * Deliberately one flat file with no index structure: an archivist with a drive
+     * and no tooling can open it, grep it, or load it into anything. A format that
+     * needs software to read defeats the point of an offline package.
+     */
+    private static function writeIndex(object $job): void
+    {
+        $dir = rtrim($job->output_path, '/').'/metadata';
+
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+            return;
+        }
+
+        try {
+            $rows = QubitPdo::fetchAll(
+                'SELECT f.information_object_id, f.usage_id, f.relative_path, f.byte_size,
+                        f.checksum, f.status, io.identifier, io.lft, s.slug
+                   FROM subtree_export_file f
+              LEFT JOIN information_object io ON io.id = f.information_object_id
+              LEFT JOIN slug s ON s.object_id = f.information_object_id
+                  WHERE f.export_id = ?
+               ORDER BY io.lft, f.usage_id',
+                [(int) $job->id]
+            );
+        } catch (\Throwable $e) {
+            return;
+        }
+
+        $records = [];
+
+        foreach ($rows as $r) {
+            $id = (int) $r->information_object_id;
+
+            if (!isset($records[$id])) {
+                $records[$id] = [
+                    'id' => $id,
+                    'slug' => $r->slug,
+                    'identifier' => $r->identifier,
+                    'lft' => null === $r->lft ? null : (int) $r->lft,
+                    'files' => [],
+                ];
+            }
+
+            $records[$id]['files'][] = [
+                'usage_id' => (int) $r->usage_id,
+                'usage' => self::usageName((int) $r->usage_id),
+                'path' => $r->relative_path,
+                'byte_size' => (int) $r->byte_size,
+                'checksum' => $r->checksum,
+                'status' => $r->status,
+            ];
+        }
+
+        // Same envelope as ahgPortableExportPlugin's manifest.json on PSIS, so it
+        // reads familiarly to anyone who has handled one of those packages. The
+        // format string differs on purpose: this is a subtree export, not a portable
+        // catalogue, and claiming the same format identifier while carrying a
+        // different structure would mislead anything that reads it.
+        $manifest = [
+            'version' => '1.0.0',
+            'format' => 'atom-heratio-subtree-export',
+            'created_at' => date('c'),
+            'source' => [
+                'url' => sfConfig::get('app_siteBaseUrl', ''),
+                'site_title' => sfConfig::get('app_siteTitle', 'AtoM'),
+                'plugin_version' => '1.0.0',
+            ],
+            'scope' => [
+                'type' => 'subtree',
+                'start_slug' => $job->start_slug,
+                'bound_slug' => $job->bound_slug,
+                'max_items' => (int) $job->max_items,
+            ],
+            'counts' => [
+                'records' => count($records),
+                'files' => count($rows),
+                'bytes_written' => (int) $job->bytes_written,
+                'files_missing' => (int) $job->files_missing,
+            ],
+            'records' => array_values($records),
+        ];
+
+        $root = rtrim($job->output_path, '/');
+        $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        // At the package root, not under metadata/, so it is the first thing
+        // anyone opening the drive sees.
+        file_put_contents($root.'/manifest.json', $json);
+
+        // The same data as a script, because browsers refuse fetch() on file://
+        // for local files. Without this, lookup.html opened from a drive - which is
+        // the entire point of an offline package - would load nothing at all.
+        // ahgPortableExportPlugin's ViewerPackager does the same for its config.
+        file_put_contents($root.'/manifest.js', 'window.SUBTREE_MANIFEST = '.$json.';');
+
+        // The browsable lookup, copied from the plugin rather than generated, so it
+        // can be edited as a normal HTML file.
+        $viewer = __DIR__.'/../../web/lookup.html';
+
+        if (is_readable($viewer)) {
+            copy($viewer, $root.'/lookup.html');
+        }
+    }
+
+    /** Usage ids mean nothing to a reader; names do. */
+    private static function usageName(int $usageId): string
+    {
+        switch ($usageId) {
+            case SubtreeExportService::USAGE_MASTER: return 'master';
+            case SubtreeExportService::USAGE_REFERENCE: return 'reference';
+            case SubtreeExportService::USAGE_THUMBNAIL: return 'thumbnail';
+            default: return 'usage-'.$usageId;
+        }
     }
 
     /** One JSON file per batch, so a resumed run never rewrites an earlier one. */
