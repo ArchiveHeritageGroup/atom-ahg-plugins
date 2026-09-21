@@ -435,6 +435,8 @@ class SubtreeExportRunner
             ];
         }
 
+        self::enrich($records);
+
         // Same envelope as ahgPortableExportPlugin's manifest.json on PSIS, so it
         // reads familiarly to anyone who has handled one of those packages. The
         // format string differs on purpose: this is a subtree export, not a portable
@@ -483,6 +485,149 @@ class SubtreeExportRunner
 
         if (is_readable($viewer)) {
             copy($viewer, $root.'/lookup.html');
+        }
+    }
+
+    /**
+     * Add the descriptive metadata worth searching on.
+     *
+     * Two queries for the whole export rather than one per record: a thousand
+     * records would otherwise be two thousand round trips.
+     *
+     * i18n rows are joined on the record's OWN source_culture rather than a fixed
+     * 'en'. A record catalogued in Afrikaans has no English row, and joining on
+     * 'en' would silently give it a blank title - present in the manifest, missing
+     * from every search.
+     *
+     * @param array $records keyed by information object id, modified in place
+     */
+    private static function enrich(array &$records): void
+    {
+        if (empty($records)) {
+            return;
+        }
+
+        $ids = implode(',', array_map('intval', array_keys($records)));
+
+        try {
+            $rows = QubitPdo::fetchAll(
+                "SELECT io.id, io.source_standard, io.shelf,
+                        i18n.title, i18n.alternate_title, i18n.scope_and_content,
+                        i18n.extent_and_medium, i18n.physical_characteristics,
+                        i18n.archival_history, i18n.access_conditions,
+                        lod.name AS level_of_description,
+                        repo.authorized_form_of_name AS repository
+                   FROM information_object io
+              LEFT JOIN information_object_i18n i18n
+                     ON i18n.id = io.id AND i18n.culture = io.source_culture
+              LEFT JOIN term_i18n lod
+                     ON lod.id = io.level_of_description_id AND lod.culture = 'en'
+              LEFT JOIN actor_i18n repo
+                     ON repo.id = io.repository_id AND repo.culture = 'en'
+                  WHERE io.id IN ({$ids})"
+            );
+        } catch (\Throwable $e) {
+            return;
+        }
+
+        foreach ($rows as $r) {
+            $id = (int) $r->id;
+
+            if (!isset($records[$id])) {
+                continue;
+            }
+
+            $records[$id] += [
+                'title' => $r->title,
+                'alternate_title' => $r->alternate_title,
+                'level_of_description' => $r->level_of_description,
+                'repository' => $r->repository,
+                'scope_and_content' => $r->scope_and_content,
+                'extent_and_medium' => $r->extent_and_medium,
+                'physical_characteristics' => $r->physical_characteristics,
+                'archival_history' => $r->archival_history,
+                'access_conditions' => $r->access_conditions,
+                'source_standard' => $r->source_standard,
+                'shelf' => $r->shelf,
+                'dates' => [],
+                'creators' => [],
+                'access_points' => [],
+            ];
+        }
+
+        // Dates and creators come from events, which are rows not columns: one
+        // record can carry a creation date, a custodial history date and several
+        // actors, so they cannot be folded into the query above.
+        try {
+            $events = QubitPdo::fetchAll(
+                "SELECT e.object_id, e.start_date, e.end_date,
+                        ei.date AS display_date,
+                        a.authorized_form_of_name AS actor,
+                        et.name AS event_type
+                   FROM event e
+              LEFT JOIN event_i18n ei ON ei.id = e.id AND ei.culture = 'en'
+              LEFT JOIN actor_i18n a ON a.id = e.actor_id AND a.culture = 'en'
+              LEFT JOIN term_i18n et ON et.id = e.type_id AND et.culture = 'en'
+                  WHERE e.object_id IN ({$ids})"
+            );
+        } catch (\Throwable $e) {
+            return;
+        }
+
+        foreach ($events as $e) {
+            $id = (int) $e->object_id;
+
+            if (!isset($records[$id])) {
+                continue;
+            }
+
+            $shown = $e->display_date ?: trim((string) $e->start_date.(
+                $e->end_date && $e->end_date !== $e->start_date ? ' - '.$e->end_date : ''
+            ));
+
+            if ('' !== (string) $shown) {
+                $records[$id]['dates'][] = ['type' => $e->event_type, 'date' => $shown];
+            }
+
+            if (!empty($e->actor) && !in_array($e->actor, $records[$id]['creators'], true)) {
+                $records[$id]['creators'][] = $e->actor;
+            }
+        }
+
+        // Access points: places, subjects and genres. On this collection they are
+        // the richest thing in the catalogue - scope and content is filled on 9
+        // records in a thousand, while every record carries a place. A search that
+        // skipped these would miss the field people actually look things up by.
+        try {
+            $terms = QubitPdo::fetchAll(
+                "SELECT otr.object_id, ti.name AS term, tx.name AS taxonomy
+                   FROM object_term_relation otr
+                   JOIN term t ON t.id = otr.term_id
+              LEFT JOIN term_i18n ti ON ti.id = t.id AND ti.culture = 'en'
+              LEFT JOIN taxonomy_i18n tx ON tx.id = t.taxonomy_id AND tx.culture = 'en'
+                  WHERE otr.object_id IN ({$ids})"
+            );
+        } catch (\Throwable $e) {
+            return;
+        }
+
+        foreach ($terms as $t) {
+            $id = (int) $t->object_id;
+
+            if (!isset($records[$id]) || empty($t->term)) {
+                continue;
+            }
+
+            // Grouped by taxonomy so a reader can tell a place from a genre.
+            $group = strtolower((string) ($t->taxonomy ?: 'other'));
+
+            if (!isset($records[$id]['access_points'][$group])) {
+                $records[$id]['access_points'][$group] = [];
+            }
+
+            if (!in_array($t->term, $records[$id]['access_points'][$group], true)) {
+                $records[$id]['access_points'][$group][] = $t->term;
+            }
         }
     }
 

@@ -38,8 +38,9 @@
   .tag { display: inline-block; font-size: .7rem; padding: .05rem .35rem; border-radius: 3px;
          background: var(--gold); color: #3a2c08; margin-right: .3rem; }
   .missing, .failed { background: #b00020; color: #fff; }
+  .scope { color: var(--muted); font-size: .8rem; margin-top: .2rem; }
   .empty { padding: 2rem 0; color: var(--muted); }
-  @media (max-width: 640px) { th:nth-child(3), td:nth-child(3) { display: none; } }
+  @media (max-width: 760px) { th:nth-child(3), td:nth-child(3) { display: none; } }
 </style>
 </head>
 <body>
@@ -49,13 +50,13 @@
 </header>
 
 <div class="bar">
-  <input type="search" id="q" placeholder="Filter by identifier, slug or file name" autocomplete="off" aria-label="Filter records">
+  <input type="search" id="q" placeholder="Filter by title, identifier, date, creator, shelf, scope note or file name" autocomplete="off" aria-label="Filter records">
   <span class="count" id="count"></span>
 </div>
 
 <main>
   <table id="tbl">
-    <thead><tr><th>Identifier</th><th>Slug</th><th>Files</th></tr></thead>
+    <thead><tr><th>Identifier</th><th>Title</th><th>Details</th><th>Files</th></tr></thead>
     <tbody id="rows"></tbody>
   </table>
   <div class="empty" id="empty" hidden>No records match that filter.</div>
@@ -93,6 +94,25 @@
     });
   }
 
+  // Built once per record and cached: rebuilding it on every keystroke over a
+  // thousand records is what makes a filter feel slow.
+  function haystack(r) {
+    if (r.__hay === undefined) {
+      var parts = [r.identifier, r.slug, r.title, r.alternate_title, r.level_of_description,
+                   r.repository, r.scope_and_content, r.extent_and_medium,
+                   r.physical_characteristics, r.archival_history, r.access_conditions,
+                   r.shelf, r.source_standard];
+      if (r.creators) { parts = parts.concat(r.creators); }
+      if (r.access_points) {
+        for (var k in r.access_points) { parts = parts.concat(r.access_points[k]); }
+      }
+      if (r.dates) { parts = parts.concat(r.dates.map(function (d) { return d.date; })); }
+      if (r.files) { parts = parts.concat(r.files.map(function (x) { return x.path; })); }
+      r.__hay = parts.join(' ').toLowerCase();
+    }
+    return r.__hay;
+  }
+
   var rows = document.getElementById('rows');
   var empty = document.getElementById('empty');
   var countEl = document.getElementById('count');
@@ -104,9 +124,11 @@
     for (var i = 0; i < recs.length; i++) {
       var r = recs[i];
       if (f) {
-        var hay = (r.identifier || '') + ' ' + (r.slug || '') + ' ' +
-                  (r.files || []).map(function (x) { return x.path || ''; }).join(' ');
-        if (hay.toLowerCase().indexOf(f) === -1) { continue; }
+        // Search every descriptive field, not a chosen few. Someone looking for a
+        // site will type whatever they remember - a shelf mark, a photographer, a
+        // phrase from the scope note - and a search that only covers identifier and
+        // slug fails them silently.
+        if (haystack(r).indexOf(f) === -1) { continue; }
       }
       shown++;
 
@@ -121,8 +143,29 @@
                ' <span class="count">' + bytes(x.byte_size || 0) + '</span></a>';
       }).join('');
 
-      html += '<tr><td>' + esc(r.identifier) + '</td>' +
-              '<td class="slug">' + esc(r.slug) + '</td>' +
+      var bits = [];
+      if (r.level_of_description) { bits.push(esc(r.level_of_description)); }
+      if (r.dates && r.dates.length) {
+        bits.push(esc(r.dates.map(function (d) { return d.date; }).join(', ')));
+      }
+      if (r.creators && r.creators.length) { bits.push(esc(r.creators.join(', '))); }
+      if (r.repository) { bits.push(esc(r.repository)); }
+      if (r.access_points) {
+        for (var k in r.access_points) {
+          bits.push('<span class="tag">' + esc(k) + '</span>' + esc(r.access_points[k].join(', ')));
+        }
+      }
+      if (r.shelf) { bits.push('shelf ' + esc(r.shelf)); }
+
+      var scope = r.scope_and_content || r.physical_characteristics || '';
+      if (scope) {
+        scope = '<div class="scope">' + esc(scope.slice(0, 220)) +
+                (scope.length > 220 ? '...' : '') + '</div>';
+      }
+
+      html += '<tr><td>' + esc(r.identifier) + '<div class="slug">' + esc(r.slug) + '</div></td>' +
+              '<td>' + esc(r.title || '') + (r.alternate_title ? '<div class="scope">' + esc(r.alternate_title) + '</div>' : '') + '</td>' +
+              '<td>' + bits.join(' &middot; ') + scope + '</td>' +
               '<td class="files">' + files + '</td></tr>';
     }
 
