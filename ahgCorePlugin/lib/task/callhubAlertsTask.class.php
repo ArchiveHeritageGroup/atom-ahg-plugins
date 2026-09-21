@@ -90,11 +90,22 @@ EOF;
             return 1;
         }
 
-        $sent = $skipped = $failed = 0;
+        $sent = $skipped = $stale = $failed = 0;
 
         foreach ($rows as $row) {
             $signature = (string) $row->signature;
             $ref = \AhgCore\Services\CallHubAlertService::externalRef($signature, $period);
+
+            // The (signature, period) claim expires at the ISO week boundary whether
+            // or not the fault recurred, so every unresolved row re-raised at 00:00
+            // SAST on Monday. Skip anything that has not been seen since it was last
+            // reported. Checked before the dry-run branch so --dry-run tells the truth
+            // about what would go out.
+            if (!\AhgCore\Services\CallHubAlertService::hasRecurredSinceLastSent($row)) {
+                ++$stale;
+
+                continue;
+            }
 
             if ($dryRun) {
                 $this->logSection('callhub', sprintf(
@@ -129,10 +140,11 @@ EOF;
         }
 
         $this->logSection('callhub', sprintf(
-            '%s%d raised, %d already sent this period, %d failed (period %s).',
+            '%s%d raised, %d already sent this period, %d not seen since last sent, %d failed (period %s).',
             $dryRun ? '[dry run] ' : '',
             $sent,
             $skipped,
+            $stale,
             $failed,
             $period
         ));

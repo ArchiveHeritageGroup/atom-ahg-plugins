@@ -277,6 +277,56 @@ class CallHubAlertService
      * The unique key does the work: a concurrent second drain loses the insert and
      * gets false, rather than both writing a spool file.
      */
+    /**
+     * Has this fault actually occurred since the last time we reported it?
+     *
+     * The (signature, period) claim expires at the ISO week boundary ON PURPOSE, so a
+     * fault that is STILL failing in a new week raises again instead of going silent.
+     * But it expired whether or not the fault had recurred: at 00:00 SAST on Monday
+     * every unresolved row became claimable again and raised a fresh call for
+     * something that had not happened since the previous week. Fourteen arrived that
+     * way on 2026-09-21, every one of them already fixed and closed - including the
+     * original pair that opened the whole arc.
+     *
+     * The week is not the bug, it is the noise control. This is the test that was
+     * missing: only send if the row has been seen since we last sent for it.
+     *
+     * Compared against sent_at for the SIGNATURE across every period, not against the
+     * fingerprint or the current period, so a row whose fault key changed for an
+     * unrelated reason is not silently suppressed by a stale match.
+     *
+     * ⚠️ Fails OPEN. Any error here returns true and the fault is reported. A monitor
+     * that fails closed stops reporting and looks exactly like a quiet estate.
+     */
+    public static function hasRecurredSinceLastSent(object $row): bool
+    {
+        if (empty($row->signature)) {
+            return true;
+        }
+
+        try {
+            $lastSent = DB::table('ahg_error_alert')
+                ->where('signature', (string) $row->signature)
+                ->max('sent_at');
+        } catch (\Throwable $e) {
+            return true;
+        }
+
+        if (empty($lastSent)) {
+            return true;
+        }
+
+        // last_seen_at is maintained by the error logger on every recurrence;
+        // created_at covers a row written before that column was populated.
+        $lastActive = $row->last_seen_at ?? $row->created_at ?? null;
+
+        if (empty($lastActive)) {
+            return true;
+        }
+
+        return strtotime((string) $lastActive) > strtotime((string) $lastSent);
+    }
+
     public static function claim(string $signature, string $period, string $externalRef, int $errorLogId): bool
     {
         try {
