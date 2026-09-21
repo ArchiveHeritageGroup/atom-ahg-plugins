@@ -172,9 +172,12 @@ EOF;
             $r = SubtreeExportRunner::drain($job, $atomRoot, $log);
 
             $this->logSection('subtree', sprintf(
-                'batch: %d records, %d files, %s%s',
+                'batch: %d records, %d files, %s%s%s',
                 $r['items'], $r['files'], SubtreeExportService::humanBytes($r['bytes']),
-                $r['missing'] ? sprintf(', %d MISSING on disk', $r['missing']) : ''
+                $r['missing'] ? sprintf(', %d MISSING on disk', $r['missing']) : '',
+                // Surfaced, not buried: a file whose size disagrees with the
+                // catalogue is the signal that a copy was short or a record stale.
+                !empty($r['mismatched']) ? sprintf(', %d SIZE MISMATCH', $r['mismatched']) : ''
             ));
 
             $job = SubtreeExportRunner::job($id);

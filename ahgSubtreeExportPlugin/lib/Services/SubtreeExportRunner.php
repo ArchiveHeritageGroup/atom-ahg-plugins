@@ -118,7 +118,7 @@ class SubtreeExportRunner
         $ids = array_map(static function ($r) { return (int) $r->id; }, $items);
         $files = SubtreeExportService::filesFor($ids, $usages);
 
-        $bytes = $copied = $missing = 0;
+        $bytes = $copied = $missing = $mismatched = 0;
 
         foreach ($files as $f) {
             $src = SubtreeExportService::absolutePath($atomRoot, $f);
@@ -148,8 +148,29 @@ class SubtreeExportRunner
             // runs on the AtoM host, where source and destination are both local.
             if (@copy($src, $dst)) {
                 ++$copied;
-                $bytes += (int) $f->byte_size;
-                self::recordFile($job->id, $f, $src, $rel, 'copied');
+
+                // What actually landed, NOT digital_object.byte_size. The catalogue
+                // figure is what the file was when it was catalogued; using it here
+                // would report a full 20 GB export as complete even if every file
+                // arrived truncated. filesize() is the only number that is evidence.
+                $written = @filesize($dst);
+                $actual = false === $written ? (int) $f->byte_size : (int) $written;
+                $bytes += $actual;
+
+                // A size the catalogue disagrees with means the source changed, the
+                // copy was short, or the record is stale. Worth saying out loud
+                // rather than silently accepting either number.
+                if (false !== $written && (int) $f->byte_size > 0 && $actual !== (int) $f->byte_size) {
+                    ++$mismatched;
+                    if ($log) {
+                        $log(sprintf(
+                            'size differs from the catalogue: %s (on disk %d, recorded %d)',
+                            $rel, $actual, (int) $f->byte_size
+                        ));
+                    }
+                }
+
+                self::recordFile($job->id, $f, $src, $rel, 'copied', $actual);
             } else {
                 self::recordFile($job->id, $f, $src, $rel, 'failed');
             }
@@ -181,7 +202,7 @@ class SubtreeExportRunner
 
         return [
             'items' => count($items), 'files' => $copied, 'bytes' => $bytes,
-            'missing' => $missing, 'done' => $done,
+            'missing' => $missing, 'mismatched' => $mismatched, 'done' => $done,
         ];
     }
 
@@ -226,7 +247,7 @@ class SubtreeExportRunner
      * INSERT IGNORE on (export_id, digital_object_id): a resumed batch that overlaps
      * an interrupted one records the file once and does not double-count bytes.
      */
-    private static function recordFile(int $exportId, object $f, string $src, string $rel, string $status): void
+    private static function recordFile(int $exportId, object $f, string $src, string $rel, string $status, ?int $actualBytes = null): void
     {
         QubitPdo::modify(
             'INSERT IGNORE INTO subtree_export_file
@@ -235,7 +256,7 @@ class SubtreeExportRunner
              VALUES (?,?,?,?,?,?,?,?,?,NOW())',
             [
                 $exportId, (int) $f->id, (int) $f->information_object_id, (int) $f->usage_id,
-                $src, $rel, (int) $f->byte_size, $f->checksum, $status,
+                $src, $rel, $actualBytes ?? (int) $f->byte_size, $f->checksum, $status,
             ]
         );
     }
