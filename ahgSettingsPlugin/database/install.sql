@@ -113,7 +113,12 @@ CREATE TABLE IF NOT EXISTS `ahg_error_log` (
   KEY `idx_error_log_level` (`level`),
   KEY `idx_error_log_resolved` (`resolved_at`),
   KEY `idx_signature` (`signature`, `id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- COLLATE is explicit on purpose. Without it the table takes utf8mb4's own
+-- default, which on MySQL 8 is utf8mb4_0900_ai_ci, while this database and
+-- every other table here are utf8mb4_unicode_ci. That mismatch makes any SQL
+-- joining ahg_error_log.signature to ahg_error_alert.signature fail with
+-- "Illegal mix of collations" - which is exactly what it did on 2026-09-21.
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/numbering_scheme.sql on 2026-08-17.
