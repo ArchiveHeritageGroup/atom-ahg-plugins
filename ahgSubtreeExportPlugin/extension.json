@@ -1,0 +1,11 @@
+{
+    "name": "ahgSubtreeExportPlugin",
+    "version": "1.0.0",
+    "description": "Export a record and the next N descriptions in tree order, with their digital objects, to external storage. CLI only.",
+    "atom_version": "2.8.1",
+    "category": "export",
+    "cli": ["subtree:export"],
+    "database": "database/install.sql",
+    "requires": [],
+    "notes": "Targets AtoM 2.8.1. Uses QubitPdo, not the 2.10 atom-framework. Does not use ahg_settings."
+}
