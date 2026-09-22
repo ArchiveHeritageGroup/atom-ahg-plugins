@@ -3573,17 +3573,13 @@ class PreservationService
      */
     private function generateUuid(): string
     {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0x0FFF) | 0x4000,
-            mt_rand(0, 0x3FFF) | 0x8000,
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF)
-        );
+        // random_bytes, not mt_rand(): mt_rand draws from a 32-bit seed, so its UUIDs
+        // collide at scale (ahgAuditTrailPlugin lost about 1,640 audit rows that way).
+        $b = random_bytes(16);
+        $b[6] = chr((ord($b[6]) & 0x0f) | 0x40);
+        $b[8] = chr((ord($b[8]) & 0x3f) | 0x80);
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($b), 4));
     }
 
     /**
