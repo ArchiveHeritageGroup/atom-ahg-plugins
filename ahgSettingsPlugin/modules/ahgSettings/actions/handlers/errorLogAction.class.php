@@ -88,6 +88,12 @@ class AhgSettingsErrorLogAction extends AhgController
 
         $query = DB::table('ahg_error_log')->orderBy('created_at', 'desc');
 
+        // ?id=N comes from CallHub alert links: show exactly that row, whatever its status.
+        if ($id = (int) $request->getParameter('id')) {
+            $query->where('id', $id);
+            $status = 'all';
+        }
+
         // Status filter
         if ($status === 'open') {
             $query->whereNull('resolved_at');

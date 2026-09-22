@@ -23,6 +23,8 @@ class ErrorNotificationService
     private static int $lockTtl = 300; // default, overridden by config
     private static int $dailyCap = 50; // default, overridden by config
     private static bool $configLoaded = false;
+    /** Set once this request has logged its real error, so the HTTP 500 is not logged again. */
+    private static bool $loggedThisRequest = false;
 
     /**
      * Severity thresholds for handleError(), widest last.
@@ -390,6 +392,14 @@ class ErrorNotificationService
                 503 => 'Service Unavailable',
             ];
 
+            // The real cause is already logged for this request. Logging the 500 as
+            // well put the URL in the message, so one outage raised a separate row -
+            // and a separate CallHub call - for every URL that failed (15 of them on
+            // PSIS during a one-minute Elasticsearch restart, 22 September 2026).
+            if (self::$loggedThisRequest) {
+                return;
+            }
+
             $statusText = $statusMessages[$statusCode] ?? 'HTTP Error';
             $url = $_SERVER['REQUEST_URI'] ?? '/';
             $message = "HTTP {$statusCode} {$statusText}: {$url}";
@@ -458,6 +468,10 @@ class ErrorNotificationService
                 'is_read' => 0,
                 'created_at' => date('Y-m-d H:i:s'),
             ];
+
+            if (null === $statusCode && in_array($level, ['error', 'fatal', 'critical'], true)) {
+                self::$loggedThisRequest = true;
+            }
 
             if (class_exists('\\AtomFramework\\Services\\ErrorLogWriter')) {
                 \AtomFramework\Services\ErrorLogWriter::record($row);

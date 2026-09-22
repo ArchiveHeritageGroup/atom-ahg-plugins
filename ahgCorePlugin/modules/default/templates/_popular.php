@@ -20,7 +20,9 @@
       // appear in the popular list.
       $label = '';
 
-      if ($object instanceof QubitActor || $object instanceof QubitRepository) {
+      // Functions carry authorizedFormOfName too, but QubitFunctionObject is not a
+      // QubitActor in 2.10 - asking it for ->title took the home page down as well.
+      if ($object instanceof QubitActor || $object instanceof QubitRepository || $object instanceof QubitFunctionObject) {
           $label = (string) $object->authorizedFormOfName;
       } elseif (isset($object->title)) {
           $label = (string) $object->title;

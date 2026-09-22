@@ -260,15 +260,49 @@ class CallHubAlertService
         return implode("\n", $lines);
     }
 
-    /** Deep link to the row in the admin error log. */
+    /**
+     * Deep link to the row in the admin error log.
+     *
+     * Built from the site's own base URL (Admin > Settings > Site information).
+     * The row's hostname is gethostname() - "theahg" on PSIS - which no browser can
+     * reach, so every alert carried a dead link. The hostname stays only as a last
+     * resort when no base URL is configured.
+     */
     public static function link(object $row): ?string
     {
-        $host = trim((string) ($row->hostname ?? ''));
-        if ($host === '' || !isset($row->id)) {
+        if (!isset($row->id)) {
             return null;
         }
+        $base = self::siteBaseUrl();
+        if ($base === '') {
+            $host = trim((string) ($row->hostname ?? ''));
+            if ($host === '') {
+                return null;
+            }
+            $base = 'https://' . $host;
+        }
 
-        return sprintf('https://%s/index.php/ahgSettings/errorLog?id=%d', $host, (int) $row->id);
+        return sprintf('%s/index.php/ahgSettings/errorLog?id=%d', $base, (int) $row->id);
+    }
+
+    /** The configured site base URL, without a trailing slash; '' when unset. */
+    private static function siteBaseUrl(): string
+    {
+        static $base = null;
+        if (null === $base) {
+            try {
+                $value = (string) DB::table('setting')
+                    ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
+                    ->where('setting.name', 'siteBaseUrl')
+                    ->value('setting_i18n.value');
+            } catch (\Throwable $e) {
+                $value = '';
+            }
+            $value = rtrim(trim($value), '/');
+            $base = preg_match('#^https?://#i', $value) ? $value : '';
+        }
+
+        return $base;
     }
 
     /**
