@@ -3695,37 +3695,11 @@ INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`
 ('getty_link_status', 'Getty Link Status', 'confirmed', 'Confirmed', '#28a745', 30, 'heritage_monuments'),
 ('getty_link_status', 'Getty Link Status', 'rejected', 'Rejected', '#dc3545', 40, 'heritage_monuments');
 
--- ============================================================
--- PART A: ALTER ENUM → VARCHAR on heritage tables
--- ============================================================
-
--- heritage_entity_graph_node.entity_type
-ALTER TABLE `heritage_entity_graph_node`
-    MODIFY COLUMN `entity_type` VARCHAR(50) NOT NULL;
-
--- heritage_entity_graph_edge.relationship_type
-ALTER TABLE `heritage_entity_graph_edge`
-    MODIFY COLUMN `relationship_type` VARCHAR(50) NOT NULL DEFAULT 'co_occurrence';
-
--- heritage_entity_graph_object.extraction_method
-ALTER TABLE `heritage_entity_graph_object`
-    MODIFY COLUMN `extraction_method` VARCHAR(50) DEFAULT 'ner';
-
--- heritage_entity_cache.entity_type
-ALTER TABLE `heritage_entity_cache`
-    MODIFY COLUMN `entity_type` VARCHAR(50) NOT NULL;
-
--- heritage_entity_cache.extraction_method
-ALTER TABLE `heritage_entity_cache`
-    MODIFY COLUMN `extraction_method` VARCHAR(50) DEFAULT 'taxonomy';
-
--- getty_vocabulary_link.vocabulary
-ALTER TABLE `getty_vocabulary_link`
-    MODIFY COLUMN `vocabulary` VARCHAR(20) NOT NULL;
-
--- getty_vocabulary_link.status
-ALTER TABLE `getty_vocabulary_link`
-    MODIFY COLUMN `status` VARCHAR(50) NOT NULL DEFAULT 'pending';
+-- (The ENUM -> VARCHAR conversions of the heritage, getty and workflow tables
+-- that stood here were removed. Those tables belong to ahgHeritagePlugin,
+-- ahgMuseumPlugin and ahgWorkflowPlugin, whose own install.sql now creates
+-- the columns as VARCHAR, and ALTERing a table this plugin does not create
+-- aborted the whole file on a clean install at the first one.)
 
 -- ============================================================
 -- PART B: Workflow V2.0 dropdown seeds
@@ -3794,97 +3768,8 @@ INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`
 ('workflow_escalation_action', 'Workflow Escalation Action', 'notify_admin', 'Notify Administrator', 20, 'reporting_workflow'),
 ('workflow_escalation_action', 'Workflow Escalation Action', 'auto_reassign', 'Auto-Reassign', 30, 'reporting_workflow');
 
--- ============================================================
--- PART B: ALTER ENUM → VARCHAR on workflow tables
--- ============================================================
-
--- ahg_workflow.scope_type
-ALTER TABLE `ahg_workflow`
-    MODIFY COLUMN `scope_type` VARCHAR(50) NOT NULL DEFAULT 'global';
-
--- ahg_workflow.trigger_event
-ALTER TABLE `ahg_workflow`
-    MODIFY COLUMN `trigger_event` VARCHAR(50) NOT NULL DEFAULT 'submit';
-
--- ahg_workflow.applies_to
-ALTER TABLE `ahg_workflow`
-    MODIFY COLUMN `applies_to` VARCHAR(50) NOT NULL DEFAULT 'information_object';
-
--- ahg_workflow_step.step_type
-ALTER TABLE `ahg_workflow_step`
-    MODIFY COLUMN `step_type` VARCHAR(50) NOT NULL DEFAULT 'review';
-
--- ahg_workflow_step.action_required
-ALTER TABLE `ahg_workflow_step`
-    MODIFY COLUMN `action_required` VARCHAR(50) NOT NULL DEFAULT 'approve_reject';
-
--- ahg_workflow_task.status
-ALTER TABLE `ahg_workflow_task`
-    MODIFY COLUMN `status` VARCHAR(50) NOT NULL DEFAULT 'pending';
-
--- ahg_workflow_task.priority
-ALTER TABLE `ahg_workflow_task`
-    MODIFY COLUMN `priority` VARCHAR(50) NOT NULL DEFAULT 'normal';
-
--- ahg_workflow_task.decision
-ALTER TABLE `ahg_workflow_task`
-    MODIFY COLUMN `decision` VARCHAR(50) DEFAULT 'pending';
-
--- ahg_workflow_history.action
-ALTER TABLE `ahg_workflow_history`
-    MODIFY COLUMN `action` VARCHAR(50) NOT NULL;
-
--- ahg_workflow_notification.notification_type
-ALTER TABLE `ahg_workflow_notification`
-    MODIFY COLUMN `notification_type` VARCHAR(50) NOT NULL;
-
--- ahg_workflow_notification.status (also ENUM)
-ALTER TABLE `ahg_workflow_notification`
-    MODIFY COLUMN `status` VARCHAR(50) NOT NULL DEFAULT 'pending';
-
--- ============================================================
--- PART B: V2.0 schema additions
--- ============================================================
-
--- Correlation ID for bulk operations (#172)
-SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ahg_workflow_history' AND COLUMN_NAME = 'correlation_id');
-SET @sql = IF(@col_exists = 0,
-    'ALTER TABLE `ahg_workflow_history` ADD COLUMN `correlation_id` VARCHAR(36) DEFAULT NULL',
-    'SELECT 1');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Index on correlation_id
-SET @idx_exists = (SELECT COUNT(*) FROM information_schema.STATISTICS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ahg_workflow_history' AND INDEX_NAME = 'idx_wh_correlation');
-SET @sql = IF(@idx_exists = 0,
-    'CREATE INDEX `idx_wh_correlation` ON `ahg_workflow_history` (`correlation_id`)',
-    'SELECT 1');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Queue ID on tasks (#173)
-SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ahg_workflow_task' AND COLUMN_NAME = 'queue_id');
-SET @sql = IF(@col_exists = 0,
-    'ALTER TABLE `ahg_workflow_task` ADD COLUMN `queue_id` INT UNSIGNED DEFAULT NULL',
-    'SELECT 1');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Index on queue_id
-SET @idx_exists = (SELECT COUNT(*) FROM information_schema.STATISTICS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ahg_workflow_task' AND INDEX_NAME = 'idx_wt_queue');
-SET @sql = IF(@idx_exists = 0,
-    'CREATE INDEX `idx_wt_queue` ON `ahg_workflow_task` (`queue_id`)',
-    'SELECT 1');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
+-- (ahg_workflow_history.correlation_id and ahg_workflow_task.queue_id, added
+-- here once, are created by ahgWorkflowPlugin's own install.sql.)
 
 -- ============================================================
 -- Queue table (#173)

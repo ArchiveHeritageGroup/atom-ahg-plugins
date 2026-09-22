@@ -38,9 +38,8 @@ class MiradorRenderer implements RendererInterface
         $html .= 'title="Close Mirador">';
         $html .= '<i class="fas fa-times"></i></button>';
         $html .= '<div id="mirador-' . $vid . '" class="ahg-mirador-frame" ';
-        // Required by ViewerInjector::renderViewers(); without it this renderer is
-        // silently discarded from the viewer list.
-        $html .= 'data-rendered-by="mirador" ';
+        // No data-rendered-by: this built-in has no boot script, so ViewerInjector
+        // must skip it (see ImageRenderer). ahgMiradorPlugin supplies Mirador.
         $html .= 'data-manifest="' . $manifestUrl . '"></div>';
         $html .= '</div>';
 
