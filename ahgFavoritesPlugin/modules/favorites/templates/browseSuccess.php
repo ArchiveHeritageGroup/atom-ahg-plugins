@@ -15,6 +15,15 @@
 // d-none carries !important, which an inline style cannot override.
 $n = sfConfig::get('csp_nonce', '');
 ?>
+
+
+<?php slot('title'); ?>
+  <h1><i class="fas fa-heart me-2"></i><?php echo __('My Favorites'); ?></h1>
+<?php end_slot(); ?>
+
+<?php slot('content'); ?>
+<?php // Inside the slot: stock layout_1col renders slots only, so a <style> placed
+      // before them was discarded on a stock AtoM theme and every .fav-* rule was lost. ?>
 <style <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   .fav-w35  { width: 35px; }
   .fav-w50  { width: 50px; }
@@ -31,13 +40,6 @@ $n = sfConfig::get('csp_nonce', '');
   .fav-toast { bottom: 20px; right: 20px; z-index: 1050; }
   .fav-hidden { display: none; }
 </style>
-
-
-<?php slot('title'); ?>
-  <h1><i class="fas fa-heart me-2"></i><?php echo __('My Favorites'); ?></h1>
-<?php end_slot(); ?>
-
-<?php slot('content'); ?>
 
 <?php
   // Helper: generate URL for a favorite item (supports research types with direct URLs)
@@ -466,7 +468,7 @@ $n = sfConfig::get('csp_nonce', '');
                       </td>
                     </tr>
                     <!-- Expandable notes row -->
-                    <tr class="notes-row" id="notes-row-<?php echo $favorite->id; ?>" class="fav-hidden">
+                    <tr class="notes-row fav-hidden" id="notes-row-<?php echo $favorite->id; ?>">
                       <td></td>
                       <td colspan="10">
                         <div class="input-group input-group-sm">
@@ -874,7 +876,9 @@ $n = sfConfig::get('csp_nonce', '');
             var favId = btn.getAttribute('data-fav-id');
             var row = document.getElementById('notes-row-' + favId);
             if (row) {
-                row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+                // Computed, not inline: the row starts hidden by a class, so its inline
+                // display is '' and an inline test took two clicks to open it.
+                row.style.display = getComputedStyle(row).display === 'none' ? 'table-row' : 'none';
                 if (row.style.display === 'table-row') {
                     var input = document.getElementById('notes-input-' + favId);
                     if (input) input.focus();

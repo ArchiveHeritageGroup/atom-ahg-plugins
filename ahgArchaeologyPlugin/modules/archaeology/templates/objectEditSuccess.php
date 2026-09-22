@@ -32,7 +32,7 @@ $nonceAttr = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
       <div class="col-md-4">
         <label class="form-label" for="site_id">Site</label>
         <select class="form-select" id="site_id" name="site_id"
-                data-contexts-url="<?php echo esc_specialchars(url_for('@archaeology_contexts_json?siteId=')); ?>">
+                data-contexts-url="<?php echo esc_specialchars(url_for('@archaeology_contexts_json?siteId=0')); ?>">
           <option value="">Not recorded</option>
           <?php foreach ($siteChoices as $s) { ?>
             <option value="<?php echo (int) $s->id; ?>"<?php echo (int) $selectedSiteId === (int) $s->id ? ' selected' : ''; ?>>
@@ -207,7 +207,10 @@ $nonceAttr = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
               return;
           }
 
-          fetch(site.getAttribute('data-contexts-url') + encodeURIComponent(id), {
+          // The URL is built with siteId 0 (the route only matches digits) and the real
+          // id swapped in here. Appending the id to an empty siteId produced
+          // /site//contexts.json<id>, a 404, and the context list never filled.
+          fetch(site.getAttribute('data-contexts-url').replace('/site/0/', '/site/' + encodeURIComponent(id) + '/'), {
               credentials: 'same-origin'
           })
               .then(function (r) { return r.ok ? r.json() : []; })

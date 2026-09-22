@@ -3,17 +3,18 @@
       // elements and never an attribute, so under an enforcing policy every one
       // of these was dropped silently.
       $cspNonce = sfConfig::get('csp_nonce', ''); ?>
-<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
-  .fav-width-110px-3e28 { width: 110px; }
-  .fav-width-140px-1417 { width: 140px; }
-  .fav-width-80px-588c { width: 80px; }
-</style>
 
 <?php slot('title'); ?>
   <h1><i class="fas fa-share-alt me-2"></i><?php echo __('Shared Favorites'); ?></h1>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
+<?php // Inside the slot: stock layout_1col renders slots only (see browseSuccess.php). ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .fav-width-110px-3e28 { width: 110px; }
+  .fav-width-140px-1417 { width: 140px; }
+  .fav-width-80px-588c { width: 80px; }
+</style>
 
 <div class="container-fluid px-0">
   <div class="card shadow-sm">
