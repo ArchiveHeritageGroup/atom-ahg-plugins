@@ -6,9 +6,7 @@
 
 <?php slot('content'); ?>
 
-  <?php if ($sf_user->hasFlash('notice')) { ?>
-    <div class="alert alert-success" role="alert"><?php echo esc_entities($sf_user->getFlash('notice')); ?></div>
-  <?php } ?>
+  <?php // The layout already shows the 'notice' flash; showing it here too printed it twice. ?>
   <?php if ($error) { ?>
     <div class="alert alert-danger" role="alert"><?php echo esc_entities($error); ?></div>
   <?php } ?>
