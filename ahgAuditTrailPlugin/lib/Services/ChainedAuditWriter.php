@@ -92,6 +92,10 @@ class ChainedAuditWriter
             error_log('audit.chain.append_failed: ' . $e->getMessage());
             try {
                 unset($data['prev_hash'], $data['entry_hash'], $data['seq'], $data['signature'], $data['kid']);
+                // A duplicate uuid fails the same way on retry, so give the fallback a fresh one.
+                if (false !== strpos($e->getMessage(), 'idx_ahg_audit_uuid')) {
+                    $data['uuid'] = self::uuid4();
+                }
 
                 return (int) DB::table('ahg_audit_log')->insertGetId(self::forStorage($data));
             } catch (\Throwable $e2) {
@@ -354,8 +358,14 @@ class ChainedAuditWriter
         return $d;
     }
 
-    /** RFC-4122 v4 UUID without the ramsey/uuid dependency. */
-    private static function uuid4(): string
+    /**
+     * RFC-4122 v4 UUID without the ramsey/uuid dependency.
+     *
+     * Public so every audit writer uses it. The mt_rand() UUIDs they built before
+     * drew from a 32-bit seed and collided on idx_ahg_audit_uuid (about 1,640 on
+     * PSIS by September 2026), and each collision lost the audit row outright.
+     */
+    public static function uuid4(): string
     {
         $b = random_bytes(16);
         $b[6] = chr((ord($b[6]) & 0x0f) | 0x40);
