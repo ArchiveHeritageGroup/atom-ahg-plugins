@@ -249,11 +249,14 @@
   font-size: 0.875rem;
 }
 
-/* Contextual help floating button */
+/* Contextual help floating button.
+   Stacks above the WhatsApp bubble in the theme (3.5rem circle at bottom/right
+   1.25rem). bottom clears it; right puts both circles on the same centre line.
+   At 2rem/2rem the two sat on top of each other. */
 .help-floating-btn {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 5.5rem;
+  right: 1.5rem;
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -520,7 +523,7 @@
   }
 
   .help-floating-btn {
-    bottom: 1.5rem;
-    right: 1rem;
+    bottom: 5.5rem;   /* same stack on small screens - the bubble does not move */
+    right: 1.5rem;
   }
 }
