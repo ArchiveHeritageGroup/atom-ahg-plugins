@@ -8,6 +8,9 @@
  */
 class SubtreeExportRunner
 {
+    /** Non-fatal problems worth telling the operator about; written into the manifest. */
+    private static $warnings = [];
+
     /**
      * Empty a previous export from the destination, so a re-run starts clean.
      *
@@ -464,6 +467,7 @@ class SubtreeExportRunner
                 'files_missing' => (int) $job->files_missing,
             ],
             'records' => array_values($records),
+            'warnings' => array_values(self::$warnings),
         ];
 
         $root = rtrim($job->output_path, '/');
@@ -501,6 +505,28 @@ class SubtreeExportRunner
      *
      * @param array $records keyed by information object id, modified in place
      */
+    /** Record a non-fatal problem once, and put it in the server log as well. */
+    private static function warn(string $message): void
+    {
+        if (!in_array($message, self::$warnings, true)) {
+            self::$warnings[] = $message;
+            error_log('subtree:export - '.$message);
+        }
+    }
+
+    /** Whether a column exists, so an optional field cannot break the whole query. */
+    private static function hasColumn(string $table, string $column): bool
+    {
+        try {
+            return (bool) QubitPdo::fetchOne(
+                'SHOW COLUMNS FROM `'.$table.'` LIKE ?',
+                [$column]
+            );
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     private static function enrich(array &$records): void
     {
         if (empty($records)) {
@@ -509,9 +535,16 @@ class SubtreeExportRunner
 
         $ids = implode(',', array_map('intval', array_keys($records)));
 
+        // shelf is not part of stock AtoM: some instances carry it, most do not.
+        // Selecting it unconditionally made the whole query fail, and the catch
+        // below then dropped every title, date and creator without a word - the
+        // lookup page rendered with empty Title and Details columns and nobody
+        // could tell why. Ask the schema instead of assuming.
+        $shelf = self::hasColumn('information_object', 'shelf') ? 'io.shelf' : "NULL AS shelf";
+
         try {
             $rows = QubitPdo::fetchAll(
-                "SELECT io.id, io.source_standard, io.shelf,
+                "SELECT io.id, io.source_standard, {$shelf},
                         i18n.title, i18n.alternate_title, i18n.scope_and_content,
                         i18n.extent_and_medium, i18n.physical_characteristics,
                         i18n.archival_history, i18n.access_conditions,
@@ -527,6 +560,8 @@ class SubtreeExportRunner
                   WHERE io.id IN ({$ids})"
             );
         } catch (\Throwable $e) {
+            self::warn('descriptive metadata could not be read, so titles and details are missing from the lookup page: '.$e->getMessage());
+
             return;
         }
 
@@ -571,6 +606,8 @@ class SubtreeExportRunner
                   WHERE e.object_id IN ({$ids})"
             );
         } catch (\Throwable $e) {
+            self::warn('dates and creators could not be read: '.$e->getMessage());
+
             return;
         }
 

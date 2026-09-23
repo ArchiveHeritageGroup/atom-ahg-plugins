@@ -11,6 +11,10 @@ class ahgSubtreeExportPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Export a run of descriptions and their digital objects to external storage (CLI).';
 
+    // Admin > Plugins reads this. Without it the row renders half a table row and
+    // no checkbox, so the plugin cannot be enabled from the UI at all.
+    public static $version = '1.0.0';
+
     public function initialize()
     {
         // Symfony 1.4 autoloads lib/ under a plugin by convention, so the services
