@@ -252,7 +252,7 @@ class SubtreeExportRunner
         $take = (int) $job->batch_size > 0 ? min((int) $job->batch_size, $remaining) : $remaining;
 
         if ($take < 1) {
-            self::finish($job->id, 'completed');
+            self::completeWithIndex($job);
 
             return ['items' => 0, 'files' => 0, 'bytes' => 0, 'missing' => 0, 'done' => true];
         }
@@ -265,8 +265,13 @@ class SubtreeExportRunner
         $cursor = null === $job->resume_after_lft ? null : (int) $job->resume_after_lft;
         $items = SubtreeExportService::selectItems($start, $take, $cursor);
 
+        // The walk ran out before the limit: the collection simply holds fewer
+        // records than were asked for. That is a normal finish, and it must still
+        // write the manifest and the lookup page - without this the whole export
+        // ends up as a folder of images with nothing to read it by, which is what
+        // happens to every batched run whose bound ends before --limit.
         if (empty($items)) {
-            self::finish($job->id, 'completed');
+            self::completeWithIndex($job);
 
             return ['items' => 0, 'files' => 0, 'bytes' => 0, 'missing' => 0, 'done' => true];
         }
@@ -732,6 +737,13 @@ class SubtreeExportRunner
                 $src, $rel, $actualBytes ?? (int) $f->byte_size, $f->checksum, $status,
             ]
         );
+    }
+
+    /** Finish a job that has run out of records: index first, so the folder is usable. */
+    private static function completeWithIndex(object $job): void
+    {
+        self::writeIndex(self::job((int) $job->id));
+        self::finish((int) $job->id, 'completed');
     }
 
     private static function finish(int $id, string $status): void
