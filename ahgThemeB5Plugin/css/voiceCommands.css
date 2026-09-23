@@ -23,10 +23,13 @@
 }
 
 /* -- Floating mic button -------------------------------------- */
+/* Sits above the WhatsApp bubble (56px circle at bottom 20px, right 20px), so
+   bottom clears it with a 12px gap and right puts both centres on 48px. The old
+   80px/20px left a 4px gap and a 3px centre offset. */
 .voice-floating-btn {
   position: fixed;
-  bottom: 80px;
-  right: 20px;
+  bottom: 88px;
+  right: 23px;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -86,7 +89,7 @@
 /* -- Toast notifications -------------------------------------- */
 .voice-toast-container {
   position: fixed;
-  bottom: 140px;
+  bottom: 150px;   /* clears the mic button, which now ends at 138px */
   right: 20px;
   z-index: 1070;
   display: flex;
