@@ -43,6 +43,15 @@ class AhgSettingsIndexAction extends AhgController
             'url' => 'admin/ahg-settings/section?section=general'
         ];
 
+        // The section itself has existed since the bubble shipped; without this tile
+        // it was reachable only by typing the address.
+        $this->sections['whatsapp'] = [
+            'label' => 'WhatsApp Bubble',
+            'icon' => 'fa-comment-dots',
+            'description' => 'Floating WhatsApp contact button, shown to every visitor including those not logged in',
+            'url' => 'admin/ahg-settings/section?section=whatsapp'
+        ];
+
         $this->sections['email'] = [
             'label' => 'Email Settings',
             'icon' => 'fa-envelope',
