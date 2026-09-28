@@ -108,4 +108,36 @@ CREATE TABLE IF NOT EXISTS ahg_storage_location (
         REFERENCES ahg_storage_location(id) ON DELETE SET NULL
 );
 
+-- Closure table for ahg_storage_location (atom-ahg-plugins#193, option 2).
+-- parent_id stays the source of truth; this is a maintained index of every
+-- ancestor/descendant pair, so "everything under Strongroom B", a location's
+-- path and capacity roll-ups are single joins instead of parent walks.
+-- Same shape as Heratio's closure tables (heratio#1333): ancestor, descendant,
+-- depth, with a (X, X, 0) self row per location. StorageLocationService keeps
+-- it in step on create, move and delete; rebuildClosure() re-derives it.
+CREATE TABLE IF NOT EXISTS ahg_storage_location_closure (
+    ancestor    BIGINT UNSIGNED NOT NULL,
+    descendant  BIGINT UNSIGNED NOT NULL,
+    depth       INT UNSIGNED NOT NULL,
+    PRIMARY KEY (ancestor, descendant),
+    INDEX ix_slc_anc_depth_desc (ancestor, depth, descendant),
+    INDEX ix_slc_desc_depth (descendant, depth),
+    CONSTRAINT fk_slc_ancestor   FOREIGN KEY (ancestor)   REFERENCES ahg_storage_location(id) ON DELETE CASCADE,
+    CONSTRAINT fk_slc_descendant FOREIGN KEY (descendant) REFERENCES ahg_storage_location(id) ON DELETE CASCADE
+);
+
+-- Backfill from parent_id. Idempotent: INSERT IGNORE on the primary key, so a
+-- re-run of this file adds only missing pairs. The depth cap stops a cycle in
+-- hand-edited data from recursing without end.
+INSERT IGNORE INTO ahg_storage_location_closure (ancestor, descendant, depth)
+WITH RECURSIVE paths (ancestor, descendant, depth) AS (
+    SELECT id, id, 0 FROM ahg_storage_location
+    UNION ALL
+    SELECT p.ancestor, c.id, p.depth + 1
+    FROM paths p
+    JOIN ahg_storage_location c ON c.parent_id = p.descendant
+    WHERE p.depth < 100
+)
+SELECT ancestor, descendant, depth FROM paths;
+
 SET FOREIGN_KEY_CHECKS = 1;
