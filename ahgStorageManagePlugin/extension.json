@@ -24,13 +24,15 @@
     "tables": [
         "physical_object_extended",
         "ahg_strongroom",
-        "ahg_physical_object_storage"
+        "ahg_physical_object_storage",
+        "ahg_storage_location"
     ],
     "features": [
         "Physical storage browse via Laravel Query Builder",
         "Sort by name and location with direction toggle",
         "Inline search across name, location, and type",
         "Export storage report link",
-        "Theme-compatible templates (SimplePager)"
+        "Theme-compatible templates (SimplePager)",
+        "Hierarchical storage locations with parent, capacity and type"
     ]
 }

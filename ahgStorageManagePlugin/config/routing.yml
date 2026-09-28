@@ -49,3 +49,45 @@ strongroom_show:
   param: { module: strongroom, action: show }
   requirements:
     slug: '(?!browse|add|unassign)[a-z0-9][a-z0-9-]*'
+
+# ---------------------------------------------------------------------------
+# Storage locations. The module shipped without routes, so nothing could reach
+# it; these mirror what its own templates already link to. Locations are keyed
+# by id rather than slug, so the id rides as a query parameter and the paths
+# stay literal - no pattern that could swallow /browse or /add.
+# ---------------------------------------------------------------------------
+storagelocation_browse:
+  url: /storagelocation/browse
+  param: { module: storageLocation, action: browse }
+
+storagelocation_view:
+  url: /storagelocation/view
+  param: { module: storageLocation, action: view }
+
+storagelocation_create:
+  url: /storagelocation/add
+  param: { module: storageLocation, action: create }
+
+storagelocation_save:
+  url: /storagelocation/save
+  param: { module: storageLocation, action: save }
+
+storagelocation_edit:
+  url: /storagelocation/edit
+  param: { module: storageLocation, action: edit }
+
+storagelocation_update:
+  url: /storagelocation/update
+  param: { module: storageLocation, action: update }
+
+storagelocation_delete:
+  url: /storagelocation/delete
+  param: { module: storageLocation, action: delete }
+
+storagelocation_api_locations:
+  url: /storagelocation/api/locations
+  param: { module: storageLocation, action: apiLocations }
+
+storagelocation_api_tree:
+  url: /storagelocation/api/tree
+  param: { module: storageLocation, action: apiTree }

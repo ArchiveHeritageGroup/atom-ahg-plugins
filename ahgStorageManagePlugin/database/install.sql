@@ -88,4 +88,24 @@ CREATE TABLE IF NOT EXISTS ahg_physical_object_storage (
     CONSTRAINT fk_strr FOREIGN KEY (strongroom_id)      REFERENCES ahg_strongroom(id)  ON DELETE RESTRICT
 );
 
+CREATE TABLE IF NOT EXISTS ahg_storage_location (
+    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(255) NOT NULL,
+    slug            VARCHAR(255) NOT NULL,
+    description     TEXT,
+    location_type   VARCHAR(50) DEFAULT NULL COMMENT 'building, floor, room, aisle, bay, rack, shelf, container, storage_unit',
+    parent_id       BIGINT UNSIGNED DEFAULT NULL,
+    capacity_value  DECIMAL(10,2) DEFAULT NULL,
+    capacity_unit   VARCHAR(50) DEFAULT NULL COMMENT 'cubic_metres, linear_metres, items',
+    notes           TEXT,
+    level           INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'depth in the tree; 0 is a root location',
+    created_at      TIMESTAMP NULL,
+    updated_at      TIMESTAMP NULL,
+    UNIQUE KEY uq_storage_location_slug (slug),
+    INDEX ix_storage_location_parent (parent_id),
+    INDEX ix_storage_location_type (location_type),
+    CONSTRAINT fk_storage_location_parent FOREIGN KEY (parent_id)
+        REFERENCES ahg_storage_location(id) ON DELETE SET NULL
+);
+
 SET FOREIGN_KEY_CHECKS = 1;

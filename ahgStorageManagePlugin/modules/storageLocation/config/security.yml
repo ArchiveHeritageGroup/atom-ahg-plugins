@@ -1,0 +1,42 @@
+# Storage locations say where holdings physically sit, so writes are
+# administrator-only. Reads follow the strongroom module next door.
+#
+# This file is not optional. The application default in
+# apps/qubit/config/security.yml is `is_secure: false`, so a module without a
+# security.yml of its own leaves every action - including save, update and
+# delete - reachable by an anonymous visitor. The comment at the top of
+# storageManage/config/security.yml records the last time that happened here.
+all:
+  is_secure: false
+
+browse:
+  is_secure: false
+
+view:
+  is_secure: false
+
+apiLocations:
+  is_secure: false
+
+apiTree:
+  is_secure: false
+
+create:
+  is_secure: true
+  credentials: administrator
+
+save:
+  is_secure: true
+  credentials: administrator
+
+edit:
+  is_secure: true
+  credentials: administrator
+
+update:
+  is_secure: true
+  credentials: administrator
+
+delete:
+  is_secure: true
+  credentials: administrator

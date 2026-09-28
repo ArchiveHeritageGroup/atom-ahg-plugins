@@ -17,6 +17,7 @@ Physical storage browse and management using Laravel Query Builder
 - Inline search across name, location, and type
 - Export storage report link
 - Theme-compatible templates (SimplePager)
+- Hierarchical storage locations, with parent, capacity and type
 
 ## Requirements
 
@@ -32,11 +33,12 @@ Physical storage browse and management using Laravel Query Builder
 
 ## Database tables
 
-Creates 3 table(s):
+Creates 4 table(s):
 
 - `physical_object_extended`
 - `ahg_strongroom`
 - `ahg_physical_object_storage`
+- `ahg_storage_location`
 
 ## Installation
 
@@ -75,6 +77,25 @@ grep -c 'loadPluginsFromDatabase' <atom-root>/config/ProjectConfiguration.class.
 - `1` or more (AHG): `atom_plugin` is the source of truth.
 
 Verify against whichever list governs, not against the admin screen.
+
+## Storage locations
+
+A hierarchy of places - building, floor, room, aisle, bay, rack, shelf, container,
+storage unit - held in `ahg_storage_location` as an adjacency list (`parent_id`),
+with `level` carried alongside for ordering and recomputed whenever a location moves.
+
+| URL | Who |
+|---|---|
+| `/storageLocation/browse`, `/view?id=`, `/apiLocations`, `/apiTree`, `/apiSearch` | Anyone |
+| `/storageLocation/create`, `/save`, `/edit`, `/update`, `/delete` | Administrators |
+
+`modules/storageLocation/config/security.yml` is what makes that table true. The
+application default is `is_secure: false`, so a module without its own security.yml
+leaves save, update and delete open to anonymous visitors. The same mistake is
+recorded at the top of `modules/storageManage/config/security.yml`.
+
+A location with children refuses to be deleted, rather than letting the foreign
+key quietly promote its children to the root.
 
 ## Licence
 

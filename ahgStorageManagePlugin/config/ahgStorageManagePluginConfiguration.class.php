@@ -28,6 +28,9 @@ class ahgStorageManagePluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'storageManage';
         $enabledModules[] = 'physicalobject';
+        // A plugin module absent from this list throws sfConfigurationException
+        // on every request, before the action class is even loaded.
+        $enabledModules[] = 'storageLocation';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
