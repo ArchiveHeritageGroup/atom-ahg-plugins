@@ -364,10 +364,13 @@ load through AtoM's own `plugins` setting - the same list Admin > Plugins writes
 
 ### Prerequisites
 
-- AtoM 2.10 installed per the [official instructions](https://www.accesstomemory.org/en/docs/2.10/admin-manual/installation/ubuntu/)
+- AtoM 2.9 or 2.10, installed per the [official instructions](https://www.accesstomemory.org/en/docs/2.10/admin-manual/installation/ubuntu/).
+  AtoM 2.8 is not supported: it is the last release on PHP 7.4, and the runtime is
+  built on Laravel 10, which is PHP 8.1 or later by construction.
 - MySQL 8.0+, Elasticsearch 7.10, Composer 2.x
-- **PHP 8.3 from Ubuntu's own repositories.** Do not add the `ondrej/php` PPA: it offers
-  8.4 and 8.5 and makes one of them the default. AtoM 2.10 does not run on 8.5.
+- **PHP 8.1 or later, from Ubuntu's own repositories** - 8.3 on 24.04, which is what
+  these instructions assume. Do not add the `ondrej/php` PPA: it offers 8.4 and 8.5 and
+  makes one of them the default. AtoM 2.10 does not run on 8.5.
 - **`php8.3-gd`** - required by the framework and **absent from AtoM's documented package
   list**. Without it `composer install` fails with *"the requested PHP extension gd is
   missing"* and the install stops dead. This is the single most common cause of a failed
@@ -556,8 +559,11 @@ yet certified for standalone installation.
 
 | Version | AtoM | PHP |
 |---------|------|-----|
-| 2.x | 2.10+ | 8.3 |
+| 2.x (current) | 2.9, 2.10 | 8.1+ |
 | 1.x | 2.8-2.9 | 7.4+ |
+
+The package names in the install commands above say `php8.3` because that is what
+Ubuntu 24.04 ships. On a host running 8.1 or 8.2, use those package names instead.
 
 ---
 
