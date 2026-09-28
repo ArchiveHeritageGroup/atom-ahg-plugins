@@ -570,7 +570,8 @@ class ahgSpectrumEventService
         $query = \Illuminate\Database\Capsule\Manager::table('spectrum_event as e')
             ->join('information_object as io', 'e.object_id', '=', 'io.id')
             ->leftJoin('user as u', 'e.user_id', '=', 'u.id')
-            ->select('e.*', 'io.identifier as object_identifier', 'io.slug as object_slug', 'u.username as user_name');
+            ->leftJoin('slug as sl', 'sl.object_id', '=', 'io.id')
+            ->select('e.*', 'io.identifier as object_identifier', 'sl.slug as object_slug', 'u.username as user_name');
 
         if ($repositoryId) {
             $query->where('io.repository_id', $repositoryId);
@@ -595,12 +596,13 @@ class ahgSpectrumEventService
         $query = \Illuminate\Database\Capsule\Manager::table('spectrum_event as e')
             ->join('information_object as io', 'e.object_id', '=', 'io.id')
             ->leftJoin('user as u', 'e.assigned_to_id', '=', 'u.id')
+            ->leftJoin('slug as sl', 'sl.object_id', '=', 'io.id')
             ->whereRaw('e.due_date < CURDATE()')
             ->whereRaw('e.id = (SELECT MAX(e2.id) FROM spectrum_event e2 WHERE e2.object_id = e.object_id AND e2.procedure_id = e.procedure_id AND e2.status_to IS NOT NULL)')
             ->whereNotIn('e.status_to', [self::STATUS_COMPLETED, self::STATUS_CANCELLED])
             ->select(
                 'e.object_id', 'e.procedure_id', 'e.due_date', 'e.assigned_to_id',
-                'io.identifier as object_identifier', 'io.slug as object_slug',
+                'io.identifier as object_identifier', 'sl.slug as object_slug',
                 'u.username as assigned_to_name',
                 \Illuminate\Database\Capsule\Manager::raw('DATEDIFF(CURDATE(), e.due_date) as days_overdue')
             );
@@ -624,7 +626,7 @@ class ahgSpectrumEventService
 
         foreach (self::$procedures as $procedureId => $procedure) {
             $sql = "SELECT
-                        COUNT(DISTINCT e.object_id) as total_objects,
+                        COUNT(DISTINCT latest.object_id) as total_objects,
                         SUM(CASE WHEN latest.status = ? THEN 1 ELSE 0 END) as completed,
                         SUM(CASE WHEN latest.status = ? THEN 1 ELSE 0 END) as in_progress,
                         SUM(CASE WHEN latest.status = ? THEN 1 ELSE 0 END) as pending_review,

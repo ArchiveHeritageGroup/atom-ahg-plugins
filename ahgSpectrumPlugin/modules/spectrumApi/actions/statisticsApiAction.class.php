@@ -11,7 +11,7 @@ use AtomFramework\Http\Controllers\AhgController;
  * @package ahgSpectrumPlugin
  */
 
-class statisticsApiAction extends AhgController
+class spectrumApiStatisticsApiAction extends AhgController
 {
     public function execute($request)
     {
@@ -60,7 +60,12 @@ class statisticsApiAction extends AhgController
             ]);
 
         } catch (Exception $e) {
-            $code = $e->getCode() ?: 500;
+            // A PDOException carries its SQLSTATE here ('42S22'), not an HTTP
+            // status - setting that as the status made nginx return 502 instead
+            // of the error this block exists to report.
+            $code = $e->getCode();
+            $code = (is_int($code) || ctype_digit((string) $code)) && $code >= 400 && $code <= 599
+                ? (int) $code : 500;
             $this->getResponse()->setStatusCode($code);
             
             return $this->renderJson([
@@ -260,11 +265,5 @@ class statisticsApiAction extends AhgController
                 'date_to' => $dateTo
             ]
         ];
-    }
-
-    protected function renderJson($data)
-    {
-        $this->getResponse()->setContent(json_encode($data, JSON_PRETTY_PRINT));
-        return sfView::NONE;
     }
 }

@@ -1,0 +1,16 @@
+# The procedure API is staff-facing, exactly like the spectrum module next door.
+#
+# Without this file Symfony applies its default of `is_secure: false` and every
+# action answers an anonymous request. That was latent rather than harmless: both
+# actions were unreachable because their classes were named after the file alone
+# instead of <module><Action>Action, so nothing ever hit them. Correcting the
+# class names made them reachable, and an anonymous GET then returned object
+# identifiers and slugs, assignee usernames, due dates and procedure notes.
+# eventApi gated only its write path; statisticsApi gated nothing at all.
+#
+# Deliberately `is_secure` only, with no `credentials` key - see the note in
+# modules/spectrum/config/security.yml: a module-wide `credentials: [editor]`
+# refuses administrators, who hold the administrator credential rather than
+# editor. The write path in eventApi keeps enforcing editor/administrator itself.
+all:
+  is_secure: true

@@ -119,16 +119,15 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         // Condition routes
         $spectrum->any('spectrum_condition_photos', '/:slug/spectrum/condition-photos', 'conditionPhotos');
         $spectrum->any('spectrum_condition_report', '/:slug/spectrum/condition-report', 'conditionReport');
-        $spectrum->any('spectrum_condition_check', '/:slug/spectrum/conditionCheck', 'conditionCheck');
 
         // Compliance routes
         $spectrum->any('spectrum_security_compliance', '/:slug/spectrum/security', 'securityCompliance');
         $spectrum->any('spectrum_privacy_compliance', '/:slug/spectrum/privacy', 'privacyCompliance');
-        $spectrum->any('spectrum_privacy_ropa', '/spectrum/ropa', 'ropa');
+        $spectrum->any('spectrum_privacy_ropa', '/spectrum/ropa', 'privacyRopa');
 
         // Annotation routes
-        $spectrum->any('spectrum_annotation_save', '/spectrum/annotation/save', 'saveAnnotation');
-        $spectrum->any('spectrum_annotation_get', '/spectrum/annotation/get/:photo_id', 'getAnnotation');
+        $spectrum->any('spectrum_annotation_save', '/spectrum/annotation/save', 'annotationSave');
+        $spectrum->any('spectrum_annotation_get', '/spectrum/annotation/get/:photo_id', 'annotationGet');
 
         // Photo management
         $spectrum->any('spectrum_photo_delete', '/spectrum/photo/delete/:photo_id', 'photoDelete');
@@ -142,15 +141,14 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         // Admin routes
         $spectrum->any('spectrum_install', '/spectrum/install', 'install');
         $spectrum->any('spectrum_export', '/spectrum/export', 'export');
-        $spectrum->any('spectrum_template_config', '/spectrum/config/templates', 'templateConfig');
 
         $spectrum->register($routing);
 
         // Spectrum API module
         $spectrumApi = new \AtomFramework\Routing\RouteLoader('spectrumApi');
-        $spectrumApi->any('spectrum_api_events', '/api/spectrum/events', 'spectrumEvents');
-        $spectrumApi->any('spectrum_api_object_events', '/api/spectrum/objects/:object_id/events', 'spectrumObjectEvents');
-        $spectrumApi->any('spectrum_api_statistics', '/api/spectrum/statistics', 'spectrumStatistics');
+        $spectrumApi->any('spectrum_api_events', '/api/spectrum/events', 'eventApi');
+        $spectrumApi->any('spectrum_api_object_events', '/api/spectrum/objects/:object_id/events', 'eventApi');
+        $spectrumApi->any('spectrum_api_statistics', '/api/spectrum/statistics', 'statisticsApi');
         $spectrumApi->register($routing);
 
         // Spectrum Reports module

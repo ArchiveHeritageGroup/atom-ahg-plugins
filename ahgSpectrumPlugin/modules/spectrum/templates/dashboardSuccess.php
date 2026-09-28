@@ -42,7 +42,7 @@
                     // Counted via the shared per-procedure helper so this tile,
                     // the admin-menu badge and the My Tasks page always agree.
                     if ($sf_user->isAuthenticated()) {
-                        $taskCount = ahgSpectrumWorkflowService::countOpenTasks(
+                        $taskCount = ahgSpectrumWorkflowService::countOpenTasksForUser(
                             (int) $sf_user->getAttribute('user_id')
                         );
                         if ($taskCount > 0) {

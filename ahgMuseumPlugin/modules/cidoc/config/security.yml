@@ -1,0 +1,12 @@
+# CIDOC-CRM export is staff-facing: nothing in this module is public.
+#
+# Symfony's default is `is_secure: false`, so a module without this file answers
+# every request from an anonymous visitor - including the write actions. This
+# module had no security.yml at all: its export action serialises the collection's records.
+#
+# Deliberately `is_secure` only, with no `credentials` key - a module-wide
+# `credentials: [editor]` refuses administrators, who hold the administrator
+# credential rather than editor. Actions needing more than "logged in" enforce
+# it themselves. Same pattern as ahgSpectrumPlugin/modules/spectrum.
+all:
+  is_secure: true

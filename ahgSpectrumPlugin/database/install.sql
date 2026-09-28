@@ -1161,3 +1161,64 @@ CREATE TABLE IF NOT EXISTS spectrum_workflow_step_state (
     UNIQUE KEY uq_step (procedure_type, record_id, step_key),
     KEY idx_record (record_id, procedure_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- Supporting evidence for a procedure step.
+--
+-- SpectrumEvidenceService has shipped against this table since it was written,
+-- but the table itself was never added here - so on a fresh install every
+-- workflow page logged "Base table or view not found" on load while still
+-- rendering, which is why it went unnoticed.
+--
+-- Only stored_name is kept; the directory is recomputed from procedure_type and
+-- record_id on every access, so there is no stored path to traverse. No explicit
+-- COLLATE - the table inherits the database collation, or joins against the
+-- core AtoM tables fail on MySQL 8.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS spectrum_evidence (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    procedure_type VARCHAR(64) NOT NULL,
+    record_id INT NOT NULL,
+    step_key VARCHAR(100) NULL COMMENT 'NULL = belongs to the procedure, not to one step',
+    evidence_type VARCHAR(20) NOT NULL DEFAULT 'document' COMMENT 'document, report, certificate, photograph, correspondence, invoice, receipt, other',
+    original_name VARCHAR(255) NOT NULL,
+    stored_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(127) NULL COMMENT 'detected from the bytes, not the browser claim',
+    size_bytes BIGINT NULL,
+    caption VARCHAR(255) NULL,
+    note TEXT NULL,
+    uploaded_by INT NULL COMMENT 'no FK: the evidence outlives the account',
+    created_at DATETIME NULL,
+    KEY idx_record (procedure_type, record_id),
+    KEY idx_step (procedure_type, record_id, step_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- Outcomes a procedure proposes for a person to accept or reject.
+--
+-- Same omission as spectrum_evidence above: SpectrumOutcomeService queries this
+-- table, nothing created it, and /spectrum/outcomes returned a 500 on every
+-- fresh install.
+--
+-- A proposal is never applied on its own. Accepting one runs the handler and
+-- records what it did in result_note; superseded is what an earlier pending
+-- proposal becomes when the same handler proposes again.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS spectrum_outcome_proposal (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    procedure_type VARCHAR(64) NOT NULL,
+    record_id INT NOT NULL,
+    handler VARCHAR(100) NOT NULL,
+    payload LONGTEXT NULL COMMENT 'JSON the handler will act on',
+    summary VARCHAR(255) NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT 'pending, accepted, rejected, superseded, failed',
+    proposed_by INT NULL,
+    proposed_at DATETIME NULL,
+    decided_by INT NULL,
+    decided_at DATETIME NULL,
+    decision_note TEXT NULL,
+    result_note TEXT NULL,
+    KEY idx_pending (status, proposed_at),
+    KEY idx_record (procedure_type, record_id),
+    KEY idx_handler (procedure_type, record_id, handler, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
