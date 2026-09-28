@@ -16,7 +16,10 @@
 <ul class="nav nav-tabs mb-3">
   <li class="nav-item">
     <a class="nav-link <?php echo $currentStatus === 'all' ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'orphans', 'status' => 'all']); ?>">
-      <?php echo __('All'); ?> <span class="badge bg-secondary"><?php echo array_sum($statusCounts); ?></span>
+      <?php // $statusCounts arrives wrapped by the output escaper, and array_sum()
+            // on the decorator is a TypeError that takes the whole page down.
+            $rawStatusCounts = $sf_data->getRaw('statusCounts') ?: []; ?>
+      <?php echo __('All'); ?> <span class="badge bg-secondary"><?php echo array_sum($rawStatusCounts); ?></span>
     </a>
   </li>
   <li class="nav-item">
