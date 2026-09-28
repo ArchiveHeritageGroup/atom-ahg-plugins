@@ -1,6 +1,7 @@
 <?php
 
 use AhgStorageManage\Services\StorageLocationService;
+use AhgStorageManage\Services\StorageMovementService;
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
@@ -17,12 +18,14 @@ class storageLocationActions extends AhgController
     public const PER_PAGE = 30;
 
     protected StorageLocationService $locationService;
+    protected StorageMovementService $movementService;
 
     public function preExecute()
     {
         parent::preExecute();
 
         $this->locationService = new StorageLocationService($this->culture());
+        $this->movementService = new StorageMovementService($this->culture());
     }
 
     public function executeBrowse($request)
@@ -76,6 +79,59 @@ class storageLocationActions extends AhgController
         $this->path = $this->locationService->getLocationPath($id);
         $this->children = $this->locationService->getChildren($id);
         $this->descendants = $this->locationService->getDescendants($id);
+        $this->objects = $this->movementService->objectsIn($id);
+        $this->movements = $this->movementService->historyForLocation($id, 20);
+        // Somewhere to move things to: anywhere but here.
+        $this->destinations = array_values(array_filter(
+            $this->locationService->getLocations(),
+            static function ($candidate) use ($id) { return (int) $candidate['id'] !== $id; }
+        ));
+    }
+
+    /**
+     * Move the selected objects to another location, in one batch.
+     *
+     * The whole move is one transaction and one batch id, so a relocation that
+     * half succeeded cannot leave the shelf list disagreeing with the history.
+     */
+    public function executeMoveObjects($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $fromId = (int) $request->getParameter('id');
+
+        if (!$fromId) {
+            $this->forward404();
+        }
+
+        $objectIds = array_filter(array_map('intval', (array) $request->getParameter('objects', [])));
+        $toRaw = $request->getParameter('to_location_id');
+        $toId = (null === $toRaw || '' === $toRaw) ? null : (int) $toRaw;
+
+        if (!$objectIds) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('Select at least one object to move.'));
+            $this->redirect(['module' => 'storageLocation', 'action' => 'view', 'id' => $fromId]);
+        }
+
+        try {
+            $moved = $this->movementService->moveObjects($objectIds, $toId, [
+                'note' => $request->getParameter('note'),
+            ]);
+
+            $this->getUser()->setFlash('notice', $this->context->i18n->__(
+                '%1% object(s) moved.',
+                ['%1%' => count($moved)]
+            ));
+        } catch (Exception $e) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__(
+                'Error moving objects: %1%',
+                ['%1%' => $e->getMessage()]
+            ));
+        }
+
+        $this->redirect(['module' => 'storageLocation', 'action' => 'view', 'id' => $fromId]);
     }
 
     public function executeCreate($request)

@@ -40,3 +40,7 @@ update:
 delete:
   is_secure: true
   credentials: administrator
+
+moveObjects:
+  is_secure: true
+  credentials: administrator

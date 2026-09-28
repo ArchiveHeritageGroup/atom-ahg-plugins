@@ -96,6 +96,119 @@
         </div>
       </div>
 
+      <!-- Objects held here, and bulk relocation -->
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><?php echo __('Objects in this location') ?></h5>
+          <span class="badge bg-secondary"><?php echo count($objects) ?></span>
+        </div>
+        <div class="card-body">
+          <?php if (0 === count($objects)) { ?>
+            <p class="mb-0 text-muted"><?php echo __('Nothing is stored here.') ?></p>
+          <?php } elseif (!$sf_user->hasCredential('administrator')) { ?>
+            <ul class="mb-0">
+              <?php foreach ($objects as $object) { ?>
+                <li><?php echo $object['name'] ?: __('Object %1%', ['%1%' => $object['physical_object_id']]) ?></li>
+              <?php } ?>
+            </ul>
+          <?php } else { ?>
+            <?php // One form, one POST: the whole selection moves as a single
+                  // batch, so a relocation cannot half happen. ?>
+            <form method="post" action="<?php echo url_for('storageLocation/moveObjects?id='.$location['id']) ?>">
+              <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
+
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered mb-3">
+                  <thead>
+                    <tr>
+                      <th style="width: 3rem;"><span class="visually-hidden"><?php echo __('Select') ?></span></th>
+                      <th><?php echo __('Object') ?></th>
+                      <th><?php echo __('Here since') ?></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($objects as $object) { ?>
+                      <tr>
+                        <td>
+                          <input class="form-check-input" type="checkbox"
+                                 name="objects[]" value="<?php echo $object['physical_object_id'] ?>"
+                                 id="object-<?php echo $object['physical_object_id'] ?>">
+                        </td>
+                        <td>
+                          <label class="form-check-label" for="object-<?php echo $object['physical_object_id'] ?>">
+                            <?php echo $object['name'] ?: __('Object %1%', ['%1%' => $object['physical_object_id']]) ?>
+                          </label>
+                        </td>
+                        <td><?php echo $object['updated_at'] ? format_date($object['updated_at'], 'f') : '' ?></td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="row g-2 align-items-end">
+                <div class="col-md-5">
+                  <label class="form-label" for="to_location_id"><?php echo __('Move selected to') ?></label>
+                  <select class="form-select" id="to_location_id" name="to_location_id">
+                    <option value=""><?php echo __('Out of storage') ?></option>
+                    <?php foreach ($destinations as $destination) { ?>
+                      <option value="<?php echo $destination['id'] ?>">
+                        <?php echo str_repeat('&nbsp;&nbsp;', (int) $destination['level']) ?><?php echo $destination['name'] ?>
+                      </option>
+                    <?php } ?>
+                  </select>
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label" for="move-note"><?php echo __('Reason') ?></label>
+                  <input class="form-control" type="text" id="move-note" name="note"
+                         placeholder="<?php echo __('Why it moved, for the record') ?>">
+                </div>
+                <div class="col-md-2 d-grid">
+                  <button class="btn btn-primary" type="submit"><?php echo __('Move') ?></button>
+                </div>
+              </div>
+            </form>
+          <?php } ?>
+        </div>
+      </div>
+
+      <!-- Movement history -->
+      <?php if (count($movements) > 0) { ?>
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0"><?php echo __('Recent movements') ?></h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm table-striped mb-0">
+                <thead>
+                  <tr>
+                    <th><?php echo __('When') ?></th>
+                    <th><?php echo __('What') ?></th>
+                    <th><?php echo __('From') ?></th>
+                    <th><?php echo __('To') ?></th>
+                    <th><?php echo __('By') ?></th>
+                    <th><?php echo __('Reason') ?></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php foreach ($movements as $movement) { ?>
+                    <tr>
+                      <td><?php echo format_date($movement['moved_at'], 'f') ?></td>
+                      <td><?php echo $movement['subject_name'] ?: $movement['subject_type'].' '.$movement['subject_id'] ?></td>
+                      <td><?php echo $movement['from_location_name'] ?: '-' ?></td>
+                      <td><?php echo $movement['to_location_name'] ?: '-' ?></td>
+                      <td><?php echo $movement['username'] ?: '-' ?></td>
+                      <td><?php echo $movement['note'] ?: '' ?></td>
+                    </tr>
+                  <?php } ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      <?php } ?>
+
       <!-- Children locations -->
       <?php if (count($children) > 0): ?>
         <div class="card mb-3">

@@ -84,6 +84,10 @@ storagelocation_delete:
   url: /storagelocation/delete
   param: { module: storageLocation, action: delete }
 
+storagelocation_move_objects:
+  url: /storagelocation/moveObjects
+  param: { module: storageLocation, action: moveObjects }
+
 storagelocation_api_locations:
   url: /storagelocation/api/locations
   param: { module: storageLocation, action: apiLocations }
