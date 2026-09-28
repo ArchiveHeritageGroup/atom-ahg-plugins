@@ -205,7 +205,21 @@ class SpectrumEvidenceService
         $dir = self::storageDir($procedureType, $recordId);
 
         if (!is_dir($dir) && !mkdir($dir, 0770, true) && !is_dir($dir)) {
-            throw new RuntimeException('Could not create the evidence directory.');
+            // Name the directory and say what to do about it. The store lives
+            // under /var/lib, which is root-owned, so the web user cannot create
+            // the root itself - only its per-procedure subdirectories. Nothing in
+            // the plugin install creates it, so on a fresh deployment every
+            // upload failed here with a message that named no path and no cause.
+            $root = self::storageRoot();
+
+            throw new RuntimeException(sprintf(
+                'Could not create the evidence directory %s. Create the store once as root: '
+                .'mkdir -p %s && chown www-data:www-data %s && chmod 770 %s',
+                $dir,
+                $root,
+                $root,
+                $root
+            ));
         }
 
         $target = $dir.'/'.$stored;

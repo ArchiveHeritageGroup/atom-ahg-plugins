@@ -52,6 +52,21 @@ sudo mkdir -p plugins/ahgSpectrumPlugin/modules/settings/templates
 sudo mkdir -p plugins/ahgSpectrumPlugin/web/css
 sudo mkdir -p plugins/ahgSpectrumPlugin/web/js
 
+# Evidence store - REQUIRED, and deliberately outside the document root.
+#
+# Procedure evidence (committee minutes, valuers' reports, condition notes) is
+# NOT written under uploads/ or data/, because anything inside the application
+# directory is reachable over the web. It goes under /var/lib, which nginx does
+# not serve, and is streamed back by an action that re-checks authorisation.
+#
+# /var/lib is root-owned, so the web user can create the per-procedure
+# subdirectories but not the store itself. Without this step every upload fails
+# with "Could not create the evidence directory". Name the directory after the
+# instance so two AtoMs on one host do not share a store.
+sudo mkdir -p /var/lib/ahg-evidence/$(basename "$PWD")
+sudo chown -R www-data:www-data /var/lib/ahg-evidence
+sudo chmod 770 /var/lib/ahg-evidence /var/lib/ahg-evidence/$(basename "$PWD")
+
 # Copy model files
 sudo cp lib/model/SpectrumConditionPhoto.php \
     plugins/ahgSpectrumPlugin/lib/model/
