@@ -1,3 +1,16 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no CHARACTER SET or COLLATE, so they take
+-- the database default and therefore match AtoM's own tables. Pinning a
+-- collation here meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci)
+-- every join between a preservation table and a base AtoM table failed with
+-- "Illegal mix of collations", which took out the Format Conversion screen.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ---------------------------------------------------------------------------
 -- Moved from atom-framework/database/install.sql.
 -- These tables belong to ahgPreservationPlugin and are created when this plugin is installed,
@@ -33,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `oais_information_package` (
   KEY `idx_object_id` (`object_id`),
   CONSTRAINT `oais_information_package_ibfk_1` FOREIGN KEY (`object_id`) REFERENCES `information_object` (`id`) ON DELETE SET NULL,
   CONSTRAINT `oais_information_package_ibfk_2` FOREIGN KEY (`parent_package_id`) REFERENCES `oais_information_package` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5;
 
 -- Table: oais_fixity_check
 CREATE TABLE IF NOT EXISTS `oais_fixity_check` (
@@ -50,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `oais_fixity_check` (
   KEY `idx_package_id` (`package_id`),
   KEY `idx_is_valid` (`is_valid`),
   CONSTRAINT `oais_fixity_check_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `oais_information_package` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2;
 
 -- Table: oais_package_content
 CREATE TABLE IF NOT EXISTS `oais_package_content` (
@@ -75,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `oais_package_content` (
   KEY `idx_pronom` (`pronom_puid`),
   CONSTRAINT `oais_package_content_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `oais_information_package` (`id`) ON DELETE CASCADE,
   CONSTRAINT `oais_package_content_ibfk_2` FOREIGN KEY (`digital_object_id`) REFERENCES `digital_object` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4;
 
 -- Table: oais_premis_event
 CREATE TABLE IF NOT EXISTS `oais_premis_event` (
@@ -98,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `oais_premis_event` (
   KEY `idx_event_date` (`event_date_time`),
   CONSTRAINT `oais_premis_event_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `oais_information_package` (`id`) ON DELETE CASCADE,
   CONSTRAINT `oais_premis_event_ibfk_2` FOREIGN KEY (`content_id`) REFERENCES `oais_package_content` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7;
 
 -- Table: oais_preservation_policy
 CREATE TABLE IF NOT EXISTS `oais_preservation_policy` (
@@ -113,7 +126,7 @@ CREATE TABLE IF NOT EXISTS `oais_preservation_policy` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB;
 
 -- Table: oais_pronom_format
 CREATE TABLE IF NOT EXISTS `oais_pronom_format` (
@@ -130,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `oais_pronom_format` (
   UNIQUE KEY `puid` (`puid`),
   KEY `idx_puid` (`puid`),
   KEY `idx_risk` (`risk_level`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB;
 
 
 --
@@ -161,7 +174,7 @@ CREATE TABLE IF NOT EXISTS preservation_checksum (
     UNIQUE KEY uk_object_algorithm (digital_object_id, algorithm),
 
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- FIXITY CHECK LOG
@@ -188,7 +201,7 @@ CREATE TABLE IF NOT EXISTS preservation_fixity_check (
 
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE,
     FOREIGN KEY (checksum_id) REFERENCES preservation_checksum(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- PREMIS EVENTS
@@ -217,7 +230,7 @@ CREATE TABLE IF NOT EXISTS preservation_event (
 
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE,
     FOREIGN KEY (information_object_id) REFERENCES information_object(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- FORMAT REGISTRY
@@ -242,7 +255,7 @@ CREATE TABLE IF NOT EXISTS preservation_format (
     INDEX idx_mime_type (mime_type),
     INDEX idx_risk_level (risk_level),
     UNIQUE KEY uk_mime_version (mime_type, format_version)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- DIGITAL OBJECT FORMAT IDENTIFICATION
@@ -271,7 +284,7 @@ CREATE TABLE IF NOT EXISTS preservation_object_format (
 
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE,
     FOREIGN KEY (format_id) REFERENCES preservation_format(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- PRESERVATION POLICIES
@@ -293,7 +306,7 @@ CREATE TABLE IF NOT EXISTS preservation_policy (
     INDEX idx_type (policy_type),
     INDEX idx_active (is_active),
     INDEX idx_next_run (next_run_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- PRESERVATION STATISTICS (for dashboard)
@@ -311,7 +324,7 @@ CREATE TABLE IF NOT EXISTS preservation_stats (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE KEY uk_stat_date (stat_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- SEED DATA: Common format registry entries
@@ -386,7 +399,7 @@ CREATE TABLE IF NOT EXISTS preservation_virus_scan (
     INDEX idx_threat (threat_name),
 
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- FORMAT CONVERSION LOG
@@ -425,7 +438,7 @@ CREATE TABLE IF NOT EXISTS preservation_format_conversion (
     INDEX idx_created_at (created_at),
 
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- BACKUP VERIFICATION LOG
@@ -456,7 +469,7 @@ CREATE TABLE IF NOT EXISTS preservation_backup_verification (
     INDEX idx_status (status),
     INDEX idx_verified_at (verified_at),
     INDEX idx_backup_type (backup_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- REPLICATION TARGETS
@@ -479,7 +492,7 @@ CREATE TABLE IF NOT EXISTS preservation_replication_target (
 
     INDEX idx_active (is_active),
     INDEX idx_type (target_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- REPLICATION LOG
@@ -506,7 +519,7 @@ CREATE TABLE IF NOT EXISTS preservation_replication_log (
     INDEX idx_started_at (started_at),
 
     FOREIGN KEY (target_id) REFERENCES preservation_replication_target(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- FORMAT CONVERSION PRESETS
@@ -581,7 +594,7 @@ CREATE TABLE IF NOT EXISTS preservation_workflow_schedule (
     INDEX idx_enabled (is_enabled),
     INDEX idx_next_run (next_run_at),
     INDEX idx_schedule_type (schedule_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- WORKFLOW RUN LOG
@@ -620,7 +633,7 @@ CREATE TABLE IF NOT EXISTS preservation_workflow_run (
     INDEX idx_started_at (started_at),
 
     FOREIGN KEY (schedule_id) REFERENCES preservation_workflow_schedule(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- DEFAULT WORKFLOW SCHEDULES
@@ -694,7 +707,7 @@ CREATE TABLE IF NOT EXISTS preservation_package (
 
     FOREIGN KEY (parent_package_id) REFERENCES preservation_package(id) ON DELETE SET NULL,
     FOREIGN KEY (information_object_id) REFERENCES information_object(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- PACKAGE CONTENTS
@@ -733,7 +746,7 @@ CREATE TABLE IF NOT EXISTS preservation_package_object (
     UNIQUE KEY uk_package_path (package_id, relative_path(500)),
     FOREIGN KEY (package_id) REFERENCES preservation_package(id) ON DELETE CASCADE,
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- PACKAGE EVENTS
@@ -765,7 +778,7 @@ CREATE TABLE IF NOT EXISTS preservation_package_event (
     INDEX idx_datetime (event_datetime),
 
     FOREIGN KEY (package_id) REFERENCES preservation_package(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- MIGRATION PATHWAY DEFINITIONS
@@ -791,7 +804,7 @@ CREATE TABLE IF NOT EXISTS preservation_migration_pathway (
     INDEX idx_recommended (is_recommended),
     INDEX idx_tool (migration_tool),
     UNIQUE KEY uk_source_target_tool (source_puid, target_puid, migration_tool)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- FORMAT OBSOLESCENCE TRACKING
@@ -819,7 +832,7 @@ CREATE TABLE IF NOT EXISTS preservation_format_obsolescence (
 
     FOREIGN KEY (format_id) REFERENCES preservation_format(id) ON DELETE CASCADE,
     FOREIGN KEY (recommended_pathway_id) REFERENCES preservation_migration_pathway(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- MIGRATION PLANNING
@@ -876,7 +889,7 @@ CREATE TABLE IF NOT EXISTS preservation_migration_plan (
     INDEX idx_created_by (created_by),
 
     FOREIGN KEY (pathway_id) REFERENCES preservation_migration_pathway(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- MIGRATION PLAN OBJECTS
@@ -918,7 +931,7 @@ CREATE TABLE IF NOT EXISTS preservation_migration_plan_object (
     UNIQUE KEY uk_plan_object (plan_id, digital_object_id),
     FOREIGN KEY (plan_id) REFERENCES preservation_migration_plan(id) ON DELETE CASCADE,
     FOREIGN KEY (digital_object_id) REFERENCES digital_object(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- =============================================
 -- SEED DATA: Common Migration Pathways
@@ -1036,7 +1049,7 @@ CREATE TABLE IF NOT EXISTS `tiff_pdf_merge_job` (
   KEY `idx_tpm_job_status` (`status`),
   KEY `idx_tpm_job_user` (`user_id`),
   KEY `idx_tpm_job_info_object` (`information_object_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28;
 CREATE TABLE IF NOT EXISTS `tiff_pdf_merge_file` (
   `id` int NOT NULL AUTO_INCREMENT,
   `merge_job_id` int NOT NULL,
@@ -1059,7 +1072,7 @@ CREATE TABLE IF NOT EXISTS `tiff_pdf_merge_file` (
   KEY `idx_tpm_file_job` (`merge_job_id`),
   KEY `idx_tpm_file_order` (`merge_job_id`,`page_order`),
   CONSTRAINT `tiff_pdf_merge_file_ibfk_1` FOREIGN KEY (`merge_job_id`) REFERENCES `tiff_pdf_merge_job` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36;
 CREATE TABLE IF NOT EXISTS `tiff_pdf_settings` (
   `id` int NOT NULL AUTO_INCREMENT,
   `setting_key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -1069,4 +1082,4 @@ CREATE TABLE IF NOT EXISTS `tiff_pdf_settings` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `setting_key` (`setting_key`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13;
