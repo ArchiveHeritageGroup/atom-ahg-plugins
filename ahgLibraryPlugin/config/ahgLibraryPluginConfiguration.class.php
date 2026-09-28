@@ -8,6 +8,32 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Register this plugin's own PSR-4 prefix.
+        //
+        // lib/Repository and lib/Service declare `namespace ahgLibraryPlugin\...`,
+        // but nothing ever mapped that prefix to a directory: the framework
+        // bootstrap registers only AtomFramework\ and AtomExtensions\, and no AHG
+        // plugin registers its own. So every one of those ten classes was
+        // unloadable, and the first screen to touch one died with
+        // Class "ahgLibraryPlugin\Repository\IsbnLookupRepository" not found -
+        // which is what took out the library item view page.
+        //
+        // Registered directly rather than through Composer: a stock AtoM 2.10 has
+        // no vendor/autoload.php at sf_root_dir, and requiring it here fatals
+        // every page that loads this plugin.
+        $libDir = __DIR__.'/../lib/';
+        spl_autoload_register(static function ($class) use ($libDir) {
+            if (0 !== strpos($class, 'ahgLibraryPlugin\\')) {
+                return;
+            }
+
+            $path = $libDir.str_replace('\\', '/', substr($class, strlen('ahgLibraryPlugin\\'))).'.php';
+
+            if (is_file($path)) {
+                require_once $path;
+            }
+        });
+
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
         $enabledModules = sfConfig::get('sf_enabled_modules', []);

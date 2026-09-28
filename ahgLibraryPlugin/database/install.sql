@@ -1,3 +1,17 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no COLLATE, so they take the database
+-- default and therefore match AtoM's own tables. Pinning utf8mb4_unicode_ci
+-- meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci) every join
+-- between one of these tables and a base AtoM table failed with "Illegal mix
+-- of collations" - which is what took out ahgPreservationPlugin's Format
+-- Conversion screen. Same defect, same fix.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ---------------------------------------------------------------------------
 -- Moved from atom-framework/database/install.sql.
 -- These tables belong to ahgLibraryPlugin and are created when this plugin is installed,
@@ -8,12 +22,12 @@
 -- Table: atom_isbn_cache
 CREATE TABLE IF NOT EXISTS `atom_isbn_cache` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `isbn` varchar(13) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `isbn_10` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `isbn_13` varchar(13) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `isbn` varchar(13) NOT NULL,
+  `isbn_10` varchar(10) DEFAULT NULL,
+  `isbn_13` varchar(13) DEFAULT NULL,
   `metadata` json NOT NULL,
-  `source` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'worldcat',
-  `oclc_number` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source` varchar(50) NOT NULL DEFAULT 'worldcat',
+  `oclc_number` varchar(20) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `expires_at` timestamp NULL DEFAULT NULL,
@@ -23,20 +37,20 @@ CREATE TABLE IF NOT EXISTS `atom_isbn_cache` (
   KEY `idx_isbn_13` (`isbn_13`),
   KEY `idx_oclc` (`oclc_number`),
   KEY `idx_expires` (`expires_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 
 -- Table: atom_isbn_lookup_audit
 CREATE TABLE IF NOT EXISTS `atom_isbn_lookup_audit` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `isbn` varchar(13) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `isbn` varchar(13) NOT NULL,
   `user_id` int DEFAULT NULL,
   `information_object_id` int DEFAULT NULL,
-  `source` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `source` varchar(50) NOT NULL,
   `success` tinyint(1) NOT NULL DEFAULT '0',
   `fields_populated` json DEFAULT NULL,
-  `error_message` text COLLATE utf8mb4_unicode_ci,
+  `error_message` text,
   `lookup_time_ms` int unsigned DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_isbn` (`isbn`),
@@ -45,25 +59,25 @@ CREATE TABLE IF NOT EXISTS `atom_isbn_lookup_audit` (
   KEY `idx_created` (`created_at`),
   CONSTRAINT `fk_isbn_audit_io` FOREIGN KEY (`information_object_id`) REFERENCES `information_object` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_isbn_audit_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
 
 -- Table: atom_isbn_provider
 CREATE TABLE IF NOT EXISTS `atom_isbn_provider` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `slug` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `api_endpoint` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `api_key_setting` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Reference to atom_setting key',
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `api_endpoint` varchar(500) NOT NULL,
+  `api_key_setting` varchar(100) DEFAULT NULL COMMENT 'Reference to atom_setting key',
   `priority` int NOT NULL DEFAULT '100',
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   `rate_limit_per_minute` int unsigned DEFAULT NULL,
-  `response_format` VARCHAR(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'json' COMMENT 'json, xml, marcxml',
+  `response_format` VARCHAR(30) NOT NULL DEFAULT 'json' COMMENT 'json, xml, marcxml',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_slug` (`slug`),
   KEY `idx_enabled_priority` (`enabled`,`priority`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 
 -- Table: atom_isbn_provider
 CREATE TABLE IF NOT EXISTS `atom_isbn_provider` (
@@ -80,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `atom_isbn_provider` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Default ISBN providers
 INSERT IGNORE INTO atom_isbn_provider (name, slug, api_endpoint, api_key_setting, priority, enabled, rate_limit_per_minute, response_format) VALUES
@@ -106,116 +120,116 @@ CREATE TABLE IF NOT EXISTS atom_library_cover_queue (
 CREATE TABLE IF NOT EXISTS `library_item` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `information_object_id` int unsigned NOT NULL,
-  `material_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monograph' COMMENT 'monograph, serial, volume, issue, chapter, article, manuscript, map, pamphlet',
-  `frbr_work_key` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'SHA-256 work identifier, first 20 chars',
-  `frbr_override_type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'none' COMMENT 'none, force_group, force_split',
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `subtitle` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `responsibility_statement` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `call_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `classification_scheme` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'dewey, lcc, udc, bliss, colon, custom',
-  `classification_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `dewey_decimal` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cutter_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `shelf_location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `copy_number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `volume_designation` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `isbn` varchar(17) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `issn` varchar(9) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `lccn` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `oclc_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `openlibrary_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `goodreads_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `librarything_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `openlibrary_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ebook_preview_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cover_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cover_url_original` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `doi` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `barcode` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `edition` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `edition_statement` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `publisher` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `publication_place` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `publication_date` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `copyright_date` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `printing` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `pagination` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `dimensions` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `physical_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `language` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `accompanying_material` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `series_title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `series_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `series_issn` varchar(9) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `subseries_title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `general_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `bibliography_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `contents_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `summary` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `target_audience` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `system_requirements` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `binding_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `frequency` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `former_frequency` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `numbering_peculiarities` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `material_type` varchar(50) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'monograph' COMMENT 'monograph, serial, volume, issue, chapter, article, manuscript, map, pamphlet',
+  `frbr_work_key` varchar(64) DEFAULT NULL COMMENT 'SHA-256 work identifier, first 20 chars',
+  `frbr_override_type` varchar(20) NOT NULL DEFAULT 'none' COMMENT 'none, force_group, force_split',
+  `description` text,
+  `subtitle` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `responsibility_statement` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `call_number` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `classification_scheme` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT 'dewey, lcc, udc, bliss, colon, custom',
+  `classification_number` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `dewey_decimal` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `cutter_number` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `shelf_location` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `copy_number` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `volume_designation` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `isbn` varchar(17) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `issn` varchar(9) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `lccn` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `oclc_number` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `openlibrary_id` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `goodreads_id` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `librarything_id` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `openlibrary_url` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `ebook_preview_url` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `cover_url` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `cover_url_original` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `doi` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `barcode` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `edition` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `edition_statement` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `publisher` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `publication_place` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `publication_date` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `copyright_date` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `printing` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `pagination` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `dimensions` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `physical_details` text CHARACTER SET utf8mb4,
+  `language` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `accompanying_material` text CHARACTER SET utf8mb4,
+  `series_title` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `series_number` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `series_issn` varchar(9) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `subseries_title` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `general_note` text CHARACTER SET utf8mb4,
+  `bibliography_note` text CHARACTER SET utf8mb4,
+  `contents_note` text CHARACTER SET utf8mb4,
+  `summary` text CHARACTER SET utf8mb4,
+  `target_audience` text CHARACTER SET utf8mb4,
+  `system_requirements` text CHARACTER SET utf8mb4,
+  `binding_note` text CHARACTER SET utf8mb4,
+  `frequency` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `former_frequency` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `numbering_peculiarities` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `publication_start_date` date DEFAULT NULL,
   `publication_end_date` date DEFAULT NULL,
-  `publication_status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'current, ceased, suspended',
+  `publication_status` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT 'current, ceased, suspended',
   `total_copies` smallint unsigned NOT NULL DEFAULT '1',
   `available_copies` smallint unsigned NOT NULL DEFAULT '1',
-  `circulation_status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'available' COMMENT 'available, on_loan, processing, lost, withdrawn, reference',
-  `cataloging_source` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cataloging_rules` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'aacr2, rda, isbd',
-  `encoding_level` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `circulation_status` varchar(30) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'available' COMMENT 'available, on_loan, processing, lost, withdrawn, reference',
+  `cataloging_source` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `cataloging_rules` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT 'aacr2, rda, isbd',
+  `encoding_level` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `heritage_asset_id` int unsigned DEFAULT NULL COMMENT 'FK to heritage_asset',
-  `acquisition_method` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'purchase, donation, gift, bequest, exchange, deposit',
+  `acquisition_method` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT 'purchase, donation, gift, bequest, exchange, deposit',
   `acquisition_date` date DEFAULT NULL,
   `acquisition_cost` decimal(15,2) DEFAULT NULL,
-  `acquisition_currency` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'ZAR',
+  `acquisition_currency` varchar(3) CHARACTER SET utf8mb4 DEFAULT 'ZAR',
   `replacement_value` decimal(15,2) DEFAULT NULL,
   `insurance_value` decimal(15,2) DEFAULT NULL,
-  `insurance_policy` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `insurance_policy` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
   `insurance_expiry` date DEFAULT NULL,
-  `asset_class_code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'heritage_asset_class.code',
-  `recognition_status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `asset_class_code` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT 'heritage_asset_class.code',
+  `recognition_status` varchar(30) CHARACTER SET utf8mb4 DEFAULT 'pending',
   `valuation_date` date DEFAULT NULL,
-  `valuation_method` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `valuation_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `donor_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `donor_restrictions` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `condition_grade` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `conservation_priority` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `content_type` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'RDA 336$a content type',
-  `carrier_type` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'RDA 337$a carrier type',
-  `instance_type` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'RDA 338$a media/instance type',
-  `marc_leader` varchar(24) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Preserved MARC leader',
-  `marc_005` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Preserved MARC 005 (last transaction date/time)',
-  `marc_008` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Preserved MARC 008 (fixed-length data elements)',
+  `valuation_method` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `valuation_notes` text CHARACTER SET utf8mb4,
+  `donor_name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `donor_restrictions` text CHARACTER SET utf8mb4,
+  `condition_grade` varchar(30) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `conservation_priority` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `content_type` varchar(100) DEFAULT NULL COMMENT 'RDA 336$a content type',
+  `carrier_type` varchar(100) DEFAULT NULL COMMENT 'RDA 337$a carrier type',
+  `instance_type` varchar(100) DEFAULT NULL COMMENT 'RDA 338$a media/instance type',
+  `marc_leader` varchar(24) DEFAULT NULL COMMENT 'Preserved MARC leader',
+  `marc_005` varchar(16) DEFAULT NULL COMMENT 'Preserved MARC 005 (last transaction date/time)',
+  `marc_008` varchar(40) DEFAULT NULL COMMENT 'Preserved MARC 008 (fixed-length data elements)',
   PRIMARY KEY (`id`),
   KEY `idx_library_item_frbr_work_key` (`frbr_work_key`),
   KEY `idx_library_item_frbr_override` (`frbr_override_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: library_item_creator
 CREATE TABLE IF NOT EXISTS `library_item_creator` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `library_item_id` bigint unsigned NOT NULL,
-  `name` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(500) CHARACTER SET utf8mb4 NOT NULL,
   `is_primary` tinyint(1) NOT NULL DEFAULT '0',
   `actor_id` int unsigned DEFAULT NULL,
-  `role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'author',
+  `role` varchar(50) CHARACTER SET utf8mb4 DEFAULT 'author',
   `sort_order` int DEFAULT '0',
-  `authority_uri` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `authority_uri` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_library_item_id` (`library_item_id`),
   KEY `idx_name` (`name`(100)),
   KEY `idx_library_item_creator_actor` (`actor_id`),
   CONSTRAINT `library_item_creator_ibfk_1` FOREIGN KEY (`library_item_id`) REFERENCES `library_item` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Subject Authority - stores controlled subject headings with usage tracking
 CREATE TABLE IF NOT EXISTS library_subject_authority (
@@ -240,20 +254,20 @@ CREATE TABLE IF NOT EXISTS library_subject_authority (
     INDEX idx_type (heading_type),
     INDEX idx_source (source),
     FULLTEXT INDEX ft_heading (heading)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: library_item_subject
 CREATE TABLE IF NOT EXISTS `library_item_subject` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `library_item_id` bigint unsigned NOT NULL,
-  `heading` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `subject_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'topic',
-  `source` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `uri` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `lcsh_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `heading` varchar(500) CHARACTER SET utf8mb4 NOT NULL,
+  `subject_type` varchar(50) CHARACTER SET utf8mb4 DEFAULT 'topic',
+  `source` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `uri` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `lcsh_id` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
   `authority_id` bigint unsigned DEFAULT NULL,
-  `dewey_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `lcc_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dewey_number` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `lcc_number` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
   `subdivisions` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -262,7 +276,7 @@ CREATE TABLE IF NOT EXISTS `library_item_subject` (
   KEY `fk_item_subject_authority` (`authority_id`),
   CONSTRAINT `fk_item_subject_authority` FOREIGN KEY (`authority_id`) REFERENCES `library_subject_authority` (`id`) ON DELETE SET NULL,
   CONSTRAINT `library_item_subject_ibfk_1` FOREIGN KEY (`library_item_id`) REFERENCES `library_item` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: library_settings
 CREATE TABLE IF NOT EXISTS `library_settings` (
@@ -405,7 +419,7 @@ CREATE TABLE IF NOT EXISTS library_entity_subject_map (
     INDEX idx_authority (subject_authority_id),
     INDEX idx_confidence (confidence DESC),
     FOREIGN KEY (subject_authority_id) REFERENCES library_subject_authority(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Alter existing library_item_subject table to add authority link fields
 -- Note: These ALTER statements are idempotent (safe to run multiple times)
@@ -503,7 +517,7 @@ CREATE TABLE IF NOT EXISTS library_kbart_vendor (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_feed_url (feed_url(768)),
     INDEX idx_active (active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- KBART import log (per-fetch audit trail)
 CREATE TABLE IF NOT EXISTS library_kbart_import_log (
@@ -517,7 +531,7 @@ CREATE TABLE IF NOT EXISTS library_kbart_import_log (
     INDEX idx_vendor (vendor_id),
     INDEX idx_fetched (fetched_at DESC),
     FOREIGN KEY (vendor_id) REFERENCES library_kbart_vendor(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
 -- Z39.50 server (parity) (registered for fresh installs)
@@ -541,7 +555,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_server_config (
   updated_at   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   INDEX idx_z3950srv_category (category)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 2. Incoming APDU request log (one row per INIT/SEARCH/PRESENT/CLOSE etc.)
 CREATE TABLE IF NOT EXISTS library_z3950_server_request (
@@ -557,7 +571,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_server_request (
   INDEX idx_z3950req_client (client_addr),
   INDEX idx_z3950req_type (apdu_type),
   INDEX idx_z3950req_time (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed sensible server defaults (idempotent).
 INSERT INTO library_z3950_server_config (option_key, option_value, category)
@@ -614,7 +628,7 @@ CREATE TABLE IF NOT EXISTS library_item_frbr_override (
   created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_frbr_override_target (target_work_key),
   INDEX idx_frbr_override_item (library_item_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET @t := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='library_usage_event');
 SET @c := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='library_usage_event' AND COLUMN_NAME='frbr_work_key');
@@ -640,7 +654,7 @@ PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
 -- Date: 2026-03-08
 -- ============================================================================
 
-SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET NAMES utf8mb4;
 
 -- ============================================================================
 -- 1. Heritage Accounting columns on library_item
@@ -749,7 +763,7 @@ CREATE TABLE IF NOT EXISTS library_copy (
     KEY idx_branch (branch),
     KEY idx_accession (accession_number),
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 3. Library Patron (borrowers)
@@ -793,7 +807,7 @@ CREATE TABLE IF NOT EXISTS library_patron (
     KEY idx_name (last_name, first_name),
     KEY idx_email (email),
     KEY idx_expiry (membership_expiry)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 4. Library Checkout (circulation transactions)
@@ -822,7 +836,7 @@ CREATE TABLE IF NOT EXISTS library_checkout (
     KEY idx_checkout_date (checkout_date),
     FOREIGN KEY (copy_id) REFERENCES library_copy(id) ON DELETE RESTRICT,
     FOREIGN KEY (patron_id) REFERENCES library_patron(id) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 5. Library Hold (reservation queue)
@@ -851,7 +865,7 @@ CREATE TABLE IF NOT EXISTS library_hold (
     KEY idx_queue (library_item_id, queue_position),
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE,
     FOREIGN KEY (patron_id) REFERENCES library_patron(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 6. Library Fine (fees & payments)
@@ -884,7 +898,7 @@ CREATE TABLE IF NOT EXISTS library_fine (
     KEY idx_date (fine_date),
     FOREIGN KEY (patron_id) REFERENCES library_patron(id) ON DELETE RESTRICT,
     FOREIGN KEY (checkout_id) REFERENCES library_checkout(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 7. Library Subscription (serial management)
@@ -914,7 +928,7 @@ CREATE TABLE IF NOT EXISTS library_subscription (
     KEY idx_status (status),
     KEY idx_renewal (renewal_date),
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 8. Library Serial Issue (individual issue tracking)
@@ -949,7 +963,7 @@ CREATE TABLE IF NOT EXISTS library_serial_issue (
     UNIQUE KEY uk_barcode (barcode),
     FOREIGN KEY (subscription_id) REFERENCES library_subscription(id) ON DELETE CASCADE,
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 9. Library Order (acquisitions / purchase orders)
@@ -986,7 +1000,7 @@ CREATE TABLE IF NOT EXISTS library_order (
     KEY idx_status (status),
     KEY idx_date (order_date),
     KEY idx_budget (budget_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 10. Library Order Line (PO line items)
@@ -1019,7 +1033,7 @@ CREATE TABLE IF NOT EXISTS library_order_line (
     KEY idx_isbn (isbn),
     KEY idx_status (status),
     FOREIGN KEY (order_id) REFERENCES library_order(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 11. Library Budget (fund allocation)
@@ -1045,7 +1059,7 @@ CREATE TABLE IF NOT EXISTS library_budget (
     KEY idx_year (fiscal_year),
     KEY idx_status (status),
     KEY idx_category (category)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 12. Interlibrary Loan Requests
@@ -1091,7 +1105,7 @@ CREATE TABLE IF NOT EXISTS library_ill_request (
     KEY idx_date (request_date),
     KEY idx_partner (partner_library),
     KEY idx_item (library_item_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 13. Library Circulation Settings (per material type loan rules)
@@ -1112,7 +1126,7 @@ CREATE TABLE IF NOT EXISTS library_loan_rule (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_type_patron (material_type, patron_type),
     KEY idx_material (material_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 14. Seed default loan rules
@@ -1346,7 +1360,7 @@ CREATE TABLE IF NOT EXISTS library_item_frbr_override (
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE,
     INDEX idx_target_work_key (target_work_key),
     INDEX idx_library_item_id (library_item_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- --- RDA/authority/EDI (migration_library_rda_authority_edi_20260529.sql) --
 -- ============================================================================
 -- Migration: Library RDA carrier fields + Authority Control + ILL EDI / Trading
@@ -1442,7 +1456,7 @@ CREATE TABLE IF NOT EXISTS library_item_authority_link (
     INDEX idx_link_authority (authority_id),
     CONSTRAINT fk_lial_item FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE,
     CONSTRAINT fk_lial_authority FOREIGN KEY (authority_id) REFERENCES library_subject_authority(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── library_trading_partner: EDI/EANCOM partner registry (NEW) ───────────────
 CREATE TABLE IF NOT EXISTS library_trading_partner (
@@ -1468,7 +1482,7 @@ CREATE TABLE IF NOT EXISTS library_trading_partner (
     UNIQUE KEY uq_tp_partner_code (edi_partner_code),
     INDEX idx_tp_vendor (vendor_id),
     INDEX idx_tp_edi_active (edi_type, is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── library_ill_request: EDI / ILL-EDI columns ──────────────────────────────
 SET @col = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_ill_request' AND COLUMN_NAME = 'request_type');
@@ -1575,7 +1589,7 @@ CREATE TABLE IF NOT EXISTS `library_bindery_batch` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_bindery_batch_number` (`batch_number`),
   KEY `idx_bindery_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET @col = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_serial_issue' AND COLUMN_NAME = 'bindery_batch_id');
 SET @sql = IF(@col = 0, 'ALTER TABLE library_serial_issue ADD COLUMN bindery_batch_id BIGINT UNSIGNED NULL', 'SELECT 1');
@@ -1602,7 +1616,7 @@ CREATE TABLE IF NOT EXISTS `library_order_line_fund` (
   PRIMARY KEY (`id`),
   KEY `idx_olf_line` (`order_line_id`),
   KEY `idx_olf_fund` (`fund_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- --- ILL status history (migration_ill_status_history_20260529.sql) -------
 -- ============================================================================
 -- ILL status history (#106) - 2026-05-29
@@ -1621,7 +1635,7 @@ CREATE TABLE IF NOT EXISTS `library_ill_status_history` (
   PRIMARY KEY (`id`),
   KEY `idx_illh_request` (`ill_request_id`),
   KEY `idx_illh_to` (`to_status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- --- serials/ILL clone (migration_heratio_serials_ill_clone.sql) ----------
 -- ahgLibraryPlugin - clone of Heratio's serials / ILL schema (parity).
 --
@@ -1649,7 +1663,7 @@ CREATE TABLE IF NOT EXISTS `library_serial_subscription` (
     `updated_at`         TIMESTAMP NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `serial_id_unique` (`serial_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `library_serial_prediction` (
     `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1662,7 +1676,7 @@ CREATE TABLE IF NOT EXISTS `library_serial_prediction` (
     PRIMARY KEY (`id`),
     KEY `idx_library_serial_prediction_serial` (`serial_id`),
     KEY `idx_library_serial_prediction_expected` (`expected_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `library_claim` (
     `id`         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1678,7 +1692,7 @@ CREATE TABLE IF NOT EXISTS `library_claim` (
     KEY `idx_library_claim_serial` (`serial_id`),
     KEY `idx_library_claim_issue` (`issue_id`),
     KEY `idx_library_claim_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `library_binding` (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1692,7 +1706,7 @@ CREATE TABLE IF NOT EXISTS `library_binding` (
     PRIMARY KEY (`id`),
     KEY `idx_library_binding_serial` (`serial_id`),
     KEY `idx_library_binding_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── ILL ──────────────────────────────────────────────────────────────────────
 -- NOTE: NOT cloned. On verification the PSIS ILLService is already functional -
@@ -1752,7 +1766,7 @@ CREATE TABLE IF NOT EXISTS `library_ill_request` (
     KEY `idx_ill_status` (`status`),
     KEY `idx_ill_patron` (`patron_id`),
     KEY `idx_ill_partner` (`trading_partner_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 */
 
 -- ── RUN-ONCE ALTERs (serials only) ───────────────────────────────────────────
@@ -1791,7 +1805,7 @@ CREATE TABLE IF NOT EXISTS library_usage_event (
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_usage_patron FOREIGN KEY (patron_id) REFERENCES library_patron(id)
         ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── COUNTER / SUSHI Settings table ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS library_counter_settings (
@@ -1799,7 +1813,7 @@ CREATE TABLE IF NOT EXISTS library_counter_settings (
     setting_key VARCHAR(100) NOT NULL UNIQUE,
     setting_value TEXT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed SUSHI default keys (values set via admin UI / API)
 INSERT INTO library_counter_settings (setting_key, setting_value) VALUES
@@ -1832,7 +1846,7 @@ CREATE TABLE IF NOT EXISTS library_sushi_access_log (
     INDEX idx_sushi_log_report   (report_type),
     INDEX idx_sushi_log_customer (customer_id),
     INDEX idx_sushi_log_created  (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;-- --- Z39.50 server (migration_z3950_server_20260601.sql) ------------------
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;-- --- Z39.50 server (migration_z3950_server_20260601.sql) ------------------
 -- Migration: Z39.50 SERVER mode (raw binary ISO 23950 daemon)
 -- ahgLibraryPlugin - PSIS parity with Heratio ahg-z3950 server half.
 --
@@ -1852,7 +1866,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_server_config (
   updated_at   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   INDEX idx_z3950srv_category (category)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 2. Incoming APDU request log (one row per INIT/SEARCH/PRESENT/CLOSE etc.)
 CREATE TABLE IF NOT EXISTS library_z3950_server_request (
@@ -1868,7 +1882,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_server_request (
   INDEX idx_z3950req_client (client_addr),
   INDEX idx_z3950req_type (apdu_type),
   INDEX idx_z3950req_time (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed sensible server defaults (idempotent).
 INSERT INTO library_z3950_server_config (option_key, option_value, category)
@@ -1897,13 +1911,13 @@ WHERE NOT EXISTS (SELECT 1 FROM library_z3950_server_config WHERE option_key = '
 -- 1. Target config table
 CREATE TABLE IF NOT EXISTS `library_z3950_target` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Human-readable target name',
-  `host` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Z39.50 host or SRU base URL',
+  `name` varchar(255) NOT NULL COMMENT 'Human-readable target name',
+  `host` varchar(255) NOT NULL COMMENT 'Z39.50 host or SRU base URL',
   `port` int unsigned NOT NULL DEFAULT '210' COMMENT 'Z39.50 port (default 210)',
-  `database` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Target database / collection name',
-  `syntax` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'marc21' COMMENT 'marc21 | usmarc | xml',
-  `username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `password_hash` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'SHA-256 of the password',
+  `database` varchar(255) NOT NULL COMMENT 'Target database / collection name',
+  `syntax` varchar(50) DEFAULT 'marc21' COMMENT 'marc21 | usmarc | xml',
+  `username` varchar(255) DEFAULT NULL,
+  `password_hash` varchar(64) DEFAULT NULL COMMENT 'SHA-256 of the password',
   `timeout` int unsigned DEFAULT '15' COMMENT 'Connection timeout in seconds',
   `is_active` tinyint(1) DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1911,7 +1925,7 @@ CREATE TABLE IF NOT EXISTS `library_z3950_target` (
   PRIMARY KEY (`id`),
   KEY `idx_host_port` (`host`,`port`),
   KEY `idx_is_active` (`is_active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 2. SRU query log (for audit / analytics)
 CREATE TABLE IF NOT EXISTS library_sru_log (
@@ -1927,7 +1941,7 @@ CREATE TABLE IF NOT EXISTS library_sru_log (
 
   INDEX idx_created_at (created_at),
   INDEX idx_result_count (result_count)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3. Z39.50 import log (for tracking imports from remote targets)
 CREATE TABLE IF NOT EXISTS library_z3950_import_log (
@@ -1946,7 +1960,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_import_log (
   FOREIGN KEY (target_id) REFERENCES library_z3950_target(id) ON DELETE SET NULL,
   INDEX idx_target_id (target_id),
   INDEX idx_created_at (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;-- --- ONIX ingest (onix_ingest.sql) ----------------------------------------
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;-- --- ONIX ingest (onix_ingest.sql) ----------------------------------------
 -- ahgLibraryPlugin - ONIX ingestion (clone of Heratio library_onix_ingest).
 -- Parse + validate publisher ONIX feeds into a review queue before commit.
 
@@ -1968,7 +1982,7 @@ CREATE TABLE IF NOT EXISTS `library_onix_ingest` (
     PRIMARY KEY (`id`),
     KEY `idx_onix_status` (`status`),
     KEY `idx_onix_created` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `library_onix_ingest_line` (
     `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1997,7 +2011,7 @@ CREATE TABLE IF NOT EXISTS `library_onix_ingest_line` (
     KEY `idx_onixline_ingest` (`ingest_id`),
     KEY `idx_onixline_status` (`status`),
     KEY `idx_onixline_isbn` (`isbn`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/migration_counter_sushi.sql on 2026-08-18.
@@ -2034,7 +2048,7 @@ CREATE TABLE IF NOT EXISTS library_usage_event (
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_usage_patron FOREIGN KEY (patron_id) REFERENCES library_patron(id)
         ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── COUNTER / SUSHI Settings table ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS library_counter_settings (
@@ -2042,7 +2056,7 @@ CREATE TABLE IF NOT EXISTS library_counter_settings (
     setting_key VARCHAR(100) NOT NULL UNIQUE,
     setting_value TEXT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed SUSHI default keys (values set via admin UI / API)
 INSERT IGNORE INTO library_counter_settings (setting_key, setting_value) VALUES
@@ -2070,13 +2084,21 @@ ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
 -- Issue #95 - ahgLibraryPlugin
 
 -- 1. Add FRBR columns to library_item
-ALTER TABLE library_item
-  ADD COLUMN frbr_work_key       VARCHAR(64)  NULL  COMMENT 'SHA-256 work identifier, first 20 chars' AFTER material_type,
-  ADD COLUMN frbr_override_type  ENUM('none','force_group','force_split') DEFAULT 'none' AFTER frbr_work_key,
-  ADD COLUMN updated_at          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER frbr_override_type;
-
-CREATE INDEX idx_library_item_frbr_work_key ON library_item (frbr_work_key);
-CREATE INDEX idx_library_item_frbr_override ON library_item (frbr_override_type);
+-- Only updated_at is added here. frbr_work_key, frbr_override_type and both
+-- indexes are already added, guarded, earlier in this same file (see the FRBR
+-- work-set clustering block) - this was a later duplicate of that work which
+-- reintroduced them UNGUARDED, and as an ENUM against the AHG standard. A clean
+-- install aborted here with "Duplicate column name 'frbr_work_key'" because the
+-- CREATE TABLE for library_item already defines it, and every statement after
+-- this point never ran.
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_item' AND COLUMN_NAME = 'updated_at');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE library_item ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- 2. Override table: librarian can force-group or force-split works
 CREATE TABLE IF NOT EXISTS library_item_frbr_override (
@@ -2091,13 +2113,27 @@ CREATE TABLE IF NOT EXISTS library_item_frbr_override (
   FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE,
   INDEX idx_target_work_key (target_work_key),
   INDEX idx_library_item_id (library_item_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3. Index for fast work-set lookups on usage events
-ALTER TABLE library_usage_event
-  ADD COLUMN frbr_work_key VARCHAR(64) NULL AFTER library_item_id;
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_usage_event' AND COLUMN_NAME = 'frbr_work_key');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE library_usage_event ADD COLUMN frbr_work_key VARCHAR(64) NULL AFTER library_item_id',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-CREATE INDEX idx_library_usage_event_work_key ON library_usage_event (frbr_work_key);
+SET @idx_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_usage_event' AND INDEX_NAME = 'idx_library_usage_event_work_key');
+SET @sql = IF(@idx_exists = 0,
+    'CREATE INDEX idx_library_usage_event_work_key ON library_usage_event (frbr_work_key)',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- ---------------------------------------------------------------------------
 -- Merged in from database/migration_full_library.sql on 2026-08-18.
 --
@@ -2115,7 +2151,7 @@ CREATE INDEX idx_library_usage_event_work_key ON library_usage_event (frbr_work_
 -- Date: 2026-03-08
 -- ============================================================================
 
-SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET NAMES utf8mb4;
 
 -- ============================================================================
 -- 1. Heritage Accounting columns on library_item
@@ -2224,7 +2260,7 @@ CREATE TABLE IF NOT EXISTS library_copy (
     KEY idx_branch (branch),
     KEY idx_accession (accession_number),
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 3. Library Patron (borrowers)
@@ -2268,7 +2304,7 @@ CREATE TABLE IF NOT EXISTS library_patron (
     KEY idx_name (last_name, first_name),
     KEY idx_email (email),
     KEY idx_expiry (membership_expiry)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 4. Library Checkout (circulation transactions)
@@ -2297,7 +2333,7 @@ CREATE TABLE IF NOT EXISTS library_checkout (
     KEY idx_checkout_date (checkout_date),
     FOREIGN KEY (copy_id) REFERENCES library_copy(id) ON DELETE RESTRICT,
     FOREIGN KEY (patron_id) REFERENCES library_patron(id) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 5. Library Hold (reservation queue)
@@ -2326,7 +2362,7 @@ CREATE TABLE IF NOT EXISTS library_hold (
     KEY idx_queue (library_item_id, queue_position),
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE,
     FOREIGN KEY (patron_id) REFERENCES library_patron(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 6. Library Fine (fees & payments)
@@ -2359,7 +2395,7 @@ CREATE TABLE IF NOT EXISTS library_fine (
     KEY idx_date (fine_date),
     FOREIGN KEY (patron_id) REFERENCES library_patron(id) ON DELETE RESTRICT,
     FOREIGN KEY (checkout_id) REFERENCES library_checkout(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 7. Library Subscription (serial management)
@@ -2389,7 +2425,7 @@ CREATE TABLE IF NOT EXISTS library_subscription (
     KEY idx_status (status),
     KEY idx_renewal (renewal_date),
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 8. Library Serial Issue (individual issue tracking)
@@ -2424,7 +2460,7 @@ CREATE TABLE IF NOT EXISTS library_serial_issue (
     UNIQUE KEY uk_barcode (barcode),
     FOREIGN KEY (subscription_id) REFERENCES library_subscription(id) ON DELETE CASCADE,
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 9. Library Order (acquisitions / purchase orders)
@@ -2461,7 +2497,7 @@ CREATE TABLE IF NOT EXISTS library_order (
     KEY idx_status (status),
     KEY idx_date (order_date),
     KEY idx_budget (budget_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 10. Library Order Line (PO line items)
@@ -2494,7 +2530,7 @@ CREATE TABLE IF NOT EXISTS library_order_line (
     KEY idx_isbn (isbn),
     KEY idx_status (status),
     FOREIGN KEY (order_id) REFERENCES library_order(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 11. Library Budget (fund allocation)
@@ -2520,7 +2556,7 @@ CREATE TABLE IF NOT EXISTS library_budget (
     KEY idx_year (fiscal_year),
     KEY idx_status (status),
     KEY idx_category (category)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 12. Interlibrary Loan Requests
@@ -2566,7 +2602,7 @@ CREATE TABLE IF NOT EXISTS library_ill_request (
     KEY idx_date (request_date),
     KEY idx_partner (partner_library),
     KEY idx_item (library_item_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 13. Library Circulation Settings (per material type loan rules)
@@ -2587,7 +2623,7 @@ CREATE TABLE IF NOT EXISTS library_loan_rule (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_type_patron (material_type, patron_type),
     KEY idx_material (material_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================
 -- 14. Seed default loan rules
@@ -2827,7 +2863,7 @@ CREATE TABLE IF NOT EXISTS `library_serial_subscription` (
     `updated_at`         TIMESTAMP NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `serial_id_unique` (`serial_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `library_serial_prediction` (
     `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -2840,7 +2876,7 @@ CREATE TABLE IF NOT EXISTS `library_serial_prediction` (
     PRIMARY KEY (`id`),
     KEY `idx_library_serial_prediction_serial` (`serial_id`),
     KEY `idx_library_serial_prediction_expected` (`expected_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `library_claim` (
     `id`         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -2856,7 +2892,7 @@ CREATE TABLE IF NOT EXISTS `library_claim` (
     KEY `idx_library_claim_serial` (`serial_id`),
     KEY `idx_library_claim_issue` (`issue_id`),
     KEY `idx_library_claim_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `library_binding` (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -2870,7 +2906,7 @@ CREATE TABLE IF NOT EXISTS `library_binding` (
     PRIMARY KEY (`id`),
     KEY `idx_library_binding_serial` (`serial_id`),
     KEY `idx_library_binding_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── ILL ──────────────────────────────────────────────────────────────────────
 -- NOTE: NOT cloned. On verification the PSIS ILLService is already functional -
@@ -2930,15 +2966,31 @@ CREATE TABLE IF NOT EXISTS `library_ill_request` (
     KEY `idx_ill_status` (`status`),
     KEY `idx_ill_patron` (`patron_id`),
     KEY `idx_ill_partner` (`trading_partner_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 */
 
 -- ── RUN-ONCE ALTERs (serials only) ───────────────────────────────────────────
 -- library_serial_issue binding fields (Heratio _000104). On PSIS shelf_location
 -- and bound_at already exist; only binding_id may be missing. Run individually;
 -- ignore "Duplicate column" errors.
-ALTER TABLE `library_serial_issue` ADD COLUMN `binding_id` BIGINT UNSIGNED NULL;
-ALTER TABLE `library_serial_issue` ADD INDEX `idx_library_serial_issue_binding` (`binding_id`);
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_serial_issue' AND COLUMN_NAME = 'binding_id');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE `library_serial_issue` ADD COLUMN `binding_id` BIGINT UNSIGNED NULL',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @idx_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_serial_issue' AND INDEX_NAME = 'idx_library_serial_issue_binding');
+SET @sql = IF(@idx_exists = 0,
+    'ALTER TABLE `library_serial_issue` ADD INDEX `idx_library_serial_issue_binding` (`binding_id`)',
+    'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 
 -- ILL ALTERs intentionally removed - PSIS ILL is not cloned (already functional).
 
@@ -2970,7 +3022,7 @@ CREATE TABLE IF NOT EXISTS `library_ill_status_history` (
   PRIMARY KEY (`id`),
   KEY `idx_illh_request` (`ill_request_id`),
   KEY `idx_illh_to` (`to_status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/migration_library_rda_authority_edi_20260529.sql on 2026-08-18.
@@ -3077,7 +3129,7 @@ CREATE TABLE IF NOT EXISTS library_item_authority_link (
     INDEX idx_link_authority (authority_id),
     CONSTRAINT fk_lial_item FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE,
     CONSTRAINT fk_lial_authority FOREIGN KEY (authority_id) REFERENCES library_subject_authority(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── library_trading_partner: EDI/EANCOM partner registry (NEW) ───────────────
 CREATE TABLE IF NOT EXISTS library_trading_partner (
@@ -3103,7 +3155,7 @@ CREATE TABLE IF NOT EXISTS library_trading_partner (
     UNIQUE KEY uq_tp_partner_code (edi_partner_code),
     INDEX idx_tp_vendor (vendor_id),
     INDEX idx_tp_edi_active (edi_type, is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── library_ill_request: EDI / ILL-EDI columns ──────────────────────────────
 SET @col = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_ill_request' AND COLUMN_NAME = 'request_type');
@@ -3232,7 +3284,7 @@ CREATE TABLE IF NOT EXISTS library_item_frbr_override (
     FOREIGN KEY (library_item_id) REFERENCES library_item(id) ON DELETE CASCADE,
     INDEX idx_target_work_key (target_work_key),
     INDEX idx_library_item_id (library_item_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/migration_marc_control_fields_20260529.sql on 2026-08-18.
@@ -3293,7 +3345,7 @@ CREATE TABLE IF NOT EXISTS `library_order_line_fund` (
   PRIMARY KEY (`id`),
   KEY `idx_olf_line` (`order_line_id`),
   KEY `idx_olf_fund` (`fund_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/migration_serial_bindery_20260529.sql on 2026-08-18.
@@ -3330,7 +3382,7 @@ CREATE TABLE IF NOT EXISTS `library_bindery_batch` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_bindery_batch_number` (`batch_number`),
   KEY `idx_bindery_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET @col = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_serial_issue' AND COLUMN_NAME = 'bindery_batch_id');
 SET @sql = IF(@col = 0, 'ALTER TABLE library_serial_issue ADD COLUMN bindery_batch_id BIGINT UNSIGNED NULL', 'SELECT 1');
@@ -3371,7 +3423,7 @@ CREATE TABLE IF NOT EXISTS library_sushi_access_log (
     INDEX idx_sushi_log_report   (report_type),
     INDEX idx_sushi_log_customer (customer_id),
     INDEX idx_sushi_log_created  (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- ---------------------------------------------------------------------------
 -- Merged in from database/migration_z3950_server_20260601.sql on 2026-08-18.
 --
@@ -3402,7 +3454,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_server_config (
   updated_at   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   INDEX idx_z3950srv_category (category)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 2. Incoming APDU request log (one row per INIT/SEARCH/PRESENT/CLOSE etc.)
 CREATE TABLE IF NOT EXISTS library_z3950_server_request (
@@ -3418,7 +3470,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_server_request (
   INDEX idx_z3950req_client (client_addr),
   INDEX idx_z3950req_type (apdu_type),
   INDEX idx_z3950req_time (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed sensible server defaults (idempotent).
 INSERT IGNORE INTO library_z3950_server_config (option_key, option_value, category)
@@ -3472,7 +3524,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_target (
 
   INDEX idx_host_port (host, port),
   INDEX idx_is_active (is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 2. SRU query log (for audit / analytics)
 CREATE TABLE IF NOT EXISTS library_sru_log (
@@ -3488,7 +3540,7 @@ CREATE TABLE IF NOT EXISTS library_sru_log (
 
   INDEX idx_created_at (created_at),
   INDEX idx_result_count (result_count)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3. Z39.50 import log (for tracking imports from remote targets)
 CREATE TABLE IF NOT EXISTS library_z3950_import_log (
@@ -3507,7 +3559,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_import_log (
   FOREIGN KEY (target_id) REFERENCES library_z3950_target(id) ON DELETE SET NULL,
   INDEX idx_target_id (target_id),
   INDEX idx_created_at (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- ---------------------------------------------------------------------------
 -- Merged in from database/onix_ingest.sql on 2026-08-18.
 --
@@ -3540,7 +3592,7 @@ CREATE TABLE IF NOT EXISTS `library_onix_ingest` (
     PRIMARY KEY (`id`),
     KEY `idx_onix_status` (`status`),
     KEY `idx_onix_created` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `library_onix_ingest_line` (
     `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -3569,4 +3621,4 @@ CREATE TABLE IF NOT EXISTS `library_onix_ingest_line` (
     KEY `idx_onixline_ingest` (`ingest_id`),
     KEY `idx_onixline_status` (`status`),
     KEY `idx_onixline_isbn` (`isbn`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

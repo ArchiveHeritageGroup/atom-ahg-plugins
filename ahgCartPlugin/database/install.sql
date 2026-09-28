@@ -1,3 +1,17 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no COLLATE, so they take the database
+-- default and therefore match AtoM's own tables. Pinning utf8mb4_unicode_ci
+-- meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci) every join
+-- between one of these tables and a base AtoM table failed with "Illegal mix
+-- of collations" - which is what took out ahgPreservationPlugin's Format
+-- Conversion screen. Same defect, same fix.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ============================================================
 -- ahgCartPlugin - E-Commerce Database Schema
 -- ============================================================
@@ -49,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `ahg_ecommerce_settings` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_ecommerce_repo` (`repository_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Types (Digital Download, Print, etc.)
 CREATE TABLE IF NOT EXISTS `ahg_product_type` (
@@ -62,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `ahg_product_type` (
   `sort_order` INT DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Pricing (per repository, per product type)
 CREATE TABLE IF NOT EXISTS `ahg_product_pricing` (
@@ -79,26 +93,26 @@ CREATE TABLE IF NOT EXISTS `ahg_product_pricing` (
   PRIMARY KEY (`id`),
   INDEX `idx_pricing_repo` (`repository_id`),
   INDEX `idx_pricing_type` (`product_type_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Orders
 CREATE TABLE IF NOT EXISTS `ahg_order` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `order_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `order_number` varchar(50) CHARACTER SET utf8mb4 NOT NULL,
   `user_id` int DEFAULT NULL,
-  `session_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `session_id` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `repository_id` int DEFAULT NULL,
-  `status` varchar(62) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending' COMMENT 'pending, paid, processing, completed, cancelled, refunded',
+  `status` varchar(62) CHARACTER SET utf8mb4 DEFAULT 'pending' COMMENT 'pending, paid, processing, completed, cancelled, refunded',
   `subtotal` decimal(10,2) NOT NULL DEFAULT '0.00',
   `vat_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
   `total` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `currency` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'ZAR',
-  `customer_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `customer_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `customer_phone` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `billing_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `shipping_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `currency` varchar(3) CHARACTER SET utf8mb4 DEFAULT 'ZAR',
+  `customer_name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `customer_email` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `customer_phone` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `billing_address` text CHARACTER SET utf8mb4,
+  `shipping_address` text CHARACTER SET utf8mb4,
+  `notes` text CHARACTER SET utf8mb4,
   `paid_at` datetime DEFAULT NULL,
   `completed_at` datetime DEFAULT NULL,
   `cancelled_at` datetime DEFAULT NULL,
@@ -109,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `ahg_order` (
   KEY `idx_order_user` (`user_id`),
   KEY `idx_order_status` (`status`),
   KEY `idx_order_repo` (`repository_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Order Items
 CREATE TABLE IF NOT EXISTS `ahg_order_item` (
@@ -131,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `ahg_order_item` (
   INDEX `idx_order_item_order` (`order_id`),
   INDEX `idx_order_item_desc` (`archival_description_id`),
   FOREIGN KEY (`order_id`) REFERENCES `ahg_order`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Payments
 CREATE TABLE IF NOT EXISTS `ahg_payment` (
@@ -151,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `ahg_payment` (
   INDEX `idx_payment_order` (`order_id`),
   INDEX `idx_payment_transaction` (`transaction_id`),
   FOREIGN KEY (`order_id`) REFERENCES `ahg_order`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Download Tokens (for secure digital delivery)
 CREATE TABLE IF NOT EXISTS `ahg_download_token` (
@@ -167,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `ahg_download_token` (
   UNIQUE KEY `idx_download_token` (`token`),
   INDEX `idx_download_item` (`order_item_id`),
   FOREIGN KEY (`order_item_id`) REFERENCES `ahg_order_item`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Insert default product types
 INSERT INTO `ahg_product_type` (`id`, `name`, `description`, `is_digital`, `requires_shipping`, `sort_order`) VALUES
