@@ -1,3 +1,17 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no COLLATE, so they take the database
+-- default and therefore match AtoM's own tables. Pinning utf8mb4_unicode_ci
+-- meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci) every join
+-- between one of these tables and a base AtoM table failed with "Illegal mix
+-- of collations" - which is what took out ahgPreservationPlugin's Format
+-- Conversion screen. Same defect, same fix.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ============================================================
 -- ahgSecurityClearancePlugin - Database Schema
 -- Generated from actual database structure
@@ -38,10 +52,10 @@ CREATE TABLE IF NOT EXISTS `object_security_classification` (
   `review_date` date DEFAULT NULL,
   `declassify_date` date DEFAULT NULL,
   `declassify_to_id` int unsigned DEFAULT NULL,
-  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `handling_instructions` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `reason` text CHARACTER SET utf8mb4,
+  `handling_instructions` text CHARACTER SET utf8mb4,
   `inherit_to_children` tinyint(1) DEFAULT '1',
-  `justification` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `justification` text CHARACTER SET utf8mb4,
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -53,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `object_security_classification` (
   CONSTRAINT `fk_osc_classification` FOREIGN KEY (`classification_id`) REFERENCES `security_classification` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `fk_osc_classified_by` FOREIGN KEY (`classified_by`) REFERENCES `user` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_osc_object` FOREIGN KEY (`object_id`) REFERENCES `information_object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,22 +126,22 @@ CREATE TABLE IF NOT EXISTS `security_access_log` (
   `object_id` int NOT NULL,
   `classification_id` int unsigned NOT NULL,
   `compartment_id` int unsigned DEFAULT NULL,
-  `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` varchar(50) CHARACTER SET utf8mb4 NOT NULL,
   `access_granted` tinyint(1) NOT NULL,
-  `denial_reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `justification` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `session_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `denial_reason` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `justification` text CHARACTER SET utf8mb4,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `user_agent` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `session_id` varchar(255) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `prev_hash` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `entry_hash` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `prev_hash` char(64) DEFAULT NULL,
+  `entry_hash` char(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_sal_object` (`object_id`),
   KEY `idx_sal_user` (`user_id`),
   KEY `idx_sal_classification` (`classification_id`),
   KEY `idx_sal_entry_hash` (`entry_hash`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -165,18 +179,18 @@ CREATE TABLE IF NOT EXISTS `security_audit_log` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_classification` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(20) CHARACTER SET utf8mb4 NOT NULL,
   `level` tinyint unsigned NOT NULL,
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
+  `description` text CHARACTER SET utf8mb4,
+  `color` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `icon` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
   `requires_justification` tinyint(1) NOT NULL DEFAULT '0',
   `requires_approval` tinyint(1) NOT NULL DEFAULT '0',
   `requires_2fa` tinyint(1) NOT NULL DEFAULT '0',
   `max_session_hours` int DEFAULT NULL,
   `watermark_required` tinyint(1) NOT NULL DEFAULT '0',
-  `watermark_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `watermark_image` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `download_allowed` tinyint(1) NOT NULL DEFAULT '1',
   `print_allowed` tinyint(1) NOT NULL DEFAULT '1',
   `copy_allowed` tinyint(1) NOT NULL DEFAULT '1',
@@ -186,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `security_classification` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_security_classification_level` (`level`),
   UNIQUE KEY `idx_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -349,14 +363,14 @@ CREATE TABLE IF NOT EXISTS `user_security_clearance` (
   `granted_by` int unsigned DEFAULT NULL,
   `granted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires_at` datetime DEFAULT NULL,
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_usc_user` (`user_id`),
   KEY `idx_usc_classification_id` (`classification_id`),
   KEY `idx_usc_expires_at` (`expires_at`),
   KEY `idx_usc_granted_by` (`granted_by`),
   CONSTRAINT `fk_usc_classification` FOREIGN KEY (`classification_id`) REFERENCES `security_classification` (`id`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -558,7 +572,7 @@ CREATE TABLE IF NOT EXISTS `acl_group` (
     `serial_number` INT NOT NULL DEFAULT 0,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `acl_group_i18n` (
     `id` BIGINT UNSIGNED NOT NULL,
@@ -567,7 +581,7 @@ CREATE TABLE IF NOT EXISTS `acl_group_i18n` (
     `description` TEXT,
     `serial_number` INT NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`, `culture`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `acl_user_group` (
     `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -576,7 +590,7 @@ CREATE TABLE IF NOT EXISTS `acl_user_group` (
     `serial_number` INT NOT NULL DEFAULT 0,
     INDEX `idx_aug_user` (`user_id`),
     INDEX `idx_aug_group` (`group_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `acl_permission` (
     `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -594,7 +608,7 @@ CREATE TABLE IF NOT EXISTS `acl_permission` (
     INDEX `idx_ap_user` (`user_id`),
     INDEX `idx_ap_object` (`object_id`),
     INDEX `idx_ap_action` (`action`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/add_audit_chain_columns.sql on 2026-08-17.
@@ -608,19 +622,57 @@ CREATE TABLE IF NOT EXISTS `acl_permission` (
 -- #126: tamper-evident hash chaining for the security access log.
 -- Also restores compartment_id + session_id (logAccess() writes them but the
 -- columns were missing, so every audit write silently failed).
-ALTER TABLE `security_access_log`
-  ADD COLUMN `compartment_id` INT UNSIGNED NULL AFTER `classification_id`,
-  ADD COLUMN `session_id` VARCHAR(255) NULL AFTER `user_agent`,
-  ADD COLUMN `prev_hash` CHAR(64) NULL COMMENT 'SHA-256 entry_hash of the previous entry',
-  ADD COLUMN `entry_hash` CHAR(64) NULL COMMENT 'SHA-256(prev_hash || canonical(content))',
-  ADD KEY `idx_sal_entry_hash` (`entry_hash`);
+-- Guarded, because this is a RETROFIT for instances created before the columns
+-- were added to the CREATE TABLE above - which now defines all four of them and
+-- the index. Run unguarded on a clean install it aborts the whole file with
+-- "Duplicate column name 'compartment_id'", so no table after this point was
+-- ever created. MySQL has no ADD COLUMN IF NOT EXISTS, hence the procedure.
+DROP PROCEDURE IF EXISTS ahg_sec_add_column;
+DROP PROCEDURE IF EXISTS ahg_sec_add_index;
+DROP PROCEDURE IF EXISTS ahg_sec_drop_fk;
+DELIMITER //
+CREATE PROCEDURE ahg_sec_add_column(IN tbl VARCHAR(64), IN col VARCHAR(64), IN ddl TEXT)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = DATABASE() AND table_name = tbl AND column_name = col) THEN
+        SET @sql := CONCAT('ALTER TABLE `', tbl, '` ADD COLUMN ', ddl);
+        PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+    END IF;
+END //
+CREATE PROCEDURE ahg_sec_add_index(IN tbl VARCHAR(64), IN idx VARCHAR(64), IN ddl TEXT)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.statistics
+                   WHERE table_schema = DATABASE() AND table_name = tbl AND index_name = idx) THEN
+        SET @sql := CONCAT('ALTER TABLE `', tbl, '` ADD KEY ', ddl);
+        PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+    END IF;
+END //
+CREATE PROCEDURE ahg_sec_drop_fk(IN tbl VARCHAR(64), IN fk VARCHAR(64))
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.table_constraints
+               WHERE table_schema = DATABASE() AND table_name = tbl
+                 AND constraint_name = fk AND constraint_type = 'FOREIGN KEY') THEN
+        SET @sql := CONCAT('ALTER TABLE `', tbl, '` DROP FOREIGN KEY `', fk, '`');
+        PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+    END IF;
+END //
+DELIMITER ;
+
+CALL ahg_sec_add_column('security_access_log', 'compartment_id', '`compartment_id` INT UNSIGNED NULL AFTER `classification_id`');
+CALL ahg_sec_add_column('security_access_log', 'session_id', '`session_id` VARCHAR(255) NULL AFTER `user_agent`');
+CALL ahg_sec_add_column('security_access_log', 'prev_hash', '`prev_hash` CHAR(64) NULL COMMENT ''SHA-256 entry_hash of the previous entry''');
+CALL ahg_sec_add_column('security_access_log', 'entry_hash', '`entry_hash` CHAR(64) NULL COMMENT ''SHA-256(prev_hash || canonical(content))''');
+CALL ahg_sec_add_index('security_access_log', 'idx_sal_entry_hash', '`idx_sal_entry_hash` (`entry_hash`)');
 
 -- An audit trail must be append-only and independent of the lifecycle of the
 -- things it records. Drop the FKs so deleting a described object (CASCADE) or
 -- a classification (RESTRICT) can neither erase nor block audit history — the
 -- ids remain as plain snapshot values and the hash chain stays intact.
-ALTER TABLE `security_access_log` DROP FOREIGN KEY `fk_sal_object`;
-ALTER TABLE `security_access_log` DROP FOREIGN KEY `fk_sal_classification`;
+-- Guarded for the same reason: the CREATE TABLE above no longer declares these
+-- constraints, so on a clean install there is nothing to drop and an unguarded
+-- DROP FOREIGN KEY is a hard error.
+CALL ahg_sec_drop_fk('security_access_log', 'fk_sal_object');
+CALL ahg_sec_drop_fk('security_access_log', 'fk_sal_classification');
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/add_webauthn_credential_table.sql on 2026-08-17.
@@ -647,4 +699,4 @@ CREATE TABLE IF NOT EXISTS `ahg_webauthn_credential` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_webauthn_credential_id` (`credential_id`),
   KEY `idx_webauthn_user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

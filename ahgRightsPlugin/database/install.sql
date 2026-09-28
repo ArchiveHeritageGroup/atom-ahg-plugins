@@ -1,3 +1,17 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no COLLATE, so they take the database
+-- default and therefore match AtoM's own tables. Pinning utf8mb4_unicode_ci
+-- meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci) every join
+-- between one of these tables and a base AtoM table failed with "Illegal mix
+-- of collations" - which is what took out ahgPreservationPlugin's Format
+-- Conversion screen. Same defect, same fix.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ---------------------------------------------------------------------------
 -- Moved from atom-framework/database/install.sql.
 -- These tables belong to ahgRightsPlugin and are created when this plugin is installed,
@@ -10,14 +24,14 @@ CREATE TABLE IF NOT EXISTS `object_creative_commons` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `object_id` int NOT NULL,
   `creative_commons_license_id` bigint unsigned NOT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_obj_cc` (`object_id`,`creative_commons_license_id`),
   KEY `idx_object_id` (`object_id`),
   KEY `idx_cc_id` (`creative_commons_license_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
 
 
 -- ============================================================
@@ -105,22 +119,22 @@ CREATE TABLE IF NOT EXISTS `rights_i18n` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_cc_license` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `version` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '4.0',
-  `uri` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(20) CHARACTER SET utf8mb4 NOT NULL,
+  `version` varchar(10) CHARACTER SET utf8mb4 NOT NULL DEFAULT '4.0',
+  `uri` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
   `allows_commercial` tinyint(1) DEFAULT '1',
   `allows_derivatives` tinyint(1) DEFAULT '1',
   `requires_share_alike` tinyint(1) DEFAULT '0',
   `requires_attribution` tinyint(1) DEFAULT '1',
-  `icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `badge_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `badge_url` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `sort_order` int DEFAULT '0',
   `is_active` tinyint(1) DEFAULT '1',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
   KEY `idx_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -131,13 +145,13 @@ CREATE TABLE IF NOT EXISTS `rights_cc_license` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_cc_license_i18n` (
   `id` int NOT NULL,
-  `culture` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `human_readable` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(16) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en',
+  `name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4,
+  `human_readable` text CHARACTER SET utf8mb4,
   PRIMARY KEY (`id`,`culture`),
   CONSTRAINT `fk_rights_cc_license_i18n` FOREIGN KEY (`id`) REFERENCES `rights_cc_license` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -174,17 +188,17 @@ CREATE TABLE IF NOT EXISTS `rights_derivative_log` (
   `id` int NOT NULL AUTO_INCREMENT,
   `digital_object_id` int NOT NULL,
   `rule_id` int DEFAULT NULL,
-  `derivative_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `original_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `derivative_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `derivative_type` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `original_path` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `derivative_path` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
   `requested_by` int DEFAULT NULL,
-  `request_purpose` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `request_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `request_purpose` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `request_ip` varchar(45) CHARACTER SET utf8mb4 DEFAULT NULL,
   `generated_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_digital_object` (`digital_object_id`),
   KEY `idx_rule` (`rule_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -198,17 +212,17 @@ CREATE TABLE IF NOT EXISTS `rights_derivative_rule` (
   `object_id` int DEFAULT NULL COMMENT 'NULL = applies to collection or global',
   `collection_id` int DEFAULT NULL COMMENT 'NULL = applies to object or global',
   `is_global` tinyint(1) DEFAULT '0',
-  `rule_type` VARCHAR(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'watermark, redaction, resize, format_conversion, metadata_strip',
+  `rule_type` VARCHAR(75) CHARACTER SET utf8mb4 NOT NULL COMMENT 'watermark, redaction, resize, format_conversion, metadata_strip',
   `priority` int DEFAULT '0',
   `applies_to_roles` json DEFAULT NULL COMMENT 'Array of role IDs, NULL = all',
   `applies_to_clearance_levels` json DEFAULT NULL COMMENT 'Array of clearance level codes',
   `applies_to_purposes` json DEFAULT NULL COMMENT 'Array of purpose codes',
-  `watermark_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `watermark_image_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `watermark_position` VARCHAR(72) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'bottom_right' COMMENT 'center, top_left, top_right, bottom_left, bottom_right, tile',
+  `watermark_text` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `watermark_image_path` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `watermark_position` VARCHAR(72) CHARACTER SET utf8mb4 DEFAULT 'bottom_right' COMMENT 'center, top_left, top_right, bottom_left, bottom_right, tile',
   `watermark_opacity` int DEFAULT '50' COMMENT '0-100',
   `redaction_areas` json DEFAULT NULL COMMENT 'Array of {x, y, width, height, page}',
-  `redaction_color` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '#000000',
+  `redaction_color` varchar(7) CHARACTER SET utf8mb4 DEFAULT '#000000',
   `max_width` int DEFAULT NULL,
   `max_height` int DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT '1',
@@ -219,7 +233,7 @@ CREATE TABLE IF NOT EXISTS `rights_derivative_rule` (
   KEY `idx_object` (`object_id`),
   KEY `idx_collection` (`collection_id`),
   KEY `idx_rule_type` (`rule_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -231,8 +245,8 @@ CREATE TABLE IF NOT EXISTS `rights_derivative_rule` (
 CREATE TABLE IF NOT EXISTS `rights_embargo` (
   `id` int NOT NULL AUTO_INCREMENT,
   `object_id` int NOT NULL COMMENT 'FK to information_object.id',
-  `embargo_type` VARCHAR(54) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'full' COMMENT 'full, metadata_only, digital_only, partial',
-  `reason` VARCHAR(105) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'donor_restriction, copyright, privacy, legal, commercial, research, cultural, security, other',
+  `embargo_type` VARCHAR(54) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'full' COMMENT 'full, metadata_only, digital_only, partial',
+  `reason` VARCHAR(105) CHARACTER SET utf8mb4 NOT NULL COMMENT 'donor_restriction, copyright, privacy, legal, commercial, research, cultural, security, other',
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL COMMENT 'NULL = indefinite',
   `auto_release` tinyint(1) DEFAULT '1' COMMENT 'Auto-lift on end_date',
@@ -240,13 +254,13 @@ CREATE TABLE IF NOT EXISTS `rights_embargo` (
   `review_interval_months` int DEFAULT '12',
   `last_reviewed_at` datetime DEFAULT NULL,
   `last_reviewed_by` int DEFAULT NULL,
-  `status` VARCHAR(54) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'active' COMMENT 'active, pending, lifted, expired, extended',
+  `status` VARCHAR(54) CHARACTER SET utf8mb4 DEFAULT 'active' COMMENT 'active, pending, lifted, expired, extended',
   `lifted_at` datetime DEFAULT NULL,
   `lifted_by` int DEFAULT NULL,
-  `lift_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `lift_reason` text CHARACTER SET utf8mb4,
   `notify_before_days` int DEFAULT '30',
   `notification_sent` tinyint(1) DEFAULT '0',
-  `notify_emails` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'JSON array of emails',
+  `notify_emails` text CHARACTER SET utf8mb4 COMMENT 'JSON array of emails',
   `created_by` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -255,7 +269,7 @@ CREATE TABLE IF NOT EXISTS `rights_embargo` (
   KEY `idx_status` (`status`),
   KEY `idx_end_date` (`end_date`),
   KEY `idx_review_date` (`review_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -266,12 +280,12 @@ CREATE TABLE IF NOT EXISTS `rights_embargo` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_embargo_i18n` (
   `id` int NOT NULL,
-  `culture` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `reason_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `internal_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(16) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en',
+  `reason_note` text CHARACTER SET utf8mb4,
+  `internal_note` text CHARACTER SET utf8mb4,
   PRIMARY KEY (`id`,`culture`),
   CONSTRAINT `fk_rights_embargo_i18n` FOREIGN KEY (`id`) REFERENCES `rights_embargo` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -283,18 +297,18 @@ CREATE TABLE IF NOT EXISTS `rights_embargo_i18n` (
 CREATE TABLE IF NOT EXISTS `rights_embargo_log` (
   `id` int NOT NULL AUTO_INCREMENT,
   `embargo_id` int NOT NULL,
-  `action` VARCHAR(81) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'created, extended, lifted, reviewed, notification_sent, auto_released',
-  `old_status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `new_status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action` VARCHAR(81) CHARACTER SET utf8mb4 NOT NULL COMMENT 'created, extended, lifted, reviewed, notification_sent, auto_released',
+  `old_status` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `new_status` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL,
   `old_end_date` date DEFAULT NULL,
   `new_end_date` date DEFAULT NULL,
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4,
   `performed_by` int DEFAULT NULL,
   `performed_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_embargo` (`embargo_id`),
   CONSTRAINT `fk_embargo_log` FOREIGN KEY (`embargo_id`) REFERENCES `rights_embargo` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -306,19 +320,19 @@ CREATE TABLE IF NOT EXISTS `rights_embargo_log` (
 CREATE TABLE IF NOT EXISTS `rights_grant` (
   `id` int NOT NULL AUTO_INCREMENT,
   `rights_record_id` int NOT NULL,
-  `act` VARCHAR(119) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'render, disseminate, replicate, migrate, modify, delete, print, use, publish, excerpt, annotate, move, sell',
-  `restriction` VARCHAR(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'allow' COMMENT 'allow, disallow, conditional',
+  `act` VARCHAR(119) CHARACTER SET utf8mb4 NOT NULL COMMENT 'render, disseminate, replicate, migrate, modify, delete, print, use, publish, excerpt, annotate, move, sell',
+  `restriction` VARCHAR(40) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'allow' COMMENT 'allow, disallow, conditional',
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
-  `condition_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `condition_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `condition_type` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `condition_value` text CHARACTER SET utf8mb4,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_rights_record` (`rights_record_id`),
   KEY `idx_act` (`act`),
   KEY `idx_restriction` (`restriction`),
   CONSTRAINT `fk_rights_grant_record` FOREIGN KEY (`rights_record_id`) REFERENCES `rights_record` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -329,11 +343,11 @@ CREATE TABLE IF NOT EXISTS `rights_grant` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_grant_i18n` (
   `id` int NOT NULL,
-  `culture` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `restriction_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(16) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en',
+  `restriction_note` text CHARACTER SET utf8mb4,
   PRIMARY KEY (`id`,`culture`),
   CONSTRAINT `fk_rights_grant_i18n` FOREIGN KEY (`id`) REFERENCES `rights_grant` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -359,11 +373,11 @@ CREATE TABLE IF NOT EXISTS `rights_object_tk_label` (
   `id` int NOT NULL AUTO_INCREMENT,
   `object_id` int NOT NULL COMMENT 'FK to information_object.id',
   `tk_label_id` int NOT NULL,
-  `community_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `community_contact` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `custom_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `community_name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `community_contact` text CHARACTER SET utf8mb4,
+  `custom_text` text CHARACTER SET utf8mb4,
   `verified` tinyint(1) DEFAULT '0',
-  `verified_by` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `verified_by` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `verified_date` date DEFAULT NULL,
   `created_by` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -372,7 +386,7 @@ CREATE TABLE IF NOT EXISTS `rights_object_tk_label` (
   KEY `idx_object` (`object_id`),
   KEY `idx_label` (`tk_label_id`),
   CONSTRAINT `fk_object_tk_label` FOREIGN KEY (`tk_label_id`) REFERENCES `rights_tk_label` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -384,21 +398,21 @@ CREATE TABLE IF NOT EXISTS `rights_object_tk_label` (
 CREATE TABLE IF NOT EXISTS `rights_orphan_search_step` (
   `id` int NOT NULL AUTO_INCREMENT,
   `orphan_work_id` int NOT NULL,
-  `source_type` VARCHAR(103) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'database, registry, publisher, author_society, archive, library, internet, newspaper, other',
-  `source_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `source_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source_type` VARCHAR(103) CHARACTER SET utf8mb4 NOT NULL COMMENT 'database, registry, publisher, author_society, archive, library, internet, newspaper, other',
+  `source_name` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
+  `source_url` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
   `search_date` date NOT NULL,
-  `search_terms` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `search_terms` text CHARACTER SET utf8mb4,
   `results_found` tinyint(1) DEFAULT '0',
-  `results_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `evidence_file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `screenshot_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `results_description` text CHARACTER SET utf8mb4,
+  `evidence_file_path` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `screenshot_path` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
   `performed_by` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_orphan_work` (`orphan_work_id`),
   CONSTRAINT `fk_orphan_search_step` FOREIGN KEY (`orphan_work_id`) REFERENCES `rights_orphan_work` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -410,18 +424,18 @@ CREATE TABLE IF NOT EXISTS `rights_orphan_search_step` (
 CREATE TABLE IF NOT EXISTS `rights_orphan_work` (
   `id` int NOT NULL AUTO_INCREMENT,
   `object_id` int NOT NULL COMMENT 'FK to information_object.id',
-  `status` VARCHAR(66) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'in_progress' COMMENT 'in_progress, completed, rights_holder_found, abandoned',
-  `work_type` VARCHAR(127) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'literary, dramatic, musical, artistic, film, sound_recording, broadcast, typographical, database, photograph, other',
+  `status` VARCHAR(66) CHARACTER SET utf8mb4 DEFAULT 'in_progress' COMMENT 'in_progress, completed, rights_holder_found, abandoned',
+  `work_type` VARCHAR(127) CHARACTER SET utf8mb4 NOT NULL COMMENT 'literary, dramatic, musical, artistic, film, sound_recording, broadcast, typographical, database, photograph, other',
   `search_started_date` date DEFAULT NULL,
   `search_completed_date` date DEFAULT NULL,
-  `search_jurisdiction` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'ZA',
+  `search_jurisdiction` varchar(10) CHARACTER SET utf8mb4 DEFAULT 'ZA',
   `rights_holder_found` tinyint(1) DEFAULT '0',
-  `rights_holder_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `rights_holder_contact` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `rights_holder_name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `rights_holder_contact` text CHARACTER SET utf8mb4,
   `contact_attempted` tinyint(1) DEFAULT '0',
   `contact_date` date DEFAULT NULL,
-  `contact_response` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `intended_use` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `contact_response` text CHARACTER SET utf8mb4,
+  `intended_use` text CHARACTER SET utf8mb4,
   `proposed_fee` decimal(10,2) DEFAULT NULL,
   `fee_held_in_escrow` tinyint(1) DEFAULT '0',
   `created_by` int DEFAULT NULL,
@@ -430,7 +444,7 @@ CREATE TABLE IF NOT EXISTS `rights_orphan_work` (
   PRIMARY KEY (`id`),
   KEY `idx_object` (`object_id`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -441,12 +455,12 @@ CREATE TABLE IF NOT EXISTS `rights_orphan_work` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_orphan_work_i18n` (
   `id` int NOT NULL,
-  `culture` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `search_summary` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(16) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en',
+  `notes` text CHARACTER SET utf8mb4,
+  `search_summary` text CHARACTER SET utf8mb4,
   PRIMARY KEY (`id`,`culture`),
   CONSTRAINT `fk_rights_orphan_work_i18n` FOREIGN KEY (`id`) REFERENCES `rights_orphan_work` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -458,32 +472,32 @@ CREATE TABLE IF NOT EXISTS `rights_orphan_work_i18n` (
 CREATE TABLE IF NOT EXISTS `rights_record` (
   `id` int NOT NULL AUTO_INCREMENT,
   `object_id` int NOT NULL COMMENT 'FK to information_object.id',
-  `basis` VARCHAR(61) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'copyright' COMMENT 'copyright, license, statute, donor, policy, other',
+  `basis` VARCHAR(61) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'copyright' COMMENT 'copyright, license, statute, donor, policy, other',
   `rights_statement_id` int DEFAULT NULL,
   `cc_license_id` int DEFAULT NULL,
-  `copyright_status` VARCHAR(47) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'unknown' COMMENT 'copyrighted, public_domain, unknown',
-  `copyright_holder` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `copyright_status` VARCHAR(47) CHARACTER SET utf8mb4 DEFAULT 'unknown' COMMENT 'copyrighted, public_domain, unknown',
+  `copyright_holder` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `copyright_holder_actor_id` int DEFAULT NULL COMMENT 'FK to actor.id',
-  `copyright_jurisdiction` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'ZA' COMMENT 'ISO 3166-1 alpha-2',
+  `copyright_jurisdiction` varchar(10) CHARACTER SET utf8mb4 DEFAULT 'ZA' COMMENT 'ISO 3166-1 alpha-2',
   `copyright_determination_date` date DEFAULT NULL,
-  `copyright_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `license_identifier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `license_terms` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `license_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `statute_citation` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `statute_jurisdiction` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `copyright_note` text CHARACTER SET utf8mb4,
+  `license_identifier` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `license_terms` text CHARACTER SET utf8mb4,
+  `license_note` text CHARACTER SET utf8mb4,
+  `statute_citation` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `statute_jurisdiction` varchar(10) CHARACTER SET utf8mb4 DEFAULT NULL,
   `statute_determination_date` date DEFAULT NULL,
-  `statute_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `donor_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `statute_note` text CHARACTER SET utf8mb4,
+  `donor_name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `donor_actor_id` int DEFAULT NULL COMMENT 'FK to actor.id',
   `donor_agreement_date` date DEFAULT NULL,
-  `donor_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `policy_identifier` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `policy_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `donor_note` text CHARACTER SET utf8mb4,
+  `policy_identifier` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `policy_note` text CHARACTER SET utf8mb4,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
-  `documentation_identifier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `documentation_role` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `documentation_identifier` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `documentation_role` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
   `created_by` int DEFAULT NULL COMMENT 'FK to user.id',
   `updated_by` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -495,7 +509,7 @@ CREATE TABLE IF NOT EXISTS `rights_record` (
   KEY `fk_rights_statement` (`rights_statement_id`),
   KEY `fk_rights_cc_license` (`cc_license_id`),
   CONSTRAINT `fk_rights_cc_license` FOREIGN KEY (`cc_license_id`) REFERENCES `rights_cc_license` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -506,12 +520,12 @@ CREATE TABLE IF NOT EXISTS `rights_record` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_record_i18n` (
   `id` int NOT NULL,
-  `culture` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `rights_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `restriction_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(16) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en',
+  `rights_note` text CHARACTER SET utf8mb4,
+  `restriction_note` text CHARACTER SET utf8mb4,
   PRIMARY KEY (`id`,`culture`),
   CONSTRAINT `fk_rights_record_i18n` FOREIGN KEY (`id`) REFERENCES `rights_record` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -522,19 +536,19 @@ CREATE TABLE IF NOT EXISTS `rights_record_i18n` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_statement` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `uri` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `category` VARCHAR(45) COMMENT 'in-copyright, no-copyright, other' COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon_filename` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uri` varchar(255) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `category` VARCHAR(45) COMMENT 'in-copyright, no-copyright, other' NOT NULL,
+  `icon_filename` varchar(100) DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `sort_order` int NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `icon_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon_url` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_rights_statement_uri` (`uri`),
   UNIQUE KEY `uq_rights_statement_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -546,14 +560,14 @@ CREATE TABLE IF NOT EXISTS `rights_statement` (
 CREATE TABLE IF NOT EXISTS `rights_statement_i18n` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `rights_statement_id` bigint unsigned NOT NULL,
-  `culture` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `definition` text COLLATE utf8mb4_unicode_ci,
-  `scope_note` text COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(10) NOT NULL DEFAULT 'en',
+  `name` varchar(255) NOT NULL,
+  `definition` text,
+  `scope_note` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_rs_i18n` (`rights_statement_id`,`culture`),
   KEY `idx_rs_i18n_parent` (`rights_statement_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -565,16 +579,16 @@ CREATE TABLE IF NOT EXISTS `rights_statement_i18n` (
 CREATE TABLE IF NOT EXISTS `rights_territory` (
   `id` int NOT NULL AUTO_INCREMENT,
   `rights_record_id` int NOT NULL,
-  `territory_type` VARCHAR(28) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'include' COMMENT 'include, exclude',
-  `country_code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ISO 3166-1 alpha-2 or region code',
+  `territory_type` VARCHAR(28) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'include' COMMENT 'include, exclude',
+  `country_code` varchar(10) CHARACTER SET utf8mb4 NOT NULL COMMENT 'ISO 3166-1 alpha-2 or region code',
   `is_gdpr_territory` tinyint(1) DEFAULT '0',
-  `gdpr_legal_basis` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gdpr_legal_basis` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_rights_record` (`rights_record_id`),
   KEY `idx_country` (`country_code`),
   CONSTRAINT `fk_rights_territory_record` FOREIGN KEY (`rights_record_id`) REFERENCES `rights_record` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -585,11 +599,11 @@ CREATE TABLE IF NOT EXISTS `rights_territory` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_tk_label` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `category` VARCHAR(31) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'tk' COMMENT 'tk, bc, attribution',
-  `uri` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Hex color code',
-  `icon_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(20) CHARACTER SET utf8mb4 NOT NULL,
+  `category` VARCHAR(31) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'tk' COMMENT 'tk, bc, attribution',
+  `uri` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `color` varchar(7) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT 'Hex color code',
+  `icon_path` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `sort_order` int DEFAULT '0',
   `is_active` tinyint(1) DEFAULT '1',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -597,7 +611,7 @@ CREATE TABLE IF NOT EXISTS `rights_tk_label` (
   UNIQUE KEY `code` (`code`),
   KEY `idx_category` (`category`),
   KEY `idx_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -608,13 +622,13 @@ CREATE TABLE IF NOT EXISTS `rights_tk_label` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_tk_label_i18n` (
   `id` int NOT NULL,
-  `culture` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `usage_protocol` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(16) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en',
+  `name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4,
+  `usage_protocol` text CHARACTER SET utf8mb4,
   PRIMARY KEY (`id`,`culture`),
   CONSTRAINT `fk_rights_tk_label_i18n` FOREIGN KEY (`id`) REFERENCES `rights_tk_label` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -625,15 +639,15 @@ CREATE TABLE IF NOT EXISTS `rights_tk_label_i18n` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `creative_commons_license` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `uri` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `version` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT '4.0',
+  `uri` varchar(255) NOT NULL,
+  `icon_url` varchar(255) DEFAULT NULL,
+  `code` varchar(30) NOT NULL,
+  `version` varchar(10) DEFAULT '4.0',
   `allows_adaptation` tinyint(1) DEFAULT '1',
   `allows_commercial` tinyint(1) DEFAULT '1',
   `requires_attribution` tinyint(1) DEFAULT '1',
   `requires_sharealike` tinyint(1) DEFAULT '0',
-  `icon_filename` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon_filename` varchar(100) DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT '1',
   `sort_order` int DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -641,7 +655,7 @@ CREATE TABLE IF NOT EXISTS `creative_commons_license` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_cc_uri` (`uri`),
   UNIQUE KEY `uq_cc_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -653,13 +667,13 @@ CREATE TABLE IF NOT EXISTS `creative_commons_license` (
 CREATE TABLE IF NOT EXISTS `creative_commons_license_i18n` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `creative_commons_license_id` bigint unsigned NOT NULL,
-  `culture` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(10) NOT NULL DEFAULT 'en',
+  `name` varchar(255) NOT NULL,
+  `description` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_cc_i18n` (`creative_commons_license_id`,`culture`),
   KEY `idx_cc_i18n_parent` (`creative_commons_license_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

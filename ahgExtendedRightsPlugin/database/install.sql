@@ -1,3 +1,17 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no COLLATE, so they take the database
+-- default and therefore match AtoM's own tables. Pinning utf8mb4_unicode_ci
+-- meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci) every join
+-- between one of these tables and a base AtoM table failed with "Illegal mix
+-- of collations" - which is what took out ahgPreservationPlugin's Format
+-- Conversion screen. Same defect, same fix.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ---------------------------------------------------------------------------
 -- Moved from atom-framework/database/install.sql.
 -- These tables belong to ahgExtendedRightsPlugin and are created when this plugin is installed,
@@ -23,26 +37,26 @@ CREATE TABLE IF NOT EXISTS `object_rights_statement` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `object_id` int NOT NULL,
   `rights_statement_id` bigint unsigned NOT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_obj_rs` (`object_id`,`rights_statement_id`),
   KEY `idx_object_id` (`object_id`),
   KEY `idx_rights_statement_id` (`rights_statement_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
 
 -- Table: tk_label_category
 CREATE TABLE IF NOT EXISTS `tk_label_category` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `color` varchar(7) COLLATE utf8mb4_unicode_ci DEFAULT '#000000',
+  `code` varchar(30) NOT NULL,
+  `color` varchar(7) DEFAULT '#000000',
   `sort_order` int DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_tk_cat_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
 -- TK Labels (Traditional Knowledge Labels)
@@ -57,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `tk_label_category` (
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_tk_cat_code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Default TK Label Categories
 INSERT IGNORE INTO `tk_label_category` (`id`, `code`, `color`, `sort_order`) VALUES
@@ -69,10 +83,10 @@ INSERT IGNORE INTO `tk_label_category` (`id`, `code`, `color`, `sort_order`) VAL
 CREATE TABLE IF NOT EXISTS `tk_label` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tk_label_category_id` bigint unsigned NOT NULL,
-  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `uri` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `icon_filename` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(30) NOT NULL,
+  `uri` varchar(255) NOT NULL,
+  `icon_url` varchar(255) DEFAULT NULL,
+  `icon_filename` varchar(100) DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT '1',
   `sort_order` int DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -81,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `tk_label` (
   UNIQUE KEY `uq_tk_code` (`code`),
   UNIQUE KEY `uq_tk_uri` (`uri`),
   KEY `idx_tk_cat` (`tk_label_category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4;
 
 -- Table: tk_label
 CREATE TABLE IF NOT EXISTS `tk_label` (
@@ -99,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `tk_label` (
   UNIQUE KEY `uq_tk_code` (`code`),
   KEY `idx_tk_cat` (`tk_label_category_id`),
   CONSTRAINT `fk_tk_label_cat` FOREIGN KEY (`tk_label_category_id`) REFERENCES `tk_label_category` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Default TK Labels
 INSERT IGNORE INTO `tk_label` (`id`, `tk_label_category_id`, `code`, `uri`, `icon_url`, `is_active`, `sort_order`) VALUES
@@ -120,13 +134,13 @@ INSERT IGNORE INTO `tk_label` (`id`, `tk_label_category_id`, `code`, `uri`, `ico
 CREATE TABLE IF NOT EXISTS `tk_label_category_i18n` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tk_label_category_id` bigint unsigned NOT NULL,
-  `culture` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(10) NOT NULL DEFAULT 'en',
+  `name` varchar(255) NOT NULL,
+  `description` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_tk_cat_i18n` (`tk_label_category_id`,`culture`),
   KEY `idx_tk_cat_i18n_parent` (`tk_label_category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 
 -- Table: tk_label_category_i18n
 CREATE TABLE IF NOT EXISTS `tk_label_category_i18n` (
@@ -138,7 +152,7 @@ CREATE TABLE IF NOT EXISTS `tk_label_category_i18n` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_tk_cat_i18n` (`tk_label_category_id`, `culture`),
   CONSTRAINT `fk_tk_cat_i18n` FOREIGN KEY (`tk_label_category_id`) REFERENCES `tk_label_category` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO `tk_label_category_i18n` (`tk_label_category_id`, `culture`, `name`, `description`) VALUES
 (1, 'en', 'Attribution', 'Labels for proper attribution and credit'),
@@ -149,14 +163,14 @@ INSERT IGNORE INTO `tk_label_category_i18n` (`tk_label_category_id`, `culture`, 
 CREATE TABLE IF NOT EXISTS `tk_label_i18n` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tk_label_id` bigint unsigned NOT NULL,
-  `culture` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `usage_guide` text COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(10) NOT NULL DEFAULT 'en',
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `usage_guide` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_tk_i18n` (`tk_label_id`,`culture`),
   KEY `idx_tk_i18n_parent` (`tk_label_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
 
 -- Table: tk_label_i18n
 CREATE TABLE IF NOT EXISTS `tk_label_i18n` (
@@ -169,7 +183,7 @@ CREATE TABLE IF NOT EXISTS `tk_label_i18n` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_tk_i18n` (`tk_label_id`, `culture`),
   CONSTRAINT `fk_tk_label_i18n` FOREIGN KEY (`tk_label_id`) REFERENCES `tk_label` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO `tk_label_i18n` (`tk_label_id`, `culture`, `name`, `description`) VALUES
 (1, 'en', 'TK Attribution', 'Corrects historical mistakes in attribution.'),
@@ -222,8 +236,8 @@ CREATE TABLE IF NOT EXISTS `extended_rights` (
   `creative_commons_license_id` bigint unsigned DEFAULT NULL,
   `rights_date` date DEFAULT NULL,
   `expiry_date` date DEFAULT NULL,
-  `rights_holder` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `rights_holder_uri` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rights_holder` varchar(255) DEFAULT NULL,
+  `rights_holder_uri` varchar(255) DEFAULT NULL,
   `is_primary` tinyint(1) NOT NULL DEFAULT '0',
   `created_by` int DEFAULT NULL,
   `updated_by` int DEFAULT NULL,
@@ -233,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `extended_rights` (
   KEY `idx_ext_rights_object` (`object_id`),
   KEY `idx_ext_rights_rs` (`rights_statement_id`),
   KEY `idx_ext_rights_cc` (`creative_commons_license_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -244,7 +258,7 @@ CREATE TABLE IF NOT EXISTS `extended_rights` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `extended_rights_batch_log` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `action` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` varchar(50) NOT NULL,
   `object_count` int NOT NULL DEFAULT '0',
   `object_ids` json DEFAULT NULL,
   `data` json DEFAULT NULL,
@@ -255,7 +269,7 @@ CREATE TABLE IF NOT EXISTS `extended_rights_batch_log` (
   KEY `idx_action` (`action`),
   KEY `idx_performed_at` (`performed_at`),
   KEY `idx_performed_by` (`performed_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -267,14 +281,14 @@ CREATE TABLE IF NOT EXISTS `extended_rights_batch_log` (
 CREATE TABLE IF NOT EXISTS `extended_rights_i18n` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `extended_rights_id` bigint unsigned NOT NULL,
-  `culture` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `rights_note` text COLLATE utf8mb4_unicode_ci,
-  `usage_conditions` text COLLATE utf8mb4_unicode_ci,
-  `copyright_notice` text COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(10) NOT NULL DEFAULT 'en',
+  `rights_note` text,
+  `usage_conditions` text,
+  `copyright_notice` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_ext_rights_i18n` (`extended_rights_id`,`culture`),
   KEY `idx_ext_rights_i18n_parent` (`extended_rights_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -288,14 +302,14 @@ CREATE TABLE IF NOT EXISTS `extended_rights_tk_label` (
   `extended_rights_id` bigint unsigned NOT NULL,
   `tk_label_id` bigint unsigned NOT NULL,
   `community_id` int DEFAULT NULL,
-  `community_note` text COLLATE utf8mb4_unicode_ci,
+  `community_note` text,
   `assigned_date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_ext_rights_tk` (`extended_rights_id`,`tk_label_id`),
   KEY `idx_ext_rights_tk_label` (`tk_label_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -307,16 +321,16 @@ CREATE TABLE IF NOT EXISTS `extended_rights_tk_label` (
 CREATE TABLE IF NOT EXISTS `embargo` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `object_id` int NOT NULL,
-  `embargo_type` VARCHAR(55) COMMENT 'full, metadata_only, digital_object, custom' COLLATE utf8mb4_unicode_ci NOT NULL,
+  `embargo_type` VARCHAR(55) COMMENT 'full, metadata_only, digital_object, custom' NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `reason` text COLLATE utf8mb4_unicode_ci,
+  `reason` text,
   `is_perpetual` tinyint(1) DEFAULT '0',
-  `status` VARCHAR(44) COMMENT 'active, expired, lifted, pending' COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `status` VARCHAR(44) COMMENT 'active, expired, lifted, pending' DEFAULT 'pending',
   `created_by` int DEFAULT NULL,
   `lifted_by` int DEFAULT NULL,
   `lifted_at` timestamp NULL DEFAULT NULL,
-  `lift_reason` text COLLATE utf8mb4_unicode_ci,
+  `lift_reason` text,
   `notify_on_expiry` tinyint(1) DEFAULT '1',
   `notify_days_before` int DEFAULT '30',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -327,7 +341,7 @@ CREATE TABLE IF NOT EXISTS `embargo` (
   KEY `idx_embargo_status` (`object_id`,`status`),
   KEY `idx_is_active` (`is_active`),
   KEY `idx_object_active` (`object_id`,`is_active`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -339,15 +353,15 @@ CREATE TABLE IF NOT EXISTS `embargo` (
 CREATE TABLE IF NOT EXISTS `embargo_audit` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `embargo_id` bigint unsigned NOT NULL,
-  `action` VARCHAR(83) COMMENT 'created, modified, lifted, extended, exception_added, exception_removed' COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` VARCHAR(83) COMMENT 'created, modified, lifted, extended, exception_added, exception_removed' NOT NULL,
   `user_id` int DEFAULT NULL,
   `old_values` json DEFAULT NULL,
   `new_values` json DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_emb_audit_embargo` (`embargo_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -359,19 +373,19 @@ CREATE TABLE IF NOT EXISTS `embargo_audit` (
 CREATE TABLE IF NOT EXISTS `embargo_exception` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `embargo_id` bigint unsigned NOT NULL,
-  `exception_type` VARCHAR(45) COMMENT 'user, group, ip_range, repository' COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception_type` VARCHAR(45) COMMENT 'user, group, ip_range, repository' NOT NULL,
   `exception_id` int DEFAULT NULL,
-  `ip_range_start` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ip_range_end` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_range_start` varchar(45) DEFAULT NULL,
+  `ip_range_end` varchar(45) DEFAULT NULL,
   `valid_from` date DEFAULT NULL,
   `valid_until` date DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text,
   `granted_by` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_emb_exc_embargo` (`embargo_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -383,14 +397,14 @@ CREATE TABLE IF NOT EXISTS `embargo_exception` (
 CREATE TABLE IF NOT EXISTS `embargo_i18n` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `embargo_id` bigint unsigned NOT NULL,
-  `culture` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
-  `public_message` text COLLATE utf8mb4_unicode_ci,
+  `culture` varchar(10) NOT NULL DEFAULT 'en',
+  `reason` varchar(255) DEFAULT NULL,
+  `notes` text,
+  `public_message` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_embargo_i18n` (`embargo_id`,`culture`),
   KEY `idx_embargo_i18n_parent` (`embargo_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
