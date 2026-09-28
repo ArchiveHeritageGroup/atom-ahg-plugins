@@ -27,7 +27,7 @@ class MetadataRepository
             ->where('do.id', $id)
             ->select(
                 'do.id',
-                'do.information_object_id',
+                'do.object_id as information_object_id',
                 'do.mime_type',
                 'do.name',
                 'do.path',

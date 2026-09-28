@@ -38,7 +38,7 @@ class metadataExtractionActions extends AhgController
 
         // Build query
         $query = Illuminate\Database\Capsule\Manager::table('digital_object as do')
-            ->join('information_object as io', 'do.information_object_id', '=', 'io.id')
+            ->join('information_object as io', 'do.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
@@ -49,7 +49,7 @@ class metadataExtractionActions extends AhgController
                 'do.path',
                 'do.mime_type',
                 'do.byte_size',
-                'do.information_object_id',
+                'do.object_id as information_object_id',
                 'ioi.title as record_title'
             )
             ->whereNotNull('do.path');
@@ -111,7 +111,7 @@ class metadataExtractionActions extends AhgController
 
         // Get digital object info
         $this->digitalObject = Illuminate\Database\Capsule\Manager::table('digital_object as do')
-            ->join('information_object as io', 'do.information_object_id', '=', 'io.id')
+            ->join('information_object as io', 'do.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
@@ -123,7 +123,7 @@ class metadataExtractionActions extends AhgController
                 'do.path',
                 'do.mime_type',
                 'do.byte_size',
-                'do.information_object_id',
+                'do.object_id as information_object_id',
                 'ioi.title as record_title',
                 'io.slug'
             )
