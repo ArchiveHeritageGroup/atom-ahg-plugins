@@ -19,6 +19,16 @@ class ahgStorageManagePluginConfiguration extends sfPluginConfiguration
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 70,
             ]);
+
+            // Same reasoning as above: without an entry the storage-location
+            // screens are reachable only by typing the URL. Heratio carries the
+            // matching link (v1.155.1), so the two read the same way.
+            AhgNav::register('manage', 'StorageLocations', [
+                'url' => '/index.php/storageLocation/browse',
+                'label' => 'Storage Locations',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 71,
+            ]);
         }
 
         $this->registerAutoloader();
