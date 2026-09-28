@@ -214,7 +214,7 @@ if ('' === trim($resourceLabel)) {
               <input type="checkbox" name="has_gaps" class="form-check-input" id="hasGaps" value="1" <?php echo ($record->has_gaps ?? 0) ? 'checked' : '' ?>>
               <label class="form-check-label" for="hasGaps">There are gaps in the provenance chain</label>
             </div>
-            <div class="mb-0" id="gapDescriptionGroup" class="<?php echo ($record->has_gaps ?? 0) ? '' : 'prov-collapsed' ?>">
+            <div class="mb-0 <?php echo ($record->has_gaps ?? 0) ? '' : 'prov-collapsed' ?>" id="gapDescriptionGroup">
               <label class="form-label">Gap Description</label>
               <textarea name="gap_description" class="form-control" rows="2" placeholder="Describe the gaps in provenance..."><?php echo htmlspecialchars($record->gap_description ?? '') ?></textarea>
             </div>
@@ -521,12 +521,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Toggle gap description
   document.getElementById('hasGaps').addEventListener('change', function() {
-    document.getElementById('gapDescriptionGroup').style.display = this.checked ? '' : 'none';
+    document.getElementById('gapDescriptionGroup').classList.toggle('prov-collapsed', !this.checked);
   });
 
   // Toggle Nazi-era clear
+  // These groups are hidden with the prov-collapsed class, not an inline style.
+  // Setting style.display = '' removed an inline rule that was never there and
+  // left the class in place, so ticking either box revealed nothing: the
+  // Nazi-era result and notes, and the gap description, were unreachable.
   document.getElementById('naziEraChecked').addEventListener('change', function() {
-    document.getElementById('naziEraClearGroup').style.display = this.checked ? '' : 'none';
+    document.getElementById('naziEraClearGroup').classList.toggle('prov-collapsed', !this.checked);
   });
 
   // Add document
