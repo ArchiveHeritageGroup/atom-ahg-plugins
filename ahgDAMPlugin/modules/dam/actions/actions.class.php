@@ -498,8 +498,12 @@ class damActions extends AhgController
         }
 
         // Build file path
-        $uploadDir = $this->config('sf_upload_dir');
-        $filePath = $uploadDir . $digitalObject->path . $digitalObject->name;
+        // digital_object.path is relative to the WEB dir and already starts with
+        // "uploads/", so joining it to sf_upload_dir - which is that same uploads
+        // directory - produced .../uploads/uploads/... and every extraction
+        // answered "File not found". Same defect and same fix as
+        // ahgMetadataExtractionPlugin.
+        $filePath = sfConfig::get('sf_web_dir').'/'.$digitalObject->path.$digitalObject->name;
 
         if (!file_exists($filePath)) {
             $this->getResponse()->setContentType('application/json');
@@ -628,7 +632,11 @@ class damActions extends AhgController
 
     public function executeBrowse($request)
     {
-        $this->redirect('ahgDisplay/browse?type=dam');
+        // The module is `display`, not `ahgDisplay` - ahgDisplayPlugin names its
+        // modules display, displaySearch, digitalobject and so on. The plugin name
+        // is not the module name, so /dam/browse 404'd with
+        // "Action ahgDisplay/browse does not exist".
+        $this->redirect('display/browse?type=dam');
     }
 
     public function executeBulkCreate($request)

@@ -1,3 +1,17 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no COLLATE, so they take the database
+-- default and therefore match AtoM's own tables. Pinning utf8mb4_unicode_ci
+-- meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci) every join
+-- between one of these tables and a base AtoM table failed with "Illegal mix
+-- of collations" - which is what took out ahgPreservationPlugin's Format
+-- Conversion screen. Same defect, same fix.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ---------------------------------------------------------------------------
 -- Moved from atom-framework/database/install.sql.
 -- These tables belong to ahgPrivacyPlugin and are created when this plugin is installed,
@@ -9,42 +23,42 @@
 CREATE TABLE IF NOT EXISTS `digital_object_metadata` (
   `id` int NOT NULL AUTO_INCREMENT,
   `digital_object_id` int NOT NULL,
-  `file_type` VARCHAR(51) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'image, pdf, office, video, audio, other',
+  `file_type` VARCHAR(51) CHARACTER SET utf8mb4 NOT NULL COMMENT 'image, pdf, office, video, audio, other',
   `raw_metadata` json DEFAULT NULL COMMENT 'Complete raw metadata as extracted',
-  `title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `creator` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `keywords` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `copyright` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `date_created` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `creator` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4,
+  `keywords` text CHARACTER SET utf8mb4,
+  `copyright` varchar(500) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `date_created` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
   `image_width` int DEFAULT NULL,
   `image_height` int DEFAULT NULL,
-  `camera_make` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `camera_model` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `camera_make` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `camera_model` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
   `gps_latitude` decimal(10,8) DEFAULT NULL,
   `gps_longitude` decimal(11,8) DEFAULT NULL,
   `gps_altitude` decimal(10,2) DEFAULT NULL,
   `page_count` int DEFAULT NULL,
   `word_count` int DEFAULT NULL,
-  `author` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `application` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `author` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `application` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `duration` decimal(12,3) DEFAULT NULL COMMENT 'Duration in seconds',
-  `duration_formatted` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `video_codec` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `audio_codec` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `resolution` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `duration_formatted` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `video_codec` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `audio_codec` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `resolution` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL,
   `frame_rate` decimal(6,2) DEFAULT NULL,
   `bitrate` int DEFAULT NULL,
   `sample_rate` int DEFAULT NULL,
   `channels` int DEFAULT NULL,
-  `artist` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `album` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `artist` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `album` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `track_number` int DEFAULT NULL,
-  `genre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `year` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `genre` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `year` varchar(10) CHARACTER SET utf8mb4 DEFAULT NULL,
   `extraction_date` datetime DEFAULT CURRENT_TIMESTAMP,
-  `extraction_method` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `extraction_errors` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `extraction_method` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `extraction_errors` text CHARACTER SET utf8mb4,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -54,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `digital_object_metadata` (
   KEY `idx_date_created` (`date_created`),
   KEY `idx_gps` (`gps_latitude`,`gps_longitude`),
   CONSTRAINT `digital_object_metadata_ibfk_1` FOREIGN KEY (`digital_object_id`) REFERENCES `digital_object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- =====================================================
@@ -78,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `privacy_audit_log` (
   KEY `idx_entity` (`entity_type`, `entity_id`),
   KEY `idx_user` (`user_id`),
   KEY `idx_action` (`action`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Breach Register
 CREATE TABLE IF NOT EXISTS `privacy_breach` (
@@ -109,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `privacy_breach` (
   KEY `idx_status` (`status`),
   KEY `idx_severity` (`severity`),
   KEY `idx_jurisdiction` (`jurisdiction`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Breach i18n
 CREATE TABLE IF NOT EXISTS `privacy_breach_i18n` (
@@ -123,7 +137,7 @@ CREATE TABLE IF NOT EXISTS `privacy_breach_i18n` (
   `lessons_learned` TEXT,
   PRIMARY KEY (`id`, `culture`),
   CONSTRAINT `fk_breach_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_breach` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Breach Incident (Legacy)
 CREATE TABLE IF NOT EXISTS `privacy_breach_incident` (
@@ -147,7 +161,7 @@ CREATE TABLE IF NOT EXISTS `privacy_breach_incident` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_reference` (`reference`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Breach Notification
 CREATE TABLE IF NOT EXISTS `privacy_breach_notification` (
@@ -164,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `privacy_breach_notification` (
   PRIMARY KEY (`id`),
   KEY `idx_breach` (`breach_id`),
   CONSTRAINT `fk_breach_notif` FOREIGN KEY (`breach_id`) REFERENCES `privacy_breach` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Complaint
 CREATE TABLE IF NOT EXISTS `privacy_complaint` (
@@ -185,7 +199,7 @@ CREATE TABLE IF NOT EXISTS `privacy_complaint` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_complaint_ref` (`reference_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Config (per jurisdiction)
 CREATE TABLE IF NOT EXISTS `privacy_config` (
@@ -204,7 +218,7 @@ CREATE TABLE IF NOT EXISTS `privacy_config` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_jurisdiction` (`jurisdiction`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Consent Types
 CREATE TABLE IF NOT EXISTS `privacy_consent` (
@@ -220,7 +234,7 @@ CREATE TABLE IF NOT EXISTS `privacy_consent` (
   PRIMARY KEY (`id`),
   KEY `idx_type` (`consent_type`),
   KEY `idx_purpose` (`purpose_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Consent i18n
 CREATE TABLE IF NOT EXISTS `privacy_consent_i18n` (
@@ -231,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `privacy_consent_i18n` (
   `purpose_description` TEXT,
   PRIMARY KEY (`id`, `culture`),
   CONSTRAINT `fk_consent_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_consent` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Consent Log
 CREATE TABLE IF NOT EXISTS `privacy_consent_log` (
@@ -252,7 +266,7 @@ CREATE TABLE IF NOT EXISTS `privacy_consent_log` (
   KEY `idx_user` (`user_id`),
   KEY `idx_subject` (`subject_identifier`),
   CONSTRAINT `fk_consent_log` FOREIGN KEY (`consent_id`) REFERENCES `privacy_consent` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Consent Record (Simple)
 CREATE TABLE IF NOT EXISTS `privacy_consent_record` (
@@ -293,7 +307,7 @@ CREATE TABLE IF NOT EXISTS `privacy_data_inventory` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_type` (`data_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- DSAR (Data Subject Access Request)
 CREATE TABLE IF NOT EXISTS `privacy_dsar` (
@@ -329,7 +343,7 @@ CREATE TABLE IF NOT EXISTS `privacy_dsar` (
   KEY `idx_jurisdiction` (`jurisdiction`),
   KEY `idx_due_date` (`due_date`),
   KEY `idx_assigned` (`assigned_to`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- DSAR i18n
 CREATE TABLE IF NOT EXISTS `privacy_dsar_i18n` (
@@ -340,7 +354,7 @@ CREATE TABLE IF NOT EXISTS `privacy_dsar_i18n` (
   `response_summary` TEXT,
   PRIMARY KEY (`id`, `culture`),
   CONSTRAINT `fk_dsar_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_dsar` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- DSAR Log
 CREATE TABLE IF NOT EXISTS `privacy_dsar_log` (
@@ -353,7 +367,7 @@ CREATE TABLE IF NOT EXISTS `privacy_dsar_log` (
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_dsar` (`dsar_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- DSAR Request (Legacy simple table)
 CREATE TABLE IF NOT EXISTS `privacy_dsar_request` (
@@ -375,7 +389,7 @@ CREATE TABLE IF NOT EXISTS `privacy_dsar_request` (
   UNIQUE KEY `uk_reference` (`reference`),
   KEY `idx_status` (`status`),
   KEY `idx_deadline` (`deadline_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Jurisdiction
 CREATE TABLE IF NOT EXISTS `privacy_jurisdiction` (
@@ -398,7 +412,7 @@ CREATE TABLE IF NOT EXISTS `privacy_jurisdiction` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_jurisdiction_code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Notification
 CREATE TABLE IF NOT EXISTS `privacy_notification` (
@@ -420,7 +434,7 @@ CREATE TABLE IF NOT EXISTS `privacy_notification` (
   KEY `idx_user` (`user_id`),
   KEY `idx_entity` (`entity_type`, `entity_id`),
   KEY `idx_unread` (`user_id`, `is_read`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Officer
 CREATE TABLE IF NOT EXISTS `privacy_officer` (
@@ -439,7 +453,7 @@ CREATE TABLE IF NOT EXISTS `privacy_officer` (
   PRIMARY KEY (`id`),
   KEY `idx_user` (`user_id`),
   KEY `idx_jurisdiction` (`jurisdiction`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- PAIA Request (South Africa)
 CREATE TABLE IF NOT EXISTS `privacy_paia_request` (
@@ -470,7 +484,7 @@ CREATE TABLE IF NOT EXISTS `privacy_paia_request` (
   UNIQUE KEY `uk_paia_reference` (`reference_number`),
   KEY `idx_paia_status` (`status`),
   KEY `idx_paia_section` (`paia_section`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ROPA (Processing Activity)
 CREATE TABLE IF NOT EXISTS `privacy_processing_activity` (
@@ -507,7 +521,7 @@ CREATE TABLE IF NOT EXISTS `privacy_processing_activity` (
   `rejected_by` INT DEFAULT NULL,
   `rejection_reason` TEXT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ROPA i18n
 CREATE TABLE IF NOT EXISTS `privacy_processing_activity_i18n` (
@@ -518,7 +532,7 @@ CREATE TABLE IF NOT EXISTS `privacy_processing_activity_i18n` (
   `description` TEXT,
   PRIMARY KEY (`id`, `culture`),
   CONSTRAINT `fk_processing_i18n` FOREIGN KEY (`id`) REFERENCES `privacy_processing_activity` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Retention Schedule
 CREATE TABLE IF NOT EXISTS `privacy_retention_schedule` (
@@ -535,7 +549,7 @@ CREATE TABLE IF NOT EXISTS `privacy_retention_schedule` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_jurisdiction` (`jurisdiction`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Template
 CREATE TABLE IF NOT EXISTS `privacy_template` (
@@ -551,7 +565,7 @@ CREATE TABLE IF NOT EXISTS `privacy_template` (
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_category` (`category`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Privacy Approval Log
 CREATE TABLE IF NOT EXISTS `privacy_approval_log` (
@@ -566,7 +580,7 @@ CREATE TABLE IF NOT EXISTS `privacy_approval_log` (
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_entity` (`entity_type`, `entity_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- Default Data
@@ -625,7 +639,7 @@ CREATE TABLE IF NOT EXISTS `privacy_visual_redaction` (
     KEY `idx_status` (`status`),
     KEY `idx_source` (`source`),
     KEY `idx_linked_entity` (`linked_entity_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Redaction cache for applied outputs
 CREATE TABLE IF NOT EXISTS `privacy_redaction_cache` (
@@ -644,7 +658,7 @@ CREATE TABLE IF NOT EXISTS `privacy_redaction_cache` (
     UNIQUE KEY `uk_object_hash` (`object_id`, `regions_hash`),
     KEY `idx_object` (`object_id`),
     KEY `idx_expires` (`expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/core.sql on 2026-08-18.

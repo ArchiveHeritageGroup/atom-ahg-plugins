@@ -1,3 +1,17 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no COLLATE, so they take the database
+-- default and therefore match AtoM's own tables. Pinning utf8mb4_unicode_ci
+-- meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci) every join
+-- between one of these tables and a base AtoM table failed with "Illegal mix
+-- of collations" - which is what took out ahgPreservationPlugin's Format
+-- Conversion screen. Same defect, same fix.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ============================================================
 -- ahgDisplayPlugin - Database Schema
 -- Generated from actual database structure
@@ -151,14 +165,14 @@ CREATE TABLE IF NOT EXISTS `display_level_i18n` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_mode_global` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `module` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Module: informationobject, actor, repository, etc.',
-  `display_mode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'list',
+  `module` varchar(100) NOT NULL COMMENT 'Module: informationobject, actor, repository, etc.',
+  `display_mode` varchar(50) NOT NULL DEFAULT 'list',
   `items_per_page` int DEFAULT '30',
-  `sort_field` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'updated_at',
-  `sort_direction` VARCHAR(21) COMMENT 'asc, desc' COLLATE utf8mb4_unicode_ci DEFAULT 'desc',
+  `sort_field` varchar(100) DEFAULT 'updated_at',
+  `sort_direction` VARCHAR(21) COMMENT 'asc, desc' DEFAULT 'desc',
   `show_thumbnails` tinyint(1) DEFAULT '1',
   `show_descriptions` tinyint(1) DEFAULT '1',
-  `card_size` VARCHAR(32) COMMENT 'small, medium, large' COLLATE utf8mb4_unicode_ci DEFAULT 'medium',
+  `card_size` VARCHAR(32) COMMENT 'small, medium, large' DEFAULT 'medium',
   `available_modes` json DEFAULT NULL COMMENT 'JSON array of enabled modes for this module',
   `allow_user_override` tinyint(1) DEFAULT '1' COMMENT 'Allow users to change from default',
   `is_active` tinyint(1) DEFAULT '1',
@@ -167,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `display_mode_global` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_module` (`module`),
   KEY `idx_active` (`is_active`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -268,14 +282,14 @@ CREATE TABLE IF NOT EXISTS `display_profile_i18n` (
 CREATE TABLE IF NOT EXISTS `user_display_preference` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
-  `module` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Module context: informationobject, actor, repository, etc.',
-  `display_mode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'list' COMMENT 'tree, grid, gallery, list, timeline',
+  `module` varchar(100) NOT NULL COMMENT 'Module context: informationobject, actor, repository, etc.',
+  `display_mode` varchar(50) NOT NULL DEFAULT 'list' COMMENT 'tree, grid, gallery, list, timeline',
   `items_per_page` int DEFAULT '30',
-  `sort_field` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'updated_at',
-  `sort_direction` VARCHAR(21) COMMENT 'asc, desc' COLLATE utf8mb4_unicode_ci DEFAULT 'desc',
+  `sort_field` varchar(100) DEFAULT 'updated_at',
+  `sort_direction` VARCHAR(21) COMMENT 'asc, desc' DEFAULT 'desc',
   `show_thumbnails` tinyint(1) DEFAULT '1',
   `show_descriptions` tinyint(1) DEFAULT '1',
-  `card_size` VARCHAR(32) COMMENT 'small, medium, large' COLLATE utf8mb4_unicode_ci DEFAULT 'medium',
+  `card_size` VARCHAR(32) COMMENT 'small, medium, large' DEFAULT 'medium',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_custom` tinyint(1) DEFAULT '1' COMMENT 'True if user explicitly set, false if inherited from global',
@@ -284,7 +298,7 @@ CREATE TABLE IF NOT EXISTS `user_display_preference` (
   KEY `idx_user_id` (`user_id`),
   KEY `idx_module` (`module`),
   KEY `idx_udp_user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -486,9 +500,9 @@ CREATE TABLE IF NOT EXISTS `user_browse_settings` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `use_glam_browse` tinyint(1) DEFAULT '0' COMMENT 'Use GLAM browse as default browse interface',
-  `default_sort_field` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'updated_at',
-  `default_sort_direction` VARCHAR(21) COMMENT 'asc, desc' COLLATE utf8mb4_unicode_ci DEFAULT 'desc',
-  `default_view` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'list',
+  `default_sort_field` varchar(100) DEFAULT 'updated_at',
+  `default_sort_direction` VARCHAR(21) COMMENT 'asc, desc' DEFAULT 'desc',
+  `default_view` varchar(50) DEFAULT 'list',
   `items_per_page` int DEFAULT '30',
   `show_facets` tinyint(1) DEFAULT '1',
   `remember_filters` tinyint(1) DEFAULT '1' COMMENT 'Remember last used filters',
@@ -498,7 +512,7 @@ CREATE TABLE IF NOT EXISTS `user_browse_settings` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_id` (`user_id`),
   KEY `idx_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
 -- Display Facet Cache Table
@@ -516,7 +530,7 @@ CREATE TABLE IF NOT EXISTS `display_facet_cache` (
   PRIMARY KEY (`id`),
   KEY `idx_facet_type` (`facet_type`),
   KEY `idx_facet_count` (`facet_type`, `count` DESC)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------
 -- Merged in from database/fulltext_indexes.sql on 2026-08-17.
@@ -539,3 +553,38 @@ CREATE FULLTEXT INDEX ft_ioi_title ON information_object_i18n(title);
 CREATE FULLTEXT INDEX ft_ioi_scope ON information_object_i18n(scope_and_content);
 CREATE FULLTEXT INDEX ft_ai_name ON actor_i18n(authorized_form_of_name);
 CREATE FULLTEXT INDEX ft_ti_name ON term_i18n(name);
+
+-- ============================================================
+-- Collection types.
+--
+-- These were missing from this file entirely: the table shipped empty, and
+-- `display_collection_type` has AUTO_INCREMENT=8, so the source dump held rows
+-- whose INSERTs were not carried across. The consequence is that Admin > Display
+-- > Bulk Set Object Types renders its required "Object Type *" label with no
+-- control at all - the template loops $collectionTypes and there is nothing to
+-- loop - so no record can be typed and every sector dashboard reads zero. PSIS
+-- had zero rows too, so the screen has never worked on any instance.
+--
+-- The values are NOT invented. They are the $typeConfig map that this plugin's
+-- own browse templates already use to render a type's icon, colour and label
+-- (modules/display/templates/browseSuccess.php and browseEmbeddedSuccess.php,
+-- identical in both). Seeding anything those templates cannot render would
+-- produce a selectable type that then displays with no icon and no colour -
+-- which is why "Audiovisual", mentioned in the help text on this screen but
+-- absent from $typeConfig, is deliberately NOT seeded here. Add it when the
+-- templates know about it.
+-- ============================================================
+INSERT IGNORE INTO `display_collection_type`
+    (`id`, `code`, `parent_id`, `icon`, `color`, `default_profile_id`, `sort_order`, `is_active`) VALUES
+    (1, 'archive',  NULL, 'fa-archive',  'success', NULL, 10, 1),
+    (2, 'museum',   NULL, 'fa-landmark', 'warning', NULL, 20, 1),
+    (3, 'gallery',  NULL, 'fa-palette',  'info',    NULL, 30, 1),
+    (4, 'library',  NULL, 'fa-book',     'primary', NULL, 40, 1),
+    (5, 'dam',      NULL, 'fa-images',   'danger',  NULL, 50, 1);
+
+INSERT IGNORE INTO `display_collection_type_i18n` (`id`, `culture`, `name`, `description`) VALUES
+    (1, 'en', 'Archive',   'ISAD(G) hierarchical view'),
+    (2, 'en', 'Museum',    'Collections Procedures object records'),
+    (3, 'en', 'Gallery',   'Artwork and artist focus'),
+    (4, 'en', 'Library',   'Bibliographic view'),
+    (5, 'en', 'Photo/DAM', 'Visual grid and lightbox');

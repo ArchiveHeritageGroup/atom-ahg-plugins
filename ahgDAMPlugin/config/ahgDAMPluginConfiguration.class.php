@@ -24,7 +24,6 @@ class ahgDAMPluginConfiguration extends sfPluginConfiguration
 
         // Specific routes (added last so they are checked first)
         $dam->any('dam_browse', '/dam/browse', 'browse');
-        $dam->any('dam_lightbox', '/dam/lightbox', 'lightbox');
         $dam->any('dam_dashboard', '/dam/dashboard', 'dashboard');
         $dam->any('dam_create', '/dam/create', 'create');
         $dam->any('dam_bulk_create', '/dam/bulk', 'bulkCreate');

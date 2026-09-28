@@ -1,3 +1,16 @@
+-- NOTE ON COLLATION
+-- These tables deliberately declare no COLLATE, so they take the database
+-- default and therefore match AtoM's own tables. Pinning utf8mb4_unicode_ci
+-- meant that on a MySQL 8 instance (default utf8mb4_0900_ai_ci) every join
+-- between a DAM table and a base AtoM table failed with "Illegal mix of
+-- collations". Same defect, and same fix, as ahgPreservationPlugin.
+--
+-- To repair an instance installed before this change:
+--   mysql <db> -N -e "SELECT CONCAT('ALTER TABLE \\`', table_name, '\\` CONVERT TO \
+--     CHARACTER SET utf8mb4 COLLATE ', @@collation_database, ';') \
+--     FROM information_schema.tables WHERE table_schema = DATABASE() \
+--     AND table_collation <> @@collation_database" | mysql <db>
+
 -- ---------------------------------------------------------------------------
 -- Moved from atom-framework/database/install.sql.
 -- These tables belong to ahgDAMPlugin and are created when this plugin is installed,
@@ -8,20 +21,6 @@
 -- NOTE: GLAM/DAM terms are created by individual plugins:
 -- ahgMuseumPlugin, ahgLibraryPlugin, ahgGalleryPlugin, ahgDAMPlugin
 -- Each plugin creates its own terms in its data/install.sql
--- =============================================
--- Watermark Types (default data)
--- =============================================
-INSERT INTO `watermark_type` (`code`, `name`, `image_file`, `position`, `opacity`, `active`, `sort_order`) VALUES
-('DRAFT', 'Draft', 'draft.png', 'center', 0.40, 1, 1),
-('COPYRIGHT', 'Copyright', 'copyright.png', 'bottom right', 0.30, 1, 2),
-('CONFIDENTIAL', 'Confidential', 'confidential.png', 'repeat', 0.40, 1, 3),
-('SECRET', 'Secret', 'secret_copyright.png', 'repeat', 0.40, 1, 4),
-('TOP_SECRET', 'Top Secret', 'top_secret_copyright.png', 'repeat', 0.50, 1, 5),
-('NONE', 'No Watermark', '', 'none', 0.00, 1, 6),
-('SAMPLE', 'Sample', 'sample.png', 'center', 0.50, 1, 7),
-('PREVIEW', 'Preview Only', 'preview.png', 'center', 0.40, 1, 8),
-('RESTRICTED', 'Restricted', 'restricted.png', 'repeat', 0.35, 1, 9)
-ON DUPLICATE KEY UPDATE name=VALUES(name), image_file=VALUES(image_file), position=VALUES(position), opacity=VALUES(opacity);
 
 
 -- =====================================================
@@ -124,7 +123,7 @@ CREATE TABLE IF NOT EXISTS dam_iptc_metadata (
     KEY idx_genre (genre),
     KEY idx_production_company (production_company(100)),
     KEY idx_broadcast_date (broadcast_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- Media Derivatives
@@ -140,7 +139,7 @@ CREATE TABLE IF NOT EXISTS media_derivatives (
     PRIMARY KEY (id),
     KEY idx_digital_object (digital_object_id),
     KEY idx_type (derivative_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- Watermark Type
@@ -157,7 +156,7 @@ CREATE TABLE IF NOT EXISTS watermark_type (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY code (code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Watermark types seed data
 INSERT IGNORE INTO watermark_type (code, name, image_file, position, opacity, active, sort_order) VALUES
@@ -183,7 +182,7 @@ CREATE TABLE IF NOT EXISTS watermark_setting (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY setting_key (setting_key)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Watermark settings seed data
 INSERT IGNORE INTO watermark_setting (setting_key, setting_value, description) VALUES
@@ -212,7 +211,7 @@ CREATE TABLE IF NOT EXISTS custom_watermark (
     PRIMARY KEY (id),
     KEY idx_object (object_id),
     KEY idx_active (active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- Object Watermark Setting
@@ -231,7 +230,7 @@ CREATE TABLE IF NOT EXISTS object_watermark_setting (
     UNIQUE KEY object_id (object_id),
     KEY watermark_type_id (watermark_type_id),
     KEY custom_watermark_id (custom_watermark_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- Creative Commons License tables
@@ -268,7 +267,7 @@ CREATE TABLE IF NOT EXISTS rights_derivative_rule (
     KEY idx_object (object_id),
     KEY idx_collection (collection_id),
     KEY idx_rule_type (rule_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- Rights Derivative Log
@@ -287,7 +286,7 @@ CREATE TABLE IF NOT EXISTS rights_derivative_log (
     PRIMARY KEY (id),
     KEY idx_digital_object (digital_object_id),
     KEY idx_rule (rule_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- Security Watermark Log
@@ -309,7 +308,7 @@ CREATE TABLE IF NOT EXISTS security_watermark_log (
     KEY idx_object (object_id),
     KEY idx_code (watermark_code),
     KEY idx_date (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- DAM Display Standard Term (taxonomy_id = 70)
@@ -412,7 +411,7 @@ CREATE TABLE IF NOT EXISTS dam_external_links (
     KEY idx_object (object_id),
     KEY idx_link_type (link_type),
     KEY idx_person (person_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- DAM Format Holdings
@@ -440,7 +439,7 @@ CREATE TABLE IF NOT EXISTS dam_format_holdings (
     KEY idx_institution (holding_institution),
     KEY idx_condition (condition_status),
     KEY idx_access (access_status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
 -- DAM Version Links
@@ -462,4 +461,4 @@ CREATE TABLE IF NOT EXISTS dam_version_links (
     KEY idx_related (related_object_id),
     KEY idx_version_type (version_type),
     KEY idx_language (language_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

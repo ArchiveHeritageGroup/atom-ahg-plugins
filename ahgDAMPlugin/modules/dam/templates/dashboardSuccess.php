@@ -119,8 +119,9 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
         </div>
         <div class="col-md-4 mb-2">
           <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'dam']); ?>" class="btn btn-info btn-lg w-100">
+            <i class="fas fa-search me-2"></i><?php echo __('Browse Assets'); ?>
+          </a>
         </div>
-        <div class="col-md-3">
       </div>
     </div>
   </div>
