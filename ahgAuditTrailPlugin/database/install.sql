@@ -215,10 +215,38 @@ INSERT IGNORE INTO `ahg_audit_settings` (`setting_key`, `setting_value`, `settin
 -- Historical rows (entry_hash IS NULL) are left as-is; every NEW entry from the
 -- seal point on is SHA-256 linked to the previous, making post-seal history
 -- tamper-evident.
-ALTER TABLE `ahg_audit_log`
-  ADD COLUMN `prev_hash` CHAR(64) NULL COMMENT 'SHA-256 entry_hash of the previous chained entry',
-  ADD COLUMN `entry_hash` CHAR(64) NULL COMMENT 'SHA-256(prev_hash || canonical(content))',
-  ADD KEY `idx_audit_entry_hash` (`entry_hash`);
+-- ---------------------------------------------------------------------------
+-- Adding a column that is already there aborts the file, and everything below
+-- the failure never runs: on this instance that stranded ahg_audit_chain_state,
+-- the seal anchor the hash chain depends on. MySQL has no ADD COLUMN IF NOT
+-- EXISTS, so each addition below asks information_schema first. The file is
+-- re-runnable in full.
+-- ---------------------------------------------------------------------------
+
+DROP PROCEDURE IF EXISTS ahg_audit_add_column;
+DELIMITER //
+CREATE PROCEDURE ahg_audit_add_column(IN tbl VARCHAR(64), IN col VARCHAR(64), IN ddl TEXT)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_schema = DATABASE() AND table_name = tbl AND column_name = col) THEN
+        SET @sql := CONCAT('ALTER TABLE `', tbl, '` ADD COLUMN ', ddl);
+        PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+    END IF;
+END //
+DROP PROCEDURE IF EXISTS ahg_audit_add_index//
+CREATE PROCEDURE ahg_audit_add_index(IN tbl VARCHAR(64), IN idx VARCHAR(64), IN ddl TEXT)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.statistics
+                   WHERE table_schema = DATABASE() AND table_name = tbl AND index_name = idx) THEN
+        SET @sql := CONCAT('ALTER TABLE `', tbl, '` ADD KEY ', ddl);
+        PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+    END IF;
+END //
+DELIMITER ;
+
+CALL ahg_audit_add_column('ahg_audit_log', 'prev_hash', '`prev_hash` CHAR(64) NULL COMMENT ''SHA-256 entry_hash of the previous chained entry''');
+CALL ahg_audit_add_column('ahg_audit_log', 'entry_hash', '`entry_hash` CHAR(64) NULL COMMENT ''SHA-256(prev_hash || canonical(content))''');
+CALL ahg_audit_add_index('ahg_audit_log', 'idx_audit_entry_hash', '`idx_audit_entry_hash` (`entry_hash`)');
 
 -- Single-row chain head + seal anchor. Locked FOR UPDATE on each append so
 -- concurrent writers cannot fork the chain.
@@ -254,12 +282,13 @@ CREATE TABLE IF NOT EXISTS `ahg_audit_chain_state` (
 -- All nullable/additive — pre-seal rows keep their entry_hash and still verify.
 -- Run-once. ALTER on a large table: MySQL 8 ADD COLUMN is INSTANT.
 
-ALTER TABLE `ahg_audit_log`
-    ADD COLUMN `kid` VARCHAR(32) NULL COMMENT 'Ed25519 signing key id' AFTER `entry_hash`,
-    ADD COLUMN `seq` BIGINT NULL COMMENT 'monotonic per-chain ordinal' AFTER `kid`,
-    ADD COLUMN `signature` VARCHAR(128) NULL COMMENT 'base64 detached Ed25519 signature over entry_hash' AFTER `seq`,
-    ADD COLUMN `tenant_id` INT NULL COMMENT 'multi-tenant scoping (nullable)' AFTER `signature`;
+CALL ahg_audit_add_column('ahg_audit_log', 'kid', '`kid` VARCHAR(32) NULL COMMENT ''Ed25519 signing key id'' AFTER `entry_hash`');
+CALL ahg_audit_add_column('ahg_audit_log', 'seq', '`seq` BIGINT NULL COMMENT ''monotonic per-chain ordinal'' AFTER `kid`');
+CALL ahg_audit_add_column('ahg_audit_log', 'signature', '`signature` VARCHAR(128) NULL COMMENT ''base64 detached Ed25519 signature over entry_hash'' AFTER `seq`');
+CALL ahg_audit_add_column('ahg_audit_log', 'tenant_id', '`tenant_id` INT NULL COMMENT ''multi-tenant scoping (nullable)'' AFTER `signature`');
 
 -- Track the monotonic seq counter on the single chain-state row.
-ALTER TABLE `ahg_audit_chain_state`
-    ADD COLUMN `last_seq` BIGINT NOT NULL DEFAULT 0 COMMENT 'last issued seq' AFTER `last_audit_id`;
+CALL ahg_audit_add_column('ahg_audit_chain_state', 'last_seq', '`last_seq` BIGINT NOT NULL DEFAULT 0 COMMENT ''last issued seq'' AFTER `last_audit_id`');
+
+DROP PROCEDURE IF EXISTS ahg_audit_add_column;
+DROP PROCEDURE IF EXISTS ahg_audit_add_index;
