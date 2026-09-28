@@ -1,10 +1,10 @@
-# AHG plugins for AtoM
+# Packaged AHG plugins for AtoM
 
-Nine plugins for [Access to Memory](https://accesstomemory.org) 2.9 and 2.10. Each installs on its own, and nothing in base AtoM is modified - no file under `apps/`, `lib/`, `vendor/` or `config/` is touched, and `ProjectConfiguration.class.php` stays as upstream ships it.
+The AHG extensions packaged as installable bundles for [Access to Memory](https://accesstomemory.org) 2.9 and 2.10, grouped by the capability they deliver. Each installs on its own, and nothing in base AtoM is modified - no file under `apps/`, `lib/`, `vendor/` or `config/` is touched, and `ProjectConfiguration.class.php` stays as upstream ships it.
 
-This page lists the **current version of each**. For older versions see the [full release history](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases).
+This page lists the **current version of each**. For older versions see the [full release history](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases). The wider catalogue - Records in Contexts, AI and semantic discovery, museum, library, DAM, rights, privacy and security - installs from the [repository](../../README.md#plugin-catalogue) rather than from bundles.
 
-## Install the runtime first
+## Foundation: install the runtime first
 
 | | Version | |
 |---|---|---|
@@ -14,7 +14,11 @@ It ships once, separately, because it is the large part and identical for all of
 
 Requirements are the same throughout: **AtoM 2.9 or 2.10, PHP 8.1+, MySQL 8.0**. AtoM 2.8 is not supported - it is the last release on PHP 7.4, and the runtime is built on Laravel 10, which is PHP 8.1+ by construction.
 
-## The plugins
+## IIIF & Advanced Viewing
+
+Standards-based delivery, deep zoom and side-by-side comparison. IIIF is the
+capability; Seadragon and Mirador are two viewers over it, and a site can install
+either, both or neither.
 
 ### IIIF - 1.2.3
 
@@ -48,6 +52,8 @@ Side-by-side comparison across manifests at `/iiif/compare?slugs=a,b`.
 
 [Download Mirador 1.2.0](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgMiradorPlugin-v1.2.0) · [Full documentation](../../ahgMiradorPlugin/README.md)
 
+## Digital Preservation
+
 ### Digital Preservation - 1.0.6
 
 Checksums, fixity verification, PREMIS events, format identification and BagIt packaging. A package built from a record arrives holding that record's masters, and builds and exports to a downloadable bag in one action.
@@ -58,6 +64,8 @@ Ten `preservation:*` command-line tasks for scheduling - fixity, virus scan, for
 
 [Download Preservation 1.0.6](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgPreservationPlugin-v1.0.6)
 
+## Provenance & Audit
+
 ### Provenance Tracking - 1.2.3
 
 Chain of custody for archival records, museum objects and library material, with a coverage view showing what is documented and what is not.
@@ -66,6 +74,8 @@ Chain of custody for archival records, museum objects and library material, with
 
 [Download Provenance 1.2.3](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgProvenancePlugin-v1.2.3)
 
+## Administration & Operations
+
 ### Backup and Restore - 1.1.3
 
 Database and file backup with scheduling, restore, upload and retention management.
@@ -73,6 +83,8 @@ Database and file backup with scheduling, restore, upload and retention manageme
 ![Backup](screenshots/ahgBackupPlugin/backup.png)
 
 [Download Backup 1.1.3](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgBackupPlugin-v1.1.3)
+
+## Researcher & Public Engagement
 
 ### Favourites - 2.0.1
 

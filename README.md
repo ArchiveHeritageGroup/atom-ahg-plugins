@@ -1,13 +1,100 @@
-# AtoM AHG Extensions
+# AHG Extensions for AtoM
 
-**Transform Access to Memory into a Complete GLAM Solution**
+**Extend AtoM into a modular GLAM platform - install only what the institution needs.**
 
-> ### ➜ [Download the plugins](docs/plugins/README.md)
+AHG Extensions adds preservation, provenance, Records in Contexts, AI and semantic
+discovery, museum, library and DAM workflows, rights, privacy and governance to
+[Access to Memory](https://www.accesstomemory.org). It is not a fork: base AtoM is
+left exactly as upstream ships it, and every capability arrives as a plugin an
+institution can install or leave out.
+
+> ### -> [Download the packaged plugins](docs/plugins/README.md)
 >
-> Nine plugins for AtoM 2.9 and 2.10, each installable on its own, with what
-> they do and what they look like. That page carries the current version of
-> each; the [releases page](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases)
-> holds the full history.
+> The plugins packaged as installable bundles today, each with what it does and
+> what it looks like. That page carries the current version of each; the
+> [releases page](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases)
+> holds the full history. Everything else in the catalogue below installs from this
+> repository.
+
+## Foundation
+
+Shared infrastructure, not a capability in its own right. Install it first; every
+capability below depends on it.
+
+| | What it is |
+|---|---|
+| `ahgRuntimePlugin` | The AHG runtime: shared services, base classes and `bin/ahg`, the command-line entry point. Generated from atom-framework rather than cloned, so it is not a directory in this repository. |
+| [`ahgCorePlugin`](ahgCorePlugin/) | Core utilities: database access, configuration, taxonomy resolution, file storage and the cross-plugin contracts everything else is written against. |
+
+## Nine flagship capabilities
+
+Each is a capability family rather than a single plugin: several plugins may deliver
+one capability, and the technical package names stay stable underneath.
+
+| Capability | What it gives an institution | Delivered by |
+|---|---|---|
+| **IIIF & Advanced Viewing** | Standards-based image delivery and rich viewing: deep zoom, side-by-side comparison, interoperable manifests, Content Search, OCR export. | [IIIF](ahgIiifPlugin/), [Seadragon](ahgSeadragonPlugin/), [Mirador](ahgMiradorPlugin/) |
+| **Digital Preservation** | Fixity, PREMIS events, format identification, BagIt packaging and condition assessment - digital continuity, not just storage. | [Preservation](ahgPreservationPlugin/), [Condition](ahgConditionPlugin/), [OCFL](ahgOcflPlugin/) |
+| **Provenance & Audit** | Chain of custody, authenticity and an account of how records and digital outputs were created or changed, including content credentials. | [Provenance](ahgProvenancePlugin/), [Audit trail](ahgAuditTrailPlugin/), [C2PA](ahgC2paPlugin/) |
+| **Records in Contexts & Graph Discovery** | Richer relationships between records, agents, functions, places and events, exposed as a graph rather than a tree. | [RiC explorer](ahgRicExplorerPlugin/), [RiC manage](ahgRicManagePlugin/) |
+| **AI & Semantic Discovery** | Entity extraction, assisted description, embedded metadata extraction and semantic search, with human review kept in the loop. | [AI](ahgAIPlugin/), [Semantic search](ahgSemanticSearchPlugin/), [Metadata extraction](ahgMetadataExtractionPlugin/), [Discovery](ahgDiscoveryPlugin/) |
+| **Spectrum & Museum Collections** | Museum procedures, object records, loans and exhibitions alongside archival description. | [Spectrum](ahgSpectrumPlugin/), [Museum](ahgMuseumPlugin/), [Loans](ahgLoanPlugin/), [Exhibitions](ahgExhibitionPlugin/) |
+| **Library Services** | Bibliographic and library workflows on the same platform as the archive. | [Library](ahgLibraryPlugin/) |
+| **Digital Asset Management** | Media-oriented workflows: derivatives, display profiles, 3D models and asset delivery. | [DAM](ahgDAMPlugin/), [Display](ahgDisplayPlugin/), [3D models](ahg3DModelPlugin/) |
+| **Rights, Privacy & Security** | Institution-level governance: rights statements, embargoes, privacy regimes, security classification and clearance. | [Rights](ahgRightsPlugin/), [Extended rights](ahgExtendedRightsPlugin/), [Privacy](ahgPrivacyPlugin/), [Security clearance](ahgSecurityClearancePlugin/) |
+
+**Maturity differs, and the catalogue says so.** IIIF, Seadragon, Mirador,
+Preservation, Provenance, Backup, Favourites and Feedback are packaged as
+[downloadable bundles](docs/plugins/README.md) with screenshots and install notes.
+The rest install from this repository, plugin directory by plugin directory, each
+with its own README.
+
+## Why modular
+
+- **Install only what you need.** Nothing obliges an archive to carry museum, library
+  or DAM functionality, and nothing obliges a museum to carry ISAD(G) workflows it
+  does not use.
+- **Base AtoM is not modified.** No file under `apps/`, `lib/`, `vendor/` or
+  `config/` is touched, and `ProjectConfiguration.class.php` stays as upstream ships
+  it. See [Base AtoM is not modified](#base-atom-is-not-modified).
+- **Cross-domain by design.** Archives stay central; the extension ecosystem
+  deliberately reaches museum, library, DAM, preservation, governance and
+  semantic-discovery work.
+
+## Browse by category
+
+| Category | Representative plugins |
+|---|---|
+| Viewing | [IIIF](ahgIiifPlugin/), [Seadragon](ahgSeadragonPlugin/), [Mirador](ahgMiradorPlugin/), [Annotations](ahgAnnotationsPlugin/) |
+| Preservation & DAM | [Preservation](ahgPreservationPlugin/), [OCFL](ahgOcflPlugin/), [DAM](ahgDAMPlugin/), [Display](ahgDisplayPlugin/), [Integrity](ahgIntegrityPlugin/) |
+| RiC & Discovery | [RiC explorer](ahgRicExplorerPlugin/), [RiC manage](ahgRicManagePlugin/), [Discovery](ahgDiscoveryPlugin/), [Search](ahgSearchPlugin/) |
+| AI | [AI](ahgAIPlugin/), [Semantic search](ahgSemanticSearchPlugin/), [Metadata extraction](ahgMetadataExtractionPlugin/), [AI compliance](ahgAiCompliancePlugin/) |
+| Museum | [Spectrum](ahgSpectrumPlugin/), [Museum](ahgMuseumPlugin/), [Gallery](ahgGalleryPlugin/), [Loans](ahgLoanPlugin/), [Exhibitions](ahgExhibitionPlugin/) |
+| Library | [Library](ahgLibraryPlugin/) |
+| Rights, Privacy & Security | [Rights](ahgRightsPlugin/), [Extended rights](ahgExtendedRightsPlugin/), [Privacy](ahgPrivacyPlugin/), [Security clearance](ahgSecurityClearancePlugin/), [Redaction](ahgRedactionPlugin/), [ICIP](ahgICIPPlugin/) |
+| Research & Public Engagement | [Research](ahgResearchPlugin/), [Researcher](ahgResearcherPlugin/), [Access requests](ahgAccessRequestPlugin/), [Favourites](ahgFavoritesPlugin/), [Feedback](ahgFeedbackPlugin/), [Cart](ahgCartPlugin/) |
+| Administration & Operations | [Backup](ahgBackupPlugin/), [Settings](ahgSettingsPlugin/), [Jobs](ahgJobsManagePlugin/), [Users](ahgUserManagePlugin/), [Reports](ahgReportsPlugin/), [Observability](ahgObservabilityPlugin/) |
+| APIs & Integration | [API](ahgAPIPlugin/), [GraphQL](ahgGraphQLPlugin/), [DOI](ahgDoiPlugin/), [Federation](ahgFederationPlugin/), [ResourceSync](ahgResourceSyncPlugin/), [SharePoint](ahgSharePointPlugin/) |
+
+## Get started
+
+1. Check the [prerequisites](#prerequisites-1) and the
+   [version compatibility table](#version-compatibility).
+2. Install the runtime and `ahgCorePlugin` - see [Install the framework](#install-the-framework).
+3. Add the capabilities you want, one at a time - see [Install a plugin](#install-a-plugin)
+   and [Dependencies and install order](#dependencies-and-install-order).
+4. Enable each in **Admin > Plugins**, clear the cache and reload PHP.
+
+## Full catalogue and developer documentation
+
+- [The full plugin catalogue](#plugin-catalogue) below: every plugin in this
+  repository, generated from each `extension.json`, in dependency order.
+- [Packaged downloads](docs/plugins/README.md) with screenshots.
+- [IIIF image server setup](docs/infrastructure/iiif-image-server.md) and
+  [nginx notes](docs/infrastructure/nginx.md).
+- Each plugin directory holds its own README with a standalone install recipe.
+
+---
 
 ## What is AtoM?
 
