@@ -13,8 +13,20 @@
  * The .cnf is a MySQL [client] file with user= and password= for an account
  * that may CREATE and DROP a database. It never touches the AtoM database.
  */
-require '/usr/share/nginx/archive/atom-framework/vendor/autoload.php';
+// The framework autoloader, wherever this instance keeps it.
+$autoload = null;
+
+foreach ([dirname(__DIR__, 3).'/atom-framework/vendor/autoload.php',
+          dirname(__DIR__, 4).'/atom-framework/vendor/autoload.php',
+          '/usr/share/nginx/archive/atom-framework/vendor/autoload.php'] as $candidate) {
+    if (file_exists($candidate)) { $autoload = $candidate; break; }
+}
+
+if (null === $autoload) { fwrite(STDERR, "cannot find atom-framework/vendor/autoload.php\n"); exit(2); }
+require $autoload;
 require dirname(__DIR__).'/lib/Services/StorageLocationService.php';
+// A location move is logged, so the service reaches for this one too.
+require dirname(__DIR__).'/lib/Services/StorageMovementService.php';
 use Illuminate\Database\Capsule\Manager as DB;
 
 $scratch = 'scratch_storage_location_check';
@@ -32,6 +44,11 @@ $db->setAsGlobal();
 DB::connection('admin')->statement("DROP DATABASE IF EXISTS $scratch");
 DB::connection('admin')->statement("CREATE DATABASE $scratch CHARACTER SET utf8mb4");
 register_shutdown_function(function () use ($scratch) { DB::connection('admin')->statement("DROP DATABASE IF EXISTS $scratch"); });
+// Stand-ins for the base AtoM tables the storage tables point at: the movement
+// log and the current-location index carry foreign keys to physical_object, so
+// the slice of install.sql loaded here will not create without them.
+DB::unprepared('CREATE TABLE physical_object (id INT NOT NULL PRIMARY KEY);');
+DB::unprepared('CREATE TABLE physical_object_i18n (id INT NOT NULL, culture VARCHAR(16) NOT NULL, name VARCHAR(255), PRIMARY KEY (id, culture));');
 DB::unprepared($sql);
 $s = new AhgStorageManage\Services\StorageLocationService();
 $fail=0; function ok($c,$m){global $fail; echo ($c?"PASS ":"FAIL ").$m."\n"; if(!$c)$fail++;}

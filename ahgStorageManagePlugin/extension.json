@@ -25,7 +25,10 @@
         "physical_object_extended",
         "ahg_strongroom",
         "ahg_physical_object_storage",
-        "ahg_storage_location"
+        "ahg_storage_location",
+        "ahg_storage_location_closure",
+        "ahg_physical_object_location",
+        "ahg_storage_movement"
     ],
     "features": [
         "Physical storage browse via Laravel Query Builder",
@@ -33,6 +36,7 @@
         "Inline search across name, location, and type",
         "Export storage report link",
         "Theme-compatible templates (SimplePager)",
-        "Hierarchical storage locations with parent, capacity and type"
+        "Hierarchical storage locations with parent, capacity and type",
+        "Movement log: append-only history of object and location moves, with bulk moves grouped by batch"
     ]
 }

@@ -95,12 +95,18 @@ class StorageLocationService
 
         $validated['updated_at'] = date('Y-m-d H:i:s');
 
-        return DB::connection()->transaction(function () use ($id, $validated, $reparented) {
+        return DB::connection()->transaction(function () use ($id, $validated, $reparented, $currentParent) {
             DB::table('ahg_storage_location')->where('id', $id)->update($validated);
 
             if ($reparented) {
                 $this->closureMoveNode($id, $validated['parent_id']);
                 $this->recomputeDescendantLevels($id, (int) $validated['level']);
+
+                // One event for the thing that moved. What sat under it is a
+                // closure query, so fanning this out over every object beneath
+                // would duplicate the hierarchy and go stale as soon as it changed.
+                (new StorageMovementService($this->culture))
+                    ->recordLocationMove($id, $currentParent, $validated['parent_id']);
             }
 
             return $this->getLocationById($id);
@@ -117,6 +123,25 @@ class StorageLocationService
 
         if ($hasChildren) {
             throw new Exception('Cannot delete a location that has children. Delete or move the children first.');
+        }
+
+        $holdsObjects = DB::table('ahg_physical_object_location')->where('location_id', $id)->exists();
+
+        if ($holdsObjects) {
+            throw new Exception('Cannot delete a location that still holds physical objects. Move them out first.');
+        }
+
+        // The movement log references locations with RESTRICT, so that deleting a
+        // location cannot erase the record of what passed through it. Without this
+        // check the operator would see a driver error instead of the reason.
+        $hasHistory = DB::table('ahg_storage_movement')
+            ->where(function ($q) use ($id) {
+                $q->where('from_location_id', $id)->orWhere('to_location_id', $id);
+            })
+            ->exists();
+
+        if ($hasHistory) {
+            throw new Exception('Cannot delete a location that appears in the movement log. Its history would go with it.');
         }
 
         return DB::connection()->transaction(function () use ($id) {
