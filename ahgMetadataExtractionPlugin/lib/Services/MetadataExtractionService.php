@@ -45,7 +45,7 @@ class MetadataExtractionService
             throw new \RuntimeException("Digital object {$digitalObjectId} not found");
         }
 
-        $filePath = sfConfig::get('sf_web_dir') . '/' . $digitalObject->path;
+        $filePath = sfConfig::get('sf_web_dir') . '/' . $digitalObject->path . $digitalObject->name;
 
         if (!file_exists($filePath)) {
             throw new \RuntimeException("File not found: {$filePath}");

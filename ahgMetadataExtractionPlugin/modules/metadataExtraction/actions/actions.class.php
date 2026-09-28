@@ -116,6 +116,9 @@ class metadataExtractionActions extends AhgController
                 $join->on('io.id', '=', 'ioi.id')
                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
+            // The slug lives in its own table in AtoM; information_object has no
+            // slug column, and selecting io.slug was a fatal on this screen.
+            ->leftJoin('slug as sl', 'sl.object_id', '=', 'io.id')
             ->where('do.id', $this->digitalObjectId)
             ->select(
                 'do.id',
@@ -125,7 +128,7 @@ class metadataExtractionActions extends AhgController
                 'do.byte_size',
                 'do.object_id as information_object_id',
                 'ioi.title as record_title',
-                'io.slug'
+                'sl.slug'
             )
             ->first();
 
@@ -134,10 +137,15 @@ class metadataExtractionActions extends AhgController
         }
 
         // Get extracted metadata
-        $this->metadata = Illuminate\Database\Capsule\Manager::table('property')
-            ->where('object_id', $this->digitalObjectId)
-            ->where('scope', 'metadata_extraction')
-            ->orderBy('name')
+        $this->metadata = Illuminate\Database\Capsule\Manager::table('property as p')
+            ->leftJoin('property_i18n as pi', function ($join) {
+                $join->on('pi.id', '=', 'p.id')
+                    ->where('pi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('p.object_id', $this->digitalObjectId)
+            ->where('p.scope', 'metadata_extraction')
+            ->orderBy('p.name')
+            ->select('p.id', 'p.name', 'p.scope', 'pi.value')
             ->get();
 
         // Group metadata by category (EXIF group)
@@ -224,7 +232,10 @@ class metadataExtractionActions extends AhgController
         }
 
         // Build file path
-        $filePath = $this->config('sf_web_dir') . '/' . $digitalObject->path;
+        // sf_web_dir is a framework path, not an app setting: config() returns
+        // null for it. And path is the directory only - the file name is in name,
+        // so this produced a folder, which file_exists() happily accepts.
+        $filePath = sfConfig::get('sf_web_dir') . '/' . $digitalObject->path . $digitalObject->name;
 
         if (!file_exists($filePath)) {
             $this->getResponse()->setStatusCode(404);
@@ -320,7 +331,7 @@ class metadataExtractionActions extends AhgController
         $exifToolPath = $this->config('app_metadata_exiftool_path', '/usr/bin/exiftool');
 
         foreach ($digitalObjects as $obj) {
-            $filePath = $this->config('sf_web_dir') . '/' . $obj->path;
+            $filePath = sfConfig::get('sf_web_dir') . '/' . $obj->path . $obj->name;
 
             if (!file_exists($filePath)) {
                 ++$errors;
@@ -499,32 +510,35 @@ class metadataExtractionActions extends AhgController
      */
     private function saveMetadataProperty(int $objectId, string $name, string $value): void
     {
-        // Insert into property table
+        $now = date('Y-m-d H:i:s');
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        // In AtoM every entity is an `object` row plus a subclass row, and
+        // property.id is a foreign key to object.id rather than its own
+        // auto-increment - so the object has to exist first. The value and the
+        // timestamps live where AtoM keeps them: property_i18n and object. The
+        // previous version wrote value, created_at and updated_at onto property,
+        // which has none of those columns, so every extraction died on the insert.
+        $propertyId = Illuminate\Database\Capsule\Manager::table('object')->insertGetId([
+            'class_name' => 'QubitProperty',
+            'created_at' => $now,
+            'updated_at' => $now,
+            'serial_number' => 0,
+        ]);
+
         Illuminate\Database\Capsule\Manager::table('property')->insert([
+            'id' => $propertyId,
             'object_id' => $objectId,
             'name' => $name,
-            'value' => $value,
             'scope' => 'metadata_extraction',
-            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
+            'source_culture' => $culture,
+            'serial_number' => 0,
         ]);
 
-        // Get the inserted ID
-        $propertyId = Illuminate\Database\Capsule\Manager::getPdo()->lastInsertId();
-
-        // Create object record
-        Illuminate\Database\Capsule\Manager::table('object')->insert([
-            'id' => $propertyId,
-            'class_name' => 'QubitProperty',
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ]);
-
-        // Create i18n record
         Illuminate\Database\Capsule\Manager::table('property_i18n')->insert([
             'id' => $propertyId,
-            'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
+            'culture' => $culture,
+            'value' => $value,
         ]);
     }
 }

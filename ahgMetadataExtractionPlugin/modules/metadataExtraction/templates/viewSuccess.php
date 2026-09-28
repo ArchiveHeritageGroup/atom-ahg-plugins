@@ -204,6 +204,10 @@
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+  // The framework rejects any mutating request without this token, and the
+  // rejection arrives as JSON that this page shows in an alert() - so extraction
+  // silently did nothing. Same wrapper the IIIF templates use.
+  var ahgCsrfToken = '<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>';
   var extractBtn = document.getElementById('extractBtn');
   var deleteBtn = document.getElementById('deleteBtn');
   var digitalObjectId = <?php echo $digitalObjectId ?>;
@@ -215,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       fetch('<?php echo url_for(['module' => 'metadataExtraction', 'action' => 'extract']) ?>?id=' + digitalObjectId, {
         method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ahgCsrfToken }
       })
       .then(response => response.json())
       .then(data => {
@@ -263,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       fetch('<?php echo url_for(['module' => 'metadataExtraction', 'action' => 'delete']) ?>?id=' + digitalObjectId, {
         method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ahgCsrfToken }
       })
       .then(response => response.json())
       .then(data => {

@@ -173,6 +173,9 @@
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+  // Without this token the framework refuses every extract, and the refusal
+  // only ever appears in an alert() - so the buttons did nothing at all.
+  var ahgCsrfToken = '<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>';
   document.querySelectorAll('.extract-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var id = this.dataset.id;
@@ -183,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       fetch('<?php echo url_for(['module' => 'metadataExtraction', 'action' => 'extract']) ?>?id=' + id, {
         method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': ahgCsrfToken }
       })
       .then(response => response.json())
       .then(data => {
