@@ -134,7 +134,7 @@ EOF;
                     ->where('pf.algorithm', '=', 'sha256');
             })
             ->where('do.usage_id', 140) // Masters only
-            ->select('do.id', 'do.name', 'pf.checked_at', 'pf.status');
+            ->select('do.id', 'do.name');
 
         if (!$checkAll) {
             // Only get stale or never-checked objects
@@ -145,7 +145,11 @@ EOF;
             });
         }
 
-        $objects = $query->orderBy('pf.checked_at', 'asc')
+        // One row per object. The join above yields a row per PAST CHECK, so an
+        // object checked three times was verified three times in a single run and
+        // counted three times in the summary.
+        $objects = $query->groupBy('do.id', 'do.name')
+            ->orderByRaw('MAX(pf.checked_at) IS NOT NULL, MAX(pf.checked_at) ASC')
             ->limit($limit)
             ->get();
 
@@ -159,6 +163,7 @@ EOF;
         $this->logSection('fixity', '');
 
         $passed = 0;
+        $baseline = 0;
         $failed = 0;
         $repaired = 0;
         $repairFailed = 0;
@@ -175,11 +180,30 @@ EOF;
             $objPassed = true;
             $objRepaired = false;
             $objRepairFailed = false;
-            $objError = null;
+            $objBaseline = false;
+            $objCheckError = null;
 
             foreach ($results as $algo => $result) {
-                if ('pass' !== $result['status']) {
+                // First check on this object: the run recorded a baseline, it did
+                // not find a mismatch. Counting it as a failure told operators a
+                // healthy archive was damaged on day one.
+                if (!empty($result['baseline'])) {
+                    $objBaseline = true;
+
+                    continue;
+                }
+
+                $status = $result['status'] ?? null;
+
+                if ('pass' !== $status) {
                     $objPassed = false;
+                }
+
+                // 'error' means the check could not be carried out. A mismatch or
+                // a missing file is an integrity failure and has to be counted as
+                // one, even though verifyFixity() also fills in an error message.
+                if ('error' === $status) {
+                    $objCheckError = $result['error'] ?? 'check could not be completed';
                 }
                 if (!empty($result['repaired'])) {
                     $objRepaired = true;
@@ -188,13 +212,14 @@ EOF;
                 if (!empty($result['repair_failed'])) {
                     $objRepairFailed = true;
                 }
-                if (!empty($result['error'])) {
-                    $objError = $result['error'];
-                }
+
             }
 
-            if ($objError) {
-                $this->logSection('fixity', "Object {$obj->id}: ERROR - {$objError}", null, 'ERROR');
+            if ($objBaseline && null === $objCheckError) {
+                $this->logSection('fixity', "Object {$obj->id}: BASELINE recorded", null, 'INFO');
+                ++$baseline;
+            } elseif (null !== $objCheckError) {
+                $this->logSection('fixity', "Object {$obj->id}: ERROR - {$objCheckError}", null, 'ERROR');
                 ++$errors;
             } elseif ($objRepaired) {
                 $source = $results['sha256']['repair_source'] ?? 'backup';
@@ -219,6 +244,9 @@ EOF;
         if ($autoRepair) {
             $this->logSection('fixity', "  Repaired:      $repaired");
             $this->logSection('fixity', "  Repair Failed: $repairFailed");
+        }
+        if ($baseline > 0) {
+            $this->logSection('fixity', "  Baselines:     $baseline (first check, nothing to compare against yet)");
         }
         $this->logSection('fixity', "  Failed:        $failed");
         $this->logSection('fixity', "  Errors:        $errors");

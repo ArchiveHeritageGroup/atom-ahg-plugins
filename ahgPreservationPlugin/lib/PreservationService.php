@@ -151,8 +151,18 @@ class PreservationService
         $checksums = $query->get();
 
         if ($checksums->isEmpty()) {
-            // No checksums to verify - generate them first
-            return $this->generateChecksums($digitalObjectId, $algorithm ? [$algorithm] : ['sha256']);
+            // Nothing stored yet, so there is nothing to verify: record the
+            // baseline and say so. These rows carry a status of their own because
+            // callers test $result['status'], and generateChecksums() returns none
+            // - which read as a checksum mismatch and told the operator that a
+            // healthy archive had integrity failures on its very first run.
+            $generated = $this->generateChecksums($digitalObjectId, $algorithm ? [$algorithm] : ['sha256']);
+
+            foreach ($generated as $algo => $result) {
+                $generated[$algo] = $result + ['status' => 'baseline', 'baseline' => true];
+            }
+
+            return $generated;
         }
 
         foreach ($checksums as $checksum) {
