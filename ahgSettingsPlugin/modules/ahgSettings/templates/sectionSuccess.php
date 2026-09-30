@@ -1599,7 +1599,8 @@ slot('title', $title);
                                                     ->whereNotNull('path')
                                                     ->whereNotNull('name')
                                                     ->count();
-                                            } catch (\Exception $e) {}
+                                            } catch (\Exception $e) {
+                                                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
                                         ?>
 
                                         <div class="alert alert-info mb-0">

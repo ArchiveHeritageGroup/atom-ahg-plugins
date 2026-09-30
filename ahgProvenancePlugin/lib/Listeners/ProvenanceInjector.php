@@ -228,6 +228,7 @@ class ProvenanceInjector
                 ->where('s.slug', $slug)
                 ->exists();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -249,6 +250,7 @@ class ProvenanceInjector
                 ->where('s.slug', $slug)
                 ->exists();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -269,6 +271,7 @@ class ProvenanceInjector
                 ->where('s.slug', $slug)
                 ->exists();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -288,6 +291,7 @@ class ProvenanceInjector
                 ->where('s.slug', $slug)
                 ->value('io.id');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
 

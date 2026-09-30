@@ -167,6 +167,7 @@ class ahgVoiceSaveDescriptionAction extends sfAction
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist or have different schema
         }
     }
@@ -189,6 +190,7 @@ class ahgVoiceSaveDescriptionAction extends sfAction
                 'created_at'  => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Silent
         }
     }

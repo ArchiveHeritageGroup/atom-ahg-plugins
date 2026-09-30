@@ -164,7 +164,8 @@ class TransferPackageService
                 ]),
                 'created_at'  => date('Y-m-d H:i:s'),
             ]);
-        } catch (\Throwable $e) { /* non-fatal */ }
+        } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* non-fatal */ }
 
         return [
             'transfer_id'     => $transferId,

@@ -172,6 +172,7 @@ class SiteRecordService
                     return $resolved;
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Fall through: a label is presentation, and a missing one must
                 // not take the page down. Showing the code is better than a blank
                 // cell, which is what the legacy application did here.

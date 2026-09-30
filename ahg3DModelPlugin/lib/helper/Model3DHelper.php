@@ -40,6 +40,7 @@ function has_3d_model($resource): bool
             
         return $cache[$objectId];
     } catch (\Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return false;
     }
 }
@@ -78,6 +79,7 @@ function get_primary_3d_model($resource): ?object
         $service = new \AtomFramework\Services\Model3DService();
         return $service->getPrimaryModel($objectId);
     } catch (\Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return null;
     }
 }

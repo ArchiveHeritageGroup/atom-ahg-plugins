@@ -1070,6 +1070,7 @@ XML;
             try {
                 DB::table('research_researcher')->where('id', $researcherId)->update($update);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // best-effort — leave existing data intact on failure
             }
         }
@@ -1081,6 +1082,7 @@ XML;
                         ->update(['last_profile_synced_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')]);
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // ignore
             }
         }

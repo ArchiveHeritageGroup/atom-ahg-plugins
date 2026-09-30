@@ -313,6 +313,7 @@ class ConditionAnnotationService
 
                     return $thumbFilename;
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Fall through to the GD implementation below.
                 }
             }
@@ -489,6 +490,7 @@ class ConditionAnnotationService
                 return rtrim($result, '/');
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fall back to default
         }
         

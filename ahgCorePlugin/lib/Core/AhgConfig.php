@@ -46,6 +46,7 @@ class AhgConfig
                 return rtrim($setting, '/');
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -162,6 +163,7 @@ class AhgConfig
 
             return $query->value('setting_i18n.value');
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -175,6 +177,7 @@ class AhgConfig
             try {
                 return \sfContext::getInstance()->getUser()->getCulture();
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Fall through
             }
         }

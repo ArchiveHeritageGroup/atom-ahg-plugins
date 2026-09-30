@@ -58,6 +58,7 @@ class InformationobjectIdentifierGeneratorComponent extends AhgComponents
                 ];
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Sector engine unavailable - fall through to the legacy service.
         }
 

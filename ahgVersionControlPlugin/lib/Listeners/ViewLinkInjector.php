@@ -102,6 +102,7 @@ final class ViewLinkInjector
         try {
             $count = (int) DB::table($versionTable)->where($fk, $entityId)->count();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
         if ($count === 0) {

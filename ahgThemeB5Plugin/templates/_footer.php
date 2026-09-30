@@ -15,7 +15,8 @@ try {
             }
         }
     }
-} catch (Exception $e) {}
+} catch (Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 ?>
 <?php if ($showBranding && !empty($footerText)): ?>
 <footer class="ahg-site-footer text-center py-3" role="contentinfo" data-ahg-style="background-color: var(--ahg-primary, #005837); color: #fff;">

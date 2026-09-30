@@ -183,6 +183,7 @@ class auditTrailActions extends AhgController
                 'current' => date_default_timezone_get(),
             ];
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // A footnote must never take the audit screen down.
             return null;
         }

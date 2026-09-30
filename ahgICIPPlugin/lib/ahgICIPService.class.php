@@ -270,6 +270,7 @@ class ahgICIPService
             ]);
             return true;
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -339,6 +340,7 @@ class ahgICIPService
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // icip_access_log table may not exist — best-effort
             }
         }

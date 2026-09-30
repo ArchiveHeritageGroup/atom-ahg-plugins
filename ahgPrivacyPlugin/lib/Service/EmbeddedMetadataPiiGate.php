@@ -36,6 +36,7 @@ class EmbeddedMetadataPiiGate
 
             return $doIds ? $this->pendingGps($doIds) : false;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -45,6 +46,7 @@ class EmbeddedMetadataPiiGate
         try {
             return $this->pendingGps([$doId]);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

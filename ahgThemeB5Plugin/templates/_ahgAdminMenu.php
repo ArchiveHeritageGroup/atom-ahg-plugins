@@ -41,7 +41,8 @@ $hasResearcher = ahgIsPluginEnabled('ahgResearcherPlugin');
 $hasStrongroom = false;
 try {
     $hasStrongroom = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_strongroom');
-} catch (Exception $e) {}
+} catch (Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
 // heratio#143 Phase 1 - Workflow visual diagram + designer surface
 // (gated by ahg_workflow table existence).
@@ -56,7 +57,8 @@ try {
         // link into a module that is not loaded. Every other flag here asks
         // ahgIsPluginEnabled(); this one now does too.
         $hasExhibitionSpace = ahgIsPluginEnabled('ahgExhibitionPlugin');
-} catch (Exception $e) {}
+} catch (Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
 // Get pending counts for badges
 $pendingBookings = 0;
@@ -70,7 +72,8 @@ if ($isAdmin && $hasResearch) {
         $pendingResearchers = (int) \Illuminate\Database\Capsule\Manager::table('research_researcher')
             ->where('status', 'pending')
             ->count();
-    } catch (Exception $e) {}
+    } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 }
 
 // Pending duplicates count
@@ -80,7 +83,8 @@ if ($isAdmin && ahgIsPluginEnabled('ahgDedupePlugin')) {
         $pendingDuplicates = (int) \Illuminate\Database\Capsule\Manager::table('ahg_duplicate_detection')
             ->where('status', 'pending')
             ->count();
-    } catch (Exception $e) {}
+    } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 }
 
 // Pending DOI queue count
@@ -90,7 +94,8 @@ if ($isAdmin && ahgIsPluginEnabled('ahgDoiPlugin')) {
         $pendingDois = (int) \Illuminate\Database\Capsule\Manager::table('ahg_doi_queue')
             ->where('status', 'pending')
             ->count();
-    } catch (Exception $e) {}
+    } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 }
 
 // Pending researcher submissions count
@@ -100,7 +105,8 @@ if ($isAdmin && $hasResearcher) {
         $pendingSubmissions = (int) \Illuminate\Database\Capsule\Manager::table('researcher_submission')
             ->whereIn('status', ['submitted', 'under_review'])
             ->count();
-    } catch (Exception $e) {}
+    } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 }
 ?>
 <?php if ($isAdmin): ?>

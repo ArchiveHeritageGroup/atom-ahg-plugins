@@ -214,6 +214,7 @@ class OnixIngestService
                 return ['status' => 'duplicate', 'error' => 'Matching ISBN/ISSN already in catalogue.'];
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // library_item may be unavailable - treat as non-duplicate.
         }
 

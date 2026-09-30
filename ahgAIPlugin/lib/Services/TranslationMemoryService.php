@@ -42,6 +42,7 @@ class TranslationMemoryService
 
             return (string) $row->target_text;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -100,6 +101,7 @@ class TranslationMemoryService
                 'created_at' => $now,
             ]);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // table absent / write failure: TM is an optimisation, never fatal.
         }
     }

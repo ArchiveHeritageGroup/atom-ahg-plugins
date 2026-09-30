@@ -316,6 +316,7 @@ class ShaclValidationService
         try {
             $row = DB::table('ric_shacl_report')->where('id', $reportId)->first();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
         if (!$row) {
@@ -365,6 +366,7 @@ class ShaclValidationService
 
             return (int) $id;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }
@@ -475,6 +477,7 @@ class ShaclValidationService
                 || DB::table('information_object')->where('id', $objectId)->exists()
                 || DB::table('repository')->where('id', $objectId)->exists();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // If we cannot verify, do not raise a false warning.
             return true;
         }

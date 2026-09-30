@@ -69,6 +69,7 @@ EOF;
                     ->where('id', $datasetId)
                     ->update(['status' => 'review', 'updated_at' => date('Y-m-d H:i:s')]);
             } catch (\Throwable $ignore) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ignore, basename(__FILE__).':'.__LINE__);
             }
             $this->logSection('rdm:scan', 'scan failed for dataset ' . $datasetId . ': ' . $e->getMessage(), null, 'ERROR');
 

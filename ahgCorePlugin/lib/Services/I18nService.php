@@ -134,6 +134,7 @@ class I18nService
                 try {
                     $row->$key = \AtomFramework\Core\Security\EncryptableFieldService::decryptValue($value);
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Leave encrypted value as-is if decryption fails
                 }
             }

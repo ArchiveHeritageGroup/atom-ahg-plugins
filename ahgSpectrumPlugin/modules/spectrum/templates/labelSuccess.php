@@ -30,6 +30,7 @@ function safeQuery($table, $objectId, $column) {
     try {
         return DB::table($table)->where('information_object_id', $objectId)->value($column);
     } catch (\Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return null;
     }
 }
@@ -41,7 +42,8 @@ try {
     $sectorConfig = DB::table('display_object_config')
         ->where('object_id', $objectId)
         ->value('object_type');
-} catch (\Exception $e) {}
+} catch (\Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 if ($sectorConfig) $sector = $sectorConfig;
 
 // Build barcode sources - NO SLUG, only real identifiers

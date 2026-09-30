@@ -164,6 +164,7 @@ class IdempotencyService
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Duplicate-key races are fine — first writer wins; ignore.
         }
     }
@@ -221,6 +222,7 @@ class IdempotencyService
         try {
             return DB::schema()->hasTable('ahg_api_idempotency_key');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

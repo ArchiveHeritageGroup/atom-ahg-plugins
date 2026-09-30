@@ -108,6 +108,7 @@ class marketplaceBuyAction extends AhgController
                     $this->redirect(['module' => 'cart', 'action' => 'index']);
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Cart integration failed, fall through to default redirect
             }
         }

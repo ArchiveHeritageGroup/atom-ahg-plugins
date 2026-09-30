@@ -143,6 +143,7 @@ class ingestActions extends sfActions
             try {
                 $this->classifications = \AtomExtensions\Services\SecurityClearanceService::getAllClassifications();
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Plugin not installed
             }
         }
@@ -158,6 +159,7 @@ class ingestActions extends sfActions
                     $this->defaults[$row->setting_key] = $row->setting_value;
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Table may not exist
             }
         }
@@ -300,6 +302,7 @@ class ingestActions extends sfActions
                     ->get()
                     ->all();
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Plugin not installed yet — leave empty
             }
         }
@@ -874,6 +877,7 @@ class ingestActions extends sfActions
                     $dispatched = true;
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Queue unavailable, fall through to nohup
             }
 

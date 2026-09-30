@@ -503,7 +503,8 @@ class ahgMetadataExtractionJob extends arBaseJob
             $overwrite = ($metaSettings['meta_overwrite_existing'] ?? '0') === '1' || ($metaSettings['meta_overwrite_existing'] ?? '') === 'true';
             $autoKeywords = ($metaSettings['meta_create_access_points'] ?? '1') !== '0' && ($metaSettings['meta_create_access_points'] ?? '1') !== 'false';
             $extractGps = ($metaSettings['meta_extract_gps'] ?? '1') !== '0' && ($metaSettings['meta_extract_gps'] ?? '1') !== 'false';
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
         // Title (only if empty or overwrite enabled)
         if (($overwrite || empty($informationObject->title)) && !empty($keyFields['title'])) {

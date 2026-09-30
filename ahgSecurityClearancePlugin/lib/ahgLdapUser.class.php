@@ -67,6 +67,7 @@ class ahgLdapUser extends ldapUser
         try {
             $setting = QubitSetting::getByName('ldap_enabled');
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
 

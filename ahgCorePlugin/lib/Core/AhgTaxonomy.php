@@ -210,6 +210,7 @@ class AhgTaxonomy
                 ->where('culture', $culture)
                 ->value('name');
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -329,6 +330,7 @@ class AhgTaxonomy
                 ->where('culture', $culture)
                 ->value('name');
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -357,6 +359,7 @@ class AhgTaxonomy
 
             self::$cacheLoaded = true;
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore errors, will fall back to direct lookups
         }
     }

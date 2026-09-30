@@ -34,7 +34,8 @@
                         }
                     }
                 }
-            } catch (Exception $e) {}
+            } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
           ?>
           <?php if ($customLogo): ?>
             <img src="<?php echo $customLogo; ?>" alt="<?php echo __('Logo'); ?>" class="d-inline-block my-2 me-3" height="35">

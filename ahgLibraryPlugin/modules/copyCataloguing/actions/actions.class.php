@@ -145,6 +145,7 @@ class copyCataloguingActions extends AhgController
                 return (int) $u->getAttribute('user_id', 0);
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
 

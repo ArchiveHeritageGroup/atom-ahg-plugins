@@ -72,7 +72,8 @@ class AuditService
                     $this->currentSessionId = session_id() ?: null;
                 }
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 
     public function isEnabled(): bool
@@ -172,6 +173,7 @@ class AuditService
         try {
             return $this->authRepo->create($data);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -226,6 +228,7 @@ class AuditService
         try {
             return $this->accessRepo->create($data);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -299,6 +302,7 @@ class AuditService
                 ->where('s.object_id', $key)
                 ->value('c.code');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Auditing must not fail because a lookup did. An unclassified row
             // is a smaller loss than a lost audit record - or than breaking the
             // page that triggered it.

@@ -415,7 +415,8 @@ final class C2paService
                     return (string) $row->public_key;
                 }
             }
-        } catch (Throwable) {
+        } catch (Throwable $ahgSwallowed) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ahgSwallowed, basename(__FILE__).':'.__LINE__);
             // table missing or DB down - fall through
         }
 

@@ -51,6 +51,7 @@ class UserPasswordEditAction extends DefaultEditAction
                             $reuseBlocked = true;
                         }
                     } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // Never block password change due to policy check errors
                     }
                 }
@@ -69,6 +70,7 @@ class UserPasswordEditAction extends DefaultEditAction
                                 $this->resource->id, $hashForHistory
                             );
                         } catch (\Throwable $e) {
+                            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                             // Don't block on history recording failure
                         }
                     }

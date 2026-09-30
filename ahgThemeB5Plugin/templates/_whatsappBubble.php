@@ -22,6 +22,7 @@
 try {
     $enabled = \AtomExtensions\Services\AhgSettingsService::getBool('whatsapp_bubble_enabled', false);
 } catch (\Throwable $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     return;
 }
 

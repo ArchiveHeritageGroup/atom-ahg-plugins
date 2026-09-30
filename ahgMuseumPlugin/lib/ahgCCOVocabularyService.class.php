@@ -736,6 +736,7 @@ class ahgCCOVocabularyService
                 ]
             );
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Cache table might not exist
         }
     }
@@ -756,6 +757,7 @@ class ahgCCOVocabularyService
                 return json_decode($cached->results, true);
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Cache table might not exist
         }
 
@@ -783,6 +785,7 @@ class ahgCCOVocabularyService
         try {
             DB::statement($sql);
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table might already exist
         }
     }

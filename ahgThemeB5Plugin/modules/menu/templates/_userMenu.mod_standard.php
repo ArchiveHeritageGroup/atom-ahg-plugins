@@ -28,6 +28,7 @@ if ($isAuthenticated && $hasAccessRequest) {
                 ->count();
         }
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Table may not exist
     }
 }
@@ -41,6 +42,7 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
             ->where('status', 'pending')
             ->count();
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Table may not exist
     }
 }
@@ -53,6 +55,7 @@ if ($isAuthenticated && $hasSpectrum) {
     try {
         $spectrumTaskCount = ahgSpectrumWorkflowService::countOpenTasksForUser($userId);
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Plugin or table may not be present.
     }
 }
@@ -77,6 +80,7 @@ if ($isAuthenticated && $hasSahra) {
             }
         }
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Plugin/table may not be present.
     }
 }

@@ -37,6 +37,7 @@ class OfflineSyncService
                 'payload_hash'    => $hash,
             ]);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Logging is non-fatal — sync still proceeds
         }
 
@@ -85,6 +86,7 @@ class OfflineSyncService
                     'error_text'        => $errors ? implode("\n", array_slice($errors, 0, 50)) : null,
                 ]);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // non-fatal
             }
         }

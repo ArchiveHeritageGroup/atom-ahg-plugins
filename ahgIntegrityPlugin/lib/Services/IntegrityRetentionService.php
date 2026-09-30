@@ -375,6 +375,7 @@ class IntegrityRetentionService
                 'verified_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal logging
         }
     }

@@ -343,6 +343,7 @@ class CallHubAlertService
                 ->where('signature', (string) $row->signature)
                 ->max('sent_at');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return true;
         }
 
@@ -374,6 +375,7 @@ class CallHubAlertService
 
             return true;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Duplicate key, or the table is absent. Either way: do not send.
             return false;
         }
@@ -385,6 +387,7 @@ class CallHubAlertService
         try {
             DB::table('ahg_error_alert')->where('external_ref', $externalRef)->delete();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // best effort
         }
     }

@@ -79,6 +79,7 @@ class UserLoginAction extends sfAction
                         $lockedOut = true;
                     }
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Never block login due to security service errors
                 }
 
@@ -88,6 +89,7 @@ class UserLoginAction extends sfAction
                         try {
                             \AtomFramework\Core\Security\LoginSecurityService::recordAttempt($email, $ip, true);
                         } catch (\Throwable $e) {
+                            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                             // Don't block login
                         }
 
@@ -112,6 +114,7 @@ class UserLoginAction extends sfAction
                     try {
                         \AtomFramework\Core\Security\LoginSecurityService::recordAttempt($email, $ip, false);
                     } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // Don't block login
                     }
 

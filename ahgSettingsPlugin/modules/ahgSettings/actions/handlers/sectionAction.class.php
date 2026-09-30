@@ -202,6 +202,7 @@ class AhgSettingsSectionAction extends AhgController
                     ->toArray();
                 $enabledPlugins = array_flip($results);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Fallback - check class exists
             }
         }
@@ -350,6 +351,7 @@ class AhgSettingsSectionAction extends AhgController
                             $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
                         }
                     } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // best-effort; admin can run `php symfony cc` if needed
                     }
                 }
@@ -369,6 +371,7 @@ class AhgSettingsSectionAction extends AhgController
                             ['config_value' => $configValue, 'updated_at' => DB::raw('NOW()')]
                         );
                     } catch (\Exception $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // Table may not exist if plugin not installed
                     }
                 }
@@ -388,6 +391,7 @@ class AhgSettingsSectionAction extends AhgController
                             ['config_value' => $configValue, 'updated_at' => DB::raw('NOW()')]
                         );
                     } catch (\Exception $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // Table may not exist if plugin not installed
                     }
                 }
@@ -407,6 +411,7 @@ class AhgSettingsSectionAction extends AhgController
                             ['setting_value' => $configValue, 'updated_at' => DB::raw('NOW()')]
                         );
                     } catch (\Exception $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // Table may not exist
                     }
                 }
@@ -439,6 +444,7 @@ class AhgSettingsSectionAction extends AhgController
                         ['setting_value' => $configValue]
                     );
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Table may not exist
                 }
             }

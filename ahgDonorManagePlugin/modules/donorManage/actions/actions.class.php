@@ -194,6 +194,7 @@ class donorManageActions extends AhgController
                 try {
                     \AhgCore\Services\ElasticsearchService::deleteDocument('qubitactor', $this->donor['id']);
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // ES failure should not block delete
                 }
 

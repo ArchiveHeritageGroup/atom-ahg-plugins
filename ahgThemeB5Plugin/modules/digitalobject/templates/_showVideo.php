@@ -1,5 +1,6 @@
 <?php use_helper('Text'); ?>
-<?php $hasIiifPlayer = false; try { use_helper('Media'); $hasIiifPlayer = function_exists('render_media_player'); } catch (Exception $e) {} ?>
+<?php $hasIiifPlayer = false; try { use_helper('Media'); $hasIiifPlayer = function_exists('render_media_player'); } catch (Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);} ?>
 
 <?php if (QubitTerm::MASTER_ID == $usageType) { ?>
 

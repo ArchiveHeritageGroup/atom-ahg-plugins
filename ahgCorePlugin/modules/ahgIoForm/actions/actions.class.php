@@ -318,6 +318,7 @@ class ahgIoFormActions extends AhgController
                 return $this->renderText(json_encode(['identifier' => $identifier]));
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fall through to legacy logic
         }
 

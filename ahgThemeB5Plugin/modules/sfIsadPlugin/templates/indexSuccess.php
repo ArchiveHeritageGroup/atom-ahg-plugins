@@ -178,6 +178,7 @@ foreach (array_keys($ahgHelpers) as $ahgHelper) {
         use_helper($ahgHelper);
         $ahgHelpers[$ahgHelper] = true;
     } catch (\Throwable $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Optional plugin absent - the feature it provides simply does not render.
     }
 }

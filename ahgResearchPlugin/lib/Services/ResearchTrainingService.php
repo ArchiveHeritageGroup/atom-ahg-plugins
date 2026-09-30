@@ -183,6 +183,7 @@ class ResearchTrainingService
         try {
             $row = DB::table('research_lecture')->where('id', $lectureId)->first();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
         if (!$row) {
@@ -431,6 +432,7 @@ class ResearchTrainingService
         try {
             return DB::schema()->hasTable($table);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

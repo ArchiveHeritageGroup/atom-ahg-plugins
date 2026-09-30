@@ -267,6 +267,7 @@ class FieldProvenanceWriter
                 return $row;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
         return self::DEFAULT_GRAPH_URI;
@@ -280,6 +281,7 @@ class FieldProvenanceWriter
                 return $row;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
         return 'https://psis.theahg.co.za';

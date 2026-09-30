@@ -153,6 +153,7 @@ class BackupSettingsService
                 $defaults[$row->setting_key] = $value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table doesn't exist, use defaults + atom config
         }
 
@@ -206,6 +207,7 @@ class BackupSettingsService
             self::$cache = null;
             return true;
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -219,6 +221,7 @@ class BackupSettingsService
             self::$cache = null;
             return true;
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

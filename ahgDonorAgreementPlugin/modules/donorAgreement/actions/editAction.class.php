@@ -225,6 +225,7 @@ class donorAgreementEditAction extends AhgController
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // History logging is optional
             }
             
@@ -378,6 +379,7 @@ class donorAgreementEditAction extends AhgController
             try {
                 \Illuminate\Database\Capsule\Manager::table('donor_agreement_reminder')->insert($insertData);
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Skip invalid reminders
             }
         }
@@ -398,6 +400,7 @@ class donorAgreementEditAction extends AhgController
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Skip duplicates
             }
         }
@@ -419,6 +422,7 @@ class donorAgreementEditAction extends AhgController
                     'linked_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Skip duplicates
             }
         }

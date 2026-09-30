@@ -150,6 +150,7 @@ class ChainedAuditWriter
             $publicKey = $signer->publicKey();
             $currentKid = $signer->keyId();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // signing not configured — seal counts stay zero.
         }
         $signed = 0;

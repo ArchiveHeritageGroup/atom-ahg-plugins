@@ -491,6 +491,7 @@ class ResourceSyncService
                 return (int) $val;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
 
@@ -584,6 +585,7 @@ class ResourceSyncService
                 return rtrim((string) $row, '/');
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
 

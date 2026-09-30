@@ -493,6 +493,7 @@ class ahgVoiceDescribeObjectAction extends sfAction
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
 
@@ -508,6 +509,7 @@ class ahgVoiceDescribeObjectAction extends sfAction
                 ->where('source', 'cloud')
                 ->count();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }
@@ -533,6 +535,7 @@ class ahgVoiceDescribeObjectAction extends sfAction
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Silent - audit failure shouldn't break the feature
         }
     }

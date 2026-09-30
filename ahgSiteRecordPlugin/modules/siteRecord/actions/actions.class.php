@@ -157,6 +157,7 @@ class siteRecordActions extends AhgController
 
             return $user && $user->isAuthenticated() ? (int) $user->getAttribute('user_id') : null;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }

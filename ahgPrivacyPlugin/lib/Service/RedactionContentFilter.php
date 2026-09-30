@@ -331,6 +331,7 @@ class RedactionContentFilter
                 empty($leaked) ? null : substr((string) $leaked[0], 0, 100)
             );
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Audit is best-effort; withholding the record is not.
         }
     }

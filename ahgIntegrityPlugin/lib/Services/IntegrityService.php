@@ -163,6 +163,7 @@ class IntegrityService
                     ->where('algorithm', $algorithm)
                     ->first();
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Could not generate baseline
             }
 
@@ -392,6 +393,7 @@ class IntegrityService
                 $alertService->sendScheduleNotification($schedule, $runResult);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Alert failures are non-fatal — never break verification
         }
 
@@ -1186,6 +1188,7 @@ HTML;
                 ->orderByDesc('id')
                 ->value('computed_hash');
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }

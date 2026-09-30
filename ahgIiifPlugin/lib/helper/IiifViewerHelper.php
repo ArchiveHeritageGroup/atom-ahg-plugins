@@ -95,6 +95,7 @@ function get_iiif_setting(string $key, $default = null)
                 $cache[$row->setting_key] = $row->setting_value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
@@ -383,6 +384,7 @@ function render_iiif_viewer($resource, $options = [])
             return render_standard_viewer($resource, $options);
         }
     } catch (\Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Context may not be available in CLI
     }
 
@@ -443,6 +445,7 @@ function render_iiif_viewer($resource, $options = [])
                 . 'v=' . $__doVer->id . '-' . substr((string) $__doVer->checksum, 0, 12);
         }
     } catch (\Throwable $__e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($__e, basename(__FILE__).':'.__LINE__);
         // best effort - fall back to the unversioned URL
     }
 
@@ -622,6 +625,7 @@ function get_primary_3d_model($resource)
         }
         return null;
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return null;
     }
 }

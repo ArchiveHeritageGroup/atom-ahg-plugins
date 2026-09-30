@@ -150,6 +150,7 @@ class MediaUploadHook
             
             return $value && filter_var($value, FILTER_VALIDATE_BOOLEAN);
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Default to enabled
             return true;
         }

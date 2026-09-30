@@ -181,6 +181,7 @@ class AhgCore
                     return $user->getAttribute('user_id');
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Ignore
             }
         }
@@ -199,6 +200,7 @@ class AhgCore
                     return $user->getAttribute('username') ?? $user->getUsername();
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Ignore
             }
         }

@@ -65,6 +65,7 @@ class SharePointRetentionMapper
                 $writtenDate = new \DateTimeImmutable($written);
                 $entry['embargo_until'] = $writtenDate->modify("+{$offsetDays} days")->format('Y-m-d');
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // skip on parse failure
             }
         }

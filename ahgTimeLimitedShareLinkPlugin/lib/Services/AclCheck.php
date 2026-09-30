@@ -66,6 +66,7 @@ class AclCheck
                 ->where('grant_deny', 1)
                 ->exists();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

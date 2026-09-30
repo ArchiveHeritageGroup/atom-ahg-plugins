@@ -40,7 +40,8 @@ function render_title($resource, $fallback = true)
             if (!empty($title)) {
                 return esc_specialchars($title);
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 
     if (method_exists($resource, 'getAuthorizedFormOfName')) {
@@ -49,7 +50,8 @@ function render_title($resource, $fallback = true)
             if (!empty($name)) {
                 return esc_specialchars($name);
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 
     if (method_exists($resource, 'getName')) {
@@ -58,7 +60,8 @@ function render_title($resource, $fallback = true)
             if (!empty($name)) {
                 return esc_specialchars($name);
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 
     if (method_exists($resource, 'getLabel')) {
@@ -67,7 +70,8 @@ function render_title($resource, $fallback = true)
             if (!empty($label)) {
                 return esc_specialchars($label);
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 
     if (method_exists($resource, '__toString')) {
@@ -76,7 +80,8 @@ function render_title($resource, $fallback = true)
             if (!empty($str)) {
                 return esc_specialchars($str);
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 
     if (method_exists($resource, 'getSlug')) {
@@ -85,7 +90,8 @@ function render_title($resource, $fallback = true)
             if (!empty($slug)) {
                 return esc_specialchars($slug);
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 
     return '';

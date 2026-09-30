@@ -77,6 +77,7 @@ class AclCheck
                 ->exists();
             return $allowAll;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // ACL tables not present → fail closed (deny).
             return false;
         }

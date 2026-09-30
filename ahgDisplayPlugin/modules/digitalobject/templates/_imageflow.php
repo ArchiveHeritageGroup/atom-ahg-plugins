@@ -21,6 +21,7 @@ if (!isset($thumbnailMeta) || empty($thumbnailMeta)) {
                 $doIds[] = (int) $item->parent->id;
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // skip
         }
     }
@@ -42,6 +43,7 @@ if (!isset($thumbnailMeta) || empty($thumbnailMeta)) {
                 $slugTitleMap[(int) $r->do_id] = ['slug' => $r->slug, 'title' => $r->title ?? ''];
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fallback: leave empty
         }
     }
@@ -55,6 +57,7 @@ if (!isset($thumbnailMeta) || empty($thumbnailMeta)) {
                 $doId = (int) $item->parent->id;
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // skip
         }
         $meta = ($doId && isset($slugTitleMap[$doId])) ? $slugTitleMap[$doId] : ['slug' => null, 'title' => ''];

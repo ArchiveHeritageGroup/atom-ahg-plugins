@@ -107,6 +107,7 @@ class iiifActions extends AhgController
 
             return \QubitAcl::check($resource, 'readMaster');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -438,6 +439,7 @@ class iiifActions extends AhgController
                 $manifest['service'] = $accessCheck['service'];
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Auth check failure is non-fatal — treat as public
         }
 
@@ -455,6 +457,7 @@ class iiifActions extends AhgController
         try {
             $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, $totalPageCount, $tier);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Cache write failure is non-fatal
         }
 
@@ -574,6 +577,7 @@ class iiifActions extends AhgController
         try {
             $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, null, $tier);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Cache write failure is non-fatal
         }
 
@@ -768,7 +772,8 @@ class iiifActions extends AhgController
         try {
             $vs = new \AhgIiif\Services\IiifViewerService();
             $vs->invalidateManifestCache((int) $data['object_id']);
-        } catch (\Throwable $e) { /* non-fatal */ }
+        } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* non-fatal */ }
 
         return $this->renderText(json_encode([
             'success' => true,
@@ -866,7 +871,8 @@ class iiifActions extends AhgController
         try {
             $vs = new \AhgIiif\Services\IiifViewerService();
             $vs->invalidateManifestCache((int) $existing->object_id);
-        } catch (\Throwable $e) { /* non-fatal */ }
+        } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* non-fatal */ }
 
         return $this->renderText(json_encode(['success' => true]));
     }
@@ -911,7 +917,8 @@ class iiifActions extends AhgController
         try {
             $vs = new \AhgIiif\Services\IiifViewerService();
             $vs->invalidateManifestCache((int) $objectId);
-        } catch (\Throwable $e) { /* non-fatal */ }
+        } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* non-fatal */ }
 
         return $this->renderText(json_encode(['success' => true]));
     }

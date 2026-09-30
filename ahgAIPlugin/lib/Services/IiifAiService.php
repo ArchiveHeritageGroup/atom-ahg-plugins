@@ -51,6 +51,7 @@ class IiifAiService
                 $this->settings[$row->setting_key] = $row->setting_value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not have iiif_ai entries yet — use defaults
         }
 
@@ -383,6 +384,7 @@ class IiifAiService
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Translation log table may not exist or missing status column
         }
 
@@ -401,6 +403,7 @@ class IiifAiService
                     );
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Culture row may not exist
             }
         }
@@ -826,6 +829,7 @@ class IiifAiService
                 return rtrim($url, '/');
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fall through
         }
 
@@ -837,6 +841,7 @@ class IiifAiService
                 return rtrim($url, '/');
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fall through
         }
 
@@ -857,6 +862,7 @@ class IiifAiService
                 return $key;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fall through
         }
 
@@ -868,6 +874,7 @@ class IiifAiService
                 return $key;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fall through
         }
 

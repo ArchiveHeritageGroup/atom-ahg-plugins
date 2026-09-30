@@ -23,6 +23,7 @@ if ($sf_user->isAuthenticated()) {
             $researcherId = $researcher->id;
         }
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // research_researcher table may not exist
     }
 }

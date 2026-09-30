@@ -19,6 +19,7 @@ try {
         ->whereIn('status', ['approved', 'linked'])
         ->count();
 } catch (Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     // Silently fail if tables don't exist
 }
 ?>
@@ -80,7 +81,8 @@ try {
                 ->where('object_id', $resource->id)->value('slug');
             $imageUrl = '/uploads/r/' . $dObj->path;
         }
-    } catch (Exception $e) {}
+    } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     ?>
     <?php if ($hasImage): ?>
     <div class="mb-2">

@@ -93,6 +93,7 @@ class registryActions extends AhgController
                 $e
             );
         } catch (\Throwable $ignored) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ignored, basename(__FILE__).':'.__LINE__);
             // Silently fail — never let logging break the app
         }
     }
@@ -316,6 +317,7 @@ class registryActions extends AhgController
         try {
             $standardCount = $db::table('registry_standard')->where('is_active', 1)->count();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist yet
         }
 

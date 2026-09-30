@@ -566,6 +566,7 @@ class TiffPdfMergeJob
                 return $setting->setting_value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         }
 
         return $default;
@@ -585,6 +586,7 @@ class TiffPdfMergeJob
                     ->where('setting_key', 'ftp_disk_path')
                     ->value('setting_value');
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             }
             $base = rtrim($base, '/');
             if ($base === '' || !is_dir($base)) {
@@ -648,6 +650,7 @@ class TiffPdfMergeJob
             try {
                 $base = (string) DB::table('ahg_settings')->where('setting_key', 'ftp_disk_path')->value('setting_value');
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             }
             $base = rtrim($base, '/');
             $trashRoot = $base . '/_trash';
@@ -661,6 +664,7 @@ class TiffPdfMergeJob
                     $days = (int) $v;
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             }
             $days = max(0, $days);
             $cutoff = time() - $days * 86400;
@@ -697,6 +701,7 @@ class TiffPdfMergeJob
                 $log(sprintf('Purged %d quarantine folder(s), %d file(s) past %d-day retention', $purged, $files, $days));
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         }
     }
 

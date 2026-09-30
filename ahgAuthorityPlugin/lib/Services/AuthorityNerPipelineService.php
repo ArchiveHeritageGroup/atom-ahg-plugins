@@ -262,6 +262,7 @@ class AuthorityNerPipelineService
                 ->whereIn('ne.entity_type', ['PERSON', 'ORG', 'GPE'])
                 ->count();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // ner_entity table may not exist
         }
 

@@ -294,6 +294,7 @@ class ObjectAddDigitalObjectAction extends AhgController
                     ->update(['physical_characteristics' => $summary]);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Physical characteristics update failed
         }
     }
@@ -341,6 +342,7 @@ class ObjectAddDigitalObjectAction extends AhgController
             $this->applyMappedMetadata($metadata, $mappings, $extractor->formatSummary());
 
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Metadata extraction failed silently
         }
     }

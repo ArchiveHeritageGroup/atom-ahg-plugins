@@ -164,6 +164,7 @@ class IssueService
                 return true;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
         // Otherwise assume yes if they got past the create check.
@@ -177,6 +178,7 @@ class IssueService
             try {
                 return \url_for(['module' => 'shareLink', 'action' => 'recipient', 'token' => $token]);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // fall through
             }
         }

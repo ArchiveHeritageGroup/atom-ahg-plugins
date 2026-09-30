@@ -155,6 +155,7 @@ class AhgCentralHelpers
             $user = sfContext::getInstance()->getUser();
             return $user->isAdministrator() || $user->isSuperUser();
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -170,6 +171,7 @@ class AhgCentralHelpers
                 || $user->isSuperUser() 
                 || (method_exists($user, 'isReportUser') && $user->isReportUser());
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -238,6 +240,7 @@ class AhgCentralHelpers
         try {
             sfContext::getInstance()->getUser()->setFlash($type, $message);
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
     }

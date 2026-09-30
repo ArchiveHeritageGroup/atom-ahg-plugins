@@ -115,7 +115,8 @@ EOF;
                     return (float) $row->value;
                 }
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $ahgSwallowed) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ahgSwallowed, basename(__FILE__).':'.__LINE__);
             // schema() may be unavailable depending on Capsule init; ignore + fall through.
         }
 
@@ -127,7 +128,8 @@ EOF;
             if ($row !== null && $row->value !== null && $row->value !== '') {
                 return (float) $row->value;
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $ahgSwallowed) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ahgSwallowed, basename(__FILE__).':'.__LINE__);
         }
 
         return 7.0;

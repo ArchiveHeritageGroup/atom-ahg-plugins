@@ -27,6 +27,7 @@ class dataMigrationIndexAction extends AhgController
                 $this->savedMappings[] = $mapping;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table might not exist
         }
         
@@ -39,6 +40,7 @@ class dataMigrationIndexAction extends AhgController
                 ->get()
                 ->toArray();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table might not exist
         }
     }

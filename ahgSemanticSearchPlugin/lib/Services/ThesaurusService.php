@@ -104,6 +104,7 @@ class ThesaurusService
                 ->first();
             return $setting ? $setting->setting_value : null;
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }

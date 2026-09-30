@@ -73,6 +73,7 @@ class FavoritesShareService
                 $baseUrl = $request->getUriPrefix();
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         }
 
         return [
@@ -127,6 +128,7 @@ class FavoritesShareService
                 ->value('authorized_form_of_name');
             $senderName = $actor ?: '';
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         }
         if (!$senderName) {
             $senderName = DB::table('user')->where('id', $userId)->value('username') ?: \__('A user');
@@ -203,6 +205,7 @@ class FavoritesShareService
                         ]);
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // recipients column may not exist yet — ignore
             }
         }
@@ -243,6 +246,7 @@ class FavoritesShareService
         try {
             $culture = \sfContext::getInstance()->getUser()->getCulture() ?: 'en';
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         }
 
         $favorites = DB::table('favorites')

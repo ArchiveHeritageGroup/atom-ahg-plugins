@@ -143,6 +143,7 @@ function _load_media_settings(): array
             $cache[$row->setting_key] = $val;
         }
     } catch (\Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Table may not exist
     }
 
@@ -315,6 +316,7 @@ function render_enhanced_media_player(array $digitalObjectData, array $options =
                     . 'srclang="' . htmlspecialchars($transcription->language ?? 'en') . '" label="Subtitles" default>';
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // media_transcription table may not exist
         }
         try {
@@ -327,6 +329,7 @@ function render_enhanced_media_player(array $digitalObjectData, array $options =
                     . 'label="' . htmlspecialchars($audioDesc->label ?? 'Audio description') . '">';
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // media_audio_description table may not exist
         }
         $html .= '<source src="' . htmlspecialchars($mediaUrl) . '" type="' . htmlspecialchars($outputMime) . '">';
@@ -687,6 +690,7 @@ function get_media_metadata(int $digitalObjectId): ?object
             ->where('digital_object_id', $digitalObjectId)
             ->first() ?: null;
     } catch (\Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return null;
     }
 }
@@ -698,6 +702,7 @@ function get_transcription(int $digitalObjectId): ?object
             ->where('digital_object_id', $digitalObjectId)
             ->first() ?: null;
     } catch (\Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return null;
     }
 }

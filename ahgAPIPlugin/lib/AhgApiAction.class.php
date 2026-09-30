@@ -241,6 +241,7 @@ class AhgApiAction extends sfAction
                 false
             );
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -287,6 +288,7 @@ class AhgApiAction extends sfAction
             $userId = (int) ($this->apiKeyInfo['user_id'] ?? 0);
             $this->idemSvc->store($userId, $request->getPathInfo(), (string) $request->getContent(), $status, (string) $this->response->getContent(), []);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // best-effort; never affect the response
         }
     }

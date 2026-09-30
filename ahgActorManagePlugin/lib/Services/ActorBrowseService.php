@@ -178,6 +178,7 @@ class ActorBrowseService
                     }
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Tables may not exist
             }
         }
@@ -601,6 +602,7 @@ class ActorBrowseService
 
             return $row ? (int) $row->object_id : null;
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -619,6 +621,7 @@ class ActorBrowseService
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fall through
         }
 
@@ -1001,6 +1004,7 @@ class ActorBrowseService
         try {
             return \sfContext::getInstance()->getUser()->isAuthenticated();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

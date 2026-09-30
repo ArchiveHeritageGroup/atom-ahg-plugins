@@ -204,6 +204,7 @@ class DpiaService
             }
             DB::table('privacy_audit_log')->insert($row);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // audit unavailable — ignore
         }
     }

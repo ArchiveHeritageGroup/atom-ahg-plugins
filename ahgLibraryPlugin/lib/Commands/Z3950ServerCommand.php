@@ -313,6 +313,7 @@ class Z3950ServerCommand extends BaseCommand
                 'created_at'     => date('Y-m-d H:i:s'),
             ]);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Logging must never break the daemon.
         }
     }

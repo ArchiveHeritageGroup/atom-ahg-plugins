@@ -164,20 +164,24 @@ foreach ($sectorTests as $sector => $t) {
 
 // ---- Safety sweep: remove any ZZ-TEST-* records that leaked -----------------
 foreach (array_unique($createdIoIds) as $iid) {
-    try { \QubitInformationObject::getById($iid)?->delete(); } catch (\Throwable $e) {}
+    try { \QubitInformationObject::getById($iid)?->delete(); } catch (\Throwable $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 }
 $leakIos = DB::table('information_object_i18n')->where('title', 'like', 'ZZ-TEST-%')->pluck('id')->all();
-foreach ($leakIos as $iid) { try { \QubitInformationObject::getById($iid)?->delete(); } catch (\Throwable $e) {} }
+foreach ($leakIos as $iid) { try { \QubitInformationObject::getById($iid)?->delete(); } catch (\Throwable $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);} }
 $leakActors = DB::table('actor_i18n')->where('authorized_form_of_name', 'like', 'ZZ-TEST-%')->pluck('id')->all();
 foreach (array_unique(array_merge($createdActorIds, $leakActors)) as $aid) {
     foreach (['donor','rights_holder','actor_i18n','actor','object'] as $t) {
-        try { DB::table($t)->where('id', $aid)->delete(); } catch (\Throwable $e) {}
+        try { DB::table($t)->where('id', $aid)->delete(); } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 }
 $leakTerms = DB::table('term_i18n')->where('name', 'like', 'ZZ-TEST-%')->pluck('id')->all();
 foreach (array_unique(array_merge($createdTermIds, $leakTerms)) as $tid) {
     foreach (['term_i18n','term','object'] as $t) {
-        try { DB::table($t)->where('id', $tid)->delete(); } catch (\Throwable $e) {}
+        try { DB::table($t)->where('id', $tid)->delete(); } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     }
 }
 $sweptA = count($leakActors); $sweptT = count($leakTerms);

@@ -147,6 +147,7 @@ class AccessionCommitHandler
 
             return $newTerm->id;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -252,6 +253,7 @@ class AccessionCommitHandler
             $relation->typeId = \QubitTerm::DONOR_ID ?? 334;
             $relation->save();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal — donor still exists
         }
     }
@@ -354,6 +356,7 @@ class AccessionCommitHandler
             $relation->typeId = \QubitTerm::HAS_PHYSICAL_OBJECT_ID ?? 335;
             $relation->save();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal
         }
     }
@@ -370,6 +373,7 @@ class AccessionCommitHandler
                 return;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return;
         }
 
@@ -411,6 +415,7 @@ class AccessionCommitHandler
                     ]);
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Table may not exist — non-fatal
             }
         }
@@ -451,6 +456,7 @@ class AccessionCommitHandler
                     ]);
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal
             }
         }

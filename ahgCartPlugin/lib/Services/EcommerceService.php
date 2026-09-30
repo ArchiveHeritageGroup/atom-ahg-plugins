@@ -599,6 +599,7 @@ class EcommerceService
 
             @mail($email, $subject, $body, 'From: noreply@' . (gethostname() ?: 'localhost'));
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Notification is best-effort
         }
     }

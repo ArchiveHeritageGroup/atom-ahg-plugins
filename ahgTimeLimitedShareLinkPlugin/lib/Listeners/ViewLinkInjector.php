@@ -118,6 +118,7 @@ final class ViewLinkInjector
             return (new \AhgShareLink\Services\AclCheck())
                 ->canUserDo($userId, \AhgShareLink\Services\AclCheck::ACTION_CREATE);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -133,6 +134,7 @@ final class ViewLinkInjector
             try {
                 $row = DB::table('slug')->where('slug', $slug)->first();
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 return null;
             }
             if ($row && !empty($row->object_id)) {

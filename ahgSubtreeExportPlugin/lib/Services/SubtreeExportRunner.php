@@ -415,6 +415,7 @@ class SubtreeExportRunner
                 [(int) $job->id]
             );
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return;
         }
 
@@ -528,6 +529,7 @@ class SubtreeExportRunner
                 [$column]
             );
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -650,6 +652,7 @@ class SubtreeExportRunner
                   WHERE otr.object_id IN ({$ids})"
             );
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return;
         }
 

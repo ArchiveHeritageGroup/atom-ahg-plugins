@@ -242,6 +242,7 @@ class discoveryActions extends AhgController
                 ->limit(1)
                 ->update(['clicked_object' => $objectId]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist yet — degrade gracefully
         }
 
@@ -351,6 +352,7 @@ class discoveryActions extends AhgController
                 $this->indexCounts['total'] += (int) $row->ready_cnt;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist yet
         }
 
@@ -617,6 +619,7 @@ class discoveryActions extends AhgController
                 return json_decode($row->result_json, true);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore cache errors
         }
 
@@ -645,6 +648,7 @@ class discoveryActions extends AhgController
                 ]
             );
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore cache errors
         }
     }
@@ -676,6 +680,7 @@ class discoveryActions extends AhgController
                 'created_at' => DB::raw('NOW()'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore log errors
         }
     }

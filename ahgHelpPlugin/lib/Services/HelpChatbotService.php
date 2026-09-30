@@ -258,6 +258,7 @@ class HelpChatbotService
 
             return DB::table('ahg_llm_config')->where('is_active', 1)->exists();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

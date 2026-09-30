@@ -252,6 +252,7 @@ class WatchedFolderService
         try {
             return DB::schema()->hasColumn('ingest_session', $column);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

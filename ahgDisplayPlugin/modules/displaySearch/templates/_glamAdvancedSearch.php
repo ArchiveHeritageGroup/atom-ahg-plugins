@@ -56,6 +56,7 @@ try {
     // Hide draft/embargoed authority records (repositories are actors) from guests.
     $repoAuthed = false;
     try { $repoAuthed = $sf_user->isAuthenticated(); } catch (\Throwable $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     }
     if (!$repoAuthed && class_exists('\AhgActorManage\Services\ActorVisibilityService')) {
         $repoHidden = \AhgActorManage\Services\ActorVisibilityService::getHiddenActorIds();
@@ -256,7 +257,8 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
                               ->orderBy('sort_order')->get(['field_key', 'field_label']) as $cf) {
                               $fieldSearchOptions['cf_' . $cf->field_key] = $cf->field_label;
                           }
-                      } catch (\Throwable $e) { /* custom_field_definition absent - skip */ }
+                      } catch (\Throwable $e) {
+                          \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* custom_field_definition absent - skip */ }
                   }
                   $activeFieldSearches = [];
                   foreach ($fieldSearchOptions as $key => $label) {

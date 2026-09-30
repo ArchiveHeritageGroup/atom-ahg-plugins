@@ -57,6 +57,7 @@ function has_museum_metadata($object)
     try {
         return $adapter->hasMuseumMetadata($object->id);
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return false;
     }
 }
@@ -83,6 +84,7 @@ function get_museum_metadata($object)
         $museumObject = $adapter->getMuseumMetadata($object->id);
         return $museumObject ? $museumObject->toArray() : null;
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return null;
     }
 }
@@ -108,6 +110,7 @@ function format_museum_measurements($measurements)
     try {
         return $adapter->formatMeasurements($measurements);
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return '';
     }
 }
@@ -287,6 +290,7 @@ function get_extent_statement($measurements)
     try {
         return $adapter->getExtentStatement($measurements);
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         return '';
     }
 }

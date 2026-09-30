@@ -60,6 +60,7 @@ class arAiBatchJob extends arBaseJob
                     $service->updateBatchProgress($batchId, true);
                 }
             } catch (\Exception $e2) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e2, basename(__FILE__).':'.__LINE__);
                 // Ignore logging errors
             }
 

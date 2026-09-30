@@ -629,6 +629,7 @@ class FormSubmitService
                 'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? substr($_SERVER['HTTP_USER_AGENT'], 0, 500) : null,
             ]);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Audit logging must never block a successful save.
         }
     }
@@ -646,6 +647,7 @@ class FormSubmitService
                 ->where('user_id', $this->currentUserId())
                 ->delete();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal.
         }
     }

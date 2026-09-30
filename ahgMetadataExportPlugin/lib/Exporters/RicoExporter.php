@@ -232,6 +232,7 @@ class RicoExporter extends AbstractRdfExporter
         try {
             $status = $resource->getPublicationStatus();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore - publication status may not be available
         }
         if ($status) {
@@ -267,6 +268,7 @@ class RicoExporter extends AbstractRdfExporter
                 try {
                     $status = $child->getPublicationStatus();
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Ignore - publication status may not be available
                 }
                 if ($status && 'Draft' === (string) $status) {
@@ -487,6 +489,7 @@ class RicoExporter extends AbstractRdfExporter
                         }
                     }
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Ignore
                 }
             }
@@ -667,21 +670,25 @@ class RicoExporter extends AbstractRdfExporter
                 try {
                     $start = $dateObj->startDate;
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Ignore
                 }
                 try {
                     $end = $dateObj->endDate;
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Ignore
                 }
                 try {
                     $display = $dateObj->getDate(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Ignore
                 }
                 break;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 

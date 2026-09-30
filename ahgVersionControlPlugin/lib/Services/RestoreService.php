@@ -135,6 +135,7 @@ class RestoreService
                             ]);
                         }
                     } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // ahgCustomFieldsPlugin not installed — silently skip.
                     }
                 }

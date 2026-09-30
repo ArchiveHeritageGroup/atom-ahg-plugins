@@ -787,6 +787,7 @@ class WorkflowService
                 return 0;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // setting not found - default to enabled
         }
 
@@ -1343,6 +1344,7 @@ class WorkflowService
             $slaService = new WorkflowSlaService();
             $slaService->applyPolicy($taskId, $userId);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // SLA application is non-fatal
         }
     }

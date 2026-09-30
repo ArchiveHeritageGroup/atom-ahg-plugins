@@ -35,6 +35,7 @@ try {
             ->pluck('id')->all();
     }
 } catch (\Throwable $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     // nested set unavailable - fall back to the record itself only
 }
 $selfAndAncestors = array_merge([$objectId], $ancestorIds);

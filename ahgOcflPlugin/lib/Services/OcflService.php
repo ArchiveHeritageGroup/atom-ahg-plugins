@@ -51,6 +51,7 @@ class OcflService
                     return (string) $val;
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // fall through to default
             }
         }
@@ -105,6 +106,7 @@ class OcflService
                 return (string) $row->ocfl_object_id;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // map table may not exist yet
         }
 
@@ -226,6 +228,7 @@ class OcflService
                     ]);
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal: the OCFL write itself is the source of truth.
         }
     }

@@ -111,6 +111,7 @@ class EmbeddedMetadataService
                 DB::table(self::TABLE)->insert($payload);
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table not yet installed — capture is best-effort, never fatal.
         }
     }
@@ -139,6 +140,7 @@ class EmbeddedMetadataService
                 ->where('digital_object_id', $digitalObjectId)
                 ->value('raw_metadata');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
 

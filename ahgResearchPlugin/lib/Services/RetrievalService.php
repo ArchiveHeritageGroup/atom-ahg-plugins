@@ -406,6 +406,7 @@ class RetrievalService
                     'comment' => $notes ?? "Status: {$oldStatus} → {$newStatus}",
                 ]);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Workflow plugin may not be installed
             }
         }

@@ -65,6 +65,7 @@ class ahgDonutService
                 return $value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // DB not available yet (CLI bootstrap, etc.) - fall through.
         }
 
@@ -296,6 +297,7 @@ class ahgDonutService
                 'occurred_at'        => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Provenance is best-effort and must never break extraction.
         }
     }

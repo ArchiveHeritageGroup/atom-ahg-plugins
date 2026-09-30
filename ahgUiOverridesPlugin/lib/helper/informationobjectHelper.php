@@ -22,6 +22,7 @@
 try {
     sfContext::getInstance()->getConfiguration()->loadHelpers(['Media']);
 } catch (Throwable $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     // ahgIiifPlugin not installed - enhanced media rendering is simply unavailable.
 }
 

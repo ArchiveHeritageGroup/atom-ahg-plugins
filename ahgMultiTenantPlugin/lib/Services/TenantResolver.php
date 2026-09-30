@@ -212,6 +212,7 @@ class TenantResolver
                 return $setting;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
 
@@ -251,6 +252,7 @@ class TenantResolver
                 return array_filter(array_map('trim', explode(',', $setting)));
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
 

@@ -139,6 +139,7 @@ class ahgAuditTrailListener
                         self::$preActionData[$key]['_i18n'] = $i18nRecords->toArray();
                     }
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // i18n table might not exist
                 }
             }
@@ -215,6 +216,7 @@ class ahgAuditTrailListener
                                         $newValues['_i18n'] = $i18nRecords->toArray();
                                     }
                                 } catch (\Exception $e) {
+                                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                                     // i18n table might not exist
                                 }
                                 
@@ -272,6 +274,7 @@ class ahgAuditTrailListener
                         }
                     }
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Keep original IP on error
                 }
             }
@@ -490,6 +493,7 @@ class ahgAuditTrailListener
                 $id = $db->table('slug')->where('slug', $slug)->value('object_id');
                 return $id ? (int)$id : null;
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 return null;
             }
         }

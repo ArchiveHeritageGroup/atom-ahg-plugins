@@ -37,6 +37,7 @@ class serialEditAction extends AhgController
                     $this->subscription = $data['subscription'];
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // ignore - form will be blank
             }
         }
@@ -48,6 +49,7 @@ class serialEditAction extends AhgController
                 $this->vendorOptions = SerialService::getInstance()->getVendorOptions();
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // leave empty - form still renders
         }
 

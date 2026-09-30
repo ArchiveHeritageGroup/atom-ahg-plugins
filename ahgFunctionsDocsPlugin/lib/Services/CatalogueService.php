@@ -41,6 +41,7 @@ class CatalogueService
                 ];
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // routing unavailable — return what we have
         }
         usort($out, fn ($a, $b) => strcmp($a['pattern'], $b['pattern']));

@@ -1036,6 +1036,7 @@ class PreservicaImportService
             }
 
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Provenance creation failed silently
         }
     }
@@ -1249,6 +1250,7 @@ class PreservicaImportService
             $rightsId = $rightsService->createRightsRecord($objectId, $importData);
 
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Rights creation failed silently
         }
     }

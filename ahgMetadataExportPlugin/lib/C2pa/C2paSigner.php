@@ -80,6 +80,7 @@ final class C2paSigner
         try {
             return sodium_crypto_sign_verify_detached(hex2bin($sigHex), $digest, $publicKey);
         } catch (\SodiumException $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

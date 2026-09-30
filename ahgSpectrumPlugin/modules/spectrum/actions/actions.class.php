@@ -88,6 +88,7 @@ class spectrumActions extends AhgController
                     $checkedBy = (string) ($user->username ?? $user->email ?? '');
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // fall through with an empty attribution rather than blocking the check
             }
 
@@ -276,6 +277,7 @@ class spectrumActions extends AhgController
                 $this->grapData = (array) $grapData;
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
 
@@ -359,6 +361,7 @@ class spectrumActions extends AhgController
                 $this->stepStates[$r->step_key] = $r;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // spectrum_workflow_step_state not migrated yet — steps render unticked.
         }
     }
@@ -1052,6 +1055,7 @@ class spectrumActions extends AhgController
                 $this->procedureStatuses[$state->procedure_type] = $state->current_state;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
 
@@ -1067,6 +1071,7 @@ class spectrumActions extends AhgController
                 ->get()
                 ->toArray();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
@@ -1334,6 +1339,7 @@ class spectrumActions extends AhgController
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
         
@@ -1346,6 +1352,7 @@ class spectrumActions extends AhgController
                 ->get()
                 ->toArray();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
@@ -1445,6 +1452,7 @@ class spectrumActions extends AhgController
                 try {
                     $userId = $this->getUser()->getAttribute('user_id');
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // User ID not available
                 }
                 
@@ -1511,6 +1519,7 @@ class spectrumActions extends AhgController
                 ->orderBy('check_date', 'desc')
                 ->first();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
@@ -1956,6 +1965,7 @@ class spectrumActions extends AhgController
                 $this->insuranceComplete = !empty($this->grapData->insurance_value);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist - use defaults
         }
 
@@ -2109,6 +2119,7 @@ class spectrumActions extends AhgController
                 ->get()
                 ->toArray();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist on older installs
         }
     }
@@ -2194,6 +2205,7 @@ class spectrumActions extends AhgController
                 $this->museumData = (array) $result;
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
@@ -2223,6 +2235,7 @@ class spectrumActions extends AhgController
             DB::table('spectrum_event')->first();
             return true;
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -3320,7 +3333,8 @@ class spectrumActions extends AhgController
                     $stats["in_progress_procedures"] += $row->count;
                 }
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
         
         return $stats;
     }
@@ -3356,7 +3370,8 @@ class spectrumActions extends AhgController
                 }
                 $counts[$row->procedure_type][$row->current_state] = $row->count;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
         return $counts;
     }
     

@@ -206,6 +206,7 @@ class AhgCentralService
                 }
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through to the inline equivalent
         }
 
@@ -303,6 +304,7 @@ class AhgCentralService
                 }
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // settings store unavailable - fall back to the default
         }
 

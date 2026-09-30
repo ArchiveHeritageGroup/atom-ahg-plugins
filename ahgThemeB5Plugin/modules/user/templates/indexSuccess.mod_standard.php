@@ -49,6 +49,7 @@ try {
         }
     }
 } catch (Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     // Silently fail if service not available
 }
 

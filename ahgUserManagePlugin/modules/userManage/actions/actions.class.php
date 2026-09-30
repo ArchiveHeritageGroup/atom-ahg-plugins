@@ -102,6 +102,7 @@ class userManageActions extends AhgController
             try {
                 $this->clearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearance($this->userRecord['id']);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Service not fully installed
             }
         }

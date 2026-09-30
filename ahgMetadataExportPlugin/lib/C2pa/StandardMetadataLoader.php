@@ -82,6 +82,7 @@ final class StandardMetadataLoader
                 ->whereIn('resolution_status', ['pending', 'escalated'])
                 ->exists();
         } catch (Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -244,6 +245,7 @@ final class StandardMetadataLoader
         try {
             $row = DB::table($table)->where($column, $value)->first();
         } catch (Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
 
@@ -255,6 +257,7 @@ final class StandardMetadataLoader
         try {
             return DB::schema()->hasTable($table);
         } catch (Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

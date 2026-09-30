@@ -806,6 +806,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 return $value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore, try without options
         }
 
@@ -822,6 +823,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -906,6 +908,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -932,6 +935,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 return (string) $resource->id;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -965,6 +969,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -995,6 +1000,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -1025,6 +1031,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -1056,6 +1063,7 @@ abstract class AbstractRdfExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 

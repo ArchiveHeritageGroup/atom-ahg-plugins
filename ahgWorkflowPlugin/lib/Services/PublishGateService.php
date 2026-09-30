@@ -441,6 +441,7 @@ class PublishGateService
                 return ['status' => 'failed', 'details' => 'IIIF issues: ' . implode('; ', $messages)];
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Fall through to basic check
         }
 
@@ -650,6 +651,7 @@ class PublishGateService
                 'comment' => "Publish gate: {$action}",
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }

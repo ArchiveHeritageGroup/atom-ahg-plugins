@@ -645,7 +645,8 @@ $n = sfConfig::get('csp_nonce', '');
           <div class="input-group">
             <?php
               $shareBaseUrl = '';
-              try { $shareBaseUrl = sfContext::getInstance()->getRequest()->getUriPrefix(); } catch (Exception $e) {}
+              try { $shareBaseUrl = sfContext::getInstance()->getRequest()->getUriPrefix(); } catch (Exception $e) {
+                  \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
             ?>
             <input type="text" class="form-control" readonly value="<?php echo $shareBaseUrl; ?>/favorites/shared/<?php echo esc_entities($currentFolder->share_token); ?>">
             <button type="button" class="btn btn-outline-primary" data-ahg-copy="prev">

@@ -62,6 +62,7 @@ class TimezoneOverride
 
             date_default_timezone_set($timezone);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // A wrong timezone is a bad day; a white page is a worse one.
         }
     }
@@ -78,6 +79,7 @@ class TimezoneOverride
         try {
             $value = \AtomExtensions\Services\AhgSettingsService::get('default_timezone', '');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
 

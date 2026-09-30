@@ -76,6 +76,7 @@ class AccessionCrudService
                 ];
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // accession_v2 table may not exist yet
         }
 
@@ -156,6 +157,7 @@ class AccessionCrudService
                     ObjectService::generateSlug($id, $number);
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // V2 tables may not be installed yet — graceful degradation
             }
 
@@ -212,6 +214,7 @@ class AccessionCrudService
                 $userId = $data['userId'] ?? null;
                 $intakeService->addTimelineEvent($id, AccessionIntakeService::EVENT_NOTE, $userId, 'Accession updated');
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // V2 tables may not be installed yet
             }
         });
@@ -234,6 +237,7 @@ class AccessionCrudService
                 $containerService = new AccessionContainerService();
                 $containerService->deleteAllForAccession($id);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // V2 tables may not be installed yet
             }
 
@@ -518,6 +522,7 @@ class AccessionCrudService
             $base['containers'] = $containerService->getContainers($accessionId);
             $base['rights'] = $containerService->getRights($accessionId);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // V2 tables may not be installed yet
         }
 
@@ -570,6 +575,7 @@ class AccessionCrudService
                 ->get()
                 ->all();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // V2 tables may not be installed yet
         }
 

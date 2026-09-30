@@ -40,6 +40,7 @@ class securityActions extends AhgController
                 ->whereDate('created_at', '>=', $monthStart)
                 ->count();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Tables may not exist
         }
         
@@ -67,6 +68,7 @@ class securityActions extends AhgController
                 ->get()
                 ->toArray();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
@@ -113,6 +115,7 @@ class securityActions extends AhgController
                 ]);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Handle error
         }
         
@@ -159,6 +162,7 @@ class securityActions extends AhgController
                 ]);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Handle error
         }
         

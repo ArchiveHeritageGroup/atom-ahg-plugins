@@ -230,6 +230,7 @@ class BackupService
                 'started_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Continue without history
         }
         
@@ -291,6 +292,7 @@ class BackupService
                     'completed_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Continue
             }
             
@@ -308,6 +310,7 @@ class BackupService
                     'completed_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (\Exception $e2) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e2, basename(__FILE__).':'.__LINE__);
                 // Continue
             }
         }
@@ -362,6 +365,7 @@ class BackupService
                 'started_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Continue
         }
 
@@ -408,6 +412,7 @@ class BackupService
                     'completed_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Continue
             }
 
@@ -424,6 +429,7 @@ class BackupService
                     'completed_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (\Exception $e2) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e2, basename(__FILE__).':'.__LINE__);
                 // Continue
             }
         }
@@ -822,6 +828,7 @@ class BackupService
         try {
             DB::table('backup_history')->where('backup_id', $backupId)->delete();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Continue
         }
         
@@ -1230,6 +1237,7 @@ private function restoreFuseki(string $backupDir): void
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Return 0 on error
         }
         return $size;

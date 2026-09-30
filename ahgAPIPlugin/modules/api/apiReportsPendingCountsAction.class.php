@@ -52,6 +52,7 @@ class apiReportsPendingCountsAction extends AhgController
                 ->where('status', 'pending')
                 ->count();
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }
@@ -67,6 +68,7 @@ class apiReportsPendingCountsAction extends AhgController
                 ->whereRaw('loan_end_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)')
                 ->count();
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }
@@ -85,6 +87,7 @@ class apiReportsPendingCountsAction extends AhgController
                 ->distinct()
                 ->count('information_object_id');
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }
@@ -100,6 +103,7 @@ class apiReportsPendingCountsAction extends AhgController
                 ->whereRaw('next_valuation_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY)')
                 ->count();
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }
@@ -114,6 +118,7 @@ class apiReportsPendingCountsAction extends AhgController
                 ->whereIn('current_state', ['pending_approval', 'under_review', 'submitted'])
                 ->count();
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }
@@ -129,6 +134,7 @@ class apiReportsPendingCountsAction extends AhgController
                 ->whereRaw('expiry_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY)')
                 ->count();
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0;
         }
     }

@@ -124,6 +124,7 @@ class reportsActions extends AhgController
             $ingestDOs = (int) DB::table('ingest_job')->sum('created_dos');
             $lastIngestAt = DB::table('ingest_job')->whereNotNull('completed_at')->max('completed_at');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // ahgIngestPlugin not installed
         }
 
@@ -134,6 +135,7 @@ class reportsActions extends AhgController
             $preservedObjects = DB::table('preservation_checksum')->distinct()->count('digital_object_id');
             $premisEvents = DB::table('preservation_event')->count();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // ahgPreservationPlugin not installed
         }
 

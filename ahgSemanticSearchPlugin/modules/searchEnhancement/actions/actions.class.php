@@ -69,6 +69,7 @@ class searchEnhancementActions extends AhgController
                         ->update(['citation_id' => $citationId]);
                 }
             } catch (\Exception $bridgeEx) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($bridgeEx, basename(__FILE__).':'.__LINE__);
                 // Non-fatal: research bridge failure shouldn't break main save
             }
 

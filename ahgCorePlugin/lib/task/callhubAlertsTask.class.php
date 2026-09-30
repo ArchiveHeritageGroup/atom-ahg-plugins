@@ -161,6 +161,7 @@ EOF;
         try {
             return \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_error_alert');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -179,6 +180,7 @@ EOF;
                 return is_string($v) && '' !== $v ? $v : $default;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
 

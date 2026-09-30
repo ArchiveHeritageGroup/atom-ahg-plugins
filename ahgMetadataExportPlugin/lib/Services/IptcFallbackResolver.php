@@ -125,6 +125,7 @@ class IptcFallbackResolver
                 }
             }
         } catch (Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through to IPTC
         }
 
@@ -143,6 +144,7 @@ class IptcFallbackResolver
                 }
             }
         } catch (Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
 
@@ -169,6 +171,7 @@ class IptcFallbackResolver
                 }
             }
         } catch (Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
 
@@ -199,6 +202,7 @@ class IptcFallbackResolver
                     return [trim($decoded)];
                 }
             } catch (Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // fall through to delimited
             }
         }
@@ -239,6 +243,7 @@ class IptcFallbackResolver
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // audit is best-effort
         }
     }

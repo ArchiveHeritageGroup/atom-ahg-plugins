@@ -33,6 +33,7 @@ class researchActions extends AhgController
                         ->where('is_read', 0)
                         ->count();
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Table may not exist yet
                 }
             }
@@ -398,6 +399,7 @@ class researchActions extends AhgController
                     $this->sendTemplatedEmail($notifyEmail, 'booking_new', $placeholders, $subject, $body);
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Best-effort notification
             }
 
@@ -415,7 +417,8 @@ class researchActions extends AhgController
                     'booking',
                     $bookingId
                 );
-            } catch (\Exception $e) { /* silent */ }
+            } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* silent */ }
 
             $this->redirect('research/viewBooking?id=' . $bookingId);
         }
@@ -573,7 +576,8 @@ class researchActions extends AhgController
                         'search',
                         $searchId
                     );
-                } catch (\Exception $e) { /* silent */ }
+                } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* silent */ }
             } elseif ($action === 'delete') {
                 $this->service->deleteSavedSearch((int) $request->getParameter('id'), $this->researcher->id);
             }
@@ -676,7 +680,8 @@ class researchActions extends AhgController
                                 'collection',
                                 $id
                             );
-                        } catch (\Exception $e) { /* silent */ }
+                        } catch (\Exception $e) {
+                            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* silent */ }
                     } else {
                         $this->getUser()->setFlash('error', 'Item(s) already in collection');
                     }
@@ -784,7 +789,8 @@ class researchActions extends AhgController
                             'annotation',
                             (int) $newId
                         );
-                    } catch (\Exception $e) { /* silent */ }
+                    } catch (\Exception $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* silent */ }
                 }
                 $this->redirect('research/annotations');
             }
@@ -829,7 +835,8 @@ class researchActions extends AhgController
                             'annotation',
                             $id
                         );
-                    } catch (\Exception $e) { /* silent */ }
+                    } catch (\Exception $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* silent */ }
                 }
                 $this->redirect('research/annotations');
             }
@@ -939,6 +946,7 @@ class researchActions extends AhgController
                     'created_at'    => date('Y-m-d H:i:s'),
                 ]);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // non-fatal
             }
         }
@@ -3179,6 +3187,7 @@ class researchActions extends AhgController
                             "Dear {name},\n\nYour reproduction request ({reference_number}) has been received and is being reviewed.\n\nPurpose: {purpose}\n\nYou will be notified when it has been processed.\n\nBest regards,\nThe Archive Team"
                         );
                     } catch (\Exception $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // Email sending is non-blocking
                     }
                 }
@@ -4689,7 +4698,8 @@ class researchActions extends AhgController
                                 $this->researcher->first_name . ' ' . $this->researcher->last_name . ' requested your review of "' . ($this->report->title ?? 'Report') . '"',
                                 'research/report/' . $id, 'report', $id
                             );
-                        } catch (\Exception $e) {}
+                        } catch (\Exception $e) {
+                            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
                         $this->getUser()->setFlash('success', 'Review request sent');
                     } catch (\Exception $e) {
@@ -5359,6 +5369,7 @@ class researchActions extends AhgController
                         $reportId
                     );
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Notification is non-critical
                 }
 
@@ -5669,6 +5680,7 @@ class researchActions extends AhgController
         try {
             $culture = \sfContext::getInstance()->getUser()->getCulture() ?: 'en';
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         }
 
         $results = [];
@@ -5815,6 +5827,7 @@ class researchActions extends AhgController
             }
             return $enabled !== 'false' && $enabled !== '0';
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return true; // default enabled
         }
     }
@@ -6395,6 +6408,7 @@ class researchActions extends AhgController
                 $this->model3D = $model3d;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // object_3d_model table doesn't exist — ahg3DModelPlugin not installed
         }
 
@@ -7368,7 +7382,8 @@ class researchActions extends AhgController
             $this->securityClearance = DB::table('object_security_classification')
                 ->where('object_id', $this->objectId)
                 ->first();
-        } catch (\Exception $e) { /* table may not exist */ }
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* table may not exist */ }
 
         // ODRL policies
         $this->odrlPolicies = [];
@@ -7377,7 +7392,8 @@ class researchActions extends AhgController
                 ->where('target_id', $this->objectId)
                 ->orderBy('created_at', 'desc')
                 ->get()->toArray();
-        } catch (\Exception $e) { /* table may not exist */ }
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* table may not exist */ }
 
         // Trust score
         $trustService = $this->loadTrustScoringService();
@@ -7480,7 +7496,8 @@ class researchActions extends AhgController
                 $this->sensitivityBreakdown = $breakdown;
                 $this->sensitivitySummary = ['max_level' => $maxLevel];
             }
-        } catch (\Exception $e) { /* security_clearance table may not exist */ }
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* security_clearance table may not exist */ }
 
         // Trust scores for project sources
         $this->trustScores = [];
@@ -7501,7 +7518,8 @@ class researchActions extends AhgController
                 $scores = array_filter(array_column($assessments, 'score'), function($s) { return $s !== null; });
                 $this->avgTrustScore = count($scores) > 0 ? array_sum($scores) / count($scores) / 10 : null;
             }
-        } catch (\Exception $e) { /* silent */ }
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* silent */ }
     }
 
     // =========================================================================
@@ -7602,6 +7620,7 @@ class researchActions extends AhgController
             $odrlService = $this->loadOdrlService();
             $result = $odrlService->evaluateAccess($targetType, $targetId, $researcherId, $action);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null; // ODRL tables may not exist; fail open
         }
 
@@ -7692,7 +7711,8 @@ class researchActions extends AhgController
                         }
                         break;
                 }
-            } catch (\Exception $e) { /* table may not exist */ }
+            } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* table may not exist */ }
 
             // Resolve researcher names from constraints
             $p->researcher_labels = [];
@@ -7707,7 +7727,8 @@ class researchActions extends AhgController
                         foreach ($researchers as $r) {
                             $p->researcher_labels[$r->id] = trim($r->first_name . ' ' . $r->last_name);
                         }
-                    } catch (\Exception $e) {}
+                    } catch (\Exception $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
                 }
             }
         }
@@ -7886,7 +7907,8 @@ class researchActions extends AhgController
         $this->searchQueries = [];
         try {
             $this->searchQueries = DB::table('research_saved_search')->where('researcher_id', $this->researcher->id)->get()->toArray();
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
         // JSON download mode
         if ($request->getParameter('format') === 'json') {
@@ -8128,6 +8150,7 @@ class researchActions extends AhgController
                     ->toArray();
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Silent — just use empty
         }
 
@@ -8178,6 +8201,7 @@ class researchActions extends AhgController
                     ->toArray();
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Silent
         }
 
@@ -9162,7 +9186,8 @@ class researchActions extends AhgController
                         'entity_id'     => $id,
                         'created_at'    => date('Y-m-d H:i:s'),
                     ]);
-                } catch (\Throwable $e) { /* non-fatal */ }
+                } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* non-fatal */ }
                 $this->getUser()->setFlash('success', 'Item added.');
             } elseif ($action === 'remove_item') {
                 $svc->removeItem((int) $request->getParameter('item_id'));

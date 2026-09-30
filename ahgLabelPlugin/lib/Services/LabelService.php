@@ -116,6 +116,7 @@ class LabelService
                 $out[(int) $r->id] = (string) $r->name;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // repositories optional
         }
 
@@ -164,6 +165,7 @@ class LabelService
 
             return $v !== null ? (string) $v : null;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }

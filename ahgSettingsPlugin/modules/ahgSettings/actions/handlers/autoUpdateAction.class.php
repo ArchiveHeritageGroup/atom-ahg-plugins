@@ -59,6 +59,7 @@ class SettingsAutoUpdateAction extends AhgController
                 $svc->save('auto_update_frequency', $frequency, 'auto_update');
                 $svc->save('auto_update_notify_email', $email, 'auto_update');
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Settings mirror is best-effort; the conf file is authoritative.
             }
 

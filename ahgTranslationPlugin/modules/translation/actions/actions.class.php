@@ -120,7 +120,8 @@ class translationActions extends AhgController
         $translated = $result['translation'];
 
         $userId = null;
-        try { $userId = (int)$this->getUser()->getAttribute('userid'); } catch (Exception $e) {}
+        try { $userId = (int)$this->getUser()->getAttribute('userid'); } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
         // Create draft with target field info
         $draft = $this->svc->createDraft($id, $targetFieldKey, $source, $target, $sourceText, $translated, $userId);

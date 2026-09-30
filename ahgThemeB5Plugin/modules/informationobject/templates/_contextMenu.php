@@ -36,7 +36,8 @@ if (isset($resource)) {
     $resourceSlug = $rawResource->slug;
   } elseif (is_object($resource) && method_exists($resource, '__call')) {
     // Fallback for escaped objects - access slug via method call
-    try { $resourceSlug = $resource->slug; } catch (Exception $e) {}
+    try { $resourceSlug = $resource->slug; } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
   }
   
   // Check which plugins are enabled
@@ -108,7 +109,8 @@ if (isset($resource)) {
           ->where('object_id', $resource->id)
           ->whereIn('status', ['approved', 'linked'])
           ->count();
-  } catch (Exception $e) {}
+  } catch (Exception $e) {
+      \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 ?>
 <section class="sidebar-widget">
   <h4><?php echo __('AI Tools'); ?></h4>
@@ -133,7 +135,8 @@ if (isset($resource)) {
     </li>
     <?php
     $hasDigitalObj = false;
-    try { $hasDigitalObj = Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->exists(); } catch (Exception $e) {}
+    try { $hasDigitalObj = Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->exists(); } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
     if ($hasDigitalObj): ?>
     <li>
       <a href="#" id="aiDescribeBtn" data-object-id="<?php echo $resource->id; ?>">

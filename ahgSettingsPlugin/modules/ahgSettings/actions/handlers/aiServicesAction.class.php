@@ -419,6 +419,7 @@ class AhgSettingsAiServicesAction extends AhgController
                 DB::table('ahg_translation_settings')
                     ->updateOrInsert(['setting_key' => 'mt.target_culture'], ['setting_value' => $targetLang]);
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Table might not exist yet
             }
 

@@ -115,6 +115,7 @@ class donorAgreementAddAction extends AhgController
                     'description' => $data['description'] ?? null,
                 ]);
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // i18n table might not exist or have different structure - ignore
             }
             

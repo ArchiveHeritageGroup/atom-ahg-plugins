@@ -51,6 +51,7 @@ class Model3DProvider implements Model3DProviderInterface
 
             return in_array($extension, self::FORMAT_EXTENSIONS, true);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

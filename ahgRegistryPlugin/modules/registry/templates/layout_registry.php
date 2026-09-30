@@ -25,6 +25,7 @@
                   ->first();
           }
       } catch (\Throwable $_e) {
+          \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($_e, basename(__FILE__).':'.__LINE__);
           // Notifications table not present or query failed — render layout without bar
       }
   }
@@ -264,6 +265,7 @@
               $_navSettings[$_nr->setting_key] = !empty($_nr->setting_value) && '0' !== $_nr->setting_value;
           }
       } catch (\Exception $e) {
+          \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
           // Defaults: all visible
       }
       $_showCommunity   = $_navSettings['nav_show_community'] ?? true;
@@ -476,6 +478,7 @@
       }
     }
   } catch (\Exception $e) {
+      \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     // Fall back to hardcoded defaults on any DB error
   }
 ?>

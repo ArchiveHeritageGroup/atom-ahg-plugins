@@ -465,6 +465,7 @@ class SubmissionService
                 $taskId = $workflowService->startWorkflow($id, $userId, 'researcher_submission', 100);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Workflow plugin not available — continue without it
         }
 
@@ -512,6 +513,7 @@ class SubmissionService
                 return true;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist if workflow plugin not installed
         }
 
@@ -533,6 +535,7 @@ class SubmissionService
                 ->where('status', 'returned')
                 ->exists();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -628,6 +631,7 @@ class SubmissionService
                 ->where('user_id', $userId)
                 ->first();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -762,6 +766,7 @@ class SubmissionService
                 ->where('id', $collectionId)
                 ->first();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
 
@@ -819,6 +824,7 @@ class SubmissionService
                 ->where('id', $projectId)
                 ->first();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -837,6 +843,7 @@ class SubmissionService
 
             return $researcher ? (int) $researcher->id : null;
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table doesn't exist — ahgResearchPlugin not installed
             return null;
         }

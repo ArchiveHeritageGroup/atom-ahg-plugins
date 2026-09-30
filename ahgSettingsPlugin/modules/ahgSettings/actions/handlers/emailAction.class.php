@@ -57,6 +57,7 @@ class AhgSettingsEmailAction extends AhgController
                         ['setting_value' => $val, 'setting_group' => 'email', 'updated_at' => DB::raw('NOW()')]
                     );
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // ignore
                 }
             }
@@ -100,6 +101,7 @@ class AhgSettingsEmailAction extends AhgController
                 $errorAlertSettings[$row->setting_key] = $row->setting_value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // table may not have these rows yet
         }
         $this->errorAlertSettings = $errorAlertSettings;
@@ -119,6 +121,7 @@ class AhgSettingsEmailAction extends AhgController
                 $notifToggles[$row->setting_key] = $row->setting_value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // table may not exist yet
         }
         $this->notifToggles = $notifToggles;

@@ -110,6 +110,7 @@ class SharePointSubscriptionService
                 try {
                     $this->graph->delete((int) $tenant->id, "/subscriptions/{$sub->subscription_id}");
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Best-effort. Sub may already be gone Graph-side; we still want our row gone.
                 }
             }

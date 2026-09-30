@@ -128,6 +128,7 @@ abstract class AbstractLookupAdapter implements LookupAdapterInterface
             $decoded = json_decode((string) $row->payload, true);
             return is_array($decoded) ? $decoded : null;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -155,6 +156,7 @@ abstract class AbstractLookupAdapter implements LookupAdapterInterface
                     ]
                 );
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Cache write failure is non-fatal - prefill still returns the live results.
         }
     }

@@ -170,7 +170,8 @@ class displayActions extends AhgController
                         $this->customFieldFilters[] = ['def_id' => (int) $def->id, 'type' => $def->field_type, 'value' => $val];
                     }
                 }
-            } catch (\Throwable $e) { /* custom_field_definition absent - skip */ }
+            } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* custom_field_definition absent - skip */ }
         }
         // Custom fields live on nested find-level records, so a custom-field search
         // must span all levels - override the default top-level-only scope.
@@ -406,6 +407,7 @@ class displayActions extends AhgController
                     }
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // rights_embargo table may not exist — silently continue
             }
         }
@@ -529,6 +531,7 @@ class displayActions extends AhgController
                         $obj->has_digital = true;
                     }
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // table does not exist - ahgLibraryPlugin not installed
                 }
             }
@@ -1467,6 +1470,7 @@ class displayActions extends AhgController
                 DB::select("SELECT 1 FROM `{$table}` LIMIT 1");
                 self::$sectorSearchTables[] = $table;
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Table doesn't exist — skip
             }
         }

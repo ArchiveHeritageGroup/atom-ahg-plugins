@@ -217,6 +217,7 @@ class FavoritesImportService
         try {
             return (new \DateTime($value))->format('Y-m-d H:i:s');
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -255,6 +256,7 @@ class FavoritesImportService
         try {
             $culture = \sfContext::getInstance()->getUser()->getCulture();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
 

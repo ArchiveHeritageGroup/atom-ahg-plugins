@@ -376,6 +376,7 @@ class InferenceService
 
             return !in_array(strtolower(trim((string) $v)), ['0', 'false', 'off', 'no', ''], true);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -397,6 +398,7 @@ class InferenceService
                 }
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // ahg_llm_config or its model_manifest column may be absent on an
             // older install - fall through to the minimal live-only manifest.
         }
@@ -492,6 +494,7 @@ class InferenceService
                 $publicKey = $signer->publicKey();
                 $currentKeyId = $signer->keyId();
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // signing not configured - everything reports unsigned/unverifiable.
             }
 

@@ -43,6 +43,7 @@ class FuzzySearchService
                 $this->addToVocabulary($term);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // table may not exist
         }
 
@@ -57,6 +58,7 @@ class FuzzySearchService
                 $this->addToVocabulary($term);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // ahgSemanticSearchPlugin not installed
         }
 
@@ -74,6 +76,7 @@ class FuzzySearchService
                 $this->addToVocabulary($term);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // skip
         }
 
@@ -89,6 +92,7 @@ class FuzzySearchService
                 $this->addToVocabulary($name);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // skip
         }
 
@@ -113,6 +117,7 @@ class FuzzySearchService
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // skip
         }
 

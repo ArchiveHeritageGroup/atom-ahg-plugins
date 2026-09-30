@@ -198,6 +198,7 @@ class FavoritesExportService
             $user = \sfContext::getInstance()->getUser();
             $userName = $user->getAttribute('display_name', $user->getAttribute('username', ''));
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         }
 
         $date = date('Y-m-d H:i');

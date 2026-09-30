@@ -75,6 +75,7 @@ trait arMetadataExtractionTrait
             return $metadata;
 
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -173,6 +174,7 @@ trait arMetadataExtractionTrait
                     ->where('id', $informationObjectId)
                     ->update(['updated_at' => date('Y-m-d H:i:s')]);
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 return false;
             }
         }
@@ -257,6 +259,7 @@ trait arMetadataExtractionTrait
             ]);
 
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Date creation failed silently
         }
     }
@@ -343,6 +346,7 @@ trait arMetadataExtractionTrait
                 ]);
 
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Creator access point failed silently
             }
         }
@@ -431,6 +435,7 @@ trait arMetadataExtractionTrait
                 ]);
 
             } catch (Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Subject access point failed silently
             }
         }
@@ -654,6 +659,7 @@ trait arMetadataExtractionTrait
             }
 
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Face detection failed silently
         }
     }

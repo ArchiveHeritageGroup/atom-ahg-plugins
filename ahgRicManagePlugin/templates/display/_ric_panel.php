@@ -27,6 +27,7 @@ try {
     $isRic = ('ric' === $code)
         || (DB::table('ric_record_meta')->where('object_id', $objectId)->exists());
 } catch (\Throwable $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     return;
 }
 if (!$isRic) {

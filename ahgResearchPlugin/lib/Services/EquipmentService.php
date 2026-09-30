@@ -447,7 +447,8 @@ class EquipmentService
                 'performed_by' => $performedBy,
                 'performed_at' => date('Y-m-d H:i:s'),
             ]);
-        } catch (\Exception $e) { /* table may not exist yet */ }
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__); /* table may not exist yet */ }
 
         // Update equipment record
         return DB::table('research_equipment')

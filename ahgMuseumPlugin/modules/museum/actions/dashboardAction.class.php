@@ -62,6 +62,7 @@ class museumDashboardAction extends AhgController
                 $this->itemsWithCondition = $conditionStats;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table doesn't exist, keep default 0
         }
 
@@ -84,6 +85,7 @@ class museumDashboardAction extends AhgController
                     ->all();
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table doesn't exist, keep default empty
         }
 
@@ -98,6 +100,7 @@ class museumDashboardAction extends AhgController
                     ->count('cp.information_object_id');
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table doesn't exist, keep default 0
         }
     }

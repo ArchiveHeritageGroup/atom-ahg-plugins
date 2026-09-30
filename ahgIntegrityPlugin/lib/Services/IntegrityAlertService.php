@@ -28,6 +28,7 @@ class IntegrityAlertService
                         ->update(['last_triggered_at' => date('Y-m-d H:i:s')]);
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Alert failures are non-fatal
             }
         }
@@ -174,6 +175,7 @@ class IntegrityAlertService
             $message = $mailer->compose(null, $email, $subject, $body);
             $mailer->send($message);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Email sending failure is non-fatal
         }
     }

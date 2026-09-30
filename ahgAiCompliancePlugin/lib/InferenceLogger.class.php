@@ -100,7 +100,8 @@ final class InferenceLogger
                     $uid = $user->getAttribute('user_id');
                     return $uid === null ? null : (int) $uid;
                 }
-            } catch (\Throwable) {
+            } catch (\Throwable $ahgSwallowed) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ahgSwallowed, basename(__FILE__).':'.__LINE__);
                 return null;
             }
         }

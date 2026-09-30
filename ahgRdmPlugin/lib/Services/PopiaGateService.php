@@ -133,6 +133,7 @@ class PopiaGateService
                 return (new \AhgRdm\Services\DatasetReleaseService())->apply($datasetId, $disposition, $userId, $embargoUntil);
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // non-fatal — disposition + gate already persisted
         }
 
@@ -150,6 +151,7 @@ class PopiaGateService
         try {
             error_log("[ahgRdm/popia-gate] {$purpose} ({$ref}, model=" . ($model ?? 'n/a') . ')');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // ignore
         }
     }

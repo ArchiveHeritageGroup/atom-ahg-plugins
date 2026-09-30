@@ -156,7 +156,8 @@ class c2paActions extends AhgController
     {
         try {
             return DB::schema()->hasTable($table);
-        } catch (\Throwable) {
+        } catch (\Throwable $ahgSwallowed) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ahgSwallowed, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

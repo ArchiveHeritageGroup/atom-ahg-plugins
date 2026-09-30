@@ -504,6 +504,7 @@ class RegistrationService
             // not AtoM's Swift mailer (which targets a dead localhost SMTP).
             \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Email failure is non-fatal - admin can still see request
         }
     }
@@ -544,6 +545,7 @@ class RegistrationService
                 \AhgCore\Services\EmailService::send($admin->email, $subject, $body);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal
         }
     }
@@ -567,6 +569,7 @@ class RegistrationService
 
             return $name ? (string) $name : null;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -606,6 +609,7 @@ class RegistrationService
             // not AtoM's Swift mailer (which targets a dead localhost SMTP).
             \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal
         }
     }
@@ -631,6 +635,7 @@ class RegistrationService
             // not AtoM's Swift mailer (which targets a dead localhost SMTP).
             \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal
         }
     }

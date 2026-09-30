@@ -488,6 +488,7 @@ class ahgSpectrumEventService
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // spectrum_movement table may not exist
             }
         }
@@ -743,7 +744,8 @@ class ahgSpectrumEventService
                     if ($val === 'false') $val = '0';
                     $cache[$row->setting_key] = $val;
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
         }
         return $cache[$key] ?? $default;
     }

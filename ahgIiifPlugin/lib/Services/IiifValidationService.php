@@ -292,6 +292,7 @@ class IiifValidationService
                 ]);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Silently skip if table doesn't exist yet
         }
     }
@@ -306,6 +307,7 @@ class IiifValidationService
             $response = @file_get_contents("{$cantaloupeUrl}/iiif/2", false, $ctx);
             return $response !== false;
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

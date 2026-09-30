@@ -1216,6 +1216,7 @@ class authorityResolutionActions extends sfActions
                 ->where('culture', 'en')
                 ->first(['description']);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
 

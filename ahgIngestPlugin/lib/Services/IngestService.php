@@ -1621,6 +1621,7 @@ class IngestService
         try {
             $profile = DB::table('atom_data_mapping')->where('id', $mappingId)->first();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return; // Table may not exist if DataMigration plugin not installed
         }
 

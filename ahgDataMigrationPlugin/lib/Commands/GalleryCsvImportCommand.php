@@ -447,6 +447,7 @@ class GalleryCsvImportCommand extends BaseCommand
                 DB::table('gallery_metadata')->insert($metadata);
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table doesn't exist, skip sector metadata
         }
     }

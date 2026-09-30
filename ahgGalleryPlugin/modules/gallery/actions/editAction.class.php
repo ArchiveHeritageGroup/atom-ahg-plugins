@@ -376,6 +376,7 @@ class galleryEditAction extends AhgController
                         $identifier = $generatedIdentifier;
                     }
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Numbering service unavailable, proceed without
                 }
             }
@@ -415,6 +416,7 @@ class galleryEditAction extends AhgController
                     $numberingService = NumberingService::getInstance();
                     $numberingService->linkReferenceToObject($generatedIdentifier, $objectId);
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Non-fatal
                 }
             }

@@ -252,6 +252,7 @@ class AuthorityCreator
         try {
             return DB::table('slug')->where('slug', $slug)->exists();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // If the slug check ever errors, fall back to "not present" - the
             // unique constraint on slug.slug catches a collision at insert time.
             return false;

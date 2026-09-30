@@ -324,6 +324,7 @@ class IngestCommitService
             try {
                 $svc->generateChecksums($doId, ['sha256']);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // non-fatal per object
             }
 
@@ -332,6 +333,7 @@ class IngestCommitService
                 try {
                     $svc->identifyFormat($doId, true);
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // non-fatal
                 }
             }
@@ -341,6 +343,7 @@ class IngestCommitService
                 try {
                     $svc->scanForVirus($doId, true, 'ingest');
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // non-fatal
                 }
             }
@@ -358,6 +361,7 @@ class IngestCommitService
                     'ahgIngestPlugin'
                 );
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // non-fatal
             }
         }
@@ -572,6 +576,7 @@ class IngestCommitService
             $status->statusId = $statusId;
             $status->save();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal
         }
 
@@ -634,6 +639,7 @@ class IngestCommitService
                     $relation->termId = $termId;
                     $relation->save();
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Duplicate or constraint error — skip
                 }
             }
@@ -658,6 +664,7 @@ class IngestCommitService
                         $relation->typeId = \QubitTerm::NAME_ACCESS_POINT_ID ?? 519;
                         $relation->save();
                     } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // skip
                     }
                 }
@@ -715,6 +722,7 @@ class IngestCommitService
                     $event->sourceCulture = 'en';
                     $event->save();
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // skip
                 }
             }
@@ -741,6 +749,7 @@ class IngestCommitService
                     $event->sourceCulture = 'en';
                     $event->save();
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // skip
                 }
             }
@@ -898,6 +907,7 @@ class IngestCommitService
                 );
                 exec($cmd, $output, $returnCode);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal, continue with next
             }
         }
@@ -952,6 +962,7 @@ class IngestCommitService
 
                 return count($objectIds);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // PreservationService not available or error — fall through to manifest
             }
         }
@@ -1139,6 +1150,7 @@ class IngestCommitService
                     \QubitSearch::getInstance()->update($io);
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal
             }
         }
@@ -1279,6 +1291,7 @@ class IngestCommitService
         try {
             \QubitSearch::getInstance()->delete($object);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Index removal is best-effort (a later search:populate reconciles).
         }
 
@@ -1317,6 +1330,7 @@ class IngestCommitService
                     $userId
                 );
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal
             }
         }
@@ -1361,6 +1375,7 @@ class IngestCommitService
                     ]);
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal per file
             }
         }
@@ -1408,6 +1423,7 @@ class IngestCommitService
                         );
                     }
                 } catch (\Throwable $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Table may not exist
                 }
             }
@@ -1471,6 +1487,7 @@ class IngestCommitService
                     }
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal per row
             }
         }
@@ -1487,6 +1504,7 @@ class IngestCommitService
                 $relation->typeId = \QubitTerm::NAME_ACCESS_POINT_ID ?? 519;
                 $relation->save();
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Duplicate
             }
         }
@@ -1512,6 +1530,7 @@ class IngestCommitService
                 $newTerm->save();
                 $termId = $newTerm->id;
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 return;
             }
         }
@@ -1522,6 +1541,7 @@ class IngestCommitService
             $relation->termId = $termId;
             $relation->save();
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Duplicate
         }
     }
@@ -1568,6 +1588,7 @@ class IngestCommitService
                     }
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal
             }
         }
@@ -1589,7 +1610,8 @@ class IngestCommitService
             if (!empty($val)) {
                 $spellLang = $val;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
         $rows = DB::table('ingest_row')
             ->where('session_id', $session->id)
@@ -1669,6 +1691,7 @@ class IngestCommitService
             try {
                 $svc->identifyFormat($row->created_do_id, true);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal
             }
         }
@@ -1713,6 +1736,7 @@ class IngestCommitService
                     }
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal
             }
         }
@@ -1738,7 +1762,8 @@ class IngestCommitService
             if (!empty($val)) {
                 $sourceLang = $val;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
         $rows = DB::table('ingest_row')
             ->where('session_id', $session->id)
@@ -1785,6 +1810,7 @@ except: print('')
                             [$dbField => $translated]
                         );
                     } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // Non-fatal
                     }
                 }
@@ -1809,6 +1835,7 @@ except: print('')
                 ]);
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Audit trail table may not exist
         }
     }

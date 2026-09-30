@@ -303,7 +303,8 @@ final class StandardMetadataLoader
         }
         try {
             $row = DB::table($table)->where($column, $value)->first();
-        } catch (Throwable) {
+        } catch (Throwable $ahgSwallowed) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ahgSwallowed, basename(__FILE__).':'.__LINE__);
             return null;
         }
         if ($row === null) {
@@ -317,7 +318,8 @@ final class StandardMetadataLoader
     {
         try {
             return DB::schema()->hasTable($table);
-        } catch (Throwable) {
+        } catch (Throwable $ahgSwallowed) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ahgSwallowed, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

@@ -26,7 +26,8 @@ if ($_isLoggedIn) {
             ->where('atom_user_id', (int) $_user->getAttribute('user_id'))
             ->first();
         $_regUserId = $_regUser->id ?? null;
-    } catch (\Exception $e) {}
+    } catch (\Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 }
 
 // Fetch notes
@@ -40,7 +41,8 @@ try {
         ->orderBy('created_at', 'desc')
         ->get()
         ->all();
-} catch (\Exception $e) {}
+} catch (\Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
 $_noteCount = count($_notes);
 ?>

@@ -185,6 +185,7 @@ class MarkDeletedCommand extends BaseCommand
         try {
             return DB::schema()->hasTable($table);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -194,6 +195,7 @@ class MarkDeletedCommand extends BaseCommand
         try {
             return DB::schema()->hasColumn($table, $column);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

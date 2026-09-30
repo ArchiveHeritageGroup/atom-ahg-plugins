@@ -105,6 +105,7 @@ class ErrorNotificationService
                 }
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // keep 'error'
         }
 
@@ -228,6 +229,7 @@ class ErrorNotificationService
                 self::$dailyCap = (int) $cap;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Silently use defaults
         }
     }
@@ -267,6 +269,7 @@ class ErrorNotificationService
 
             return true;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return true; // Default to enabled on config failure
         }
     }
@@ -312,6 +315,7 @@ class ErrorNotificationService
                     return;
                 }
             } catch (\Exception $ex) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ex, basename(__FILE__).':'.__LINE__);
                 // sfContext not available, fall through
             }
         }
@@ -528,6 +532,7 @@ class ErrorNotificationService
                 }
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore — leave as 'anonymous'
         }
 
@@ -703,6 +708,7 @@ class ErrorNotificationService
                     return false;
                 }
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 return false;
             }
 

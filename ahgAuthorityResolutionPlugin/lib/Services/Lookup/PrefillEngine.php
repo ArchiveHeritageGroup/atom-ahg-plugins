@@ -260,6 +260,7 @@ class PrefillEngine
             $key = "authority_resolution.lookup.{$source}.{$param}";
             return DB::table('ahg_settings')->where('setting_key', $key)->value('setting_value');
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -277,6 +278,7 @@ class PrefillEngine
                 }
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
         return ['viaf', 'wikidata', 'geonames', 'tgn', 'gnd', 'isni', 'sagnc'];

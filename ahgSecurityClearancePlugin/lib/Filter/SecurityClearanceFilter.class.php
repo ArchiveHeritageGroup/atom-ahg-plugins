@@ -52,6 +52,7 @@ class SecurityClearanceFilter extends sfFilter
         try {
             $resource = DB::table("information_object as io")->join("slug", "slug.object_id", "=", "io.id")->where("slug.slug", $request->getParameter("slug"))->select("io.*", "slug.slug")->first();
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return;
         }
 

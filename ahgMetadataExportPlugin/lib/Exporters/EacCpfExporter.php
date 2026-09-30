@@ -102,6 +102,7 @@ class EacCpfExporter extends AbstractXmlExporter
             $t = $resource->getEntityType(['culture' => 'en']);
             $type = is_object($t) && method_exists($t, '__toString') ? (string) $t : (is_string($t) ? $t : null);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
         $type = strtolower((string) $type);

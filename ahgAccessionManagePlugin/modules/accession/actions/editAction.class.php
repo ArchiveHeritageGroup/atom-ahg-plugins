@@ -178,6 +178,7 @@ class AccessionEditAction extends AhgEditController
                 try {
                     QubitSearch::getInstance()->update($this->resource);
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Log but don't block — data is already saved
                 }
 
@@ -467,6 +468,7 @@ class AccessionEditAction extends AhgEditController
 
             return isset($params['_sf_route']) && $params['_sf_route']->resource !== null;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

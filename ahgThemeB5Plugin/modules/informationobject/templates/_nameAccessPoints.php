@@ -66,6 +66,7 @@ if (class_exists('\AhgActorManage\Services\ActorVisibilityService')) {
     try {
         $__authed = sfContext::getInstance()->getUser()->isAuthenticated();
     } catch (\Throwable $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     }
     if (!$__authed) {
         $__hidden = \AhgActorManage\Services\ActorVisibilityService::getHiddenActorIds();

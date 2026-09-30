@@ -239,6 +239,7 @@ class DecisionProvenanceWriter
                 return $row;
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through to default
         }
         return self::DEFAULT_GRAPH_URI;
@@ -255,6 +256,7 @@ class DecisionProvenanceWriter
                 return rtrim($row, '/');
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // fall through
         }
         return 'https://psis.theahg.co.za';

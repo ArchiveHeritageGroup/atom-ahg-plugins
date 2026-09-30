@@ -12,6 +12,7 @@ if ($isAuthenticated && !$isAdmin) {
     try {
         $isApprover = \AtomExtensions\Services\AccessRequestService::isApprover($userId);
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Service may not exist
     }
 }
@@ -29,6 +30,7 @@ if ($isAuthenticated && $hasSpectrum) {
         // valuation but sits mid-flow in an acquisition.
         $spectrumTaskCount = ahgSpectrumWorkflowService::countOpenTasksForUser($userId);
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Plugin or table may not be present.
     }
 }
@@ -102,6 +104,7 @@ try {
                 ];
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
@@ -127,6 +130,7 @@ try {
             ->value('setting_value');
         $hideSystemErrors = in_array(strtolower(trim((string) $raw)), ['1', 'true', 'yes', 'on'], true);
     } catch (Exception $e) {
+        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
         // Settings table absent on an older install - show the banner.
     }
 
@@ -145,10 +149,12 @@ try {
                 ];
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
 } catch (Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
     // Tables may not exist - silently fail
 }
 

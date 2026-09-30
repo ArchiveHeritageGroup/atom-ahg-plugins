@@ -231,6 +231,7 @@ class shareLinkActions extends sfActions
             require_once $libDir . '/ClearanceCheck.php';
             $classificationLevel = (new \AhgShareLink\Services\ClearanceCheck())->resolveEntityClassificationLevel($ioId);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Clearance plugin not installed — ignore.
         }
 

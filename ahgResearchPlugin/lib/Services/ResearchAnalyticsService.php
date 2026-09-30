@@ -244,6 +244,7 @@ class ResearchAnalyticsService
         try {
             return DB::getSchemaBuilder()->hasTable($name);
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }

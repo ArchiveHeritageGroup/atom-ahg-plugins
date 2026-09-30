@@ -336,6 +336,7 @@ class IiifManifestV3Service
                 $consolidated = $metadata['consolidated'] ?? null;
                 $gpsData = $metadata['gps'] ?? null;
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal; continue silently
             }
             break; // Use first valid image object
@@ -553,6 +554,7 @@ class IiifManifestV3Service
 
             return $auth->formatServiceDescriptionV2($service);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Auth lookup failure is non-fatal
             return null;
         }
@@ -714,6 +716,7 @@ class IiifManifestV3Service
                 }
             }
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // A manifest without a direction is fine; one that throws is not.
         }
 
@@ -749,6 +752,7 @@ class IiifManifestV3Service
 
             return $ts ? gmdate('Y-m-d\TH:i:s\Z', $ts) : null;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -793,6 +797,7 @@ class IiifManifestV3Service
                 'label' => [$culture => [(string) ($title ?: $slug)]],
             ];
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -1047,6 +1052,7 @@ class IiifManifestV3Service
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Rights lookup failure is non-fatal
         }
 
@@ -1072,6 +1078,7 @@ class IiifManifestV3Service
                 return $attribution;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // ahg_settings table may not exist
         }
 

@@ -469,6 +469,7 @@ class CustodyHandoffService
                 ->get()
                 ->toArray();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Provenance tables may not exist
         }
 
@@ -614,6 +615,7 @@ class CustodyHandoffService
                 'workflow_state' => 'completed',
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // spectrum_movement may not exist if ahgConditionPlugin not installed
             return null;
         }
@@ -633,6 +635,7 @@ class CustodyHandoffService
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }
@@ -658,6 +661,7 @@ class CustodyHandoffService
                 ->where('information_object_id', $objectId)
                 ->update($update);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
     }

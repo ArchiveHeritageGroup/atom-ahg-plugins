@@ -108,11 +108,13 @@ class MetadataExtractionHandler
                 (new \AtomExtensions\Extensions\MetadataExtraction\Services\EmbeddedMetadataService())
                     ->captureAndStore($digitalObjectId, $absPath, $informationObjectId);
             } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Full capture is additive; failures must not affect the upload.
             }
 
             return true;
         } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
     }
@@ -479,6 +481,7 @@ class MetadataExtractionHandler
                     }
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Table may not exist
             }
         }

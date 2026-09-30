@@ -379,6 +379,7 @@ class ResearchJournalService
 
                 return true;
             } catch (\Throwable $e2) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e2, basename(__FILE__).':'.__LINE__);
                 return false;
             }
         }

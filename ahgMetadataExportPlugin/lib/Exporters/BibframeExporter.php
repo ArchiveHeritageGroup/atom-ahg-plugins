@@ -556,21 +556,25 @@ class BibframeExporter extends AbstractRdfExporter
                 try {
                     $start = $dateObj->startDate;
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Ignore
                 }
                 try {
                     $end = $dateObj->endDate;
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Ignore
                 }
                 try {
                     $display = $dateObj->getDate(['culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()]);
                 } catch (\Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // Ignore
                 }
                 break;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 

@@ -156,7 +156,8 @@
                         try {
                             $targets = \Illuminate\Database\Capsule\Manager::table('research_annotation_target')
                                 ->where('annotation_id', $ann->id)->orderBy('id')->get()->toArray();
-                        } catch (\Exception $e) {}
+                        } catch (\Exception $e) {
+                            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
                         $hasFragment = false;
                         $selectorData = [];
                         foreach ($targets as $t) {
@@ -284,7 +285,8 @@
                             try {
                                 $targets3d = \Illuminate\Database\Capsule\Manager::table('research_annotation_target')
                                     ->where('annotation_id', $ann->id)->orderBy('id')->get()->toArray();
-                            } catch (\Exception $e) {}
+                            } catch (\Exception $e) {
+                                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
                             $is3d = false;
                             $sel3dData = [];
                             foreach ($targets3d as $t3d) {

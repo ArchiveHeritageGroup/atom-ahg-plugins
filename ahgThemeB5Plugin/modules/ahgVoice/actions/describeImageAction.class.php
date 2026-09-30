@@ -182,6 +182,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                 $source = 'transcript';
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // property_i18n may not have expected join - try object_id instead
         }
 
@@ -197,6 +198,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                     $source = 'ocr';
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Table may not exist
             }
         }
@@ -215,6 +217,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                     $source = 'transcript';
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Silent
             }
         }
@@ -269,6 +272,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                 $transcript = $row->full_text;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
 
@@ -285,6 +289,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                     $transcript = $prop->value;
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Silent
             }
         }
@@ -378,6 +383,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                 if (strpos($type, 'dam') !== false) return 'iptc';
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist
         }
 
@@ -687,6 +693,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                 ->where('source', 'cloud')
                 ->count();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return 0; // Table may not exist
         }
     }
@@ -714,6 +721,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Silent - audit failure shouldn't break the feature
         }
     }

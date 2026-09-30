@@ -71,6 +71,7 @@ class AdminErrorDetail
             // rendering its own page over the top of this one.
             return true;
         } catch (\Throwable $ignored) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ignored, basename(__FILE__).':'.__LINE__);
             // Fall back to the stock page. A worse error page is still a page.
             return false;
         }
@@ -117,6 +118,7 @@ class AdminErrorDetail
                 $request = \sfContext::getInstance()->getRequest();
                 $rows['URL'] = $request->getMethod().' '.$request->getUri();
             } catch (\Throwable $ignored) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($ignored, basename(__FILE__).':'.__LINE__);
             }
         }
 

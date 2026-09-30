@@ -229,6 +229,7 @@ class ahgAuditTrailPluginFilter extends sfFilter
                     return $auditViews === '1';
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 return false;
             }
         }
@@ -290,6 +291,7 @@ class ahgAuditTrailPluginFilter extends sfFilter
                     return $id ? (int)$id : null;
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 return null;
             }
         }

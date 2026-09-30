@@ -23,6 +23,7 @@ class acquisitionBatchCaptureAction extends AhgController
                 ->orderBy('order_date', 'desc')
                 ->get();
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Table may not exist on fresh installs
         }
 
@@ -232,6 +233,7 @@ class acquisitionBatchCaptureAction extends AhgController
                         try {
                             $actorId = $libService->resolveOrCreateActor(mb_substr($authorName, 0, 500));
                         } catch (\Throwable $e) {
+                            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                             // Authority upsert is best-effort; fall back to name-only.
                         }
                         DB::table('library_item_creator')->insert([
@@ -261,6 +263,7 @@ class acquisitionBatchCaptureAction extends AhgController
                                 $libService->linkIoToTerm((int) $objectId, (int) $termId);
                             }
                         } catch (\Throwable $e) {
+                            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                             // Subject taxonomy linkage is best-effort; the
                             // sidecar row below still records the heading.
                         }
@@ -300,6 +303,7 @@ class acquisitionBatchCaptureAction extends AhgController
             try {
                 exec('php ' . escapeshellarg(sfConfig::get('sf_root_dir') . '/symfony') . ' propel:build-nested-set 2>&1', $output, $rc);
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Non-fatal - nested set will be rebuilt on next cache clear
             }
         }

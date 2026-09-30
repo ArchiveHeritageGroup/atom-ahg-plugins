@@ -320,6 +320,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 return $value;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore, try without options
         }
 
@@ -337,6 +338,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -369,6 +371,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 return (string) $resource->id;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -390,6 +393,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 $slug = $resource->getSlug() ?? $slug;
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -475,6 +479,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 return is_array($children) ? $children : [];
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -501,6 +506,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -530,6 +536,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 return is_array($objects) ? $objects : [];
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -567,6 +574,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                     break; // Use first date
                 }
             } catch (\Exception $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Ignore errors
             }
         }
@@ -609,6 +617,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -642,6 +651,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -675,6 +685,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 
@@ -711,6 +722,7 @@ abstract class AbstractXmlExporter implements ExporterInterface
                 }
             }
         } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore
         }
 

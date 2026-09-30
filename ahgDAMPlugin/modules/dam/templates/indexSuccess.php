@@ -50,6 +50,7 @@
               try {
                   use_helper('informationobject');
               } catch (Exception $e) {
+                  \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                   // An instance without ahgUiOverridesPlugin keeps the fallback
                   // below rather than fataling on a missing helper.
               }

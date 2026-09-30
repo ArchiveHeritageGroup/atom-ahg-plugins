@@ -100,6 +100,7 @@ class AhgNav
                 try {
                     return (bool) ($config['visible'])($user);
                 } catch (Exception $e) {
+                    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // A plugin's own visibility rule must not take down the menu.
                     return false;
                 }
@@ -178,6 +179,7 @@ class AhgNav
         try {
             return url_for($config['route']);
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
     }
@@ -248,6 +250,7 @@ class AhgNav
                 }
             }
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
         }
 
@@ -310,6 +313,7 @@ class AhgNav
         try {
             $count = ($config['badge'])();
         } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return null;
         }
 

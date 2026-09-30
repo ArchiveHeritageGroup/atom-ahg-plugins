@@ -106,6 +106,7 @@ class RelationEditComponent extends sfComponent
                     try {
                         $forbiddenValues[] = $this->context->routing->generate(null, $this->resource);
                     } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                         // No canonical route for this resource yet — nothing to forbid.
                     }
                 }
