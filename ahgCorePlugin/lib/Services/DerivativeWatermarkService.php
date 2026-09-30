@@ -91,6 +91,22 @@ class DerivativeWatermarkService
     }
 
     /**
+     * Steps 2-4 of getWatermarkConfig() read ahgDAMPlugin's tables, which are
+     * optional (#302). The security-classification step does not, and runs
+     * regardless.
+     */
+    private static function watermarkTablesPresent(): bool
+    {
+        foreach (['watermark_type', 'watermark_setting', 'object_watermark_setting', 'custom_watermark'] as $t) {
+            if (!\AhgCore\Core\AhgDb::hasOptionalTable($t)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Get watermark configuration for an object.
      * Priority: Security > Custom > Selected > Default
      */
@@ -113,6 +129,10 @@ class DerivativeWatermarkService
                 'position' => 'repeat',
                 'opacity' => 0.5,  // Higher opacity for security
             ];
+        }
+
+        if (!self::watermarkTablesPresent()) {
+            return null;
         }
 
         // 2. Check object_watermark_setting table (separate from AtoM)
@@ -399,6 +419,10 @@ class DerivativeWatermarkService
      */
     public static function getCustomWatermarks(?int $objectId = null): array
     {
+        if (!self::watermarkTablesPresent()) {
+            return [];
+        }
+
         $query = DB::table('custom_watermark')
             ->where('active', 1)
             ->where(function ($q) use ($objectId) {

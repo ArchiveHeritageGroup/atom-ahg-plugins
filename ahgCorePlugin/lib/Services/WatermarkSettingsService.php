@@ -21,6 +21,19 @@ class WatermarkSettingsService
     protected static string $cacheFile = '/tmp/cantaloupe_classifications.json';
 
     /**
+     * The watermark tables belong to ahgDAMPlugin, which is optional (#302).
+     * Without them the type lookups answer "none" and the object/default steps
+     * are skipped; the security-classification watermark does not use these
+     * tables and still applies.
+     */
+    private static function watermarkTablesPresent(): bool
+    {
+        return \AhgCore\Core\AhgDb::hasOptionalTable('watermark_type')
+            && \AhgCore\Core\AhgDb::hasOptionalTable('object_watermark_setting')
+            && \AhgCore\Core\AhgDb::hasOptionalTable('custom_watermark');
+    }
+
+    /**
      * Get a global setting value.
      */
     public static function getSetting(string $key, ?string $default = null): ?string
@@ -71,6 +84,10 @@ class WatermarkSettingsService
      */
     public static function getWatermarkType(int $id): ?object
     {
+        if (!self::watermarkTablesPresent()) {
+            return null;
+        }
+
         return DB::table('watermark_type')
             ->where('id', $id)
             ->where('active', 1)
@@ -82,6 +99,10 @@ class WatermarkSettingsService
      */
     public static function getWatermarkTypeByCode(string $code): ?object
     {
+        if (!self::watermarkTablesPresent()) {
+            return null;
+        }
+
         return DB::table('watermark_type')
             ->where('code', $code)
             ->where('active', 1)
@@ -93,6 +114,10 @@ class WatermarkSettingsService
      */
     public static function getWatermarkTypes(): array
     {
+        if (!self::watermarkTablesPresent()) {
+            return [];
+        }
+
         return DB::table('watermark_type')
             ->where('active', 1)
             ->orderBy('sort_order')
@@ -132,7 +157,7 @@ class WatermarkSettingsService
         }
 
         // 2. Check object_watermark_setting table
-        $watermarkSetting = DB::table('object_watermark_setting as ows')
+        $watermarkSetting = !self::watermarkTablesPresent() ? null : DB::table('object_watermark_setting as ows')
             ->leftJoin('watermark_type as wt', 'ows.watermark_type_id', '=', 'wt.id')
             ->leftJoin('custom_watermark as cw', 'ows.custom_watermark_id', '=', 'cw.id')
             ->where('ows.object_id', $objectId)
@@ -268,6 +293,10 @@ class WatermarkSettingsService
      */
     public static function getObjectsWithWatermarks(): array
     {
+        if (!self::watermarkTablesPresent()) {
+            return [];
+        }
+
         return DB::table('object_watermark_setting as ows')
             ->join('watermark_type as wt', 'ows.watermark_type_id', '=', 'wt.id')
             ->where('ows.watermark_enabled', 1)
@@ -310,7 +339,7 @@ class WatermarkSettingsService
         }
 
         // Get object-specific watermarks
-        $objectWatermarks = DB::table('object_watermark_setting as ows')
+        $objectWatermarks = !self::watermarkTablesPresent() ? [] : DB::table('object_watermark_setting as ows')
             ->leftJoin('watermark_type as wt', 'ows.watermark_type_id', '=', 'wt.id')
             ->leftJoin('custom_watermark as cw', 'ows.custom_watermark_id', '=', 'cw.id')
             ->where('ows.watermark_enabled', 1)

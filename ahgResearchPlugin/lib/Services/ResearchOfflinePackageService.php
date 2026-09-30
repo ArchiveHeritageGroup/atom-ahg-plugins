@@ -85,7 +85,11 @@ class ResearchOfflinePackageService
             $groups[] = ['heading' => 'Projects', 'name' => (string) $proj->title, 'ids' => array_keys($set)];
         }
 
-        foreach (array_map('intval', $sources['favorites'] ?? []) as $fid) {
+        // Favourites belong to ahgFavoritesPlugin, which is optional (#302).
+        $favourites = \AhgCore\Core\AhgDb::hasOptionalTable('favorites_folder')
+            && \AhgCore\Core\AhgDb::hasOptionalTable('favorites')
+            ? array_map('intval', $sources['favorites'] ?? []) : [];
+        foreach ($favourites as $fid) {
             $folder = DB::table('favorites_folder')->where('id', $fid)
                 ->where('user_id', $userId)->first();
             if (!$folder) {

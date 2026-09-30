@@ -194,6 +194,17 @@ function is_iiif_available()
     // on pages that are about to render a viewer. Where the server does not
     // answer the caller falls back to render_standard_viewer(), which needs no
     // tile server at all.
+    //
+    // Ask the internal address first (#305). The public URL defaults to this
+    // site's own /iiif/2, which proves nothing either way: a host that cannot
+    // reach its own public HTTPS endpoint gets no status at all (PSIS), and one
+    // with no image server gets its own 404. The internal address is where
+    // Cantaloupe actually listens, so it answers the real question. The public
+    // probe remains the fallback for a server hosted elsewhere.
+    $internal = (string) sfConfig::get('app_iiif_cantaloupe_internal_url', '');
+    if ('' !== $internal && iiif_image_server_responds(rtrim($internal, '/').'/iiif/2')) {
+        return $available = true;
+    }
     $available = iiif_image_server_responds($cantaloupeUrl);
 
     return $available;
@@ -232,6 +243,9 @@ function iiif_image_server_responds(string $baseUrl, float $timeout = 1.5): bool
             CURLOPT_CONNECTTIMEOUT_MS => (int) ($timeout * 1000),
             CURLOPT_TIMEOUT_MS => (int) ($timeout * 1000),
             CURLOPT_FOLLOWLOCATION => false,
+            // Bot filters answer an empty User-Agent with 403, which reads as
+            // "something is listening" - the same false positive as #305.
+            CURLOPT_USERAGENT => 'AtoM-AHG-IIIF-probe/1.0',
         ]);
         curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
@@ -256,6 +270,19 @@ function iiif_image_server_responds(string $baseUrl, float $timeout = 1.5): bool
         if (0 === $status && !in_array($errno, [6, 7, 28], true)) {
             return $seen[$key] = true;
         }
+
+        // A 404 from the SITE ITSELF is not an image server (#305). The default
+        // app_iiif_cantaloupe_url is relative, so with no image server deployed
+        // the probe resolves to this site and gets its own 404 - which "any
+        // status means something is listening" read as present, and the
+        // fallback viewer never ran. A Cantaloupe proxied on this host answers
+        // its root with 200 or 301 (measured on PSIS), never 404. Other hosts
+        // keep the generous rule: their 404 may be a real server's.
+        if (404 === $status && function_exists('get_iiif_base_url')
+            && strcasecmp((string) parse_url($key, PHP_URL_HOST), (string) parse_url(get_iiif_base_url(), PHP_URL_HOST)) === 0) {
+            return $seen[$key] = false;
+        }
+
         $seen[$key] = $status > 0;
     } catch (\Throwable $e) {
         $seen[$key] = false;
