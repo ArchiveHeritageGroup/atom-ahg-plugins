@@ -10,7 +10,7 @@
   </thead><tbody>    
     <section class="actions">
       <ul>
-		<li><input class="c-btn c-btn-submit" type="button" onclick="history.back();" value="Back"></li>
+		<li><input class="c-btn c-btn-submit" type="button" data-ahg-action="back" value="Back"></li>
       </ul>
     </section>
 	<?php $auditObjectsArr = []; ?>
@@ -232,7 +232,7 @@
 
     <section class="actions">
       <ul>
-		<li><input class="c-btn c-btn-submit" type="button" onclick="history.back();" value="Back"></li>
+		<li><input class="c-btn c-btn-submit" type="button" data-ahg-action="back" value="Back"></li>
       </ul>
     </section>
 

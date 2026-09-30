@@ -21,9 +21,9 @@
           <div class="col-md-6 col-lg-4">
             <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'explore', 'category' => $cat['code']]); ?>"
                class="card h-100 text-decoration-none explore-card"
-               style="background-color: <?php echo $cat['background_color']; ?>; color: <?php echo $cat['text_color']; ?>;">
+               data-ahg-style="background-color: <?php echo $cat['background_color']; ?>; color: <?php echo $cat['text_color']; ?>;">
               <?php if ($cat['cover_image']): ?>
-                <div class="card-img-top" style="height: 150px; background: url('<?php echo $cat['cover_image']; ?>') center/cover;"></div>
+                <div class="card-img-top" data-ahg-style="height: 150px; background: url('<?php echo $cat['cover_image']; ?>') center/cover;"></div>
               <?php endif; ?>
               <div class="card-body">
                 <div class="d-flex align-items-center mb-2">

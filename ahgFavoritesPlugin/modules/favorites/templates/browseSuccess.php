@@ -249,7 +249,7 @@ $n = sfConfig::get('csp_nonce', '');
               </div>
             </div>
             <div class="col-md-4">
-              <select name="sort" class="form-select form-select-sm" onchange="this.form.querySelector('[name=sortDir]').value=this.value.split('|')[1]; this.value=this.value.split('|')[0]; this.form.submit();">
+              <select name="sort" class="form-select form-select-sm" data-ahg-call="favoritesSortChange" data-ahg-on="change" data-ahg-types="this">
                 <?php foreach ($sortOptions as $key => $label): ?>
                   <option value="<?php echo $key; ?>" <?php echo ($key === $currentSortKey) ? 'selected' : ''; ?>>
                     <?php echo $label; ?>
@@ -293,11 +293,11 @@ $n = sfConfig::get('csp_nonce', '');
 
               <?php if (!empty($researchEnabled)): ?>
                 <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#sendToCollectionModal"
-                        onclick="populateBulkIds('collectionBulkIds');">
+                        data-ahg-call="populateBulkIds" data-ahg-types="s" data-ahg-a0="collectionBulkIds">
                   <i class="fas fa-archive me-1"></i><?php echo __('Send to Collection'); ?>
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#sendToProjectModal"
-                        onclick="populateBulkIds('projectBulkIds');">
+                        data-ahg-call="populateBulkIds" data-ahg-types="s" data-ahg-a0="projectBulkIds">
                   <i class="fas fa-project-diagram me-1"></i><?php echo __('Send to Project'); ?>
                 </button>
               <?php endif; ?>
@@ -648,7 +648,7 @@ $n = sfConfig::get('csp_nonce', '');
               try { $shareBaseUrl = sfContext::getInstance()->getRequest()->getUriPrefix(); } catch (Exception $e) {}
             ?>
             <input type="text" class="form-control" readonly value="<?php echo $shareBaseUrl; ?>/favorites/shared/<?php echo esc_entities($currentFolder->share_token); ?>">
-            <button type="button" class="btn btn-outline-primary" onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.innerHTML='<i class=\'fas fa-check\'></i>';">
+            <button type="button" class="btn btn-outline-primary" data-ahg-copy="prev">
               <i class="fas fa-copy"></i>
             </button>
           </div>
@@ -1151,3 +1151,14 @@ $n = sfConfig::get('csp_nonce', '');
 </script>
 
 <?php end_slot(); ?>
+<?php // Sort options carry "field|direction"; split them into the two inputs the
+      // listing reads. Called through data-ahg-call: an inline onchange is
+      // blocked by the enforcing CSP.
+echo ahg_script_block(<<<'JS'
+function favoritesSortChange(sel) {
+  var parts = sel.value.split('|');
+  sel.form.querySelector('[name=sortDir]').value = parts[1];
+  sel.value = parts[0];
+  sel.form.submit();
+}
+JS); ?>

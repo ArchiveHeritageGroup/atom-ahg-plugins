@@ -22,7 +22,7 @@ $sectionsArray = $sections instanceof sfOutputEscaperArrayDecorator ? $sections-
       </div>
       <div class="d-print-none">
         <div class="btn-group">
-          <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+          <button type="button" class="btn btn-outline-primary" data-ahg-action="print">
             <i class="fas fa-print"></i> Print
           </button>
           <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'objectList', 'id' => $exhibition['id'], 'format' => 'csv']); ?>"
@@ -134,7 +134,7 @@ $sectionsArray = $sections instanceof sfOutputEscaperArrayDecorator ? $sections-
             <table class="table table-sm table-hover mb-0">
               <thead>
                 <tr>
-                  <th style="width: 30px;"></th>
+                  <th data-ahg-style="width: 30px;"></th>
                   <th>Object Number</th>
                   <th>Title/Description</th>
                   <th>Display Location</th>
@@ -192,7 +192,7 @@ $sectionsArray = $sections instanceof sfOutputEscaperArrayDecorator ? $sections-
             <table class="table table-sm table-hover mb-0">
               <thead>
                 <tr>
-                  <th style="width: 30px;"></th>
+                  <th data-ahg-style="width: 30px;"></th>
                   <th>Object Number</th>
                   <th>Title/Description</th>
                   <th>Display Location</th>

@@ -67,12 +67,12 @@
       <table class="table table-striped table-sm align-middle mb-0">
         <thead>
           <tr>
-            <th style="width: 14%"><?php echo __('Source'); ?></th>
-            <th style="width: 8%"><?php echo __('Enabled'); ?></th>
-            <th style="width: 11%"><?php echo __('Rate limit'); ?> <small class="text-muted">(/min)</small></th>
-            <th style="width: 12%"><?php echo __('Cache TTL'); ?> <small class="text-muted">(s)</small></th>
-            <th style="width: 15%"><?php echo __('License note'); ?></th>
-            <th style="width: 20%"><?php echo __('License URL'); ?></th>
+            <th data-ahg-style="width: 14%"><?php echo __('Source'); ?></th>
+            <th data-ahg-style="width: 8%"><?php echo __('Enabled'); ?></th>
+            <th data-ahg-style="width: 11%"><?php echo __('Rate limit'); ?> <small class="text-muted">(/min)</small></th>
+            <th data-ahg-style="width: 12%"><?php echo __('Cache TTL'); ?> <small class="text-muted">(s)</small></th>
+            <th data-ahg-style="width: 15%"><?php echo __('License note'); ?></th>
+            <th data-ahg-style="width: 20%"><?php echo __('License URL'); ?></th>
             <th><?php echo __('Description'); ?></th>
           </tr>
         </thead>

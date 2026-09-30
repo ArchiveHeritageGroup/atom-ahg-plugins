@@ -105,7 +105,7 @@
                 $color = $providerIcons[$p][1] ?? '#666';
             ?>
               <a href="/registry/oauth/<?php echo $p; ?>" class="btn btn-outline-secondary btn-sm" title="<?php echo ucfirst($p); ?>">
-                <i class="<?php echo $icon; ?>" style="color:<?php echo $color; ?>"></i> <?php echo ucfirst($p); ?>
+                <i class="<?php echo $icon; ?>" data-ahg-style="color:<?php echo $color; ?>"></i> <?php echo ucfirst($p); ?>
               </a>
             <?php endforeach; ?>
           </div>

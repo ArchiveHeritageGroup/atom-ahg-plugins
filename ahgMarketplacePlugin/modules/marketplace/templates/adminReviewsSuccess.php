@@ -69,7 +69,7 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 40px;"><?php echo __('ID'); ?></th>
+            <th data-ahg-style="width: 40px;"><?php echo __('ID'); ?></th>
             <th><?php echo __('Seller'); ?></th>
             <th><?php echo __('Reviewer'); ?></th>
             <th><?php echo __('Rating'); ?></th>
@@ -92,7 +92,7 @@
                 <?php endfor; ?>
               </td>
               <td class="small"><?php echo esc_entities($review->title ?? '-'); ?></td>
-              <td class="small" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <td class="small" data-ahg-style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 <?php echo esc_entities(mb_substr($review->comment ?? '', 0, 80)); ?>
                 <?php if (mb_strlen($review->comment ?? '') > 80): ?>...<?php endif; ?>
               </td>

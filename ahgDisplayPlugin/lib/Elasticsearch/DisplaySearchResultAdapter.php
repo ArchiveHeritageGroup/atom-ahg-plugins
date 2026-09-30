@@ -398,7 +398,7 @@ class DisplaySearchResultAdapter
         if (!empty($aggregations['subjects'])) {
             echo '<div class="facet-group mb-4">';
             echo '<h6 class="facet-title"><i class="fas fa-tags me-2"></i>Subjects</h6>';
-            echo '<div class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;">';
+            echo '<div class="list-group list-group-flush" data-ahg-style="max-height: 250px; overflow-y: auto;">';
             foreach (array_slice($aggregations['subjects'], 0, 15) as $bucket) {
                 echo '<a href="?subject=' . urlencode($bucket['key']) . '" class="list-group-item list-group-item-action d-flex justify-content-between">';
                 echo '<span>' . htmlspecialchars($bucket['key']) . '</span>';
@@ -412,7 +412,7 @@ class DisplaySearchResultAdapter
         if (!empty($aggregations['creators'])) {
             echo '<div class="facet-group mb-4">';
             echo '<h6 class="facet-title"><i class="fas fa-user me-2"></i>Creators</h6>';
-            echo '<div class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;">';
+            echo '<div class="list-group list-group-flush" data-ahg-style="max-height: 250px; overflow-y: auto;">';
             foreach (array_slice($aggregations['creators'], 0, 15) as $bucket) {
                 echo '<a href="?creator=' . urlencode($bucket['key']) . '" class="list-group-item list-group-item-action d-flex justify-content-between">';
                 echo '<span>' . htmlspecialchars($bucket['key']) . '</span>';

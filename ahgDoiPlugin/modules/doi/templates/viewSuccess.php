@@ -95,7 +95,7 @@
                         <h5 class="mb-0">DataCite Metadata</h5>
                     </div>
                     <div class="card-body">
-                        <pre class="mb-0" style="max-height: 400px; overflow: auto;"><code><?php echo htmlspecialchars(json_encode(json_decode($doi->metadata_json), JSON_PRETTY_PRINT)) ?></code></pre>
+                        <pre class="mb-0" data-ahg-style="max-height: 400px; overflow: auto;"><code><?php echo htmlspecialchars(json_encode(json_decode($doi->metadata_json), JSON_PRETTY_PRINT)) ?></code></pre>
                     </div>
                 </div>
             <?php endif ?>

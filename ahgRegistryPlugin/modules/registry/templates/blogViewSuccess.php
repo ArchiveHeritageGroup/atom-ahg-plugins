@@ -19,7 +19,7 @@
     <!-- Featured image -->
     <?php if (!empty($detail->featured_image_path)): ?>
     <div class="mb-4 rounded-3 overflow-hidden">
-      <img src="<?php echo htmlspecialchars($detail->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="img-fluid w-100" style="max-height: 400px; object-fit: cover;">
+      <img src="<?php echo htmlspecialchars($detail->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="img-fluid w-100" data-ahg-style="max-height: 400px; object-fit: cover;">
     </div>
     <?php endif; ?>
 
@@ -28,7 +28,7 @@
 
     <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
       <div class="d-flex align-items-center">
-        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" data-ahg-style="width: 40px; height: 40px;">
           <i class="fas fa-user text-muted"></i>
         </div>
         <div>

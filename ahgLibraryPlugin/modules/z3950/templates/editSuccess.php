@@ -140,7 +140,7 @@
 
           <?php if ($targetId > 0): ?>
             <button type="button" class="btn btn-outline-danger ms-auto"
-                    onclick="if(confirm('Delete this target?')) { window.location.href='<?php echo url_for(['module' => 'z3950', 'action' => 'delete', 'id' => $targetId]); ?>'; }">
+                    data-ahg-confirm="Delete this target?" data-ahg-href="<?php echo url_for(['module' => 'z3950', 'action' => 'delete', 'id' => $targetId]); ?>">
               <i class="fas fa-trash me-1"></i><?php echo __('Delete Target'); ?>
             </button>
           <?php endif; ?>
@@ -157,10 +157,10 @@
       <?php echo __('Enter host/port/database and click "Test" to verify connectivity '
         . 'before saving. For saved targets, use the "Test" button on the index page.'); ?>
     </p>
-    <div class="input-group" style="max-width:500px;">
+    <div class="input-group" data-ahg-style="max-width:500px;">
       <input type="text" class="form-control" id="test-host" placeholder="Host"
              value="<?php echo esc_entities($target['host'] ?? ''); ?>">
-      <input type="number" class="form-control" id="test-port" placeholder="Port" style="max-width:100px;"
+      <input type="number" class="form-control" id="test-port" placeholder="Port" data-ahg-style="max-width:100px;"
              value="<?php echo esc_entities($target['port'] ?? 210); ?>">
       <input type="text" class="form-control" id="test-db" placeholder="Database"
              value="<?php echo esc_entities($target['database'] ?? ''); ?>">
@@ -169,7 +169,7 @@
         <i class="fas fa-plug me-1"></i><?php echo __('Test'); ?>
       </button>
     </div>
-    <div id="test-result" class="mt-2 small" style="display:none;"></div>
+    <div id="test-result" class="mt-2 small" data-ahg-style="display:none;"></div>
   </div>
 </div>
 

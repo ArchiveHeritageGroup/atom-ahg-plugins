@@ -26,7 +26,7 @@
                                 <!-- Avatar -->
                                 <div class="heritage-avatar flex-shrink-0 me-3">
                                     <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                         style="width: 40px; height: 40px;">
+                                         data-ahg-style="width: 40px; height: 40px;">
                                         <?php echo strtoupper(substr($activity['user'] ?? 'A', 0, 1)); ?>
                                     </div>
                                 </div>

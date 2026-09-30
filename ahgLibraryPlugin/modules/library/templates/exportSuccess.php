@@ -45,7 +45,7 @@
                   <input type="radio" name="format" value="<?php echo $fmt; ?>"
                          <?php echo $isSelected ? 'checked' : ''; ?>
                          class="d-none"
-                         onchange="var d=document.getElementById('download-flag');if(d){d.value='';}this.form.submit();">
+                         data-ahg-set-target="#download-flag" data-ahg-set-value="" data-ahg-submit-form="1">
                   <i class="fas fa-<?php echo $fmt === 'csv' ? 'table' : ($fmt === 'bibtex' ? 'file-code' : 'book'); ?> me-2"></i>
                   <?php if ($fmt === 'csv'): ?>
                     <?php echo __('CSV (Spreadsheet)'); ?>
@@ -121,7 +121,7 @@
 
           <div class="d-grid gap-2">
             <button type="submit" class="btn btn-success"
-                    onclick="var d=document.getElementById('download-flag');if(d){d.value='1';}">
+                    data-ahg-set-target="#download-flag" data-ahg-set-value="1">
               <i class="fas fa-download me-1"></i>
               <?php echo __('Download %format%', ['%format%' => strtoupper($format)]); ?>
               <?php if ($count > 0): ?>
@@ -194,7 +194,7 @@
 
       <div class="mt-3">
         <button type="submit" form="export-form" class="btn btn-success btn-lg"
-                onclick="var d=document.getElementById('download-flag');if(d){d.value='1';}">
+                data-ahg-set-target="#download-flag" data-ahg-set-value="1">
           <i class="fas fa-download me-2"></i>
           <?php echo __('Download %format% (%count% items)', ['%format%' => strtoupper($format), '%count%' => $count]); ?>
         </button>

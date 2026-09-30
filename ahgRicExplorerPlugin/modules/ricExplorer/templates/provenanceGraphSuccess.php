@@ -43,7 +43,7 @@ $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
     <?php else: ?>
     <div class="row g-3">
       <div class="col-lg-8">
-        <div id="prov-cy" style="height: 520px;" class="border rounded bg-light"></div>
+        <div id="prov-cy" data-ahg-style="height: 520px;" class="border rounded bg-light"></div>
         <div class="form-text"><?php echo __('Arrows show the direction of custody transfer. Drag nodes to rearrange.') ?></div>
       </div>
       <div class="col-lg-4">

@@ -64,9 +64,9 @@
     <div class="card-body">
       <div class="d-flex align-items-start mb-2">
         <?php if (!empty($item->logo_path)): ?>
-          <img src="<?php echo htmlspecialchars($item->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 flex-shrink-0" style="width: 48px; height: 48px; object-fit: contain;">
+          <img src="<?php echo htmlspecialchars($item->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 flex-shrink-0" data-ahg-style="width: 48px; height: 48px; object-fit: contain;">
         <?php else: ?>
-          <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+          <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" data-ahg-style="width: 48px; height: 48px;">
             <i class="fas fa-code text-muted"></i>
           </div>
         <?php endif; ?>
@@ -102,7 +102,7 @@
         <div class="small mb-2">
           <a href="<?php echo htmlspecialchars($item->git_url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-decoration-none">
             <i class="<?php echo $gitIcon; ?> me-1"></i><?php echo __('Source'); ?>
-            <i class="fas fa-external-link-alt ms-1" style="font-size: 0.7em;"></i>
+            <i class="fas fa-external-link-alt ms-1" data-ahg-style="font-size: 0.7em;"></i>
           </a>
         </div>
       <?php endif; ?>

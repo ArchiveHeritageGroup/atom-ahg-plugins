@@ -53,7 +53,7 @@
                     </div>
 
                     <!-- Copyright Fields -->
-                    <div id="copyrightFields" class="basis-fields" style="display: none;">
+                    <div id="copyrightFields" class="basis-fields" data-ahg-style="display: none;">
                         <hr><h6 class="text-muted mb-3"><?php echo __('Copyright Information'); ?></h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -91,7 +91,7 @@
                     </div>
 
                     <!-- License Fields -->
-                    <div id="licenseFields" class="basis-fields" style="display: none;">
+                    <div id="licenseFields" class="basis-fields" data-ahg-style="display: none;">
                         <hr><h6 class="text-muted mb-3"><?php echo __('License Information'); ?></h6>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('License type'); ?></label>
@@ -103,7 +103,7 @@
                                 <option value="custom" <?php echo ($right['license_type'] ?? '') === 'custom' ? 'selected' : ''; ?>><?php echo __('Custom'); ?></option>
                             </select>
                         </div>
-                        <div id="ccLicenseField" class="mb-3" style="display: none;">
+                        <div id="ccLicenseField" class="mb-3" data-ahg-style="display: none;">
                             <label class="form-label"><?php echo __('Creative Commons License'); ?></label>
                             <select name="cc_license_id" class="form-select">
                                 <option value=""><?php echo __('-- Select --'); ?></option>
@@ -129,7 +129,7 @@
                     </div>
 
                     <!-- Statute Fields -->
-                    <div id="statuteFields" class="basis-fields" style="display: none;">
+                    <div id="statuteFields" class="basis-fields" data-ahg-style="display: none;">
                         <hr><h6 class="text-muted mb-3"><?php echo __('Statute Information'); ?></h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -152,7 +152,7 @@
                     </div>
 
                     <!-- Donor Fields -->
-                    <div id="donorFields" class="basis-fields" style="display: none;">
+                    <div id="donorFields" class="basis-fields" data-ahg-style="display: none;">
                         <hr><h6 class="text-muted mb-3"><?php echo __('Donor Information'); ?></h6>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Donor name'); ?></label>
@@ -161,7 +161,7 @@
                     </div>
 
                     <!-- Policy Fields -->
-                    <div id="policyFields" class="basis-fields" style="display: none;">
+                    <div id="policyFields" class="basis-fields" data-ahg-style="display: none;">
                         <hr><h6 class="text-muted mb-3"><?php echo __('Policy Information'); ?></h6>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Policy identifier'); ?></label>

@@ -10,7 +10,7 @@
                 <h1 class="h3 mb-1"><i class="fas fa-file-alt me-2"></i><?php echo __('National Treasury Report') ?></h1>
                 <p class="text-muted mb-0"><?php echo __('GRAP 103 Heritage Assets - Financial Year %1%', ['%1%' => $financialYear]) ?></p>
             </div>
-            <button onclick="window.print()" class="btn btn-outline-secondary"><i class="fas fa-print me-1"></i><?php echo __('Print') ?></button>
+            <button data-ahg-action="print" class="btn btn-outline-secondary"><i class="fas fa-print me-1"></i><?php echo __('Print') ?></button>
         </div>
     </div>
 

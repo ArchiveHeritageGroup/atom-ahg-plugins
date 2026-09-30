@@ -37,12 +37,12 @@
           <?php echo __('Exact position not recorded for this mention - showing the full source text.'); ?>
         </div>
         <div id="ar-context-body" class="border rounded p-3 bg-light d-none"
-             style="white-space: pre-wrap; line-height: 1.7; max-height: 60vh; overflow-y: auto;"></div>
+             data-ahg-style="white-space: pre-wrap; line-height: 1.7; max-height: 60vh; overflow-y: auto;"></div>
       </div>
       <div class="modal-footer">
         <span class="me-auto small text-muted">
           <mark class="bg-warning px-1"><?php echo __('mention'); ?></mark>
-          <span class="ms-2 px-1" style="background-color: rgba(255,193,7,0.18);"><?php echo __('enclosing paragraph'); ?></span>
+          <span class="ms-2 px-1" data-ahg-style="background-color: rgba(255,193,7,0.18);"><?php echo __('enclosing paragraph'); ?></span>
         </span>
         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
       </div>

@@ -284,6 +284,20 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
      * data-ahg-confirm="message"   - ask before proceeding; cancel stops the
      *                                click or the form submit.
      * data-ahg-toggle-column="n"   - toggle the nth column of the nearest table.
+     * data-ahg-call="fn|Obj.fn"    - call a global function; arguments in
+     *                                data-ahg-a0..n, typed by data-ahg-types
+     *                                (see the script), data-ahg-on for the event.
+     * data-ahg-action              - print | back | reload | close.
+     * data-ahg-prevent             - also cancel the default action.
+     * data-ahg-stop                - keep the click from a clickable parent.
+     * data-ahg-href / -submit / -click / -set-src / -fullscreen
+     * data-ahg-set-target + -set-value, -copy, -copy-to, -mirror, -navigate,
+     * -name-next, -show-if-checked, -submit-form, -remove-closest,
+     * -toggle-password, -tree-toggle, and data-ahg-onerror (+ data-ahg-fallback)
+     *                              for image fallbacks.
+     *
+     * A call target must be reachable from window: a top-level function or var,
+     * or an explicit window.X. A top-level const/let is not (#303).
      */
     public static function injectHandlerShims($event, $content)
     {
@@ -291,10 +305,11 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
             return $content;
         }
 
-        if (false === stripos($content, 'data-ahg-confirm')
-            && false === stripos($content, 'data-ahg-toggle-column')
-            && false === stripos($content, 'data-ahg-submit-form')
-            && false === stripos($content, 'data-ahg-call')) {
+        // On every HTML page, not only pages whose own markup carries a shim
+        // attribute: a fragment loaded later (a modal, an AJAX panel) needs the
+        // delegated listeners already bound. The marker keeps it to one copy,
+        // since response.filter_content can fire more than once.
+        if (false !== stripos($content, 'id="ahg-handler-shims"')) {
             return $content;
         }
 
@@ -307,98 +322,318 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
 
         $js = <<<'SHIMS'
 (function () {
-  // Delegated, so it covers markup added after load without rebinding.
+  function closest(ev, sel) { return ev.target && ev.target.closest ? ev.target.closest(sel) : null; }
+
+  // --- confirm, on the clicked element or its form --------------------------
   document.addEventListener('click', function (ev) {
-    var el = ev.target.closest ? ev.target.closest('[data-ahg-confirm]') : null;
-    if (el && !window.confirm(el.getAttribute('data-ahg-confirm'))) {
+    var el = closest(ev, '[data-ahg-confirm]');
+    if (el && 'FORM' !== el.tagName && !window.confirm(el.getAttribute('data-ahg-confirm'))) {
       ev.preventDefault();
-      ev.stopPropagation();
-      return;
+      ev.stopImmediatePropagation();
     }
-    var col = ev.target.closest ? ev.target.closest('[data-ahg-toggle-column]') : null;
-    if (col) {
-      var idx = parseInt(col.getAttribute('data-ahg-toggle-column'), 10);
-      if (isNaN(idx)) { return; }
-
-      // Call the page's OWN toggleColumn where it exists. Those definitions live
-      // in nonced <script> blocks, so the function is defined and working - it was
-      // only the onclick ATTRIBUTE calling it that CSP dropped. Reimplementing its
-      // semantics here would change behaviour (they target #reportTable by id and
-      // toggle style.display) for no reason.
-      if ('function' === typeof window.toggleColumn) {
-        window.toggleColumn(idx);
-        return;
-      }
-
-      // Fallback for pages with no such function: named table, else the first one.
-      var sel = col.getAttribute('data-ahg-toggle-table');
-      var table = sel ? document.querySelector(sel) : document.querySelector('table');
-      if (!table) { return; }
-      table.querySelectorAll('tr').forEach(function (row) {
-        var cell = row.children[idx];
-        if (cell) { cell.style.display = 'none' === cell.style.display ? '' : 'none'; }
-      });
+  }, true);
+  document.addEventListener('submit', function (ev) {
+    var form = closest(ev, 'form[data-ahg-confirm]');
+    if (form && !window.confirm(form.getAttribute('data-ahg-confirm'))) {
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
     }
   }, true);
 
-  // Call a global function named by the element, for handlers that were a single
-  // call and nothing else. The functions themselves live in nonced <script>
-  // blocks, so they are defined and working - it was only the inline ATTRIBUTE
-  // calling them that CSP dropped, so binding the call is enough and
-  // reimplementing anything would be wrong.
+  // --- keep a click from reaching a clickable parent -------------------------
+  // For a link inside a collapse header or a clickable row (was
+  // onclick="event.stopPropagation()"). Stopped at the document in capture, so
+  // the parent's delegated handler never sees it; the link still follows its
+  // href, since stopping propagation does not cancel the default action.
+  document.addEventListener('click', function (ev) {
+    if (closest(ev, '[data-ahg-stop]')) { ev.stopPropagation(); }
+  }, true);
+
+  // --- toggle a table column -------------------------------------------------
+  // Calls the page's own toggleColumn where it exists (it lives in a nonced
+  // block and works; only the attribute calling it was blocked).
+  document.addEventListener('click', function (ev) {
+    var col = closest(ev, '[data-ahg-toggle-column]');
+    if (!col) { return; }
+    var idx = parseInt(col.getAttribute('data-ahg-toggle-column'), 10);
+    if (isNaN(idx)) { return; }
+    if ('function' === typeof window.toggleColumn) { window.toggleColumn(idx); return; }
+    var sel = col.getAttribute('data-ahg-toggle-table');
+    var table = sel ? document.querySelector(sel) : document.querySelector('table');
+    if (!table) { return; }
+    table.querySelectorAll('tr').forEach(function (row) {
+      var cell = row.children[idx];
+      if (cell) { cell.style.display = 'none' === cell.style.display ? '' : 'none'; }
+    });
+  }, true);
+
+  // --- call a named global function -------------------------------------------
+  // For handlers that were a single call. Deliberately NOT eval: the name is
+  // resolved as a property path from window, and each argument is either text
+  // or one of a fixed set of sentinels, never code.
   //
-  // Deliberately NOT eval: the argument is a fixed sentinel, never arbitrary text.
-  function ahgDispatch(ev) {
-    var el = ev.target.closest ? ev.target.closest('[data-ahg-call]') : null;
-    if (!el) { return; }
-    if ((el.getAttribute('data-ahg-on') || 'click') !== ev.type) { return; }
-
-    var fn = window[el.getAttribute('data-ahg-call')];
-    if ('function' !== typeof fn) { return; }
-
-    switch (el.getAttribute('data-ahg-arg')) {
-      case 'this':         fn(el); break;
-      case 'this.value':   fn(el.value); break;
-      case 'this.checked': fn(el.checked); break;
-      default:             fn(); break;
+  //   data-ahg-call="fn" or "Obj.method"
+  //   data-ahg-on="click|change|input" (default click)
+  //   data-ahg-a0, data-ahg-a1 ...   the argument texts
+  //   data-ahg-types="s,n,x,..."      per argument: s string, n number,
+  //                                   x JSON if it parses else text,
+  //                                   q the value of the field its text selects,
+  //                                   this, value, checked, checked01, event, null
+  //   data-ahg-arg="this|this.value|this.checked"  (older single-argument form)
+  function resolve(path) {
+    var parts = path.split('.'), obj = window, owner = window;
+    for (var i = 0; i < parts.length; i++) {
+      if (null == obj) { return null; }
+      owner = obj;
+      obj = obj[parts[i]];
     }
+    return 'function' === typeof obj ? [obj, owner] : null;
   }
-  ['click', 'change', 'input'].forEach(function (t) {
-    document.addEventListener(t, ahgDispatch, true);
+  function argsFor(el, ev) {
+    var types = el.getAttribute('data-ahg-types');
+    if (null === types) {
+      switch (el.getAttribute('data-ahg-arg')) {
+        case 'this': return [el];
+        case 'this.value': return [el.value];
+        case 'this.checked': return [el.checked];
+        default: return [];
+      }
+    }
+    return ('' === types ? [] : types.split(',')).map(function (t, i) {
+      var raw = el.getAttribute('data-ahg-a' + i);
+      switch (t) {
+        case 'this': return el;
+        case 'value': return el.value;
+        case 'checked': return el.checked;
+        case 'checked01': return el.checked ? 1 : 0;
+        case 'q': var t = document.querySelector(raw); return t ? t.value : '';
+        case 'event': return ev;
+        case 'null': return null;
+        case 'n': return Number(raw);
+        case 'x': try { return JSON.parse(raw); } catch (e) { return raw; }
+        default: return raw;
+      }
+    });
+  }
+  function dispatch(ev) {
+    var el = closest(ev, '[data-ahg-call]');
+    if (!el || (el.getAttribute('data-ahg-on') || 'click') !== ev.type) { return; }
+    var fn = resolve(el.getAttribute('data-ahg-call'));
+    if (el.hasAttribute('data-ahg-prevent')) { ev.preventDefault(); }
+    if (fn) { fn[0].apply(fn[1], argsFor(el, ev)); }
+  }
+  ['click', 'change', 'input'].forEach(function (t) { document.addEventListener(t, dispatch, true); });
+
+  // --- small fixed behaviours --------------------------------------------------
+  document.addEventListener('click', function (ev) {
+    var el = closest(ev, '[data-ahg-action]');
+    if (el) {
+      switch (el.getAttribute('data-ahg-action')) {
+        case 'print': window.print(); break;
+        case 'back': history.back(); break;
+        case 'reload': location.reload(); break;
+        case 'close': window.close(); break;
+      }
+      if (el.hasAttribute('data-ahg-prevent')) { ev.preventDefault(); }
+      return;
+    }
+    el = closest(ev, '[data-ahg-href]');
+    if (el) { window.location = el.getAttribute('data-ahg-href'); return; }
+    el = closest(ev, '[data-ahg-remove-closest]');
+    if (el) {
+      var row = el.closest(el.getAttribute('data-ahg-remove-closest'));
+      if (row) { row.remove(); }
+      return;
+    }
+    // Copy a field's value, then show a tick: data-ahg-copy="prev" (the element
+    // just before the button) or a selector.
+    el = closest(ev, '[data-ahg-copy]');
+    if (el) {
+      var sel = el.getAttribute('data-ahg-copy');
+      var src = 'prev' === sel ? el.previousElementSibling : document.querySelector(sel);
+      if (src) {
+        if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(src.value); }
+        else { src.select(); document.execCommand('copy'); }
+        el.innerHTML = '<i class="fas fa-check"></i>';
+      }
+      return;
+    }
+    // Tree node: flip the toggle and show/hide the node's own child list.
+    el = closest(ev, '[data-ahg-tree-toggle]');
+    if (el) {
+      el.classList.toggle('expanded');
+      var li = el.closest('li'), ul = li ? li.querySelector(':scope > ul') : null;
+      if (ul) { ul.classList.toggle('d-none'); }
+      return;
+    }
+    el = closest(ev, '[data-ahg-fullscreen]');
+    if (el) {
+      var fs = document.querySelector(el.getAttribute('data-ahg-fullscreen'));
+      if (fs && fs.requestFullscreen) { fs.requestFullscreen(); }
+      return;
+    }
+    el = closest(ev, '[data-ahg-toggle-password]');
+    if (el) {
+      var i = document.querySelector(el.getAttribute('data-ahg-toggle-password'));
+      if (i) { i.type = 'password' === i.type ? 'text' : 'password'; }
+    }
+  }, true);
+
+  // Set another field before anything else acts: a hidden flag telling the form
+  // which button submitted it, or a search box filled from a suggestion.
+  //   data-ahg-set-target="<selector>" data-ahg-set-value="<value>"
+  ['click', 'change'].forEach(function (t) {
+    document.addEventListener(t, function (ev) {
+      var el = closest(ev, '[data-ahg-set-target]');
+      if (!el) { return; }
+      var target = document.querySelector(el.getAttribute('data-ahg-set-target'));
+      if (target) { target.value = el.getAttribute('data-ahg-set-value') || ''; }
+    }, true);
   });
 
-  // Submit the owning form on change. Converted from data-ahg-submit-form="1",
-  // the commonest inline handler in the suite after confirm - a select that filters
-  // a listing. requestSubmit() where available so any submit handlers and native
-  // validation still run; submit() is the fallback.
+  // Click: submit a named form, or click another element (a hidden file input).
+  document.addEventListener('click', function (ev) {
+    var el = closest(ev, '[data-ahg-submit]');
+    if (el) {
+      var spec = el.getAttribute('data-ahg-submit');
+      var f = 'this-form' === spec ? (el.form || el.closest('form')) : document.querySelector(spec);
+      if (f) { ev.preventDefault(); f.submit(); }
+      return;
+    }
+    // Load this link's target into an image elsewhere (a lightbox), instead of
+    // navigating to it.
+    el = closest(ev, '[data-ahg-set-src]');
+    if (el) {
+      var img = document.querySelector(el.getAttribute('data-ahg-set-src'));
+      if (img) { ev.preventDefault(); img.src = el.href; }
+      return;
+    }
+    el = closest(ev, '[data-ahg-click]');
+    if (el) {
+      var c = document.querySelector(el.getAttribute('data-ahg-click'));
+      if (c) { ev.preventDefault(); c.click(); }
+    }
+  });
+
+  // Show another element while this checkbox is ticked.
   document.addEventListener('change', function (ev) {
-    var el = ev.target.closest ? ev.target.closest('[data-ahg-submit-form]') : null;
+    var el = closest(ev, '[data-ahg-show-if-checked]');
+    if (el) {
+      var t = document.querySelector(el.getAttribute('data-ahg-show-if-checked'));
+      if (t) { t.style.display = el.checked ? 'block' : 'none'; }
+    }
+  }, true);
+
+  // Navigate on change: location = prefix + value + suffix, or
+  // data-ahg-navigate-empty when the value is empty.
+  document.addEventListener('change', function (ev) {
+    var el = closest(ev, '[data-ahg-navigate]');
+    if (el) {
+      window.location.href = '' === el.value && el.hasAttribute('data-ahg-navigate-empty')
+        ? el.getAttribute('data-ahg-navigate-empty')
+        : el.getAttribute('data-ahg-navigate') + el.value + (el.getAttribute('data-ahg-navigate-suffix') || '');
+    }
+  }, true);
+
+  // Copy this field's value into another field (colour picker <-> text box).
+  document.addEventListener('change', function (ev) {
+    var el = closest(ev, '[data-ahg-copy-to]');
+    if (el) {
+      var t = document.querySelector(el.getAttribute('data-ahg-copy-to'));
+      if (t) { t.value = el.value; }
+    }
+  }, true);
+
+  // Name the next field after this select's value (field-search rows: pick a
+  // field, and the input beside it submits under that field's name).
+  document.addEventListener('change', function (ev) {
+    var el = closest(ev, '[data-ahg-name-next]');
+    if (el && el.nextElementSibling) { el.nextElementSibling.name = el.value; }
+  }, true);
+
+  // Mirror a range/input value into another element's text as it moves.
+  document.addEventListener('input', function (ev) {
+    var el = closest(ev, '[data-ahg-mirror]');
+    if (el) {
+      var t = document.querySelector(el.getAttribute('data-ahg-mirror'));
+      if (t) { t.textContent = el.value; }
+    }
+  }, true);
+
+  // Submit the owning form on change. requestSubmit() so submit handlers and
+  // native validation still run.
+  document.addEventListener('change', function (ev) {
+    var el = closest(ev, '[data-ahg-submit-form]');
     if (!el) { return; }
-    var form = el.form || (el.closest ? el.closest('form') : null);
+    var form = el.form || el.closest('form');
     if (!form) { return; }
     if ('function' === typeof form.requestSubmit) { form.requestSubmit(); } else { form.submit(); }
   }, true);
 
-  // A form may carry the confirm itself, converted from an inline submit handler.
-  document.addEventListener('submit', function (ev) {
-    var form = ev.target.closest ? ev.target.closest('form[data-ahg-confirm]') : null;
-    if (form && !window.confirm(form.getAttribute('data-ahg-confirm'))) {
-      ev.preventDefault();
-      ev.stopPropagation();
+  // --- image fallbacks (replaces onerror) ---------------------------------------
+  //   data-ahg-onerror="hide | hide-parent | hide-show-next | src | parent-html"
+  //   data-ahg-fallback="<url or html>"   for src / parent-html
+  // error does not bubble, so listen in capture; and an image can fail before
+  // this script has run, so already-broken images are swept on load too.
+  function fallback(img) {
+    if (!img.hasAttribute('data-ahg-onerror')) { return; }
+    var mode = img.getAttribute('data-ahg-onerror');
+    var val = img.getAttribute('data-ahg-fallback') || '';
+    img.removeAttribute('data-ahg-onerror');   // once, like this.onerror = null
+    switch (mode) {
+      case 'hide': img.style.display = 'none'; break;
+      case 'hide-parent': if (img.parentElement) { img.parentElement.style.display = 'none'; } break;
+      case 'hide-show-next':
+        img.style.display = 'none';
+        if (img.nextElementSibling) { img.nextElementSibling.style.display = 'flex'; }
+        break;
+      case 'src': img.src = val; break;
+      case 'parent-html': if (img.parentElement) { img.parentElement.innerHTML = val; } break;
     }
+  }
+  document.addEventListener('error', function (ev) {
+    if (ev.target && ev.target.tagName === 'IMG') { fallback(ev.target); }
   }, true);
+  function sweep(root) {
+    root = root && root.querySelectorAll ? root : document;
+    var imgs = [].slice.call(root.querySelectorAll('img[data-ahg-onerror]'));
+    if (root.matches && root.matches('img[data-ahg-onerror]')) { imgs.push(root); }
+    imgs.forEach(function (img) {
+      if (img.complete && 0 === img.naturalWidth && img.getAttribute('src')) { fallback(img); }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () { sweep(document); });
+  window.addEventListener('load', function () { sweep(document); });
+  // Markup built by script is often assembled detached and inserted later; an
+  // image that failed while detached fired its error where no listener could
+  // see it. Check each inserted subtree once it is in the page.
+  if (window.MutationObserver) {
+    new MutationObserver(function (records) {
+      records.forEach(function (r) {
+        r.addedNodes.forEach(function (n) { if (1 === n.nodeType) { sweep(n); } });
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
 })();
 SHIMS;
 
-        $block = '<script'.$nonceAttr.'>'.$js.'</script>';
-        $pos = strripos($content, '</body>');
+        $block = '<script id="ahg-handler-shims"'.$nonceAttr.'>'.$js.'</script>';
+
+        // In the head, so the listeners exist before any image can fail or any
+        // control can be used; fragments without a head fall back to the body.
+        $pos = stripos($content, '</head>');
+        if (false === $pos) {
+            $pos = strripos($content, '</body>');
+        }
 
         return false === $pos ? $content.$block : substr_replace($content, $block."\n", $pos, 0);
     }
 
     public static function injectStyleApplier($event, $content)
     {
-        if (!is_string($content) || false === stripos($content, 'data-ahg-style')) {
+        // Every HTML page, for the same reason as the handler shims: content
+        // added after load carries data-ahg-style too. One copy per page.
+        if (!is_string($content) || false !== stripos($content, 'id="ahg-style-applier"')) {
             return $content;
         }
 
@@ -415,48 +650,62 @@ SHIMS;
         // is why the name is passed through untouched.
         $js = <<<'APPLIER'
 (function () {
-  function apply(root) {
-    root.querySelectorAll('[data-ahg-style]').forEach(function (el) {
-      var decls = el.getAttribute('data-ahg-style');
-      if (!decls) { return; }
-      decls.split(';').forEach(function (decl) {
-        var i = decl.indexOf(':');
-        if (i < 1) { return; }
-        var name = decl.slice(0, i).trim();
-        var value = decl.slice(i + 1).trim();
-        if (!name || !value) { return; }
-        try { el.style.setProperty(name, value); } catch (e) {}
-      });
-      el.removeAttribute('data-ahg-style');
+  function applyEl(el) {
+    var decls = el.getAttribute('data-ahg-style');
+    el.removeAttribute('data-ahg-style');
+    if (!decls) { return; }
+    decls.split(';').forEach(function (decl) {
+      var i = decl.indexOf(':');
+      if (i < 1) { return; }
+      var name = decl.slice(0, i).trim();
+      var value = decl.slice(i + 1).trim();
+      var important = /!\s*important$/i.test(value);
+      if (important) { value = value.replace(/!\s*important$/i, '').trim(); }
+      if (!name || !value) { return; }
+      try { el.style.setProperty(name, value, important ? 'important' : ''); } catch (e) {}
     });
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { apply(document); });
-  } else {
-    apply(document);
+  function apply(root) {
+    if (root.hasAttribute && root.hasAttribute('data-ahg-style')) { applyEl(root); }
+    if (root.querySelectorAll) { root.querySelectorAll('[data-ahg-style]').forEach(applyEl); }
   }
 
-  // Content added after load - autocompletes, modals, AJAX panels - carries the
-  // same attributes, so watch for it rather than leaving those elements bare.
+  // Watch from the head. The parser delivers pending mutation records before it
+  // runs each script, so every element has its declarations applied before any
+  // later script can read them - the same guarantee a real style attribute gave.
+  // It also covers content added after load: modals, autocompletes, AJAX panels.
   if (window.MutationObserver) {
     new MutationObserver(function (records) {
       records.forEach(function (r) {
-        r.addedNodes.forEach(function (n) {
-          if (1 !== n.nodeType) { return; }
-          if (n.hasAttribute && n.hasAttribute('data-ahg-style')) { apply(n.parentNode || document); }
-          else if (n.querySelector && n.querySelector('[data-ahg-style]')) { apply(n); }
-        });
+        r.addedNodes.forEach(function (n) { if (1 === n.nodeType) { apply(n); } });
       });
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
+  apply(document);
+  document.addEventListener('DOMContentLoaded', function () { apply(document); });
 })();
 APPLIER;
 
-        $script = "\n<script".$nonceAttr.">".$js."</script>\n";
+        $script = '<script id="ahg-style-applier"'.$nonceAttr.'>'.$js.'</script>';
+
+        // The applier hides nothing itself, so an element meant to start hidden
+        // is also hidden from CSS until its declarations are applied - after which
+        // the attribute is gone, this rule stops matching, and scripts toggle
+        // display exactly as they did with an inline style.
+        $prehide = '<style id="ahg-style-prehide"'.$nonceAttr.'>'
+            .'[data-ahg-style*="display:none"],[data-ahg-style*="display: none"]{display:none}'
+            .'[data-ahg-style*="visibility:hidden"],[data-ahg-style*="visibility: hidden"]{visibility:hidden}'
+            .'</style>';
+
+        // In the head, so it is watching before the body is parsed. Pages with no
+        // head (fragments with a body) fall back to the end of the body.
+        $head = stripos($content, '</head>');
+        if (false !== $head) {
+            return substr_replace($content, $prehide.$script."\n", $head, 0);
+        }
         $pos = stripos($content, '</body>');
 
-        return substr($content, 0, $pos).$script.substr($content, $pos);
+        return substr($content, 0, $pos).$prehide.$script.substr($content, $pos);
     }
 
     /**

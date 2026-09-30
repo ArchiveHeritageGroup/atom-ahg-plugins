@@ -77,8 +77,8 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 40px;"><?php echo __('ID'); ?></th>
-            <th style="width: 50px;"></th>
+            <th data-ahg-style="width: 40px;"><?php echo __('ID'); ?></th>
+            <th data-ahg-style="width: 50px;"></th>
             <th><?php echo __('Title'); ?></th>
             <th><?php echo __('Seller'); ?></th>
             <th><?php echo __('Sector'); ?></th>
@@ -95,9 +95,9 @@
               <td class="small text-muted"><?php echo (int) $listing->id; ?></td>
               <td>
                 <?php if ($listing->featured_image_path): ?>
-                  <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                  <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="" class="rounded" data-ahg-style="width: 40px; height: 40px; object-fit: cover;">
                 <?php else: ?>
-                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center" data-ahg-style="width: 40px; height: 40px;">
                     <i class="fas fa-image text-muted small"></i>
                   </div>
                 <?php endif; ?>

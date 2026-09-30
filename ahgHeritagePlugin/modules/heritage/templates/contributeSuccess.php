@@ -22,7 +22,7 @@ decorate_with('layout_2col');
     <img src="<?php echo esc_specialchars($thumbnail); ?>"
          class="card-img-top"
          alt="<?php echo esc_specialchars($item->title ?? 'Item'); ?>"
-         onerror="this.style.display='none'">
+         data-ahg-onerror="hide">
     <?php endif; ?>
     <div class="card-body">
         <h5 class="card-title"><?php echo esc_specialchars($item->title ?? 'Untitled'); ?></h5>
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function renderTags() {
             tagContainer.innerHTML = tags.map((tag, i) =>
                 `<span class="badge bg-primary me-1 mb-1">${tag}
-                    <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6em" onclick="removeTag(${i})"></button>
+                    <button type="button" class="btn-close btn-close-white ms-1" data-ahg-style="font-size: 0.6em" data-ahg-call="removeTag" data-ahg-types="x" data-ahg-a0="${i}"></button>
                 </span>`
             ).join('');
             tagsData.value = JSON.stringify(tags);
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const suggestions = document.getElementById('tag-suggestions');
                     suggestions.innerHTML = '<small class="text-muted">Suggestions: </small>' +
                         result.data.slice(0, 5).map(tag =>
-                            `<button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addSuggestedTag('${tag}')">${tag}</button>`
+                            `<button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" data-ahg-call="addSuggestedTag" data-ahg-types="s" data-ahg-a0="${tag}">${tag}</button>`
                         ).join('');
                 }
             }, 300);

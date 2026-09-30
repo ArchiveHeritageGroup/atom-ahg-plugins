@@ -58,7 +58,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">Data Table</h5>
                 </div>
-                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                <div class="card-body p-0" data-ahg-style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-sm table-hover mb-0">
                         <thead class="table-light sticky-top">
                             <tr>

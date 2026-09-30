@@ -128,7 +128,7 @@ $compositeScore = $candidate->composite_score !== null ? (float) $candidate->com
       <div class="mt-2 ar-map" id="ar-map-cand-<?php echo (int) $candidate->id; ?>"
            data-lat="<?php echo (float) $coord['lat']; ?>"
            data-lng="<?php echo (float) $coord['lng']; ?>"
-           style="height: 160px; max-width: 100%; overflow: hidden; position: relative; border: 1px solid #dee2e6; border-radius: 4px;"></div>
+           data-ahg-style="height: 160px; max-width: 100%; overflow: hidden; position: relative; border: 1px solid #dee2e6; border-radius: 4px;"></div>
     <?php endif; ?>
   </div>
 

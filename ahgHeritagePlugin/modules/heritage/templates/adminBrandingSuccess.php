@@ -31,7 +31,7 @@ $branding = (array) $branding;
                     <div class="input-group">
                         <input type="color" class="form-control form-control-color" id="primary_color_picker"
                                value="<?php echo esc_specialchars($branding['primary_color'] ?? '#0d6efd'); ?>"
-                               onchange="document.getElementById('primary_color').value = this.value;">
+                               data-ahg-copy-to="#primary_color">
                         <input type="text" class="form-control" id="primary_color" name="primary_color"
                                value="<?php echo esc_specialchars($branding['primary_color'] ?? '#0d6efd'); ?>" pattern="#[0-9A-Fa-f]{6}">
                     </div>
@@ -41,7 +41,7 @@ $branding = (array) $branding;
                     <div class="input-group">
                         <input type="color" class="form-control form-control-color" id="secondary_color_picker"
                                value="<?php echo esc_specialchars($branding['secondary_color'] ?? '#6c757d'); ?>"
-                               onchange="document.getElementById('secondary_color').value = this.value;">
+                               data-ahg-copy-to="#secondary_color">
                         <input type="text" class="form-control" id="secondary_color" name="secondary_color"
                                value="<?php echo esc_specialchars($branding['secondary_color'] ?? ''); ?>" pattern="#[0-9A-Fa-f]{6}">
                     </div>
@@ -51,7 +51,7 @@ $branding = (array) $branding;
                     <div class="input-group">
                         <input type="color" class="form-control form-control-color" id="accent_color_picker"
                                value="<?php echo esc_specialchars($branding['accent_color'] ?? '#198754'); ?>"
-                               onchange="document.getElementById('accent_color').value = this.value;">
+                               data-ahg-copy-to="#accent_color">
                         <input type="text" class="form-control" id="accent_color" name="accent_color"
                                value="<?php echo esc_specialchars($branding['accent_color'] ?? ''); ?>" pattern="#[0-9A-Fa-f]{6}">
                     </div>

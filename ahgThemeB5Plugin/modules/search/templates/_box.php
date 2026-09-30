@@ -76,7 +76,7 @@
         <?php echo __('Advanced search'); ?>
       </a>
       <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="#" id="semantic-search-dropdown-link" onclick="event.preventDefault(); var btn = document.getElementById('openSemanticSearchBtn'); if (btn) { btn.click(); } else if (typeof openSemanticModal === 'function') { openSemanticModal(); }">
+      <a class="dropdown-item" href="#" id="semantic-search-dropdown-link">
         <i class="fas fa-brain me-1" aria-hidden="true"></i>
         <?php echo __('Semantic search'); ?>
       </a>
@@ -162,3 +162,14 @@
   });
 })();
 </script>
+<?php // Semantic search entry in the dropdown. A listener, not onclick: inline
+      // handlers are blocked by the enforcing CSP.
+echo ahg_script_block(<<<'JS'
+document.addEventListener('click', function (ev) {
+  var a = ev.target.closest ? ev.target.closest('#semantic-search-dropdown-link') : null;
+  if (!a) { return; }
+  ev.preventDefault();
+  var btn = document.getElementById('openSemanticSearchBtn');
+  if (btn) { btn.click(); } else if ('function' === typeof window.openSemanticModal) { window.openSemanticModal(); }
+});
+JS); ?>

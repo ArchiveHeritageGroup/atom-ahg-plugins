@@ -40,9 +40,9 @@
           <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'collection', 'slug' => $col->slug]); ?>" class="text-decoration-none">
             <div class="card h-100 border-0 shadow-sm">
               <?php if ($col->cover_image_path): ?>
-                <img src="<?php echo esc_entities($col->cover_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($col->title); ?>" style="height: 200px; object-fit: cover;">
+                <img src="<?php echo esc_entities($col->cover_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($col->title); ?>" data-ahg-style="height: 200px; object-fit: cover;">
               <?php else: ?>
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" data-ahg-style="height: 200px;">
                   <i class="fas fa-layer-group fa-3x text-muted"></i>
                 </div>
               <?php endif; ?>

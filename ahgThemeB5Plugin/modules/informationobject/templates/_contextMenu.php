@@ -152,22 +152,22 @@ if (isset($resource)) {
     <?php /* Handwriting Recognition - commented out for now
     <li class="mt-2" style="list-style:none; margin-left:-1rem;"><span class="fw-semibold text-secondary"><?php echo __('Handwriting Recognition'); ?></span></li>
     <li>
-      <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'all'); return false;">
+      <a href="#" data-ahg-call="extractHandwriting" data-ahg-types="x,s" data-ahg-a0="<?php echo $resource->id ?>" data-ahg-a1="all" data-ahg-prevent="1">
         <i class="bi bi-pencil me-1"></i><?php echo __('Extract All (HTR)'); ?>
       </a>
     </li>
     <li>
-      <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'date'); return false;">
+      <a href="#" data-ahg-call="extractHandwriting" data-ahg-types="x,s" data-ahg-a0="<?php echo $resource->id ?>" data-ahg-a1="date" data-ahg-prevent="1">
         <i class="bi bi-calendar-event me-1"></i><?php echo __('Extract Dates'); ?>
       </a>
     </li>
     <li>
-      <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'digits'); return false;">
+      <a href="#" data-ahg-call="extractHandwriting" data-ahg-types="x,s" data-ahg-a0="<?php echo $resource->id ?>" data-ahg-a1="digits" data-ahg-prevent="1">
         <i class="bi bi-123 me-1"></i><?php echo __('Extract Digits'); ?>
       </a>
     </li>
     <li>
-      <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'letters'); return false;">
+      <a href="#" data-ahg-call="extractHandwriting" data-ahg-types="x,s" data-ahg-a0="<?php echo $resource->id ?>" data-ahg-a1="letters" data-ahg-prevent="1">
         <i class="bi bi-alphabet me-1"></i><?php echo __('Extract Letters'); ?>
       </a>
     </li>

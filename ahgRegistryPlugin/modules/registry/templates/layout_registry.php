@@ -325,7 +325,7 @@
       <!-- Right side: Search + Auth -->
       <form class="d-flex me-3" method="get" action="/registry/search">
         <div class="input-group input-group-sm">
-          <input type="text" class="form-control" name="q" placeholder="Search..." style="max-width: 180px;">
+          <input type="text" class="form-control" name="q" placeholder="Search..." data-ahg-style="max-width: 180px;">
           <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
         </div>
       </form>
@@ -343,7 +343,7 @@
             <div class="dropdown-menu dropdown-menu-end reg-notif-menu" aria-labelledby="regNotifBellToggle">
               <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
                 <strong>Notifications</strong>
-                <button type="button" class="btn btn-link btn-sm p-0" id="regNotifMarkAllRead" style="text-decoration:none;">Mark all read</button>
+                <button type="button" class="btn btn-link btn-sm p-0" id="regNotifMarkAllRead" data-ahg-style="text-decoration:none;">Mark all read</button>
               </div>
               <div id="regNotifList" class="reg-notif-list">
                 <div class="text-muted small text-center p-3">Loading&hellip;</div>

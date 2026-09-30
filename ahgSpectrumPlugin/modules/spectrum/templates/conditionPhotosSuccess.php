@@ -112,7 +112,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
                                 </p>
                             </div>
                             <!-- Preview area -->
-                            <div id="photo-preview" class="row mt-3" style="display: none;"></div>
+                            <div id="photo-preview" class="row mt-3" data-ahg-style="display: none;"></div>
                         </div>
                     </div>
                     
@@ -708,8 +708,8 @@ function deletePhoto(photoId) {
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-0" style="height: calc(100vh - 120px);">
-                <div id="annotator-container" style="height: 100%;"></div>
+            <div class="modal-body p-0" data-ahg-style="height: calc(100vh - 120px);">
+                <div id="annotator-container" data-ahg-style="height: 100%;"></div>
             </div>
             <div class="modal-footer">
                 <span id="annotation-status" class="text-muted me-auto"></span>
@@ -833,7 +833,7 @@ document.getElementById('annotation-modal').addEventListener('hidden.bs.modal', 
 });
 
 // Delegated listeners, not inline handlers: AtoM's CSP script-src has no
-// 'unsafe-inline', so every onclick="" on the photo cards was refused by the
+// 'unsafe-inline', so every  on the photo cards was refused by the
 // browser and none of the buttons did anything. This block carries the nonce.
 (function () {
     function bind(selector, fn) {

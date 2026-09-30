@@ -48,7 +48,7 @@
           <div class="row g-2">
             <?php foreach ($images as $img): ?>
               <div class="col-4 col-md-3">
-                <img src="<?php echo esc_entities($img->image_path); ?>" alt="<?php echo esc_entities($img->alt_text ?? ''); ?>" class="img-fluid rounded border" style="width: 100%; height: 120px; object-fit: cover;">
+                <img src="<?php echo esc_entities($img->image_path); ?>" alt="<?php echo esc_entities($img->alt_text ?? ''); ?>" class="img-fluid rounded border" data-ahg-style="width: 100%; height: 120px; object-fit: cover;">
               </div>
             <?php endforeach; ?>
           </div>
@@ -65,7 +65,7 @@
         <table class="table table-sm mb-0">
           <tbody>
             <tr>
-              <th style="width: 200px;"><?php echo __('Listing Number'); ?></th>
+              <th data-ahg-style="width: 200px;"><?php echo __('Listing Number'); ?></th>
               <td><?php echo esc_entities($listing->listing_number); ?></td>
             </tr>
             <tr>
@@ -177,9 +177,9 @@
       </div>
       <div class="card-body text-center">
         <?php if ($seller->avatar_path): ?>
-          <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle mb-3" width="80" height="80" style="object-fit: cover;">
+          <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle mb-3" width="80" height="80" data-ahg-style="object-fit: cover;">
         <?php else: ?>
-          <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+          <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" data-ahg-style="width: 80px; height: 80px;">
             <i class="fas fa-user fa-2x text-muted"></i>
           </div>
         <?php endif; ?>

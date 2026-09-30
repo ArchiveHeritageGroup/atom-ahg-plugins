@@ -45,7 +45,7 @@ $filterStatus = $sf_data->getRaw('filterStatus') ?: '';
                 <tr>
                   <td><?php echo $h->id; ?></td>
                   <td><?php echo $h->information_object_id; ?></td>
-                  <td class="text-truncate" style="max-width:300px"><?php echo htmlspecialchars($h->reason); ?></td>
+                  <td class="text-truncate" data-ahg-style="max-width:300px"><?php echo htmlspecialchars($h->reason); ?></td>
                   <td><?php echo htmlspecialchars($h->placed_by); ?></td>
                   <td><?php echo $h->placed_at; ?></td>
                   <td><span class="badge <?php echo $h->status === 'active' ? 'bg-danger' : 'bg-secondary'; ?>"><?php echo $h->status; ?></span></td>

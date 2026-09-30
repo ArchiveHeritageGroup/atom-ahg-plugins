@@ -31,7 +31,7 @@
                             <?php if ($type->category === 'TK'): ?>
                                 <div class="col-md-6 mb-3">
                                     <div class="d-flex align-items-start">
-                                        <div class="icip-tk-label-icon me-2" style="background-color: #8B4513; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
+                                        <div class="icip-tk-label-icon me-2" data-ahg-style="background-color: #8B4513; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
                                             <?php echo strtoupper($type->code) ?>
                                         </div>
                                         <div>
@@ -56,7 +56,7 @@
                             <?php if ($type->category === 'BC'): ?>
                                 <div class="col-md-6 mb-3">
                                     <div class="d-flex align-items-start">
-                                        <div class="icip-tk-label-icon me-2" style="background-color: #228B22; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
+                                        <div class="icip-tk-label-icon me-2" data-ahg-style="background-color: #228B22; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
                                             <?php echo strtoupper($type->code) ?>
                                         </div>
                                         <div>

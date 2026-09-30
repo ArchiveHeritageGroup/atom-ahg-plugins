@@ -60,7 +60,7 @@ $sectionTypeIcons = [
                 <h6 class="card-title text-muted mb-3"><i class="bi bi-info-circle me-1"></i><?php echo __('Template Details'); ?></h6>
                 <table class="table table-sm mb-0">
                     <tr>
-                        <td class="text-muted" style="width:140px"><?php echo __('Category'); ?></td>
+                        <td class="text-muted" data-ahg-style="width:140px"><?php echo __('Category'); ?></td>
                         <td><strong><?php echo htmlspecialchars($rawTemplate->category ?? 'Custom'); ?></strong></td>
                     </tr>
                     <tr>

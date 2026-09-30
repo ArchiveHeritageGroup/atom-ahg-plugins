@@ -255,7 +255,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
             <a class="btn btn-outline-secondary" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]); ?>">
                 <i class="fas fa-arrow-left me-1"></i><?php echo __('Back'); ?>
             </a>
-            <button type="button" class="btn btn-primary" onclick="window.print()">
+            <button type="button" class="btn btn-primary" data-ahg-action="print">
                 <i class="fas fa-print me-1"></i><?php echo __('Print Label'); ?>
             </button>
             <button type="button" class="btn btn-secondary" data-ahg-call="downloadLabel">
@@ -268,8 +268,8 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         <div class="card">
             <div class="card-header"><?php echo __('Preview'); ?></div>
             <div class="card-body text-center">
-                <div class="label-preview" id="labelContent" style="max-width: 300px;">
-                    <div id="labelTitle" class="fw-bold mb-2" style="font-size: 11pt;">
+                <div class="label-preview" id="labelContent" data-ahg-style="max-width: 300px;">
+                    <div id="labelTitle" class="fw-bold mb-2" data-ahg-style="font-size: 11pt;">
                         <?php echo esc_specialchars(html_entity_decode($resource->title ?? $resource->slug, ENT_QUOTES, 'UTF-8')); ?>
                     </div>
                     

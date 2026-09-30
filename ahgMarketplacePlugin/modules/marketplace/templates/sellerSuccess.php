@@ -20,18 +20,18 @@
 <!-- Banner + avatar -->
 <div class="position-relative mb-4">
   <?php if ($seller->banner_path): ?>
-    <div class="rounded overflow-hidden" style="height: 200px;">
-      <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="w-100 h-100" style="object-fit: cover;">
+    <div class="rounded overflow-hidden" data-ahg-style="height: 200px;">
+      <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="w-100 h-100" data-ahg-style="object-fit: cover;">
     </div>
   <?php else: ?>
-    <div class="rounded bg-secondary" style="height: 140px;"></div>
+    <div class="rounded bg-secondary" data-ahg-style="height: 140px;"></div>
   <?php endif; ?>
 
-  <div class="d-flex align-items-end ms-4" style="margin-top: -50px; position: relative; z-index: 1;">
+  <div class="d-flex align-items-end ms-4" data-ahg-style="margin-top: -50px; position: relative; z-index: 1;">
     <?php if ($seller->avatar_path): ?>
-      <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle border border-3 border-white shadow" width="100" height="100" style="object-fit: cover;">
+      <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle border border-3 border-white shadow" width="100" height="100" data-ahg-style="object-fit: cover;">
     <?php else: ?>
-      <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center border border-3 border-white shadow" style="width: 100px; height: 100px;">
+      <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center border border-3 border-white shadow" data-ahg-style="width: 100px; height: 100px;">
         <i class="fas fa-user fa-2x"></i>
       </div>
     <?php endif; ?>
@@ -74,7 +74,7 @@
         <div class="h5 mb-0">
           <?php if ($seller->average_rating > 0): ?>
             <?php for ($s = 1; $s <= 5; $s++): ?>
-              <i class="fa<?php echo $s <= round($seller->average_rating) ? 's' : 'r'; ?> fa-star text-warning" style="font-size: 0.85rem;"></i>
+              <i class="fa<?php echo $s <= round($seller->average_rating) ? 's' : 'r'; ?> fa-star text-warning" data-ahg-style="font-size: 0.85rem;"></i>
             <?php endfor; ?>
           <?php else: ?>
             &mdash;
@@ -187,9 +187,9 @@
           <div class="col">
             <div class="card h-100">
               <?php if ($col->cover_image_path): ?>
-                <img src="<?php echo esc_entities($col->cover_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($col->title); ?>" style="height: 160px; object-fit: cover;">
+                <img src="<?php echo esc_entities($col->cover_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($col->title); ?>" data-ahg-style="height: 160px; object-fit: cover;">
               <?php else: ?>
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 160px;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" data-ahg-style="height: 160px;">
                   <i class="fas fa-layer-group fa-2x text-muted"></i>
                 </div>
               <?php endif; ?>
@@ -231,11 +231,11 @@
             <?php $count = isset($ratingStats[$star]) ? (int) $ratingStats[$star] : 0; ?>
             <?php $pct = $seller->rating_count > 0 ? round(($count / $seller->rating_count) * 100) : 0; ?>
             <div class="d-flex align-items-center mb-1">
-              <span class="small text-nowrap me-2" style="width: 45px;"><?php echo $star; ?> <i class="fas fa-star text-warning small"></i></span>
-              <div class="progress flex-grow-1" style="height: 8px;">
-                <div class="progress-bar bg-warning" style="width: <?php echo $pct; ?>%;"></div>
+              <span class="small text-nowrap me-2" data-ahg-style="width: 45px;"><?php echo $star; ?> <i class="fas fa-star text-warning small"></i></span>
+              <div class="progress flex-grow-1" data-ahg-style="height: 8px;">
+                <div class="progress-bar bg-warning" data-ahg-style="width: <?php echo $pct; ?>%;"></div>
               </div>
-              <span class="small text-muted ms-2" style="width: 30px;"><?php echo $count; ?></span>
+              <span class="small text-muted ms-2" data-ahg-style="width: 30px;"><?php echo $count; ?></span>
             </div>
           <?php endfor; ?>
         </div>

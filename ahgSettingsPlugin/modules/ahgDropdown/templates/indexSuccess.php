@@ -54,7 +54,7 @@
     <?php $meta = $sectionMeta[$sectionCode]; ?>
     <div class="accordion-item section-block" data-section="<?php echo $sectionCode ?>" id="section-<?php echo $sectionCode ?>">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?php echo $sectionCode ?>" style="font-size:0.9rem">
+            <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?php echo $sectionCode ?>" data-ahg-style="font-size:0.9rem">
                 <i class="fas <?php echo $meta['icon'] ?> fa-fw me-2 text-muted"></i>
                 <?php echo $meta['label'] ?>
                 <span class="badge bg-secondary ms-2"><?php echo $meta['count'] ?></span>
@@ -87,13 +87,13 @@
                                 <a href="<?php echo url_for(['module' => 'ahgDropdown', 'action' => 'edit', 'taxonomy' => $tax->taxonomy]) ?>" class="btn btn-sm btn-outline-primary" title="<?php echo __('Edit Terms') ?>">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="renameTaxonomy('<?php echo esc_entities($tax->taxonomy) ?>', '<?php echo esc_entities($tax->taxonomy_label) ?>')" title="<?php echo __('Rename') ?>">
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-ahg-call="renameTaxonomy" data-ahg-types="s,s" data-ahg-a0="<?php echo esc_entities($tax->taxonomy) ?>" data-ahg-a1="<?php echo esc_entities($tax->taxonomy_label) ?>" title="<?php echo __('Rename') ?>">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-info" onclick="moveTaxonomy('<?php echo esc_entities($tax->taxonomy) ?>', '<?php echo $sectionCode ?>')" title="<?php echo __('Move to Section') ?>">
+                                <button type="button" class="btn btn-sm btn-outline-info" data-ahg-call="moveTaxonomy" data-ahg-types="s,s" data-ahg-a0="<?php echo esc_entities($tax->taxonomy) ?>" data-ahg-a1="<?php echo $sectionCode ?>" title="<?php echo __('Move to Section') ?>">
                                     <i class="fas fa-arrows-alt"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteTaxonomy('<?php echo esc_entities($tax->taxonomy) ?>')" title="<?php echo __('Delete') ?>">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="deleteTaxonomy" data-ahg-types="s" data-ahg-a0="<?php echo esc_entities($tax->taxonomy) ?>" title="<?php echo __('Delete') ?>">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>

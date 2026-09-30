@@ -228,7 +228,7 @@ function render_media_player($digitalObject, array $options = []): string
 
     // Player container
     $html = '<div id="' . htmlspecialchars($containerId) . '" class="ahg-media-player" '
-        . 'data-do-id="' . (int) $id . '" style="height:' . htmlspecialchars($height) . ';"></div>';
+        . 'data-do-id="' . (int) $id . '" data-ahg-style="height:' . htmlspecialchars($height) . ';"></div>';
 
     // Include player JS (locally hosted)
     $html .= '<script ' . $nonceAttr . ' src="/plugins/ahgIiifPlugin/js/atom-media-player.js"></script>';
@@ -305,7 +305,7 @@ function render_enhanced_media_player(array $digitalObjectData, array $options =
         $html .= '<source src="' . htmlspecialchars($mediaUrl) . '" type="' . htmlspecialchars($outputMime) . '">';
         $html .= 'Your browser does not support audio playback.</audio>';
     } else {
-        $html = '<video id="' . htmlspecialchars($playerId) . '" controls class="w-100" style="max-height:500px;">';
+        $html = '<video id="' . htmlspecialchars($playerId) . '" controls class="w-100" data-ahg-style="max-height:500px;">';
         try {
             $transcription = \Illuminate\Database\Capsule\Manager::table('media_transcription')
                 ->where('digital_object_id', $doId)
@@ -411,7 +411,7 @@ function render_media_metadata($digitalObject, array $options = []): string
     if (!empty($metadata->waveform_path) && $metadata->media_type === 'audio') {
         $html .= '<div class="waveform-container mt-3">';
         $html .= '<h6 class="text-muted mb-2">Waveform</h6>';
-        $html .= '<img src="' . htmlspecialchars($metadata->waveform_path) . '" alt="Audio waveform" class="img-fluid rounded" style="background:#1a1a1a;width:100%;">';
+        $html .= '<img src="' . htmlspecialchars($metadata->waveform_path) . '" alt="Audio waveform" class="img-fluid rounded" data-ahg-style="background:#1a1a1a;width:100%;">';
         $html .= '</div>';
     }
 
@@ -479,17 +479,17 @@ function render_transcription_panel($digitalObject, array $options = []): string
     $html .= '</div></div>';
 
     // Content
-    $html .= '<div class="card-body transcript-content" style="max-height:400px;overflow-y:auto;">';
+    $html .= '<div class="card-body transcript-content" data-ahg-style="max-height:400px;overflow-y:auto;">';
     if (empty($options['segments_only'])) {
-        $html .= '<div class="transcript-full-text" style="white-space:pre-wrap;line-height:1.8;">';
+        $html .= '<div class="transcript-full-text" data-ahg-style="white-space:pre-wrap;line-height:1.8;">';
         $html .= htmlspecialchars($transcription->full_text ?? '');
         $html .= '</div>';
     }
-    $html .= '<div class="transcript-segments" style="display:none;">';
+    $html .= '<div class="transcript-segments" data-ahg-style="display:none;">';
     foreach ($segments as $index => $segment) {
         $html .= '<div class="transcript-segment" data-start="' . ($segment['start'] ?? 0) . '" '
             . 'data-end="' . ($segment['end'] ?? 0) . '" data-index="' . $index . '" '
-            . 'style="cursor:pointer;padding:4px 8px;border-radius:4px;margin:2px 0;">';
+            . 'data-ahg-style="cursor:pointer;padding:4px 8px;border-radius:4px;margin:2px 0;">';
         $html .= '<small class="text-muted me-2">[' . format_duration($segment['start'] ?? 0) . ']</small>';
         $html .= htmlspecialchars(trim($segment['text'] ?? ''));
         $html .= '</div>';
@@ -639,7 +639,7 @@ function render_snippets_list($digitalObject, array $options = []): string
         }
         $html .= '</div></div>';
         $html .= '<div class="btn-group btn-group-sm">';
-        $html .= '<button class="btn btn-outline-primary" onclick="playSnippet(' . $snippet->id . ',' . $snippet->start_time . ',' . $snippet->end_time . ')"><i class="fas fa-play"></i></button>';
+        $html .= '<button class="btn btn-outline-primary" data-ahg-call="playSnippet" data-ahg-types="x,x,x" data-ahg-a0="' . (int) $snippet->id . '" data-ahg-a1="' . (float) $snippet->start_time . '" data-ahg-a2="' . (float) $snippet->end_time . '"><i class="fas fa-play"></i></button>';
         if (!empty($snippet->export_path)) {
             $html .= '<a class="btn btn-outline-secondary" href="' . htmlspecialchars($snippet->export_path) . '" download><i class="fas fa-download"></i></a>';
         }

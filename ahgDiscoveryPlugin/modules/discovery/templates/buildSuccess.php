@@ -148,7 +148,7 @@ function renderTreeNode(array $node, int $depth): string
     $indent = $depth * 1.25;
     $collapseId = 'tree-node-' . preg_replace('/[^a-zA-Z0-9_-]/', '-', $id);
 
-    $html = '<div class="tree-node" style="margin-left: ' . $indent . 'rem;">';
+    $html = '<div class="tree-node" data-ahg-style="margin-left: ' . $indent . 'rem;">';
 
     // Node header
     $html .= '<div class="tree-node-header d-flex align-items-start py-1">';
@@ -158,32 +158,32 @@ function renderTreeNode(array $node, int $depth): string
         $html .= '<i class="fas fa-caret-' . ($depth < 2 ? 'down' : 'right') . ' tree-caret"></i>';
         $html .= '</a>';
     } else {
-        $html .= '<span class="me-1" style="width: 14px; display: inline-block;"></span>';
+        $html .= '<span class="me-1" data-ahg-style="width: 14px; display: inline-block;"></span>';
     }
 
     // Level badge
     if (!empty($level)) {
-        $html .= '<span class="badge bg-light text-muted me-1" style="font-size: 0.68rem;">' . $level . '</span>';
+        $html .= '<span class="badge bg-light text-muted me-1" data-ahg-style="font-size: 0.68rem;">' . $level . '</span>';
     }
 
     // Title
-    $html .= '<span class="fw-semibold" style="font-size: 0.9rem;">' . $title . '</span>';
+    $html .= '<span class="fw-semibold" data-ahg-style="font-size: 0.9rem;">' . $title . '</span>';
 
     // Node ID
-    $html .= '<small class="text-muted ms-2" style="font-size: 0.7rem;">' . $id . '</small>';
+    $html .= '<small class="text-muted ms-2" data-ahg-style="font-size: 0.7rem;">' . $id . '</small>';
 
     $html .= '</div>';
 
     // Node details (summary + keywords) -- collapsed for deeper nodes
     if (!empty($summary) || !empty($keywords)) {
-        $html .= '<div class="tree-node-details ms-3 mb-1" style="font-size: 0.82rem;">';
+        $html .= '<div class="tree-node-details ms-3 mb-1" data-ahg-style="font-size: 0.82rem;">';
         if (!empty($summary)) {
             $html .= '<div class="text-muted">' . $summary . '</div>';
         }
         if (!empty($keywords)) {
             $html .= '<div class="mt-1">';
             foreach ($keywords as $kw) {
-                $html .= '<span class="badge bg-light text-muted me-1" style="font-size: 0.68rem;">' . htmlspecialchars($kw, ENT_QUOTES, 'UTF-8') . '</span>';
+                $html .= '<span class="badge bg-light text-muted me-1" data-ahg-style="font-size: 0.68rem;">' . htmlspecialchars($kw, ENT_QUOTES, 'UTF-8') . '</span>';
             }
             $html .= '</div>';
         }

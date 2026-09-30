@@ -111,7 +111,7 @@
                         '<button class="btn btn-sm btn-outline-secondary" id="wf-refresh-comments"><i class="bi bi-arrow-clockwise"></i></button>' +
                     '</div>' +
                     '<div class="card-body p-0">' +
-                        '<div id="wf-comments-list" style="max-height:400px;overflow-y:auto;"></div>' +
+                        '<div id="wf-comments-list" data-ahg-style="max-height:400px;overflow-y:auto;"></div>' +
                     '</div>' +
                     '<div class="card-footer">' +
                         '<div class="input-group">' +

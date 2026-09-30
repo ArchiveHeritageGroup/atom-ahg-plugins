@@ -176,7 +176,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Display Order</label>
-                            <input type="number" name="display_order" class="form-control" value="100" style="max-width: 100px;">
+                            <input type="number" name="display_order" class="form-control" value="100" data-ahg-style="max-width: 100px;">
                         </div>
 
                         <button type="submit" class="btn btn-primary">

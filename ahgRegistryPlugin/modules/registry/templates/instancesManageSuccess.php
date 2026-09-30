@@ -45,7 +45,7 @@
           <td><strong><?php echo htmlspecialchars($inst->name ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></td>
           <td>
             <?php if (!empty($inst->url)): ?>
-              <a href="<?php echo htmlspecialchars($inst->url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-truncate d-inline-block" style="max-width: 200px;">
+              <a href="<?php echo htmlspecialchars($inst->url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-truncate d-inline-block" data-ahg-style="max-width: 200px;">
                 <?php echo htmlspecialchars(preg_replace('#^https?://#', '', $inst->url), ENT_QUOTES, 'UTF-8'); ?>
               </a>
             <?php else: ?>
@@ -124,7 +124,7 @@
           <td><strong><?php echo htmlspecialchars($oi->name ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></td>
           <td>
             <?php if (!empty($oi->url)): ?>
-              <a href="<?php echo htmlspecialchars($oi->url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-truncate d-inline-block" style="max-width: 200px;">
+              <a href="<?php echo htmlspecialchars($oi->url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-truncate d-inline-block" data-ahg-style="max-width: 200px;">
                 <?php echo htmlspecialchars(preg_replace('#^https?://#', '', $oi->url), ENT_QUOTES, 'UTF-8'); ?>
               </a>
             <?php else: ?>

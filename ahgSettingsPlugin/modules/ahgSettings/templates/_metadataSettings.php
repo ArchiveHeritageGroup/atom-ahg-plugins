@@ -228,10 +228,10 @@ $metadataSources = [
             <table class="table table-sm table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 20%;">Metadata Source</th>
-                        <th style="width: 26%;">Archives (ISAD)</th>
-                        <th style="width: 27%;">Museum (Collections Procedures)</th>
-                        <th style="width: 27%;">DAM</th>
+                        <th data-ahg-style="width: 20%;">Metadata Source</th>
+                        <th data-ahg-style="width: 26%;">Archives (ISAD)</th>
+                        <th data-ahg-style="width: 27%;">Museum (Collections Procedures)</th>
+                        <th data-ahg-style="width: 27%;">DAM</th>
                     </tr>
                 </thead>
                 <tbody>

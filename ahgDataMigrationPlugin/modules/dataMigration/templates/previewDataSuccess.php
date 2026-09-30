@@ -23,7 +23,7 @@ $allFields = array_unique($allFields);
       <?php if (empty($rawData)): ?>
         <div class="alert alert-warning m-3">No data to preview. Check your field mappings.</div>
       <?php else: ?>
-      <div class="table-responsive" style="max-height: 70vh; overflow: auto;">
+      <div class="table-responsive" data-ahg-style="max-height: 70vh; overflow: auto;">
         <table class="table table-striped table-hover table-sm mb-0">
           <thead class="table-light sticky-top">
             <tr>

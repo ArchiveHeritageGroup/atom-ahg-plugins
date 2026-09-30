@@ -74,7 +74,7 @@
       <i class="bi bi-exclamation-triangle me-2"></i>Import Errors
     </div>
     <div class="card-body">
-      <ul class="list-unstyled mb-0" style="max-height: 300px; overflow-y: auto;">
+      <ul class="list-unstyled mb-0" data-ahg-style="max-height: 300px; overflow-y: auto;">
         <?php foreach ($stats['errors'] as $error): ?>
           <li class="text-danger small mb-1"><i class="bi bi-x-circle me-1"></i><?php echo esc_specialchars($error) ?></li>
         <?php endforeach ?>

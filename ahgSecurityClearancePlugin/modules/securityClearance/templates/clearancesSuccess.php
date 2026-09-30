@@ -40,7 +40,7 @@
             <small class="text-muted"><?php echo esc_entities($c->email) ?></small>
           </td>
           <td>
-            <span class="badge" style="background-color: <?php echo $c->color ?>">
+            <span class="badge" data-ahg-style="background-color: <?php echo $c->color ?>">
               <?php echo esc_entities($c->clearance_name) ?>
             </span>
             <br><small>Level <?php echo $c->level ?></small>
@@ -75,7 +75,7 @@
             <a href="<?php echo url_for('@security_clearance_view?id=' . $c->user_id); ?>" class="btn btn-sm btn-outline-primary">
               <i class="fas fa-edit"></i>
             </a>
-            <button class="btn btn-sm btn-outline-danger" onclick="revokeClearance(<?php echo $c->user_id ?>)">
+            <button class="btn btn-sm btn-outline-danger" data-ahg-call="revokeClearance" data-ahg-types="x" data-ahg-a0="<?php echo $c->user_id ?>">
               <i class="fas fa-ban"></i>
             </button>
           </td>

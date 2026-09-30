@@ -102,18 +102,18 @@
           <input type="text" id="lookup-query" class="form-control" placeholder="<?php echo __('Search name...'); ?>">
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-primary" onclick="searchAuthority('wikidata')">
+          <button class="btn btn-outline-primary" data-ahg-call="searchAuthority" data-ahg-types="s" data-ahg-a0="wikidata">
             <i class="fas fa-globe me-1"></i>Wikidata
           </button>
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-primary" onclick="searchAuthority('viaf')">VIAF</button>
+          <button class="btn btn-outline-primary" data-ahg-call="searchAuthority" data-ahg-types="s" data-ahg-a0="viaf">VIAF</button>
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-primary" onclick="searchAuthority('ulan')">ULAN</button>
+          <button class="btn btn-outline-primary" data-ahg-call="searchAuthority" data-ahg-types="s" data-ahg-a0="ulan">ULAN</button>
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-primary" onclick="searchAuthority('lcnaf')">LCNAF</button>
+          <button class="btn btn-outline-primary" data-ahg-call="searchAuthority" data-ahg-types="s" data-ahg-a0="lcnaf">LCNAF</button>
         </div>
       </div>
       <div id="lookup-results" class="d-none">
@@ -224,15 +224,19 @@ function searchAuthority(source) {
         tr.innerHTML = '<td>' + (r.id || '') + '</td>' +
           '<td>' + (r.label || '') + '</td>' +
           '<td><small>' + (r.description || '') + '</small></td>' +
-          '<td><button class="btn btn-sm btn-success" onclick="linkResult(\'' + source + '\',\'' +
-          (r.id || '').replace(/'/g, "\\'") + '\',\'' +
-          (r.label || '').replace(/'/g, "\\'") + '\',\'' +
-          (r.uri || '').replace(/'/g, "\\'") + '\')"><i class="fas fa-link"></i></button></td>';
+          // data-ahg-call, not onclick: an inline handler is blocked by the enforcing CSP.
+          '<td><button class="btn btn-sm btn-success" data-ahg-call="linkResult" data-ahg-types="s,s,s,s"' +
+          ' data-ahg-a0="' + attrEsc(source) + '" data-ahg-a1="' + attrEsc(r.id) + '"' +
+          ' data-ahg-a2="' + attrEsc(r.label) + '" data-ahg-a3="' + attrEsc(r.uri) + '"><i class="fas fa-link"></i></button></td>';
         tbody.appendChild(tr);
       });
 
       document.getElementById('lookup-results').classList.remove('d-none');
     });
+}
+
+function attrEsc(v) {
+  return String(v || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
 function linkResult(source, id, label, uri) {

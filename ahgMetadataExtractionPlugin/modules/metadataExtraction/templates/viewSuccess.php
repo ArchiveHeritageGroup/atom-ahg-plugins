@@ -101,7 +101,7 @@
                 <table class="table table-sm table-striped mb-0">
                   <thead class="table-light">
                     <tr>
-                      <th style="width: 30%"><?php echo __('Field'); ?></th>
+                      <th data-ahg-style="width: 30%"><?php echo __('Field'); ?></th>
                       <th><?php echo __('Value'); ?></th>
                     </tr>
                   </thead>
@@ -155,7 +155,7 @@
             <i class="bi bi-card-list me-1"></i><?php echo __('Full embedded metadata'); ?>
             <span class="badge bg-secondary ms-1"><?php echo (int) $fullTagCount ?> <?php echo __('tags'); ?></span>
           </strong>
-          <input type="search" id="ahgMetaFilter" class="form-control form-control-sm" style="max-width: 16rem;"
+          <input type="search" id="ahgMetaFilter" class="form-control form-control-sm" data-ahg-style="max-width: 16rem;"
                  placeholder="<?php echo __('Filter tags…'); ?>" autocomplete="off">
         </div>
         <?php if (!empty($gpsGatedForViewer)): ?>
@@ -178,7 +178,7 @@
                 <tbody>
                   <?php foreach ((array) $tags as $tag => $value): ?>
                     <tr class="ahg-meta-row">
-                      <td style="width: 32%;"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
+                      <td data-ahg-style="width: 32%;"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
                       <td class="small">
                         <?php
                         if (is_array($value)) {

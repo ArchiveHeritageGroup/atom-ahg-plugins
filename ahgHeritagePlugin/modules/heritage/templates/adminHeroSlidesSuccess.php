@@ -84,7 +84,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                         <?php if ($editSlideData && !empty($editSlideData['image_path'])): ?>
                             <div class="mb-2">
                                 <img src="<?php echo htmlspecialchars($editSlideData['image_path']); ?>"
-                                     class="img-thumbnail" style="max-height: 100px;" alt="Current image">
+                                     class="img-thumbnail" data-ahg-style="max-height: 100px;" alt="Current image">
                                 <br><small class="text-muted">Current image</small>
                             </div>
                         <?php endif; ?>
@@ -296,7 +296,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th style="width: 100px;">Image</th>
+                                <th data-ahg-style="width: 100px;">Image</th>
                                 <th>Title</th>
                                 <th>Position</th>
                                 <th>Order</th>
@@ -312,7 +312,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                                     <td>
                                         <?php if (!empty($slide['image_path'])): ?>
                                             <img src="<?php echo htmlspecialchars($slide['image_path']); ?>"
-                                                 class="img-thumbnail" style="max-width: 80px; max-height: 50px; object-fit: cover;"
+                                                 class="img-thumbnail" data-ahg-style="max-width: 80px; max-height: 50px; object-fit: cover;"
                                                  alt="<?php echo htmlspecialchars($slide['image_alt'] ?? 'Hero slide'); ?>">
                                         <?php else: ?>
                                             <span class="text-muted"><i class="fas fa-image"></i></span>

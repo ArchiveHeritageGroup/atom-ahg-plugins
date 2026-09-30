@@ -87,16 +87,16 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">
+                            <th data-ahg-style="width: 40px;">
                                 <input type="checkbox" class="form-check-input" id="checkAll">
                             </th>
-                            <th style="width: 80px;">Score</th>
+                            <th data-ahg-style="width: 80px;">Score</th>
                             <th>Record A</th>
                             <th>Record B</th>
                             <th>Method</th>
                             <th>Status</th>
                             <th>Detected</th>
-                            <th style="width: 140px;">Actions</th>
+                            <th data-ahg-style="width: 140px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

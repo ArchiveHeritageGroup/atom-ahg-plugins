@@ -16,25 +16,25 @@
         <h4><?php echo __('Batch Actions'); ?></h4>
         <div class="d-grid gap-2">
             <?php if ($batch->status === 'pending'): ?>
-                <button class="btn btn-success btn-sm" onclick="batchAction('start')">
+                <button class="btn btn-success btn-sm" data-ahg-call="batchAction" data-ahg-types="s" data-ahg-a0="start">
                     <i class="fas fa-play me-1"></i><?php echo __('Start Batch'); ?>
                 </button>
             <?php elseif ($batch->status === 'running'): ?>
-                <button class="btn btn-warning btn-sm" onclick="batchAction('pause')">
+                <button class="btn btn-warning btn-sm" data-ahg-call="batchAction" data-ahg-types="s" data-ahg-a0="pause">
                     <i class="fas fa-pause me-1"></i><?php echo __('Pause'); ?>
                 </button>
             <?php elseif ($batch->status === 'paused'): ?>
-                <button class="btn btn-success btn-sm" onclick="batchAction('resume')">
+                <button class="btn btn-success btn-sm" data-ahg-call="batchAction" data-ahg-types="s" data-ahg-a0="resume">
                     <i class="fas fa-play me-1"></i><?php echo __('Resume'); ?>
                 </button>
             <?php endif; ?>
             <?php if (in_array($batch->status, ['pending', 'running', 'paused'])): ?>
-                <button class="btn btn-danger btn-sm" onclick="if(confirm('Cancel this batch?')) batchAction('cancel')">
+                <button class="btn btn-danger btn-sm" data-ahg-confirm="Cancel this batch?" data-ahg-call="batchAction" data-ahg-types="s" data-ahg-a0="cancel">
                     <i class="fas fa-times me-1"></i><?php echo __('Cancel'); ?>
                 </button>
             <?php endif; ?>
             <?php if ($batch->failed_items > 0): ?>
-                <button class="btn btn-outline-warning btn-sm" onclick="batchAction('retry')">
+                <button class="btn btn-outline-warning btn-sm" data-ahg-call="batchAction" data-ahg-types="s" data-ahg-a0="retry">
                     <i class="fas fa-redo me-1"></i><?php echo __('Retry Failed'); ?>
                 </button>
             <?php endif; ?>
@@ -114,10 +114,10 @@
                 <span id="progressPercent"><?php echo number_format($batch->progress_percent, 1); ?>%</span>
             </div>
             <div class="progress progress-lg">
-                <div class="progress-bar bg-success" id="progressBar" style="width: <?php echo $batch->progress_percent; ?>%">
+                <div class="progress-bar bg-success" id="progressBar" data-ahg-style="width: <?php echo $batch->progress_percent; ?>%">
                 </div>
                 <?php if ($batch->failed_items > 0): ?>
-                    <div class="progress-bar bg-danger" id="failedBar" style="width: <?php echo ($batch->failed_items / $batch->total_items * 100); ?>%">
+                    <div class="progress-bar bg-danger" id="failedBar" data-ahg-style="width: <?php echo ($batch->failed_items / $batch->total_items * 100); ?>%">
                     </div>
                 <?php endif; ?>
             </div>
@@ -174,7 +174,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-list me-2"></i><?php echo __('Jobs'); ?> (<?php echo count($jobs); ?>)</span>
         <div>
-            <select id="statusFilter" class="form-select form-select-sm d-inline-block" style="width: auto" data-ahg-call="filterJobs" data-ahg-on="change">
+            <select id="statusFilter" class="form-select form-select-sm d-inline-block" data-ahg-style="width: auto" data-ahg-call="filterJobs" data-ahg-on="change">
                 <option value=""><?php echo __('All Status'); ?></option>
                 <option value="pending"><?php echo __('Pending'); ?></option>
                 <option value="queued"><?php echo __('Queued'); ?></option>
@@ -189,13 +189,13 @@
             <table class="table table-hover mb-0" id="jobsTable">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 60px"><?php echo __('ID'); ?></th>
+                        <th data-ahg-style="width: 60px"><?php echo __('ID'); ?></th>
                         <th><?php echo __('Object'); ?></th>
-                        <th style="width: 100px"><?php echo __('Task'); ?></th>
-                        <th style="width: 100px"><?php echo __('Status'); ?></th>
-                        <th style="width: 80px"><?php echo __('Attempts'); ?></th>
-                        <th style="width: 100px"><?php echo __('Time'); ?></th>
-                        <th style="width: 200px"><?php echo __('Error'); ?></th>
+                        <th data-ahg-style="width: 100px"><?php echo __('Task'); ?></th>
+                        <th data-ahg-style="width: 100px"><?php echo __('Status'); ?></th>
+                        <th data-ahg-style="width: 80px"><?php echo __('Attempts'); ?></th>
+                        <th data-ahg-style="width: 100px"><?php echo __('Time'); ?></th>
+                        <th data-ahg-style="width: 200px"><?php echo __('Error'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -278,7 +278,7 @@
         <i class="fas fa-history me-2"></i><?php echo __('Recent Activity'); ?>
     </div>
     <div class="card-body p-0">
-        <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+        <div class="list-group list-group-flush" data-ahg-style="max-height: 300px; overflow-y: auto;">
             <?php foreach ($logs as $log): ?>
                 <?php
                 $logIcon = match($log->event_type) {

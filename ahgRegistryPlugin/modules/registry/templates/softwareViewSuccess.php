@@ -19,9 +19,9 @@
 
     <div class="d-flex align-items-start mb-4">
       <?php if (!empty($detail->logo_path)): ?>
-      <img src="<?php echo htmlspecialchars($detail->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 80px; height: 80px; object-fit: contain;">
+      <img src="<?php echo htmlspecialchars($detail->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" data-ahg-style="width: 80px; height: 80px; object-fit: contain;">
       <?php else: ?>
-      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" data-ahg-style="width: 80px; height: 80px;">
         <i class="fas fa-box-open fa-2x text-muted"></i>
       </div>
       <?php endif; ?>
@@ -308,15 +308,15 @@
                   <div class="min-width-0">
                     <strong class="small d-block text-truncate"><?php echo htmlspecialchars($comp->name, ENT_QUOTES, 'UTF-8'); ?></strong>
                     <?php if (!empty($comp->is_required)): ?>
-                      <span class="badge bg-primary" style="font-size: 0.65em;"><?php echo __('Required'); ?></span>
+                      <span class="badge bg-primary" data-ahg-style="font-size: 0.65em;"><?php echo __('Required'); ?></span>
                     <?php endif; ?>
                     <?php if (!empty($comp->version)): ?>
-                      <span class="badge bg-secondary" style="font-size: 0.65em;">v<?php echo htmlspecialchars($comp->version, ENT_QUOTES, 'UTF-8'); ?></span>
+                      <span class="badge bg-secondary" data-ahg-style="font-size: 0.65em;">v<?php echo htmlspecialchars($comp->version, ENT_QUOTES, 'UTF-8'); ?></span>
                     <?php endif; ?>
                   </div>
                 </div>
                 <?php if (!empty($comp->short_description)): ?>
-                  <small class="text-muted d-block mt-1" style="font-size: 0.75em;"><?php echo htmlspecialchars($comp->short_description, ENT_QUOTES, 'UTF-8'); ?></small>
+                  <small class="text-muted d-block mt-1" data-ahg-style="font-size: 0.75em;"><?php echo htmlspecialchars($comp->short_description, ENT_QUOTES, 'UTF-8'); ?></small>
                 <?php endif; ?>
               </div>
             </div>
@@ -531,7 +531,7 @@
       <div class="card-body">
         <div class="d-flex align-items-center">
           <?php if (!empty($software['vendor']->logo_path)): ?>
-          <img src="<?php echo htmlspecialchars($software['vendor']->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2" style="width: 40px; height: 40px; object-fit: contain;">
+          <img src="<?php echo htmlspecialchars($software['vendor']->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2" data-ahg-style="width: 40px; height: 40px; object-fit: contain;">
           <?php endif; ?>
           <div>
             <?php if (!empty($software['vendor']->slug)): ?>

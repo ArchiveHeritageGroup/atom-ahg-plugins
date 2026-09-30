@@ -48,7 +48,7 @@
                     <input type="text" class="form-control form-control-sm" name="ai_condition_api_key" value="<?php echo esc_entities($settings['ai_condition_api_key']) ?>">
                 </div>
             </div>
-            <div id="testResult" style="display:none"></div>
+            <div id="testResult" data-ahg-style="display:none"></div>
         </div>
     </div>
 

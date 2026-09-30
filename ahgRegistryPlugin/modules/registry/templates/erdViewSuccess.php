@@ -85,7 +85,7 @@
   <div class="card-body text-center p-3">
     <?php if ($_isImg): ?>
       <a href="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" target="_blank">
-        <img src="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo $erd->display_name; ?> ERD" class="img-fluid rounded" style="max-height: 800px;">
+        <img src="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo $erd->display_name; ?> ERD" class="img-fluid rounded" data-ahg-style="max-height: 800px;">
       </a>
     <?php elseif ($_ext === 'pdf'): ?>
       <embed src="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" type="application/pdf" width="100%" height="700px" class="rounded border">
@@ -105,7 +105,7 @@
     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo !empty($erd->diagram_image) ? __('ASCII Diagram (Detail)') : __('Entity Relationship Diagram'); ?></h5>
   </div>
   <div class="card-body p-0">
-    <pre class="p-4 mb-0 text-white" style="font-size: 0.78em; overflow-x: auto; background: #1a1a2e;"><?php echo htmlspecialchars($erd->diagram, ENT_QUOTES, 'UTF-8'); ?></pre>
+    <pre class="p-4 mb-0 text-white" data-ahg-style="font-size: 0.78em; overflow-x: auto; background: #1a1a2e;"><?php echo htmlspecialchars($erd->diagram, ENT_QUOTES, 'UTF-8'); ?></pre>
   </div>
 </div>
 <?php endif; ?>
@@ -161,7 +161,7 @@
     <table class="table table-sm table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th style="width: 30px;"></th>
+          <th data-ahg-style="width: 30px;"></th>
           <th><?php echo __('Column'); ?></th>
           <th><?php echo __('Type'); ?></th>
           <th><?php echo __('Nullable'); ?></th>

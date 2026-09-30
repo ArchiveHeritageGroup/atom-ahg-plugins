@@ -69,14 +69,14 @@ $opacity = $watermarkSetting->opacity ?? 0.4;
           <input class="form-check-input" type="checkbox" role="switch" 
                  id="watermark_enabled" name="watermark_enabled" value="1"
                  <?php echo $watermarkEnabled ? 'checked' : ''; ?>
-                 style="width: 3em; height: 1.5em;">
-          <label class="form-check-label" for="watermark_enabled" style="margin-left: 10px;">
+                 data-ahg-style="width: 3em; height: 1.5em;">
+          <label class="form-check-label" for="watermark_enabled" data-ahg-style="margin-left: 10px;">
             <strong><?php echo __('Enable watermark for this object'); ?></strong>
           </label>
         </div>
       </div>
 
-      <div id="watermark-options" style="<?php echo $watermarkEnabled ? '' : 'display:none;'; ?>">
+      <div id="watermark-options" data-ahg-style="<?php echo $watermarkEnabled ? '' : 'display:none;'; ?>">
         
         <!-- System Watermark Type -->
         <div class="cco-field">
@@ -118,7 +118,7 @@ $opacity = $watermarkSetting->opacity ?? 0.4;
         <?php endif; ?>
 
         <!-- Upload NEW Custom Watermark -->
-        <div class="cco-field" style="background: #fff3cd; border-left-color: #ffc107;">
+        <div class="cco-field" data-ahg-style="background: #fff3cd; border-left-color: #ffc107;">
           <div class="field-header">
             <label><?php echo __('Upload NEW Custom Watermark'); ?></label>
           </div>

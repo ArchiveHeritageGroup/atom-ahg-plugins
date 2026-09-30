@@ -41,10 +41,10 @@
         <table class="table table-sm mb-0">
           <thead>
             <tr>
-              <th style="width:20%"><?php echo __('Field'); ?></th>
-              <th style="width:38%"><?php echo __('Primary: %1%', ['%1%' => htmlspecialchars($primary->authorized_form_of_name ?? '')]); ?></th>
-              <th style="width:38%"><?php echo __('Secondary: %1%', ['%1%' => htmlspecialchars($secondary->authorized_form_of_name ?? '')]); ?></th>
-              <th style="width:4%"></th>
+              <th data-ahg-style="width:20%"><?php echo __('Field'); ?></th>
+              <th data-ahg-style="width:38%"><?php echo __('Primary: %1%', ['%1%' => htmlspecialchars($primary->authorized_form_of_name ?? '')]); ?></th>
+              <th data-ahg-style="width:38%"><?php echo __('Secondary: %1%', ['%1%' => htmlspecialchars($secondary->authorized_form_of_name ?? '')]); ?></th>
+              <th data-ahg-style="width:4%"></th>
             </tr>
           </thead>
           <tbody>

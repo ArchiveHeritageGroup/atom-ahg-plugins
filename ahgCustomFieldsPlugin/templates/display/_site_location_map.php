@@ -96,7 +96,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
   <h5 class="section-title border-bottom pb-2 mb-3"><?php echo __('Site location'); ?></h5>
 
   <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/leaflet.min.css">
-  <div id="<?php echo $mapId; ?>" class="mb-2" style="height: 320px; border-radius: .375rem;"></div>
+  <div id="<?php echo $mapId; ?>" class="mb-2" data-ahg-style="height: 320px; border-radius: .375rem;"></div>
 
   <?php if ($showExact): ?>
     <p class="text-muted small mb-0">

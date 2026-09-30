@@ -76,7 +76,7 @@ $typeIcons = [
                         <div class="d-flex align-items-start">
                             <!-- Entity Icon -->
                             <div class="rounded-3 p-3 me-4 d-flex align-items-center justify-content-center"
-                                 style="background-color: <?php echo $typeColors[$entityData->entity_type] ?? '#999'; ?>; min-width: 80px; min-height: 80px;">
+                                 data-ahg-style="background-color: <?php echo $typeColors[$entityData->entity_type] ?? '#999'; ?>; min-width: 80px; min-height: 80px;">
                                 <i class="<?php echo $typeIcons[$entityData->entity_type] ?? 'bi-tag-fill'; ?> text-white fs-1"></i>
                             </div>
 
@@ -84,7 +84,7 @@ $typeIcons = [
                                 <h1 class="h2 mb-2"><?php echo esc_specialchars($entityData->display_label ?? $entityData->canonical_value); ?></h1>
 
                                 <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <span class="badge fs-6" style="background-color: <?php echo $typeColors[$entityData->entity_type] ?? '#999'; ?>;">
+                                    <span class="badge fs-6" data-ahg-style="background-color: <?php echo $typeColors[$entityData->entity_type] ?? '#999'; ?>;">
                                         <?php echo ucfirst(esc_specialchars($entityData->entity_type)); ?>
                                     </span>
                                     <span class="badge bg-light text-dark fs-6">
@@ -154,7 +154,7 @@ $typeIcons = [
                                 <div class="card h-100 border">
                                     <div class="card-body py-2">
                                         <div class="d-flex align-items-center">
-                                            <span class="badge me-2" style="background-color: <?php echo $typeColors[$related['entity_type']] ?? '#999'; ?>;">
+                                            <span class="badge me-2" data-ahg-style="background-color: <?php echo $typeColors[$related['entity_type']] ?? '#999'; ?>;">
                                                 <?php echo ucfirst(substr($related['entity_type'], 0, 1)); ?>
                                             </span>
                                             <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'entity', 'type' => $related['entity_type'], 'value' => $related['value']]); ?>"
@@ -263,7 +263,7 @@ $typeIcons = [
                         ?>
                         <?php foreach ($typeCounts as $type => $count): ?>
                         <div class="d-flex align-items-center mb-2">
-                            <span class="badge me-2" style="background-color: <?php echo $typeColors[$type] ?? '#999'; ?>; width: 20px;">&nbsp;</span>
+                            <span class="badge me-2" data-ahg-style="background-color: <?php echo $typeColors[$type] ?? '#999'; ?>; width: 20px;">&nbsp;</span>
                             <span class="flex-grow-1"><?php echo ucfirst(esc_specialchars($type)); ?></span>
                             <span class="badge bg-light text-dark"><?php echo $count; ?></span>
                         </div>

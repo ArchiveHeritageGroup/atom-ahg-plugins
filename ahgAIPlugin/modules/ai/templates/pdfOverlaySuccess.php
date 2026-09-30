@@ -107,7 +107,7 @@ $typeColors = [
                             <label class="form-check form-check-inline mb-0 entity-toggle-label">
                                 <input type="checkbox" class="form-check-input entity-type-toggle"
                                        data-type="<?php echo $type; ?>" checked>
-                                <span class="badge" style="background: <?php echo $config['bg']; ?>;">
+                                <span class="badge" data-ahg-style="background: <?php echo $config['bg']; ?>;">
                                     <?php echo $config['label']; ?> (<?php echo $count; ?>)
                                 </span>
                             </label>
@@ -129,7 +129,7 @@ $typeColors = [
         <div class="row">
             <!-- PDF Viewer -->
             <div class="col-lg-9">
-                <div class="card" style="background: #1a1a1a;">
+                <div class="card" data-ahg-style="background: #1a1a1a;">
                     <div class="card-body p-0">
                         <!-- PDF Toolbar -->
                         <div class="pdf-overlay-toolbar bg-dark text-white p-2 d-flex gap-2 align-items-center">
@@ -155,8 +155,8 @@ $typeColors = [
                         </div>
 
                         <!-- PDF Viewer Area -->
-                        <div id="pdf-viewer-area" style="height: 650px; overflow: auto; background: #2a2a2a; display: flex; justify-content: center; padding: 20px;">
-                            <div id="pdf-page-wrapper" style="position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                        <div id="pdf-viewer-area" data-ahg-style="height: 650px; overflow: auto; background: #2a2a2a; display: flex; justify-content: center; padding: 20px;">
+                            <div id="pdf-page-wrapper" data-ahg-style="position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
                                 <canvas id="pdf-canvas"></canvas>
                                 <div id="text-layer" class="textLayer"></div>
                                 <div id="highlight-layer" class="ner-highlight-layer"></div>
@@ -173,7 +173,7 @@ $typeColors = [
                         <span><i class="fas fa-brain me-2"></i>Detected Entities</span>
                         <span class="badge bg-info" id="entity-count"><?php echo $totalEntities; ?></span>
                     </div>
-                    <div class="card-body p-0" id="entity-list" style="max-height: 550px; overflow-y: auto;">
+                    <div class="card-body p-0" id="entity-list" data-ahg-style="max-height: 550px; overflow-y: auto;">
                         <div class="text-center text-muted py-4" id="entity-loading">
                             <div class="spinner-border spinner-border-sm me-2"></div>
                             Loading entities...

@@ -32,7 +32,7 @@
   <table class="table table-sm table-hover">
     <thead class="table-light">
       <tr>
-        <th style="width:40px;">#</th>
+        <th data-ahg-style="width:40px;">#</th>
         <th><?php echo __('Plugin'); ?></th>
         <th><?php echo __('Display Name'); ?></th>
         <th><?php echo __('Category'); ?></th>

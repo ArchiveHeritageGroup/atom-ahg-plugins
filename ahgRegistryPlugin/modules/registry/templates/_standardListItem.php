@@ -28,7 +28,7 @@
 <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardView', 'slug' => $slug]); ?>"
    class="list-group-item list-group-item-action">
   <div class="d-flex align-items-start">
-    <div class="me-3 flex-shrink-0 text-center" style="min-width: 64px;">
+    <div class="me-3 flex-shrink-0 text-center" data-ahg-style="min-width: 64px;">
       <?php if (!empty($acronym)): ?>
         <div class="badge bg-secondary fs-6 px-2 py-1"><?php echo htmlspecialchars($acronym, ENT_QUOTES, 'UTF-8'); ?></div>
       <?php else: ?>
@@ -62,7 +62,7 @@
           <span class="badge bg-success"><i class="fas fa-puzzle-piece me-1"></i>Heratio +<?php echo $extensionCount; ?></span>
         <?php endif; ?>
         <?php foreach ($sectors as $s): ?>
-          <span class="badge bg-light text-dark border ms-1" style="font-size: 0.75em;"><?php echo htmlspecialchars(ucfirst($s), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="badge bg-light text-dark border ms-1" data-ahg-style="font-size: 0.75em;"><?php echo htmlspecialchars(ucfirst($s), ENT_QUOTES, 'UTF-8'); ?></span>
         <?php endforeach; ?>
       </div>
 

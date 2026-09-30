@@ -42,7 +42,7 @@
                     <table class="table table-hover table-sm mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th style="width:30px"></th>
+                                <th data-ahg-style="width:30px"></th>
                                 <th>Key</th>
                                 <th>Label</th>
                                 <th>Type</th>
@@ -52,13 +52,13 @@
                                 <th class="text-center">Public</th>
                                 <th class="text-center">Repeat</th>
                                 <th class="text-center">Active</th>
-                                <th style="width:100px">Actions</th>
+                                <th data-ahg-style="width:100px">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="cf-sortable" data-entity-type="<?php echo htmlspecialchars($entityType); ?>">
                             <?php foreach ($definitions as $def): ?>
                                 <tr data-id="<?php echo $def->id; ?>" class="<?php echo $def->is_active ? '' : 'table-secondary'; ?>">
-                                    <td class="cf-drag-handle" style="cursor:grab" title="Drag to reorder">
+                                    <td class="cf-drag-handle" data-ahg-style="cursor:grab" title="Drag to reorder">
                                         <i class="bi bi-grip-vertical"></i>
                                     </td>
                                     <td><code><?php echo htmlspecialchars($def->field_key); ?></code></td>

@@ -68,8 +68,8 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 40px;"><?php echo __('ID'); ?></th>
-            <th style="width: 50px;"></th>
+            <th data-ahg-style="width: 40px;"><?php echo __('ID'); ?></th>
+            <th data-ahg-style="width: 50px;"></th>
             <th><?php echo __('Name'); ?></th>
             <th><?php echo __('Type'); ?></th>
             <th><?php echo __('Email'); ?></th>
@@ -86,9 +86,9 @@
               <td class="small text-muted"><?php echo (int) $seller->id; ?></td>
               <td>
                 <?php if ($seller->avatar_path): ?>
-                  <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                  <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle" data-ahg-style="width: 40px; height: 40px; object-fit: cover;">
                 <?php else: ?>
-                  <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" data-ahg-style="width: 40px; height: 40px;">
                     <i class="fas fa-user text-muted small"></i>
                   </div>
                 <?php endif; ?>

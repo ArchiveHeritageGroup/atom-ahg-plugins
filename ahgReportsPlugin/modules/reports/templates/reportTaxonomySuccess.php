@@ -11,8 +11,7 @@
 <?php echo $form->renderGlobalErrors(); ?>
 <section class="sidebar-widget">
 
-	<body onload="javascript:NewCal('dateStart','ddmmyyyy',false,false,24,true);renderCalendar('dateStart','div0');
-			  javascript:NewCal('dateEnd','ddmmyyyy',false,false,24,true);renderCalendar('dateEnd','div1');toggleOff('div3');">
+	<body>
   
 		<div>
 	        <button type="submit" class="btn"><?php echo link_to(__('Back to reports'), ['module' => 'reports', 'action' => 'index'], ['title' => __('Back to reports')]); ?></button>
@@ -24,7 +23,7 @@
 
 			<?php echo $form->renderHiddenFields(); ?>
 
-			<div id='divTypeOfReport' style="display: none"> 
+			<div id='divTypeOfReport' data-ahg-style="display: none"> 
 				<?php echo $form->className->label('Types of Reports')->renderRow(); ?>
 			</div>
 
@@ -74,9 +73,9 @@
 		<th><?php echo __('Forms'); ?></th>
   
         <?php if ('CREATED_AT' != $form->getValue('dateOf')) { ?>
-          <th style="width: 110px"><?php echo __('Updated'); ?></th>
+          <th data-ahg-style="width: 110px"><?php echo __('Updated'); ?></th>
         <?php } else { ?>
-          <th style="width: 110px"><?php echo __('Created'); ?></th>
+          <th data-ahg-style="width: 110px"><?php echo __('Created'); ?></th>
         <?php } ?>
       </tr>
     </thead><tbody>

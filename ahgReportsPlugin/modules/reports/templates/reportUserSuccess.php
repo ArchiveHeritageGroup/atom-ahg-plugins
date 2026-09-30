@@ -19,8 +19,7 @@
 <?php slot('sidebar'); ?>
 <?php echo $form->renderGlobalErrors(); ?>
 <section class="sidebar-widget">
-	<body onload="javascript:NewCal('dateStart','ddmmyyyy',false,false,24,true);renderCalendar('dateStart','div0');
-			  javascript:NewCal('dateEnd','ddmmyyyy',false,false,24,true);renderCalendar('dateEnd','div1');toggleOff('div3');">
+	<body>
 
 		<div>
 	        <button type="submit" class="btn"><?php echo link_to(__('Back to reports'), ['module' => 'reports', 'action' => 'index'], ['title' => __('Back to reports')]); ?></button>

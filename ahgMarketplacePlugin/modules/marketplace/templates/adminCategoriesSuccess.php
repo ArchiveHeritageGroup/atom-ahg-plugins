@@ -139,7 +139,7 @@
               </tr>
 
               <!-- Edit modal -->
-              <tr style="display: none;"><td colspan="6">
+              <tr data-ahg-style="display: none;"><td colspan="6">
                 <div class="modal fade" id="editCat<?php echo (int) $cat->id; ?>" tabindex="-1" aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">

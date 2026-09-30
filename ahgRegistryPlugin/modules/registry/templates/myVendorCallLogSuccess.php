@@ -104,14 +104,14 @@
   <table class="table table-hover align-middle">
     <thead class="table-light">
       <tr>
-        <th style="width: 40px;"></th>
+        <th data-ahg-style="width: 40px;"></th>
         <th><?php echo __('Subject'); ?></th>
         <th><?php echo __('Contact'); ?></th>
         <th><?php echo __('Status'); ?></th>
         <th><?php echo __('Priority'); ?></th>
         <th><?php echo __('Follow-up'); ?></th>
         <th><?php echo __('Date'); ?></th>
-        <th style="width: 90px;"></th>
+        <th data-ahg-style="width: 90px;"></th>
       </tr>
     </thead>
     <tbody>
@@ -126,9 +126,9 @@
           <td class="text-center">
             <i class="fas <?php echo $icon; ?> text-muted" title="<?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $log->interaction_type ?? '')), ENT_QUOTES, 'UTF-8'); ?>"></i>
             <?php if ($log->direction === 'inbound'): ?>
-              <i class="fas fa-arrow-down text-info" style="font-size: 0.6em;" title="Inbound"></i>
+              <i class="fas fa-arrow-down text-info" data-ahg-style="font-size: 0.6em;" title="Inbound"></i>
             <?php else: ?>
-              <i class="fas fa-arrow-up text-success" style="font-size: 0.6em;" title="Outbound"></i>
+              <i class="fas fa-arrow-up text-success" data-ahg-style="font-size: 0.6em;" title="Outbound"></i>
             <?php endif; ?>
           </td>
           <td>

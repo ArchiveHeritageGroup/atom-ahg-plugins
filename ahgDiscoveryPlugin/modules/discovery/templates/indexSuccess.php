@@ -423,7 +423,7 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
       html += '<div class="discovery-collection">';
       html += '<div class="discovery-collection-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#' + colId + '">';
       html += '<h5><i class="fas fa-archive me-2 text-muted"></i>';
-      if (slug) { html += '<a href="/' + encodeURI(slug) + '" class="text-decoration-none" onclick="event.stopPropagation()">' + title + '</a>'; }
+      if (slug) { html += '<a href="/' + encodeURI(slug) + '" class="text-decoration-none" data-ahg-stop="1">' + title + '</a>'; }
       else { html += title; }
       html += '</h5>';
       html += '<span class="badge bg-primary rounded-pill">' + count + '</span>';
@@ -499,10 +499,10 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
     if (typeof r.score === 'number') {
       var pct = Math.round(r.score * 100);
       var barColor = pct >= 70 ? '#198754' : pct >= 40 ? '#fd7e14' : '#6c757d';
-      html += '<span class="ms-2 flex-shrink-0 text-nowrap" style="min-width:80px;" title="Similarity: ' + pct + '%">';
-      html += '<small class="fw-bold" style="color:' + barColor + '">' + pct + '%</small>';
-      html += '<div style="height:4px;width:60px;background:#e9ecef;border-radius:2px;margin-top:2px;">';
-      html += '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:2px;"></div>';
+      html += '<span class="ms-2 flex-shrink-0 text-nowrap" data-ahg-style="min-width:80px;" title="Similarity: ' + pct + '%">';
+      html += '<small class="fw-bold" data-ahg-style="color:' + barColor + '">' + pct + '%</small>';
+      html += '<div data-ahg-style="height:4px;width:60px;background:#e9ecef;border-radius:2px;margin-top:2px;">';
+      html += '<div data-ahg-style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:2px;"></div>';
       html += '</div>';
       html += '</span>';
     }

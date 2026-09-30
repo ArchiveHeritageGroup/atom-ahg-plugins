@@ -27,7 +27,7 @@ $children = $data['children'] ?? [];
     <div class="card-body">
         <div class="d-flex align-items-start">
             <?php if ($digitalObject): ?>
-            <img src="<?php echo $digitalObject->path; ?>" class="me-3 rounded" style="max-width: 80px;" alt="">
+            <img src="<?php echo $digitalObject->path; ?>" class="me-3 rounded" data-ahg-style="max-width: 80px;" alt="">
             <?php endif; ?>
             <div class="flex-grow-1">
                 <h4 class="mb-1">
@@ -57,9 +57,9 @@ $children = $data['children'] ?? [];
         <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $child->slug]); ?>" 
            class="list-group-item list-group-item-action d-flex align-items-center">
             <?php if ($child->thumbnail_path): ?>
-            <img src="<?php echo $child->thumbnail_path; ?>" class="me-3 rounded" style="width: 50px; height: 50px; object-fit: cover;" alt="">
+            <img src="<?php echo $child->thumbnail_path; ?>" class="me-3 rounded" data-ahg-style="width: 50px; height: 50px; object-fit: cover;" alt="">
             <?php else: ?>
-            <div class="me-3 text-muted" style="width: 50px; text-align: center;">
+            <div class="me-3 text-muted" data-ahg-style="width: 50px; text-align: center;">
                 <i class="fas <?php echo get_level_icon(strtolower($child->level_name ?? 'file')); ?> fa-2x"></i>
             </div>
             <?php endif; ?>

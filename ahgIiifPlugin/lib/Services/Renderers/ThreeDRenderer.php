@@ -47,8 +47,8 @@ class ThreeDRenderer implements RendererInterface
         $html .= $autoRotate . ' ';
         $html .= 'camera-controls touch-action="pan-y" ';
         $html .= 'camera-orbit="' . $cameraOrbit . '" ';
-        $html .= 'style="width:100%;height:' . $height . ';background-color:' . $bgColor . ';border-radius:8px;">';
-        $html .= '<button slot="ar-button" class="btn btn-primary" style="position:absolute;bottom:16px;right:16px;">';
+        $html .= 'data-ahg-style="width:100%;height:' . $height . ';background-color:' . $bgColor . ';border-radius:8px;">';
+        $html .= '<button slot="ar-button" class="btn btn-primary" data-ahg-style="position:absolute;bottom:16px;right:16px;">';
         $html .= '<i class="fas fa-cube me-1"></i>View in AR</button>';
         $html .= '</model-viewer></div>';
 

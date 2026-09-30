@@ -39,7 +39,7 @@
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th style="min-width: 250px;"><?php echo __('Name'); ?></th>
+              <th data-ahg-style="min-width: 250px;"><?php echo __('Name'); ?></th>
               <th><?php echo __('Type'); ?></th>
               <th><?php echo __('Version'); ?></th>
               <th class="text-center"><?php echo __('Required'); ?></th>

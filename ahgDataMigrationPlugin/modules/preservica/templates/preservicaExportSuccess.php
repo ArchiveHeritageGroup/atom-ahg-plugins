@@ -131,7 +131,7 @@
                     <strong>Entire Repository</strong>
                   </label>
                 </div>
-                <div class="ms-4 mt-2" id="repository_options" style="display: none;">
+                <div class="ms-4 mt-2" id="repository_options" data-ahg-style="display: none;">
                   <label for="repository_id" class="form-label">Repository</label>
                   <select class="form-select" id="repository_id" name="repository_id">
                     <option value="">-- Select Repository --</option>

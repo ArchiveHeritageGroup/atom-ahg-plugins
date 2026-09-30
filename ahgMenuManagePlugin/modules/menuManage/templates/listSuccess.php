@@ -26,8 +26,8 @@
         <tr>
           <th><?php echo __('Name / Label'); ?></th>
           <th><?php echo __('Path'); ?></th>
-          <th class="text-center" style="width: 100px;"><?php echo __('Reorder'); ?></th>
-          <th class="text-end" style="width: 140px;"><?php echo __('Actions'); ?></th>
+          <th class="text-center" data-ahg-style="width: 100px;"><?php echo __('Reorder'); ?></th>
+          <th class="text-end" data-ahg-style="width: 140px;"><?php echo __('Actions'); ?></th>
         </tr>
       </thead>
       <tbody>

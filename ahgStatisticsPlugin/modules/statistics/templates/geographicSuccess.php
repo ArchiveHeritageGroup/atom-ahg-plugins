@@ -42,12 +42,12 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 60px">#</th>
-                            <th style="width: 80px">Code</th>
+                            <th data-ahg-style="width: 60px">#</th>
+                            <th data-ahg-style="width: 80px">Code</th>
                             <th>Country</th>
-                            <th class="text-end" style="width: 150px">Total Requests</th>
-                            <th class="text-end" style="width: 150px">Unique Visitors</th>
-                            <th style="width: 200px">Distribution</th>
+                            <th class="text-end" data-ahg-style="width: 150px">Total Requests</th>
+                            <th class="text-end" data-ahg-style="width: 150px">Unique Visitors</th>
+                            <th data-ahg-style="width: 200px">Distribution</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,8 +63,8 @@
                                 <td class="text-end"><strong><?php echo number_format($row->total) ?></strong></td>
                                 <td class="text-end"><?php echo number_format($row->unique_visitors) ?></td>
                                 <td>
-                                    <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar" style="width: <?php echo $percent ?>%"><?php echo $percent ?>%</div>
+                                    <div class="progress" data-ahg-style="height: 20px;">
+                                        <div class="progress-bar" data-ahg-style="width: <?php echo $percent ?>%"><?php echo $percent ?>%</div>
                                     </div>
                                 </td>
                             </tr>

@@ -66,9 +66,9 @@
                 echo $percent;
               ?>%</span>
             </div>
-            <div class="progress" style="height: 25px;">
+            <div class="progress" data-ahg-style="height: 25px;">
               <div id="progressBar" class="progress-bar progress-bar-striped <?php echo $job->status === 'running' ? 'progress-bar-animated' : '' ?>" 
-                   role="progressbar" style="width: <?php echo $percent ?>%">
+                   role="progressbar" data-ahg-style="width: <?php echo $percent ?>%">
               </div>
             </div>
           </div>
@@ -110,7 +110,7 @@
         </div>
         <div class="card-footer">
           <?php if (in_array($job->status, ['pending', 'running'])): ?>
-            <button type="button" class="btn btn-danger" id="cancelBtn" onclick="cancelJob(<?php echo $job->id ?>)">
+            <button type="button" class="btn btn-danger" id="cancelBtn" data-ahg-call="cancelJob" data-ahg-types="x" data-ahg-a0="<?php echo $job->id ?>">
               <i class="bi bi-x-circle me-1"></i> Cancel Job
             </button>
           <?php endif ?>
@@ -132,7 +132,7 @@
           <i class="bi bi-exclamation-triangle me-2"></i>
           Errors (<?php echo count($errors) ?>)
         </div>
-        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+        <div class="card-body" data-ahg-style="max-height: 300px; overflow-y: auto;">
           <ul class="list-unstyled mb-0">
             <?php foreach (array_slice($errors, 0, 50) as $error): ?>
               <li class="text-danger small mb-1">

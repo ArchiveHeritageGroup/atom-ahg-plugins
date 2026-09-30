@@ -43,7 +43,7 @@ $menuSections = [
 ];
 ?>
 
-<nav class="list-group mb-3 sticky-top" style="top: 1rem;" aria-label="<?php echo __('Heritage accounting navigation') ?>">
+<nav class="list-group mb-3 sticky-top" data-ahg-style="top: 1rem;" aria-label="<?php echo __('Heritage accounting navigation') ?>">
   <?php foreach ($menuSections as $section => $links): ?>
     <div class="list-group-item list-group-item-dark fw-bold small text-uppercase"><?php echo $section ?></div>
     <?php foreach ($links as $link): ?>
@@ -51,7 +51,7 @@ $menuSections = [
       <a href="<?php echo url_for(['module' => $link['module'], 'action' => $link['action']]) ?>"
          class="list-group-item list-group-item-action d-flex align-items-center<?php echo $isCurrent ? ' active' : '' ?>"
          <?php echo $isCurrent ? 'aria-current="page"' : '' ?>>
-        <i class="fas <?php echo $link['icon'] ?> me-2" style="width:18px;text-align:center;" aria-hidden="true"></i><?php echo $link['label'] ?>
+        <i class="fas <?php echo $link['icon'] ?> me-2" data-ahg-style="width:18px;text-align:center;" aria-hidden="true"></i><?php echo $link['label'] ?>
       </a>
     <?php endforeach; ?>
   <?php endforeach; ?>

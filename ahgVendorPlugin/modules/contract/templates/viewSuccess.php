@@ -5,11 +5,11 @@
   <div class="d-flex justify-content-between align-items-start mb-4">
     <div>
       <?php if (!empty($contract->logo_path)): ?>
-      <img src="/uploads<?php echo esc_entities($contract->logo_path) ?>" alt="Logo" class="mb-3" style="max-height: 80px;">
+      <img src="/uploads<?php echo esc_entities($contract->logo_path) ?>" alt="Logo" class="mb-3" data-ahg-style="max-height: 80px;">
       <?php endif; ?>
       <h1 class="h2 mb-1"><?php echo esc_entities($contract->title) ?></h1>
       <p class="text-muted mb-0">
-        <span class="badge" style="background-color: <?php echo $contract->type_color ?>"><?php echo esc_entities($contract->contract_type_name) ?></span>
+        <span class="badge" data-ahg-style="background-color: <?php echo $contract->type_color ?>"><?php echo esc_entities($contract->contract_type_name) ?></span>
         <span class="ms-2"><?php echo esc_entities($contract->contract_number) ?></span>
       </p>
     </div>

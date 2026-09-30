@@ -18,8 +18,8 @@ $pct = (float) ($counts['percent'] ?? 0);
     <div class="col-md-3 mb-2"><div class="card h-100"><div class="card-body"><div class="text-muted small text-uppercase"><?php echo __('Coverage') ?></div><div class="display-6"><?php echo $pct ?>%</div></div></div></div>
   </div>
 
-  <div class="progress mb-4" style="height:8px;" role="progressbar" aria-label="<?php echo __('Alt text coverage') ?>" aria-valuenow="<?php echo $pct ?>" aria-valuemin="0" aria-valuemax="100">
-    <div class="progress-bar bg-success" style="width: <?php echo $pct ?>%;"></div>
+  <div class="progress mb-4" data-ahg-style="height:8px;" role="progressbar" aria-label="<?php echo __('Alt text coverage') ?>" aria-valuenow="<?php echo $pct ?>" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar bg-success" data-ahg-style="width: <?php echo $pct ?>%;"></div>
   </div>
 
   <form method="get" action="<?php echo $indexUrl ?>" class="row g-2 mb-3">
@@ -48,7 +48,7 @@ $pct = (float) ($counts['percent'] ?? 0);
             <td class="small text-muted"><?php echo esc_entities((string) $r->name) ?></td>
             <td>
               <?php if ($r->alt_text !== null && $r->alt_text !== ''): ?>
-                <span class="text-truncate d-inline-block" style="max-width:380px;" title="<?php echo esc_entities((string) $r->alt_text) ?>"><?php echo esc_entities((string) $r->alt_text) ?></span>
+                <span class="text-truncate d-inline-block" data-ahg-style="max-width:380px;" title="<?php echo esc_entities((string) $r->alt_text) ?>"><?php echo esc_entities((string) $r->alt_text) ?></span>
               <?php else: ?>
                 <span class="badge bg-danger"><?php echo __('missing') ?></span>
               <?php endif ?>

@@ -47,7 +47,7 @@
   </div>
   <div class="card-body">
     <div class="d-flex mb-3">
-      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; min-width: 48px;">
+      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" data-ahg-style="width: 48px; height: 48px; min-width: 48px;">
         <i class="fas fa-user text-muted"></i>
       </div>
       <div>

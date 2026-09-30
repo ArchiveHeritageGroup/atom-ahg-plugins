@@ -36,7 +36,7 @@ if ($mediaTypeId == 137 && ahg_needs_streaming($resource)) {
       <i class="fas fa-info-circle me-1"></i>
       <strong><?php echo ahg_get_format_name($mimeType); ?></strong> - Streaming via server transcoding (original file preserved)
     </div>
-    <video controls preload="metadata" class="mw-100" style="max-height: 500px; background: #000;">
+    <video controls preload="metadata" class="mw-100" data-ahg-style="max-height: 500px; background: #000;">
       <source src="/media/stream/<?php echo $resource->id; ?>" type="video/mp4">
       Your browser does not support video playback.
     </video>

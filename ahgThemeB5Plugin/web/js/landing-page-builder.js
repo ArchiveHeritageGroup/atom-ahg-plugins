@@ -249,7 +249,7 @@
                         <div class="column-drop-zone border border-2 border-dashed rounded p-2 text-center"
                              data-parent-block="${block.id}"
                              data-column="col${i}"
-                             style="min-height: 80px; background: #fff;">
+                             data-ahg-style="min-height: 80px; background: #fff;">
                             <div class="empty-column text-muted py-2">
                                 <small>⬇ Col ${i}</small>
                             </div>
@@ -466,7 +466,7 @@
                                         <label class="form-label small">Background Color</label>
                                         <div class="input-group input-group-sm">
                                             <input type="color" name="background_color" class="form-control form-control-color" 
-                                                   value="${block.background_color || '#ffffff'}" style="width: 40px;">
+                                                   value="${block.background_color || '#ffffff'}" data-ahg-style="width: 40px;">
                                             <input type="text" class="form-control" 
                                                    value="${block.background_color || '#ffffff'}" 
                                                    id="bg_color_text" readonly>
@@ -476,7 +476,7 @@
                                         <label class="form-label small">Text Color</label>
                                         <div class="input-group input-group-sm">
                                             <input type="color" name="text_color" class="form-control form-control-color" 
-                                                   value="${block.text_color || '#212529'}" style="width: 40px;">
+                                                   value="${block.text_color || '#212529'}" data-ahg-style="width: 40px;">
                                             <input type="text" class="form-control" 
                                                    value="${block.text_color || '#212529'}" 
                                                    id="text_color_text" readonly>
@@ -607,7 +607,7 @@
                         <input type="range" name="config[${key}]" class="form-range" 
                                value="${value}" min="${field.min || 0}" max="${field.max || 100}" 
                                step="${field.step || 1}"
-                               oninput="document.getElementById('${key}_value').textContent = this.value">
+                               data-ahg-mirror="#${key}_value">
                     `;
                     break;
 
@@ -625,7 +625,7 @@
                         <input type="text" name="config[${key}]" class="form-control form-control-sm" 
                                value="${this.escapeHtml(value)}" placeholder="Image URL">
                         <div class="form-text small">Enter image URL or path</div>
-                        ${value ? `<img src="${this.escapeHtml(value)}" class="img-thumbnail mt-2" style="max-height: 80px;">` : ''}
+                        ${value ? `<img src="${this.escapeHtml(value)}" class="img-thumbnail mt-2" data-ahg-style="max-height: 80px;">` : ''}
                     `;
                     break;
 
@@ -634,8 +634,7 @@
                         <label class="form-label small">${label}</label>
                         <div class="input-group input-group-sm">
                             <span class="input-group-text"><i class="bi ${value || 'bi-square'}"></i></span>
-                            <select name="config[${key}]" class="form-select form-select-sm icon-select" 
-                                    onchange="this.previousElementSibling.querySelector('i').className = 'bi ' + this.value">
+                            <select name="config[${key}]" class="form-select form-select-sm icon-select" >
                                 ${this.getIconOptions(value)}
                             </select>
                         </div>
@@ -1046,3 +1045,11 @@
     // Expose for external access
     window.LandingPageBuilderUI = Builder;
 })();
+
+// Icon selects preview their choice in the addon before them. A delegated
+// listener, not an inline onchange: inline handlers are blocked by the CSP.
+document.addEventListener('change', function (ev) {
+    var sel = ev.target.closest ? ev.target.closest('select.icon-select') : null;
+    var icon = sel && sel.previousElementSibling ? sel.previousElementSibling.querySelector('i') : null;
+    if (icon) { icon.className = 'bi ' + sel.value; }
+});

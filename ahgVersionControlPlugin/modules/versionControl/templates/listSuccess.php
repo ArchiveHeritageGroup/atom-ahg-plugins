@@ -48,13 +48,13 @@
 <table class="table table-sm vc-list">
     <thead>
         <tr>
-            <th style="width:36px"></th>
-            <th style="width:84px"><?php echo __('Version') ?></th>
-            <th style="width:170px"><?php echo __('Date') ?></th>
-            <th style="width:140px"><?php echo __('User') ?></th>
+            <th data-ahg-style="width:36px"></th>
+            <th data-ahg-style="width:84px"><?php echo __('Version') ?></th>
+            <th data-ahg-style="width:170px"><?php echo __('Date') ?></th>
+            <th data-ahg-style="width:140px"><?php echo __('User') ?></th>
             <th><?php echo __('Summary') ?></th>
-            <th style="width:170px"><?php echo __('Changes') ?></th>
-            <th style="width:60px"></th>
+            <th data-ahg-style="width:170px"><?php echo __('Changes') ?></th>
+            <th data-ahg-style="width:60px"></th>
         </tr>
     </thead>
     <tbody>

@@ -40,7 +40,7 @@ $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
       <span class="badge bg-info text-dark me-1"><?php echo (int) ($s['subjects'] ?? 0) ?> <?php echo __('subjects') ?></span>
       <span class="badge bg-success me-1"><?php echo (int) ($s['related'] ?? 0) ?> <?php echo __('related') ?></span>
     </div>
-    <div id="kg-cy" style="height: 560px;" class="border rounded bg-light"></div>
+    <div id="kg-cy" data-ahg-style="height: 560px;" class="border rounded bg-light"></div>
     <div class="form-text"><?php echo __('Drag nodes to rearrange. Colours: record (dark), repository (blue), creator (orange), subject (teal), related record (green).') ?></div>
 
     <script type="application/json" id="kg-graph-data"<?php echo $nonce ?>><?php echo json_encode($graph, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>

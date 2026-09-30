@@ -109,7 +109,7 @@
             <label class="form-label"><?php echo __('Genre'); ?></label>
             <input type="text" class="form-control" name="genre" value="<?php echo esc_entities($iptc->genre ?? ''); ?>" placeholder="<?php echo __('e.g., Documentary, Drama, Portrait'); ?>">
           </div>
-          <div class="col-md-4 mb-3 field-video field-audio" style="display:none;">
+          <div class="col-md-4 mb-3 field-video field-audio" data-ahg-style="display:none;">
             <label class="form-label"><?php echo __('Color'); ?></label>
             <select class="form-select" name="color_type">
               <option value=""><?php echo __('-- Select --'); ?></option>
@@ -124,7 +124,7 @@
     </div>
 
     <!-- Film/Video Production (Only for video types) -->
-    <div class="card mb-3 field-video" style="display:none;">
+    <div class="card mb-3 field-video" data-ahg-style="display:none;">
       <div class="card-header bg-danger text-white">
         <i class="fas fa-film"></i> <?php echo __('Production Details'); ?>
       </div>
@@ -182,7 +182,7 @@
     </div>
 
     <!-- Production Credits (Video/Audio) -->
-    <div class="card mb-3 field-video field-audio" style="display:none;">
+    <div class="card mb-3 field-video field-audio" data-ahg-style="display:none;">
       <div class="card-header bg-secondary text-white">
         <i class="fas fa-users"></i> <?php echo __('Production Credits'); ?>
       </div>
@@ -225,7 +225,7 @@
     </div>
 
     <!-- Language (Video/Audio) -->
-    <div class="card mb-3 field-video field-audio" style="display:none;">
+    <div class="card mb-3 field-video field-audio" data-ahg-style="display:none;">
       <div class="card-header bg-info text-white">
         <i class="fas fa-language"></i> <?php echo __('Language'); ?>
       </div>
@@ -245,7 +245,7 @@
 
     <!-- IPTC Creator Information -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcCreatorSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcCreatorSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-user"></i> <?php echo __('IPTC - Creator / Photographer'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -292,7 +292,7 @@
 
     <!-- IPTC Content Description -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcContentSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcContentSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-align-left"></i> <?php echo __('IPTC - Content Description'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -334,7 +334,7 @@
 
     <!-- IPTC Location -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcLocationSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcLocationSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-map-marker-alt"></i> <?php echo __('IPTC - Location'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -375,7 +375,7 @@
 
     <!-- IPTC Copyright & Rights -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcRightsSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcRightsSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-copyright"></i> <?php echo __('IPTC - Copyright & Rights'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -427,7 +427,7 @@
 
     <!-- IPTC Releases -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcReleasesSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcReleasesSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-file-signature"></i> <?php echo __('IPTC - Model & Property Releases'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -469,7 +469,7 @@
 
     <!-- IPTC Artwork -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcArtworkSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcArtworkSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-palette"></i> <?php echo __('IPTC - Artwork / Object in Image'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -506,7 +506,7 @@
 
     <!-- IPTC Administrative -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcAdminSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#iptcAdminSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-cog"></i> <?php echo __('IPTC - Administrative'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -532,7 +532,7 @@
 
     <!-- Scope and Content -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#scopeSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#scopeSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-file-alt"></i> <?php echo __('Scope and content'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -548,7 +548,7 @@
 
     <!-- Access Points -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#accessPointsSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#accessPointsSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-tags"></i> <?php echo __('Access Points'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -625,7 +625,7 @@
     </div>
     <!-- Repository -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#repositorySection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#repositorySection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-building"></i> <?php echo __('Repository'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>
@@ -650,7 +650,7 @@
 
     <!-- Alternative Versions (Film/Video) -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #17a2b8; color: white;">
+      <div class="card-header" data-ahg-style="background-color: #17a2b8; color: white;">
         <i class="fas fa-language"></i> <?php echo __('Alternative Versions'); ?>
       </div>
       <div class="card-body">
@@ -708,7 +708,7 @@
 
     <!-- Format Holdings (Film/Video) -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #6c757d; color: white;">
+      <div class="card-header" data-ahg-style="background-color: #6c757d; color: white;">
         <i class="fas fa-archive"></i> <?php echo __('Format Holdings & Access'); ?>
       </div>
       <div class="card-body">
@@ -834,7 +834,7 @@
 
     <!-- External Links (ESAT, IMDb, etc.) -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #28a745; color: white;">
+      <div class="card-header" data-ahg-style="background-color: #28a745; color: white;">
         <i class="fas fa-external-link-alt"></i> <?php echo __('External References'); ?>
       </div>
       <div class="card-body">
@@ -925,7 +925,7 @@
 
     <!-- Admin Area -->
     <div class="card mb-3">
-      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#adminSection" style="cursor:pointer;">
+      <div class="card-header bg-success text-white collapsed" data-bs-toggle="collapse" data-bs-target="#adminSection" data-ahg-style="cursor:pointer;">
         <i class="fas fa-lock"></i> <?php echo __('Administration area'); ?>
         <i class="fas fa-chevron-down float-end mt-1"></i>
       </div>

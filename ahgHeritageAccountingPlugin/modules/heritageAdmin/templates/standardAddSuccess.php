@@ -27,7 +27,7 @@
                                 <input type="text" name="code" class="form-control" required 
                                        value="<?php echo $isEdit ? esc_entities($standard->code) : ''; ?>"
                                        placeholder="e.g. GRAP103, IPSAS45" maxlength="20"
-                                       style="text-transform: uppercase;">
+                                       data-ahg-style="text-transform: uppercase;">
                                 <small class="text-muted"><?php echo __('Unique identifier, uppercase'); ?></small>
                             </div>
                             <div class="col-md-8">

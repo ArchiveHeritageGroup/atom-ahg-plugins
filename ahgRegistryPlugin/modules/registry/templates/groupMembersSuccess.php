@@ -63,7 +63,7 @@
       <tr data-role="<?php echo htmlspecialchars($m->role ?? 'member', ENT_QUOTES, 'UTF-8'); ?>">
         <td>
           <div class="d-flex align-items-center">
-            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px; min-width: 36px;">
+            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" data-ahg-style="width: 36px; height: 36px; min-width: 36px;">
               <i class="fas fa-user text-muted small"></i>
             </div>
             <div>

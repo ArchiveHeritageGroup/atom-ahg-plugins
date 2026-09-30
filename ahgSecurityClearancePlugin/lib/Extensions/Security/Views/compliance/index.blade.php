@@ -177,7 +177,7 @@
                                 @forelse($report['classification_access'] ?? [] as $access)
                                 <tr>
                                     <td>
-                                        <span class="badge" style="background-color: {{ $access['classification']['color'] ?? '#6c757d' }}">
+                                        <span class="badge" data-ahg-style="background-color: {{ $access['classification']['color'] ?? '#6c757d' }}">
                                             {{ $access['classification']['code'] }}
                                         </span>
                                         {{ $access['classification']['name'] }}
@@ -188,8 +188,8 @@
                                         @php
                                             $coverage = $access['object_count'] > 0 && $access['user_count'] > 0 ? 100 : 0;
                                         @endphp
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-success" style="width: {{ $coverage }}%"></div>
+                                        <div class="progress" data-ahg-style="height: 6px;">
+                                            <div class="progress-bar bg-success" data-ahg-style="width: {{ $coverage }}%"></div>
                                         </div>
                                     </td>
                                 </tr>

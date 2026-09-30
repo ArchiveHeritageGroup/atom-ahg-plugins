@@ -4,7 +4,7 @@
  */
 ?>
 
-<div class="container py-4" style="max-width: 700px;">
+<div class="container py-4" data-ahg-style="max-width: 700px;">
   <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
       <li class="breadcrumb-item">

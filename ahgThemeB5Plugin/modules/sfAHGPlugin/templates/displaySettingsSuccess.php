@@ -56,12 +56,12 @@ $moduleLabels = [
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 20%;"><?php echo __('Module'); ?></th>
-                            <th style="width: 20%;"><?php echo __('Default Mode'); ?></th>
-                            <th style="width: 20%;"><?php echo __('Available Modes'); ?></th>
-                            <th style="width: 10%;"><?php echo __('Per Page'); ?></th>
-                            <th style="width: 15%;"><?php echo __('Options'); ?></th>
-                            <th style="width: 15%;"><?php echo __('Actions'); ?></th>
+                            <th data-ahg-style="width: 20%;"><?php echo __('Module'); ?></th>
+                            <th data-ahg-style="width: 20%;"><?php echo __('Default Mode'); ?></th>
+                            <th data-ahg-style="width: 20%;"><?php echo __('Available Modes'); ?></th>
+                            <th data-ahg-style="width: 10%;"><?php echo __('Per Page'); ?></th>
+                            <th data-ahg-style="width: 15%;"><?php echo __('Options'); ?></th>
+                            <th data-ahg-style="width: 15%;"><?php echo __('Actions'); ?></th>
                         </tr>
                     </thead>
                     <tbody>

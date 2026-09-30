@@ -1,6 +1,6 @@
 <h1><?php echo __('Audit Trail'); ?></h1>
 
-<table class="sticky-enabled" style="width: 100%;">
+<table class="sticky-enabled" data-ahg-style="width: 100%;">
   <thead>
     <tr>
       <th>
@@ -8,9 +8,9 @@
       </th>
     </tr>
   </thead>
-  <tbody style="width: 100%;">    
+  <tbody data-ahg-style="width: 100%;">    
 	<section class="actions mb-3">
-		<input class="c-btn c-btn-submit" type="button" onclick="history.back();" value="<?php echo __('Back'); ?>">
+		<input class="c-btn c-btn-submit" type="button" data-ahg-action="back" value="<?php echo __('Back'); ?>">
 	</section>
 
 	<?php $auditObjectsArr = []; ?>
@@ -23,7 +23,7 @@
        <tr class="<?php echo 0 == @++$row % 2 ? 'even' : 'odd'; ?>">
         <td>
     		<?php echo '<hr>'; ?>
-			<table border=1 style="width: 100%;">
+			<table border=1 data-ahg-style="width: 100%;">
 			<tr>
 			<td colspan=3><?php echo __('Archival Description'); ?>
 			</td>
@@ -636,7 +636,7 @@
 </div>
 
 	<section class="actions mb-3">
-		<input class="c-btn c-btn-submit" type="button" onclick="history.back();" value="<?php echo __('Back'); ?>">
+		<input class="c-btn c-btn-submit" type="button" data-ahg-action="back" value="<?php echo __('Back'); ?>">
 	</section>
 
 <?php

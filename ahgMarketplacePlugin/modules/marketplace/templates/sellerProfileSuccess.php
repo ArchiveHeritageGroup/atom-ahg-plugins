@@ -42,7 +42,7 @@
               <label for="avatar" class="form-label"><?php echo __('Avatar'); ?></label>
               <?php if ($seller->avatar_path): ?>
                 <div class="mb-2">
-                  <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle" width="80" height="80" style="object-fit: cover;">
+                  <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle" width="80" height="80" data-ahg-style="object-fit: cover;">
                 </div>
               <?php endif; ?>
               <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
@@ -52,7 +52,7 @@
               <label for="banner" class="form-label"><?php echo __('Banner Image'); ?></label>
               <?php if ($seller->banner_path): ?>
                 <div class="mb-2">
-                  <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="rounded" width="200" height="60" style="object-fit: cover;">
+                  <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="rounded" width="200" height="60" data-ahg-style="object-fit: cover;">
                 </div>
               <?php endif; ?>
               <input type="file" class="form-control" id="banner" name="banner" accept="image/*">

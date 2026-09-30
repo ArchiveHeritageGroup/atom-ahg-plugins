@@ -39,7 +39,7 @@ $formAction = $isNew
     </div>
   <?php } ?>
 
-  <form method="post" action="<?php echo $formAction; ?>" class="mt-3" style="max-width: 48rem;">
+  <form method="post" action="<?php echo $formAction; ?>" class="mt-3" data-ahg-style="max-width: 48rem;">
     <div class="mb-3">
       <label for="sr_name" class="form-label fw-semibold"><?php echo __('Name'); ?> <span class="text-danger">*</span></label>
       <input type="text" id="sr_name" name="name" class="form-control" required maxlength="255"

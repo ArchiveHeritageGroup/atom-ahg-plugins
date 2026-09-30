@@ -85,7 +85,7 @@
         <div class="card-body p-0">
           <?php if (empty($items)): ?>
             <div class="text-center text-muted py-4">
-              <i class="bi bi-inbox" style="font-size: 1.5rem;"></i>
+              <i class="bi bi-inbox" data-ahg-style="font-size: 1.5rem;"></i>
               <p class="mt-2 mb-0">No items yet.
                 <?php if (in_array($submission->status, ['draft', 'returned'])): ?>
                   <a href="<?php echo url_for(['module' => 'researcher', 'action' => 'addItem', 'id' => $submission->id]) ?>">Add your first item</a>.
@@ -145,7 +145,7 @@
                     <td class="text-end">
                       <?php if (in_array($submission->status, ['draft', 'returned'])): ?>
                         <form method="post" action="<?php echo url_for(['module' => 'researcher', 'action' => 'deleteItem', 'id' => $submission->id, 'itemId' => $item->id]) ?>"
-                              style="display:inline" data-ahg-confirm="Delete this item?">
+                              data-ahg-style="display:inline" data-ahg-confirm="Delete this item?">
                           <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                             <i class="bi bi-trash"></i>
                           </button>

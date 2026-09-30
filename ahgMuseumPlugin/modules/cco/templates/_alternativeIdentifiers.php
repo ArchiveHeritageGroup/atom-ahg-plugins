@@ -1,13 +1,13 @@
-<div class="section" id="alternative-identifiers-table"<?php echo 0 < count($alternativeIdentifiers) ? '' : 'style="display:none"'; ?>>
+<div class="section" id="alternative-identifiers-table"<?php echo 0 < count($alternativeIdentifiers) ? '' : ' data-ahg-style="display:none"'; ?>>
 
   <h3><?php echo __('Alternative identifier(s)'); ?></h3>
 
   <table class="table table-bordered multiRow">
     <thead>
       <tr>
-        <th style="width: 50%">
+        <th data-ahg-style="width: 50%">
           <?php echo __('Label'); ?>
-        </th><th style="width: 50%">
+        </th><th data-ahg-style="width: 50%">
           <?php echo __('Identifier'); ?>
         </th>
       </tr>

@@ -8,7 +8,7 @@
   <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
 <?php endif; ?>
 
-<form method="post" action="<?php echo url_for('@rdm_datasets_create'); ?>" class="mt-3" style="max-width:640px;">
+<form method="post" action="<?php echo url_for('@rdm_datasets_create'); ?>" class="mt-3" data-ahg-style="max-width:640px;">
   <div class="mb-3">
     <label class="form-label" for="title">Title <span class="text-danger">*</span></label>
     <input type="text" class="form-control" id="title" name="title" required maxlength="500"

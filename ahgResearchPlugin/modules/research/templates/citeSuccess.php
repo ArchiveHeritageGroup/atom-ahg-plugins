@@ -79,7 +79,7 @@ $exportFormats = [
                         <p class="citation-text" id="cite-<?php echo $style; ?>"><?php echo $data['citation']; ?></p>
                     </div>
                     <div class="card-footer">
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('cite-<?php echo $style; ?>')">
+                        <button class="btn btn-sm btn-outline-primary" data-ahg-call="copyToClipboard" data-ahg-types="s" data-ahg-a0="cite-<?php echo $style; ?>">
                             <i class="fas fa-copy me-1"></i> Copy
                         </button>
                     </div>

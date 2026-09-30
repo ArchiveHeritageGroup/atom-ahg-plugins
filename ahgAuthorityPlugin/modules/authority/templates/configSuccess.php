@@ -105,7 +105,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label"><?php echo __('Minimum confidence threshold'); ?></label>
-          <input type="number" name="config[ner_auto_stub_threshold]" class="form-control" style="max-width:200px"
+          <input type="number" name="config[ner_auto_stub_threshold]" class="form-control" data-ahg-style="max-width:200px"
                  value="<?php echo htmlspecialchars(cfgVal($cfg, 'ner_auto_stub_threshold', '0.85')); ?>"
                  min="0" max="1" step="0.05">
         </div>
@@ -126,7 +126,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label"><?php echo __('Deduplication threshold (0-1)'); ?></label>
-          <input type="number" name="config[dedup_threshold]" class="form-control" style="max-width:200px"
+          <input type="number" name="config[dedup_threshold]" class="form-control" data-ahg-style="max-width:200px"
                  value="<?php echo htmlspecialchars(cfgVal($cfg, 'dedup_threshold', '0.80')); ?>"
                  min="0" max="1" step="0.05">
         </div>

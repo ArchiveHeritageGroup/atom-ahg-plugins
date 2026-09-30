@@ -54,7 +54,7 @@
       <div class="col-md-6">
         <table class="table table-sm table-borderless mb-0">
           <tr>
-            <th class="text-muted" style="width:40%"><?php echo __('Vendor'); ?></th>
+            <th class="text-muted" data-ahg-style="width:40%"><?php echo __('Vendor'); ?></th>
             <td class="fw-bold"><?php echo esc_entities($rawOrder->vendor_name ?? '-'); ?></td>
           </tr>
           <tr>
@@ -70,7 +70,7 @@
       <div class="col-md-6">
         <table class="table table-sm table-borderless mb-0">
           <tr>
-            <th class="text-muted" style="width:40%"><?php echo __('Type'); ?></th>
+            <th class="text-muted" data-ahg-style="width:40%"><?php echo __('Type'); ?></th>
             <td><?php echo esc_entities(ucfirst($rawOrder->order_type ?? '-')); ?></td>
           </tr>
           <tr>
@@ -143,10 +143,10 @@
                   <?php if (($line->line_status ?? '') !== 'received'): ?>
                     <form method="post" action="<?php echo url_for(['module' => 'acquisition', 'action' => 'receive']); ?>" class="d-inline">
                       <input type="hidden" name="order_line_id" value="<?php echo (int) $line->id; ?>">
-                      <div class="input-group input-group-sm" style="width:140px; display:inline-flex !important;">
+                      <div class="input-group input-group-sm" data-ahg-style="width:140px; display:inline-flex !important;">
                         <input type="number" class="form-control form-control-sm" name="quantity_received" value="1" min="1"
                                max="<?php echo max(1, (int) $line->quantity - (int) $line->quantity_received); ?>"
-                               style="width:50px;">
+                               data-ahg-style="width:50px;">
                         <button type="submit" class="btn btn-sm btn-outline-success" title="<?php echo __('Receive'); ?>">
                           <i class="fas fa-check"></i>
                         </button>

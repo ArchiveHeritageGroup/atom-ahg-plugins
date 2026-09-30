@@ -27,7 +27,7 @@
             <input type="text" id="ar-link-different-search" class="form-control"
                    placeholder="<?php echo __('Type a name...'); ?>" autocomplete="off"
                    data-entity-type="<?php echo htmlspecialchars((string) $mention->entity_type); ?>">
-            <div id="ar-link-different-results" class="list-group mt-2" style="max-height: 320px; overflow-y: auto;"></div>
+            <div id="ar-link-different-results" class="list-group mt-2" data-ahg-style="max-height: 320px; overflow-y: auto;"></div>
           </div>
 
           <input type="hidden" name="authority_id" id="ar-link-different-authority-id" value="">

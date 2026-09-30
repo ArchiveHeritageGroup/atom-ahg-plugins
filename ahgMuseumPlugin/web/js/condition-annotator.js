@@ -66,15 +66,15 @@ class ConditionAnnotator {
 
     createUI() {
         this.container.innerHTML = `
-            <div class="condition-annotator" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="condition-annotator" data-ahg-style="height: 100%; display: flex; flex-direction: column;">
                 ${this.options.showToolbar && !this.options.readonly ? this.createToolbar() : ''}
-                <div style="flex: 1; display: flex; overflow: hidden; min-height: 450px;">
-                    <div class="annotator-canvas-container" style="flex: 1; background: #2a2a2a; overflow: auto; display: flex; justify-content: center; align-items: center; padding: 20px;">
+                <div data-ahg-style="flex: 1; display: flex; overflow: hidden; min-height: 450px;">
+                    <div class="annotator-canvas-container" data-ahg-style="flex: 1; background: #2a2a2a; overflow: auto; display: flex; justify-content: center; align-items: center; padding: 20px;">
                         <canvas id="${this.containerId}-canvas"></canvas>
                     </div>
                     ${this.options.showLegend ? this.createLegend() : ''}
                 </div>
-                <div class="annotator-status-bar" style="display: flex; justify-content: space-between; padding: 8px 15px; background: #f8f9fa; border-top: 1px solid #dee2e6; font-size: 0.85em;">
+                <div class="annotator-status-bar" data-ahg-style="display: flex; justify-content: space-between; padding: 8px 15px; background: #f8f9fa; border-top: 1px solid #dee2e6; font-size: 0.85em;">
                     <span class="status-text">Ready</span>
                     <span class="annotation-count">0 annotations</span>
                 </div>
@@ -84,7 +84,7 @@ class ConditionAnnotator {
 
     createToolbar() {
         return `
-            <div class="annotator-toolbar" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 15px; background: #e9ecef; border-bottom: 1px solid #dee2e6; align-items: center;">
+            <div class="annotator-toolbar" data-ahg-style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 15px; background: #e9ecef; border-bottom: 1px solid #dee2e6; align-items: center;">
                 <div class="btn-group" role="group">
                     <button type="button" class="tool-btn btn btn-sm btn-primary active" data-tool="select" title="Select (V)">
                         <i class="fas fa-mouse-pointer"></i>
@@ -109,18 +109,18 @@ class ConditionAnnotator {
                     </button>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 5px; margin-left: 15px;">
-                    <label style="margin: 0; font-size: 0.85em; font-weight: 500;">Category:</label>
-                    <select id="${this.containerId}-category" class="form-select form-select-sm" style="width: 140px;">
+                <div data-ahg-style="display: flex; align-items: center; gap: 5px; margin-left: 15px;">
+                    <label data-ahg-style="margin: 0; font-size: 0.85em; font-weight: 500;">Category:</label>
+                    <select id="${this.containerId}-category" class="form-select form-select-sm" data-ahg-style="width: 140px;">
                         ${Object.entries(this.categories).map(([key, cat]) =>
                             `<option value="${key}" data-color="${cat.color}">${cat.label}</option>`
                         ).join('')}
                     </select>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <label style="margin: 0; font-size: 0.85em; font-weight: 500;">Color:</label>
-                    <input type="color" id="${this.containerId}-color" value="${this.currentColor}" style="width: 40px; height: 28px; padding: 1px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
+                <div data-ahg-style="display: flex; align-items: center; gap: 5px;">
+                    <label data-ahg-style="margin: 0; font-size: 0.85em; font-weight: 500;">Color:</label>
+                    <input type="color" id="${this.containerId}-color" value="${this.currentColor}" data-ahg-style="width: 40px; height: 28px; padding: 1px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
                 </div>
 
                 <div class="btn-group ms-auto" role="group">
@@ -152,12 +152,12 @@ class ConditionAnnotator {
 
     createLegend() {
         return `
-            <div class="annotator-legend" id="${this.containerId}-legend" style="width: 240px; background: #f8f9fa; border-left: 1px solid #dee2e6; display: flex; flex-direction: column;">
-                <div style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; background: #495057; color: white;">
+            <div class="annotator-legend" id="${this.containerId}-legend" data-ahg-style="width: 240px; background: #f8f9fa; border-left: 1px solid #dee2e6; display: flex; flex-direction: column;">
+                <div data-ahg-style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; background: #495057; color: white;">
                     <strong><i class="fas fa-list-ul me-2"></i>Annotations</strong>
                 </div>
-                <div class="legend-items" style="flex: 1; overflow-y: auto; padding: 10px;">
-                    <div class="text-muted text-center py-4" style="font-size: 0.85em;">
+                <div class="legend-items" data-ahg-style="flex: 1; overflow-y: auto; padding: 10px;">
+                    <div class="text-muted text-center py-4" data-ahg-style="font-size: 0.85em;">
                         <i class="fas fa-draw-polygon fa-2x mb-2 d-block opacity-50"></i>
                         No annotations yet.<br>
                         <small>Use tools above to annotate.</small>
@@ -524,7 +524,7 @@ class ConditionAnnotator {
         
         if (count === 0) {
             legendItems.innerHTML = `
-                <div class="text-muted text-center py-4" style="font-size: 0.85em;">
+                <div class="text-muted text-center py-4" data-ahg-style="font-size: 0.85em;">
                     <i class="fas fa-draw-polygon fa-2x mb-2 d-block opacity-50"></i>
                     No annotations yet.<br>
                     <small>Use tools above to annotate.</small>
@@ -541,7 +541,7 @@ class ConditionAnnotator {
             const typeIcon = this.getTypeIcon(ann.type);
             
             html += `
-                <div class="legend-item" data-id="${ann.id}" style="
+                <div class="legend-item" data-id="${ann.id}" data-ahg-style="
                     padding: 10px 12px;
                     margin-bottom: 8px;
                     background: #fff;
@@ -552,15 +552,15 @@ class ConditionAnnotator {
                     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
                     transition: all 0.2s ease;
                 ">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <strong style="color: ${color};">
-                            <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; text-align: center; background: ${color}; color: #fff; border-radius: 50%; font-size: 0.75em; margin-right: 6px;">${idx + 1}</span>
+                    <div data-ahg-style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <strong data-ahg-style="color: ${color};">
+                            <span data-ahg-style="display: inline-block; width: 20px; height: 20px; line-height: 20px; text-align: center; background: ${color}; color: #fff; border-radius: 50%; font-size: 0.75em; margin-right: 6px;">${idx + 1}</span>
                             ${category.label}
                         </strong>
-                        <span style="font-size: 0.9em; color: #666;">${typeIcon}</span>
+                        <span data-ahg-style="font-size: 0.9em; color: #666;">${typeIcon}</span>
                     </div>
-                    ${ann.notes ? `<div style="margin: 6px 0; color: #444; padding-left: 26px; font-size: 0.95em;">"${this.escapeHtml(ann.notes)}"</div>` : ''}
-                    <div style="color: #999; font-size: 0.75em; padding-left: 26px;">
+                    ${ann.notes ? `<div data-ahg-style="margin: 6px 0; color: #444; padding-left: 26px; font-size: 0.95em;">"${this.escapeHtml(ann.notes)}"</div>` : ''}
+                    <div data-ahg-style="color: #999; font-size: 0.75em; padding-left: 26px;">
                         <i class="far fa-clock me-1"></i>${ann.created_at ? new Date(ann.created_at).toLocaleTimeString() : 'Just now'}
                     </div>
                 </div>

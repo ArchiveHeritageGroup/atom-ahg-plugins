@@ -101,7 +101,7 @@
             </div>
 
             <!-- Preview area -->
-            <div id="previewArea" class="mb-3" style="display:none;">
+            <div id="previewArea" class="mb-3" data-ahg-style="display:none;">
               <div class="card bg-light">
                 <div class="card-body small">
                   <h6><i class="bi bi-eye me-2"></i>File Preview</h6>

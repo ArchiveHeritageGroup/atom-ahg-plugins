@@ -43,7 +43,7 @@
         <div class="col-md-6">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('ISSN'); ?></th>
+              <th class="text-muted" data-ahg-style="width:40%"><?php echo __('ISSN'); ?></th>
               <td><?php echo esc_entities($rawSub->issn ?? '-'); ?></td>
             </tr>
             <tr>
@@ -79,7 +79,7 @@
         <div class="col-md-6">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Frequency'); ?></th>
+              <th class="text-muted" data-ahg-style="width:40%"><?php echo __('Frequency'); ?></th>
               <td><?php echo esc_entities(ucfirst($rawSub->frequency ?? '-')); ?></td>
             </tr>
             <tr>

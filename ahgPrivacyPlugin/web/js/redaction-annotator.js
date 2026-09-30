@@ -649,7 +649,7 @@ class RedactionAnnotator {
             }[region.status] || '';
 
             return `
-                <div class="region-item" data-id="${region.id}" style="border-left-color: ${region.status === 'applied' ? '#28a745' : '#ff0000'}">
+                <div class="region-item" data-id="${region.id}" data-ahg-style="border-left-color: ${region.status === 'applied' ? '#28a745' : '#ff0000'}">
                     <div class="region-body">
                         <div class="region-label">${region.label || 'Region ' + (idx + 1)}</div>
                         <div class="region-meta">

@@ -77,8 +77,8 @@
         </div>
       </form>
       <div id="upload-progress" class="mt-2 d-none">
-        <div class="progress" style="height: 6px;">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+        <div class="progress" data-ahg-style="height: 6px;">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" data-ahg-style="width: 100%"></div>
         </div>
         <small class="text-muted"><?php echo __('Uploading...'); ?></small>
       </div>

@@ -62,7 +62,7 @@
               <div class="card h-100 help-category-card">
                 <div class="card-body">
                   <div class="d-flex align-items-center mb-2">
-                    <i class="bi <?php echo isset($rawCategoryIcons[$catName]) ? $rawCategoryIcons[$catName] : 'bi-folder' ?> fs-3 me-2" style="color: var(--ahg-primary, #005837);"></i>
+                    <i class="bi <?php echo isset($rawCategoryIcons[$catName]) ? $rawCategoryIcons[$catName] : 'bi-folder' ?> fs-3 me-2" data-ahg-style="color: var(--ahg-primary, #005837);"></i>
                     <h5 class="card-title mb-0"><?php echo htmlspecialchars($catName) ?></h5>
                   </div>
                   <p class="card-text text-muted small">

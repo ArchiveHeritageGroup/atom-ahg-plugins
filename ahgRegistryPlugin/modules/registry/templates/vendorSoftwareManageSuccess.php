@@ -31,9 +31,9 @@
       <div class="card-body">
         <div class="d-flex align-items-start mb-2">
           <?php if (!empty($sw->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($sw->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2" style="width: 40px; height: 40px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($sw->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2" data-ahg-style="width: 40px; height: 40px; object-fit: contain;">
           <?php else: ?>
-            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" data-ahg-style="width: 40px; height: 40px;">
               <i class="fas fa-laptop-code text-muted"></i>
             </div>
           <?php endif; ?>

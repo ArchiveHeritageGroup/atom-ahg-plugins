@@ -39,8 +39,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 8%"></div>
+    <div class="progress mt-2" data-ahg-style="height: 4px;">
+        <div class="progress-bar" data-ahg-style="width: 8%"></div>
     </div>
 </div>
 
@@ -155,7 +155,7 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
 
                     <!-- Existing parent search (shown when 'existing' selected) -->
-                    <div id="existing-parent-panel" class="mb-3" style="display:none;">
+                    <div id="existing-parent-panel" class="mb-3" data-ahg-style="display:none;">
                         <label for="parent_search" class="form-label"><?php echo __('Search for parent record') ?></label>
                         <input type="text" class="form-control" id="parent_search"
                                placeholder="<?php echo __('Type to search...') ?>" autocomplete="off">
@@ -164,7 +164,7 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
 
                     <!-- New parent fields (shown when 'new' selected) -->
-                    <div id="new-parent-panel" style="display:none;">
+                    <div id="new-parent-panel" data-ahg-style="display:none;">
                         <div class="mb-3">
                             <label for="new_parent_title" class="form-label"><?php echo __('New parent title') ?></label>
                             <input type="text" class="form-control" id="new_parent_title" name="new_parent_title"
@@ -380,7 +380,7 @@ $entityTypeVal = $session->entity_type ?? 'description';
 
             <!-- Translation language row (shown when translate checked) -->
             <?php if ($svcAvail['translate']): ?>
-            <div id="translate-lang-panel" class="row mt-2" style="display:none;">
+            <div id="translate-lang-panel" class="row mt-2" data-ahg-style="display:none;">
                 <div class="col-md-4">
                     <label for="process_translate_lang" class="form-label"><?php echo __('Translate to') ?></label>
                     <select class="form-select form-select-sm" id="process_translate_lang" name="process_translate_lang">

@@ -39,7 +39,7 @@
           </div>
           <div class="card-body text-center">
             <?php if ($referenceUrl) { ?>
-              <img src="<?php echo $referenceUrl; ?>" alt="<?php echo esc_specialchars($rawProps['altText']); ?>" class="img-fluid rounded" style="max-height: 400px;">
+              <img src="<?php echo $referenceUrl; ?>" alt="<?php echo esc_specialchars($rawProps['altText']); ?>" class="img-fluid rounded" data-ahg-style="max-height: 400px;">
             <?php } elseif ($thumbnailUrl) { ?>
               <img src="<?php echo $thumbnailUrl; ?>" alt="<?php echo esc_specialchars($rawProps['altText']); ?>" class="img-fluid rounded">
             <?php } ?>

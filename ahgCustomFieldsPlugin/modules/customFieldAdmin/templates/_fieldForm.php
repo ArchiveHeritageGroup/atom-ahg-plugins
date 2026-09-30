@@ -66,7 +66,7 @@ $indexUrl = url_for(['module' => 'customFieldAdmin', 'action' => 'index']);
             </div>
 
             <!-- Dropdown taxonomy selector (shown only when type=dropdown) -->
-            <div class="mb-3" id="cf-dropdown-taxonomy-wrap" style="display:none;">
+            <div class="mb-3" id="cf-dropdown-taxonomy-wrap" data-ahg-style="display:none;">
                 <label for="cf-dropdown-taxonomy" class="form-label">Dropdown Taxonomy</label>
                 <select class="form-select" id="cf-dropdown-taxonomy" name="dropdown_taxonomy">
                     <option value="">— Select taxonomy —</option>
@@ -117,7 +117,7 @@ $indexUrl = url_for(['module' => 'customFieldAdmin', 'action' => 'index']);
             <div class="mb-3">
                 <label for="cf-sort-order" class="form-label">Sort Order</label>
                 <input type="number" class="form-control" id="cf-sort-order" name="sort_order"
-                       value="<?php echo (int) ($def->sort_order ?? 0); ?>" style="max-width:120px">
+                       value="<?php echo (int) ($def->sort_order ?? 0); ?>" data-ahg-style="max-width:120px">
             </div>
         </div>
 

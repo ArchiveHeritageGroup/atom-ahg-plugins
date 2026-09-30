@@ -52,7 +52,7 @@ $userJobs = $repository->getJobs(['user_id' => $userId], 3);
         <div class="list-group list-group-flush small">
             <?php foreach ($userJobs as $job): ?>
             <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
-                <div class="text-truncate" style="max-width: 150px;" title="<?php echo htmlspecialchars($job->job_name); ?>">
+                <div class="text-truncate" data-ahg-style="max-width: 150px;" title="<?php echo htmlspecialchars($job->job_name); ?>">
                     <?php echo htmlspecialchars($job->job_name); ?>
                 </div>
                 <div>

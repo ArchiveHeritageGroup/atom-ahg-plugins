@@ -26,7 +26,7 @@
       <table class="table table-borderless mb-0">
         <tbody>
           <tr>
-            <th class="text-nowrap" style="width: 200px;"><?php echo __('Job ID'); ?></th>
+            <th class="text-nowrap" data-ahg-style="width: 200px;"><?php echo __('Job ID'); ?></th>
             <td><?php echo (int) $job->id; ?></td>
           </tr>
           <tr>
@@ -132,7 +132,7 @@
         </button>
       </div>
       <div class="card-body p-0">
-        <pre id="job-output" class="p-3 mb-0" style="max-height: 600px; overflow: auto; background: #f8f9fa; font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word;"><?php echo esc_specialchars($job->output); ?></pre>
+        <pre id="job-output" class="p-3 mb-0" data-ahg-style="max-height: 600px; overflow: auto; background: #f8f9fa; font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word;"><?php echo esc_specialchars($job->output); ?></pre>
       </div>
     </div>
 

@@ -136,7 +136,7 @@
                 <input type="checkbox" name="tk_label_ids[]" value="<?php echo $tk->id; ?>" class="form-check-input" id="tk_<?php echo $tk->id; ?>">
                 <label class="form-check-label" for="tk_<?php echo $tk->id; ?>">
                   <?php if (!empty($tk->icon_url)): ?>
-                  <img src="<?php echo $tk->icon_url; ?>" alt="" style="width:20px;height:20px;" class="me-1">
+                  <img src="<?php echo $tk->icon_url; ?>" alt="" data-ahg-style="width:20px;height:20px;" class="me-1">
                   <?php endif; ?>
                   <?php echo $tk->name ?? $tk->code; ?>
                 </label>
@@ -149,7 +149,7 @@
     </div>
 
     <!-- Embargo Options (hidden by default) -->
-    <div id="embargo_options" class="card mb-4" style="display:none;">
+    <div id="embargo_options" class="card mb-4" data-ahg-style="display:none;">
       <div class="card-header">
         <h5 class="mb-0"><?php echo __('Embargo Details'); ?></h5>
       </div>

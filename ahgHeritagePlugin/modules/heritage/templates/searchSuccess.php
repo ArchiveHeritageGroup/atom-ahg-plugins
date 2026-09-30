@@ -257,9 +257,9 @@ $filters = $toArray($filters ?? []);
                         <img src="<?php echo esc_specialchars($result['thumbnail']); ?>"
                              alt="<?php echo esc_specialchars($result['title']); ?>"
                              class="img-fluid rounded-start h-100 object-fit-cover"
-                             style="max-height: 180px; width: 100%;"
+                             data-ahg-style="max-height: 180px; width: 100%;"
                              loading="lazy"
-                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'bg-light h-100 d-flex align-items-center justify-content-center text-muted rounded-start\' style=\'min-height: 150px;\'><i class=\'fas fa-image fs-1\'></i></div>';">
+                             data-ahg-onerror="parent-html" data-ahg-fallback="<div class='bg-light h-100 d-flex align-items-center justify-content-center text-muted rounded-start' data-ahg-style='min-height: 150px;'><i class='fas fa-image fs-1'></i></div>">
                         <?php else: ?>
                         <?php
                         $iconClass = match($result['media_type'] ?? null) {
@@ -280,7 +280,7 @@ $filters = $toArray($filters ?? []);
                             default => 'bg-secondary'
                         };
                         ?>
-                        <div class="<?php echo $bgClass; ?> bg-opacity-25 h-100 d-flex align-items-center justify-content-center rounded-start" style="min-height: 150px;">
+                        <div class="<?php echo $bgClass; ?> bg-opacity-25 h-100 d-flex align-items-center justify-content-center rounded-start" data-ahg-style="min-height: 150px;">
                             <i class="fas <?php echo $iconClass; ?> fs-1 text-<?php echo str_replace('bg-', '', $bgClass); ?>"></i>
                         </div>
                         <?php endif; ?>

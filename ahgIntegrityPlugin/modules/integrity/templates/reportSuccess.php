@@ -59,8 +59,8 @@ $monthlyTrend = $sf_data->getRaw('monthlyTrend') ?: [];
             <span class="badge <?php echo $outcome === 'pass' ? 'bg-success' : 'bg-danger'; ?>"><?php echo $outcome; ?></span>
             <span><?php echo number_format($count); ?> (<?php echo $pct; ?>%)</span>
           </div>
-          <div class="progress" style="height: 6px;">
-            <div class="progress-bar <?php echo $outcome === 'pass' ? 'bg-success' : 'bg-danger'; ?>" style="width: <?php echo $pct; ?>%"></div>
+          <div class="progress" data-ahg-style="height: 6px;">
+            <div class="progress-bar <?php echo $outcome === 'pass' ? 'bg-success' : 'bg-danger'; ?>" data-ahg-style="width: <?php echo $pct; ?>%"></div>
           </div>
         </div>
       <?php endforeach; ?>

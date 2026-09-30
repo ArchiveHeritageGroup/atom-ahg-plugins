@@ -30,7 +30,7 @@ $pluginPath = '/plugins/ahg3DModelPlugin';
     </div>
 
     <div id="<?php echo $viewerId; ?>"
-         style="width:100%; height:<?php echo $height; ?>; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:8px; position:relative;">
+         data-ahg-style="width:100%; height:<?php echo $height; ?>; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:8px; position:relative;">
         <div class="d-flex flex-column align-items-center justify-content-center h-100 text-white" id="<?php echo $viewerId; ?>-loading">
             <div class="spinner-border text-primary mb-3" role="status"></div>
             <span><?php echo __('Loading Gaussian Splat...'); ?></span>

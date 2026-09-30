@@ -190,7 +190,7 @@ $secondaryColor = $config->secondary_color ?? '';
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th style="width: 30px;"></th>
+                            <th data-ahg-style="width: 30px;"></th>
                             <th>Filter</th>
                             <th>Source</th>
                             <th class="text-center">Landing</th>
@@ -287,7 +287,7 @@ $secondaryColor = $config->secondary_color ?? '';
                 <div class="col-md-4">
                     <div class="card h-100">
                         <img src="<?php echo esc_specialchars($image['image_path'] ?? ''); ?>"
-                             class="card-img-top" style="height: 120px; object-fit: cover;"
+                             class="card-img-top" data-ahg-style="height: 120px; object-fit: cover;"
                              alt="Hero image">
                         <div class="card-body p-2">
                             <small class="text-muted">
@@ -319,7 +319,7 @@ $secondaryColor = $config->secondary_color ?? '';
                     <div class="input-group">
                         <input type="color" class="form-control form-control-color" id="primary_color_picker"
                                value="<?php echo esc_specialchars($primaryColor); ?>"
-                               onchange="document.getElementById('primary_color').value = this.value;">
+                               data-ahg-copy-to="#primary_color">
                         <input type="text" class="form-control" id="primary_color" name="primary_color"
                                value="<?php echo esc_specialchars($primaryColor); ?>" pattern="#[0-9A-Fa-f]{6}">
                     </div>
@@ -329,7 +329,7 @@ $secondaryColor = $config->secondary_color ?? '';
                     <div class="input-group">
                         <input type="color" class="form-control form-control-color" id="secondary_color_picker"
                                value="<?php echo esc_specialchars($secondaryColor ?: '#6c757d'); ?>"
-                               onchange="document.getElementById('secondary_color').value = this.value;">
+                               data-ahg-copy-to="#secondary_color">
                         <input type="text" class="form-control" id="secondary_color" name="secondary_color"
                                value="<?php echo esc_specialchars($secondaryColor); ?>" pattern="#[0-9A-Fa-f]{6}">
                     </div>

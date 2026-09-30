@@ -58,7 +58,7 @@ $storylines = ($storylinesRaw instanceof sfOutputEscaperArrayDecorator) ? $story
                 <i class="fas fa-edit"></i>
               </button>
               <button type="button" class="btn btn-outline-danger"
-                      onclick="deleteStoryline(<?php echo $storyline['id']; ?>, '<?php echo htmlspecialchars(addslashes($storyline['title'])); ?>')">
+                      data-ahg-call="deleteStoryline" data-ahg-types="x,s" data-ahg-a0="<?php echo $storyline['id']; ?>" data-ahg-a1="<?php echo htmlspecialchars($storyline['title']); ?>">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
@@ -121,7 +121,7 @@ $storylines = ($storylinesRaw instanceof sfOutputEscaperArrayDecorator) ? $story
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>

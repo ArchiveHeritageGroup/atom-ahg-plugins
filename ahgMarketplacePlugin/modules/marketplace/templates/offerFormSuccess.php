@@ -36,11 +36,11 @@
       <div class="card-body">
         <div class="d-flex">
           <?php if ($primaryImage): ?>
-            <img src="<?php echo esc_entities($primaryImage->file_path); ?>" alt="<?php echo esc_entities($listing->title); ?>" class="rounded me-3" style="width: 100px; height: 100px; object-fit: cover;">
+            <img src="<?php echo esc_entities($primaryImage->file_path); ?>" alt="<?php echo esc_entities($listing->title); ?>" class="rounded me-3" data-ahg-style="width: 100px; height: 100px; object-fit: cover;">
           <?php elseif ($listing->featured_image_path): ?>
-            <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="<?php echo esc_entities($listing->title); ?>" class="rounded me-3" style="width: 100px; height: 100px; object-fit: cover;">
+            <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="<?php echo esc_entities($listing->title); ?>" class="rounded me-3" data-ahg-style="width: 100px; height: 100px; object-fit: cover;">
           <?php else: ?>
-            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 100px; height: 100px;">
+            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" data-ahg-style="width: 100px; height: 100px;">
               <i class="fas fa-image fa-2x text-muted"></i>
             </div>
           <?php endif; ?>

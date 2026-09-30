@@ -37,7 +37,7 @@
         <div class="card-body">
 
           <!-- Drag-drop upload zone -->
-          <div class="border border-2 border-dashed rounded p-5 text-center mb-3 position-relative" id="upload-drop-zone" style="min-height: 200px; cursor: pointer;">
+          <div class="border border-2 border-dashed rounded p-5 text-center mb-3 position-relative" id="upload-drop-zone" data-ahg-style="min-height: 200px; cursor: pointer;">
             <div id="upload-preview">
               <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
               <h5><?php echo __('Drag and drop your package here'); ?></h5>
@@ -50,7 +50,7 @@
                 <span class="badge bg-light text-dark border">.bz2</span>
               </div>
             </div>
-            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="upload-file" name="package" accept=".zip,.tar.gz,.tgz,.gz,.bz2" style="cursor: pointer;">
+            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="upload-file" name="package" accept=".zip,.tar.gz,.tgz,.gz,.bz2" data-ahg-style="cursor: pointer;">
           </div>
 
           <div class="row g-3">

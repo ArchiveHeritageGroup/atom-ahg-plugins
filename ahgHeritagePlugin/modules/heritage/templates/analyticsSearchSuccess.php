@@ -173,7 +173,7 @@ $patterns = [
         <div class="row">
             <div class="col-md-8">
                 <h6>By Hour of Day</h6>
-                <div style="height: 200px;">
+                <div data-ahg-style="height: 200px;">
                     <canvas id="hourChart"></canvas>
                 </div>
             </div>

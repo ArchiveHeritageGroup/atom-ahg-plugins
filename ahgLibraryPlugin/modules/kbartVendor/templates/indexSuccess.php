@@ -131,7 +131,7 @@
                     <td class="text-center">
                         <div class="btn-group btn-group-sm" role="group">
                             <!-- Fetch Now -->
-                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'fetch', 'id' => $vendor->id]); ?>" style="display:inline;">
+                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'fetch', 'id' => $vendor->id]); ?>" data-ahg-style="display:inline;">
                                 <button type="submit" class="btn btn-success btn-sm" title="<?php echo __('Fetch Now'); ?>" data-ahg-confirm="<?php echo __('Fetch KBART feed now?'); ?>">
                                     <i class="fas fa-sync"></i>
                                 </button>
@@ -143,14 +143,14 @@
                             </a>
 
                             <!-- Toggle Active -->
-                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'toggle', 'id' => $vendor->id]); ?>" style="display:inline;">
+                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'toggle', 'id' => $vendor->id]); ?>" data-ahg-style="display:inline;">
                                 <button type="submit" class="btn btn-warning btn-sm" title="<?php echo $vendor->active ? __('Disable') : __('Enable'); ?>">
                                     <i class="fas fa-toggle-<?php echo $vendor->active ? 'on' : 'off'; ?>"></i>
                                 </button>
                             </form>
 
                             <!-- Delete -->
-                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'delete', 'id' => $vendor->id]); ?>" style="display:inline;" data-ahg-confirm="<?php echo __('Delete vendor'); ?>: <?php echo htmlspecialchars($vendor->name); ?>?">
+                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'delete', 'id' => $vendor->id]); ?>" data-ahg-style="display:inline;" data-ahg-confirm="<?php echo __('Delete vendor'); ?>: <?php echo htmlspecialchars($vendor->name); ?>?">
                                 <button type="submit" class="btn btn-danger btn-sm" title="<?php echo __('Delete'); ?>">
                                     <i class="fas fa-trash"></i>
                                 </button>

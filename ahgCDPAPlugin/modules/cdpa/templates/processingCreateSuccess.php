@@ -119,7 +119,7 @@
                                 <label class="form-check-label" for="health_data">Health data</label>
                             </div>
                         </div>
-                        <div class="col-12" id="cross_border_safeguards_container" style="display:none;">
+                        <div class="col-12" id="cross_border_safeguards_container" data-ahg-style="display:none;">
                             <label class="form-label">Cross-border Safeguards</label>
                             <textarea name="cross_border_safeguards" class="form-control" rows="2"></textarea>
                         </div>

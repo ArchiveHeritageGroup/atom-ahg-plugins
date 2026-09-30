@@ -233,7 +233,7 @@ $restrictionTypes = $sf_data->getRaw('restrictionTypes');
                     <?php else: ?>
                         <div class="d-flex flex-wrap gap-3">
                             <?php foreach ($labels as $label): ?>
-                                <div class="icip-tk-label-card p-2 border rounded" style="min-width: 200px;">
+                                <div class="icip-tk-label-card p-2 border rounded" data-ahg-style="min-width: 200px;">
                                     <div class="d-flex align-items-center">
                                         <span class="badge <?php echo $label->category === 'TK' ? 'icip-tk-label' : 'icip-bc-label' ?> me-2">
                                             <?php echo strtoupper($label->label_code) ?>

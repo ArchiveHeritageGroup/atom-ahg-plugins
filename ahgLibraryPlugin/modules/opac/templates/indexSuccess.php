@@ -84,7 +84,7 @@
       <input type="hidden" name="search_type" value="<?php echo esc_entities($searchType); ?>">
       <input type="hidden" name="material_type" value="<?php echo esc_entities($materialType); ?>">
       <input type="hidden" name="frbr_cluster" value="<?php echo $frbrCluster ? '1' : '0'; ?>">
-      <select name="sort" class="form-select form-select-sm d-inline-block" style="width: auto;" data-ahg-submit-form="1">
+      <select name="sort" class="form-select form-select-sm d-inline-block" data-ahg-style="width: auto;" data-ahg-submit-form="1">
         <option value="relevance" <?php echo $sort === 'relevance' ? 'selected' : ''; ?>><?php echo __('Sort: Relevance'); ?></option>
         <option value="title" <?php echo $sort === 'title' ? 'selected' : ''; ?>><?php echo __('Sort: Title A-Z'); ?></option>
         <option value="date_desc" <?php echo $sort === 'date_desc' ? 'selected' : ''; ?>><?php echo __('Sort: Newest'); ?></option>
@@ -397,9 +397,9 @@
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
               <?php if (!empty($item->cover_url)): ?>
-                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2" style="max-height: 120px; max-width: 100%;">
+                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2" data-ahg-style="max-height: 120px; max-width: 100%;">
               <?php else: ?>
-                <div class="bg-light d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                <div class="bg-light d-flex align-items-center justify-content-center mb-2" data-ahg-style="height: 120px;">
                   <i class="fas fa-book fa-3x text-muted"></i>
                 </div>
               <?php endif; ?>
@@ -426,9 +426,9 @@
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
               <?php if (!empty($item->cover_url)): ?>
-                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2" style="max-height: 120px; max-width: 100%;">
+                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2" data-ahg-style="max-height: 120px; max-width: 100%;">
               <?php else: ?>
-                <div class="bg-light d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                <div class="bg-light d-flex align-items-center justify-content-center mb-2" data-ahg-style="height: 120px;">
                   <i class="fas fa-book fa-3x text-muted"></i>
                 </div>
               <?php endif; ?>

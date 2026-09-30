@@ -88,7 +88,7 @@
 
                         <div class="mb-3" id="limit-field">
                             <label class="form-label">Limit (for direct sync)</label>
-                            <select name="limit" class="form-select" style="max-width: 200px;">
+                            <select name="limit" class="form-select" data-ahg-style="max-width: 200px;">
                                 <option value="10">10 DOIs</option>
                                 <option value="50" selected>50 DOIs</option>
                                 <option value="100">100 DOIs</option>

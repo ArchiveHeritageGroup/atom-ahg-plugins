@@ -60,7 +60,7 @@ $reminderTypes = $taxonomyService->getReminderTypes(false);
                 <label class="form-label"><?php echo __('Agreement Logo') ?></label>
                 <?php if (!empty($agreement->logo_path)): ?>
                 <div class="mb-2">
-                  <img src="<?php echo esc_entities($agreement->logo_path) ?>" alt="Logo" class="img-thumbnail" style="max-height: 80px;">
+                  <img src="<?php echo esc_entities($agreement->logo_path) ?>" alt="Logo" class="img-thumbnail" data-ahg-style="max-height: 80px;">
                   <div class="form-check mt-1">
                     <input type="checkbox" name="remove_logo" id="remove_logo" class="form-check-input" value="1">
                     <label class="form-check-label text-danger" for="remove_logo"><?php echo __('Remove logo') ?></label>
@@ -653,7 +653,7 @@ $reminderTypes = $taxonomyService->getReminderTypes(false);
 
       <!-- Sidebar -->
       <div class="col-lg-4">
-        <div class="card mb-4 sticky-top" style="top: 1rem;">
+        <div class="card mb-4 sticky-top" data-ahg-style="top: 1rem;">
           <div class="card-header bg-success text-white">
             <h5 class="mb-0"><i class="fas fa-cog me-2"></i><?php echo __('Status & Actions') ?></h5>
           </div>

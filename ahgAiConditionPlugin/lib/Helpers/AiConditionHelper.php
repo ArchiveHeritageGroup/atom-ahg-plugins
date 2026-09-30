@@ -107,8 +107,8 @@ class AiConditionHelper
             $color = 'warning';
         }
 
-        return '<div class="progress" style="height:6px;width:60px;display:inline-block;vertical-align:middle">'
-            . '<div class="progress-bar bg-' . $color . '" style="width:' . $percent . '%"></div>'
+        return '<div class="progress" data-ahg-style="height:6px;width:60px;display:inline-block;vertical-align:middle">'
+            . '<div class="progress-bar bg-' . $color . '" data-ahg-style="width:' . $percent . '%"></div>'
             . '</div> <small class="text-muted">' . $percent . '%</small>';
     }
 

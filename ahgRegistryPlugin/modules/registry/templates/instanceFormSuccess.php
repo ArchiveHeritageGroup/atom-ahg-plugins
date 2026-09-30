@@ -267,8 +267,8 @@
             <table class="table table-sm">
               <thead class="table-light">
                 <tr>
-                  <th style="width: 40%;"><?php echo __('Feature'); ?></th>
-                  <th style="width: 15%;" class="text-center"><?php echo __('In Use?'); ?></th>
+                  <th data-ahg-style="width: 40%;"><?php echo __('Feature'); ?></th>
+                  <th data-ahg-style="width: 15%;" class="text-center"><?php echo __('In Use?'); ?></th>
                   <th><?php echo __('Comments'); ?></th>
                 </tr>
               </thead>
@@ -316,7 +316,7 @@
         <div>
           <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstances']); ?>" class="btn btn-outline-secondary"><?php echo __('Cancel'); ?></a>
           <?php if ($instance): ?>
-            <button type="button" class="btn btn-outline-danger ms-2" onclick="if(confirm('<?php echo __('Are you sure you want to delete this instance?'); ?>')) { document.getElementById('delete-instance-form').submit(); }">
+            <button type="button" class="btn btn-outline-danger ms-2" data-ahg-confirm="<?php echo __('Are you sure you want to delete this instance?'); ?>" data-ahg-submit="#delete-instance-form">
               <i class="fas fa-trash me-1"></i> <?php echo __('Delete'); ?>
             </button>
           <?php endif; ?>
@@ -327,7 +327,7 @@
     </form>
 
     <?php if ($instance): ?>
-    <form id="delete-instance-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceDelete', 'id' => (int) $instance->id]); ?>" style="display: none;">
+    <form id="delete-instance-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceDelete', 'id' => (int) $instance->id]); ?>" data-ahg-style="display: none;">
     </form>
     <?php endif; ?>
 

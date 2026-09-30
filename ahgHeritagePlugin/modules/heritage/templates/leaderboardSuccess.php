@@ -135,7 +135,7 @@ $stats = $toArray($stats ?? []);
                                 <img src="<?php echo esc_specialchars($entry['avatar_url']); ?>"
                                      class="rounded-circle me-2" width="32" height="32" alt="">
                                 <?php else: ?>
-                                <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" data-ahg-style="width: 32px; height: 32px;">
                                     <i class="fas fa-user text-primary"></i>
                                 </div>
                                 <?php endif; ?>

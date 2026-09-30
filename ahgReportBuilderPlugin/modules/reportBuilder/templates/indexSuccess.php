@@ -65,7 +65,7 @@
         </a>
     </div>
     <div>
-        <input type="text" class="form-control" id="searchReports" placeholder="<?php echo __('Search reports...'); ?>" style="width: 250px;">
+        <input type="text" class="form-control" id="searchReports" placeholder="<?php echo __('Search reports...'); ?>" data-ahg-style="width: 250px;">
     </div>
 </div>
 

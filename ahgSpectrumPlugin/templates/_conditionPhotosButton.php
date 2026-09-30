@@ -33,7 +33,7 @@ try {
                 <img src="/uploads/<?php echo $primaryPhoto['file_path']; ?>" 
                      alt="<?php echo htmlspecialchars($primaryPhoto['caption'] ?? 'Primary photo'); ?>"
                      class="img-thumbnail"
-                     style="max-height: 150px; max-width: 200px;">
+                     data-ahg-style="max-height: 150px; max-width: 200px;">
             </a>
         </div>
     <?php endif; ?>

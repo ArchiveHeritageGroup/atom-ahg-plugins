@@ -39,7 +39,7 @@ $formatList = is_array($allowedFormats) ? $allowedFormats : ['glb', 'gltf', 'usd
                                     Supported formats: <?php echo strtoupper(implode(', ', $formatList)) ?>
                                 </p>
                             </div>
-                            <div class="upload-preview" id="upload-preview" style="display:none;">
+                            <div class="upload-preview" id="upload-preview" data-ahg-style="display:none;">
                                 <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
                                 <p class="mb-0" id="file-name"></p>
                                 <p class="text-muted small" id="file-size"></p>

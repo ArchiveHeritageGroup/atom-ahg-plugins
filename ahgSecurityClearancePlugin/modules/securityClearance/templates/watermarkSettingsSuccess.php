@@ -96,7 +96,7 @@
 
       <div class="mb-3">
         <label for="watermark_min_size" class="form-label"><?php echo __('Minimum Image Size'); ?></label>
-        <div class="input-group" style="max-width: 200px;">
+        <div class="input-group" data-ahg-style="max-width: 200px;">
           <input type="number" class="form-control" id="watermark_min_size" 
                  name="watermark_min_size" value="<?php echo $minSize; ?>" min="0">
           <span class="input-group-text">px</span>
@@ -143,7 +143,7 @@
           <input type="file" class="form-control" id="custom_watermark_file" name="custom_watermark_file" accept="image/png,image/jpeg,image/gif">
           <small class="text-muted"><?php echo __('Supported: PNG, JPEG, GIF. Recommended: transparent PNG.'); ?></small>
         </div>
-        <div class="col-md-2 d-flex align-items-center" style="padding-top: 25px;">
+        <div class="col-md-2 d-flex align-items-center" data-ahg-style="padding-top: 25px;">
           <button type="submit" name="upload_watermark" value="1" class="btn btn-success">
             <i class="fas fa-upload me-1"></i> <?php echo __('Upload'); ?>
           </button>
@@ -158,7 +158,7 @@
         <div class="col-md-3 mb-3">
           <div class="card h-100">
             <div class="card-body text-center p-2">
-              <img src="/uploads/watermarks/<?php echo $cw->filename; ?>" alt="<?php echo $cw->name; ?>" style="max-width: 80px; max-height: 60px; object-fit: contain;">
+              <img src="/uploads/watermarks/<?php echo $cw->filename; ?>" alt="<?php echo $cw->name; ?>" data-ahg-style="max-width: 80px; max-height: 60px; object-fit: contain;">
               <p class="mb-1 mt-2"><small><strong><?php echo $cw->name; ?></strong></small></p>
               <p class="mb-1"><small class="text-muted"><?php echo $cw->position; ?> / <?php echo $cw->opacity; ?></small></p>
               <div class="form-check">
@@ -203,10 +203,10 @@
         <?php foreach ($watermarkTypes as $wtype): ?>
           <?php if ($wtype->image_file): ?>
           <div class="col-md-3 mb-3 text-center">
-            <div class="border rounded p-2" style="height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div class="border rounded p-2" data-ahg-style="height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
               <img src="/images/watermarks/<?php echo $wtype->image_file; ?>" 
                    alt="<?php echo $wtype->name; ?>" 
-                   style="max-width: 100px; max-height: 80px; object-fit: contain;">
+                   data-ahg-style="max-width: 100px; max-height: 80px; object-fit: contain;">
               <p class="mb-0 mt-2"><small><strong><?php echo $wtype->name; ?></strong></small></p>
               <p class="mb-0"><small class="text-muted"><?php echo $wtype->code; ?></small></p>
             </div>

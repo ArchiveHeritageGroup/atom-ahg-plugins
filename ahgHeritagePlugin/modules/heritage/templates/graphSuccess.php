@@ -58,7 +58,7 @@ use_helper('Heritage');
 
                             <!-- Search -->
                             <div class="col-auto">
-                                <input type="text" id="graph-search" class="form-control form-control-sm" placeholder="Search entities..." style="width: 180px;">
+                                <input type="text" id="graph-search" class="form-control form-control-sm" placeholder="Search entities..." data-ahg-style="width: 180px;">
                             </div>
 
                             <!-- Min Occurrences -->
@@ -66,7 +66,7 @@ use_helper('Heritage');
                                 <label class="form-label mb-0 small text-muted">Min occurrences:</label>
                             </div>
                             <div class="col-auto">
-                                <input type="number" id="min-occurrences" class="form-control form-control-sm" value="1" min="1" max="100" style="width: 70px;">
+                                <input type="number" id="min-occurrences" class="form-control form-control-sm" value="1" min="1" max="100" data-ahg-style="width: 70px;">
                             </div>
 
                             <!-- Refresh Button -->
@@ -85,12 +85,12 @@ use_helper('Heritage');
                 <div class="card shadow-sm">
                     <div class="card-body py-2">
                         <div class="d-flex flex-wrap gap-3 small">
-                            <span><span class="badge rounded-pill" style="background-color: #4e79a7;">Person</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #59a14f;">Organization</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #e15759;">Place</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #b07aa1;">Date</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #76b7b2;">Event</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #ff9da7;">Work</span></span>
+                            <span><span class="badge rounded-pill" data-ahg-style="background-color: #4e79a7;">Person</span></span>
+                            <span><span class="badge rounded-pill" data-ahg-style="background-color: #59a14f;">Organization</span></span>
+                            <span><span class="badge rounded-pill" data-ahg-style="background-color: #e15759;">Place</span></span>
+                            <span><span class="badge rounded-pill" data-ahg-style="background-color: #b07aa1;">Date</span></span>
+                            <span><span class="badge rounded-pill" data-ahg-style="background-color: #76b7b2;">Event</span></span>
+                            <span><span class="badge rounded-pill" data-ahg-style="background-color: #ff9da7;">Work</span></span>
                         </div>
                     </div>
                 </div>
@@ -102,8 +102,8 @@ use_helper('Heritage');
             <div class="col-md-8">
                 <div class="card shadow-sm">
                     <div class="card-body p-0 position-relative">
-                        <div id="graph-container" style="height: 600px; width: 100%;"></div>
-                        <div id="graph-loading" class="position-absolute top-50 start-50 translate-middle" style="display: none;">
+                        <div id="graph-container" data-ahg-style="height: 600px; width: 100%;"></div>
+                        <div id="graph-loading" class="position-absolute top-50 start-50 translate-middle" data-ahg-style="display: none;">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
@@ -134,7 +134,7 @@ use_helper('Heritage');
 
             <!-- Entity Detail Panel -->
             <div class="col-md-4">
-                <div id="entity-panel" class="card shadow-sm" style="display: none;">
+                <div id="entity-panel" class="card shadow-sm" data-ahg-style="display: none;">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0" id="entity-panel-title">Entity Details</h5>
                         <button type="button" class="btn-close" id="close-entity-panel" aria-label="Close"></button>
@@ -339,7 +339,7 @@ use_helper('Heritage');
         const content = document.getElementById('entity-panel-content');
         content.innerHTML = `
             <div class="mb-3">
-                <span class="badge" style="background-color: ${colorScale[entity.type] || '#999'};">${entity.type}</span>
+                <span class="badge" data-ahg-style="background-color: ${colorScale[entity.type] || '#999'};">${entity.type}</span>
                 <span class="badge bg-light text-dark ms-1">${entity.occurrences} occurrences</span>
             </div>
             <dl class="row small mb-3">

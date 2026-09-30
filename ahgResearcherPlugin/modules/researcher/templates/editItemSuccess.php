@@ -193,7 +193,7 @@
         </div>
 
         <!-- Repository fields (shown when item_type = repository) -->
-        <div class="card mb-3" id="sectionRepository" style="display:none;">
+        <div class="card mb-3" id="sectionRepository" data-ahg-style="display:none;">
           <div class="card-header bg-warning"><h6 class="mb-0"><i class="bi bi-building me-2"></i>Repository Details</h6></div>
           <div class="card-body">
             <div class="row g-3">
@@ -219,7 +219,7 @@
       <div class="col-lg-4">
 
         <?php if ($item): ?>
-        <div class="card mb-3 sticky-top" style="top: 1rem;">
+        <div class="card mb-3 sticky-top" data-ahg-style="top: 1rem;">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0"><i class="bi bi-paperclip me-2"></i>Files (<?php echo count($itemFiles) ?>)</h6>
           </div>
@@ -445,7 +445,7 @@
 
     var tag = document.createElement('span');
     tag.className = 'badge bg-secondary d-flex align-items-center gap-1';
-    tag.innerHTML = escHtml(name) + ' <button type="button" class="btn-close btn-close-white" style="font-size:0.5rem;" aria-label="Remove"></button>';
+    tag.innerHTML = escHtml(name) + ' <button type="button" class="btn-close btn-close-white" data-ahg-style="font-size:0.5rem;" aria-label="Remove"></button>';
     tag.querySelector('.btn-close').addEventListener('click', function() {
       tag.remove();
       syncHidden(container, hidden);

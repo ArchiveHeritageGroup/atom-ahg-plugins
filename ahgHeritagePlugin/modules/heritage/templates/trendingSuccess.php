@@ -26,13 +26,13 @@
                 #<?php echo $index + 1; ?>
               </span>
               <?php if (!empty($item['thumbnail'])): ?>
-                <img src="<?php echo $item['thumbnail']; ?>" class="card-img-top" alt="<?php echo htmlspecialchars($item['title']); ?>" style="height: 180px; object-fit: cover;" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
-                <div class="card-img-top bg-light align-items-center justify-content-center" style="height: 180px; display: none;">
-                  <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
+                <img src="<?php echo $item['thumbnail']; ?>" class="card-img-top" alt="<?php echo htmlspecialchars($item['title']); ?>" data-ahg-style="height: 180px; object-fit: cover;" data-ahg-onerror="hide-show-next">
+                <div class="card-img-top bg-light align-items-center justify-content-center" data-ahg-style="height: 180px; display: none;">
+                  <i class="fas fa-file-alt text-muted" data-ahg-style="font-size: 3rem;"></i>
                 </div>
               <?php else: ?>
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
-                  <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" data-ahg-style="height: 180px;">
+                  <i class="fas fa-file-alt text-muted" data-ahg-style="font-size: 3rem;"></i>
                 </div>
               <?php endif; ?>
               <div class="card-body">

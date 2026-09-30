@@ -238,8 +238,8 @@
                 <span><?php echo $purposeInfo['label']; ?></span>
                 <span class="text-muted"><?php echo $count; ?> (<?php echo round(($count / $total) * 100); ?>%)</span>
               </div>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar bg-<?php echo $purposeInfo['color']; ?>" style="width: <?php echo ($count / $total) * 100; ?>%"></div>
+              <div class="progress" data-ahg-style="height: 8px;">
+                <div class="progress-bar bg-<?php echo $purposeInfo['color']; ?>" data-ahg-style="width: <?php echo ($count / $total) * 100; ?>%"></div>
               </div>
             </div>
           <?php endforeach; ?>

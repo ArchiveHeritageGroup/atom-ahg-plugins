@@ -119,7 +119,7 @@ $chartMetrics = ['lux' => __('Light (lux)'), 'temp_c' => __('Temperature (C)'), 
         <div class="small text-muted mb-2"><i class="fas fa-check-circle text-success me-1"></i><?php echo __('No conservation alerts.') ?></div>
       <?php endif ?>
       <div class="small mb-1"><?php echo __('Sensors POST readings to this endpoint with the space token:') ?></div>
-      <pre class="small bg-light p-2 rounded" style="white-space:pre-wrap">curl -X POST <?php echo esc_entities($u('recordReadings')) ?> \
+      <pre class="small bg-light p-2 rounded" data-ahg-style="white-space:pre-wrap">curl -X POST <?php echo esc_entities($u('recordReadings')) ?> \
   -H "X-Sensor-Token: <?php echo esc_entities($sensor['token']) ?>" -H "Content-Type: application/json" \
   -d '{"readings":[{"metric":"temp_c","value":21.5},{"metric":"humidity","value":52},{"metric":"lux","value":180}]}'</pre>
       <div class="d-flex align-items-center gap-2">
@@ -181,10 +181,10 @@ $chartMetrics = ['lux' => __('Light (lux)'), 'temp_c' => __('Temperature (C)'), 
   <div class="card mb-3">
     <div class="card-header py-2"><strong><i class="fas fa-fire me-1"></i><?php echo __('Visitor heatmap') ?></strong> <small class="text-muted"><?php echo __('rooms shaded by time spent; red dots = object attention') ?></small></div>
     <div class="card-body">
-      <canvas id="heatCanvas" style="width:100%;max-width:760px;display:block;margin:0 auto;background:#f8f9fa;border-radius:6px"></canvas>
+      <canvas id="heatCanvas" data-ahg-style="width:100%;max-width:760px;display:block;margin:0 auto;background:#f8f9fa;border-radius:6px"></canvas>
       <div class="small text-muted mt-2 d-flex align-items-center gap-2 justify-content-center">
         <span><?php echo __('Less time') ?></span>
-        <span style="display:inline-block;width:120px;height:10px;border-radius:5px;background:linear-gradient(90deg,#dfe7ef,#4e9be8,#46c06b,#f4d03f,#e8553a)"></span>
+        <span data-ahg-style="display:inline-block;width:120px;height:10px;border-radius:5px;background:linear-gradient(90deg,#dfe7ef,#4e9be8,#46c06b,#f4d03f,#e8553a)"></span>
         <span><?php echo __('More time') ?></span>
       </div>
     </div>

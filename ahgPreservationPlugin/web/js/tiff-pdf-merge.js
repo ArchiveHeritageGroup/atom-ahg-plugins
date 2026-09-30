@@ -265,7 +265,7 @@ const TiffPdfMerge = (function() {
                         ${file.image_info?.width ? ` • ${file.image_info.width}×${file.image_info.height}px` : ''}
                     </small>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="TiffPdfMerge.removeFile(${file.id})">
+                <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="TiffPdfMerge.removeFile" data-ahg-types="x" data-ahg-a0="${file.id}">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -538,3 +538,8 @@ if (document.readyState === 'loading') {
 } else {
     TiffPdfMerge.init();
 }
+
+// A top-level const is not a property of window, and data-ahg-call resolves
+// names from window (inline onclick could see the binding; the CSP-safe shim
+// cannot).
+window.TiffPdfMerge = TiffPdfMerge;

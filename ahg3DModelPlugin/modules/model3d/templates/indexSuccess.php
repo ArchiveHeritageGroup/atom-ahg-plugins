@@ -49,9 +49,9 @@ $totalPages = $sf_data->getRaw('totalPages');
                 <tr>
                     <td>
                         <?php if ($model->thumbnail): ?>
-                        <img src="/uploads/<?php echo $model->thumbnail ?>" alt="" class="rounded" style="width:50px;height:50px;object-fit:cover;">
+                        <img src="/uploads/<?php echo $model->thumbnail ?>" alt="" class="rounded" data-ahg-style="width:50px;height:50px;object-fit:cover;">
                         <?php else: ?>
-                        <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+                        <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center" data-ahg-style="width:50px;height:50px;">
                             <i class="fas fa-cube"></i>
                         </div>
                         <?php endif ?>

@@ -23,7 +23,7 @@ $idTypes = $taxonomyService->getIdTypes(true);
     <div class="row mb-4">
         <div class="col-md-4">
             <label class="form-label">Select Reading Room</label>
-            <select class="form-select" onchange="window.location.href='?room_id=' + this.value">
+            <select class="form-select" data-ahg-navigate="?room_id=">
                 <option value="">-- Select Room --</option>
                 <?php foreach ($rooms as $room): ?>
                 <option value="<?php echo $room->id ?>" <?php echo ($currentRoom && $currentRoom->id == $room->id) ? 'selected' : '' ?>>

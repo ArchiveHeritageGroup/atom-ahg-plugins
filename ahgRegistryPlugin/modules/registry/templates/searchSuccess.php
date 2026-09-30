@@ -64,7 +64,7 @@
   <?php $item = sfOutputEscaper::unescape($item); ?>
   <div class="list-group-item">
     <div class="d-flex align-items-start">
-      <div class="me-3" style="min-width: 40px; text-align: center;">
+      <div class="me-3" data-ahg-style="min-width: 40px; text-align: center;">
         <?php
           $entityType = $item->entity_type ?? '';
           $icons = [

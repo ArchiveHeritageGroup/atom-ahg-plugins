@@ -54,7 +54,7 @@
       @php $meta = $sectionMeta[$sectionCode]; @endphp
       <div class="accordion-item section-block" data-section="{{ $sectionCode }}" id="section-{{ $sectionCode }}">
         <h2 class="accordion-header">
-          <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $sectionCode }}" style="font-size:0.9rem">
+          <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $sectionCode }}" data-ahg-style="font-size:0.9rem">
             <i class="fas {{ $meta['icon'] }} fa-fw me-2 text-muted"></i>
             {{ $meta['label'] }}
             <span class="badge bg-secondary ms-2">{{ $meta['count'] }}</span>
@@ -87,13 +87,13 @@
                     <a href="{{ url_for(['module' => 'ahgDropdown', 'action' => 'edit', 'taxonomy' => $tax->taxonomy]) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Edit Terms') }}">
                       <i class="fas fa-edit"></i>
                     </a>
-                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="renameTaxonomy('{{ e($tax->taxonomy) }}', '{{ e($tax->taxonomy_label) }}')" title="{{ __('Rename') }}">
+                    <button type="button" class="btn btn-sm btn-outline-warning" data-ahg-call="renameTaxonomy" data-ahg-types="s,s" data-ahg-a0="{{ e($tax->taxonomy) }}" data-ahg-a1="{{ e($tax->taxonomy_label) }}" title="{{ __('Rename') }}">
                       <i class="fas fa-pen"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-info" onclick="moveTaxonomy('{{ e($tax->taxonomy) }}', '{{ $sectionCode }}')" title="{{ __('Move to Section') }}">
+                    <button type="button" class="btn btn-sm btn-outline-info" data-ahg-call="moveTaxonomy" data-ahg-types="s,s" data-ahg-a0="{{ e($tax->taxonomy) }}" data-ahg-a1="{{ $sectionCode }}" title="{{ __('Move to Section') }}">
                       <i class="fas fa-arrows-alt"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteTaxonomy('{{ e($tax->taxonomy) }}')" title="{{ __('Delete') }}">
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="deleteTaxonomy" data-ahg-types="s" data-ahg-a0="{{ e($tax->taxonomy) }}" title="{{ __('Delete') }}">
                       <i class="fas fa-trash"></i>
                     </button>
                   </td>

@@ -46,7 +46,7 @@ if ($isPdf && in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->
 
   <?php } else { ?>
 
-    <div class="digitalObject text-center" style="width: 120px;">
+    <div class="digitalObject text-center" data-ahg-style="width: 120px;">
 
       <?php if (isset($link)) { ?>
         <?php if ($hasPiiRedaction): ?>

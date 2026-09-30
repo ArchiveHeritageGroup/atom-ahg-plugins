@@ -19,7 +19,7 @@ if (!empty($seller->display_name)) {
   <?php if (!empty($seller->avatar_path)): ?>
     <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="mkt-seller-avatar rounded-circle me-1" width="24" height="24">
   <?php else: ?>
-    <span class="mkt-seller-avatar rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center me-1" style="width:24px;height:24px;font-size:0.65rem;">
+    <span class="mkt-seller-avatar rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center me-1" data-ahg-style="width:24px;height:24px;font-size:0.65rem;">
       <?php echo esc_entities($initials); ?>
     </span>
   <?php endif; ?>

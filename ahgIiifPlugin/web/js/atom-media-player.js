@@ -282,14 +282,14 @@
                 '<label class="form-label">Start Time</label>' +
                 '<div class="input-group">' +
                 '<input type="text" class="form-control" id="snippetStart-' + id + '" value="0:00" readonly>' +
-                '<button class="btn btn-outline-secondary" type="button" onclick="window._ahgSetSnipTime(\'start\',' + id + ')">' +
+                '<button class="btn btn-outline-secondary" type="button" data-ahg-call="_ahgSetSnipTime" data-ahg-types="s,x" data-ahg-a0="start" data-ahg-a1="' + id + '">' +
                 '<i class="fas fa-map-marker-alt"></i> Set</button>' +
                 '</div></div>' +
                 '<div class="col-6">' +
                 '<label class="form-label">End Time</label>' +
                 '<div class="input-group">' +
                 '<input type="text" class="form-control" id="snippetEnd-' + id + '" value="0:00" readonly>' +
-                '<button class="btn btn-outline-secondary" type="button" onclick="window._ahgSetSnipTime(\'end\',' + id + ')">' +
+                '<button class="btn btn-outline-secondary" type="button" data-ahg-call="_ahgSetSnipTime" data-ahg-types="s,x" data-ahg-a0="end" data-ahg-a1="' + id + '">' +
                 '<i class="fas fa-flag-checkered"></i> Set</button>' +
                 '</div></div></div>' +
                 '<div class="mb-3">' +
@@ -302,7 +302,7 @@
                 '</div></div>' +
                 '<div class="modal-footer">' +
                 '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>' +
-                '<button type="button" class="btn btn-primary" onclick="window._ahgSaveSnippet(' + id + ')">' +
+                '<button type="button" class="btn btn-primary" data-ahg-call="_ahgSaveSnippet" data-ahg-types="x" data-ahg-a0="' + id + '">' +
                 '<i class="fas fa-save me-1"></i>Save Snippet</button>' +
                 '</div></div></div>';
             return modal;
@@ -320,7 +320,7 @@
                 this.hasTranscription = false;
                 if (slot) {
                     slot.innerHTML =
-                        '<button class="btn btn-sm btn-success" id="transcribe-btn-' + id + '" onclick="window._ahgStartTranscription(' + id + ')">' +
+                        '<button class="btn btn-sm btn-success" id="transcribe-btn-' + id + '" data-ahg-call="_ahgStartTranscription" data-ahg-types="x" data-ahg-a0="' + id + '">' +
                         '<i class="fas fa-microphone"></i> Generate Transcript</button>';
                 }
                 var body = document.getElementById('ahg-transcript-body-' + id);
@@ -343,7 +343,7 @@
                     self.hasTranscription = false;
                     if (slot) {
                         slot.innerHTML =
-                            '<button class="btn btn-sm btn-success" id="transcribe-btn-' + id + '" onclick="window._ahgStartTranscription(' + id + ')">' +
+                            '<button class="btn btn-sm btn-success" id="transcribe-btn-' + id + '" data-ahg-call="_ahgStartTranscription" data-ahg-types="x" data-ahg-a0="' + id + '">' +
                             '<i class="fas fa-microphone"></i> Generate Transcript</button>';
                     }
                     var body = document.getElementById('ahg-transcript-body-' + id);
@@ -366,11 +366,11 @@
                 '<i class="fas fa-download"></i> SRT</a>';
 
             // Re-transcribe
-            html += '<button class="btn btn-sm btn-outline-warning" onclick="window._ahgReTranscribe(' + id + ')" title="Re-transcribe">' +
+            html += '<button class="btn btn-sm btn-outline-warning" data-ahg-call="_ahgReTranscribe" data-ahg-types="x" data-ahg-a0="' + id + '" title="Re-transcribe">' +
                 '<i class="fas fa-redo"></i> Re-transcribe</button>';
 
             // Delete
-            html += '<button class="btn btn-sm btn-outline-danger" onclick="window._ahgDeleteTranscription(' + id + ')" title="Delete transcription">' +
+            html += '<button class="btn btn-sm btn-outline-danger" data-ahg-call="_ahgDeleteTranscription" data-ahg-types="x" data-ahg-a0="' + id + '" title="Delete transcription">' +
                 '<i class="fas fa-trash"></i></button>';
 
             slot.innerHTML = html;
@@ -394,7 +394,7 @@
             // Search
             html += '<div class="input-group input-group-sm mb-2">';
             html += '<input type="text" class="form-control" id="ahg-tsearch-' + id + '" placeholder="Search transcript...">';
-            html += '<button class="btn btn-outline-secondary" onclick="window._ahgTSearch(' + id + ')"><i class="fas fa-search"></i></button>';
+            html += '<button class="btn btn-outline-secondary" data-ahg-call="_ahgTSearch" data-ahg-types="x" data-ahg-a0="' + id + '"><i class="fas fa-search"></i></button>';
             html += '</div>';
 
             if (segments.length > 0) {
@@ -402,8 +402,8 @@
                 for (var i = 0; i < segments.length; i++) {
                     var seg = segments[i];
                     html += '<p class="transcript-segment mb-2" data-start="' + (seg.start || 0) + '" data-end="' + (seg.end || 0) + '" ' +
-                        'onclick="window._ahgTSeek(' + id + ',' + (seg.start || 0) + ',this)" ' +
-                        'style="cursor:pointer; padding:4px 8px; border-radius:4px; transition:background 0.2s;" ' +
+                        'data-ahg-call="_ahgTSeek" data-ahg-types="x,x,this" data-ahg-a0="' + id + '" data-ahg-a1="' + (seg.start || 0) + '" ' +
+                        'data-ahg-style="cursor:pointer; padding:4px 8px; border-radius:4px; transition:background 0.2s;" ' +
                         'onmouseover="this.style.background=\'#f0f0f0\'" onmouseout="this.style.background=\'transparent\'">' +
                         '<small class="text-muted">[' + AhgMediaPlayer.formatTime(seg.start || 0) + ']</small> ' +
                         AhgMediaPlayer.escapeHtml((seg.text || '').trim()) +
@@ -411,7 +411,7 @@
                 }
                 html += '</div>';
             } else if (fullText) {
-                html += '<p class="mb-0" style="white-space:pre-wrap;">' + AhgMediaPlayer.escapeHtml(fullText) + '</p>';
+                html += '<p class="mb-0" data-ahg-style="white-space:pre-wrap;">' + AhgMediaPlayer.escapeHtml(fullText) + '</p>';
             }
 
             body.innerHTML = html;
@@ -462,8 +462,8 @@
                 if (s.duration) html += ' (' + AhgMediaPlayer.formatTime(s.duration) + ')';
                 html += '</div></div>';
                 html += '<div class="btn-group btn-group-sm">';
-                html += '<button class="btn btn-outline-primary" onclick="window._ahgSnipPlay(' + id + ',' + (s.start_time || 0) + ',' + (s.end_time || 0) + ')"><i class="fas fa-play"></i></button>';
-                html += '<button class="btn btn-outline-danger" onclick="window._ahgDeleteSnippet(' + (s.id || 0) + ',' + id + ')"><i class="fas fa-trash"></i></button>';
+                html += '<button class="btn btn-outline-primary" data-ahg-call="_ahgSnipPlay" data-ahg-types="x,x,x" data-ahg-a0="' + id + '" data-ahg-a1="' + (s.start_time || 0) + '" data-ahg-a2="' + (s.end_time || 0) + '"><i class="fas fa-play"></i></button>';
+                html += '<button class="btn btn-outline-danger" data-ahg-call="_ahgDeleteSnippet" data-ahg-types="x,x" data-ahg-a0="' + (s.id || 0) + '" data-ahg-a1="' + id + '"><i class="fas fa-trash"></i></button>';
                 if (s.export_path) {
                     html += '<a class="btn btn-outline-secondary" href="' + s.export_path + '" download><i class="fas fa-download"></i></a>';
                 }

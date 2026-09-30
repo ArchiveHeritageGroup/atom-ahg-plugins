@@ -38,8 +38,8 @@
         <input class="c-btn c-btn-submit" type="submit" value="<?php echo __('Search'); ?>"/>
       </section>
 
-      <div style="margin-top: 1rem;">
-        <button type="button" data-ahg-call="exportTableToCSV" class="c-btn" style="width:100%;">
+      <div data-ahg-style="margin-top: 1rem;">
+        <button type="button" data-ahg-call="exportTableToCSV" class="c-btn" data-ahg-style="width:100%;">
           <i class="fa fa-download"></i> <?php echo __('Export CSV'); ?>
         </button>
       </div>
@@ -58,7 +58,7 @@
       <?php echo __('Found %1% results', ['%1%' => $total]); ?>
     </div>
 
-    <div style="margin-bottom: 1rem; font-size: 0.85rem;">
+    <div data-ahg-style="margin-bottom: 1rem; font-size: 0.85rem;">
       <strong><?php echo __('Show/Hide Columns'); ?>:</strong><br/>
       <label><input type="checkbox" data-ahg-toggle-column="0" checked> Authorized Form Of Name</label>
       <label><input type="checkbox" data-ahg-toggle-column="1" checked> Created</label>
@@ -110,7 +110,7 @@
     }
     </script>
 
-    <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+    <div class="table-responsive" data-ahg-style="max-height: 600px; overflow: auto;">
       <table id="reportTable" class="table table-bordered table-striped table-sm">
         <thead>
           <tr>

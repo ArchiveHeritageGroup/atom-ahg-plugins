@@ -26,8 +26,8 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
         <div class="flex-fill"><span class="badge bg-primary rounded-pill">5</span><br><small class="fw-bold"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 75%"></div>
+    <div class="progress mt-2" data-ahg-style="height: 4px;">
+        <div class="progress-bar" data-ahg-style="width: 75%"></div>
     </div>
 </div>
 
@@ -69,7 +69,7 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
                     <i class="fas fa-expand-alt me-1"></i><?php echo __('Expand All') ?>
                 </button>
             </div>
-            <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+            <div class="card-body" data-ahg-style="max-height: 500px; overflow-y: auto;">
                 <?php if (!empty($tree)): ?>
                     <?php echo renderTree($tree); ?>
                 <?php else: ?>
@@ -145,7 +145,7 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
 function renderTree(array $nodes, int $depth = 0): string
 {
     $html = '<ul class="list-unstyled ' . ($depth > 0 ? 'ms-3 tree-children' : '') . '"' .
-            ($depth > 0 ? ' style="display:block;"' : '') . '>';
+            ($depth > 0 ? ' data-ahg-style="display:block;"' : '') . '>';
 
     foreach ($nodes as $node) {
         $cls = 'text-success';
@@ -158,12 +158,12 @@ function renderTree(array $nodes, int $depth = 0): string
         $hasChildren = !empty($node['children']);
 
         $html .= '<li class="mb-1">';
-        $html .= '<div class="d-flex align-items-center tree-node" data-row="' . $node['row_number'] . '" style="cursor:pointer;">';
+        $html .= '<div class="d-flex align-items-center tree-node" data-row="' . $node['row_number'] . '" data-ahg-style="cursor:pointer;">';
 
         if ($hasChildren) {
             $html .= '<i class="fas fa-caret-down me-1 tree-toggle"></i>';
         } else {
-            $html .= '<i class="fas fa-file me-1 text-muted" style="width:14px"></i>';
+            $html .= '<i class="fas fa-file me-1 text-muted" data-ahg-style="width:14px"></i>';
         }
 
         $html .= '<span class="' . $cls . '">';

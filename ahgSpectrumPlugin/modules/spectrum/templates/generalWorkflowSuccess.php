@@ -124,15 +124,15 @@ $users = DB::table('user')
                             };
                         ?>
                         <div class="text-center">
-                            <span class="badge <?php echo $badgeClass; ?> d-block mb-1" style="min-width: 30px;">
+                            <span class="badge <?php echo $badgeClass; ?> d-block mb-1" data-ahg-style="min-width: 30px;">
                                 <?php echo $step['order']; ?>
                             </span>
-                            <small class="d-block" style="max-width: 80px; font-size: 0.7rem;">
+                            <small class="d-block" data-ahg-style="max-width: 80px; font-size: 0.7rem;">
                                 <?php echo esc_entities($step['name']); ?>
                             </small>
                         </div>
                         <?php if ($index < count($steps) - 1): ?>
-                        <div class="d-flex align-items-center" style="margin-top: -15px;">
+                        <div class="d-flex align-items-center" data-ahg-style="margin-top: -15px;">
                             <i class="fas fa-arrow-right text-muted"></i>
                         </div>
                         <?php endif; ?>

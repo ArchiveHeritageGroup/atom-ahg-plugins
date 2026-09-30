@@ -37,11 +37,11 @@
             $pct = $totalReviews > 0 ? round(($count / $totalReviews) * 100) : 0;
           ?>
           <div class="d-flex align-items-center mb-1">
-            <span class="small text-nowrap me-2" style="width: 50px;"><?php echo $star; ?> <i class="fas fa-star text-warning small"></i></span>
-            <div class="progress flex-grow-1" style="height: 10px;">
-              <div class="progress-bar bg-warning" style="width: <?php echo $pct; ?>%;"></div>
+            <span class="small text-nowrap me-2" data-ahg-style="width: 50px;"><?php echo $star; ?> <i class="fas fa-star text-warning small"></i></span>
+            <div class="progress flex-grow-1" data-ahg-style="height: 10px;">
+              <div class="progress-bar bg-warning" data-ahg-style="width: <?php echo $pct; ?>%;"></div>
             </div>
-            <span class="small text-muted ms-2" style="width: 40px;"><?php echo $count; ?></span>
+            <span class="small text-muted ms-2" data-ahg-style="width: 40px;"><?php echo $count; ?></span>
           </div>
         <?php endfor; ?>
       </div>

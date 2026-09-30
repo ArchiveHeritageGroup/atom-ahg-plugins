@@ -83,7 +83,7 @@
           <td><?php echo esc_entities($user->granted_by_name ?? '-') ?></td>
           <td>
             <button class="btn btn-sm btn-outline-danger" 
-                    onclick="revokeAccess(<?php echo $user->user_id ?>)">
+                    data-ahg-call="revokeAccess" data-ahg-types="x" data-ahg-a0="<?php echo $user->user_id ?>">
               <i class="fas fa-ban"></i> <?php echo __('Revoke') ?>
             </button>
           </td>

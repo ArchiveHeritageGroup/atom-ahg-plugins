@@ -24,7 +24,7 @@ $checklists = ($checklistsRaw instanceof sfOutputEscaperArrayDecorator) ? $check
         <ul class="dropdown-menu dropdown-menu-end">
           <?php foreach ($templates as $template): ?>
             <li>
-              <form method="post" action="<?php echo url_for(['module' => 'exhibition', 'action' => 'createChecklist', 'id' => $exhibition['id']]); ?>" style="display: inline;">
+              <form method="post" action="<?php echo url_for(['module' => 'exhibition', 'action' => 'createChecklist', 'id' => $exhibition['id']]); ?>" data-ahg-style="display: inline;">
                 <input type="hidden" name="template_id" value="<?php echo $template['id']; ?>">
                 <button type="submit" class="dropdown-item">
                   <?php echo htmlspecialchars($template['name']); ?>
@@ -73,9 +73,9 @@ $checklists = ($checklistsRaw instanceof sfOutputEscaperArrayDecorator) ? $check
           </div>
 
           <div class="card-body p-0">
-            <div class="progress" style="height: 4px; border-radius: 0;">
+            <div class="progress" data-ahg-style="height: 4px; border-radius: 0;">
               <div class="progress-bar bg-<?php echo $progress == 100 ? 'success' : 'primary'; ?>"
-                   style="width: <?php echo $progress; ?>%"></div>
+                   data-ahg-style="width: <?php echo $progress; ?>%"></div>
             </div>
 
             <?php if (!empty($checklist['items'])): ?>
@@ -84,9 +84,9 @@ $checklists = ($checklistsRaw instanceof sfOutputEscaperArrayDecorator) ? $check
                   <li class="list-group-item <?php echo !empty($item['is_completed']) ? 'bg-light' : ''; ?>">
                     <div class="d-flex align-items-start">
                       <div class="form-check me-3">
-                        <input type="checkbox" class="form-check-input" style="transform: scale(1.3);"
+                        <input type="checkbox" class="form-check-input" data-ahg-style="transform: scale(1.3);"
                                <?php echo !empty($item['is_completed']) ? 'checked disabled' : ''; ?>
-                               onchange="completeItem(<?php echo $item['id']; ?>, this.checked)">
+                               data-ahg-call="completeItem" data-ahg-on="change" data-ahg-types="x,checked" data-ahg-a0="<?php echo $item['id']; ?>">
                       </div>
                       <div class="flex-grow-1">
                         <div class="d-flex justify-content-between">
@@ -155,7 +155,7 @@ $checklists = ($checklistsRaw instanceof sfOutputEscaperArrayDecorator) ? $check
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>
@@ -180,9 +180,9 @@ $checklists = ($checklistsRaw instanceof sfOutputEscaperArrayDecorator) ? $check
           <div class="display-4"><?php echo $overallProgress; ?>%</div>
           <small class="text-muted"><?php echo $completedItems; ?> of <?php echo $totalItems; ?> items complete</small>
         </div>
-        <div class="progress" style="height: 8px;">
+        <div class="progress" data-ahg-style="height: 8px;">
           <div class="progress-bar bg-<?php echo $overallProgress == 100 ? 'success' : 'primary'; ?>"
-               style="width: <?php echo $overallProgress; ?>%"></div>
+               data-ahg-style="width: <?php echo $overallProgress; ?>%"></div>
         </div>
       </div>
     </div>

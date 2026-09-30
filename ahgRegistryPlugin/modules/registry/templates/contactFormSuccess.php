@@ -125,7 +125,7 @@
             <a href="<?php echo $backUrl; ?>" class="btn btn-outline-secondary"><?php echo __('Cancel'); ?></a>
           <?php endif; ?>
           <?php if ($contact && !empty($c->id)): ?>
-            <button type="button" class="btn btn-outline-danger ms-2" onclick="if(confirm('<?php echo __('Are you sure you want to delete this contact?'); ?>')) { document.getElementById('delete-contact-form').submit(); }">
+            <button type="button" class="btn btn-outline-danger ms-2" data-ahg-confirm="<?php echo __('Are you sure you want to delete this contact?'); ?>" data-ahg-submit="#delete-contact-form">
               <i class="fas fa-trash me-1"></i> <?php echo __('Delete'); ?>
             </button>
           <?php endif; ?>
@@ -136,7 +136,7 @@
     </form>
 
     <?php if ($contact && !empty($c->id)): ?>
-    <form id="delete-contact-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContactDelete', 'id' => (int) $c->id]); ?>" style="display: none;">
+    <form id="delete-contact-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContactDelete', 'id' => (int) $c->id]); ?>" data-ahg-style="display: none;">
     </form>
     <?php endif; ?>
 

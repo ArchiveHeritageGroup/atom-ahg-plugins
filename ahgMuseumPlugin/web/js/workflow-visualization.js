@@ -355,13 +355,13 @@
         html += '<br><small>' + d.description + '</small>';
       }
       if (d.isCurrent) {
-        html += '<br><span style="color:#4caf50">● Current State</span>';
+        html += '<br><span data-ahg-style="color:#4caf50">● Current State</span>';
       }
       if (d.isInitial) {
-        html += '<br><span style="color:#2196f3">→ Initial State</span>';
+        html += '<br><span data-ahg-style="color:#2196f3">→ Initial State</span>';
       }
       if (d.isFinal) {
-        html += '<br><span style="color:#9e9e9e">◎ Final State</span>';
+        html += '<br><span data-ahg-style="color:#9e9e9e">◎ Final State</span>';
       }
 
       this.tooltip

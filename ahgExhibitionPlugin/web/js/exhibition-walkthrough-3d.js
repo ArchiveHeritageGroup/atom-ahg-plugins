@@ -1917,15 +1917,15 @@
         var pad = 10, vw = 236, sx = (mxx - mnx) || 1, sz = (mxz - mnz) || 1;
         var sc = (vw - 2 * pad) / Math.max(sx, sz), vh = Math.round(sz * sc + 2 * pad);
         var P = function (x, z) { return ((x - mnx) * sc + pad) + ',' + ((z - mnz) * sc + pad); };
-        var btns = floors.map(function (f) { return '<button type="button" class="btn btn-sm ' + (f === miniFloor ? 'btn-primary' : 'btn-outline-light') + ' py-0 px-1 me-1 mb-1 minifloor" data-f="' + f + '" style="font-size:10px">' + miniFloorLabel(f) + '</button>'; }).join('');
-        var svg = '<div class="mb-1">' + btns + '</div><svg width="' + vw + '" height="' + vh + '" style="background:#11141a;border-radius:4px;display:block;">';
+        var btns = floors.map(function (f) { return '<button type="button" class="btn btn-sm ' + (f === miniFloor ? 'btn-primary' : 'btn-outline-light') + ' py-0 px-1 me-1 mb-1 minifloor" data-f="' + f + '" data-ahg-style="font-size:10px">' + miniFloorLabel(f) + '</button>'; }).join('');
+        var svg = '<div class="mb-1">' + btns + '</div><svg width="' + vw + '" height="' + vh + '" data-ahg-style="background:#11141a;border-radius:4px;display:block;">';
         fr.forEach(function (rm) {
           var i = ROOMS.indexOf(rm);
           var pts = [[rm.x_offset, rm.z_offset], [rm.x_offset + rm.w, rm.z_offset], [rm.x_offset + rm.w, rm.z_offset + rm.d], [rm.x_offset, rm.z_offset + rm.d]]
             .map(function (c) { var w = roomWorld(rm, c[0], c[1]); return P(w.x, w.z); }).join(' ');
-          svg += '<polygon data-i="' + i + '" points="' + pts + '" fill="' + (rm === here ? '#0d6efd' : 'rgba(255,255,255,.16)') + '" stroke="#fff" stroke-width="1" style="cursor:pointer"/>';
+          svg += '<polygon data-i="' + i + '" points="' + pts + '" fill="' + (rm === here ? '#0d6efd' : 'rgba(255,255,255,.16)') + '" stroke="#fff" stroke-width="1" data-ahg-style="cursor:pointer"/>';
           var cc = roomWorld(rm, rm.x_offset + rm.w / 2, rm.z_offset + rm.d / 2);
-          svg += '<text x="' + ((cc.x - mnx) * sc + pad) + '" y="' + ((cc.z - mnz) * sc + pad + 3) + '" fill="#fff" font-size="9" text-anchor="middle" style="pointer-events:none">' + (rm.name || '').substring(0, 14) + '</text>';
+          svg += '<text x="' + ((cc.x - mnx) * sc + pad) + '" y="' + ((cc.z - mnz) * sc + pad + 3) + '" fill="#fff" font-size="9" text-anchor="middle" data-ahg-style="pointer-events:none">' + (rm.name || '').substring(0, 14) + '</text>';
         });
         svg += '</svg>';
         var el = document.getElementById('wtMiniSvg'); el.innerHTML = svg;
@@ -1957,8 +1957,8 @@
         if (r.humidity) parts.push('' + T('Humidity') + ': ' + r.humidity.value + '%');
         if (r.visitors) parts.push('' + T('Visitors') + ': ' + Math.round(r.visitors.value));
         var col = { ok: '#7bd88f', warn: '#ffd454', alert: '#ff8a8a' }[lv.status] || '#cccccc';
-        var reasons = (lv.reasons && lv.reasons.length) ? '<div class="text-white-50 mt-1" style="font-size:11px">' + lv.reasons.join('<br>') + '</div>' : '';
-        return '<div style="color:' + col + ';font-weight:bold;text-transform:uppercase">' + lv.status + '</div><div>' + parts.join('<br>') + '</div>' + reasons;
+        var reasons = (lv.reasons && lv.reasons.length) ? '<div class="text-white-50 mt-1" data-ahg-style="font-size:11px">' + lv.reasons.join('<br>') + '</div>' : '';
+        return '<div data-ahg-style="color:' + col + ';font-weight:bold;text-transform:uppercase">' + lv.status + '</div><div>' + parts.join('<br>') + '</div>' + reasons;
       }
       function updateLive() {
         if (!liveOn) return;
@@ -2576,8 +2576,8 @@
           tourOpts += '<option value="' + i + '">' + nm + '</option>';
         });
         blocker.innerHTML =
-          '<div class="text-center text-white" style="max-width:340px;padding:0 18px;">' +
-            '<div style="font-size:2.2rem;"><i class="fas fa-route"></i></div>' +
+          '<div class="text-center text-white" data-ahg-style="max-width:340px;padding:0 18px;">' +
+            '<div data-ahg-style="font-size:2.2rem;"><i class="fas fa-route"></i></div>' +
             '<div class="fw-bold mt-2 mb-2">' + T('Take a guided tour') + '</div>' +
             (singleTour
               ? '<div class="small text-white-50 mb-2">' + ((TOURS[0].name || 'Tour').replace(/[<>&]/g, '')) + '</div>'

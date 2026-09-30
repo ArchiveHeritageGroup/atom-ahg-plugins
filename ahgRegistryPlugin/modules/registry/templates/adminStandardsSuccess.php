@@ -42,7 +42,7 @@
   <table class="table table-hover table-striped align-middle">
     <thead class="table-light">
       <tr>
-        <th style="width: 60px;"><?php echo __('Sort'); ?></th>
+        <th data-ahg-style="width: 60px;"><?php echo __('Sort'); ?></th>
         <th><?php echo __('Acronym'); ?></th>
         <th><?php echo __('Name'); ?></th>
         <th><?php echo __('Category'); ?></th>

@@ -196,7 +196,7 @@ function initIdentifierSelector(container) {
         if (raw && raw.cover_url) {
             html += '<div class="col-md-4 text-center">' +
                 '<img src="' + escapeHtml(raw.cover_url) + '" alt="Cover" ' +
-                'class="img-fluid rounded" style="max-height:150px;"></div>';
+                'class="img-fluid rounded" data-ahg-style="max-height:150px;"></div>';
         }
 
         html += '</div>';

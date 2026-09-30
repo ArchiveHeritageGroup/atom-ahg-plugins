@@ -158,7 +158,7 @@
                             </a>
                         </div>
                     </div>
-                    <div id="sync-result" class="mt-3" style="display: none;">
+                    <div id="sync-result" class="mt-3" data-ahg-style="display: none;">
                         <div class="alert mb-0" role="alert"></div>
                     </div>
                 </div>
@@ -177,7 +177,7 @@
                             <i class="fas fa-search me-1"></i><?php echo __('Expand'); ?>
                         </button>
                     </div>
-                    <div id="expansion-result" style="display: none;">
+                    <div id="expansion-result" data-ahg-style="display: none;">
                         <h6><?php echo __('Expansions:'); ?></h6>
                         <div id="expansion-terms"></div>
                     </div>

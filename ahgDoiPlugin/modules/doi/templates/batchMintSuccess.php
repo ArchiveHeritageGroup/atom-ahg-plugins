@@ -51,7 +51,7 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th style="width: 40px;">
+                                <th data-ahg-style="width: 40px;">
                                     <input type="checkbox" class="form-check-input" id="check-all">
                                 </th>
                                 <th>Title</th>
@@ -84,7 +84,7 @@
                     <div class="row align-items-center">
                         <div class="col">
                             <label class="form-label">Initial DOI State</label>
-                            <select name="state" class="form-select" style="max-width: 200px;">
+                            <select name="state" class="form-select" data-ahg-style="max-width: 200px;">
                                 <option value="findable">Findable (Recommended)</option>
                                 <option value="registered">Registered</option>
                                 <option value="draft">Draft</option>

@@ -83,7 +83,7 @@
                         <th class="text-center">Tokens</th>
                         <th class="text-center">Model</th>
                         <th>Created</th>
-                        <th style="width: 150px">Actions</th>
+                        <th data-ahg-style="width: 150px">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,7 +112,7 @@
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-primary" onclick="reviewSuggestion(<?php echo $suggestion->id; ?>, <?php echo $suggestion->object_id; ?>)">
+                                <button class="btn btn-sm btn-primary" data-ahg-call="reviewSuggestion" data-ahg-types="x,x" data-ahg-a0="<?php echo $suggestion->id; ?>" data-ahg-a1="<?php echo $suggestion->object_id; ?>">
                                     <i class="bi bi-eye me-1"></i>Review
                                 </button>
                             </td>
@@ -146,7 +146,7 @@
                     <p class="mt-2">Loading...</p>
                 </div>
             </div>
-            <div class="modal-footer" id="reviewModalFooter" style="display: none;">
+            <div class="modal-footer" id="reviewModalFooter" data-ahg-style="display: none;">
                 <div class="me-auto">
                     <small class="text-muted" id="reviewStats"></small>
                 </div>
@@ -191,9 +191,9 @@ function reviewSuggestion(suggestionId, objectId) {
             html += '<div class="col-md-6">';
             html += '<div class="card h-100">';
             html += '<div class="card-header"><i class="bi bi-file-text me-1"></i>Current Description</div>';
-            html += '<div class="card-body" style="max-height: 400px; overflow-y: auto;">';
+            html += '<div class="card-body" data-ahg-style="max-height: 400px; overflow-y: auto;">';
             if (s.existing_text && s.existing_text.trim()) {
-                html += '<pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(s.existing_text) + '</pre>';
+                html += '<pre class="mb-0" data-ahg-style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(s.existing_text) + '</pre>';
             } else {
                 html += '<em class="text-muted">No existing description</em>';
             }
@@ -205,7 +205,7 @@ function reviewSuggestion(suggestionId, objectId) {
             html += '<div class="card-header bg-primary text-white"><i class="bi bi-magic me-1"></i>AI Suggestion';
             html += '<span class="badge bg-light text-primary float-end">' + (s.model_used || 'AI') + '</span></div>';
             html += '<div class="card-body">';
-            html += '<textarea id="editSuggestedText" class="form-control" rows="15" style="font-size: 0.9rem;">' + escapeHtml(s.suggested_text) + '</textarea>';
+            html += '<textarea id="editSuggestedText" class="form-control" rows="15" data-ahg-style="font-size: 0.9rem;">' + escapeHtml(s.suggested_text) + '</textarea>';
             html += '<small class="text-muted mt-1 d-block"><i class="bi bi-pencil me-1"></i>Edit before approving</small>';
             html += '</div></div></div>';
 

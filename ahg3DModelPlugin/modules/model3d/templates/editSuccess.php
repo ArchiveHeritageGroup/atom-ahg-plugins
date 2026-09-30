@@ -40,7 +40,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                         field-of-view="<?php echo $model->field_of_view ?>"
                         exposure="<?php echo $model->exposure ?>"
                         shadow-intensity="<?php echo $model->shadow_intensity ?>"
-                        style="width:100%; height:400px; background-color: <?php echo $model->background_color ?>;"
+                        data-ahg-style="width:100%; height:400px; background-color: <?php echo $model->background_color ?>;"
                     ></model-viewer>
                 </div>
             </div>
@@ -100,7 +100,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                                 <label for="exposure" class="form-label">Exposure</label>
                                 <input type="range" class="form-range" id="exposure" name="exposure" 
                                        min="0" max="2" step="0.1" value="<?php echo $model->exposure ?>"
-                                       oninput="document.getElementById('exposure-val').textContent=this.value; updatePreview();">
+                                       data-ahg-mirror="#exposure-val" data-ahg-call="updatePreview" data-ahg-on="input" data-ahg-types="">
                                 <span id="exposure-val"><?php echo $model->exposure ?></span>
                             </div>
                         </div>
@@ -109,7 +109,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                                 <label for="shadow_intensity" class="form-label">Shadow Intensity</label>
                                 <input type="range" class="form-range" id="shadow_intensity" name="shadow_intensity" 
                                        min="0" max="2" step="0.1" value="<?php echo $model->shadow_intensity ?>"
-                                       oninput="document.getElementById('shadow-val').textContent=this.value; updatePreview();">
+                                       data-ahg-mirror="#shadow-val" data-ahg-call="updatePreview" data-ahg-on="input" data-ahg-types="">
                                 <span id="shadow-val"><?php echo $model->shadow_intensity ?></span>
                             </div>
                         </div>
@@ -124,10 +124,10 @@ $hotspots = $sf_data->getRaw('hotspots');
 
                     <div class="mb-3">
                         <label for="background_color" class="form-label">Background Color</label>
-                        <div class="input-group" style="max-width:200px;">
+                        <div class="input-group" data-ahg-style="max-width:200px;">
                             <input type="color" class="form-control form-control-color" id="bg_color_picker" 
                                    value="<?php echo $model->background_color ?>"
-                                   onchange="document.getElementById('background_color').value=this.value; updatePreview();">
+                                   data-ahg-copy-to="#background_color" data-ahg-call="updatePreview" data-ahg-on="change" data-ahg-types="">
                             <input type="text" class="form-control" id="background_color" name="background_color" 
                                    value="<?php echo $model->background_color ?>">
                         </div>
@@ -250,7 +250,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                         <?php foreach ($hotspots as $hotspot): ?>
                         <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="badge" style="background-color:<?php echo $hotspot->color ?>;"><?php echo ucfirst($hotspot->hotspot_type) ?></span>
+                                <span class="badge" data-ahg-style="background-color:<?php echo $hotspot->color ?>;"><?php echo ucfirst($hotspot->hotspot_type) ?></span>
                                 <small class="ms-1"><?php echo esc_entities($hotspot->title ?: 'Untitled') ?></small>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-danger delete-hotspot" data-id="<?php echo $hotspot->id ?>">

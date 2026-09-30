@@ -25,7 +25,7 @@ $actions = ['', 'destroy', 'transfer', 'retain_permanent', 'review'];
                 <tr><td colspan="5" class="text-center text-muted py-4"><?php echo __('No classification nodes yet — add one →'); ?></td></tr>
                 <?php else: foreach ($rows as $n): ?>
                 <tr>
-                    <td><span style="padding-left: <?php echo (int) $n->depth * 18; ?>px"><code><?php echo htmlspecialchars($n->code); ?></code> <?php echo htmlspecialchars($n->title); ?></span></td>
+                    <td><span data-ahg-style="padding-left: <?php echo (int) $n->depth * 18; ?>px"><code><?php echo htmlspecialchars($n->code); ?></code> <?php echo htmlspecialchars($n->title); ?></span></td>
                     <td><span class="badge bg-light text-dark"><?php echo htmlspecialchars($n->node_type); ?></span></td>
                     <td class="small"><?php echo htmlspecialchars((string) $n->retention_period); ?><?php echo $n->disposal_action ? ' <span class="text-muted">('.htmlspecialchars($n->disposal_action).')</span>' : ''; ?></td>
                     <td><?php echo (int) ($n->record_count ?? 0); ?></td>

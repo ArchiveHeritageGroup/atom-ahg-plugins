@@ -24,7 +24,7 @@
   <div class="card-body">
     <div class="d-flex align-items-start justify-content-between">
       <h1 class="h4 mb-1"><i class="fas fa-database me-2"></i><?php echo esc_specialchars($dataset->title); ?></h1>
-      <span class="badge" style="background:<?php echo $access[1]; ?>">
+      <span class="badge" data-ahg-style="background:<?php echo $access[1]; ?>">
         <i class="fas <?php echo $access[2]; ?> me-1"></i><?php echo $access[0]; ?>
       </span>
     </div>

@@ -54,7 +54,7 @@
         <div class="error-icon">✗</div>
         <h1><?php echo isset($service) ? esc_specialchars($service->failure_header) : 'Access Denied' ?></h1>
         <p><?php echo esc_specialchars($error ?? 'You do not have permission to access this resource.') ?></p>
-        <button class="btn" onclick="window.close()">Close</button>
+        <button class="btn" data-ahg-action="close">Close</button>
     </div>
 </body>
 </html>

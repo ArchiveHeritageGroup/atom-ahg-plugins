@@ -17,13 +17,13 @@ $photoTypes = [
 
 <div class="condition-check-header">
     <nav aria-label="breadcrumb" class="mb-2">
-        <ol class="breadcrumb mb-0" style="background: transparent; padding: 0;">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage') ?>" style="color: rgba(255,255,255,0.8);">Home</a></li>
+        <ol class="breadcrumb mb-0" data-ahg-style="background: transparent; padding: 0;">
+            <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage') ?>" data-ahg-style="color: rgba(255,255,255,0.8);">Home</a></li>
             <?php if ($conditionCheck->slug): ?>
-            <li class="breadcrumb-item"><a href="/<?php echo $conditionCheck->slug ?>" style="color: rgba(255,255,255,0.8);"><?php echo $conditionCheck->identifier ?></a></li>
+            <li class="breadcrumb-item"><a href="/<?php echo $conditionCheck->slug ?>" data-ahg-style="color: rgba(255,255,255,0.8);"><?php echo $conditionCheck->identifier ?></a></li>
             <?php endif ?>
-            <li class="breadcrumb-item"><a href="<?php echo url_for('@condition_photos?id=' . $photo->condition_check_id) ?>" style="color: rgba(255,255,255,0.8);">Condition Photos</a></li>
-            <li class="breadcrumb-item active" style="color: #fff;">Annotate</li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('@condition_photos?id=' . $photo->condition_check_id) ?>" data-ahg-style="color: rgba(255,255,255,0.8);">Condition Photos</a></li>
+            <li class="breadcrumb-item active" data-ahg-style="color: #fff;">Annotate</li>
         </ol>
     </nav>
     
@@ -65,7 +65,7 @@ $photoTypes = [
 <div class="row">
     <div class="col-lg-9">
         <!-- Annotation Canvas -->
-        <div id="annotator-container" style="min-height: 500px;"></div>
+        <div id="annotator-container" data-ahg-style="min-height: 500px;"></div>
     </div>
     
     <div class="col-lg-3">
@@ -82,7 +82,7 @@ $photoTypes = [
                 <?php else: ?>
                 <?php foreach ($annotations as $ann): ?>
                 <div class="annotation-list-item" data-id="<?php echo $ann['id'] ?? '' ?>">
-                    <span class="ann-color" style="background: <?php echo $ann['fabricData']['stroke'] ?? $ann['stroke'] ?? '#FF0000' ?>;"></span>
+                    <span class="ann-color" data-ahg-style="background: <?php echo $ann['fabricData']['stroke'] ?? $ann['stroke'] ?? '#FF0000' ?>;"></span>
                     <div class="ann-info">
                         <div class="ann-label">
                             <?php echo esc_entities($ann['label'] ?? 'Annotation') ?>
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var aiTag = ann.ai_generated ? '<span class="ann-ai">AI</span>' : '';
             
             html += '<div class="annotation-list-item" data-id="' + (ann.id || '') + '">' +
-                '<span class="ann-color" style="background: ' + color + ';"></span>' +
+                '<span class="ann-color" data-ahg-style="background: ' + color + ';"></span>' +
                 '<div class="ann-info">' +
                 '<div class="ann-label">' + (ann.label || 'Annotation') + ' ' + aiTag + '</div>' +
                 (ann.notes ? '<div class="ann-notes">' + ann.notes + '</div>' : '') +

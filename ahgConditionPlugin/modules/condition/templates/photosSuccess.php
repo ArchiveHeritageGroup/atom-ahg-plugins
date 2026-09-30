@@ -244,9 +244,9 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                     <i class="fas fa-spinner fa-spin fa-2x text-success mb-3 d-block"></i>
                     <p class="text-muted"><?php echo __('Analyzing image for damage...'); ?></p>
                 </div>
-                <div id="aiScanResult" style="display:none"></div>
+                <div id="aiScanResult" data-ahg-style="display:none"></div>
             </div>
-            <div class="modal-footer" id="aiScanFooter" style="display:none">
+            <div class="modal-footer" id="aiScanFooter" data-ahg-style="display:none">
                 <a href="#" id="aiScanViewFull" class="btn btn-primary btn-sm" target="_blank">
                     <i class="fas fa-eye me-1"></i><?php echo __('View Full Report'); ?>
                 </a>

@@ -36,7 +36,7 @@
 <div class="d-flex justify-content-between align-items-start mb-4">
   <div>
     <h1 class="h3 mb-1">
-      <span class="d-inline-block rounded-circle bg-<?php echo $sColor; ?> me-2" style="width: 12px; height: 12px;"></span>
+      <span class="d-inline-block rounded-circle bg-<?php echo $sColor; ?> me-2" data-ahg-style="width: 12px; height: 12px;"></span>
       <?php echo htmlspecialchars($instName, ENT_QUOTES, 'UTF-8'); ?>
     </h1>
     <div>

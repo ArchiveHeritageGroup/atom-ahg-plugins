@@ -28,7 +28,7 @@
 
   <!-- Map -->
   <div class="col-lg-9 mb-4">
-    <div id="registry-map" class="border rounded" style="height: 600px;"></div>
+    <div id="registry-map" class="border rounded" data-ahg-style="height: 600px;"></div>
   </div>
 
   <!-- Sidebar: institution list -->
@@ -38,7 +38,7 @@
         <?php echo __('Institutions'); ?>
         <span class="badge bg-primary ms-1" id="map-count">0</span>
       </div>
-      <div class="card-body p-0" style="max-height: 555px; overflow-y: auto;">
+      <div class="card-body p-0" data-ahg-style="max-height: 555px; overflow-y: auto;">
         <div class="list-group list-group-flush" id="institution-list">
           <!-- Populated by JavaScript -->
         </div>
@@ -104,14 +104,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var icon = L.divIcon({
       className: 'registry-marker',
-      html: '<div style="background-color: ' + color + '; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3);"></div>',
+      html: '<div data-ahg-style="background-color: ' + color + '; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3);"></div>',
       iconSize: [16, 16],
       iconAnchor: [8, 8]
     });
 
-    var popupContent = '<div style="min-width: 200px;">'
+    var popupContent = '<div data-ahg-style="min-width: 200px;">'
       + '<strong>' + escapeHtml(inst.name) + '</strong>'
-      + '<br><span class="badge" style="background-color: ' + color + '; font-size: 10px;">' + typeLabel + '</span>';
+      + '<br><span class="badge" data-ahg-style="background-color: ' + color + '; font-size: 10px;">' + typeLabel + '</span>';
 
     if (inst.city || inst.country) {
       popupContent += '<br><small class="text-muted">' + escapeHtml([inst.city, inst.country].filter(Boolean).join(', ')) + '</small>';
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
       item.className = 'list-group-item list-group-item-action py-2';
       item.href = '#';
       item.innerHTML = '<div class="d-flex align-items-center">'
-        + '<div style="width: 10px; height: 10px; border-radius: 50%; background: ' + color + '; margin-right: 8px; flex-shrink: 0;"></div>'
+        + '<div data-ahg-style="width: 10px; height: 10px; border-radius: 50%; background: ' + color + '; margin-right: 8px; flex-shrink: 0;"></div>'
         + '<div class="small">'
         + '<strong>' + escapeHtml(inst.name) + '</strong>'
         + (inst.city ? '<br><span class="text-muted">' + escapeHtml(inst.city) + '</span>' : '')
@@ -163,14 +163,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var vIcon = L.divIcon({
       className: 'registry-marker',
-      html: '<div style="background-color: ' + vendorColor + '; width: 12px; height: 12px; border-radius: 2px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transform: rotate(45deg);"></div>',
+      html: '<div data-ahg-style="background-color: ' + vendorColor + '; width: 12px; height: 12px; border-radius: 2px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transform: rotate(45deg);"></div>',
       iconSize: [16, 16],
       iconAnchor: [8, 8]
     });
 
-    var popup = '<div style="min-width: 200px;">'
+    var popup = '<div data-ahg-style="min-width: 200px;">'
       + '<strong>' + escapeHtml(v.name) + '</strong>'
-      + '<br><span class="badge bg-success" style="font-size: 10px;"><i class="fas fa-building me-1"></i>' + typeLabel + '</span>';
+      + '<br><span class="badge bg-success" data-ahg-style="font-size: 10px;"><i class="fas fa-building me-1"></i>' + typeLabel + '</span>';
 
     if (v.city || v.country) {
       popup += '<br><small class="text-muted">' + escapeHtml([v.city, v.country].filter(Boolean).join(', ')) + '</small>';

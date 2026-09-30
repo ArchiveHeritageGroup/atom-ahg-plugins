@@ -31,10 +31,10 @@ if ($detailDisplay !== '' && preg_match('/^[a-z][a-z0-9_]*$/', $detailDisplay)) 
 }
 ?>
 <tr>
-  <td class="text-capitalize" style="width: 28%;">
+  <td class="text-capitalize" data-ahg-style="width: 28%;">
     <small><?php echo htmlspecialchars(str_replace('_', ' ', $dimension)); ?></small>
   </td>
-  <td style="width: 22%;">
+  <td data-ahg-style="width: 22%;">
     <span class="badge bg-<?php echo $cfg['cls']; ?><?php echo $cfg['cls'] === 'light' ? ' text-dark border' : ''; ?>">
       <i class="fas <?php echo $cfg['icon']; ?> me-1"></i><?php echo $cfg['label']; ?>
     </span>

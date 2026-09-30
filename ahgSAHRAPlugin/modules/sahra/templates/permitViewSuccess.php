@@ -30,12 +30,12 @@
           <div class="d-flex justify-content-between text-center mb-4">
             <?php $i = 0; foreach ($steps as $key => $lbl): ?>
               <div class="flex-fill">
-                <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center <?php echo ($curIdx >= $i) ? 'bg-success text-white' : 'bg-light text-muted'; ?>" style="width:38px;height:38px;">
+                <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center <?php echo ($curIdx >= $i) ? 'bg-success text-white' : 'bg-light text-muted'; ?>" data-ahg-style="width:38px;height:38px;">
                   <?php echo ($curIdx > $i) ? '<i class="fas fa-check"></i>' : ($i + 1); ?>
                 </div>
                 <small class="<?php echo ($curIdx >= $i) ? 'fw-bold' : 'text-muted'; ?>"><?php echo $lbl; ?></small>
               </div>
-              <?php if ($i < count($steps) - 1): ?><div class="align-self-center flex-fill border-top mx-1" style="height:1px;"></div><?php endif; ?>
+              <?php if ($i < count($steps) - 1): ?><div class="align-self-center flex-fill border-top mx-1" data-ahg-style="height:1px;"></div><?php endif; ?>
             <?php $i++; endforeach; ?>
           </div>
 

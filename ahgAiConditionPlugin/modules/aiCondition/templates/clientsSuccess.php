@@ -63,7 +63,7 @@
                 </td>
                 <td class="text-end">
                     <?php if ($c->is_active): ?>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeClient(<?php echo $c->id ?>)">
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="revokeClient" data-ahg-types="x" data-ahg-a0="<?php echo $c->id ?>">
                         <i class="fas fa-ban"></i>
                     </button>
                     <?php endif ?>

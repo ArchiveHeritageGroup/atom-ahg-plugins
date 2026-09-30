@@ -58,7 +58,7 @@
     </form>
   </div>
   <div class="col-md-3">
-    <select class="form-select form-select-sm" onchange="window.location='/registry/admin/groups/<?php echo $gid; ?>/members?status='+this.value+'&q=<?php echo urlencode($sf_request->getParameter('q', '')); ?>'">
+    <select class="form-select form-select-sm" data-ahg-navigate="/registry/admin/groups/<?php echo $gid; ?>/members?status=" data-ahg-navigate-suffix="&q=<?php echo urlencode($sf_request->getParameter('q', '')); ?>">
       <option value=""><?php echo __('All statuses'); ?></option>
       <option value="1"<?php echo '1' === $sf_request->getParameter('status') ? ' selected' : ''; ?>><?php echo __('Active'); ?></option>
       <option value="0"<?php echo '0' === $sf_request->getParameter('status') ? ' selected' : ''; ?>><?php echo __('Inactive'); ?></option>
@@ -89,7 +89,7 @@
           <form method="post" action="/registry/admin/groups/<?php echo $gid; ?>/members" class="d-inline">
             <input type="hidden" name="form_action" value="update_role">
             <input type="hidden" name="member_id" value="<?php echo (int) $m->id; ?>">
-            <select name="member_role" class="form-select form-select-sm" style="width:auto;display:inline-block;" data-ahg-submit-form="1">
+            <select name="member_role" class="form-select form-select-sm" data-ahg-style="width:auto;display:inline-block;" data-ahg-submit-form="1">
               <?php $roles = ['organizer' => 'Organizer', 'co_organizer' => 'Co-organizer', 'speaker' => 'Speaker', 'sponsor' => 'Sponsor', 'member' => 'Member'];
                 foreach ($roles as $rv => $rl): ?>
                   <option value="<?php echo $rv; ?>"<?php echo ($m->role ?? 'member') === $rv ? ' selected' : ''; ?>><?php echo __($rl); ?></option>

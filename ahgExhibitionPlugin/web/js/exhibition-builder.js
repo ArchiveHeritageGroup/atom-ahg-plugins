@@ -26,11 +26,11 @@
     el.style.height = it.h + 'px';
     el.style.zIndex = it.z || 0;
     var media = it.thumb
-      ? '<img src="' + esc(it.thumb) + '" alt="" style="width:100%;height:100%;object-fit:cover;pointer-events:none">'
-      : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;padding:4px;color:#333;background:#efe9d8;pointer-events:none">' + esc(it.title) + '</div>';
+      ? '<img src="' + esc(it.thumb) + '" alt="" data-ahg-style="width:100%;height:100%;object-fit:cover;pointer-events:none">'
+      : '<div data-ahg-style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;padding:4px;color:#333;background:#efe9d8;pointer-events:none">' + esc(it.title) + '</div>';
     el.innerHTML = media
-      + '<span class="exh-resize" style="position:absolute;right:0;bottom:0;width:16px;height:16px;background:rgba(0,0,0,.55);cursor:nwse-resize"></span>'
-      + (it.tour ? '<span class="exh-tour" style="position:absolute;top:2px;left:2px;background:#0dcaf0;color:#003;border-radius:8px;font-size:11px;padding:0 5px">' + it.tour + '</span>' : '');
+      + '<span class="exh-resize" data-ahg-style="position:absolute;right:0;bottom:0;width:16px;height:16px;background:rgba(0,0,0,.55);cursor:nwse-resize"></span>'
+      + (it.tour ? '<span class="exh-tour" data-ahg-style="position:absolute;top:2px;left:2px;background:#0dcaf0;color:#003;border-radius:8px;font-size:11px;padding:0 5px">' + it.tour + '</span>' : '');
     canvas.appendChild(el);
     bindDrag(el, it);
     return el;
@@ -46,7 +46,7 @@
       chip.className = 'exh-tray-item d-flex align-items-center gap-2 p-1 mb-1 border rounded';
       chip.style.cursor = 'grab';
       chip.dataset.id = it.id;
-      var thumb = it.thumb ? '<img src="' + esc(it.thumb) + '" style="width:34px;height:34px;object-fit:cover;border-radius:2px">' : '<span class="badge bg-secondary">#' + it.io + '</span>';
+      var thumb = it.thumb ? '<img src="' + esc(it.thumb) + '" data-ahg-style="width:34px;height:34px;object-fit:cover;border-radius:2px">' : '<span class="badge bg-secondary">#' + it.io + '</span>';
       chip.innerHTML = thumb + '<span class="small text-truncate">' + esc(it.title) + '</span>';
       chip.addEventListener('mousedown', function (ev) { startPlaceFromTray(ev, it); });
       tray.appendChild(chip);

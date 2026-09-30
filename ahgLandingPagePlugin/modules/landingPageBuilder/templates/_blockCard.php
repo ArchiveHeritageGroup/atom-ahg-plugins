@@ -50,7 +50,7 @@ $isColumnLayout = in_array($block->machine_name, ['row_1_col', 'row_2_col', 'row
             <div class="column-drop-zone border border-2 border-dashed rounded p-2 text-center" 
                  data-parent-block="<?php echo $block->id ?>" 
                  data-column="<?php echo $colSlot ?>"
-                 style="min-height: 80px; background: #fff;">
+                 data-ahg-style="min-height: 80px; background: #fff;">
               <?php if (empty($colBlocks)): ?>
                 <div class="empty-column text-muted py-2">
                   <small>⬇ Col <?php echo $i ?></small>
@@ -59,7 +59,7 @@ $isColumnLayout = in_array($block->machine_name, ['row_1_col', 'row_2_col', 'row
                 <?php foreach ($colBlocks as $childBlock): ?>
                   <div class="nested-block card mb-1" data-block-id="<?php echo $childBlock->id ?>">
                     <div class="card-body py-1 px-2 small d-flex align-items-center">
-                      <span class="drag-handle me-1" style="cursor: grab;">☰</span>
+                      <span class="drag-handle me-1" data-ahg-style="cursor: grab;">☰</span>
                       <span class="flex-grow-1 text-truncate"><?php echo $childBlock->title ?: $childBlock->type_label ?></span>
                       <button type="button" class="btn btn-link btn-sm p-0 px-1 btn-edit-nested text-primary" 
                               data-block-id="<?php echo $childBlock->id ?>" title="Edit">✏️</button>

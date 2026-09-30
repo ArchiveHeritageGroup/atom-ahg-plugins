@@ -78,13 +78,13 @@
                             '</div>' +
                         '</div>' +
                         // Related Tables panel
-                        '<div class="mt-3" id="qb-relations-wrapper" style="display:none;">' +
+                        '<div class="mt-3" id="qb-relations-wrapper" data-ahg-style="display:none;">' +
                             '<label class="form-label fw-bold"><i class="bi bi-diagram-3 me-1"></i>Related Tables (Joins)</label>' +
                             '<div id="qb-relations-list" class="border rounded p-2"></div>' +
                         '</div>' +
                         '<div class="mt-3">' +
                             '<label class="form-label fw-bold"><i class="bi bi-columns-gap me-1"></i>Columns</label>' +
-                            '<div id="qb-columns-list" class="border rounded p-2" style="max-height:250px;overflow-y:auto;">' +
+                            '<div id="qb-columns-list" class="border rounded p-2" data-ahg-style="max-height:250px;overflow-y:auto;">' +
                                 '<span class="text-muted small">Select a table first</span>' +
                             '</div>' +
                         '</div>' +
@@ -108,7 +108,7 @@
                                     '<select class="form-select" id="qb-order-by">' +
                                         '<option value="">-- None --</option>' +
                                     '</select>' +
-                                    '<select class="form-select" id="qb-order-dir" style="max-width:100px;">' +
+                                    '<select class="form-select" id="qb-order-dir" data-ahg-style="max-width:100px;">' +
                                         '<option value="ASC">ASC</option>' +
                                         '<option value="DESC">DESC</option>' +
                                     '</select>' +
@@ -186,7 +186,7 @@
                             '<label class="form-label fw-bold">SQL Query</label>' +
                             '<textarea class="form-control font-monospace" id="qb-sql-textarea" rows="8" ' +
                                 'placeholder="SELECT * FROM information_object LIMIT 10;" ' +
-                                'style="font-size:0.85rem;tab-size:4;"></textarea>' +
+                                'data-ahg-style="font-size:0.85rem;tab-size:4;"></textarea>' +
                         '</div>' +
                         '<div class="d-flex gap-2">' +
                             '<button class="btn btn-primary" id="qb-sql-run"><i class="bi bi-play me-1"></i>Execute</button>' +
@@ -264,7 +264,7 @@
                         '<div class="card-header py-2 d-flex justify-content-between align-items-center">' +
                             '<span><i class="bi bi-table me-1"></i>Results <span class="badge bg-secondary">' + rows.length + ' row' + (rows.length !== 1 ? 's' : '') + '</span></span>' +
                         '</div>' +
-                        '<div class="table-responsive" style="max-height:500px;overflow-y:auto;">' +
+                        '<div class="table-responsive" data-ahg-style="max-height:500px;overflow-y:auto;">' +
                             '<table class="table table-sm table-hover table-striped mb-0">' +
                                 '<thead class="table-light sticky-top">' +
                                     '<tr>';
@@ -592,10 +592,10 @@
                                 'data-to="' + self._escAttr(rel.table + '.' + rel.to) + '" ' +
                                 'data-join-type="' + joinType + '">' +
                             '<label class="form-check-label small" for="qb-join-' + idx + '">' +
-                                '<span class="badge ' + badgeClass + ' me-1" style="font-size:0.65rem;">' + joinType + '</span>' +
+                                '<span class="badge ' + badgeClass + ' me-1" data-ahg-style="font-size:0.65rem;">' + joinType + '</span>' +
                                 '<strong>' + self._escHtml(rel.table) + '</strong>' +
                                 '<span class="text-muted ms-1">(' + self._escHtml(rel.label) + ')</span>' +
-                                '<br><code class="text-muted" style="font-size:0.7rem;">' +
+                                '<br><code class="text-muted" data-ahg-style="font-size:0.7rem;">' +
                                     self._escHtml(tableName + '.' + rel.from) + ' = ' + self._escHtml(rel.table + '.' + rel.to) +
                                 '</code>' +
                             '</label>' +
@@ -675,7 +675,7 @@
                     var badgeClass = isPrimary ? 'bg-primary' : 'bg-info text-dark';
                     html += '<div class="mb-2">' +
                         '<div class="d-flex align-items-center mb-1">' +
-                            '<span class="badge ' + badgeClass + ' me-1" style="font-size:0.65rem;">' + (isPrimary ? 'PRIMARY' : 'JOINED') + '</span>' +
+                            '<span class="badge ' + badgeClass + ' me-1" data-ahg-style="font-size:0.65rem;">' + (isPrimary ? 'PRIMARY' : 'JOINED') + '</span>' +
                             '<strong class="small">' + self._escHtml(r.table) + '</strong>' +
                         '</div>';
 
@@ -753,7 +753,7 @@
                 '<select class="form-select qb-filter-column">' +
                     '<option value="">Column...</option>' +
                 '</select>' +
-                '<select class="form-select qb-filter-operator" style="max-width:120px;">' +
+                '<select class="form-select qb-filter-operator" data-ahg-style="max-width:120px;">' +
                     '<option value="=">=</option>' +
                     '<option value="!=">!=</option>' +
                     '<option value="LIKE">LIKE</option>' +

@@ -44,7 +44,7 @@
       <div class="mb-0 position-relative">
         <label for="io_search" class="form-label"><?php echo __('Search by title'); ?></label>
         <input type="text" class="form-control" id="io_search" autocomplete="off" placeholder="<?php echo __('Start typing to search archival records...'); ?>" value="<?php echo $pf ? esc_entities($pf->title) : ''; ?>">
-        <div id="io_results" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; max-height:250px; overflow-y:auto; display:none;"></div>
+        <div id="io_results" class="list-group position-absolute w-100 shadow-sm" data-ahg-style="z-index:1050; max-height:250px; overflow-y:auto; display:none;"></div>
         <div class="form-text"><?php echo __('Search and select an existing record to auto-fill title, description, and metadata.'); ?></div>
         <?php if ($pf): ?>
           <div class="mt-2" id="io_linked">
@@ -52,7 +52,7 @@
             <button type="button" class="btn btn-sm btn-link text-danger" id="io_unlink"><i class="fas fa-times"></i> <?php echo __('Unlink'); ?></button>
           </div>
         <?php else: ?>
-          <div class="mt-2" id="io_linked" style="display:none;">
+          <div class="mt-2" id="io_linked" data-ahg-style="display:none;">
             <span class="badge bg-info" id="io_linked_label"></span>
             <button type="button" class="btn btn-sm btn-link text-danger" id="io_unlink"><i class="fas fa-times"></i> <?php echo __('Unlink'); ?></button>
           </div>
@@ -164,7 +164,7 @@
         </div>
       </div>
 
-      <div class="mb-3" id="frame-description-group" style="display: none;">
+      <div class="mb-3" id="frame-description-group" data-ahg-style="display: none;">
         <label for="frame_description" class="form-label"><?php echo __('Frame Description'); ?></label>
         <input type="text" class="form-control" id="frame_description" name="frame_description" value="<?php echo esc_entities($sf_request->getParameter('frame_description', '')); ?>" maxlength="255">
       </div>
@@ -225,7 +225,7 @@
       </div>
 
       <!-- Auction fields -->
-      <div id="auction-fields" style="display: none;">
+      <div id="auction-fields" data-ahg-style="display: none;">
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="starting_bid" class="form-label"><?php echo __('Starting Bid'); ?></label>
@@ -245,7 +245,7 @@
       </div>
 
       <!-- Offer-only fields -->
-      <div id="offer-only-fields" style="display: none;">
+      <div id="offer-only-fields" data-ahg-style="display: none;">
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="minimum_offer_only" class="form-label"><?php echo __('Minimum Offer'); ?></label>

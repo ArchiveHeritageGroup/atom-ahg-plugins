@@ -158,7 +158,7 @@
             <th><?php echo __('Type'); ?></th>
             <th><?php echo __('Title'); ?></th>
             <th><?php echo __('Plugin'); ?></th>
-            <th style="width: 60px;"><?php echo __('Sort'); ?></th>
+            <th data-ahg-style="width: 60px;"><?php echo __('Sort'); ?></th>
             <th class="text-end"><?php echo __('Actions'); ?></th>
           </tr>
         </thead>

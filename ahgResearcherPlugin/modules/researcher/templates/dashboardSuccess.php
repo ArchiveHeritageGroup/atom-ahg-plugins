@@ -90,7 +90,7 @@
         <div class="card-body p-0">
           <?php if (empty($recent)): ?>
             <div class="text-center text-muted py-5">
-              <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+              <i class="bi bi-inbox" data-ahg-style="font-size: 2rem;"></i>
               <p class="mt-2 mb-0">No submissions yet. Create your first submission to get started.</p>
             </div>
           <?php else: ?>
@@ -108,7 +108,7 @@
                 </thead>
                 <tbody>
                   <?php foreach ($recent as $sub): ?>
-                  <tr class="cursor-pointer" onclick="window.location='<?php echo url_for(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $sub->id]) ?>'">
+                  <tr class="cursor-pointer" data-ahg-href="<?php echo url_for(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $sub->id]) ?>">
                     <td>
                       <strong><?php echo htmlspecialchars($sub->title) ?></strong>
                       <?php if ($isAdmin && !empty($sub->user_name)): ?>
@@ -187,9 +187,9 @@
                   $projStatusColors = ['active' => 'success', 'planning' => 'info', 'on_hold' => 'warning', 'completed' => 'secondary'];
                   $pc = $projStatusColors[$proj->status] ?? 'secondary';
                 ?>
-                <br><span class="badge bg-<?php echo $pc ?>" style="font-size:0.65rem;"><?php echo ucfirst($proj->status) ?></span>
+                <br><span class="badge bg-<?php echo $pc ?>" data-ahg-style="font-size:0.65rem;"><?php echo ucfirst($proj->status) ?></span>
                 <?php if (!empty($proj->project_type)): ?>
-                  <span class="badge bg-light text-dark" style="font-size:0.65rem;"><?php echo ucfirst($proj->project_type) ?></span>
+                  <span class="badge bg-light text-dark" data-ahg-style="font-size:0.65rem;"><?php echo ucfirst($proj->project_type) ?></span>
                 <?php endif ?>
               </div>
             </div>
@@ -253,7 +253,7 @@
       <?php if (!$researcherProfile): ?>
       <div class="card mb-3">
         <div class="card-body text-center text-muted">
-          <i class="bi bi-person-plus" style="font-size: 1.5rem;"></i>
+          <i class="bi bi-person-plus" data-ahg-style="font-size: 1.5rem;"></i>
           <p class="small mt-2 mb-2">Register as a researcher to link your research workspace.</p>
           <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']) ?>" class="btn btn-sm btn-outline-success">
             <i class="bi bi-person-plus me-1"></i>Register

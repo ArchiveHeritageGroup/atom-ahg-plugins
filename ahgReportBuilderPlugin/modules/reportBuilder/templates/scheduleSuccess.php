@@ -53,7 +53,7 @@
                         </select>
                     </div>
 
-                    <div class="mb-3" id="weeklyOptions" style="display: none;">
+                    <div class="mb-3" id="weeklyOptions" data-ahg-style="display: none;">
                         <label class="form-label"><?php echo __('Day of Week'); ?></label>
                         <select class="form-select" name="day_of_week">
                             <option value="1"><?php echo __('Monday'); ?></option>
@@ -66,7 +66,7 @@
                         </select>
                     </div>
 
-                    <div class="mb-3" id="monthlyOptions" style="display: none;">
+                    <div class="mb-3" id="monthlyOptions" data-ahg-style="display: none;">
                         <label class="form-label"><?php echo __('Day of Month'); ?></label>
                         <select class="form-select" name="day_of_month">
                             <?php for ($i = 1; $i <= 28; $i++): ?>
@@ -83,7 +83,7 @@
 
                     </div><!-- end recurringOptions -->
 
-                    <div id="triggerOptions" style="display: none;">
+                    <div id="triggerOptions" data-ahg-style="display: none;">
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Trigger Event'); ?></label>
                             <select class="form-select" name="trigger_event">

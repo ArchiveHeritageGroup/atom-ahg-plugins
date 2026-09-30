@@ -344,7 +344,7 @@ class CustomFieldRenderService
                 if (!empty($row->color)) {
                     $color = htmlspecialchars($row->color, ENT_QUOTES, 'UTF-8');
 
-                    return '<span class="badge" style="background-color:' . $color . '">' . $label . '</span>';
+                    return '<span class="badge" data-ahg-style="background-color:' . $color . '">' . $label . '</span>';
                 }
 
                 return $label;

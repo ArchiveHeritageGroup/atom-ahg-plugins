@@ -241,7 +241,7 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
         <?php endforeach; ?>
     </select>
     <button type="submit"><?php echo __('Filter'); ?></button>
-    <a href="?export=csv" class="btn" style="background:#17a2b8;color:#fff;padding:8px 15px;border-radius:4px;text-decoration:none;">
+    <a href="?export=csv" class="btn" data-ahg-style="background:#17a2b8;color:#fff;padding:8px 15px;border-radius:4px;text-decoration:none;">
         <i class="fa fa-download"></i> <?php echo __('Export CSV'); ?>
     </a>
 </form>
@@ -269,9 +269,9 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 <!-- Grade Distribution -->
 <div class="stats-row">
     <div class="stat-box">
-        <div class="value" style="color:#27ae60;"><?php echo $gradeDistribution['A'] ?? 0; ?></div>
+        <div class="value" data-ahg-style="color:#27ae60;"><?php echo $gradeDistribution['A'] ?? 0; ?></div>
         <div class="label"><?php echo __('Grade A (Excellent)'); ?></div>
     </div>
     <div class="stat-box">
-        <div class="value" style="color:#2ecc71;"><?php echo $gradeDistribution['B'] ?? 0; ?></div>
+        <div class="value" data-ahg-style="color:#2ecc71;"><?php echo $gradeDistribution['B'] ?? 0; ?></div>
         <div class="label"><?php

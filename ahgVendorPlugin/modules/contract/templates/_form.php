@@ -49,7 +49,7 @@
             <label class="form-label"><?php echo __('Contract Logo') ?></label>
             <?php if (!empty($contract->logo_path)): ?>
             <div class="mb-2">
-              <img src="/uploads<?php echo esc_entities($contract->logo_path) ?>" alt="Logo" class="img-thumbnail" style="max-height: 80px;">
+              <img src="/uploads<?php echo esc_entities($contract->logo_path) ?>" alt="Logo" class="img-thumbnail" data-ahg-style="max-height: 80px;">
               <div class="form-check mt-1">
                 <input type="checkbox" name="remove_logo" id="remove_logo" class="form-check-input" value="1">
                 <label class="form-check-label text-danger" for="remove_logo"><?php echo __('Remove logo') ?></label>

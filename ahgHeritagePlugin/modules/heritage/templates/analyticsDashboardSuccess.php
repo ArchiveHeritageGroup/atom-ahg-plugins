@@ -156,7 +156,7 @@ $trends = [
     </div>
     <div class="card-body">
         <?php if (!empty($trends['searches'])): ?>
-        <div style="height: 250px;">
+        <div data-ahg-style="height: 250px;">
             <canvas id="trendsChart"></canvas>
         </div>
         <script src="/plugins/ahgThemeB5Plugin/web/js/chart.umd.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>

@@ -49,7 +49,7 @@
             <label for="cover_image" class="form-label"><?php echo __('Cover Image'); ?></label>
             <?php if ($isEdit && $collection->cover_image_path): ?>
               <div class="mb-2">
-                <img src="<?php echo esc_entities($collection->cover_image_path); ?>" alt="" class="rounded" style="max-height: 120px;">
+                <img src="<?php echo esc_entities($collection->cover_image_path); ?>" alt="" class="rounded" data-ahg-style="max-height: 120px;">
               </div>
             <?php endif; ?>
             <input type="file" class="form-control" id="cover_image" name="cover_image" accept="image/*">

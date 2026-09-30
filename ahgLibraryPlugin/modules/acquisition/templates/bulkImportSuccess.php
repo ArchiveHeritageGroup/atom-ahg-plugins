@@ -76,7 +76,7 @@
 
           <?php if (!empty($rows)): ?>
             <details class="mb-3">
-              <summary class="text-primary" style="cursor:pointer;"><?php echo __('Preview results (%1%)', ['%1%' => count($rows)]); ?></summary>
+              <summary class="text-primary" data-ahg-style="cursor:pointer;"><?php echo __('Preview results (%1%)', ['%1%' => count($rows)]); ?></summary>
               <div class="table-responsive mt-2">
                 <table class="table table-sm table-hover">
                   <thead>

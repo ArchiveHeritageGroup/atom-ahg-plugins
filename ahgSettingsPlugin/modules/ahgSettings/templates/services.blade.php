@@ -191,7 +191,7 @@
 
               <div class="mb-3">
                 <label class="form-label" for="check_interval">{{ __('Check interval') }}</label>
-                <select class="form-select" id="check_interval" name="check_interval" style="min-width: 200px; padding: 10px 15px; font-size: 1rem;">
+                <select class="form-select" id="check_interval" name="check_interval" data-ahg-style="min-width: 200px; padding: 10px 15px; font-size: 1rem;">
                   @php
                   $intervals = [
                       '1' => __('1 minute'),
@@ -257,7 +257,7 @@
             <i class="bi bi-clock-history me-2"></i>
             {{ __('Recent Events') }}
           </div>
-          <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+          <div class="card-body" data-ahg-style="max-height: 400px; overflow-y: auto;">
             @if (empty($serviceHistory))
               <p class="text-muted mb-0">{{ __('No events recorded yet.') }}</p>
             @else

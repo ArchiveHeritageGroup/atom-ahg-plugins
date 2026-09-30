@@ -37,7 +37,7 @@
       <input type="hidden" name="form_action" value="add">
       <div class="col-md-2">
         <label class="form-label small"><?php echo __('Code'); ?></label>
-        <input type="text" name="code" class="form-control form-control-sm" required placeholder="USD" maxlength="3" style="text-transform: uppercase;">
+        <input type="text" name="code" class="form-control form-control-sm" required placeholder="USD" maxlength="3" data-ahg-style="text-transform: uppercase;">
       </div>
       <div class="col-md-3">
         <label class="form-label small"><?php echo __('Name'); ?></label>
@@ -95,7 +95,7 @@
                 <form method="post" action="<?php echo url_for(['module' => 'marketplace', 'action' => 'adminCurrencies']); ?>" class="d-inline-flex align-items-center">
                   <input type="hidden" name="form_action" value="update">
                   <input type="hidden" name="code" value="<?php echo esc_entities($currency->code); ?>">
-                  <input type="number" name="exchange_rate_to_zar" class="form-control form-control-sm me-1" value="<?php echo number_format((float) $currency->exchange_rate_to_zar, 6, '.', ''); ?>" step="0.000001" min="0.000001" style="width: 130px;">
+                  <input type="number" name="exchange_rate_to_zar" class="form-control form-control-sm me-1" value="<?php echo number_format((float) $currency->exchange_rate_to_zar, 6, '.', ''); ?>" step="0.000001" min="0.000001" data-ahg-style="width: 130px;">
                   <button type="submit" class="btn btn-sm btn-outline-primary" title="<?php echo __('Update Rate'); ?>">
                     <i class="fas fa-save"></i>
                   </button>

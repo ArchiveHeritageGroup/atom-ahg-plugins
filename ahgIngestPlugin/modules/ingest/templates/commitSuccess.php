@@ -24,8 +24,8 @@ $job = $sf_data->getRaw('job');
         <div class="flex-fill"><span class="badge bg-success rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-primary rounded-pill">6</span><br><small class="fw-bold"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 100%"></div>
+    <div class="progress mt-2" data-ahg-style="height: 4px;">
+        <div class="progress-bar" data-ahg-style="width: 100%"></div>
     </div>
 </div>
 
@@ -48,13 +48,13 @@ $job = $sf_data->getRaw('job');
                 </h5>
             </div>
             <div class="card-body">
-                <div class="progress mb-3" style="height: 24px;">
+                <div class="progress mb-3" data-ahg-style="height: 24px;">
                     <div class="progress-bar progress-bar-striped progress-bar-animated" id="commit-progress"
-                         style="width: <?php echo $pct ?>%">
+                         data-ahg-style="width: <?php echo $pct ?>%">
                         <?php echo $pct ?>%
                     </div>
                 </div>
-                <div id="post-processing-info" class="alert alert-info mb-3" style="display: none;">
+                <div id="post-processing-info" class="alert alert-info mb-3" data-ahg-style="display: none;">
                     <i class="fas fa-cogs me-2"></i>
                     <?php echo __('Records created. Running post-processing (derivatives, packages, indexing)...') ?>
                 </div>

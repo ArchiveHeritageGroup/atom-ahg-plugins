@@ -30,7 +30,7 @@
 <body>
   <div class="no-print">
     <?php // Handlers bound below rather than inline: an enforcing CSP blocks
-          // onclick="", and a nonce cannot apply to an attribute. ?>
+          // , and a nonce cannot apply to an attribute. ?>
     <button class="print-btn" id="print-page">Print this page</button>
     <button class="print-btn" id="close-window">Close</button>
   </div>
@@ -61,11 +61,11 @@
   <table>
     <thead>
       <tr>
-        <th style="width:120px">Identifier</th>
+        <th data-ahg-style="width:120px">Identifier</th>
         <th>Title</th>
-        <th style="width:100px">Level</th>
-        <th style="width:80px">Type</th>
-        <th style="width:250px">Scope and Content</th>
+        <th data-ahg-style="width:100px">Level</th>
+        <th data-ahg-style="width:80px">Type</th>
+        <th data-ahg-style="width:250px">Scope and Content</th>
       </tr>
     </thead>
     <tbody>
@@ -81,7 +81,7 @@
     </tbody>
   </table>
 
-  <div class="meta" style="margin-top: 20px;">
+  <div class="meta" data-ahg-style="margin-top: 20px;">
     <em>Printed from GLAM Display System</em>
   </div>
 </body>

@@ -9,11 +9,11 @@
         <div class="card-img-wrapper position-relative overflow-hidden">
             <img src="<?php echo $digitalObject->path; ?>" 
                  class="card-img-top" 
-                 style="height: 180px; object-fit: cover;"
+                 data-ahg-style="height: 180px; object-fit: cover;"
                  alt="<?php echo $object->title ?? ''; ?>"
                  loading="lazy">
             <div class="card-img-overlay d-flex flex-column justify-content-end p-0">
-                <div class="bg-gradient-dark p-2" style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+                <div class="bg-gradient-dark p-2" data-ahg-style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
                     <div class="btn-group btn-group-sm">
                         <?php if (in_array('view', $data['actions'])): ?>
                         <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $object->slug]); ?>" 

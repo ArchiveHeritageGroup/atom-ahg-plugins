@@ -146,7 +146,7 @@
             <td>
               <div class="progress progress-small">
                 <div class="progress-bar progress-bar-success" 
-                     style="width: <?php echo $loan['workflow']['progress'] ?? 0 ?>%">
+                     data-ahg-style="width: <?php echo $loan['workflow']['progress'] ?? 0 ?>%">
                 </div>
               </div>
             </td>

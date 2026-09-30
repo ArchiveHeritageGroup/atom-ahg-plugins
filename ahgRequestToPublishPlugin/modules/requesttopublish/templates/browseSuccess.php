@@ -71,14 +71,14 @@
         <table class="table table-striped table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th style="width: 100px;"><?php echo __('Status'); ?></th>
+              <th data-ahg-style="width: 100px;"><?php echo __('Status'); ?></th>
               <th><?php echo __('Archival Description'); ?></th>
               <th><?php echo __('Requester'); ?></th>
               <th><?php echo __('Contact'); ?></th>
               <th><?php echo __('Institution'); ?></th>
               <th><?php echo __('Need By'); ?></th>
               <th><?php echo __('Created'); ?></th>
-              <th style="width: 80px;"><?php echo __('Action'); ?></th>
+              <th data-ahg-style="width: 80px;"><?php echo __('Action'); ?></th>
             </tr>
           </thead>
           <tbody>

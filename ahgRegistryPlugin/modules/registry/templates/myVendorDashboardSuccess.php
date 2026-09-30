@@ -22,9 +22,9 @@
   <div class="card-body">
     <div class="d-flex align-items-start">
       <?php if (!empty($vendor->logo_path)): ?>
-        <img src="<?php echo htmlspecialchars($vendor->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 80px; height: 80px; object-fit: contain;">
+        <img src="<?php echo htmlspecialchars($vendor->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" data-ahg-style="width: 80px; height: 80px; object-fit: contain;">
       <?php else: ?>
-        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" data-ahg-style="width: 80px; height: 80px;">
           <i class="fas fa-handshake fa-2x text-muted"></i>
         </div>
       <?php endif; ?>

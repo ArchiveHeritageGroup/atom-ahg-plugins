@@ -37,7 +37,7 @@
                         <?php if ($item['installed']): ?>
                             <span class="text-success"><i class="fas fa-check me-1"></i>Already installed</span>
                         <?php else: ?>
-                            <form method="post" action="<?php echo url_for(['module' => 'forms', 'action' => 'libraryInstall', 'id' => $item['id']]) ?>" style="display:inline;">
+                            <form method="post" action="<?php echo url_for(['module' => 'forms', 'action' => 'libraryInstall', 'id' => $item['id']]) ?>" data-ahg-style="display:inline;">
                                 <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="fas fa-download me-1"></i> Install
                                 </button>

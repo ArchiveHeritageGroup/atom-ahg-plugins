@@ -23,7 +23,7 @@ $equipmentConditions = $taxonomyService->getEquipmentConditions(false);
     <div class="row mb-4">
         <div class="col-md-4">
             <label class="form-label">Select Reading Room</label>
-            <select class="form-select" onchange="window.location.href='?room_id=' + this.value">
+            <select class="form-select" data-ahg-navigate="?room_id=">
                 <option value="">-- Select Room --</option>
                 <?php foreach ($rooms as $room): ?>
                 <option value="<?php echo $room->id ?>" <?php echo ($currentRoom && $currentRoom->id == $room->id) ? 'selected' : '' ?>>
@@ -123,15 +123,15 @@ $equipmentConditions = $taxonomyService->getEquipmentConditions(false);
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="editEquipment(<?php echo htmlspecialchars(json_encode($item)) ?>)">
+                                                data-ahg-call="editEquipment" data-ahg-types="x" data-ahg-a0="<?php echo htmlspecialchars(json_encode($item)) ?>">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-info"
-                                                onclick="logMaintenance(<?php echo $item->id ?>)">
+                                                data-ahg-call="logMaintenance" data-ahg-types="x" data-ahg-a0="<?php echo $item->id ?>">
                                             <i class="fas fa-wrench"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                onclick="viewHistory(<?php echo $item->id ?>, '<?php echo htmlspecialchars($item->name, ENT_QUOTES) ?>')"
+                                                data-ahg-call="viewHistory" data-ahg-types="x,s" data-ahg-a0="<?php echo $item->id ?>" data-ahg-a1="<?php echo htmlspecialchars($item->name, ENT_QUOTES) ?>"
                                                 title="Maintenance History">
                                             <i class="fas fa-history"></i>
                                         </button>

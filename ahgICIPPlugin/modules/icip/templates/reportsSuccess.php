@@ -76,8 +76,8 @@
                                     <span><?php echo $info['label'] ?></span>
                                     <span><?php echo $status->count ?> (<?php echo $percent ?>%)</span>
                                 </div>
-                                <div class="progress" style="height: 10px;">
-                                    <div class="progress-bar <?php echo $info['class'] ?>" role="progressbar" style="width: <?php echo $percent ?>%"></div>
+                                <div class="progress" data-ahg-style="height: 10px;">
+                                    <div class="progress-bar <?php echo $info['class'] ?>" role="progressbar" data-ahg-style="width: <?php echo $percent ?>%"></div>
                                 </div>
                             </div>
                         <?php endforeach ?>

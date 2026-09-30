@@ -11,7 +11,7 @@ $issued = !empty($cert['issued_at']) ? date('j F Y', strtotime((string) $cert['i
 <?php slot('title') ?>
 <div class="d-flex justify-content-between align-items-center">
   <h1><i class="fas fa-certificate text-success me-2"></i><?php echo __('Certificate'); ?></h1>
-  <button type="button" class="btn btn-outline-secondary" onclick="window.print()"><i class="fas fa-print me-1"></i><?php echo __('Print'); ?></button>
+  <button type="button" class="btn btn-outline-secondary" data-ahg-action="print"><i class="fas fa-print me-1"></i><?php echo __('Print'); ?></button>
 </div>
 <?php end_slot() ?>
 

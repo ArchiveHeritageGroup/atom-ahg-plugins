@@ -28,9 +28,9 @@
             <div class="timeline-dot"></div>
             <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'timeline', 'period_id' => $period['id']]); ?>"
                class="card timeline-card text-decoration-none"
-               <?php if ($period['background_color']): ?>style="border-left: 4px solid <?php echo $period['background_color']; ?>;"<?php endif; ?>>
+               <?php if ($period['background_color']): ?>data-ahg-style="border-left: 4px solid <?php echo $period['background_color']; ?>;"<?php endif; ?>>
               <?php if ($period['cover_image']): ?>
-                <div class="card-img-top" style="height: 120px; background: url('<?php echo $period['cover_image']; ?>') center/cover;"></div>
+                <div class="card-img-top" data-ahg-style="height: 120px; background: url('<?php echo $period['cover_image']; ?>') center/cover;"></div>
               <?php endif; ?>
               <div class="card-body">
                 <h3 class="card-title h5"><?php echo $period['name']; ?></h3>
@@ -91,10 +91,10 @@
               <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $item['slug']]); ?>"
                  class="card h-100 text-decoration-none heritage-result-card">
                 <?php if (!empty($item['thumbnail'])): ?>
-                  <img src="<?php echo $item['thumbnail']; ?>" class="card-img-top heritage-thumb" alt="<?php echo htmlspecialchars($item['title']); ?>" style="height: 150px; object-fit: cover;" onerror="this.src='/plugins/ahgThemeB5Plugin/images/placeholder.png'">
+                  <img src="<?php echo $item['thumbnail']; ?>" class="card-img-top heritage-thumb" alt="<?php echo htmlspecialchars($item['title']); ?>" data-ahg-style="height: 150px; object-fit: cover;" data-ahg-onerror="src" data-ahg-fallback="/plugins/ahgThemeB5Plugin/images/placeholder.png">
                 <?php else: ?>
-                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
-                    <i class="fas fa-file-earmark text-muted" style="font-size: 3rem;"></i>
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" data-ahg-style="height: 150px;">
+                    <i class="fas fa-file-earmark text-muted" data-ahg-style="font-size: 3rem;"></i>
                   </div>
                 <?php endif; ?>
                 <div class="card-body">

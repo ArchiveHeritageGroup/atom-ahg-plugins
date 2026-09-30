@@ -67,7 +67,7 @@
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-info me-2">&nbsp;</span> <?php echo __('Received / Documented / Reported'); ?></li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-primary me-2">&nbsp;</span> <?php echo __('In Progress / Examining / Investigating'); ?></li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-warning text-dark me-2">&nbsp;</span> <?php echo __('Review / Under Review / Assessed'); ?></li>
-                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-cyan me-2" style="background-color: #17a2b8 !important;">&nbsp;</span> <?php echo __('Approved / Scheduled / Quoted'); ?></li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-cyan me-2" data-ahg-style="background-color: #17a2b8 !important;">&nbsp;</span> <?php echo __('Approved / Scheduled / Quoted'); ?></li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-success me-2">&nbsp;</span> <?php echo __('Completed / Resolved / Accessioned'); ?></li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-secondary me-2">&nbsp;</span> <?php echo __('Disposed / Closed'); ?></li>
             </ul>
@@ -81,15 +81,15 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-3 text-center">
-                        <div class="rounded-circle bg-white text-info d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                        <div class="rounded-circle bg-white text-info d-inline-flex align-items-center justify-content-center" data-ahg-style="width: 100px; height: 100px;">
                             <span class="h3 mb-0"><?php echo $overallCompletion['percentage']; ?>%</span>
                         </div>
                     </div>
                     <div class="col-md-9">
                         <h3><?php echo __('Overall Workflow Completion'); ?></h3>
                         <p class="mb-0"><?php echo $overallCompletion['completed']; ?> <?php echo __('of'); ?> <?php echo $overallCompletion['total']; ?> <?php echo __('procedures completed'); ?></p>
-                        <div class="progress mt-2" style="height: 10px;">
-                            <div class="progress-bar bg-white" style="width: <?php echo $overallCompletion['percentage']; ?>%"></div>
+                        <div class="progress mt-2" data-ahg-style="height: 10px;">
+                            <div class="progress-bar bg-white" data-ahg-style="width: <?php echo $overallCompletion['percentage']; ?>%"></div>
                         </div>
                     </div>
                 </div>

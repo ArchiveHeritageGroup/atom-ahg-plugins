@@ -40,7 +40,7 @@
         <a href="<?php echo $runUrl; ?>" class="btn btn-primary btn-sm">
           <i class="fa fa-play"></i> <?php echo __('Run'); ?>
         </a>
-        <button type="button" class="btn btn-danger btn-sm" onclick="deleteSearch(<?php echo $search->id; ?>)">
+        <button type="button" class="btn btn-danger btn-sm" data-ahg-call="deleteSearch" data-ahg-types="x" data-ahg-a0="<?php echo $search->id; ?>">
           <i class="fa fa-trash"></i>
         </button>
       </td>

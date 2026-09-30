@@ -5,7 +5,7 @@
     <div class="row">
         <!-- Facets Sidebar -->
         <div class="col-lg-3 col-md-4">
-            <div class="facets-sidebar sticky-top" style="top: 20px;">
+            <div class="facets-sidebar sticky-top" data-ahg-style="top: 20px;">
                 <div class="card">
                     <div class="card-header bg-dark text-white">
                         <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Results</h5>
@@ -70,7 +70,7 @@
                     </div>
                     
                     <!-- Sort -->
-                    <select class="form-select form-select-sm" style="width: auto;" onchange="location=this.value">
+                    <select class="form-select form-select-sm" data-ahg-style="width: auto;" data-ahg-navigate="">
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => '_score'])); ?>" <?php echo $params['sort'] === '_score' ? 'selected' : ''; ?>>Relevance</option>
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'title_asc'])); ?>" <?php echo $params['sort'] === 'title_asc' ? 'selected' : ''; ?>>Title A-Z</option>
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'title_desc'])); ?>" <?php echo $params['sort'] === 'title_desc' ? 'selected' : ''; ?>>Title Z-A</option>

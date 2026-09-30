@@ -5,7 +5,7 @@ $languages = $sf_data->getRaw('languages') ?: ['en'];
 $recordTitle = $sf_data->getRaw('recordTitle');
 $recordSlug = $sf_data->getRaw('recordSlug');
 ?>
-<div class="container-fluid py-3 accessibility-altedit" style="max-width: 900px;">
+<div class="container-fluid py-3 accessibility-altedit" data-ahg-style="max-width: 900px;">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0"><i class="fas fa-universal-access me-2"></i><?php echo __('Edit alternative text') ?></h1>
     <a href="<?php echo url_for(['module' => 'accessibility', 'action' => 'index']) ?>" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i><?php echo __('Back to coverage') ?></a>

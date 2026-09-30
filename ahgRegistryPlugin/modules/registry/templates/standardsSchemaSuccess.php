@@ -52,7 +52,7 @@
     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Entity Relationship Diagram'); ?></h5>
   </div>
   <div class="card-body p-0">
-    <pre class="p-4 mb-0" style="font-size: 0.78em; overflow-x: auto; background: #f8f9fa;">
+    <pre class="p-4 mb-0" data-ahg-style="font-size: 0.78em; overflow-x: auto; background: #f8f9fa;">
 ┌─────────────────────────────────┐
 │        registry_standard        │
 ├─────────────────────────────────┤
@@ -160,7 +160,7 @@
     <table class="table table-sm table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th style="width: 30px;"></th>
+          <th data-ahg-style="width: 30px;"></th>
           <th><?php echo __('Column'); ?></th>
           <th><?php echo __('Type'); ?></th>
           <th><?php echo __('Nullable'); ?></th>

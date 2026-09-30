@@ -65,7 +65,7 @@
             <?php foreach ($statistics['clearances_by_level'] ?? [] as $level): ?>
             <tr>
               <td>
-                <span class="badge" style="background-color: <?php echo $level->color ?>">
+                <span class="badge" data-ahg-style="background-color: <?php echo $level->color ?>">
                   <?php echo esc_entities($level->name) ?>
                 </span>
               </td>
@@ -99,7 +99,7 @@
             <?php foreach ($statistics['objects_by_level'] ?? [] as $level): ?>
             <tr>
               <td>
-                <span class="badge" style="background-color: <?php echo $level->color ?>">
+                <span class="badge" data-ahg-style="background-color: <?php echo $level->color ?>">
                   <?php echo esc_entities($level->name) ?>
                 </span>
               </td>
@@ -179,7 +179,7 @@
         <tr class="<?php echo $exp->days_remaining <= 7 ? 'table-danger' : ($exp->days_remaining <= 14 ? 'table-warning' : '') ?>">
           <td><?php echo esc_entities($exp->username) ?></td>
           <td>
-            <span class="badge" style="background-color: <?php echo $exp->color ?? '#666' ?>">
+            <span class="badge" data-ahg-style="background-color: <?php echo $exp->color ?? '#666' ?>">
               <?php echo esc_entities($exp->clearance_name) ?>
             </span>
           </td>

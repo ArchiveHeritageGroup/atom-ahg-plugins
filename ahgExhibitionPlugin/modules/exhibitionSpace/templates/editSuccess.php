@@ -10,7 +10,7 @@
   <form method="post" action="<?php echo $isNew
       ? url_for(['module' => 'exhibitionSpace', 'action' => 'create'])
       : url_for(['module' => 'exhibitionSpace', 'action' => 'edit', 'slug' => $space->slug]) ?>"
-        class="mt-3" style="max-width: 56rem;">
+        class="mt-3" data-ahg-style="max-width: 56rem;">
 
     <div class="row g-3">
       <div class="col-md-8">

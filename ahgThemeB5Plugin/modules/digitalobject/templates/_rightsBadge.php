@@ -29,10 +29,10 @@ if (!$rights) {
 }
 ?>
 
-<div class="rights-badge position-absolute bottom-0 end-0 m-2" style="z-index:10;">
+<div class="rights-badge position-absolute bottom-0 end-0 m-2" data-ahg-style="z-index:10;">
   <?php if ($rights->cc_code): ?>
     <a href="<?php echo $rights->cc_uri; ?>" target="_blank" title="<?php echo $rights->cc_code; ?>" class="d-inline-block">
-      <img src="<?php echo $rights->cc_icon; ?>" alt="<?php echo $rights->cc_code; ?>" style="height:20px;">
+      <img src="<?php echo $rights->cc_icon; ?>" alt="<?php echo $rights->cc_code; ?>" data-ahg-style="height:20px;">
     </a>
   <?php elseif ($rights->rs_code): ?>
     <a href="<?php echo $rights->rs_uri; ?>" target="_blank" class="badge bg-dark text-decoration-none" title="<?php echo $rights->rs_code; ?>">

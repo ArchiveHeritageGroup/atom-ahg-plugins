@@ -215,7 +215,7 @@
             
             <?php if (!$searchQuery): ?>
                 <div class="search-suggestion">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.querySelector('input[name=q]').value = '<?php echo addslashes($actor->getAuthorizedFormOfName(['cultureFallback' => true])); ?>'; this.form.submit();">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-ahg-set-target="input[name=q]" data-ahg-set-value="<?php echo esc_entities($actor->getAuthorizedFormOfName(['cultureFallback' => true])); ?>" data-ahg-submit="this-form">
                         <i class="fa fa-magic"></i> <?php echo __('Search for "%1%"', ['%1%' => $actor->getAuthorizedFormOfName(['cultureFallback' => true])]); ?>
                     </button>
                 </div>

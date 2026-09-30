@@ -27,7 +27,7 @@
                         <?php if ($popularSearches && count($popularSearches) > 0): ?>
                             <?php foreach ($popularSearches as $search): ?>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span class="text-truncate" style="max-width: 200px;" title="<?php echo htmlspecialchars($search->original_query); ?>">
+                                <span class="text-truncate" data-ahg-style="max-width: 200px;" title="<?php echo htmlspecialchars($search->original_query); ?>">
                                     <?php echo htmlspecialchars($search->original_query); ?>
                                 </span>
                                 <span class="badge bg-primary rounded-pill"><?php echo number_format($search->count); ?></span>

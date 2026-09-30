@@ -14,7 +14,7 @@ $siblings = $data['siblings'] ?? [];
                     <img src="<?php echo $digitalObject->path; ?>" 
                          class="img-fluid" 
                          alt="<?php echo $object->title ?? ''; ?>"
-                         style="max-height: 70vh; object-fit: contain;">
+                         data-ahg-style="max-height: 70vh; object-fit: contain;">
                 </a>
             </div>
             <?php endif; ?>
@@ -41,7 +41,7 @@ $siblings = $data['siblings'] ?? [];
         </div>
         
         <div class="col-lg-4">
-            <div class="artwork-details sticky-top" style="top: 20px;">
+            <div class="artwork-details sticky-top" data-ahg-style="top: 20px;">
                 <?php // Artist ?>
                 <?php if (!empty($fields['identity']['artist'])): ?>
                 <h4 class="artist-name mb-1"><?php echo $fields['identity']['artist']['value']; ?></h4>

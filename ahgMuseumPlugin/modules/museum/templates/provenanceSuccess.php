@@ -62,7 +62,7 @@
         </h5>
       </div>
       <div class="card-body">
-        <div id="timeline-container" style="width: 100%; min-height: 400px; overflow-x: auto;">
+        <div id="timeline-container" data-ahg-style="width: 100%; min-height: 400px; overflow-x: auto;">
           <svg id="provenance-timeline"></svg>
         </div>
         
@@ -71,7 +71,7 @@
             <span class="badge bg-primary"><?php echo __('Creation') ?></span>
             <span class="badge bg-secondary"><?php echo __('Accumulation') ?></span>
             <span class="badge bg-info"><?php echo __('Collection') ?></span>
-            <span class="badge" style="background-color: #6610f2;"><?php echo __('Contribution') ?></span>
+            <span class="badge" data-ahg-style="background-color: #6610f2;"><?php echo __('Contribution') ?></span>
             <span class="badge bg-success"><?php echo __('Verified Custody') ?></span>
             <span class="badge bg-warning text-dark"><?php echo __('Unverified Custody') ?></span>
           </div>

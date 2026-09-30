@@ -49,7 +49,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
                   <li class="mb-2">
                     <?php if (!empty($rs->icon_filename)): ?>
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/rights/<?php echo $rs->icon_filename; ?>"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" data-ahg-style="width: 20px; height: 20px;" class="me-1">
                     <?php endif; ?>
                     <?php if (!empty($rs->uri)): ?>
                       <a href="<?php echo htmlspecialchars($rs->uri); ?>" target="_blank" title="<?php echo htmlspecialchars($rs->description ?? ''); ?>">
@@ -83,7 +83,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
                   <li class="mb-2">
                     <?php if (!empty($cc->icon_filename)): ?>
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/cc/<?php echo $cc->icon_filename; ?>"
-                           alt="" style="height: 20px;" class="me-1">
+                           alt="" data-ahg-style="height: 20px;" class="me-1">
                     <?php endif; ?>
                     <?php if (!empty($cc->uri)): ?>
                       <a href="<?php echo htmlspecialchars($cc->uri); ?>" target="_blank" title="<?php echo htmlspecialchars($cc->description ?? ''); ?>">
@@ -105,7 +105,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
       <!-- TK Labels -->
       <div class="col-md-4 mb-4">
         <div class="card h-100" id="tk-labels">
-          <div class="card-header" style="background-color: #1a4d2e; color: white;">
+          <div class="card-header" data-ahg-style="background-color: #1a4d2e; color: white;">
             <h5 class="mb-0">Traditional Knowledge Labels</h5>
           </div>
           <div class="card-body">
@@ -117,10 +117,10 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
                   <li class="mb-2">
                     <?php if (!empty($tk->icon_filename)): ?>
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/tk/<?php echo $tk->icon_filename; ?>"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" data-ahg-style="width: 20px; height: 20px;" class="me-1">
                     <?php elseif (!empty($tk->icon_url)): ?>
                       <img src="<?php echo htmlspecialchars($tk->icon_url); ?>"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" data-ahg-style="width: 20px; height: 20px;" class="me-1">
                     <?php endif; ?>
                     <?php if (!empty($tk->uri)): ?>
                       <a href="<?php echo htmlspecialchars($tk->uri); ?>" target="_blank">

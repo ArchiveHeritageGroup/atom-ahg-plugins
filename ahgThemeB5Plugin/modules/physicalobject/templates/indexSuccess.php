@@ -190,9 +190,9 @@
             <small class="text-muted"><?php echo __('Available'); ?></small>
           </div>
         </div>
-        <div class="progress mb-2" style="height: 25px;">
+        <div class="progress mb-2" data-ahg-style="height: 25px;">
           <div class="progress-bar <?php echo $barClass; ?>" role="progressbar" 
-               style="width: <?php echo $percent; ?>%;">
+               data-ahg-style="width: <?php echo $percent; ?>%;">
             <?php echo $percent; ?>% <?php echo __('used'); ?>
           </div>
         </div>
@@ -225,9 +225,9 @@
             <small class="text-muted"><?php echo __('Available'); ?></small>
           </div>
         </div>
-        <div class="progress" style="height: 25px;">
+        <div class="progress" data-ahg-style="height: 25px;">
           <div class="progress-bar <?php echo $barClassLm; ?>" role="progressbar" 
-               style="width: <?php echo $percentLm; ?>%;">
+               data-ahg-style="width: <?php echo $percentLm; ?>%;">
             <?php echo $percentLm; ?>% <?php echo __('used'); ?>
           </div>
         </div>

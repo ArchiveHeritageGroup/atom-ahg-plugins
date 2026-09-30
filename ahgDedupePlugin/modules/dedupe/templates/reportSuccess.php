@@ -82,9 +82,9 @@
                                         <td><span class="text-success"><?php echo $stat->merged; ?></span></td>
                                         <td><span class="text-secondary"><?php echo $stat->dismissed; ?></span></td>
                                         <td>
-                                            <div class="progress" style="height: 20px;">
+                                            <div class="progress" data-ahg-style="height: 20px;">
                                                 <div class="progress-bar bg-success" role="progressbar"
-                                                     style="width: <?php echo $rate; ?>%">
+                                                     data-ahg-style="width: <?php echo $rate; ?>%">
                                                     <?php echo $rate; ?>%
                                                 </div>
                                             </div>

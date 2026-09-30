@@ -105,7 +105,7 @@
                     <h6><i class="bi bi-terminal me-1"></i> Command</h6>
                     <div class="command-box mb-3">
                       <code>{{ htmlspecialchars($job['command']) }}</code>
-                      <i class="bi bi-clipboard copy-btn float-end" onclick="copyToClipboard('{{ htmlspecialchars(addslashes($job['command'])) }}')" title="Copy"></i>
+                      <i class="bi bi-clipboard copy-btn float-end" data-ahg-call="copyToClipboard" data-ahg-types="s" data-ahg-a0="{{ htmlspecialchars($job['command']) }}" title="Copy"></i>
                     </div>
 
                     @if (!empty($job['options']))
@@ -126,7 +126,7 @@
                     <h6><i class="bi bi-code-square me-1"></i> Example Cron Entry</h6>
                     <div class="command-box">
                       <code>{!! nl2br(htmlspecialchars(str_replace('{root}', $atomRoot, $job['example']))) !!}</code>
-                      <i class="bi bi-clipboard copy-btn float-end" onclick="copyToClipboard('{{ htmlspecialchars(addslashes(str_replace('{root}', $atomRoot, $job['example']))) }}')" title="Copy"></i>
+                      <i class="bi bi-clipboard copy-btn float-end" data-ahg-call="copyToClipboard" data-ahg-types="s" data-ahg-a0="{{ htmlspecialchars(str_replace('{root}', $atomRoot, $job['example'])) }}" title="Copy"></i>
                     </div>
                   </div>
                 </div>

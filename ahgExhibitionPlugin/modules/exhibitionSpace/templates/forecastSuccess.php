@@ -60,16 +60,16 @@ $badgeMap = ['ok' => 'success', 'warn' => 'warning', 'alert' => 'danger', 'none'
   <div class="card mb-3">
     <div class="card-header py-2"><strong><i class="fas fa-clock-rotate-left me-1"></i><?php echo __('Conservation time machine') ?></strong> <small class="text-muted"><?php echo __('drag time; rooms shade by conservation status') ?></small></div>
     <div class="card-body">
-      <canvas id="tlCanvas" style="width:100%;max-width:760px;display:block;margin:0 auto;background:#f8f9fa;border-radius:6px"></canvas>
-      <div class="d-flex align-items-center gap-2 mt-2" style="max-width:760px;margin:0 auto">
+      <canvas id="tlCanvas" data-ahg-style="width:100%;max-width:760px;display:block;margin:0 auto;background:#f8f9fa;border-radius:6px"></canvas>
+      <div class="d-flex align-items-center gap-2 mt-2" data-ahg-style="max-width:760px;margin:0 auto">
         <input type="range" id="tlSlider" class="form-range flex-grow-1" min="0" max="0" step="1">
-        <span id="tlLabel" class="badge bg-secondary" style="min-width:120px"></span>
+        <span id="tlLabel" class="badge bg-secondary" data-ahg-style="min-width:120px"></span>
       </div>
       <div class="small text-muted mt-1 d-flex gap-3 justify-content-center">
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#46c06b"></span> <?php echo __('OK') ?></span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f4d03f"></span> <?php echo __('Watch') ?></span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e8553a"></span> <?php echo __('At risk') ?></span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#eef1f4"></span> <?php echo __('No data') ?></span>
+        <span><span data-ahg-style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#46c06b"></span> <?php echo __('OK') ?></span>
+        <span><span data-ahg-style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f4d03f"></span> <?php echo __('Watch') ?></span>
+        <span><span data-ahg-style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e8553a"></span> <?php echo __('At risk') ?></span>
+        <span><span data-ahg-style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#eef1f4"></span> <?php echo __('No data') ?></span>
       </div>
     </div>
   </div>

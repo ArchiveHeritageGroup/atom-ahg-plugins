@@ -48,11 +48,11 @@
 
             container.innerHTML =
                 '<div class="upload-zone border border-2 border-dashed rounded p-4 text-center" id="am-drop-zone" ' +
-                    'style="cursor:pointer;transition:background-color 0.2s;">' +
+                    'data-ahg-style="cursor:pointer;transition:background-color 0.2s;">' +
                     '<i class="bi bi-cloud-arrow-up fs-1 text-muted d-block mb-2"></i>' +
                     '<p class="mb-1">Drag and drop files here, or click to browse</p>' +
                     '<small class="text-muted">Max 10MB per file. Supported: images, PDF, DOC, XLSX</small>' +
-                    '<input type="file" id="am-file-input" multiple style="display:none;" ' +
+                    '<input type="file" id="am-file-input" multiple data-ahg-style="display:none;" ' +
                         'accept="' + ALLOWED_EXTENSIONS.join(',') + '">' +
                 '</div>' +
                 '<div id="am-upload-progress" class="mt-2"></div>';
@@ -134,8 +134,8 @@
                         '<div class="card h-100">' +
                             '<div class="position-relative">' +
                                 (isImage
-                                    ? '<img src="' + self._escAttr(att.url || att.thumbnail_url || '') + '" class="card-img-top" alt="' + self._escAttr(att.filename || '') + '" style="height:140px;object-fit:cover;">'
-                                    : '<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;"><i class="bi ' + icon + ' fs-1 text-muted"></i></div>'
+                                    ? '<img src="' + self._escAttr(att.url || att.thumbnail_url || '') + '" class="card-img-top" alt="' + self._escAttr(att.filename || '') + '" data-ahg-style="height:140px;object-fit:cover;">'
+                                    : '<div class="d-flex align-items-center justify-content-center bg-light" data-ahg-style="height:140px;"><i class="bi ' + icon + ' fs-1 text-muted"></i></div>'
                                 ) +
                                 '<div class="position-absolute top-0 end-0 p-1">' +
                                     '<button class="btn btn-sm btn-danger am-delete-btn" data-attachment-id="' + att.id + '" title="Delete">' +
@@ -143,7 +143,7 @@
                                     '</button>' +
                                 '</div>' +
                                 '<div class="position-absolute top-0 start-0 p-1">' +
-                                    '<span class="badge bg-dark bg-opacity-75" style="cursor:grab;"><i class="bi bi-grip-vertical am-drag-handle"></i></span>' +
+                                    '<span class="badge bg-dark bg-opacity-75" data-ahg-style="cursor:grab;"><i class="bi bi-grip-vertical am-drag-handle"></i></span>' +
                                 '</div>' +
                             '</div>' +
                             '<div class="card-body p-2">' +
@@ -307,9 +307,9 @@
                 var progressId = 'progress-' + Date.now() + '-' + Math.random().toString(36).substring(7);
                 var progressHtml =
                     '<div class="d-flex align-items-center mb-2" id="' + progressId + '">' +
-                        '<small class="text-truncate me-2" style="max-width:200px;">' + self._escHtml(file.name) + '</small>' +
-                        '<div class="progress flex-grow-1" style="height:6px;">' +
-                            '<div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%"></div>' +
+                        '<small class="text-truncate me-2" data-ahg-style="max-width:200px;">' + self._escHtml(file.name) + '</small>' +
+                        '<div class="progress flex-grow-1" data-ahg-style="height:6px;">' +
+                            '<div class="progress-bar progress-bar-striped progress-bar-animated" data-ahg-style="width:100%"></div>' +
                         '</div>' +
                     '</div>';
                 progressContainer.insertAdjacentHTML('beforeend', progressHtml);
@@ -320,7 +320,7 @@
                     var el = document.getElementById(progressId);
                     if (el) {
                         el.innerHTML =
-                            '<small class="text-truncate me-2 text-success" style="max-width:200px;">' +
+                            '<small class="text-truncate me-2 text-success" data-ahg-style="max-width:200px;">' +
                                 '<i class="bi bi-check-circle me-1"></i>' + self._escHtml(file.name) +
                             '</small>';
                         setTimeout(function() { el.remove(); }, 3000);
@@ -330,7 +330,7 @@
                     var el = document.getElementById(progressId);
                     if (el) {
                         el.innerHTML =
-                            '<small class="text-truncate me-2 text-danger" style="max-width:200px;">' +
+                            '<small class="text-truncate me-2 text-danger" data-ahg-style="max-width:200px;">' +
                                 '<i class="bi bi-x-circle me-1"></i>' + self._escHtml(file.name) +
                                 ' - ' + self._escHtml(err.message) +
                             '</small>';

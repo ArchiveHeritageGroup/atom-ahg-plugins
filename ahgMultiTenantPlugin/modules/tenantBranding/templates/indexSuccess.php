@@ -44,7 +44,7 @@
             <div class="card-body text-center">
               <?php if (!empty($branding['logo'])): ?>
                 <div class="mb-3">
-                  <img src="<?php echo $branding['logo'] ?>" alt="Logo" class="img-fluid" style="max-height: 150px;">
+                  <img src="<?php echo $branding['logo'] ?>" alt="Logo" class="img-fluid" data-ahg-style="max-height: 150px;">
                 </div>
                 <form action="<?php echo url_for('tenant_branding_logo_upload') ?>?delete=1" method="post" class="d-inline">
                   <input type="hidden" name="repository_id" value="<?php echo $repository->id ?>">
@@ -93,7 +93,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Primary Color</label>
                     <div class="input-group">
-                      <input type="color" class="form-control form-control-color" name="primary_color_picker" value="<?php echo $branding['primary_color'] ?? '#336699' ?>" onchange="document.getElementById('primary_color').value = this.value">
+                      <input type="color" class="form-control form-control-color" name="primary_color_picker" value="<?php echo $branding['primary_color'] ?? '#336699' ?>" data-ahg-copy-to="#primary_color">
                       <input type="text" class="form-control" id="primary_color" name="primary_color" value="<?php echo $branding['primary_color'] ?? '' ?>" placeholder="#336699" pattern="^#[0-9A-Fa-f]{6}$">
                     </div>
                     <small class="text-muted">Main brand color for buttons and links.</small>
@@ -102,7 +102,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Secondary Color</label>
                     <div class="input-group">
-                      <input type="color" class="form-control form-control-color" name="secondary_color_picker" value="<?php echo $branding['secondary_color'] ?? '#6c757d' ?>" onchange="document.getElementById('secondary_color').value = this.value">
+                      <input type="color" class="form-control form-control-color" name="secondary_color_picker" value="<?php echo $branding['secondary_color'] ?? '#6c757d' ?>" data-ahg-copy-to="#secondary_color">
                       <input type="text" class="form-control" id="secondary_color" name="secondary_color" value="<?php echo $branding['secondary_color'] ?? '' ?>" placeholder="#6c757d" pattern="^#[0-9A-Fa-f]{6}$">
                     </div>
                     <small class="text-muted">Secondary brand color.</small>
@@ -111,7 +111,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Header Background</label>
                     <div class="input-group">
-                      <input type="color" class="form-control form-control-color" name="header_bg_color_picker" value="<?php echo $branding['header_bg_color'] ?? '#212529' ?>" onchange="document.getElementById('header_bg_color').value = this.value">
+                      <input type="color" class="form-control form-control-color" name="header_bg_color_picker" value="<?php echo $branding['header_bg_color'] ?? '#212529' ?>" data-ahg-copy-to="#header_bg_color">
                       <input type="text" class="form-control" id="header_bg_color" name="header_bg_color" value="<?php echo $branding['header_bg_color'] ?? '' ?>" placeholder="#212529" pattern="^#[0-9A-Fa-f]{6}$">
                     </div>
                     <small class="text-muted">Navigation bar background color.</small>
@@ -120,7 +120,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Header Text Color</label>
                     <div class="input-group">
-                      <input type="color" class="form-control form-control-color" name="header_text_color_picker" value="<?php echo $branding['header_text_color'] ?? '#ffffff' ?>" onchange="document.getElementById('header_text_color').value = this.value">
+                      <input type="color" class="form-control form-control-color" name="header_text_color_picker" value="<?php echo $branding['header_text_color'] ?? '#ffffff' ?>" data-ahg-copy-to="#header_text_color">
                       <input type="text" class="form-control" id="header_text_color" name="header_text_color" value="<?php echo $branding['header_text_color'] ?? '' ?>" placeholder="#ffffff" pattern="^#[0-9A-Fa-f]{6}$">
                     </div>
                     <small class="text-muted">Navigation bar text and link color.</small>
@@ -129,7 +129,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Link Color</label>
                     <div class="input-group">
-                      <input type="color" class="form-control form-control-color" name="link_color_picker" value="<?php echo $branding['link_color'] ?? '#0d6efd' ?>" onchange="document.getElementById('link_color').value = this.value">
+                      <input type="color" class="form-control form-control-color" name="link_color_picker" value="<?php echo $branding['link_color'] ?? '#0d6efd' ?>" data-ahg-copy-to="#link_color">
                       <input type="text" class="form-control" id="link_color" name="link_color" value="<?php echo $branding['link_color'] ?? '' ?>" placeholder="#0d6efd" pattern="^#[0-9A-Fa-f]{6}$">
                     </div>
                     <small class="text-muted">Color for text links.</small>
@@ -138,7 +138,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Button Color</label>
                     <div class="input-group">
-                      <input type="color" class="form-control form-control-color" name="button_color_picker" value="<?php echo $branding['button_color'] ?? '#198754' ?>" onchange="document.getElementById('button_color').value = this.value">
+                      <input type="color" class="form-control form-control-color" name="button_color_picker" value="<?php echo $branding['button_color'] ?? '#198754' ?>" data-ahg-copy-to="#button_color">
                       <input type="text" class="form-control" id="button_color" name="button_color" value="<?php echo $branding['button_color'] ?? '' ?>" placeholder="#198754" pattern="^#[0-9A-Fa-f]{6}$">
                     </div>
                     <small class="text-muted">Color for action buttons.</small>
@@ -179,28 +179,28 @@
           <div class="row">
             <div class="col-md-6">
               <h6>Buttons</h6>
-              <button class="btn btn-primary me-2" style="background-color: <?php echo $branding['primary_color'] ?? '#336699' ?>; border-color: <?php echo $branding['primary_color'] ?? '#336699' ?>;">Primary Button</button>
-              <button class="btn btn-secondary me-2" style="background-color: <?php echo $branding['secondary_color'] ?? '#6c757d' ?>; border-color: <?php echo $branding['secondary_color'] ?? '#6c757d' ?>;">Secondary</button>
-              <button class="btn" style="background-color: <?php echo $branding['button_color'] ?? '#198754' ?>; border-color: <?php echo $branding['button_color'] ?? '#198754' ?>; color: white;">Action</button>
+              <button class="btn btn-primary me-2" data-ahg-style="background-color: <?php echo $branding['primary_color'] ?? '#336699' ?>; border-color: <?php echo $branding['primary_color'] ?? '#336699' ?>;">Primary Button</button>
+              <button class="btn btn-secondary me-2" data-ahg-style="background-color: <?php echo $branding['secondary_color'] ?? '#6c757d' ?>; border-color: <?php echo $branding['secondary_color'] ?? '#6c757d' ?>;">Secondary</button>
+              <button class="btn" data-ahg-style="background-color: <?php echo $branding['button_color'] ?? '#198754' ?>; border-color: <?php echo $branding['button_color'] ?? '#198754' ?>; color: white;">Action</button>
             </div>
             <div class="col-md-6">
               <h6>Links</h6>
-              <p>This is a <a href="#" style="color: <?php echo $branding['link_color'] ?? '#0d6efd' ?>;">sample link</a> with your configured color.</p>
+              <p>This is a <a href="#" data-ahg-style="color: <?php echo $branding['link_color'] ?? '#0d6efd' ?>;">sample link</a> with your configured color.</p>
             </div>
           </div>
           <hr>
           <h6>Header Preview</h6>
-          <nav class="navbar navbar-dark p-2 rounded" style="background-color: <?php echo $branding['header_bg_color'] ?? '#212529' ?>;">
-            <span class="navbar-brand mb-0 h1" style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>;">
+          <nav class="navbar navbar-dark p-2 rounded" data-ahg-style="background-color: <?php echo $branding['header_bg_color'] ?? '#212529' ?>;">
+            <span class="navbar-brand mb-0 h1" data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>;">
               <?php if (!empty($branding['logo'])): ?>
-                <img src="<?php echo $branding['logo'] ?>" alt="Logo" style="height: 30px; margin-right: 10px;">
+                <img src="<?php echo $branding['logo'] ?>" alt="Logo" data-ahg-style="height: 30px; margin-right: 10px;">
               <?php endif; ?>
               <?php echo esc_specialchars($repository->name ?: 'Repository Name') ?>
             </span>
-            <span style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>;">
-              <a href="#" style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none; margin-right: 15px;">Home</a>
-              <a href="#" style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none; margin-right: 15px;">Browse</a>
-              <a href="#" style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none;">About</a>
+            <span data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>;">
+              <a href="#" data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none; margin-right: 15px;">Home</a>
+              <a href="#" data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none; margin-right: 15px;">Browse</a>
+              <a href="#" data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none;">About</a>
             </span>
           </nav>
         </div>

@@ -52,10 +52,10 @@
           <?php echo $clPct; ?>%
         </span>
       </div>
-      <div class="progress" style="height: 24px;">
+      <div class="progress" data-ahg-style="height: 24px;">
         <div class="progress-bar bg-<?php echo $barColor; ?>"
              role="progressbar"
-             style="width: <?php echo $clPct; ?>%"
+             data-ahg-style="width: <?php echo $clPct; ?>%"
              aria-valuenow="<?php echo $clPct; ?>"
              aria-valuemin="0"
              aria-valuemax="100">
@@ -73,7 +73,7 @@
       </div>
       <div class="card-body">
         <div class="d-flex gap-2">
-          <select id="checklist-template-select" class="form-select" style="max-width: 400px;">
+          <select id="checklist-template-select" class="form-select" data-ahg-style="max-width: 400px;">
             <option value=""><?php echo __('Select a checklist template...'); ?></option>
             <?php foreach ($templatesArr as $tpl): ?>
               <option value="<?php echo htmlspecialchars($tpl->id); ?>">

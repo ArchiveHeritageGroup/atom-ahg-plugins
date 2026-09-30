@@ -25,7 +25,7 @@
           <div class="col-md-6">
             <p>
               <strong><?php echo __('Level:') ?></strong><br>
-              <span class="badge fs-5" style="background-color: <?php echo $clearance->color ?>">
+              <span class="badge fs-5" data-ahg-style="background-color: <?php echo $clearance->color ?>">
                 <?php echo esc_entities($clearance->name) ?>
               </span>
             </p>
@@ -192,7 +192,7 @@
               <td><?php echo $comp->granted_date ?></td>
               <td><?php echo $comp->expiry_date ?? '-' ?></td>
               <td>
-                <button class="btn btn-sm btn-outline-danger" onclick="revokeCompartment(<?php echo $comp->compartment_id ?>)">
+                <button class="btn btn-sm btn-outline-danger" data-ahg-call="revokeCompartment" data-ahg-types="x" data-ahg-a0="<?php echo $comp->compartment_id ?>">
                   <?php echo __('Revoke') ?>
                 </button>
               </td>
@@ -244,7 +244,7 @@
       <div class="card-header">
         <h5 class="mb-0"><?php echo __('Clearance History') ?></h5>
       </div>
-      <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+      <div class="card-body" data-ahg-style="max-height: 400px; overflow-y: auto;">
         <?php if (empty($history)): ?>
         <p class="text-muted"><?php echo __('No history.') ?></p>
         <?php else: ?>

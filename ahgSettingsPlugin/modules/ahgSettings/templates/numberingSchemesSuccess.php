@@ -13,7 +13,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <form method="get" class="d-inline-flex gap-2">
-      <select name="sector" class="form-select form-select-sm" style="width: auto;">
+      <select name="sector" class="form-select form-select-sm" data-ahg-style="width: auto;">
         <option value=""><?php echo __('All Sectors'); ?></option>
         <?php foreach ($sectors as $code => $label): ?>
           <option value="<?php echo $code; ?>" <?php echo $sectorFilter === $code ? 'selected' : ''; ?>>

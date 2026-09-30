@@ -25,9 +25,9 @@
     <div class="card-body">
       <div class="d-flex align-items-start mb-2">
         <?php if (!empty($item->logo_path)): ?>
-          <img src="<?php echo htmlspecialchars($item->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 flex-shrink-0" style="width: 48px; height: 48px; object-fit: contain;">
+          <img src="<?php echo htmlspecialchars($item->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 flex-shrink-0" data-ahg-style="width: 48px; height: 48px; object-fit: contain;">
         <?php else: ?>
-          <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+          <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" data-ahg-style="width: 48px; height: 48px;">
             <i class="fas fa-university text-muted"></i>
           </div>
         <?php endif; ?>
@@ -40,7 +40,7 @@
               <i class="fas fa-check-circle text-primary ms-1" title="<?php echo __('Verified'); ?>"></i>
             <?php endif; ?>
           </h6>
-          <span class="badge <?php echo $typeClass; ?>" style="<?php echo $typeStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $type)), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="badge <?php echo $typeClass; ?>" data-ahg-style="<?php echo $typeStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $type)), ENT_QUOTES, 'UTF-8'); ?></span>
           <?php if (!empty($myInstitutionIds) && is_array($myInstitutionIds) && in_array($item->id, $myInstitutionIds)): ?>
             <span class="badge bg-info ms-1"><i class="fas fa-user me-1"></i><?php echo __('My Institution'); ?></span>
           <?php endif; ?>
@@ -92,7 +92,7 @@
       <?php
         $_isFav = isset($userFavoriteIds) && is_array($userFavoriteIds) && in_array($item->id, $userFavoriteIds);
       ?>
-      <div class="card-footer bg-transparent border-0 pt-0 text-end" style="position:relative; z-index:2;">
+      <div class="card-footer bg-transparent border-0 pt-0 text-end" data-ahg-style="position:relative; z-index:2;">
         <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'favoriteToggle']); ?>" class="d-inline">
           <input type="hidden" name="entity_type" value="institution">
           <input type="hidden" name="entity_id" value="<?php echo (int) $item->id; ?>">

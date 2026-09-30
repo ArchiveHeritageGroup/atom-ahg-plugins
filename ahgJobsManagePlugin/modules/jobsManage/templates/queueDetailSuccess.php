@@ -111,9 +111,9 @@
       <div class="card-header"><strong><?php echo __('Progress'); ?></strong></div>
       <div class="card-body">
         <?php $pct = round($rawJob->progress_current / $rawJob->progress_total * 100); ?>
-        <div class="progress mb-2" style="height: 24px;">
+        <div class="progress mb-2" data-ahg-style="height: 24px;">
           <div class="progress-bar <?php echo ($rawJob->status === 'failed') ? 'bg-danger' : 'bg-success'; ?>"
-               role="progressbar" style="width: <?php echo $pct; ?>%">
+               role="progressbar" data-ahg-style="width: <?php echo $pct; ?>%">
             <?php echo (int) $rawJob->progress_current; ?> / <?php echo (int) $rawJob->progress_total; ?> (<?php echo $pct; ?>%)
           </div>
         </div>
@@ -136,7 +136,7 @@
         <?php if ($rawJob->error_trace): ?>
           <details class="mt-2">
             <summary><?php echo __('Stack trace'); ?></summary>
-            <pre class="bg-light p-2 mt-1 small" style="max-height: 300px; overflow-y: auto;"><?php echo esc_specialchars($rawJob->error_trace); ?></pre>
+            <pre class="bg-light p-2 mt-1 small" data-ahg-style="max-height: 300px; overflow-y: auto;"><?php echo esc_specialchars($rawJob->error_trace); ?></pre>
           </details>
         <?php endif; ?>
       </div>
@@ -148,7 +148,7 @@
     <div class="card mb-4">
       <div class="card-header"><strong><?php echo __('Payload'); ?></strong></div>
       <div class="card-body">
-        <pre class="bg-light p-2 small mb-0" style="max-height: 200px; overflow-y: auto;"><?php echo esc_specialchars(json_encode(json_decode($rawJob->payload), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
+        <pre class="bg-light p-2 small mb-0" data-ahg-style="max-height: 200px; overflow-y: auto;"><?php echo esc_specialchars(json_encode(json_decode($rawJob->payload), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
       </div>
     </div>
   <?php endif; ?>
@@ -158,7 +158,7 @@
     <div class="card mb-4">
       <div class="card-header"><strong><?php echo __('Result'); ?></strong></div>
       <div class="card-body">
-        <pre class="bg-light p-2 small mb-0" style="max-height: 200px; overflow-y: auto;"><?php echo esc_specialchars(json_encode(json_decode($rawJob->result_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
+        <pre class="bg-light p-2 small mb-0" data-ahg-style="max-height: 200px; overflow-y: auto;"><?php echo esc_specialchars(json_encode(json_decode($rawJob->result_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
       </div>
     </div>
   <?php endif; ?>
@@ -173,8 +173,8 @@
           <table class="table table-sm table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width: 160px;"><?php echo __('Time'); ?></th>
-                <th style="width: 120px;"><?php echo __('Event'); ?></th>
+                <th data-ahg-style="width: 160px;"><?php echo __('Time'); ?></th>
+                <th data-ahg-style="width: 120px;"><?php echo __('Event'); ?></th>
                 <th><?php echo __('Message'); ?></th>
               </tr>
             </thead>

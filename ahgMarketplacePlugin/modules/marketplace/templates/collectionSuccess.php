@@ -13,8 +13,8 @@
 
 <!-- Cover image banner -->
 <?php if ($collection->cover_image_path): ?>
-  <div class="rounded overflow-hidden mb-4" style="max-height: 300px;">
-    <img src="<?php echo esc_entities($collection->cover_image_path); ?>" alt="<?php echo esc_entities($collection->title); ?>" class="w-100" style="object-fit: cover; max-height: 300px;">
+  <div class="rounded overflow-hidden mb-4" data-ahg-style="max-height: 300px;">
+    <img src="<?php echo esc_entities($collection->cover_image_path); ?>" alt="<?php echo esc_entities($collection->title); ?>" class="w-100" data-ahg-style="object-fit: cover; max-height: 300px;">
   </div>
 <?php endif; ?>
 

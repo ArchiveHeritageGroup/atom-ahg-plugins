@@ -242,19 +242,19 @@ function _render_setting_field($setting, $friendlyLabels, $key) {
     <?php endif; ?>
 
     <?php if (!empty($setting->description)): ?>
-      <div class="form-text mb-1" style="margin-top: -2px;"><?php echo htmlspecialchars($setting->description, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="form-text mb-1" data-ahg-style="margin-top: -2px;"><?php echo htmlspecialchars($setting->description, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
     <?php if ('boolean' === $settingType): ?>
       <!-- already rendered above -->
     <?php elseif ('number' === $settingType): ?>
-      <input type="number" class="form-control" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" value="<?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="max-width: 200px;">
+      <input type="number" class="form-control" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" value="<?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?>" data-ahg-style="max-width: 200px;">
     <?php elseif ('json' === $settingType): ?>
       <textarea class="form-control font-monospace" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" rows="4"><?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
     <?php elseif (strpos($setting->setting_key, 'secret') !== false || strpos($setting->setting_key, 'password') !== false): ?>
-      <div class="input-group" style="max-width: 500px;">
+      <div class="input-group" data-ahg-style="max-width: 500px;">
         <input type="password" class="form-control" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" value="<?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-        <button class="btn btn-outline-secondary" type="button" onclick="var i=document.getElementById('<?php echo $fieldId; ?>'); i.type = i.type==='password' ? 'text' : 'password';"><i class="fas fa-eye"></i></button>
+        <button class="btn btn-outline-secondary" type="button" data-ahg-toggle-password="#<?php echo $fieldId; ?>"><i class="fas fa-eye"></i></button>
       </div>
     <?php else: ?>
       <input type="text" class="form-control" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" value="<?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?>">

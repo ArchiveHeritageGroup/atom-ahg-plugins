@@ -75,7 +75,7 @@ $slug = $object->slug ?? '';
             <div class="d-flex flex-wrap gap-1">
                 <?php foreach ($tkLabels as $label): ?>
                     <span class="badge" 
-                          style="background-color: <?php echo $label['color'] ?? '#666'; ?>;"
+                          data-ahg-style="background-color: <?php echo $label['color'] ?? '#666'; ?>;"
                           title="<?php echo esc_entities($label['description'] ?? ''); ?>">
                         <?php echo esc_entities($label['name']); ?>
                     </span>
@@ -100,7 +100,7 @@ $slug = $object->slug ?? '';
                         <th><?php echo __('Acts'); ?></th>
                         <th><?php echo __('Period'); ?></th>
                         <?php if ($canEdit): ?>
-                            <th class="d-print-none" style="width: 80px;"></th>
+                            <th class="d-print-none" data-ahg-style="width: 80px;"></th>
                         <?php endif; ?>
                     </tr>
                 </thead>

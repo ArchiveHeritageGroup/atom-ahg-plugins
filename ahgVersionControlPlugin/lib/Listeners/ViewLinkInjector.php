@@ -117,7 +117,7 @@ final class ViewLinkInjector
         $label = sprintf(\__('Version history (%d)'), $count);
 
         $banner = sprintf(
-            '<div class="alert alert-info py-1 px-2 mb-2 d-inline-block" style="font-size:.9rem;">'
+            '<div class="alert alert-info py-1 px-2 mb-2 d-inline-block" data-ahg-style="font-size:.9rem;">'
             . '<i class="fas fa-history me-1"></i><a href="%s">%s</a>'
             . '</div>',
             htmlspecialchars($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'),

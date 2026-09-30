@@ -40,7 +40,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
             <div class="card h-100">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                  <i class="fas fa-grip-vertical me-2 text-muted drag-handle" style="cursor: move;"></i>
+                  <i class="fas fa-grip-vertical me-2 text-muted drag-handle" data-ahg-style="cursor: move;"></i>
                   <?php echo htmlspecialchars($section['name']); ?>
                 </h6>
                 <span class="badge bg-primary"><?php echo $section['display_order'] ?? 0; ?></span>
@@ -86,7 +86,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
                     <i class="fas fa-edit"></i> Edit
                   </button>
                   <button type="button" class="btn btn-outline-danger"
-                          onclick="deleteSection(<?php echo $section['id']; ?>, '<?php echo htmlspecialchars(addslashes($section['name'])); ?>')">
+                          data-ahg-call="deleteSection" data-ahg-types="x,s" data-ahg-a0="<?php echo $section['id']; ?>" data-ahg-a1="<?php echo htmlspecialchars($section['name']); ?>">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -106,7 +106,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>

@@ -42,7 +42,7 @@
               <?php elseif ($entry['status'] === 'rejected'): ?>
                 <i class="fas fa-times-circle"></i>
               <?php else: ?>
-                <i class="fas fa-circle text-muted" style="opacity:0.3"></i>
+                <i class="fas fa-circle text-muted" data-ahg-style="opacity:0.3"></i>
               <?php endif ?>
             </span>
           </div>

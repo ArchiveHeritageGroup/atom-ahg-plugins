@@ -34,7 +34,7 @@
         <div class="field mb-3">
           <h5><?php echo __('Rights Statement'); ?></h5>
           <div class="d-flex align-items-start">
-            <img src="<?php echo $primary->rightsStatement->icon_url; ?>" alt="" class="me-3" style="width:88px;">
+            <img src="<?php echo $primary->rightsStatement->icon_url; ?>" alt="" class="me-3" data-ahg-style="width:88px;">
             <div>
               <strong><?php echo esc_entities($primary->rightsStatement->name); ?></strong>
               <p class="text-muted mb-1"><?php echo esc_entities($primary->rightsStatement->definition); ?></p>
@@ -67,7 +67,7 @@
           <div class="tk-labels-grid">
             <?php foreach ($primary->tkLabels as $label): ?>
               <div class="tk-label-item d-flex align-items-start mb-2">
-                <img src="<?php echo $label->icon_url; ?>" alt="" class="me-2" style="width:48px;height:48px;">
+                <img src="<?php echo $label->icon_url; ?>" alt="" class="me-2" data-ahg-style="width:48px;height:48px;">
                 <div>
                   <strong><?php echo esc_entities($label->name); ?></strong>
                   <p class="small text-muted mb-0"><?php echo esc_entities($label->description); ?></p>

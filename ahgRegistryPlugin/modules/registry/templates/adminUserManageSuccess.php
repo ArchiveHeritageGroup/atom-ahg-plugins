@@ -62,7 +62,7 @@
     <table class="table table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th style="width: 60px;"><?php echo __('ID'); ?></th>
+          <th data-ahg-style="width: 60px;"><?php echo __('ID'); ?></th>
           <th><?php echo __('Name'); ?></th>
           <th><?php echo __('Username'); ?></th>
           <th><?php echo __('Email'); ?></th>

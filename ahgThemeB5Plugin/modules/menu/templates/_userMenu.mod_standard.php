@@ -89,7 +89,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
   <button class="btn btn-sm atom-btn-secondary dropdown-toggle" type="button" id="user-menu" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
     <i class="fas fa-sign-in-alt me-1"></i><?php echo $menuLabels['login'] ?? __('Log in'); ?>
   </button>
-  <div class="dropdown-menu dropdown-menu-lg-end mt-2 p-3" aria-labelledby="user-menu" style="min-width: 280px;">
+  <div class="dropdown-menu dropdown-menu-lg-end mt-2 p-3" aria-labelledby="user-menu" data-ahg-style="min-width: 280px;">
     <h6 class="dropdown-header px-0"><?php echo __('Have an account?'); ?></h6>
     <?php echo $form->renderFormTag(url_for(['module' => 'user', 'action' => 'login']), ['class' => 'mt-2']); ?>
       <?php echo $form->renderHiddenFields(); ?>

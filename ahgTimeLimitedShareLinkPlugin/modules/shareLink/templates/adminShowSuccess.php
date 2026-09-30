@@ -117,7 +117,7 @@ $publicUrl = $request->getUriPrefix() . '/share/' . $tokenRow->token;
         <td><?php echo esc_entities($a->accessed_at) ?></td>
         <td><i class="fas <?php echo $icon ?> me-1"></i><?php echo esc_entities($label) ?></td>
         <td><?php echo esc_entities($a->ip_address ?? '—') ?></td>
-        <td class="text-truncate" style="max-width:300px;"><?php echo esc_entities($a->user_agent ?? '—') ?></td>
+        <td class="text-truncate" data-ahg-style="max-width:300px;"><?php echo esc_entities($a->user_agent ?? '—') ?></td>
       </tr>
     <?php endforeach ?>
   </tbody>

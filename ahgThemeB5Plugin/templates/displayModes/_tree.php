@@ -22,11 +22,11 @@ function renderTreeNode($node, $module, $level = 0) {
                 <span class="tree-toggle" 
                       role="button" 
                       aria-expanded="false"
-                      onclick="this.classList.toggle('expanded'); this.closest('li').querySelector(':scope > ul')?.classList.toggle('d-none');">
+                      data-ahg-tree-toggle="1">
                     <i class="bi bi-chevron-right"></i>
                 </span>
             <?php else: ?>
-                <span class="tree-toggle" style="visibility: hidden;">
+                <span class="tree-toggle" data-ahg-style="visibility: hidden;">
                     <i class="bi bi-chevron-right"></i>
                 </span>
             <?php endif; ?>

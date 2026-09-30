@@ -147,14 +147,14 @@
         <table class="table table-hover table-striped mb-0">
           <thead class="table-light">
             <tr>
-              <th style="width:50px" class="text-center"><?php echo __('Include'); ?></th>
-              <th style="width:80px"><?php echo __('Cover'); ?></th>
+              <th data-ahg-style="width:50px" class="text-center"><?php echo __('Include'); ?></th>
+              <th data-ahg-style="width:80px"><?php echo __('Cover'); ?></th>
               <th><?php echo __('ISBN'); ?></th>
               <th><?php echo __('Title'); ?></th>
               <th><?php echo __('Author(s)'); ?></th>
               <th><?php echo __('Publisher'); ?></th>
-              <th style="width:80px"><?php echo __('Year'); ?></th>
-              <th style="width:70px"><?php echo __('Pages'); ?></th>
+              <th data-ahg-style="width:80px"><?php echo __('Year'); ?></th>
+              <th data-ahg-style="width:70px"><?php echo __('Pages'); ?></th>
             </tr>
           </thead>
           <tbody>
@@ -166,7 +166,7 @@
                 <td class="align-middle">
                   <?php if (!empty($result['cover_url'])): ?>
                     <img src="<?php echo esc_entities($result['cover_url']); ?>" alt="Cover"
-                         style="max-height:60px; max-width:60px" class="rounded shadow-sm">
+                         data-ahg-style="max-height:60px; max-width:60px" class="rounded shadow-sm">
                   <?php else: ?>
                     <span class="text-muted"><i class="fas fa-book fa-2x"></i></span>
                   <?php endif; ?>
@@ -174,7 +174,7 @@
                 </td>
                 <td class="align-middle">
                   <input type="text" class="form-control form-control-sm" name="items[<?php echo $idx; ?>][isbn]"
-                         value="<?php echo esc_entities($result['isbn'] ?? $result['isbn_input'] ?? ''); ?>" style="width:160px">
+                         value="<?php echo esc_entities($result['isbn'] ?? $result['isbn_input'] ?? ''); ?>" data-ahg-style="width:160px">
                 </td>
                 <td class="align-middle">
                   <input type="text" class="form-control form-control-sm" name="items[<?php echo $idx; ?>][title]"
@@ -193,11 +193,11 @@
                 </td>
                 <td class="align-middle">
                   <input type="text" class="form-control form-control-sm" name="items[<?php echo $idx; ?>][year]"
-                         value="<?php echo esc_entities($result['date_of_publication'] ?? ''); ?>" style="width:80px">
+                         value="<?php echo esc_entities($result['date_of_publication'] ?? ''); ?>" data-ahg-style="width:80px">
                 </td>
                 <td class="align-middle">
                   <input type="text" class="form-control form-control-sm" name="items[<?php echo $idx; ?>][pages]"
-                         value="<?php echo esc_entities(str_replace(' pages', '', $result['extent'] ?? '')); ?>" style="width:70px">
+                         value="<?php echo esc_entities(str_replace(' pages', '', $result['extent'] ?? '')); ?>" data-ahg-style="width:70px">
                 </td>
               </tr>
               <!-- Hidden fields for additional data -->

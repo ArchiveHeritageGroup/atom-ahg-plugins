@@ -14,7 +14,7 @@
 <!-- Stats Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-center" style="background-color: #f0ad4e; color: white;">
+        <div class="card text-center" data-ahg-style="background-color: #f0ad4e; color: white;">
             <div class="card-body">
                 <h2><?php echo $pendingCount; ?></h2>
                 <small><?php echo __('Pending'); ?></small>
@@ -22,7 +22,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center" style="background-color: #5cb85c; color: white;">
+        <div class="card text-center" data-ahg-style="background-color: #5cb85c; color: white;">
             <div class="card-body">
                 <h2><?php echo $approvedTodayCount; ?></h2>
                 <small><?php echo __('Approved Today'); ?></small>
@@ -30,7 +30,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center" style="background-color: #d9534f; color: white;">
+        <div class="card text-center" data-ahg-style="background-color: #d9534f; color: white;">
             <div class="card-body">
                 <h2><?php echo $deniedTodayCount; ?></h2>
                 <small><?php echo __('Denied Today'); ?></small>
@@ -38,7 +38,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center" style="background-color: #5bc0de; color: white;">
+        <div class="card text-center" data-ahg-style="background-color: #5bc0de; color: white;">
             <div class="card-body">
                 <h2><?php echo $thisMonthCount; ?></h2>
                 <small><?php echo __('This Month'); ?></small>

@@ -47,7 +47,7 @@
     <!-- Banner -->
     <?php if ($seller->banner_path): ?>
       <div class="card mb-4">
-        <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="card-img-top" style="max-height: 200px; object-fit: cover;">
+        <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="card-img-top" data-ahg-style="max-height: 200px; object-fit: cover;">
       </div>
     <?php endif; ?>
 
@@ -59,9 +59,9 @@
       <div class="card-body">
         <div class="d-flex align-items-center mb-4">
           <?php if ($seller->avatar_path): ?>
-            <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle me-3" width="80" height="80" style="object-fit: cover;">
+            <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle me-3" width="80" height="80" data-ahg-style="object-fit: cover;">
           <?php else: ?>
-            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px;">
+            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" data-ahg-style="width: 80px; height: 80px;">
               <i class="fas fa-user fa-2x text-muted"></i>
             </div>
           <?php endif; ?>
@@ -74,7 +74,7 @@
         <table class="table table-sm mb-0">
           <tbody>
             <tr>
-              <th style="width: 200px;"><?php echo __('Seller Type'); ?></th>
+              <th data-ahg-style="width: 200px;"><?php echo __('Seller Type'); ?></th>
               <td><span class="badge bg-secondary"><?php echo esc_entities(ucfirst($seller->seller_type ?? '-')); ?></span></td>
             </tr>
             <tr>

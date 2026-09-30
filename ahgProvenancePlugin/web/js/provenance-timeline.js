@@ -351,7 +351,7 @@
           }
         }
         html += '<br>Certainty: ' + (d.certainty || 'unknown');
-        if (d.isGap) html += '<br><span style="color:#f44336">⚠ Gap in provenance</span>';
+        if (d.isGap) html += '<br><span data-ahg-style="color:#f44336">⚠ Gap in provenance</span>';
       } else if (type === 'event') {
         html = '<strong>' + (d.label || 'Transfer') + '</strong>';
         if (d.year) html += '<br>Year: ' + d.year;

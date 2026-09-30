@@ -106,8 +106,8 @@
                   <thead>
                     <tr>
                       <th>{{ __('Level') }}</th>
-                      <th style="width: 100px;">{{ __('Order') }}</th>
-                      <th style="width: 80px;">{{ __('Actions') }}</th>
+                      <th data-ahg-style="width: 100px;">{{ __('Order') }}</th>
+                      <th data-ahg-style="width: 80px;">{{ __('Actions') }}</th>
                     </tr>
                   </thead>
                   <tbody>

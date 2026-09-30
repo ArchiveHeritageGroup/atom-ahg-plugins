@@ -133,7 +133,7 @@ function _getFileIcon($path, $extIconMap, $imageExts)
             ?>
             <a title="<?php echo esc_entities($title); ?>" href="<?php echo $href; ?>">
               <?php if ($iconClass): ?>
-              <span class="img-thumbnail mx-2 d-inline-flex align-items-center justify-content-center" style="width:120px;height:120px;background:#f8f9fa;">
+              <span class="img-thumbnail mx-2 d-inline-flex align-items-center justify-content-center" data-ahg-style="width:120px;height:120px;background:#f8f9fa;">
                 <i class="<?php echo $iconClass; ?> fa-3x text-secondary"></i>
               </span>
               <?php else: ?>

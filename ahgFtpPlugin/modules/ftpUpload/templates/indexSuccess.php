@@ -47,7 +47,7 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div id="drop-zone" class="border border-2 border-dashed rounded p-5 text-center mb-3" style="cursor:pointer; border-color:#0d6efd!important;">
+                <div id="drop-zone" class="border border-2 border-dashed rounded p-5 text-center mb-3" data-ahg-style="cursor:pointer; border-color:#0d6efd!important;">
                     <i class="fa fa-cloud-upload-alt fa-3x text-muted mb-3 d-block"></i>
                     <p class="lead mb-1"><?php echo __('Drag and drop files here') ?></p>
                     <p class="text-muted"><?php echo __('or click to browse') ?></p>
@@ -107,7 +107,7 @@
         </div>
 
         <!-- Combined PDFs ready to link to a record -->
-        <div class="card mb-4" id="ready-link-card" style="display:none;">
+        <div class="card mb-4" id="ready-link-card" data-ahg-style="display:none;">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fa fa-link me-2"></i><?php echo __('Combined PDFs - link to a record') ?></h5>
             </div>
@@ -141,9 +141,9 @@
                         <thead>
                             <tr>
                                 <th><?php echo __('Filename') ?></th>
-                                <th class="text-end" style="width:120px"><?php echo __('Size') ?></th>
-                                <th style="width:180px"><?php echo __('Modified') ?></th>
-                                <th class="text-center" style="width:80px"><?php echo __('Actions') ?></th>
+                                <th class="text-end" data-ahg-style="width:120px"><?php echo __('Size') ?></th>
+                                <th data-ahg-style="width:180px"><?php echo __('Modified') ?></th>
+                                <th class="text-center" data-ahg-style="width:80px"><?php echo __('Actions') ?></th>
                             </tr>
                         </thead>
                         <tbody id="files-tbody">
@@ -537,12 +537,12 @@
         // Build progress UI
         var html = '<div id="' + domId + '" class="mb-3 border rounded p-3">' +
             '<div class="d-flex justify-content-between align-items-center mb-1">' +
-                '<span class="text-truncate fw-semibold" style="max-width:50%"><i class="fa fa-file me-1"></i>' + escapeHtml(file.name) + '</span>' +
+                '<span class="text-truncate fw-semibold" data-ahg-style="max-width:50%"><i class="fa fa-file me-1"></i>' + escapeHtml(file.name) + '</span>' +
                 '<span class="text-muted small">' + formatBytes(file.size) + ' &middot; ' + totalChunks + ' chunk' + (totalChunks > 1 ? 's' : '') + '</span>' +
                 '<span class="upload-status badge bg-primary">0%</span>' +
             '</div>' +
-            '<div class="progress mb-2" style="height:8px">' +
-                '<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%"></div>' +
+            '<div class="progress mb-2" data-ahg-style="height:8px">' +
+                '<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" data-ahg-style="width:0%"></div>' +
             '</div>' +
             '<div class="upload-detail text-muted small"></div>' +
             '<div class="upload-actions mt-1">' +

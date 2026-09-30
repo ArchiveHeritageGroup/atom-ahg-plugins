@@ -74,7 +74,7 @@
                   </td>
                   <td><?php echo $exhibition['type_label']; ?></td>
                   <td>
-                    <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+                    <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
                       <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
                     </span>
                   </td>
@@ -162,7 +162,7 @@
           <?php foreach ($stats['by_status'] as $status => $count): ?>
             <?php $statusInfo = $statuses[$status] ?? []; ?>
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="badge" style="background-color: <?php echo $statusInfo['color'] ?? '#999'; ?>">
+              <span class="badge" data-ahg-style="background-color: <?php echo $statusInfo['color'] ?? '#999'; ?>">
                 <?php echo $statusInfo['label'] ?? $status; ?>
               </span>
               <span><?php echo $count; ?></span>

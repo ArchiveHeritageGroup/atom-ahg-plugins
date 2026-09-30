@@ -52,7 +52,7 @@
           </button>
         </div>
         <div class="col-12">
-          <div id="barcodeLookupResult" class="mt-2" style="display:none;"></div>
+          <div id="barcodeLookupResult" class="mt-2" data-ahg-style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -66,7 +66,7 @@
   </div>
 
   <!-- Add Container form (initially hidden) -->
-  <div id="addContainerForm" class="card mb-4" style="display:none;">
+  <div id="addContainerForm" class="card mb-4" data-ahg-style="display:none;">
     <div class="card-header">
       <i class="fas fa-box me-2"></i><?php echo __('New container'); ?>
     </div>
@@ -230,7 +230,7 @@
           <?php endif; ?>
 
           <!-- Expandable items section -->
-          <div class="container-items-section" id="containerItems<?php echo $cId; ?>" style="display:none;">
+          <div class="container-items-section" id="containerItems<?php echo $cId; ?>" data-ahg-style="display:none;">
             <hr>
             <h6 class="mb-3"><i class="fas fa-list me-1"></i><?php echo __('Items in this container'); ?></h6>
 
@@ -244,7 +244,7 @@
                       <th><?php echo __('Format'); ?></th>
                       <th><?php echo __('Date range'); ?></th>
                       <th><?php echo __('Linked IO'); ?></th>
-                      <th style="width:80px;"><?php echo __('Actions'); ?></th>
+                      <th data-ahg-style="width:80px;"><?php echo __('Actions'); ?></th>
                     </tr>
                   </thead>
                   <tbody>

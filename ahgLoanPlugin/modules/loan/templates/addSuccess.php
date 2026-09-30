@@ -133,7 +133,7 @@
             <div class="col-md-6">
               <label class="form-label">Total Insurance Value</label>
               <div class="input-group">
-                <select name="insurance_currency" class="form-select" style="max-width: 100px;">
+                <select name="insurance_currency" class="form-select" data-ahg-style="max-width: 100px;">
                   <option value="ZAR" selected>ZAR</option>
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>

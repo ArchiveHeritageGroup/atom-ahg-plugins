@@ -54,7 +54,7 @@ $repositories = $sf_data->getRaw('repositories') ?: [];
           <i class="fas fa-file-csv fa-3x text-success mb-3"></i>
           <h5><?php echo __('CSV Export'); ?></h5>
           <p class="text-muted"><?php echo __('Download the verification ledger as a CSV file with all columns.'); ?></p>
-          <button type="button" class="btn btn-success" onclick="downloadExport('csv')">
+          <button type="button" class="btn btn-success" data-ahg-call="downloadExport" data-ahg-types="s" data-ahg-a0="csv">
             <i class="fas fa-download me-1"></i><?php echo __('Download CSV'); ?>
           </button>
         </div>
@@ -66,7 +66,7 @@ $repositories = $sf_data->getRaw('repositories') ?: [];
           <i class="fas fa-file-archive fa-3x text-primary mb-3"></i>
           <h5><?php echo __('Auditor Pack (ZIP)'); ?></h5>
           <p class="text-muted"><?php echo __('Download a ZIP containing summary.html, exceptions.csv, and config-snapshot.json.'); ?></p>
-          <button type="button" class="btn btn-primary" onclick="downloadExport('auditor')">
+          <button type="button" class="btn btn-primary" data-ahg-call="downloadExport" data-ahg-types="s" data-ahg-a0="auditor">
             <i class="fas fa-download me-1"></i><?php echo __('Download Auditor Pack'); ?>
           </button>
         </div>

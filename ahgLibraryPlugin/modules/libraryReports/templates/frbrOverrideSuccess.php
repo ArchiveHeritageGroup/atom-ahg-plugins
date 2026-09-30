@@ -124,9 +124,9 @@
             <?php $pct = $workKeyStats['total'] > 0
                 ? round($workKeyStats['keyed'] / $workKeyStats['total'] * 100, 1)
                 : 0; ?>
-            <div class="progress" style="height: 6px;">
+            <div class="progress" data-ahg-style="height: 6px;">
               <div class="progress-bar bg-success" role="progressbar"
-                   style="width: <?php echo $pct; ?>%;" aria-valuenow="<?php echo $pct; ?>">
+                   data-ahg-style="width: <?php echo $pct; ?>%;" aria-valuenow="<?php echo $pct; ?>">
               </div>
             </div>
             <small class="text-muted"><?php echo $pct; ?>% keyed</small>
@@ -142,7 +142,7 @@
           <strong>Active Overrides</strong>
           <span class="badge bg-dark"><?php echo isset($overrides) ? count($overrides) : 0; ?></span>
         </div>
-        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+        <div class="table-responsive" data-ahg-style="max-height: 600px; overflow-y: auto;">
           <table class="table table-sm table-hover mb-0">
             <thead class="table-light sticky-top">
               <tr>
@@ -161,7 +161,7 @@
                   <tr>
                     <td><a href="?item_id=<?php echo $row->library_item_id; ?>">
                         <?php echo $row->library_item_id; ?></a></td>
-                    <td style="max-width: 150px;" class="text-truncate"
+                    <td data-ahg-style="max-width: 150px;" class="text-truncate"
                         title="<?php echo esc_entities($row->title ?? ''); ?>">
                         <?php echo esc_entities($row->title ?? '-'); ?></td>
                     <td>
@@ -171,9 +171,9 @@
                       ?>
                       <span class="badge <?php echo $bc; ?> small"><?php echo $t; ?></span>
                     </td>
-                    <td style="max-width: 100px;" class="text-truncate">
+                    <td data-ahg-style="max-width: 100px;" class="text-truncate">
                       <code class="small"><?php echo esc_entities($row->target_work_key ?? '-'); ?></code></td>
-                    <td style="max-width: 120px;" class="text-truncate text-muted small"
+                    <td data-ahg-style="max-width: 120px;" class="text-truncate text-muted small"
                         title="<?php echo esc_entities($row->reason ?? ''); ?>">
                         <?php echo esc_entities($row->reason ?? '-'); ?></td>
                     <td class="small text-muted"><?php echo substr($row->created_at, 0, 10); ?></td>

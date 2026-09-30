@@ -28,7 +28,7 @@
       </header>
 
       <?php if (!empty($newsletter->excerpt)): ?>
-      <div class="lead text-muted mb-4" style="font-size: 1.1rem;">
+      <div class="lead text-muted mb-4" data-ahg-style="font-size: 1.1rem;">
         <?php echo htmlspecialchars($newsletter->excerpt, ENT_QUOTES, 'UTF-8'); ?>
       </div>
       <?php endif; ?>

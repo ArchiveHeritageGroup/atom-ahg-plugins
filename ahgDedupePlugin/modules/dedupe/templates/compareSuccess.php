@@ -71,7 +71,7 @@
                     <table class="table table-sm">
                         <?php foreach ($comparison as $field): ?>
                             <tr class="<?php echo $field['match'] ? '' : 'table-warning'; ?>">
-                                <th style="width: 30%;"><?php echo $field['label']; ?></th>
+                                <th data-ahg-style="width: 30%;"><?php echo $field['label']; ?></th>
                                 <td>
                                     <?php if (!empty($field['value_a'])): ?>
                                         <?php echo nl2br(htmlspecialchars(mb_substr($field['value_a'], 0, 500))); ?>
@@ -100,7 +100,7 @@
                     <table class="table table-sm">
                         <?php foreach ($comparison as $field): ?>
                             <tr class="<?php echo $field['match'] ? '' : 'table-warning'; ?>">
-                                <th style="width: 30%;"><?php echo $field['label']; ?></th>
+                                <th data-ahg-style="width: 30%;"><?php echo $field['label']; ?></th>
                                 <td>
                                     <?php if (!empty($field['value_b'])): ?>
                                         <?php echo nl2br(htmlspecialchars(mb_substr($field['value_b'], 0, 500))); ?>

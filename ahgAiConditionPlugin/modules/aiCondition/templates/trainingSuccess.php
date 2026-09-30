@@ -58,18 +58,18 @@
             <i class="fas fa-info-circle me-1"></i>
             <?php echo __('Expected format: ZIP file containing an <code>images/</code> directory (JPG/PNG files) and an <code>annotations/</code> directory (JSON files with damage type and bounding box coordinates).') ?>
         </div>
-        <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3" style="cursor:pointer;border-color:#adb5bd !important">
+        <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3" data-ahg-style="cursor:pointer;border-color:#adb5bd !important">
             <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2 d-block"></i>
             <p class="text-muted mb-1"><?php echo __('Drag and drop a ZIP file here, or click to browse') ?></p>
-            <input type="file" id="trainingFile" accept=".zip" style="display:none">
+            <input type="file" id="trainingFile" accept=".zip" data-ahg-style="display:none">
         </div>
-        <div id="uploadProgress" style="display:none">
-            <div class="progress mb-2" style="height:6px">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" id="uploadProgressBar" style="width:0%"></div>
+        <div id="uploadProgress" data-ahg-style="display:none">
+            <div class="progress mb-2" data-ahg-style="height:6px">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="uploadProgressBar" data-ahg-style="width:0%"></div>
             </div>
             <p class="text-center small text-muted" id="uploadProgressText"><?php echo __('Uploading...') ?></p>
         </div>
-        <div id="uploadResult" style="display:none"></div>
+        <div id="uploadResult" data-ahg-style="display:none"></div>
     </div>
 </div>
 
@@ -171,7 +171,7 @@ function loadTrainingStatus() {
         if (status === 'training' && d.current_epoch != null && d.total_epochs) {
             var pct = Math.round((d.current_epoch / d.total_epochs) * 100);
             html += '<tr><td class="text-muted"><?php echo __('Progress') ?></td><td>'
-                + '<div class="progress" style="height:6px"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:' + pct + '%"></div></div>'
+                + '<div class="progress" data-ahg-style="height:6px"><div class="progress-bar progress-bar-striped progress-bar-animated" data-ahg-style="width:' + pct + '%"></div></div>'
                 + '<span class="small">' + d.current_epoch + ' / ' + d.total_epochs + ' <?php echo __('epochs') ?></span>'
                 + '</td></tr>';
         }
@@ -323,10 +323,10 @@ function loadDatasets() {
                 + '<td class="text-center"><span class="badge bg-secondary">' + (ds.annotations || 0) + '</span></td>'
                 + '<td class="small">' + esc(ds.created_at || '--') + '</td>'
                 + '<td class="text-end">'
-                + '<button type="button" class="btn btn-sm ' + (isSelected ? 'btn-primary' : 'btn-outline-primary') + ' me-1" onclick="selectDataset(' + ds.id + ')">'
+                + '<button type="button" class="btn btn-sm ' + (isSelected ? 'btn-primary' : 'btn-outline-primary') + ' me-1" data-ahg-call="selectDataset" data-ahg-types="x" data-ahg-a0="' + ds.id + '">'
                 + '<i class="fas fa-check me-1"></i>' + (isSelected ? '<?php echo __('Selected') ?>' : '<?php echo __('Use for Training') ?>')
                 + '</button>'
-                + '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteDataset(' + ds.id + ')">'
+                + '<button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="deleteDataset" data-ahg-types="x" data-ahg-a0="' + ds.id + '">'
                 + '<i class="fas fa-trash"></i>'
                 + '</button>'
                 + '</td></tr>';

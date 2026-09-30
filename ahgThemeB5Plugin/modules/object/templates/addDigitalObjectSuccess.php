@@ -107,7 +107,7 @@
           </h2>
           <div id="merge-collapse" class="accordion-collapse collapse" aria-labelledby="merge-heading">
             <div class="accordion-body">
-              <div id="tpmAlert" class="alert" style="display: none;"></div>
+              <div id="tpmAlert" class="alert" data-ahg-style="display: none;"></div>
 
               <input type="hidden" id="tpmJobId" value="">
 
@@ -145,20 +145,20 @@
                 </div>
               </div>
 
-              <div id="tpmDropZone" class="border border-2 border-dashed rounded p-4 text-center bg-light mb-3" style="cursor:pointer;">
+              <div id="tpmDropZone" class="border border-2 border-dashed rounded p-4 text-center bg-light mb-3" data-ahg-style="cursor:pointer;">
                 <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
                 <h6><?php echo __('Drag and drop images here'); ?></h6>
                 <p class="text-muted small mb-0"><?php echo __('TIFF, JPEG, PNG, BMP, GIF'); ?></p>
                 <input type="file" id="tpmFileInput" class="d-none" multiple accept=".tif,.tiff,.jpg,.jpeg,.png,.bmp,.gif">
               </div>
 
-              <div id="tpmProgressContainer" class="mb-3" style="display: none;">
+              <div id="tpmProgressContainer" class="mb-3" data-ahg-style="display: none;">
                 <div class="d-flex justify-content-between mb-1">
                   <small class="text-muted"><?php echo __('Uploading...'); ?></small>
                   <small id="tpmProgressText" class="text-muted"></small>
                 </div>
-                <div class="progress" style="height: 6px;">
-                  <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                <div class="progress" data-ahg-style="height: 6px;">
+                  <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" data-ahg-style="width: 0%"></div>
                 </div>
               </div>
 
@@ -166,12 +166,12 @@
                 <small class="text-muted"><strong><?php echo __('Pages'); ?></strong> <span id="tpmFileCount" class="badge bg-secondary">0</span></small>
                 <small class="text-muted"><i class="fas fa-arrows-alt me-1"></i><?php echo __('Drag to reorder'); ?></small>
               </div>
-              <div id="tpmFileList" class="border rounded bg-white mb-3" style="min-height: 60px; max-height: 300px; overflow-y: auto;">
+              <div id="tpmFileList" class="border rounded bg-white mb-3" data-ahg-style="min-height: 60px; max-height: 300px; overflow-y: auto;">
                 <div class="text-muted text-center py-3"><i class="fas fa-images me-1"></i><?php echo __('No files uploaded yet'); ?></div>
               </div>
 
               <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-outline-danger btn-sm" id="tpmClearBtn" style="display: none;">
+                <button type="button" class="btn btn-outline-danger btn-sm" id="tpmClearBtn" data-ahg-style="display: none;">
                   <i class="fas fa-trash me-1"></i><?php echo __('Clear'); ?>
                 </button>
                 <button type="button" class="btn btn-primary" id="tpmCreateBtn" disabled>
@@ -326,7 +326,7 @@
                     '<i class="fas fa-file-image text-secondary me-2"></i>' +
                     '<div class="flex-grow-1"><small class="fw-semibold">' + escapeHtml(f.name) + '</small>' +
                     '<br><small class="text-muted">' + formatSize(f.size) + (f.width ? ' \u2022 ' + f.width + '\u00d7' + f.height + 'px' : '') + '</small></div>' +
-                    '<button type="button" class="btn btn-sm btn-outline-danger" onclick="window.tpmRemoveFile(' + f.id + ')"><i class="fas fa-times"></i></button>' +
+                    '<button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="tpmRemoveFile" data-ahg-types="x" data-ahg-a0="' + f.id + '"><i class="fas fa-times"></i></button>' +
                     '</div>';
             }).join('');
         }

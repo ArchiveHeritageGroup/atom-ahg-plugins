@@ -33,12 +33,12 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 80px;">Status</th>
-                            <th style="width: 120px;">Type</th>
+                            <th data-ahg-style="width: 80px;">Status</th>
+                            <th data-ahg-style="width: 120px;">Type</th>
                             <th>Value</th>
                             <th>Object</th>
-                            <th class="text-center" style="width: 100px;">Confidence</th>
-                            <th style="width: 200px;">Actions</th>
+                            <th class="text-center" data-ahg-style="width: 100px;">Confidence</th>
+                            <th data-ahg-style="width: 200px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,7 +73,7 @@ $typeBadges = [
                                 $isIsad = strpos($entity->entity_type, 'ISAD_') === 0;
                                 $displayType = $isIsad ? str_replace('ISAD_', '', $entity->entity_type) : $entity->entity_type;
 @endphp
-                                <span class="badge {{ $badge }}" style="{{ $isIsad ? 'background-color: #6f42c1 !important;' : '' }}">
+                                <span class="badge {{ $badge }}" data-ahg-style="{{ $isIsad ? 'background-color: #6f42c1 !important;' : '' }}">
                                     @if($isIsad)<i class="fas fa-tag me-1"></i>@endif
                                     {{ $displayType }}
                                 </span>
@@ -164,10 +164,10 @@ $conf = round($entity->confidence * 100);
                 </div>
                 <div class="col-md-6">
                     <p class="mb-2"><strong>ISAD Access Points</strong></p>
-                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>SUBJECT</span>
-                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>PLACE</span>
-                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>NAME</span>
-                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>DATE</span>
+                    <span class="badge me-1" data-ahg-style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>SUBJECT</span>
+                    <span class="badge me-1" data-ahg-style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>PLACE</span>
+                    <span class="badge me-1" data-ahg-style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>NAME</span>
+                    <span class="badge me-1" data-ahg-style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>DATE</span>
                     <small class="d-block text-muted mt-1">From Subject, Place, Name, and Date access point fields</small>
                 </div>
             </div>

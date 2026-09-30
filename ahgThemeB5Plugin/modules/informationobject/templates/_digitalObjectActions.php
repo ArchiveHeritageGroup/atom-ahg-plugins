@@ -48,7 +48,7 @@ $resourceSlug = $resource->slug ?? null;
 
             <div class="modal-body">
                 <!-- Alert area -->
-                <div id="tpmAlert" class="alert" style="display: none;"></div>
+                <div id="tpmAlert" class="alert" data-ahg-style="display: none;"></div>
 
                 <!-- Hidden fields -->
                 <input type="hidden" id="tpmInformationObjectId" value="<?php echo $resourceId; ?>">
@@ -96,14 +96,14 @@ $resourceSlug = $resource->slug ?? null;
                 </div>
 
                 <!-- Progress Bar -->
-                <div id="tpmProgressContainer" class="mb-3" style="display: none;">
+                <div id="tpmProgressContainer" class="mb-3" data-ahg-style="display: none;">
                     <div class="d-flex justify-content-between mb-1">
                         <small class="text-muted">Uploading...</small>
                         <small id="tpmProgressText" class="text-muted"></small>
                     </div>
-                    <div class="progress" style="height: 6px;">
+                    <div class="progress" data-ahg-style="height: 6px;">
                         <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                             role="progressbar" style="width: 0%"></div>
+                             role="progressbar" data-ahg-style="width: 0%"></div>
                     </div>
                 </div>
 
@@ -120,7 +120,7 @@ $resourceSlug = $resource->slug ?? null;
                             Drag to reorder pages
                         </small>
                     </div>
-                    <div id="tpmFileList" class="border rounded" style="max-height: 300px; overflow-y: auto;">
+                    <div id="tpmFileList" class="border rounded" data-ahg-style="max-height: 300px; overflow-y: auto;">
                         <div class="text-muted text-center py-4">No files uploaded yet</div>
                     </div>
                 </div>
@@ -308,7 +308,7 @@ $resourceSlug = $resource->slug ?? null;
                     <div class="fw-medium">${escapeHtml(file.name)}</div>
                     <small class="text-muted">${formatSize(file.size)}${file.image_info?.width ? ` • ${file.image_info.width}×${file.image_info.height}px` : ''}</small>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.tpmRemoveFile(${file.id})">
+                <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="tpmRemoveFile" data-ahg-types="x" data-ahg-a0="${file.id}">
                     <i class="fas fa-times"></i>
                 </button>
             </div>

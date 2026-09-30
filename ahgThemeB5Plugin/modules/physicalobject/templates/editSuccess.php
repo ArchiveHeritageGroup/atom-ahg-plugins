@@ -218,9 +218,9 @@
               $percent = $total > 0 ? round(($used / $total) * 100) : 0;
               $barClass = $percent >= 90 ? 'bg-danger' : ($percent >= 70 ? 'bg-warning' : 'bg-success');
             ?>
-            <div class="progress" style="height: 25px;">
+            <div class="progress" data-ahg-style="height: 25px;">
               <div class="progress-bar <?php echo $barClass; ?>" role="progressbar" 
-                   style="width: <?php echo $percent; ?>%;">
+                   data-ahg-style="width: <?php echo $percent; ?>%;">
                 <?php echo $used; ?> / <?php echo $total; ?> (<?php echo $percent; ?>%)
               </div>
             </div>

@@ -41,7 +41,7 @@ $resourceId = isset($resource) && $resource->id ? $resource->id : '';
                 <button type="button" 
                         id="isbnLookupBtn" 
                         class="btn btn-primary w-100"
-                        onclick="IsbnLookup.lookup(document.getElementById('isbnLookupInput').value)">
+                        data-ahg-call="IsbnLookup.lookup" data-ahg-types="q" data-ahg-a0="#isbnLookupInput">
                     <i class="fas fa-search me-1"></i><?php echo __('Lookup ISBN'); ?>
                 </button>
             </div>

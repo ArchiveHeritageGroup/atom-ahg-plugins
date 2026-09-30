@@ -27,12 +27,12 @@ class AudioVideoRenderer implements RendererInterface
         $html = '<div id="av-wrapper-' . $vid . '" class="av-wrapper">';
 
         if ($isAudio) {
-            $html .= '<audio id="audio-' . $vid . '" controls style="width:100%;">';
+            $html .= '<audio id="audio-' . $vid . '" controls data-ahg-style="width:100%;">';
             $html .= '<source src="' . $mediaUrl . '" type="' . htmlspecialchars($mimeType) . '">';
             $html .= 'Your browser does not support the audio element.</audio>';
         } else {
             $html .= '<video id="video-' . $vid . '" controls ';
-            $html .= 'style="width:100%;height:' . $height . ';background:#000;border-radius:8px;">';
+            $html .= 'data-ahg-style="width:100%;height:' . $height . ';background:#000;border-radius:8px;">';
             $html .= '<source src="' . $mediaUrl . '" type="' . htmlspecialchars($mimeType) . '">';
             $html .= 'Your browser does not support the video element.</video>';
         }

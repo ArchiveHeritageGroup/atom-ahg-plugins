@@ -58,13 +58,13 @@ elseif ($resourceData->media_type_id == $MEDIA_IMAGE) $mediaIcon = 'fa-image';
           <div class="card-header bg-dark text-white">
             <h5 class="mb-0"><i class="fas fa-eye me-2"></i><?php echo __('Preview') ?></h5>
           </div>
-          <div class="card-body text-center bg-light" style="min-height: 200px;">
+          <div class="card-body text-center bg-light" data-ahg-style="min-height: 200px;">
             <?php if ($resourceData->media_type_id == $MEDIA_IMAGE && ($refSrc || $thumbSrc)): ?>
-              <img src="<?php echo $refSrc ?: $thumbSrc ?>" class="img-fluid rounded shadow" style="max-height: 400px;" alt="">
+              <img src="<?php echo $refSrc ?: $thumbSrc ?>" class="img-fluid rounded shadow" data-ahg-style="max-height: 400px;" alt="">
             <?php elseif (in_array($resourceData->media_type_id, [$MEDIA_VIDEO, $MEDIA_AUDIO])): ?>
               <?php echo get_component('digitalobject', 'show', ['resource' => QubitDigitalObject::getById($resourceData->id), 'usageType' => QubitTerm::REFERENCE_ID]) ?>
             <?php elseif ($thumbSrc): ?>
-              <img src="<?php echo $thumbSrc ?>" class="img-fluid rounded" style="max-height: 200px;" alt="">
+              <img src="<?php echo $thumbSrc ?>" class="img-fluid rounded" data-ahg-style="max-height: 200px;" alt="">
             <?php else: ?>
               <div class="py-5 text-muted">
                 <i class="fas <?php echo $mediaIcon ?> fa-4x mb-3"></i>
@@ -133,7 +133,7 @@ elseif ($resourceData->media_type_id == $MEDIA_IMAGE) $mediaIcon = 'fa-image';
               <div class="row align-items-center">
                 <?php if ($refSrc): ?>
                 <div class="col-md-3 text-center mb-3 mb-md-0">
-                  <img src="<?php echo $refSrc ?>" class="img-thumbnail" style="max-height: 120px;" alt="">
+                  <img src="<?php echo $refSrc ?>" class="img-thumbnail" data-ahg-style="max-height: 120px;" alt="">
                 </div>
                 <?php endif; ?>
                 <div class="col">
@@ -162,7 +162,7 @@ elseif ($resourceData->media_type_id == $MEDIA_IMAGE) $mediaIcon = 'fa-image';
               <div class="row align-items-center">
                 <?php if ($thumbSrc): ?>
                 <div class="col-md-2 text-center mb-3 mb-md-0">
-                  <img src="<?php echo $thumbSrc ?>" class="img-thumbnail" style="max-height: 80px;" alt="">
+                  <img src="<?php echo $thumbSrc ?>" class="img-thumbnail" data-ahg-style="max-height: 80px;" alt="">
                 </div>
                 <?php endif; ?>
                 <div class="col">

@@ -182,7 +182,7 @@ if (!empty($scalars)): ?>
     <table class="table table-sm mb-0">
         <thead class="table-light">
             <tr>
-                <th style="width:22%"><?php echo __('Field') ?></th>
+                <th data-ahg-style="width:22%"><?php echo __('Field') ?></th>
                 <th class="vc-side old"><?php echo sprintf(__('v%d (old)'), $v1) ?></th>
                 <th class="vc-side new"><?php echo sprintf(__('v%d (new)'), $v2) ?></th>
             </tr>
@@ -222,7 +222,7 @@ foreach ($byCulture as $culture => $rows): ?>
     <table class="table table-sm mb-0">
         <thead class="table-light">
             <tr>
-                <th style="width:22%"><?php echo __('Field') ?></th>
+                <th data-ahg-style="width:22%"><?php echo __('Field') ?></th>
                 <th class="vc-side old"><?php echo sprintf(__('v%d (old)'), $v1) ?></th>
                 <th class="vc-side new"><?php echo sprintf(__('v%d (new)'), $v2) ?></th>
             </tr>

@@ -36,7 +36,7 @@ class PdfRenderer implements RendererInterface
         // Iframe
         $html .= '<iframe id="pdf-frame-' . $vid . '" ';
         $html .= 'src="' . $pdfUrl . '" ';
-        $html .= 'style="width:100%;height:' . $height . ';border:none;border-radius:8px;background:#525659;" ';
+        $html .= 'data-ahg-style="width:100%;height:' . $height . ';border:none;border-radius:8px;background:#525659;" ';
         $html .= 'title="PDF Viewer"></iframe>';
 
         $html .= '</div>';

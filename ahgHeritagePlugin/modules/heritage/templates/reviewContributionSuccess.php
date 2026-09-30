@@ -40,7 +40,7 @@ $versions = $contribution['versions'] ?? [];
     <img src="<?php echo esc_specialchars($item['thumbnail']); ?>"
          class="card-img-top"
          alt="<?php echo esc_specialchars($item['title'] ?? 'Item'); ?>"
-         onerror="this.style.display='none'">
+         data-ahg-onerror="hide">
     <?php endif; ?>
     <div class="card-body">
         <h6 class="card-title"><?php echo esc_specialchars($item['title'] ?? 'Untitled'); ?></h6>
@@ -67,7 +67,7 @@ $versions = $contribution['versions'] ?? [];
             <img src="<?php echo esc_specialchars($contributor['avatar_url']); ?>"
                  class="rounded-circle me-2" width="40" height="40" alt="">
             <?php else: ?>
-            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" data-ahg-style="width: 40px; height: 40px;">
                 <i class="fas fa-user text-primary"></i>
             </div>
             <?php endif; ?>
@@ -155,7 +155,7 @@ $versions = $contribution['versions'] ?? [];
         <h6 class="text-muted mb-3">Contribution Content</h6>
 
         <?php if ($type['code'] === 'transcription'): ?>
-        <div class="bg-light border rounded p-3 font-monospace" style="white-space: pre-wrap;">
+        <div class="bg-light border rounded p-3 font-monospace" data-ahg-style="white-space: pre-wrap;">
 <?php echo esc_specialchars($content['text'] ?? ''); ?>
         </div>
         <?php if (!empty($content['notes'])): ?>

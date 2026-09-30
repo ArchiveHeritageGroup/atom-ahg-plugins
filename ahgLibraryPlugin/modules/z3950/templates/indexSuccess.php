@@ -118,7 +118,7 @@
              value="/api/sru?version=1.1&operation=searchRetrieve&query=dc.title%3Dlibrary&recordPacking=xml"
              id="sru-url-field">
       <button class="btn btn-outline-secondary" type="button"
-              onclick="document.getElementById('sru-url-field').select(); document.execCommand('copy'); this.innerHTML='<i class=\'fas fa-check\'></i>'">
+              data-ahg-copy="#sru-url-field">
         <i class="fas fa-copy"></i>
       </button>
     </div>

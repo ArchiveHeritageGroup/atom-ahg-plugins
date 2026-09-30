@@ -62,13 +62,13 @@
             </div>
             <div class="col-12">
               <label for="reg-logo" class="form-label"><?php echo __('Logo'); ?></label>
-              <div class="border rounded p-3 text-center position-relative" id="logo-drop-zone" style="min-height: 120px; cursor: pointer;">
+              <div class="border rounded p-3 text-center position-relative" id="logo-drop-zone" data-ahg-style="min-height: 120px; cursor: pointer;">
                 <div id="logo-preview-area">
                   <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                   <p class="mb-1"><?php echo __('Drag and drop your logo here, or click to browse'); ?></p>
                   <small class="text-muted"><?php echo __('PNG, JPG, SVG. Max 2MB. Recommended: 200x200px.'); ?></small>
                 </div>
-                <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="reg-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" style="cursor: pointer;">
+                <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="reg-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" data-ahg-style="cursor: pointer;">
               </div>
             </div>
           </div>
@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.target.files && e.target.files[0]) {
         var reader = new FileReader();
         reader.onload = function(ev) {
-          previewArea.innerHTML = '<img src="' + ev.target.result + '" alt="Logo preview" style="max-height: 100px; max-width: 200px;" class="mb-2"><br><small class="text-muted">' + e.target.files[0].name + '</small>';
+          previewArea.innerHTML = '<img src="' + ev.target.result + '" alt="Logo preview" data-ahg-style="max-height: 100px; max-width: 200px;" class="mb-2"><br><small class="text-muted">' + e.target.files[0].name + '</small>';
         };
         reader.readAsDataURL(e.target.files[0]);
       }

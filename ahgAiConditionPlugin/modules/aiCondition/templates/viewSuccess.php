@@ -45,7 +45,7 @@ require_once dirname(__FILE__, 4).'/lib/Helpers/AiConditionHelper.php';
             <?php endif ?>
             <hr>
             <?php if (!$assessment->is_confirmed): ?>
-            <button type="button" class="btn btn-success btn-sm w-100 mb-2" onclick="confirmAssessment(<?php echo $assessment->id ?>)">
+            <button type="button" class="btn btn-success btn-sm w-100 mb-2" data-ahg-call="confirmAssessment" data-ahg-types="x" data-ahg-a0="<?php echo $assessment->id ?>">
                 <i class="fas fa-check me-1"></i><?php echo __('Confirm') ?>
             </button>
             <?php endif ?>
@@ -82,7 +82,7 @@ require_once dirname(__FILE__, 4).'/lib/Helpers/AiConditionHelper.php';
                 <?php elseif ($assessment->image_path): ?>
                 <div class="position-relative d-inline-block">
                     <img src="/uploads/<?php echo esc_entities($assessment->image_path) ?>" alt="Original" class="img-fluid rounded" id="baseImage">
-                    <canvas id="overlayCanvas" class="position-absolute top-0 start-0" style="pointer-events:none"></canvas>
+                    <canvas id="overlayCanvas" class="position-absolute top-0 start-0" data-ahg-style="pointer-events:none"></canvas>
                 </div>
                 <?php else: ?>
                 <div class="alert alert-secondary"><?php echo __('No image available') ?></div>
@@ -109,7 +109,7 @@ require_once dirname(__FILE__, 4).'/lib/Helpers/AiConditionHelper.php';
                     <div class="list-group-item py-2">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <span class="badge" style="background-color:<?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::damageColor($dmg->damage_type) ?>">
+                                <span class="badge" data-ahg-style="background-color:<?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::damageColor($dmg->damage_type) ?>">
                                     <?php echo ucfirst(str_replace('_', ' ', $dmg->damage_type)) ?>
                                 </span>
                                 <?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::severityBadge($dmg->severity) ?>

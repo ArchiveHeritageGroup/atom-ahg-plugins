@@ -1082,7 +1082,7 @@ function render_iiif_image($identifier, $options = [])
     
     // A style attribute is dropped under any enforcing CSP, so emit one only when a
     // caller explicitly asks. Prefer passing 'class'.
-    $styleAttr = '' !== trim((string) $style) ? ' style="' . htmlspecialchars($style) . '"' : '';
+    $styleAttr = '' !== trim((string) $style) ? ' data-ahg-style="' . htmlspecialchars($style) . '"' : '';
 
     return '<img src="' . htmlspecialchars($url) . '" alt="' . htmlspecialchars($alt) . '" class="' . $class . '"' . $styleAttr . '>';
 }

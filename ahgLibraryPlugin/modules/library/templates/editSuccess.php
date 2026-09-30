@@ -461,7 +461,7 @@ $creatorRoles = $taxonomyService->getCreatorRoles(false);
     <div class="col-md-4">
 
       <!-- Actions -->
-      <section class="card mb-4 sticky-top" style="top: 1rem; z-index: 100;">
+      <section class="card mb-4 sticky-top" data-ahg-style="top: 1rem; z-index: 100;">
         <div class="card-header bg-success text-white">
           <h5 class="mb-0"><i class="fas fa-save me-2"></i><?php echo __('Actions'); ?></h5>
         </div>
@@ -516,7 +516,7 @@ $creatorRoles = $taxonomyService->getCreatorRoles(false);
               $refPath = $refObj ? $refObj->getFullPath() : null;
               $displayPath = $refPath ?: $thumbPath ?: $digitalObject->getFullPath();
               if (strpos($mimeType, 'image') !== false && $displayPath): ?>
-              <img src="<?php echo $displayPath; ?>" alt="Cover" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;">
+              <img src="<?php echo $displayPath; ?>" alt="Cover" class="img-fluid rounded shadow-sm mb-2" data-ahg-style="max-height: 200px;">
               <div class="mt-2">
                 <a href="<?php echo url_for([$digitalObject, 'module' => 'digitalobject', 'action' => 'edit']); ?>" class="btn btn-sm btn-outline-primary">
                   <i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?>
@@ -531,8 +531,8 @@ $creatorRoles = $taxonomyService->getCreatorRoles(false);
           <?php elseif (!empty($cleanIsbn)): ?>
             <div id="ol-cover-preview">
               <img src="/library/cover/<?php echo $cleanIsbn; ?>"
-                   alt="Cover" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;"
-                   onerror="this.parentElement.innerHTML='<p class=\'text-muted\'>No Open Library cover found</p>'">
+                   alt="Cover" class="img-fluid rounded shadow-sm mb-2" data-ahg-style="max-height: 200px;"
+                   data-ahg-onerror="parent-html" data-ahg-fallback="<p class='text-muted'>No Open Library cover found</p>">
               <div class="mt-1"><small class="text-muted">Open Library Preview</small></div>
               <div class="mt-1"><small class="text-success"><i class="fas fa-info-circle me-1"></i>Will be saved to AtoM on save</small></div>
             </div>
@@ -742,7 +742,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         var coverPreview = document.getElementById('cover-preview');
                         if (coverPreview && coverUrl) {
                             coverPreview.innerHTML = 
-                                '<img src="' + coverUrl + '" class="img-fluid rounded shadow-sm" style="max-height:250px">' +
+                                '<img src="' + coverUrl + '" class="img-fluid rounded shadow-sm" data-ahg-style="max-height:250px">' +
                                 '<div class="mt-2"><small class="text-muted">Open Library</small></div>' +
                                 '<input type="hidden" name="cover_url" id="cover-url-input" value="' + escapeHtml(coverUrl) + '">';
                         }
@@ -776,7 +776,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var coverPreview = document.getElementById('cover-preview');
                 if (coverPreview) {
                     coverPreview.innerHTML =
-                        '<img src="/library/cover/' + isbn + '" class="img-fluid rounded shadow-sm" style="max-height:250px" onerror="this.style.display=\'none\'">' +
+                        '<img src="/library/cover/' + isbn + '" class="img-fluid rounded shadow-sm" data-ahg-style="max-height:250px" data-ahg-onerror="hide">' +
                         '<div class="mt-2"><small class="text-muted">Open Library</small></div>' +
                         '<input type="hidden" name="cover_url" id="cover-url-input" value="">';
                 }
@@ -939,7 +939,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 '<label class="form-check-label" for="select-all-suggestions"><strong><?php echo __('Select All'); ?></strong></label>' +
                             '</div>' +
                         '</div>' +
-                        '<div class="suggestions-list" style="max-height: 400px; overflow-y: auto;">' +
+                        '<div class="suggestions-list" data-ahg-style="max-height: 400px; overflow-y: auto;">' +
                             suggestionRows +
                         '</div>' +
                     '</div>' +

@@ -11,7 +11,7 @@ if (!$actorId) return;
   <div class="card-header py-2 d-flex justify-content-between">
     <span><i class="fas fa-project-diagram me-1"></i><?php echo __('Relationship Graph'); ?></span>
     <div>
-      <select id="graph-depth" class="form-select form-select-sm d-inline-block" style="width:auto">
+      <select id="graph-depth" class="form-select form-select-sm d-inline-block" data-ahg-style="width:auto">
         <option value="1"><?php echo __('Depth 1'); ?></option>
         <option value="2"><?php echo __('Depth 2'); ?></option>
         <option value="3"><?php echo __('Depth 3'); ?></option>
@@ -22,7 +22,7 @@ if (!$actorId) return;
     </div>
   </div>
   <div class="card-body p-0">
-    <div id="authority-graph" style="height:400px; background:#f8f9fa;"></div>
+    <div id="authority-graph" data-ahg-style="height:400px; background:#f8f9fa;"></div>
   </div>
 </div>
 

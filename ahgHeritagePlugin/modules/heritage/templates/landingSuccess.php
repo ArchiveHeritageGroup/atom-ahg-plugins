@@ -64,12 +64,12 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 </style>
 <?php end_slot(); ?>
 
-<div class="heritage-landing" style="margin: 0; width: 100%; max-width: none;">
+<div class="heritage-landing" data-ahg-style="margin: 0; width: 100%; max-width: none;">
 
     <!-- ================================================================
          Section 1: Hero (Full Viewport)
          ================================================================ -->
-    <section class="heritage-hero" id="heritage-hero" style="height: calc(100vh - 280px); min-height: 450px;">
+    <section class="heritage-hero" id="heritage-hero" data-ahg-style="height: calc(100vh - 280px); min-height: 450px;">
 
         <!-- Background Images -->
         <div class="heritage-hero-backgrounds">
@@ -107,7 +107,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                     echo ahg_style_block($heroCss);
                 ?>
             <?php else: ?>
-                <div class="heritage-hero-bg active" style="background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%);"></div>
+                <div class="heritage-hero-bg active" data-ahg-style="background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%);"></div>
             <?php endif; ?>
         </div>
 
@@ -234,13 +234,13 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                              src="<?php echo esc_specialchars($collection['thumbnail']); ?>"
                              alt="<?php echo esc_specialchars($collection['name']); ?>"
                              loading="lazy"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="main-image fallback-gradient" style="background: <?php echo $placeholderGradients[$index % 6]; ?>; height: 280px; display: none; align-items: center; justify-content: center;">
-                            <i class="fas <?php echo $collectionIcon; ?>" style="font-size: 3rem; color: rgba(255,255,255,0.5);"></i>
+                             data-ahg-onerror="hide-show-next">
+                        <div class="main-image fallback-gradient" data-ahg-style="background: <?php echo $placeholderGradients[$index % 6]; ?>; height: 280px; display: none; align-items: center; justify-content: center;">
+                            <i class="fas <?php echo $collectionIcon; ?>" data-ahg-style="font-size: 3rem; color: rgba(255,255,255,0.5);"></i>
                         </div>
                         <?php else: ?>
-                        <div class="main-image" style="background: <?php echo $placeholderGradients[$index % 6]; ?>; height: 280px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas <?php echo $collectionIcon; ?>" style="font-size: 3rem; color: rgba(255,255,255,0.5);"></i>
+                        <div class="main-image" data-ahg-style="background: <?php echo $placeholderGradients[$index % 6]; ?>; height: 280px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas <?php echo $collectionIcon; ?>" data-ahg-style="font-size: 3rem; color: rgba(255,255,255,0.5);"></i>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -248,7 +248,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                         <h3 class="heritage-card-title"><?php echo esc_specialchars($collection['name'] ?? 'Untitled Collection'); ?></h3>
                         <p class="heritage-card-subtitle"><?php echo esc_specialchars(substr($collection['description'] ?? '', 0, 60)); ?><?php echo strlen($collection['description'] ?? '') > 60 ? '...' : ''; ?></p>
                         <span class="heritage-card-count">
-                            <i class="fas <?php echo $collectionIcon; ?> me-1" style="font-size: 0.75em;"></i>
+                            <i class="fas <?php echo $collectionIcon; ?> me-1" data-ahg-style="font-size: 0.75em;"></i>
                             <?php echo number_format($collection['item_count'] ?? 0); ?> items
                         </span>
                     </div>
@@ -350,7 +350,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
             ?>
             <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'timeline', 'period_id' => $period->id]); ?>"
                class="heritage-timeline-marker"
-               style="left: <?php echo $position; ?>%;"
+               data-ahg-style="left: <?php echo $position; ?>%;"
                title="<?php echo esc_specialchars($period->name); ?>">
                 <div class="heritage-timeline-label">
                     <span class="heritage-period-name"><?php echo esc_specialchars($period->short_name ?? $period->name); ?></span>
@@ -433,14 +433,14 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                 <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $item->slug]); ?>" class="heritage-masonry-item">
                     <img src="<?php echo esc_specialchars($thumbPath); ?>"
                          alt="<?php echo esc_specialchars($item->title ?? 'Item'); ?>"
-                         onerror="this.parentElement.style.display='none';">
+                         data-ahg-onerror="hide-parent">
                     <div class="heritage-masonry-overlay">
                         <h4 class="heritage-masonry-title"><?php echo esc_specialchars($item->title ?? 'Untitled'); ?></h4>
                     </div>
                 </a>
                 <?php endforeach; ?>
             <?php else: ?>
-                <p class="text-muted text-center w-100 py-4" style="column-span: all;">No recent items with images found</p>
+                <p class="text-muted text-center w-100 py-4" data-ahg-style="column-span: all;">No recent items with images found</p>
             <?php endif; ?>
         </div>
     </section>
@@ -495,7 +495,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                             <img class="heritage-leaderboard-avatar"
                                  src="<?php echo esc_specialchars($contributor->avatar_url ?? ''); ?>"
                                  alt=""
-                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23fff3%22 width=%2240%22 height=%2240%22 rx=%2220%22/></svg>';">
+                                 data-ahg-onerror="src" data-ahg-fallback="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23fff3%22 width=%2240%22 height=%2240%22 rx=%2220%22/></svg>">
                             <div>
                                 <div class="heritage-leaderboard-name"><?php echo esc_specialchars($contributor->display_name); ?></div>
                                 <div class="heritage-leaderboard-points"><?php echo number_format($contributor->points); ?> points</div>
@@ -503,7 +503,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                         </div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <p style="opacity: 0.8; font-size: 0.875rem;">Be the first to contribute!</p>
+                        <p data-ahg-style="opacity: 0.8; font-size: 0.875rem;">Be the first to contribute!</p>
                     <?php endif; ?>
                 </div>
             </div>

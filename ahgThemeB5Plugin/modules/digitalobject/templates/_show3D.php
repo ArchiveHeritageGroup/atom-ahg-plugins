@@ -15,7 +15,7 @@ $viewerId = 'viewer-' . uniqid();
       <span class="badge bg-primary"><i class="fas fa-cube me-1"></i><?php echo esc_entities($resource->name); ?> (3D)</span>
     </div>
     
-    <div id="<?php echo $viewerId; ?>-container" style="width: 100%; height: 400px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 8px; position: relative;">
+    <div id="<?php echo $viewerId; ?>-container" data-ahg-style="width: 100%; height: 400px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 8px; position: relative;">
       <?php if (in_array($ext, ['glb', 'gltf'])): ?>
         <script type="module" src="/plugins/ahgCorePlugin/web/js/vendor/model-viewer.min.js"></script>
         <model-viewer 
@@ -26,14 +26,14 @@ $viewerId = 'viewer-' . uniqid();
           auto-rotate
           shadow-intensity="1"
           exposure="1"
-          style="width:100%;height:100%;background:transparent;border-radius:8px;">
+          data-ahg-style="width:100%;height:100%;background:transparent;border-radius:8px;">
           <div slot="poster" class="d-flex flex-column align-items-center justify-content-center h-100 text-white">
             <div class="spinner-border text-primary mb-3" role="status"></div>
             <span><?php echo __('Loading 3D model...'); ?></span>
           </div>
         </model-viewer>
       <?php else: ?>
-        <div id="<?php echo $viewerId; ?>-threejs" style="width:100%;height:100%;border-radius:8px;"></div>
+        <div id="<?php echo $viewerId; ?>-threejs" data-ahg-style="width:100%;height:100%;border-radius:8px;"></div>
         <script src="/plugins/ahg3DModelPlugin/web/vendor/threejs/three.min.js"></script>
         <script src="/plugins/ahg3DModelPlugin/web/vendor/threejs/OBJLoader.js"></script>
         <script src="/plugins/ahg3DModelPlugin/web/vendor/threejs/STLLoader.js"></script>
@@ -79,7 +79,7 @@ $viewerId = 'viewer-' . uniqid();
         </script>
       <?php endif; ?>
       
-      <button onclick="open3DFullscreen('<?php echo esc_entities($fullPath); ?>', '<?php echo $ext; ?>')" class="btn btn-sm btn-primary position-absolute" style="bottom: 10px; right: 10px; z-index: 10;">
+      <button data-ahg-call="open3DFullscreen" data-ahg-types="s,s" data-ahg-a0="<?php echo esc_entities($fullPath); ?>" data-ahg-a1="<?php echo $ext; ?>" class="btn btn-sm btn-primary position-absolute" data-ahg-style="bottom: 10px; right: 10px; z-index: 10;">
         <i class="fas fa-expand me-1"></i><?php echo __('Fullscreen'); ?>
       </button>
     </div>

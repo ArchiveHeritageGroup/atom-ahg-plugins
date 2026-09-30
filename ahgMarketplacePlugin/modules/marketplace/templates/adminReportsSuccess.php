@@ -25,7 +25,7 @@
   <div class="col-6 col-md-3">
     <div class="card h-100 text-center">
       <div class="card-body py-3">
-        <i class="fas fa-coins text-success mb-1 d-block" style="font-size: 1.5rem;"></i>
+        <i class="fas fa-coins text-success mb-1 d-block" data-ahg-style="font-size: 1.5rem;"></i>
         <div class="h4 mb-0">ZAR <?php echo number_format($totalRevenue, 2); ?></div>
         <small class="text-muted"><?php echo __('Total Revenue'); ?></small>
       </div>
@@ -34,7 +34,7 @@
   <div class="col-6 col-md-3">
     <div class="card h-100 text-center">
       <div class="card-body py-3">
-        <i class="fas fa-percentage text-primary mb-1 d-block" style="font-size: 1.5rem;"></i>
+        <i class="fas fa-percentage text-primary mb-1 d-block" data-ahg-style="font-size: 1.5rem;"></i>
         <div class="h4 mb-0">ZAR <?php echo number_format($totalCommission, 2); ?></div>
         <small class="text-muted"><?php echo __('Total Commission'); ?></small>
       </div>
@@ -43,7 +43,7 @@
   <div class="col-6 col-md-3">
     <div class="card h-100 text-center">
       <div class="card-body py-3">
-        <i class="fas fa-wallet text-warning mb-1 d-block" style="font-size: 1.5rem;"></i>
+        <i class="fas fa-wallet text-warning mb-1 d-block" data-ahg-style="font-size: 1.5rem;"></i>
         <div class="h4 mb-0">ZAR <?php echo number_format($netSellerPayouts, 2); ?></div>
         <small class="text-muted"><?php echo __('Net Seller Payouts'); ?></small>
       </div>
@@ -52,7 +52,7 @@
   <div class="col-6 col-md-3">
     <div class="card h-100 text-center">
       <div class="card-body py-3">
-        <i class="fas fa-receipt text-info mb-1 d-block" style="font-size: 1.5rem;"></i>
+        <i class="fas fa-receipt text-info mb-1 d-block" data-ahg-style="font-size: 1.5rem;"></i>
         <div class="h4 mb-0"><?php echo number_format($txnCount); ?></div>
         <small class="text-muted"><?php echo __('Transaction Count'); ?></small>
       </div>
@@ -78,10 +78,10 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 120px;"><?php echo __('Month'); ?></th>
+            <th data-ahg-style="width: 120px;"><?php echo __('Month'); ?></th>
             <th><?php echo __('Revenue'); ?></th>
-            <th class="text-end" style="width: 140px;"><?php echo __('Commission'); ?></th>
-            <th class="text-end" style="width: 100px;"><?php echo __('Sales'); ?></th>
+            <th class="text-end" data-ahg-style="width: 140px;"><?php echo __('Commission'); ?></th>
+            <th class="text-end" data-ahg-style="width: 100px;"><?php echo __('Sales'); ?></th>
           </tr>
         </thead>
         <tbody>
@@ -94,10 +94,10 @@
               <td class="fw-semibold"><?php echo esc_entities($month->month ?? '-'); ?></td>
               <td>
                 <div class="d-flex align-items-center">
-                  <div class="progress flex-grow-1 me-2" style="height: 20px;">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $pct; ?>%;" aria-valuenow="<?php echo $pct; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                  <div class="progress flex-grow-1 me-2" data-ahg-style="height: 20px;">
+                    <div class="progress-bar bg-success" role="progressbar" data-ahg-style="width: <?php echo $pct; ?>%;" aria-valuenow="<?php echo $pct; ?>" aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
-                  <span class="text-nowrap small fw-semibold" style="width: 120px;">ZAR <?php echo number_format($rev, 2); ?></span>
+                  <span class="text-nowrap small fw-semibold" data-ahg-style="width: 120px;">ZAR <?php echo number_format($rev, 2); ?></span>
                 </div>
               </td>
               <td class="text-end small">ZAR <?php echo number_format((float) ($month->commission ?? 0), 2); ?></td>
@@ -127,7 +127,7 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width: 40px;">#</th>
+                <th data-ahg-style="width: 40px;">#</th>
                 <th><?php echo __('Seller'); ?></th>
                 <th class="text-end"><?php echo __('Sales'); ?></th>
                 <th class="text-end"><?php echo __('Revenue'); ?></th>
@@ -168,7 +168,7 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width: 40px;">#</th>
+                <th data-ahg-style="width: 40px;">#</th>
                 <th><?php echo __('Item'); ?></th>
                 <th><?php echo __('Sector'); ?></th>
                 <th class="text-end"><?php echo __('Revenue'); ?></th>

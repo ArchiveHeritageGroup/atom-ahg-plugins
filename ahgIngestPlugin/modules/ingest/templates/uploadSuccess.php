@@ -27,8 +27,8 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 25%"></div>
+    <div class="progress mt-2" data-ahg-style="height: 4px;">
+        <div class="progress-bar" data-ahg-style="width: 25%"></div>
     </div>
 </div>
 
@@ -77,7 +77,7 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
                                     <input type="file" class="form-control mt-3" id="ingest_file" name="ingest_file"
                                            accept=".csv,.zip,.xml,.ead">
                                 </div>
-                                <div id="file-info" class="alert alert-info" style="display:none;"></div>
+                                <div id="file-info" class="alert alert-info" data-ahg-style="display:none;"></div>
                             </div>
 
                             <hr>
@@ -87,7 +87,7 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
                                 <input type="file" class="form-control" id="ingest_folder" name="ingest_folder[]"
                                        webkitdirectory directory multiple>
                                 <small class="text-muted"><?php echo __('Pick a folder on your computer — every file inside is uploaded as a batch of digital objects (no CSV required).') ?></small>
-                                <div id="folder-info" class="alert alert-info mt-2" style="display:none;"></div>
+                                <div id="folder-info" class="alert alert-info mt-2" data-ahg-style="display:none;"></div>
                             </div>
 
                             <hr>
@@ -163,7 +163,7 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
 
                             <div class="mb-3">
                                 <label class="form-label"><?php echo __('Items') ?></label>
-                                <div id="sp-tree" class="border rounded p-3" style="max-height: 360px; overflow-y: auto;">
+                                <div id="sp-tree" class="border rounded p-3" data-ahg-style="max-height: 360px; overflow-y: auto;">
                                     <small class="text-muted"><?php echo __('Select a drive to browse files') ?></small>
                                 </div>
                                 <small class="text-muted"><?php echo __('Tick the files to import; folders expand on click.') ?></small>

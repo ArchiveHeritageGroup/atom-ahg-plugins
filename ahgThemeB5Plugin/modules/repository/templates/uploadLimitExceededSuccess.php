@@ -17,5 +17,5 @@
 </div>
 
 <section class="actions mb-3">
-  <a class="btn atom-btn-outline-light" href="#" onClick="history.back(); return false;"><?php echo __('Back'); ?></a>
+  <a class="btn atom-btn-outline-light" href="#" data-ahg-action="back" data-ahg-prevent="1"><?php echo __('Back'); ?></a>
 </section>

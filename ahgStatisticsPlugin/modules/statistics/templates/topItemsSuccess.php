@@ -67,11 +67,11 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 60px">Rank</th>
+                            <th data-ahg-style="width: 60px">Rank</th>
                             <th>Title</th>
-                            <th class="text-end" style="width: 120px">Total</th>
-                            <th class="text-end" style="width: 120px">Unique</th>
-                            <th style="width: 100px">Actions</th>
+                            <th class="text-end" data-ahg-style="width: 120px">Total</th>
+                            <th class="text-end" data-ahg-style="width: 120px">Unique</th>
+                            <th data-ahg-style="width: 100px">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

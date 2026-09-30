@@ -128,7 +128,7 @@
             <div class="col-md-4">
               <label class="form-label fw-bold"><?php echo __('Monetary Value'); ?></label>
               <div class="input-group">
-                <select name="currency" class="form-select" style="max-width: 80px;">
+                <select name="currency" class="form-select" data-ahg-style="max-width: 80px;">
                   <?php foreach (['ZAR', 'USD', 'EUR', 'GBP'] as $cur): ?>
                   <option value="<?php echo $cur; ?>" <?php echo ($ap->currency ?? 'ZAR') === $cur ? 'selected' : ''; ?>><?php echo $cur; ?></option>
                   <?php endforeach; ?>
@@ -168,8 +168,8 @@
               <thead class="table-light">
                 <tr>
                   <th><?php echo __('Criterion'); ?></th>
-                  <th class="text-center" style="width:60px;"><?php echo __('Weight'); ?></th>
-                  <th class="text-center" style="width:280px;"><?php echo __('Score (1-5)'); ?></th>
+                  <th class="text-center" data-ahg-style="width:60px;"><?php echo __('Weight'); ?></th>
+                  <th class="text-center" data-ahg-style="width:280px;"><?php echo __('Score (1-5)'); ?></th>
                   <th><?php echo __('Notes'); ?></th>
                 </tr>
               </thead>
@@ -224,8 +224,8 @@
           </div>
           <p class="text-muted mb-0"><?php echo __('out of 5.00'); ?></p>
           <?php if ($weightedScore !== null): ?>
-          <div class="progress mt-3" style="height: 8px;">
-            <div class="progress-bar <?php echo $weightedScore >= 4 ? 'bg-success' : ($weightedScore >= 3 ? 'bg-info' : ($weightedScore >= 2 ? 'bg-warning' : 'bg-danger')); ?>" style="width: <?php echo ($weightedScore / 5) * 100; ?>%"></div>
+          <div class="progress mt-3" data-ahg-style="height: 8px;">
+            <div class="progress-bar <?php echo $weightedScore >= 4 ? 'bg-success' : ($weightedScore >= 3 ? 'bg-info' : ($weightedScore >= 2 ? 'bg-warning' : 'bg-danger')); ?>" data-ahg-style="width: <?php echo ($weightedScore / 5) * 100; ?>%"></div>
           </div>
           <?php endif; ?>
         </div>
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="mb-3">
             <label class="form-label"><?php echo __('Monetary Value'); ?></label>
             <div class="input-group">
-              <select name="currency" class="form-select" style="max-width: 80px;">
+              <select name="currency" class="form-select" data-ahg-style="max-width: 80px;">
                 <?php foreach (['ZAR', 'USD', 'EUR', 'GBP'] as $cur): ?>
                 <option value="<?php echo $cur; ?>"><?php echo $cur; ?></option>
                 <?php endforeach; ?>

@@ -169,7 +169,7 @@
                     <?php endif; ?>
                   </td>
                   <td class="text-end">
-                    <form action="<?php echo url_for(['module' => 'loan', 'action' => 'removeObject', 'id' => $loan['id']]); ?>" method="post" style="display: inline;" data-ahg-confirm="Remove this object from the loan?">
+                    <form action="<?php echo url_for(['module' => 'loan', 'action' => 'removeObject', 'id' => $loan['id']]); ?>" method="post" data-ahg-style="display: inline;" data-ahg-confirm="Remove this object from the loan?">
                       <input type="hidden" name="object_id" value="<?php echo $obj['information_object_id']; ?>">
                       <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
                         <i class="fa-solid fa-times"></i>
@@ -399,7 +399,7 @@
             <input type="hidden" name="information_object_id" id="selectedObjectId">
             <input type="hidden" name="object_title" id="selectedObjectTitle">
             <input type="hidden" name="object_identifier" id="selectedObjectIdentifier">
-            <div id="searchResults" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;"></div>
+            <div id="searchResults" class="list-group mt-2" data-ahg-style="max-height: 200px; overflow-y: auto;"></div>
           </div>
           <div class="mb-3">
             <label class="form-label">Insurance Value (ZAR)</label>

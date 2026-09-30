@@ -60,7 +60,7 @@
       <table class="table table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 50px">Status</th>
+            <th data-ahg-style="width: 50px">Status</th>
             <th>Rule</th>
             <th>Type</th>
             <th>Severity</th>

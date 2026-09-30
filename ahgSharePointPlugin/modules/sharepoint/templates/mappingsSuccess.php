@@ -156,10 +156,10 @@ foreach ($standardsAllFlat as $code => $info) {
     <table class="table" id="mappings-table">
         <thead>
             <tr>
-                <th style="width:32%"><?php echo __('SharePoint field') ?></th>
-                <th style="width:32%"><?php echo __('AtoM target') ?></th>
-                <th style="width:14%"><?php echo __('Transform') ?></th>
-                <th style="width:18%"><?php echo __('Default value') ?></th>
+                <th data-ahg-style="width:32%"><?php echo __('SharePoint field') ?></th>
+                <th data-ahg-style="width:32%"><?php echo __('AtoM target') ?></th>
+                <th data-ahg-style="width:14%"><?php echo __('Transform') ?></th>
+                <th data-ahg-style="width:18%"><?php echo __('Default value') ?></th>
                 <th></th>
             </tr>
         </thead>
@@ -231,7 +231,7 @@ foreach ($standardsAllFlat as $code => $info) {
     </div>
 </form>
 
-<form id="delete-template-form" method="post" action="" style="display:none;">
+<form id="delete-template-form" method="post" action="" data-ahg-style="display:none;">
     <input type="hidden" name="drive_id" value="<?php echo $selectedDriveId ?>">
     <input type="hidden" name="template_id" value="">
 </form>

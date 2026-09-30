@@ -55,10 +55,10 @@
               <td><span class="badge bg-<?php echo $colors[$item->status] ?? 'secondary'; ?>"><?php echo $item->status; ?></span></td>
               <td>
                 <?php if ($item->status === 'failed'): ?>
-                  <button class="btn btn-sm btn-outline-primary" onclick="queueAction(<?php echo $item->id; ?>, 'retry')"><i class="fa fa-redo"></i></button>
+                  <button class="btn btn-sm btn-outline-primary" data-ahg-call="queueAction" data-ahg-types="x,s" data-ahg-a0="<?php echo $item->id; ?>" data-ahg-a1="retry"><i class="fa fa-redo"></i></button>
                 <?php endif; ?>
                 <?php if (in_array($item->status, ['queued', 'failed'])): ?>
-                  <button class="btn btn-sm btn-outline-danger" onclick="queueAction(<?php echo $item->id; ?>, 'cancel')"><i class="fa fa-times"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" data-ahg-call="queueAction" data-ahg-types="x,s" data-ahg-a0="<?php echo $item->id; ?>" data-ahg-a1="cancel"><i class="fa fa-times"></i></button>
                 <?php endif; ?>
               </td>
             </tr>

@@ -48,7 +48,7 @@ $comparisons = ['lt' => '<', 'lte' => '<=', 'gt' => '>', 'gte' => '>=', 'eq' => 
                   <td><?php echo $ac->webhook_url ? 'Yes' : "\xE2\x80\x94"; ?></td>
                   <td><?php echo $ac->last_triggered_at ?? "\xE2\x80\x94"; ?></td>
                   <td>
-                    <button class="btn btn-sm btn-outline-secondary me-1" onclick='editAlert(<?php echo json_encode($ac); ?>)'><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary me-1" data-ahg-call='editAlert' data-ahg-types='x' data-ahg-a0='<?php echo json_encode($ac); ?>'><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-outline-danger" data-alert-delete="<?php echo $ac->id; ?>"><i class="fas fa-trash"></i></button>
                   </td>
                 </tr>

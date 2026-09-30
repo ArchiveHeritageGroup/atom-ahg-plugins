@@ -285,12 +285,12 @@ function render_splat_viewer(string $url, array $options = []): string
             <i class="fas fa-cloud me-1"></i>{$title} (Gaussian Splat)
         </span>
         <div class="btn-group btn-group-sm">
-            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('{$viewerId}-container').requestFullscreen()" title="Fullscreen">
+            <button type="button" class="btn btn-outline-secondary" data-ahg-fullscreen="#{$viewerId}-container" title="Fullscreen">
                 <i class="fas fa-expand"></i>
             </button>
         </div>
     </div>
-    <div id="{$viewerId}" style="width:100%; height:{$height}; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:8px; position:relative;">
+    <div id="{$viewerId}" data-ahg-style="width:100%; height:{$height}; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:8px; position:relative;">
         <div class="d-flex flex-column align-items-center justify-content-center h-100 text-white" id="{$viewerId}-loading">
             <div class="spinner-border text-primary mb-3" role="status"></div>
             <span>Loading Gaussian Splat...</span>

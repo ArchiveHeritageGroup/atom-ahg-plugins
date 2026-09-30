@@ -133,7 +133,7 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50px;"></th>
+                            <th data-ahg-style="width: 50px;"></th>
                             <th><?php echo __('Code'); ?></th>
                             <th><?php echo __('Name'); ?></th>
                             <th><?php echo __('Country'); ?></th>
@@ -148,7 +148,7 @@
                         <tr<?php echo ($activeJurisdiction && $activeJurisdiction->code === $j->code) ? ' class="table-primary"' : ''; ?>>
                             <td class="text-center">
                                 <?php if ($j->icon): ?>
-                                <span style="font-size: 1.5rem;"><?php echo $j->icon; ?></span>
+                                <span data-ahg-style="font-size: 1.5rem;"><?php echo $j->icon; ?></span>
                                 <?php endif; ?>
                             </td>
                             <td>

@@ -56,14 +56,14 @@ require_once dirname(__FILE__, 4).'/lib/Helpers/AiConditionHelper.php';
 <!-- Filters -->
 <div class="d-flex gap-2 mb-3 flex-wrap">
     <form method="get" action="<?php echo url_for(['module' => 'aiCondition', 'action' => 'browse']) ?>" class="d-flex gap-2 flex-wrap">
-        <input type="text" name="q" class="form-control form-control-sm" style="width:200px" placeholder="<?php echo __('Search...') ?>" value="<?php echo esc_entities($filters['search'] ?? '') ?>">
-        <select name="grade" class="form-select form-select-sm" style="width:150px">
+        <input type="text" name="q" class="form-control form-control-sm" data-ahg-style="width:200px" placeholder="<?php echo __('Search...') ?>" value="<?php echo esc_entities($filters['search'] ?? '') ?>">
+        <select name="grade" class="form-select form-select-sm" data-ahg-style="width:150px">
             <option value=""><?php echo __('All grades') ?></option>
             <?php foreach (['excellent','good','fair','poor','critical'] as $g): ?>
             <option value="<?php echo $g ?>" <?php echo ($filters['condition_grade'] ?? '') === $g ? 'selected' : '' ?>><?php echo ucfirst($g) ?></option>
             <?php endforeach ?>
         </select>
-        <select name="confirmed" class="form-select form-select-sm" style="width:150px">
+        <select name="confirmed" class="form-select form-select-sm" data-ahg-style="width:150px">
             <option value=""><?php echo __('All status') ?></option>
             <option value="1" <?php echo ($filters['is_confirmed'] ?? '') === '1' ? 'selected' : '' ?>><?php echo __('Confirmed') ?></option>
             <option value="0" <?php echo ($filters['is_confirmed'] ?? '') === '0' ? 'selected' : '' ?>><?php echo __('Pending') ?></option>

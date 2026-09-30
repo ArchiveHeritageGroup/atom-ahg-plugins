@@ -72,7 +72,7 @@
                   <tr>
                     <th><?php echo __('Label'); ?></th>
                     <th><?php echo __('Value'); ?></th>
-                    <th style="width:80px"></th>
+                    <th data-ahg-style="width:80px"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -172,7 +172,7 @@
                       <th><?php echo __('Identifier'); ?></th>
                       <th><?php echo __('Level'); ?></th>
                       <th><?php echo __('Title'); ?></th>
-                      <th style="width:80px"></th>
+                      <th data-ahg-style="width:80px"></th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -462,9 +462,9 @@
             <table class="table table-sm" id="notes-table">
               <thead>
                 <tr>
-                  <th style="width:30%"><?php echo __('Type'); ?></th>
+                  <th data-ahg-style="width:30%"><?php echo __('Type'); ?></th>
                   <th><?php echo __('Content'); ?></th>
-                  <th style="width:80px"></th>
+                  <th data-ahg-style="width:80px"></th>
                 </tr>
               </thead>
               <tbody>

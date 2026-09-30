@@ -12,7 +12,7 @@ $period = $sf_data->getRaw('period');
     <h1><i class="fas fa-chart-line me-2"></i><?php echo __('Security Audit Dashboard') ?></h1>
     <div>
         <form method="get" class="d-inline">
-            <select name="period" class="form-select form-select-sm d-inline-block" style="width: auto;" data-ahg-submit-form="1">
+            <select name="period" class="form-select form-select-sm d-inline-block" data-ahg-style="width: auto;" data-ahg-submit-form="1">
                 <option value="24 hours" <?php echo $period === '24 hours' ? 'selected' : '' ?>>Last 24 Hours</option>
                 <option value="7 days" <?php echo $period === '7 days' ? 'selected' : '' ?>>Last 7 Days</option>
                 <option value="30 days" <?php echo $period === '30 days' ? 'selected' : '' ?>>Last 30 Days</option>
@@ -239,11 +239,11 @@ $recentLogs = \Illuminate\Database\Capsule\Manager::table('spectrum_audit_log as
         <table class="table table-hover table-striped mb-0">
             <thead class="table-light">
                 <tr>
-                    <th style="width: 150px;"><?php echo __('Date/Time') ?></th>
-                    <th style="width: 120px;"><?php echo __('User') ?></th>
-                    <th style="width: 100px;"><?php echo __('Action') ?></th>
+                    <th data-ahg-style="width: 150px;"><?php echo __('Date/Time') ?></th>
+                    <th data-ahg-style="width: 120px;"><?php echo __('User') ?></th>
+                    <th data-ahg-style="width: 100px;"><?php echo __('Action') ?></th>
                     <th><?php echo __('Object') ?></th>
-                    <th style="width: 120px;"><?php echo __('IP Address') ?></th>
+                    <th data-ahg-style="width: 120px;"><?php echo __('IP Address') ?></th>
                 </tr>
             </thead>
             <tbody>

@@ -96,7 +96,7 @@
 
     <!-- Queue filter -->
     <div class="ms-auto d-flex gap-2 align-items-center">
-      <select id="queueFilter" class="form-select form-select-sm" style="width: auto;">
+      <select id="queueFilter" class="form-select form-select-sm" data-ahg-style="width: auto;">
         <option value=""><?php echo __('All queues'); ?></option>
         <?php foreach ($sf_data->getRaw('queueNames') as $qKey => $qLabel): ?>
           <option value="<?php echo esc_specialchars($qKey); ?>" <?php echo ($currentQueue === $qKey) ? 'selected' : ''; ?>>
@@ -129,7 +129,7 @@
       <table class="table table-bordered table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 60px;"><?php echo __('ID'); ?></th>
+            <th data-ahg-style="width: 60px;"><?php echo __('ID'); ?></th>
             <th><?php echo __('Job Type'); ?></th>
             <th><?php echo __('Queue'); ?></th>
             <th><?php echo __('Status'); ?></th>
@@ -137,7 +137,7 @@
             <th><?php echo __('User'); ?></th>
             <th><?php echo __('Created'); ?></th>
             <th><?php echo __('Duration'); ?></th>
-            <th style="width: 120px;"><?php echo __('Actions'); ?></th>
+            <th data-ahg-style="width: 120px;"><?php echo __('Actions'); ?></th>
           </tr>
         </thead>
         <tbody>
@@ -172,9 +172,9 @@
               <td>
                 <?php if ($job->progress_total > 0): ?>
                   <?php $pct = round($job->progress_current / $job->progress_total * 100); ?>
-                  <div class="progress" style="height: 18px;" title="<?php echo esc_specialchars($job->progress_message ?? ''); ?>">
+                  <div class="progress" data-ahg-style="height: 18px;" title="<?php echo esc_specialchars($job->progress_message ?? ''); ?>">
                     <div class="progress-bar <?php echo ($job->status === 'failed') ? 'bg-danger' : ''; ?>"
-                         role="progressbar" style="width: <?php echo $pct; ?>%"
+                         role="progressbar" data-ahg-style="width: <?php echo $pct; ?>%"
                          aria-valuenow="<?php echo $pct; ?>" aria-valuemin="0" aria-valuemax="100">
                       <?php echo $pct; ?>%
                     </div>

@@ -3,7 +3,7 @@ $n = sfConfig::get('csp_nonce', '');
 $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
 $available = !empty($aiAvailable);
 ?>
-<div class="container py-4" style="max-width: 820px">
+<div class="container py-4" data-ahg-style="max-width: 820px">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <span class="h2"><i class="fas fa-comments me-2"></i><?php echo __('Collection assistant'); ?></span>
         <span class="badge bg-<?php echo $available ? 'success' : 'secondary'; ?>"><?php echo $available ? __('AI ready') : __('AI offline'); ?></span>
@@ -14,7 +14,7 @@ $available = !empty($aiAvailable);
     <div class="alert alert-warning"><?php echo __('No language model is configured, so answers will fall back to a list of relevant records. Configure one under AI settings to enable generated answers.'); ?></div>
     <?php endif; ?>
 
-    <div id="chat-log" class="border rounded p-3 mb-3 bg-light" style="height: 420px; overflow-y: auto;">
+    <div id="chat-log" class="border rounded p-3 mb-3 bg-light" data-ahg-style="height: 420px; overflow-y: auto;">
         <div class="text-muted small text-center mt-5" id="chat-empty"><?php echo __('Ask something like “What records do we hold about land claims in the 1960s?”'); ?></div>
     </div>
 

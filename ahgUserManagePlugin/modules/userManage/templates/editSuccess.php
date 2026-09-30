@@ -70,8 +70,8 @@
                 </label>
                 <input type="password" class="form-control" id="new_pw" name="new_pw"
                        <?php echo $isNew ? 'required' : ''; ?> autocomplete="new-password">
-                <div class="progress mt-1" style="height: 5px;" id="passwordStrengthBar">
-                  <div class="progress-bar" role="progressbar" style="width: 0%;" id="passwordStrengthFill"></div>
+                <div class="progress mt-1" data-ahg-style="height: 5px;" id="passwordStrengthBar">
+                  <div class="progress-bar" role="progressbar" data-ahg-style="width: 0%;" id="passwordStrengthFill"></div>
                 </div>
                 <div class="form-text" id="passwordStrengthText">
                   <?php if (!$isNew) { ?>

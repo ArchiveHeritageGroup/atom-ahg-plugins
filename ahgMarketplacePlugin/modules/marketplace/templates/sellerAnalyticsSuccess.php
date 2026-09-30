@@ -62,7 +62,7 @@
             <th><?php echo __('Month'); ?></th>
             <th class="text-end"><?php echo __('Revenue'); ?></th>
             <th class="text-end"><?php echo __('Sales Count'); ?></th>
-            <th style="width: 40%;"><?php echo __(''); ?></th>
+            <th data-ahg-style="width: 40%;"><?php echo __(''); ?></th>
           </tr>
         </thead>
         <tbody>
@@ -79,8 +79,8 @@
               <td class="text-end fw-semibold"><?php echo esc_entities($seller->payout_currency ?? 'ZAR'); ?> <?php echo number_format((float) $row->revenue, 2); ?></td>
               <td class="text-end"><?php echo (int) $row->sales_count; ?></td>
               <td>
-                <div class="progress" style="height: 20px;">
-                  <div class="progress-bar bg-primary" style="width: <?php echo $pct; ?>%;"></div>
+                <div class="progress" data-ahg-style="height: 20px;">
+                  <div class="progress-bar bg-primary" data-ahg-style="width: <?php echo $pct; ?>%;"></div>
                 </div>
               </td>
             </tr>
@@ -103,7 +103,7 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 50px;">#</th>
+            <th data-ahg-style="width: 50px;">#</th>
             <th><?php echo __('Item'); ?></th>
             <th class="text-end"><?php echo __('Revenue'); ?></th>
             <th class="text-end"><?php echo __('Sales'); ?></th>
@@ -116,7 +116,7 @@
               <td>
                 <div class="d-flex align-items-center">
                   <?php if (!empty($item->featured_image_path)): ?>
-                    <img src="<?php echo esc_entities($item->featured_image_path); ?>" alt="" class="rounded me-2" style="width: 36px; height: 36px; object-fit: cover;">
+                    <img src="<?php echo esc_entities($item->featured_image_path); ?>" alt="" class="rounded me-2" data-ahg-style="width: 36px; height: 36px; object-fit: cover;">
                   <?php endif; ?>
                   <span><?php echo esc_entities($item->title ?? '-'); ?></span>
                 </div>

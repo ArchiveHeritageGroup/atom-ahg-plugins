@@ -212,8 +212,8 @@
                   <tr>
                     <th><?php echo __('Product Type'); ?></th>
                     <th><?php echo __('Type'); ?></th>
-                    <th class="text-center" style="width: 100px;"><?php echo __('Active'); ?></th>
-                    <th style="width: 150px;"><?php echo __('Price'); ?> (<?php echo $settings->currency ?? 'ZAR'; ?>)</th>
+                    <th class="text-center" data-ahg-style="width: 100px;"><?php echo __('Active'); ?></th>
+                    <th data-ahg-style="width: 150px;"><?php echo __('Price'); ?> (<?php echo $settings->currency ?? 'ZAR'; ?>)</th>
                   </tr>
                 </thead>
                 <tbody>

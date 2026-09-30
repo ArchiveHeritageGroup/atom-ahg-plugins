@@ -9,7 +9,7 @@
         <div class="col-4">
             <img src="<?php echo $digitalObject->path; ?>" 
                  class="img-fluid rounded-start h-100" 
-                 style="object-fit: cover; min-height: 120px;"
+                 data-ahg-style="object-fit: cover; min-height: 120px;"
                  alt="<?php echo $object->title ?? ''; ?>">
         </div>
         <?php endif; ?>

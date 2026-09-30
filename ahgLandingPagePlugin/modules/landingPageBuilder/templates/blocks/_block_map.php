@@ -17,7 +17,7 @@ $mapId = 'map-' . uniqid();
 <?php if (empty($locations)): ?>
   <p class="text-muted">No locations with coordinates available.</p>
 <?php else: ?>
-  <div id="<?php echo $mapId ?>" style="height: <?php echo $height ?>;" class="rounded border"></div>
+  <div id="<?php echo $mapId ?>" data-ahg-style="height: <?php echo $height ?>;" class="rounded border"></div>
   
   <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/vendor/leaflet.min.css" />
   <script src="/plugins/ahgCorePlugin/web/js/vendor/leaflet.min.js"></script>

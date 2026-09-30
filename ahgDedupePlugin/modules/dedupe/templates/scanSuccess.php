@@ -41,7 +41,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-4" id="repositorySelect" style="display: none;">
+                        <div class="mb-4" id="repositorySelect" data-ahg-style="display: none;">
                             <label for="repository_id" class="form-label">Select Repository</label>
                             <select name="repository_id" id="repository_id" class="form-select">
                                 <option value="">-- Select Repository --</option>

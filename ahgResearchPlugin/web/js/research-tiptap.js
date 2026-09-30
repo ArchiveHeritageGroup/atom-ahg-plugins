@@ -237,7 +237,7 @@
     // Header
     var header = document.createElement('div');
     header.style.cssText = 'padding:16px 20px;border-bottom:1px solid #dee2e6;display:flex;justify-content:space-between;align-items:center;';
-    header.innerHTML = '<h5 style="margin:0;font-size:1.1rem;"><i class="fas fa-archive" style="margin-right:8px;color:#0d6efd;"></i>Embed Record Thumbnail</h5>';
+    header.innerHTML = '<h5 data-ahg-style="margin:0;font-size:1.1rem;"><i class="fas fa-archive" data-ahg-style="margin-right:8px;color:#0d6efd;"></i>Embed Record Thumbnail</h5>';
     var closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.innerHTML = '<i class="fas fa-times"></i>';
@@ -261,7 +261,7 @@
     // Results container
     var resultsWrap = document.createElement('div');
     resultsWrap.style.cssText = 'padding:8px 20px;overflow-y:auto;flex:1;min-height:120px;max-height:400px;';
-    resultsWrap.innerHTML = '<p style="color:#6c757d;text-align:center;margin-top:32px;">Type to search for archival records...</p>';
+    resultsWrap.innerHTML = '<p data-ahg-style="color:#6c757d;text-align:center;margin-top:32px;">Type to search for archival records...</p>';
     modal.appendChild(resultsWrap);
 
     backdrop.appendChild(modal);
@@ -284,7 +284,7 @@
       clearTimeout(timer);
       var val = this.value.trim();
       if (val.length < 2) {
-        resultsWrap.innerHTML = '<p style="color:#6c757d;text-align:center;margin-top:32px;">Type to search for archival records...</p>';
+        resultsWrap.innerHTML = '<p data-ahg-style="color:#6c757d;text-align:center;margin-top:32px;">Type to search for archival records...</p>';
         return;
       }
       timer = setTimeout(function() { doSearch(val, resolveUrl, resultsWrap, editor, backdrop); }, 300);
@@ -292,7 +292,7 @@
   }
 
   function doSearch(query, resolveUrl, container, editor, backdrop) {
-    container.innerHTML = '<p style="color:#6c757d;text-align:center;margin-top:32px;"><i class="fas fa-spinner fa-spin"></i> Searching...</p>';
+    container.innerHTML = '<p data-ahg-style="color:#6c757d;text-align:center;margin-top:32px;"><i class="fas fa-spinner fa-spin"></i> Searching...</p>';
 
     // Detect if it looks like a URL or slug
     var param = 'q';
@@ -304,7 +304,7 @@
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (!data.results || data.results.length === 0) {
-          container.innerHTML = '<p style="color:#6c757d;text-align:center;margin-top:32px;">No records found.</p>';
+          container.innerHTML = '<p data-ahg-style="color:#6c757d;text-align:center;margin-top:32px;">No records found.</p>';
           return;
         }
         container.innerHTML = '';
@@ -318,9 +318,9 @@
           var thumbEl = document.createElement('div');
           thumbEl.style.cssText = 'width:56px;height:56px;flex-shrink:0;border-radius:4px;overflow:hidden;background:#f8f9fa;display:flex;align-items:center;justify-content:center;border:1px solid #e9ecef;';
           if (rec.thumbnailUrl) {
-            thumbEl.innerHTML = '<img src="' + escHtml(rec.thumbnailUrl) + '" style="width:100%;height:100%;object-fit:cover;" alt="">';
+            thumbEl.innerHTML = '<img src="' + escHtml(rec.thumbnailUrl) + '" data-ahg-style="width:100%;height:100%;object-fit:cover;" alt="">';
           } else {
-            thumbEl.innerHTML = '<i class="fas fa-file-alt" style="font-size:1.4rem;color:#adb5bd;"></i>';
+            thumbEl.innerHTML = '<i class="fas fa-file-alt" data-ahg-style="font-size:1.4rem;color:#adb5bd;"></i>';
           }
           card.appendChild(thumbEl);
 
@@ -328,8 +328,8 @@
           var textEl = document.createElement('div');
           textEl.style.cssText = 'flex:1;min-width:0;';
           var titleText = rec.title || 'Untitled';
-          var sub = rec.identifier ? '<div style="font-size:0.8rem;color:#6c757d;">' + escHtml(rec.identifier) + '</div>' : '';
-          textEl.innerHTML = '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escHtml(titleText) + '</div>' + sub;
+          var sub = rec.identifier ? '<div data-ahg-style="font-size:0.8rem;color:#6c757d;">' + escHtml(rec.identifier) + '</div>' : '';
+          textEl.innerHTML = '<div data-ahg-style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escHtml(titleText) + '</div>' + sub;
           card.appendChild(textEl);
 
           // Insert icon
@@ -347,7 +347,7 @@
         });
       })
       .catch(function(err) {
-        container.innerHTML = '<p style="color:#dc3545;text-align:center;margin-top:32px;">Search error: ' + escHtml(err.message) + '</p>';
+        container.innerHTML = '<p data-ahg-style="color:#dc3545;text-align:center;margin-top:32px;">Search error: ' + escHtml(err.message) + '</p>';
       });
   }
 

@@ -634,8 +634,8 @@ $rawResource = sfOutputEscaper::unescape($resource);
             ?>
             <div class="mt-1">
               <small class="text-muted"><?php echo __('Capacity'); ?>: <?php echo $used; ?>/<?php echo $total; ?> <?php echo esc_entities($extData['capacity_unit'] ?? 'items'); ?></small>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar <?php echo $barClass; ?>" style="width: <?php echo $percent; ?>%;"></div>
+              <div class="progress" data-ahg-style="height: 8px;">
+                <div class="progress-bar <?php echo $barClass; ?>" data-ahg-style="width: <?php echo $percent; ?>%;"></div>
               </div>
             </div>
             <?php endif; ?>

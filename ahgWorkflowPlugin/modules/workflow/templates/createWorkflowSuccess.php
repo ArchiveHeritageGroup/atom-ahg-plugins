@@ -39,15 +39,15 @@
                                 </select>
                                 <small class="form-text text-muted">Where this workflow applies</small>
                             </div>
-                            <div class="col-md-6" id="scope_id_container" style="display:none">
+                            <div class="col-md-6" id="scope_id_container" data-ahg-style="display:none">
                                 <label for="scope_id" class="form-label">Select Target</label>
-                                <select class="form-select" id="scope_id_repo" name="scope_id" style="display:none">
+                                <select class="form-select" id="scope_id_repo" name="scope_id" data-ahg-style="display:none">
                                     <option value="">Select repository...</option>
                                     <?php foreach ($repositories as $repo): ?>
                                         <option value="<?php echo $repo->id ?>"><?php echo esc_entities($repo->name) ?></option>
                                     <?php endforeach ?>
                                 </select>
-                                <select class="form-select" id="scope_id_collection" name="scope_id" style="display:none">
+                                <select class="form-select" id="scope_id_collection" name="scope_id" data-ahg-style="display:none">
                                     <option value="">Select collection...</option>
                                     <?php foreach ($collections as $col): ?>
                                         <option value="<?php echo $col->id ?>"><?php echo esc_entities($col->name) ?></option>

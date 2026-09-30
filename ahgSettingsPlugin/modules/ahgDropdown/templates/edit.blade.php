@@ -65,13 +65,13 @@
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
-                <th style="width: 40px;"></th>
+                <th data-ahg-style="width: 40px;"></th>
                 <th>{{ __('Label') }}</th>
                 <th>{{ __('Code') }}</th>
-                <th style="width: 80px;">{{ __('Color') }}</th>
-                <th style="width: 80px;">{{ __('Default') }}</th>
-                <th style="width: 80px;">{{ __('Active') }}</th>
-                <th style="width: 120px;">{{ __('Actions') }}</th>
+                <th data-ahg-style="width: 80px;">{{ __('Color') }}</th>
+                <th data-ahg-style="width: 80px;">{{ __('Default') }}</th>
+                <th data-ahg-style="width: 80px;">{{ __('Active') }}</th>
+                <th data-ahg-style="width: 120px;">{{ __('Actions') }}</th>
               </tr>
             </thead>
             <tbody id="termsTable">
@@ -79,24 +79,24 @@
               <tr data-id="{{ $term->id }}" class="term-row {{ !$term->is_active ? 'table-secondary inactive-row d-none' : '' }}">
                 <td class="drag-handle text-center text-muted"><i class="fas fa-grip-vertical"></i></td>
                 <td>
-                  <input type="text" class="form-control form-control-sm border-0 bg-transparent" value="{{ e($term->label) }}" onchange="updateTerm({{ $term->id }}, 'label', this.value)">
+                  <input type="text" class="form-control form-control-sm border-0 bg-transparent" value="{{ e($term->label) }}" data-ahg-call="updateTerm" data-ahg-on="change" data-ahg-types="x,s,value" data-ahg-a0="{{ $term->id }}" data-ahg-a1="label">
                 </td>
                 <td><code class="small">{{ e($term->code) }}</code></td>
                 <td>
-                  <input type="color" class="form-control form-control-color form-control-sm" value="{{ $term->color ?: '#6c757d' }}" onchange="updateTerm({{ $term->id }}, 'color', this.value)" title="{{ __('Choose color') }}">
+                  <input type="color" class="form-control form-control-color form-control-sm" value="{{ $term->color ?: '#6c757d' }}" data-ahg-call="updateTerm" data-ahg-on="change" data-ahg-types="x,s,value" data-ahg-a0="{{ $term->id }}" data-ahg-a1="color" title="{{ __('Choose color') }}">
                 </td>
                 <td class="text-center">
                   <div class="form-check form-switch d-flex justify-content-center">
-                    <input type="radio" name="default_term" class="form-check-input" {{ $term->is_default ? 'checked' : '' }} onchange="setDefault({{ $term->id }})">
+                    <input type="radio" name="default_term" class="form-check-input" {{ $term->is_default ? 'checked' : '' }} data-ahg-call="setDefault" data-ahg-on="change" data-ahg-types="x" data-ahg-a0="{{ $term->id }}">
                   </div>
                 </td>
                 <td class="text-center">
                   <div class="form-check form-switch d-flex justify-content-center">
-                    <input type="checkbox" class="form-check-input" {{ $term->is_active ? 'checked' : '' }} onchange="updateTerm({{ $term->id }}, 'is_active', this.checked ? 1 : 0)">
+                    <input type="checkbox" class="form-check-input" {{ $term->is_active ? 'checked' : '' }} data-ahg-call="updateTerm" data-ahg-on="change" data-ahg-types="x,s,checked01" data-ahg-a0="{{ $term->id }}" data-ahg-a1="is_active">
                   </div>
                 </td>
                 <td class="text-end">
-                  <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteTerm({{ $term->id }})" title="{{ __('Delete') }}">
+                  <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="deleteTerm" data-ahg-types="x" data-ahg-a0="{{ $term->id }}" title="{{ __('Delete') }}">
                     <i class="fas fa-trash"></i>
                   </button>
                 </td>

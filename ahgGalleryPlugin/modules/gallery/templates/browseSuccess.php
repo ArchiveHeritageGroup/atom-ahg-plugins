@@ -39,13 +39,13 @@
               <img src="<?php echo esc_entities($thumbUrl); ?>" 
                    class="card-img-top" 
                    alt="<?php echo esc_entities($item->title ?? ''); ?>"
-                   style="height: 180px; object-fit: cover;">
+                   data-ahg-style="height: 180px; object-fit: cover;">
             <?php elseif ($is3D): ?>
-              <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 180px;">
+              <div class="card-img-top d-flex align-items-center justify-content-center bg-light" data-ahg-style="height: 180px;">
                 <i class="fas fa-cube fa-4x text-primary"></i>
               </div>
             <?php else: ?>
-              <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 180px;">
+              <div class="card-img-top d-flex align-items-center justify-content-center bg-light" data-ahg-style="height: 180px;">
                 <i class="fas fa-image fa-4x text-muted"></i>
               </div>
             <?php endif; ?>

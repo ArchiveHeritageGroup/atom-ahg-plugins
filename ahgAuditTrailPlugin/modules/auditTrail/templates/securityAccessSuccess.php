@@ -9,7 +9,7 @@
   <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header"><h5 class="mb-0"><?php echo __('Classified Content Access') ?></h5></div>
-      <div class="table-responsive" style="max-height: 400px;">
+      <div class="table-responsive" data-ahg-style="max-height: 400px;">
         <table class="table table-hover table-sm mb-0">
           <thead class="table-light"><tr><th><?php echo __('Time') ?></th><th><?php echo __('User') ?></th><th><?php echo __('Classification') ?></th><th><?php echo __('Entity') ?></th></tr></thead>
           <tbody>
@@ -32,7 +32,7 @@
   <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header bg-danger text-white"><h5 class="mb-0"><?php echo __('Denied Access Attempts') ?></h5></div>
-      <div class="table-responsive" style="max-height: 400px;">
+      <div class="table-responsive" data-ahg-style="max-height: 400px;">
         <table class="table table-hover table-sm mb-0">
           <thead class="table-light"><tr><th><?php echo __('Time') ?></th><th><?php echo __('User') ?></th><th><?php echo __('Entity') ?></th><th><?php echo __('Reason') ?></th></tr></thead>
           <tbody>

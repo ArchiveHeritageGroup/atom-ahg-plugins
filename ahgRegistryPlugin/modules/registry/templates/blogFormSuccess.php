@@ -150,17 +150,17 @@
         <div class="card-body">
           <?php if (!empty($p->featured_image_path)): ?>
             <div class="mb-2">
-              <img src="<?php echo htmlspecialchars($p->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded border" style="max-height: 120px;">
+              <img src="<?php echo htmlspecialchars($p->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded border" data-ahg-style="max-height: 120px;">
               <small class="text-muted d-block mt-1"><?php echo __('Upload a new image to replace.'); ?></small>
             </div>
           <?php endif; ?>
-          <div class="border rounded p-3 text-center position-relative" id="blog-img-drop" style="min-height: 80px; cursor: pointer;">
+          <div class="border rounded p-3 text-center position-relative" id="blog-img-drop" data-ahg-style="min-height: 80px; cursor: pointer;">
             <div id="blog-img-preview">
               <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-1"></i>
               <p class="mb-0 small"><?php echo __('Drag and drop, or click to upload a featured image.'); ?></p>
               <small class="text-muted"><?php echo __('PNG, JPG. Recommended: 1200x630px.'); ?></small>
             </div>
-            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="blog-img" name="featured_image" accept="image/png,image/jpeg" style="cursor: pointer;">
+            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="blog-img" name="featured_image" accept="image/png,image/jpeg" data-ahg-style="cursor: pointer;">
           </div>
         </div>
       </div>
@@ -179,7 +179,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Featured image preview
   var inp = document.getElementById('blog-img'), prev = document.getElementById('blog-img-preview'), drop = document.getElementById('blog-img-drop');
-  if (inp) { inp.addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { var r = new FileReader(); r.onload = function(ev) { prev.innerHTML = '<img src="'+ev.target.result+'" alt="Preview" style="max-height:100px;" class="mb-1"><br><small class="text-muted">'+e.target.files[0].name+'</small>'; }; r.readAsDataURL(e.target.files[0]); } }); }
+  if (inp) { inp.addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { var r = new FileReader(); r.onload = function(ev) { prev.innerHTML = '<img src="'+ev.target.result+'" alt="Preview" data-ahg-style="max-height:100px;" class="mb-1"><br><small class="text-muted">'+e.target.files[0].name+'</small>'; }; r.readAsDataURL(e.target.files[0]); } }); }
   if (drop) { ['dragenter','dragover'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('border-primary');});}); ['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('border-primary');});}); drop.addEventListener('drop',function(e){if(e.dataTransfer.files.length){inp.files=e.dataTransfer.files;inp.dispatchEvent(new Event('change'));}}); }
 
   // Auto-generate slug from title

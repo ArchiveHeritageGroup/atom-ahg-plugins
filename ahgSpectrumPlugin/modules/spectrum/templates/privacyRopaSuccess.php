@@ -29,8 +29,8 @@
                         </td>
                         <td><span class="badge bg-success"><?php echo ucfirst($a->status ?? 'active'); ?></span></td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary" onclick="editRopa(<?php echo $a->id; ?>)"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRopa(<?php echo $a->id; ?>)"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-outline-primary" data-ahg-call="editRopa" data-ahg-types="x" data-ahg-a0="<?php echo $a->id; ?>"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" data-ahg-call="deleteRopa" data-ahg-types="x" data-ahg-a0="<?php echo $a->id; ?>"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 <?php endforeach; ?>

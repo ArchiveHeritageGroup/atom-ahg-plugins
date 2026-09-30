@@ -1,5 +1,5 @@
 <?php $keys = $sf_data->getRaw('passkeys'); $n = sfConfig::get('csp_nonce', ''); $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>
-<div class="container py-4" style="max-width: 760px">
+<div class="container py-4" data-ahg-style="max-width: 760px">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="h2"><i class="fas fa-fingerprint me-2"></i><?php echo __('Passkeys (WebAuthn / FIDO2)'); ?></span>
         <div class="btn-group">

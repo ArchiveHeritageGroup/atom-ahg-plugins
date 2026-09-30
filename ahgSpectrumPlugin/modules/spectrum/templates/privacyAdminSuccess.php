@@ -99,8 +99,8 @@
                 $scoreClass = $score >= 80 ? 'success' : ($score >= 60 ? 'warning' : 'danger');
                 ?>
                 <div class="display-1 text-<?php echo $scoreClass; ?>"><?php echo $score; ?>%</div>
-                <div class="progress mt-3" style="height: 20px;">
-                    <div class="progress-bar bg-<?php echo $scoreClass; ?>" style="width: <?php echo $score; ?>%"></div>
+                <div class="progress mt-3" data-ahg-style="height: 20px;">
+                    <div class="progress-bar bg-<?php echo $scoreClass; ?>" data-ahg-style="width: <?php echo $score; ?>%"></div>
                 </div>
             </div>
         </div>

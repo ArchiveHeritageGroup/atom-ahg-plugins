@@ -121,7 +121,7 @@
       <?php foreach ($tkLabels as $label): ?>
       <div class="col-md-6 mb-3">
         <div class="d-flex align-items-start">
-          <span class="badge me-3" style="background-color: <?php echo esc_entities($label->color); ?>; width: 60px; padding: 10px;">
+          <span class="badge me-3" data-ahg-style="background-color: <?php echo esc_entities($label->color); ?>; width: 60px; padding: 10px;">
             <?php echo esc_entities($label->code); ?>
           </span>
           <div>

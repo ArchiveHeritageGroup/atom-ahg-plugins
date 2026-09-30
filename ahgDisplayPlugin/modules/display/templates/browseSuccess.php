@@ -517,7 +517,7 @@ function getItemUrl($obj) {
 <?php slot('before-content'); ?>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Semantic-search modal backdrop: hidden by default via this (nonce'd) stylesheet.
-   It must NOT rely on an inline style="display:none" attribute - CSP style-src
+   It must NOT rely on an inline data-ahg-style="display:none" attribute - CSP style-src
    drops inline style attributes, which left this transparent full-screen backdrop
    (position:fixed, z-index:1050) covering the page and swallowing every click, so
    browse loaded but was completely unresponsive. The open/close JS toggles

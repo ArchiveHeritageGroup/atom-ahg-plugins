@@ -75,13 +75,13 @@
 		    <?php } else { ?>
 			    <?php $n = "publish_{$row}"; ?>
 
-				<input type="radio" name="<?php echo $n; ?>" id="<?php echo $n; ?>" value="Yes" class="radio" onclick="updateYesNo('<?php echo $n; ?>~<?php echo $this->publishYes; ?>','<?php echo $d; ?>','<?php echo $pager->getResults()->count(); ?>')"
+				<input type="radio" name="<?php echo $n; ?>" id="<?php echo $n; ?>" value="Yes" class="radio" data-ahg-call="updateYesNo" data-ahg-types="s,s,s" data-ahg-a0="<?php echo $n; ?>~<?php echo $this->publishYes; ?>" data-ahg-a1="<?php echo $d; ?>" data-ahg-a2="<?php echo $pager->getResults()->count(); ?>"
 				
 				<?php if (isset($item->publish) && 'Yes' == $item->publish) {
 				echo 'checked';
 				}?>
 				/> Yes
-				<input type="radio" name="<?php echo $n; ?>" value="No" id="<?php echo $n; ?>" class="radio" onclick="updateYesNo('<?php echo $n; ?>~<?php echo $this->publishNo; ?>','<?php echo $d; ?>','<?php echo $pager->getResults()->count(); ?>')" 
+				<input type="radio" name="<?php echo $n; ?>" value="No" id="<?php echo $n; ?>" class="radio" data-ahg-call="updateYesNo" data-ahg-types="s,s,s" data-ahg-a0="<?php echo $n; ?>~<?php echo $this->publishNo; ?>" data-ahg-a1="<?php echo $d; ?>" data-ahg-a2="<?php echo $pager->getResults()->count(); ?>" 
 				<?php if (isset($item->publish) && 'No' == $item->publish) {
 				echo 'checked';
 				}?>

@@ -12,9 +12,9 @@
 <div class="col">
   <div class="card h-100">
     <?php if (!empty($item->featured_image_path)): ?>
-      <img src="<?php echo htmlspecialchars($item->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" style="height: 160px; object-fit: cover;">
+      <img src="<?php echo htmlspecialchars($item->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" data-ahg-style="height: 160px; object-fit: cover;">
     <?php else: ?>
-      <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <div class="card-img-top d-flex align-items-center justify-content-center" data-ahg-style="height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <i class="fas fa-newspaper fa-2x text-white opacity-50"></i>
       </div>
     <?php endif; ?>
@@ -41,7 +41,7 @@
         <small class="text-muted">
           <?php echo htmlspecialchars($item->author_name ?? '', ENT_QUOTES, 'UTF-8'); ?>
           <?php if (!empty($at)): ?>
-            <span class="badge <?php echo $atClass; ?>" style="<?php echo $atStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $at)), ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="badge <?php echo $atClass; ?>" data-ahg-style="<?php echo $atStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $at)), ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>
         </small>
         <small class="text-muted">

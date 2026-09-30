@@ -93,7 +93,7 @@
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="#" onclick="testConnection(<?php echo $peer->id ?>, '<?php echo esc_specialchars($peer->base_url) ?>')">
+                      <a class="dropdown-item" href="#" data-ahg-call="testConnection" data-ahg-types="x,s" data-ahg-a0="<?php echo $peer->id ?>" data-ahg-a1="<?php echo esc_specialchars($peer->base_url) ?>">
                         <i class="bi bi-plug me-2"></i> Test Connection
                       </a>
                     </li>
@@ -141,7 +141,7 @@
           </div>
           <p class="mt-2 text-muted">Testing connection...</p>
         </div>
-        <div id="testResult" style="display: none;"></div>
+        <div id="testResult" data-ahg-style="display: none;"></div>
       </div>
     </div>
   </div>

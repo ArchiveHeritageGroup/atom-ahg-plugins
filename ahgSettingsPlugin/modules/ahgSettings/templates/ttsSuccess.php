@@ -44,7 +44,7 @@
                      name="tts[all][default_rate]"
                      min="0.5" max="2.0" step="0.1"
                      value="<?php echo htmlspecialchars($settings['all']['default_rate'] ?? '1.0') ?>">
-              <?php // Bound below rather than oninput="": an enforcing CSP blocks
+              <?php // Bound below rather than : an enforcing CSP blocks
                     // inline handlers, and a nonce cannot apply to an attribute. ?>
               <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
                 (function () {

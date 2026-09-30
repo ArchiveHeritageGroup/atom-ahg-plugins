@@ -46,7 +46,7 @@ $userJobs = $repository->getJobs(['user_id' => $userId], 3);
         <div class="list-group list-group-flush small">
             @foreach ($userJobs as $job)
             <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
-                <div class="text-truncate" style="max-width: 150px;" title="{{ htmlspecialchars($job->job_name) }}">
+                <div class="text-truncate" data-ahg-style="max-width: 150px;" title="{{ htmlspecialchars($job->job_name) }}">
                     {{ htmlspecialchars($job->job_name) }}
                 </div>
                 <div>

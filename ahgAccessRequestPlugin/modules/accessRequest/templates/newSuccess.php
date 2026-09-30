@@ -104,7 +104,7 @@
                        placeholder="Type at least 2 characters of a title...">
                 <input type="hidden" name="object_id" id="ar-object-id" value="">
                 <div id="ar-object-results" class="list-group position-absolute w-100 shadow-sm d-none"
-                     style="z-index:1000; max-height:280px; overflow-y:auto;"></div>
+                     data-ahg-style="z-index:1000; max-height:280px; overflow-y:auto;"></div>
                 <div id="ar-object-chosen" class="form-text mt-2 d-none">
                   <i class="fas fa-check-circle text-success me-1"></i>
                   <span id="ar-object-chosen-title"></span>

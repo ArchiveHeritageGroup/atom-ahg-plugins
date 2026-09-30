@@ -26,14 +26,14 @@
       <table class="table table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 40px"></th>
+            <th data-ahg-style="width: 40px"></th>
             <th>Rule Name</th>
             <th>Type</th>
             <th>Severity</th>
             <th>Field</th>
             <th>Scope</th>
             <th>Order</th>
-            <th style="width: 120px">Actions</th>
+            <th data-ahg-style="width: 120px">Actions</th>
           </tr>
         </thead>
         <tbody>

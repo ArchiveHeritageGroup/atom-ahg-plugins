@@ -75,12 +75,12 @@ $totalPages = $sf_data->getRaw('totalPages');
         <table class="table table-hover table-striped mb-0">
             <thead class="table-dark">
                 <tr>
-                    <th style="width:140px;">Date/Time</th>
-                    <th style="width:120px;">User</th>
-                    <th style="width:90px;">Action</th>
+                    <th data-ahg-style="width:140px;">Date/Time</th>
+                    <th data-ahg-style="width:120px;">User</th>
+                    <th data-ahg-style="width:90px;">Action</th>
                     <th>Object</th>
-                    <th style="width:100px;">Category</th>
-                    <th style="width:120px;">IP</th>
+                    <th data-ahg-style="width:100px;">Category</th>
+                    <th data-ahg-style="width:120px;">IP</th>
                 </tr>
             </thead>
             <tbody>

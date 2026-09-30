@@ -32,7 +32,7 @@
       <?php endif; ?>
     </div>
     <form method="post" action="<?php echo url_for(['module' => 'ricShacl', 'action' => 'run']); ?>" class="d-flex gap-2">
-      <input type="text" name="graph" class="form-control form-control-sm" style="width:320px"
+      <input type="text" name="graph" class="form-control form-control-sm" data-ahg-style="width:320px"
              placeholder="<?php echo __('Optional named graph URI (blank = all)'); ?>">
       <button type="submit" class="btn btn-primary btn-sm">
         <i class="fa fa-play"></i> <?php echo __('Run validation'); ?>

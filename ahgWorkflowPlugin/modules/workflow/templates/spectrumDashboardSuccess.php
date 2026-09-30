@@ -27,7 +27,7 @@
   </div>
 
   <form method="get" action="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']) ?>" class="d-flex gap-2 align-items-end mb-3">
-    <div style="max-width: 14rem;">
+    <div data-ahg-style="max-width: 14rem;">
       <label for="overdue_days" class="form-label small mb-1"><?php echo __('Overdue threshold (days)') ?></label>
       <input type="number" name="overdue_days" id="overdue_days" class="form-control form-control-sm" min="1" max="3650" value="<?php echo (int) $overdueDays ?>">
     </div>
@@ -46,7 +46,7 @@
               <th class="status-cell"><?php echo __('Completed') ?></th>
               <th class="status-cell"><?php echo __('Overdue') ?></th>
               <th class="status-cell"><?php echo __('Rejected') ?></th>
-              <th style="min-width: 150px;"><?php echo __('Completion') ?></th>
+              <th data-ahg-style="min-width: 150px;"><?php echo __('Completion') ?></th>
             </tr>
           </thead>
           <tbody>
@@ -61,9 +61,9 @@
                 <td>
                   <div class="d-flex align-items-center gap-2">
                     <div class="progress flex-grow-1">
-                      <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $row['percent_completed'] ?>%" aria-valuenow="<?php echo $row['percent_completed'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                      <div class="progress-bar bg-success" role="progressbar" data-ahg-style="width: <?php echo $row['percent_completed'] ?>%" aria-valuenow="<?php echo $row['percent_completed'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <small class="text-muted" style="min-width: 3rem; text-align: right;"><?php echo $row['percent_completed'] ?>%</small>
+                    <small class="text-muted" data-ahg-style="min-width: 3rem; text-align: right;"><?php echo $row['percent_completed'] ?>%</small>
                   </div>
                 </td>
               </tr>

@@ -134,7 +134,7 @@ $regionIcons = [
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50px;"></th>
+                            <th data-ahg-style="width: 50px;"></th>
                             <th>{{ __('Code') }}</th>
                             <th>{{ __('Name') }}</th>
                             <th>{{ __('Country') }}</th>
@@ -149,7 +149,7 @@ $regionIcons = [
                         <tr{{ ($activeJurisdiction && $activeJurisdiction->code === $j->code) ? ' class="table-primary"' : '' }}>
                             <td class="text-center">
                                 @if($j->icon)
-                                <span style="font-size: 1.5rem;">{{ $j->icon }}</span>
+                                <span data-ahg-style="font-size: 1.5rem;">{{ $j->icon }}</span>
                                 @endif
                             </td>
                             <td>

@@ -27,8 +27,8 @@ $sampleRows = $sf_data->getRaw('sampleRows') ?? [];
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 42%"></div>
+    <div class="progress mt-2" data-ahg-style="height: 4px;">
+        <div class="progress-bar" data-ahg-style="width: 42%"></div>
     </div>
 </div>
 
@@ -65,7 +65,7 @@ $requiredFields = isset($requiredFields) ? $sf_data->getRaw('requiredFields') : 
                             <strong><?php echo __('Add sequential counter to identifiers') ?></strong>
                         </label>
                     </div>
-                    <div id="counter-options" style="display:none;">
+                    <div id="counter-options" data-ahg-style="display:none;">
                         <div class="row">
                             <div class="col-md-4 mb-2">
                                 <label class="form-label small"><?php echo __('Prefix') ?></label>
@@ -190,7 +190,7 @@ $requiredFields = isset($requiredFields) ? $sf_data->getRaw('requiredFields') : 
         <form method="post" action="<?php echo url_for(['module' => 'ingest', 'action' => 'map', 'id' => $session->id]) ?>" class="d-flex align-items-center">
             <input type="hidden" name="form_action" value="load_profile">
             <label class="form-label mb-0 me-2 text-nowrap"><?php echo __('Load saved profile:') ?></label>
-            <select class="form-select form-select-sm me-2" name="mapping_profile_id" style="max-width: 300px;">
+            <select class="form-select form-select-sm me-2" name="mapping_profile_id" data-ahg-style="max-width: 300px;">
                 <option value=""><?php echo __('— Select —') ?></option>
                 <?php foreach ($savedProfiles as $p): ?>
                     <option value="<?php echo $p->id ?>"><?php echo esc_entities($p->name) ?> (<?php echo $p->target_type ?>)</option>
@@ -219,11 +219,11 @@ $requiredFields = isset($requiredFields) ? $sf_data->getRaw('requiredFields') : 
                         <table class="table table-sm table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 30%"><?php echo __('Source Column') ?></th>
-                                    <th style="width: 30%"><?php echo __('Target Field') ?></th>
-                                    <th style="width: 15%"><?php echo __('Default') ?></th>
-                                    <th style="width: 15%"><?php echo __('Transform') ?></th>
-                                    <th style="width: 10%"><?php echo __('Ignore') ?></th>
+                                    <th data-ahg-style="width: 30%"><?php echo __('Source Column') ?></th>
+                                    <th data-ahg-style="width: 30%"><?php echo __('Target Field') ?></th>
+                                    <th data-ahg-style="width: 15%"><?php echo __('Default') ?></th>
+                                    <th data-ahg-style="width: 15%"><?php echo __('Transform') ?></th>
+                                    <th data-ahg-style="width: 10%"><?php echo __('Ignore') ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -322,11 +322,11 @@ $requiredFields = isset($requiredFields) ? $sf_data->getRaw('requiredFields') : 
                 <div class="card-body">
                     <h6><?php echo __('Legend') ?></h6>
                     <div class="d-flex align-items-center mb-1">
-                        <span class="d-inline-block me-2 rounded" style="width:16px;height:16px;background:rgba(25,135,84,0.1);border:1px solid rgba(25,135,84,0.3)"></span>
+                        <span class="d-inline-block me-2 rounded" data-ahg-style="width:16px;height:16px;background:rgba(25,135,84,0.1);border:1px solid rgba(25,135,84,0.3)"></span>
                         <small><?php echo __('Mapped (auto or manual)') ?></small>
                     </div>
                     <div class="d-flex align-items-center">
-                        <span class="d-inline-block me-2 rounded" style="width:16px;height:16px;background:rgba(220,53,69,0.1);border:1px solid rgba(220,53,69,0.3)"></span>
+                        <span class="d-inline-block me-2 rounded" data-ahg-style="width:16px;height:16px;background:rgba(220,53,69,0.1);border:1px solid rgba(220,53,69,0.3)"></span>
                         <small><?php echo __('Unmapped (needs attention)') ?></small>
                     </div>
                 </div>

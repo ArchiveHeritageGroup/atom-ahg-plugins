@@ -272,7 +272,7 @@ $carouselId = 'featured-collection-' . $collection->id;
                              
                              alt="<?php echo esc_entities($slide['title']) ?>"
                              loading="<?php echo $idx < 3 ? 'eager' : 'lazy' ?>"
-                             onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'text-white-50 text-center\'><i class=\'fas fa-image fa-3x mb-2\'></i><br>Image unavailable</div>';">
+                             data-ahg-onerror="parent-html" data-ahg-fallback="<div class='text-white-50 text-center'><i class='fas fa-image fa-3x mb-2'></i><br>Image unavailable</div>">
                     </div>
                 </a>
                 <?php if ($showCaptions): ?>
@@ -317,7 +317,7 @@ $carouselId = 'featured-collection-' . $collection->id;
                  data-bs-slide-to="<?php echo $idx ?>"
                  alt="<?php echo esc_entities($slide['title']) ?>"
                  title="<?php echo esc_entities($slide['title']) ?>"
-                 onerror="this.style.display='none';">
+                 data-ahg-onerror="hide">
             <?php if ($slide['media_type'] === 'video'): ?>
             <span class="position-absolute bottom-0 end-0 badge bg-dark bg-opacity-75 iiif-font-size-0-6rem-b742" ><i class="fas fa-film"></i></span>
             <?php elseif ($slide['media_type'] === 'audio'): ?>

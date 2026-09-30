@@ -30,7 +30,7 @@
                 <label class="form-label"><?php echo __('Link to Object (optional)') ?></label>
                 <input type="text" class="form-control form-control-sm" id="objectSearch" placeholder="<?php echo __('Search by title...') ?>" autocomplete="off">
                 <input type="hidden" id="objectId" name="information_object_id" value="">
-                <div id="objectResults" class="list-group position-absolute" style="z-index:1000;display:none"></div>
+                <div id="objectResults" class="list-group position-absolute" data-ahg-style="z-index:1000;display:none"></div>
             </div>
 
             <!-- Condition Grade -->
@@ -73,7 +73,7 @@
                 <input type="file" class="form-control form-control-sm" id="imageFile" name="image_file" accept="image/*">
             </div>
 
-            <div id="submitAlert" style="display:none"></div>
+            <div id="submitAlert" data-ahg-style="display:none"></div>
 
             <button type="submit" class="btn btn-primary w-100" id="submitBtn">
                 <i class="fas fa-save me-1"></i><?php echo __('Save Assessment') ?>
@@ -145,7 +145,7 @@ function addDamageRow() {
         + '<div class="col-md-4"><select class="form-select form-select-sm" name="damages[' + idx + '][damage_type]" required>' + typeOpts + '</select></div>'
         + '<div class="col-md-3"><select class="form-select form-select-sm" name="damages[' + idx + '][severity]" required>' + sevOpts + '</select></div>'
         + '<div class="col-md-3"><input type="text" class="form-control form-control-sm" name="damages[' + idx + '][location_zone]" placeholder="<?php echo __('Location zone') ?>"></div>'
-        + '<div class="col-md-2 text-end"><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDamageRow(' + idx + ')"><i class="fas fa-times"></i> <?php echo __('Remove') ?></button></div>'
+        + '<div class="col-md-2 text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="removeDamageRow" data-ahg-types="x" data-ahg-a0="' + idx + '"><i class="fas fa-times"></i> <?php echo __('Remove') ?></button></div>'
         + '</div>'
         + '<textarea class="form-control form-control-sm" name="damages[' + idx + '][description]" rows="2" placeholder="<?php echo __('Damage description...') ?>"></textarea>';
 

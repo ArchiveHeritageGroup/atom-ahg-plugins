@@ -6,7 +6,7 @@
 <tr class="list-item" data-id="<?php echo $object->id; ?>">
     <?php if ($digitalObject && $data['thumbnail_size'] !== 'none'): ?>
     <td width="60">
-        <img src="<?php echo $digitalObject->path; ?>" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" alt="">
+        <img src="<?php echo $digitalObject->path; ?>" class="rounded" data-ahg-style="width: 50px; height: 50px; object-fit: cover;" alt="">
     </td>
     <?php endif; ?>
     

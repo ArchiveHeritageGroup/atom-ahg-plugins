@@ -146,9 +146,9 @@
             <table class="table table-sm table-striped">
                 <thead>
                     <tr>
-                        <th style="width: 80px"><?php echo __('Row') ?></th>
-                        <th style="width: 150px"><?php echo __('Column') ?></th>
-                        <th style="width: 100px"><?php echo __('Severity') ?></th>
+                        <th data-ahg-style="width: 80px"><?php echo __('Row') ?></th>
+                        <th data-ahg-style="width: 150px"><?php echo __('Column') ?></th>
+                        <th data-ahg-style="width: 100px"><?php echo __('Severity') ?></th>
                         <th><?php echo __('Message') ?></th>
                     </tr>
                 </thead>
@@ -199,7 +199,7 @@
         if (!empty($violations)):
         ?>
         <h6 class="mt-4"><?php echo __('Issues by Rule') ?></h6>
-        <table class="table table-sm" style="max-width: 400px">
+        <table class="table table-sm" data-ahg-style="max-width: 400px">
             <thead>
                 <tr>
                     <th><?php echo __('Rule') ?></th>

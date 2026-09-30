@@ -57,9 +57,9 @@
         <div class="card h-100 text-center">
           <div class="card-body">
             <?php if ($seller->avatar_path): ?>
-              <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="<?php echo esc_entities($seller->display_name); ?>" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+              <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="<?php echo esc_entities($seller->display_name); ?>" class="rounded-circle mb-3" data-ahg-style="width: 80px; height: 80px; object-fit: cover;">
             <?php else: ?>
-              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3" data-ahg-style="width: 80px; height: 80px;">
                 <i class="fas fa-user fa-2x"></i>
               </div>
             <?php endif; ?>

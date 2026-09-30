@@ -115,7 +115,7 @@
             <div class="col-md-6">
               <label class="form-label">Total Insurance Value</label>
               <div class="input-group">
-                <select name="insurance_currency" class="form-select" style="max-width: 100px;">
+                <select name="insurance_currency" class="form-select" data-ahg-style="max-width: 100px;">
                   <option value="ZAR" <?php echo ($loan['insurance_currency'] ?? 'ZAR') === 'ZAR' ? 'selected' : ''; ?>>ZAR</option>
                   <option value="USD" <?php echo ($loan['insurance_currency'] ?? '') === 'USD' ? 'selected' : ''; ?>>USD</option>
                   <option value="EUR" <?php echo ($loan['insurance_currency'] ?? '') === 'EUR' ? 'selected' : ''; ?>>EUR</option>

@@ -34,8 +34,8 @@
 </head>
 <body>
     <div class="print-controls no-print">
-        <button onclick="window.print()">Print</button>
-        <button onclick="window.close()">Close</button>
+        <button data-ahg-action="print">Print</button>
+        <button data-ahg-action="close">Close</button>
     </div>
 
     <?php echo $html ?>

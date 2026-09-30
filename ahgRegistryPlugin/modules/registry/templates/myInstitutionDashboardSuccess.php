@@ -116,7 +116,7 @@
         </button>
       </div>
     </form>
-    <div id="admin-inst-results" class="list-group mt-2" style="display: none; max-height: 250px; overflow-y: auto;"></div>
+    <div id="admin-inst-results" class="list-group mt-2" data-ahg-style="display: none; max-height: 250px; overflow-y: auto;"></div>
   </div>
 </div>
 
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionClaim']); ?>" class="d-flex gap-2">
       <input type="hidden" name="institution_id" value="<?php echo (int) $institution->id; ?>">
       <?php if ($isAdmin): ?>
-      <select name="role" class="form-select form-select-sm" style="width: auto;">
+      <select name="role" class="form-select form-select-sm" data-ahg-style="width: auto;">
         <option value="owner"><?php echo __('as Owner'); ?></option>
         <option value="manager"><?php echo __('as Manager'); ?></option>
       </select>
@@ -271,9 +271,9 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="card-body">
     <div class="d-flex align-items-start">
       <?php if (!empty($institution->logo_path)): ?>
-        <img src="<?php echo htmlspecialchars($institution->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 80px; height: 80px; object-fit: contain;">
+        <img src="<?php echo htmlspecialchars($institution->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" data-ahg-style="width: 80px; height: 80px; object-fit: contain;">
       <?php else: ?>
-        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" data-ahg-style="width: 80px; height: 80px;">
           <i class="fas fa-university fa-2x text-muted"></i>
         </div>
       <?php endif; ?>

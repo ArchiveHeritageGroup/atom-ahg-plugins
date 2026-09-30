@@ -72,7 +72,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
           <img src="<?php echo htmlspecialchars($webPath); ?>"
                alt="<?php echo ucfirst($view); ?> view"
                class="img-fluid rounded border"
-               style="max-height: 120px; cursor: pointer;">
+               data-ahg-style="max-height: 120px; cursor: pointer;">
         </a>
         <small class="d-block text-muted mt-1"><?php echo ucfirst($view); ?></small>
       </div>

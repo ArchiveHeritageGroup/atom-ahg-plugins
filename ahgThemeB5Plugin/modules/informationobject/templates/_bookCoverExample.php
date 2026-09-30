@@ -27,8 +27,8 @@ if (!$isbn): ?>
              alt="<?php echo __('Book cover'); ?>"
              class="img-fluid rounded shadow-sm"
              loading="lazy"
-             style="max-height: 300px;"
-             onerror="this.onerror=null; this.src='/plugins/ahgThemeB5Plugin/images/no-cover.png';">
+             data-ahg-style="max-height: 300px;"
+             data-ahg-onerror="src" data-ahg-fallback="/plugins/ahgThemeB5Plugin/images/no-cover.png">
     </a>
     
     <div class="mt-2">

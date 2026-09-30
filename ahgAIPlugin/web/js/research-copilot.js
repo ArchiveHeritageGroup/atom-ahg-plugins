@@ -80,7 +80,7 @@
         a.className = 'list-group-item list-group-item-action py-2';
         a.setAttribute('data-sid', s.id);
         a.innerHTML = '<div class="text-truncate small fw-semibold">' + esc(s.title) + '</div>'
-          + '<div class="text-muted" style="font-size:.72rem">' + esc((s.updated_at || '').substring(0, 16)) + '</div>';
+          + '<div class="text-muted" data-ahg-style="font-size:.72rem">' + esc((s.updated_at || '').substring(0, 16)) + '</div>';
         a.addEventListener('click', function (e) { e.preventDefault(); openSession(s.id, s.title); });
         sessionsEl.appendChild(a);
       });

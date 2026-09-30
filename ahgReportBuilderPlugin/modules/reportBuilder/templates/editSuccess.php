@@ -28,7 +28,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
 <?php endif; ?>
 
 <!-- Toolbar -->
-<div class="bg-light border-bottom py-2 px-3 mb-4 sticky-top" style="z-index: 1020;">
+<div class="bg-light border-bottom py-2 px-3 mb-4 sticky-top" data-ahg-style="z-index: 1020;">
     <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-3">
             <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'index']); ?>" class="btn btn-sm btn-outline-secondary">
@@ -201,7 +201,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                 </button>
             </div>
             <div class="collapse show" id="columnsCollapse">
-                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                <div class="card-body p-0" data-ahg-style="max-height: 400px; overflow-y: auto;">
                     <div class="p-2">
                         <input type="text" class="form-control form-control-sm" id="columnSearch" placeholder="<?php echo __('Search columns...'); ?>">
                     </div>
@@ -214,7 +214,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                                 <input class="form-check-input me-2 column-checkbox" type="checkbox" value="<?php echo $key; ?>"
                                        <?php echo in_array($key, $rawColumns) ? 'checked' : ''; ?>>
                                 <span class="small"><?php echo $col['label']; ?></span>
-                                <span class="badge bg-secondary float-end" style="font-size: 0.65rem;"><?php echo $col['type']; ?></span>
+                                <span class="badge bg-secondary float-end" data-ahg-style="font-size: 0.65rem;"><?php echo $col['type']; ?></span>
                             </label>
                             <?php endforeach; ?>
                         </div>
@@ -284,7 +284,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                     </button>
                 </div>
             </div>
-            <div class="card-body" id="designerCanvas" style="min-height: 500px; background: #f8f9fa;">
+            <div class="card-body" id="designerCanvas" data-ahg-style="min-height: 500px; background: #f8f9fa;">
                 <!-- Layout blocks will be rendered here -->
                 <div class="layout-blocks" id="layoutBlocks">
                     <?php foreach ($rawLayout['blocks'] ?? [] as $index => $block): ?>
@@ -363,7 +363,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                 <ul class="list-group list-group-flush sortable-list" id="selectedColumns">
                     <?php foreach ($rawColumns as $col): ?>
                     <li class="list-group-item list-group-item-action py-2 d-flex justify-content-between align-items-center sortable-item" data-column="<?php echo $col; ?>">
-                        <div class="d-flex align-items-center flex-grow-1 drag-handle" style="cursor: grab;">
+                        <div class="d-flex align-items-center flex-grow-1 drag-handle" data-ahg-style="cursor: grab;">
                             <i class="bi bi-grip-vertical text-muted me-2"></i>
                             <span class="small"><?php echo $allColumns[$col]['label'] ?? $col; ?></span>
                         </div>
@@ -378,7 +378,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
         </div>
 
         <!-- Chart Configuration (shown when chart is selected) -->
-        <div class="card mb-3" id="chartConfigPanel" style="display: none;">
+        <div class="card mb-3" id="chartConfigPanel" data-ahg-style="display: none;">
             <div class="card-header py-2">
                 <i class="bi bi-bar-chart me-1"></i><?php echo __('Chart Settings'); ?>
             </div>

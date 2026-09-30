@@ -88,7 +88,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="<?php echo __('Close') ?>"></button>
       </div>
 
-      <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+      <div class="modal-body" data-ahg-style="max-height: 75vh; overflow-y: auto;">
 
         <!-- STEP 1: Field Selection -->
         <div class="ahg-step-1">
@@ -198,7 +198,7 @@
         </div>
 
         <!-- STEP 2: Review Translations -->
-        <div class="ahg-step-2" style="display:none;">
+        <div class="ahg-step-2" data-ahg-style="display:none;">
           <div class="alert alert-warning py-2 mb-3">
             <i class="fas fa-eye me-1"></i>
             <strong><?php echo __('Review Translations') ?></strong> - Edit if needed, then click "Approve & Save" to apply.
@@ -211,7 +211,7 @@
 
         <!-- Status Messages -->
         <div class="mt-3">
-          <div class="alert py-2 mb-0 ahg-translate-status" style="display:none; white-space:pre-wrap;"></div>
+          <div class="alert py-2 mb-0 ahg-translate-status" data-ahg-style="display:none; white-space:pre-wrap;"></div>
         </div>
       </div>
 
@@ -227,7 +227,7 @@
         </div>
 
         <!-- Step 2 buttons -->
-        <div class="ahg-step-2-buttons" style="display:none;">
+        <div class="ahg-step-2-buttons" data-ahg-style="display:none;">
           <button type="button" class="btn btn-outline-secondary ahg-back-to-step1">
             <i class="fas fa-arrow-left me-1"></i><?php echo __('Back') ?>
           </button>
@@ -356,7 +356,7 @@
                 <div class="row">
                   <div class="col-md-6">
                     <label class="form-label fw-bold text-muted">Source Text</label>
-                    <div class="border rounded p-2 bg-light" style="max-height:150px;overflow-y:auto;">
+                    <div class="border rounded p-2 bg-light" data-ahg-style="max-height:150px;overflow-y:auto;">
                       ${escapeHtml(r.sourceText || '(empty)')}
                     </div>
                   </div>
@@ -365,7 +365,7 @@
                       <i class="fas fa-arrow-right me-1"></i>Translation
                     </label>
                     <textarea class="form-control ahg-translated-text" data-field="${r.field}" data-draft-id="${r.draft_id}"
-                              rows="4" style="max-height:150px;">${escapeHtml(r.translation || '')}</textarea>
+                              rows="4" data-ahg-style="max-height:150px;">${escapeHtml(r.translation || '')}</textarea>
                   </div>
                 </div>
               ` : `

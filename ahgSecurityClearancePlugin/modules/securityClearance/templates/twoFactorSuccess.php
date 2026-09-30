@@ -26,7 +26,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
         <?php if (isset($clearance) && $clearance): ?>
         <p>
           <strong><?php echo __('Your Clearance:') ?></strong>
-          <span class="badge" style="background-color: <?php echo esc_entities($clearance->color ?? '#666') ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo esc_entities($clearance->color ?? '#666') ?>">
             <?php echo esc_entities($clearance->name ?? '') ?>
           </span>
         </p>
@@ -54,7 +54,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
             <input type="text" name="code" class="form-control form-control-lg text-center"
                    maxlength="6" pattern="\d{6}" placeholder="000000" required autofocus
                    autocomplete="one-time-code" inputmode="numeric"
-                   style="font-size: 2rem; letter-spacing: 0.5rem;">
+                   data-ahg-style="font-size: 2rem; letter-spacing: 0.5rem;">
             <div class="form-text">
               <?php echo __('Enter the 6-digit code from your authenticator app.') ?>
             </div>

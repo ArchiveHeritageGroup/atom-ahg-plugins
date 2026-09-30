@@ -70,9 +70,9 @@
       <div class="card-body">
         <a href="<?php echo url_for(['module' => 'registry', 'action' => 'softwareView', 'slug' => $software->slug ?? '']); ?>" class="d-flex align-items-center text-decoration-none">
           <?php if (!empty($software->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($software->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2 flex-shrink-0" style="width: 40px; height: 40px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($software->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2 flex-shrink-0" data-ahg-style="width: 40px; height: 40px; object-fit: contain;">
           <?php else: ?>
-            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center flex-shrink-0" data-ahg-style="width: 40px; height: 40px;">
               <i class="fas fa-box-open text-muted"></i>
             </div>
           <?php endif; ?>
@@ -100,7 +100,7 @@
           <a href="<?php echo url_for(['module' => 'registry', 'action' => 'setupGuideView', 'slug' => $software->slug ?? '', 'guide_slug' => $other->slug ?? '']); ?>" class="text-decoration-none">
             <?php echo htmlspecialchars($other->title ?? '', ENT_QUOTES, 'UTF-8'); ?>
           </a>
-          <span class="badge <?php echo $oCatClass; ?> ms-1" style="font-size: 0.65em;"><?php echo htmlspecialchars(ucfirst($oCat), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="badge <?php echo $oCatClass; ?> ms-1" data-ahg-style="font-size: 0.65em;"><?php echo htmlspecialchars(ucfirst($oCat), ENT_QUOTES, 'UTF-8'); ?></span>
           <?php if (!empty($other->view_count)): ?>
             <small class="text-muted d-block"><i class="fas fa-eye me-1"></i><?php echo number_format((int) $other->view_count); ?></small>
           <?php endif; ?>

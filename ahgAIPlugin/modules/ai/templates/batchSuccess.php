@@ -153,7 +153,7 @@
                                 </div>
                                 <div class="progress progress-thin mb-2">
                                     <div class="progress-bar bg-<?php echo $batch->failed_items > 0 ? 'danger' : 'success'; ?>"
-                                         style="width: <?php echo $batch->progress_percent; ?>%"></div>
+                                         data-ahg-style="width: <?php echo $batch->progress_percent; ?>%"></div>
                                 </div>
                                 <small class="text-muted">
                                     <?php echo $batch->completed_items; ?>/<?php echo $batch->total_items; ?> completed
@@ -166,20 +166,20 @@
                             </div>
                             <div class="btn-group">
                                 <?php if ($batch->status === 'pending'): ?>
-                                    <button class="btn btn-sm btn-success" onclick="batchAction(<?php echo $batch->id; ?>, 'start')">
+                                    <button class="btn btn-sm btn-success" data-ahg-call="batchAction" data-ahg-types="x,s" data-ahg-a0="<?php echo $batch->id; ?>" data-ahg-a1="start">
                                         <i class="fas fa-play"></i>
                                     </button>
                                 <?php elseif ($batch->status === 'running'): ?>
-                                    <button class="btn btn-sm btn-warning" onclick="batchAction(<?php echo $batch->id; ?>, 'pause')">
+                                    <button class="btn btn-sm btn-warning" data-ahg-call="batchAction" data-ahg-types="x,s" data-ahg-a0="<?php echo $batch->id; ?>" data-ahg-a1="pause">
                                         <i class="fas fa-pause"></i>
                                     </button>
                                 <?php elseif ($batch->status === 'paused'): ?>
-                                    <button class="btn btn-sm btn-success" onclick="batchAction(<?php echo $batch->id; ?>, 'resume')">
+                                    <button class="btn btn-sm btn-success" data-ahg-call="batchAction" data-ahg-types="x,s" data-ahg-a0="<?php echo $batch->id; ?>" data-ahg-a1="resume">
                                         <i class="fas fa-play"></i>
                                     </button>
                                 <?php endif; ?>
                                 <?php if ($batch->failed_items > 0): ?>
-                                    <button class="btn btn-sm btn-outline-warning" onclick="batchAction(<?php echo $batch->id; ?>, 'retry')" title="Retry failed">
+                                    <button class="btn btn-sm btn-outline-warning" data-ahg-call="batchAction" data-ahg-types="x,s" data-ahg-a0="<?php echo $batch->id; ?>" data-ahg-a1="retry" title="Retry failed">
                                         <i class="fas fa-redo"></i>
                                     </button>
                                 <?php endif; ?>

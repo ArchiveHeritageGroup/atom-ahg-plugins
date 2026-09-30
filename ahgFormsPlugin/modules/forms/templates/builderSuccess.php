@@ -165,7 +165,7 @@
                         <i class="fas fa-mouse-pointer fa-2x mb-2"></i>
                         <p>Select a field to edit its properties</p>
                     </div>
-                    <form id="field-properties-form" style="display: none;">
+                    <form id="field-properties-form" data-ahg-style="display: none;">
                         <input type="hidden" id="prop-field-id" name="field_id">
 
                         <div class="mb-3">

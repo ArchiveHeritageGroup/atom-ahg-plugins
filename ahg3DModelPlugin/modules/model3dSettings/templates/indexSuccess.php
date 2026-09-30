@@ -107,7 +107,7 @@ function isSettingEnabled($settings, $key) {
                                 <div class="input-group">
                                     <input type="color" class="form-control form-control-color" id="bg_picker"
                                            value="<?php echo getSetting($settings, 'default_background', '#f5f5f5') ?>"
-                                           onchange="document.getElementById('default_background').value=this.value;">
+                                           data-ahg-copy-to="#default_background">
                                     <input type="text" class="form-control" id="default_background" name="default_background"
                                            value="<?php echo getSetting($settings, 'default_background', '#f5f5f5') ?>">
                                 </div>
@@ -341,7 +341,7 @@ function isSettingEnabled($settings, $key) {
                         </div>
                     </div>
 
-                    <div id="triposr_remote_config" style="display: <?php echo getSetting($settings, 'triposr_mode') == 'remote' ? 'block' : 'none' ?>;">
+                    <div id="triposr_remote_config" data-ahg-style="display: <?php echo getSetting($settings, 'triposr_mode') == 'remote' ? 'block' : 'none' ?>;">
                         <div class="alert alert-info small mb-3">
                             <i class="fas fa-info-circle me-1"></i>
                             Configure remote GPU server for faster processing. The local server will auto-fallback if remote fails.

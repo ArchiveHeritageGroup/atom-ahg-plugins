@@ -8,9 +8,9 @@
         </div>
         <div class="card-body py-2 small">
             <p class="text-muted mb-2"><?php echo __('Upload an image or select an archival object to analyze for damage.') ?></p>
-            <div id="progressArea" style="display:none">
-                <div class="progress mb-2" style="height:4px">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" style="width:0%"></div>
+            <div id="progressArea" data-ahg-style="display:none">
+                <div class="progress mb-2" data-ahg-style="height:4px">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" data-ahg-style="width:0%"></div>
                 </div>
                 <p class="text-center small text-muted" id="progressText"><?php echo __('Analyzing...') ?></p>
             </div>
@@ -35,7 +35,7 @@
                         <label class="form-label"><?php echo __('Link to Object (optional)') ?></label>
                         <input type="text" class="form-control form-control-sm" id="objectSearch" placeholder="<?php echo __('Search by title...') ?>" autocomplete="off">
                         <input type="hidden" id="objectId" name="information_object_id" value="<?php echo esc_entities($objectId ?? '') ?>">
-                        <div id="objectResults" class="list-group position-absolute" style="z-index:1000;display:none"></div>
+                        <div id="objectResults" class="list-group position-absolute" data-ahg-style="z-index:1000;display:none"></div>
                     </div>
 
                     <!-- Image upload -->
@@ -45,8 +45,8 @@
                     </div>
 
                     <!-- Preview -->
-                    <div class="mb-3 text-center" id="previewArea" style="display:none">
-                        <img id="previewImg" src="" alt="Preview" class="img-fluid rounded border" style="max-height:300px">
+                    <div class="mb-3 text-center" id="previewArea" data-ahg-style="display:none">
+                        <img id="previewImg" src="" alt="Preview" class="img-fluid rounded border" data-ahg-style="max-height:300px">
                     </div>
 
                     <!-- Confidence slider -->
@@ -64,7 +64,7 @@
     </div>
     <div class="col-md-6">
         <!-- Results panel (populated by JS) -->
-        <div id="resultsPanel" style="display:none">
+        <div id="resultsPanel" data-ahg-style="display:none">
             <div class="card">
                 <div class="card-header py-2 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0"><i class="fas fa-chart-bar me-1"></i><?php echo __('Results') ?></h6>
@@ -72,7 +72,7 @@
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-3">
-                        <img id="overlayImg" src="" alt="Overlay" class="img-fluid rounded border" style="max-height:400px">
+                        <img id="overlayImg" src="" alt="Overlay" class="img-fluid rounded border" data-ahg-style="max-height:400px">
                     </div>
                     <div id="resultGrade" class="text-center mb-3"></div>
                     <h6><?php echo __('Damages Detected') ?></h6>
@@ -83,7 +83,7 @@
                         <a id="viewDetailLink" href="#" class="btn btn-sm btn-primary">
                             <i class="fas fa-eye me-1"></i><?php echo __('View Full Report') ?>
                         </a>
-                        <button type="button" class="btn btn-sm btn-success" id="confirmBtn" style="display:none">
+                        <button type="button" class="btn btn-sm btn-success" id="confirmBtn" data-ahg-style="display:none">
                             <i class="fas fa-check me-1"></i><?php echo __('Confirm Assessment') ?>
                         </button>
                     </div>
@@ -208,7 +208,7 @@ function showResults(data) {
     var damageHtml = '';
     (data.damages || []).forEach(function(d) {
         damageHtml += '<div class="d-flex justify-content-between align-items-center border-bottom py-1">';
-        damageHtml += '<span><span class="badge" style="background-color:' + (d.color || '#6c757d') + '">' + (d.damage_type || 'unknown').replace('_',' ') + '</span></span>';
+        damageHtml += '<span><span class="badge" data-ahg-style="background-color:' + (d.color || '#6c757d') + '">' + (d.damage_type || 'unknown').replace('_',' ') + '</span></span>';
         damageHtml += '<span class="small text-muted">' + Math.round((d.confidence || 0) * 100) + '% conf</span>';
         damageHtml += '</div>';
     });

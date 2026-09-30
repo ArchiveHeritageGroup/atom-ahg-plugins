@@ -77,7 +77,7 @@
                   include_component('digitalobject', 'showVideo', ['resource' => $digitalObject, 'usageType' => QubitTerm::REFERENCE_ID]);
               } elseif (strpos($mimeType, 'image') !== false && $displayPath) {
                   echo '<a href="' . $masterPath . '" target="_blank">';
-                  echo '<img src="' . $displayPath . '" alt="' . esc_entities($resource->title ?? $resource->slug) . '" class="img-fluid rounded shadow-sm" style="max-height: 400px;">';
+                  echo '<img src="' . $displayPath . '" alt="' . esc_entities($resource->title ?? $resource->slug) . '" class="img-fluid rounded shadow-sm" data-ahg-style="max-height: 400px;">';
                   echo '</a>';
               } else {
                   echo '<a href="' . $masterPath . '" target="_blank" class="btn btn-outline-primary">';
@@ -264,7 +264,7 @@
             <table class="table table-sm table-striped">
               <?php foreach ($credits as $credit): ?>
               <tr>
-                <td class="fw-bold" style="width: 200px;"><?php echo esc_entities($credit['role']); ?></td>
+                <td class="fw-bold" data-ahg-style="width: 200px;"><?php echo esc_entities($credit['role']); ?></td>
                 <td><?php echo esc_entities($credit['name']); ?></td>
               </tr>
               <?php endforeach; ?>
@@ -333,7 +333,7 @@
   <!-- IPTC Artwork -->
   <?php if ($iptc && (!empty($iptc->artwork_title) || !empty($iptc->artwork_creator))): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: #6f42c1; color: white;">
+    <div class="card-header" data-ahg-style="background-color: #6f42c1; color: white;">
       <h4 class="mb-0"><i class="fas fa-palette"></i> <?php echo __('IPTC - Artwork / Object in Image'); ?></h4>
     </div>
     <div class="card-body">
@@ -419,7 +419,7 @@
   ?>
   <?php if (count($versions) > 0): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: #17a2b8; color: white;">
+    <div class="card-header" data-ahg-style="background-color: #17a2b8; color: white;">
       <h4 class="mb-0"><i class="fas fa-language"></i> <?php echo __('Alternative Versions'); ?></h4>
     </div>
     <div class="card-body">
@@ -455,7 +455,7 @@
   ?>
   <?php if (count($holdings) > 0): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: #6c757d; color: white;">
+    <div class="card-header" data-ahg-style="background-color: #6c757d; color: white;">
       <h4 class="mb-0"><i class="fas fa-film"></i> <?php echo __('Format Holdings & Access'); ?></h4>
     </div>
     <div class="card-body">
@@ -516,7 +516,7 @@
   ?>
   <?php if (count($links) > 0): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: #28a745; color: white;">
+    <div class="card-header" data-ahg-style="background-color: #28a745; color: white;">
       <h4 class="mb-0"><i class="fas fa-external-link-alt"></i> <?php echo __('External References'); ?></h4>
     </div>
     <div class="card-body">
@@ -586,7 +586,7 @@
   ?>
   <?php if ($hasSubjects || $hasPlaces || $hasGenres || $hasNames): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: var(--ahg-primary, #005837); color: var(--ahg-card-header-text, #fff);">
+    <div class="card-header" data-ahg-style="background-color: var(--ahg-primary, #005837); color: var(--ahg-card-header-text, #fff);">
       <h4 class="mb-0"><i class="fas fa-tags me-2"></i><?php echo __('Access Points'); ?></h4>
     </div>
     <div class="card-body">

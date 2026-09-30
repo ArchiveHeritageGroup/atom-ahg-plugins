@@ -131,7 +131,7 @@
                       <th><?php echo __('Identifier'); ?></th>
                       <th><?php echo __('Level'); ?></th>
                       <th><?php echo __('Title'); ?></th>
-                      <th style="width:80px"></th>
+                      <th data-ahg-style="width:80px"></th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -164,7 +164,7 @@
               <label class="form-label"><?php echo __('Alternative identifier(s)'); ?></label>
               <?php $rawAltIds = $rawIo['alternativeIdentifiers'] ?? []; ?>
               <table class="table table-sm" id="altids-table">
-                <thead><tr><th><?php echo __('Label'); ?></th><th><?php echo __('Value'); ?></th><th style="width:80px"></th></tr></thead>
+                <thead><tr><th><?php echo __('Label'); ?></th><th><?php echo __('Value'); ?></th><th data-ahg-style="width:80px"></th></tr></thead>
                 <tbody>
                   <?php if (!empty($rawAltIds)) { ?>
                     <?php foreach ($rawAltIds as $aiIdx => $ai) { ?>
@@ -508,7 +508,7 @@
             <?php $rawNotes = $rawIo['notes']; ?>
             <label class="form-label"><?php echo __('Other notes'); ?></label>
             <table class="table table-sm" id="notes-table">
-              <thead><tr><th style="width:30%"><?php echo __('Type'); ?></th><th><?php echo __('Content'); ?></th><th style="width:80px"></th></tr></thead>
+              <thead><tr><th data-ahg-style="width:30%"><?php echo __('Type'); ?></th><th><?php echo __('Content'); ?></th><th data-ahg-style="width:80px"></th></tr></thead>
               <tbody>
                 <?php if (!empty($rawNotes)) { ?>
                   <?php foreach ($rawNotes as $nIdx => $note) { ?>

@@ -39,7 +39,7 @@ $archivalCollections = (array) $archivalCollections;
                     </select>
                 </div>
 
-                <div class="col-md-4" id="archival_select_wrapper" style="display: none;">
+                <div class="col-md-4" id="archival_select_wrapper" data-ahg-style="display: none;">
                     <label for="archival_source_id" class="form-label">Select Archival Collection</label>
                     <select class="form-select" id="archival_source_id" name="source_id_archival">
                         <option value="">Select collection...</option>
@@ -49,7 +49,7 @@ $archivalCollections = (array) $archivalCollections;
                     </select>
                 </div>
 
-                <div class="col-md-4" id="iiif_select_wrapper" style="display: none;">
+                <div class="col-md-4" id="iiif_select_wrapper" data-ahg-style="display: none;">
                     <label for="iiif_source_id" class="form-label">Select IIIF Collection</label>
                     <select class="form-select" id="iiif_source_id" name="source_id_iiif">
                         <option value="">Select collection...</option>
@@ -103,12 +103,12 @@ $archivalCollections = (array) $archivalCollections;
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 60px;">Order</th>
+                        <th data-ahg-style="width: 60px;">Order</th>
                         <th>Collection</th>
                         <th>Type</th>
                         <th>Custom Title</th>
-                        <th style="width: 100px;">Status</th>
-                        <th style="width: 150px;">Actions</th>
+                        <th data-ahg-style="width: 100px;">Status</th>
+                        <th data-ahg-style="width: 150px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

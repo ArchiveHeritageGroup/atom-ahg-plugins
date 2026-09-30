@@ -4,7 +4,7 @@
   $rawCategories = is_array($categories) ? $categories : sfOutputEscaper::unescape($categories);
 ?>
 
-<div class="help-sidebar sticky-top" style="top: 1rem;">
+<div class="help-sidebar sticky-top" data-ahg-style="top: 1rem;">
 
   <!-- Search -->
   <div class="mb-3">

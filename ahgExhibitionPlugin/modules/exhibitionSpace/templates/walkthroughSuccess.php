@@ -102,46 +102,46 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
         <span class="small text-muted"><?php echo __('Click to enter. Move: W A S D. Look: mouse. Select: click an object. Exit: Esc.') ?></span>
       </div>
       <div class="card-body p-0">
-        <div id="room" style="position:relative;width:100%;height:70vh;min-height:420px;background:#1a1d21;border-radius:0;overflow:hidden;">
-          <div id="roomBlocker" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:5;cursor:pointer;">
+        <div id="room" data-ahg-style="position:relative;width:100%;height:70vh;min-height:420px;background:#1a1d21;border-radius:0;overflow:hidden;">
+          <div id="roomBlocker" data-ahg-style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:5;cursor:pointer;">
             <div class="text-center text-white">
-              <div style="font-size:2rem;"><i class="fas fa-vr-cardboard"></i></div>
+              <div data-ahg-style="font-size:2rem;"><i class="fas fa-vr-cardboard"></i></div>
               <div class="fw-bold mt-2"><?php echo __('Click to enter the gallery') ?></div>
               <div class="small text-white-50 mt-1"><?php echo __('W A S D to walk, mouse to look, click an object for details, Esc to exit') ?></div>
               <div class="small text-white-50"><?php echo __('Press H any time for the full controls') ?></div>
             </div>
           </div>
-          <div id="roomCrosshair" style="position:absolute;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#000;border:2px solid rgba(255,255,255,.85);box-sizing:border-box;z-index:4;display:none;pointer-events:none;"></div>
-          <img id="figurePointer" alt="" style="position:absolute;top:50%;left:50%;height:120px;margin-top:-110px;transform:translateX(-50%);z-index:4;display:none;pointer-events:none;opacity:.92;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));">
-          <div id="figureHint" class="bg-dark text-white px-2 py-1 rounded small" style="position:absolute;bottom:90px;left:50%;transform:translateX(-50%);z-index:7;display:none;"><i class="fas fa-person-walking me-1"></i><?php echo __('Wheel: change person - click: place (this view only)') ?></div>
-          <div id="objectPointer" style="position:absolute;top:50%;left:50%;margin:-12px 0 0 -11px;z-index:5;display:none;pointer-events:none;color:#fff;font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.8);"><i class="fas fa-hand-pointer"></i></div>
-          <div id="roomLoading" style="position:absolute;bottom:8px;left:8px;z-index:4;color:#ccc;font-size:.8rem;"><?php echo __('Loading gallery...') ?></div>
-          <div id="wtAlarm" style="position:absolute;inset:0;background:#ff0000;opacity:0;z-index:9;pointer-events:none;display:none;"></div>
-          <div id="wtAlarmBar" style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);z-index:10;display:none;text-align:center;">
+          <div id="roomCrosshair" data-ahg-style="position:absolute;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#000;border:2px solid rgba(255,255,255,.85);box-sizing:border-box;z-index:4;display:none;pointer-events:none;"></div>
+          <img id="figurePointer" alt="" data-ahg-style="position:absolute;top:50%;left:50%;height:120px;margin-top:-110px;transform:translateX(-50%);z-index:4;display:none;pointer-events:none;opacity:.92;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));">
+          <div id="figureHint" class="bg-dark text-white px-2 py-1 rounded small" data-ahg-style="position:absolute;bottom:90px;left:50%;transform:translateX(-50%);z-index:7;display:none;"><i class="fas fa-person-walking me-1"></i><?php echo __('Wheel: change person - click: place (this view only)') ?></div>
+          <div id="objectPointer" data-ahg-style="position:absolute;top:50%;left:50%;margin:-12px 0 0 -11px;z-index:5;display:none;pointer-events:none;color:#fff;font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.8);"><i class="fas fa-hand-pointer"></i></div>
+          <div id="roomLoading" data-ahg-style="position:absolute;bottom:8px;left:8px;z-index:4;color:#ccc;font-size:.8rem;"><?php echo __('Loading gallery...') ?></div>
+          <div id="wtAlarm" data-ahg-style="position:absolute;inset:0;background:#ff0000;opacity:0;z-index:9;pointer-events:none;display:none;"></div>
+          <div id="wtAlarmBar" data-ahg-style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);z-index:10;display:none;text-align:center;">
             <div class="bg-danger text-white px-4 py-2 rounded-pill shadow fw-bold"><i class="fas fa-triangle-exclamation me-2"></i><span id="wtAlarmText"></span></div>
             <button type="button" id="wtAlarmOff" class="btn btn-light btn-sm rounded-pill mt-2 shadow"><i class="fas fa-bell-slash me-1"></i><?php echo __('Silence alarm') ?></button>
           </div>
-          <div id="wtHeight" class="bg-dark text-white px-2 py-1 rounded small" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:7;display:none;"></div>
-          <div id="wtNarr" class="bg-primary text-white px-2 py-1 rounded small" style="position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:7;display:none;"><i class="fas fa-volume-high me-1"></i><?php echo __('Reading description... (Esc to stop)') ?></div>
-          <button id="roomHelpBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:8px;z-index:6;opacity:.85;" title="<?php echo __('Controls') ?>"><i class="fas fa-question"></i></button>
-          <button id="roomMapBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:44px;z-index:6;opacity:.85;" title="<?php echo __('Building map') ?>"><i class="fas fa-map"></i></button>
-          <button id="roomLiveBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:80px;z-index:6;opacity:.85;" title="<?php echo __('Live data') ?>"><i class="fas fa-temperature-half"></i></button>
-          <button id="wtPeopleBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:116px;z-index:6;opacity:.85;" title="<?php echo __('People here') ?>"><i class="fas fa-users"></i> <span id="wtPeopleCount">1</span></button>
-          <button id="wtTorchBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:156px;z-index:6;opacity:.85;" title="<?php echo __('Torch (F)') ?>"><i class="fas fa-lightbulb"></i></button>
-          <button id="wtGraffitiBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:192px;z-index:6;opacity:.85;" title="<?php echo __('Graffiti: click a wall to tag it') ?>"><i class="fas fa-spray-can"></i></button>
-          <button id="wtTourPlayBtn" type="button" class="btn btn-sm btn-success" style="position:absolute;top:8px;right:228px;z-index:6;opacity:.9;display:none;" title="<?php echo __('Play guided tour') ?>"><i class="fas fa-play"></i></button>
-          <button id="wtStealBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:264px;z-index:6;opacity:.85;" title="<?php echo __('Steal mode: click an object to trigger the alarm') ?>"><i class="fas fa-mask"></i></button>
-          <button id="wtFigureBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:300px;z-index:6;opacity:.85;" title="<?php echo __('Figures: wheel to pick a person, click to place') ?>"><i class="fas fa-person-walking"></i></button>
-          <button id="wtSunBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:336px;z-index:6;opacity:.85;" title="<?php echo __('Sun & shadows (off / morning / noon / afternoon)') ?>"><i class="fas fa-sun"></i></button>
-          <button id="wtNightBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:372px;z-index:6;opacity:.85;" title="<?php echo __('Night mode (walk with the flashlight) - N') ?>"><i class="fas fa-moon"></i></button>
-          <button id="wtFsBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:408px;z-index:6;opacity:.85;" title="<?php echo __('Fullscreen') ?>"><i class="fas fa-expand"></i></button>
-          <button id="wt360Btn" type="button" class="btn btn-sm btn-info" style="position:absolute;top:8px;right:444px;z-index:6;opacity:.9;display:none;" title="<?php echo __('360 / Matterport view of this room') ?>"><i class="fas fa-vr-cardboard me-1"></i>360</button>
-          <div id="wt360Overlay" style="position:absolute;inset:0;z-index:20;background:#000;display:none;">
-            <iframe id="wt360Frame" src="" allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer" allowfullscreen style="border:0;width:100%;height:100%;"></iframe>
-            <button id="wt360Close" type="button" class="btn btn-light btn-sm rounded-pill shadow" style="position:absolute;top:10px;right:10px;z-index:21;"><i class="fas fa-times me-1"></i><?php echo __('Close 360 view') ?></button>
+          <div id="wtHeight" class="bg-dark text-white px-2 py-1 rounded small" data-ahg-style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:7;display:none;"></div>
+          <div id="wtNarr" class="bg-primary text-white px-2 py-1 rounded small" data-ahg-style="position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:7;display:none;"><i class="fas fa-volume-high me-1"></i><?php echo __('Reading description... (Esc to stop)') ?></div>
+          <button id="roomHelpBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:8px;z-index:6;opacity:.85;" title="<?php echo __('Controls') ?>"><i class="fas fa-question"></i></button>
+          <button id="roomMapBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:44px;z-index:6;opacity:.85;" title="<?php echo __('Building map') ?>"><i class="fas fa-map"></i></button>
+          <button id="roomLiveBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:80px;z-index:6;opacity:.85;" title="<?php echo __('Live data') ?>"><i class="fas fa-temperature-half"></i></button>
+          <button id="wtPeopleBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:116px;z-index:6;opacity:.85;" title="<?php echo __('People here') ?>"><i class="fas fa-users"></i> <span id="wtPeopleCount">1</span></button>
+          <button id="wtTorchBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:156px;z-index:6;opacity:.85;" title="<?php echo __('Torch (F)') ?>"><i class="fas fa-lightbulb"></i></button>
+          <button id="wtGraffitiBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:192px;z-index:6;opacity:.85;" title="<?php echo __('Graffiti: click a wall to tag it') ?>"><i class="fas fa-spray-can"></i></button>
+          <button id="wtTourPlayBtn" type="button" class="btn btn-sm btn-success" data-ahg-style="position:absolute;top:8px;right:228px;z-index:6;opacity:.9;display:none;" title="<?php echo __('Play guided tour') ?>"><i class="fas fa-play"></i></button>
+          <button id="wtStealBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:264px;z-index:6;opacity:.85;" title="<?php echo __('Steal mode: click an object to trigger the alarm') ?>"><i class="fas fa-mask"></i></button>
+          <button id="wtFigureBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:300px;z-index:6;opacity:.85;" title="<?php echo __('Figures: wheel to pick a person, click to place') ?>"><i class="fas fa-person-walking"></i></button>
+          <button id="wtSunBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:336px;z-index:6;opacity:.85;" title="<?php echo __('Sun & shadows (off / morning / noon / afternoon)') ?>"><i class="fas fa-sun"></i></button>
+          <button id="wtNightBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:372px;z-index:6;opacity:.85;" title="<?php echo __('Night mode (walk with the flashlight) - N') ?>"><i class="fas fa-moon"></i></button>
+          <button id="wtFsBtn" type="button" class="btn btn-sm btn-dark" data-ahg-style="position:absolute;top:8px;right:408px;z-index:6;opacity:.85;" title="<?php echo __('Fullscreen') ?>"><i class="fas fa-expand"></i></button>
+          <button id="wt360Btn" type="button" class="btn btn-sm btn-info" data-ahg-style="position:absolute;top:8px;right:444px;z-index:6;opacity:.9;display:none;" title="<?php echo __('360 / Matterport view of this room') ?>"><i class="fas fa-vr-cardboard me-1"></i>360</button>
+          <div id="wt360Overlay" data-ahg-style="position:absolute;inset:0;z-index:20;background:#000;display:none;">
+            <iframe id="wt360Frame" src="" allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer" allowfullscreen data-ahg-style="border:0;width:100%;height:100%;"></iframe>
+            <button id="wt360Close" type="button" class="btn btn-light btn-sm rounded-pill shadow" data-ahg-style="position:absolute;top:10px;right:10px;z-index:21;"><i class="fas fa-times me-1"></i><?php echo __('Close 360 view') ?></button>
           </div>
-          <div id="wtTourBanner" class="bg-dark text-white px-3 py-2 rounded small" style="position:absolute;bottom:64px;left:50%;transform:translateX(-50%);z-index:7;display:none;max-width:86%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5);">
-            <div id="wtTourText" style="max-height:30vh;overflow-y:auto;"></div>
+          <div id="wtTourBanner" class="bg-dark text-white px-3 py-2 rounded small" data-ahg-style="position:absolute;bottom:64px;left:50%;transform:translateX(-50%);z-index:7;display:none;max-width:86%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5);">
+            <div id="wtTourText" data-ahg-style="max-height:30vh;overflow-y:auto;"></div>
             <div class="mt-2 text-nowrap">
               <button type="button" id="wtTourTextBtn" class="btn btn-sm btn-outline-light py-0" title="<?php echo __('Show/hide narration text') ?>"><i class="fas fa-closed-captioning"></i></button>
               <button type="button" id="wtTourPrevBtn" class="btn btn-sm btn-outline-light py-0" title="<?php echo __('Previous stop') ?>"><i class="fas fa-step-backward"></i></button>
@@ -150,27 +150,27 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
               <button type="button" id="wtTourStopBtn" class="btn btn-sm btn-outline-light py-0"><i class="fas fa-stop"></i></button>
             </div>
           </div>
-          <div id="wtTourQuick" style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:8;display:none;text-align:center;width:90%;max-width:360px;">
+          <div id="wtTourQuick" data-ahg-style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:8;display:none;text-align:center;width:90%;max-width:360px;">
             <select id="wtTourQuickSel" class="form-select form-select-sm mb-2 d-none"></select>
             <button type="button" id="wtTourQuickBtn" class="btn btn-success btn-lg rounded-pill shadow w-100"><i class="fas fa-play me-2"></i><?php echo __('Start guided tour') ?></button>
           </div>
-          <div id="wtPeople" class="bg-dark text-white p-2 rounded small" style="position:absolute;top:46px;right:8px;z-index:8;width:240px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
+          <div id="wtPeople" class="bg-dark text-white p-2 rounded small" data-ahg-style="position:absolute;top:46px;right:8px;z-index:8;width:240px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
             <div class="d-flex justify-content-between align-items-center mb-1"><span class="fw-bold"><i class="fas fa-users me-1"></i><?php echo __('In this exhibition') ?></span><button type="button" id="wtPeopleClose" class="btn-close btn-close-white btn-sm" aria-label="<?php echo __('Close') ?>"></button></div>
             <input id="wtNameInput" class="form-control form-control-sm mb-2" placeholder="<?php echo __('Your name') ?>" maxlength="40">
             <div id="wtPeopleList"></div>
-            <button id="wtFollowBtn" type="button" class="btn btn-sm btn-warning w-100 mt-2" style="display:none;"><i class="fas fa-shoe-prints me-1"></i><?php echo __('Follow the docent') ?></button>
+            <button id="wtFollowBtn" type="button" class="btn btn-sm btn-warning w-100 mt-2" data-ahg-style="display:none;"><i class="fas fa-shoe-prints me-1"></i><?php echo __('Follow the docent') ?></button>
           </div>
-          <div id="wtHereNow" class="bg-dark text-white px-2 py-1 rounded-pill small" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:7;opacity:.9;box-shadow:0 2px 8px rgba(0,0,0,.45);cursor:pointer;" title="<?php echo __('People in this exhibition right now') ?>"><i class="fas fa-users me-1"></i><span id="wtHereNowN">1</span> <span id="wtHereNowLbl"><?php echo __('here now') ?></span></div>
-          <div id="wtDocentBanner" class="bg-primary text-white px-3 py-2 rounded small" style="position:absolute;top:46px;left:50%;transform:translateX(-50%);z-index:7;display:none;max-width:80%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5);"></div>
-          <div id="wtLive" class="bg-dark text-white p-2 rounded small" style="position:absolute;top:46px;left:8px;z-index:7;width:230px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
+          <div id="wtHereNow" class="bg-dark text-white px-2 py-1 rounded-pill small" data-ahg-style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:7;opacity:.9;box-shadow:0 2px 8px rgba(0,0,0,.45);cursor:pointer;" title="<?php echo __('People in this exhibition right now') ?>"><i class="fas fa-users me-1"></i><span id="wtHereNowN">1</span> <span id="wtHereNowLbl"><?php echo __('here now') ?></span></div>
+          <div id="wtDocentBanner" class="bg-primary text-white px-3 py-2 rounded small" data-ahg-style="position:absolute;top:46px;left:50%;transform:translateX(-50%);z-index:7;display:none;max-width:80%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5);"></div>
+          <div id="wtLive" class="bg-dark text-white p-2 rounded small" data-ahg-style="position:absolute;top:46px;left:8px;z-index:7;width:230px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
             <div class="fw-bold mb-1"><i class="fas fa-temperature-half me-1"></i><?php echo __('Live conditions') ?></div>
             <div id="wtLiveBody"></div>
           </div>
-          <div id="wtMinimap" class="bg-dark text-white p-2 rounded" style="position:absolute;top:46px;right:8px;z-index:7;width:260px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
+          <div id="wtMinimap" class="bg-dark text-white p-2 rounded" data-ahg-style="position:absolute;top:46px;right:8px;z-index:7;width:260px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
             <div class="d-flex justify-content-between align-items-center mb-1"><span class="small fw-bold"><i class="fas fa-map me-1"></i><?php echo __('Building — tap a room to enter') ?></span><button type="button" id="wtMiniClose" class="btn-close btn-close-white btn-sm" aria-label="<?php echo __('Close') ?>"></button></div>
             <div id="wtMiniSvg"></div>
           </div>
-          <div id="roomHelp" class="bg-dark text-white p-3 rounded small" style="position:absolute;top:46px;right:8px;z-index:6;max-width:260px;display:none;">
+          <div id="roomHelp" class="bg-dark text-white p-3 rounded small" data-ahg-style="position:absolute;top:46px;right:8px;z-index:6;max-width:260px;display:none;">
             <div class="fw-bold mb-2"><i class="fas fa-gamepad me-1"></i><?php echo __('Controls') ?></div>
             <ul class="mb-0 ps-3">
               <li><?php echo __('Click gallery to enter') ?></li>
@@ -191,7 +191,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
               <li><?php echo __('Exit gallery: Esc') ?></li>
               <li class="mt-1 text-info"><?php echo __('Touch: drag to look, pinch to zoom, tap an object, tap a numbered button to travel') ?></li>
             </ul>
-            <div class="mt-2" id="wtTourPick" style="display:none;">
+            <div class="mt-2" id="wtTourPick" data-ahg-style="display:none;">
               <label class="form-label mb-1"><i class="fas fa-route me-1"></i><?php echo __('Guided tour') ?></label>
               <select id="wtTourSel" class="form-select form-select-sm"></select>
             </div>
@@ -200,10 +200,10 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
               <select id="wtVoiceSel" class="form-select form-select-sm"><option value=""><?php echo __('Default') ?></option></select>
             </div>
           </div>
-          <div id="wtInlay" style="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;max-width:520px;width:92%;max-height:38vh;overflow-y:auto;display:none;background:rgba(20,22,26,.85);color:#fff;border-radius:.5rem;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,.45);">
-            <button type="button" id="inlayClose" class="btn-close btn-close-white" style="position:absolute;top:8px;right:10px;" aria-label="<?php echo __('Close') ?>"></button>
+          <div id="wtInlay" data-ahg-style="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;max-width:520px;width:92%;max-height:38vh;overflow-y:auto;display:none;background:rgba(20,22,26,.85);color:#fff;border-radius:.5rem;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,.45);">
+            <button type="button" id="inlayClose" class="btn-close btn-close-white" data-ahg-style="position:absolute;top:8px;right:10px;" aria-label="<?php echo __('Close') ?>"></button>
             <h6 id="inlayTitle" class="fw-bold mb-1 pe-4"></h6>
-            <p id="inlayDesc" class="small mb-2" style="max-height:22vh;overflow:auto;"></p>
+            <p id="inlayDesc" class="small mb-2" data-ahg-style="max-height:22vh;overflow:auto;"></p>
             <a id="inlayRec" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-light"><i class="fas fa-external-link-alt me-1"></i><?php echo __('View full record') ?> <span class="badge bg-secondary ms-1">V</span></a>
             <div id="wtAsk" class="mt-2">
               <div class="input-group input-group-sm">
@@ -211,22 +211,22 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
                 <button id="wtAskBtn" type="button" class="btn btn-info" title="<?php echo __('Ask') ?>"><i class="fas fa-comment-dots"></i></button>
               </div>
               <div id="wtAskChips" class="d-flex flex-wrap gap-1 mt-1"></div>
-              <div id="wtAskAnswer" class="small mt-2" style="display:none;background:rgba(255,255,255,.08);border-radius:.4rem;padding:6px 8px;"></div>
+              <div id="wtAskAnswer" class="small mt-2" data-ahg-style="display:none;background:rgba(255,255,255,.08);border-radius:.4rem;padding:6px 8px;"></div>
             </div>
-            <div id="wtRelated" class="mt-2" style="display:none;">
+            <div id="wtRelated" class="mt-2" data-ahg-style="display:none;">
               <div class="small text-white-50 mb-1"><i class="fas fa-wand-magic-sparkles me-1"></i><?php echo __('You might also like') ?></div>
               <div id="wtRelatedItems" class="d-flex flex-wrap gap-1"></div>
             </div>
           </div>
-          <div id="recOverlay" style="position:absolute;inset:0;z-index:20;display:none;background:rgba(10,12,15,.96);">
-            <div style="position:absolute;top:8px;right:10px;z-index:21;display:flex;gap:6px;">
+          <div id="recOverlay" data-ahg-style="position:absolute;inset:0;z-index:20;display:none;background:rgba(10,12,15,.96);">
+            <div data-ahg-style="position:absolute;top:8px;right:10px;z-index:21;display:flex;gap:6px;">
               <a id="recOpenTab" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-light" title="<?php echo __('Open in new tab') ?>"><i class="fas fa-external-link-alt"></i></a>
               <button type="button" id="recClose" class="btn btn-sm btn-warning fw-semibold" title="<?php echo __('Back to the gallery') ?>"><i class="fas fa-arrow-left me-1"></i><?php echo __('Back to gallery') ?></button>
             </div>
-            <iframe id="recFrame" title="<?php echo __('Full record') ?>" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;"></iframe>
+            <iframe id="recFrame" title="<?php echo __('Full record') ?>" data-ahg-style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;"></iframe>
           </div>
         </div>
-        <div id="roomNav" class="d-flex gap-1 p-2 overflow-auto border-top bg-light" style="white-space:nowrap;"></div>
+        <div id="roomNav" class="d-flex gap-1 p-2 overflow-auto border-top bg-light" data-ahg-style="white-space:nowrap;"></div>
       </div>
     </div>
 

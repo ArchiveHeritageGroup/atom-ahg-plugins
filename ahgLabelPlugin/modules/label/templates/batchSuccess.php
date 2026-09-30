@@ -55,7 +55,7 @@ function lbl_barcode_value(array $r, $t): string
   <div class="mt-3">
     <button class="btn btn-primary"><i class="fas fa-eye me-1"></i><?php echo __('Generate'); ?></button>
     <?php if ($hasSelection && !empty($records)): ?>
-      <button type="button" class="btn btn-success" onclick="window.print()"><i class="fas fa-print me-1"></i><?php echo __('Print'); ?></button>
+      <button type="button" class="btn btn-success" data-ahg-action="print"><i class="fas fa-print me-1"></i><?php echo __('Print'); ?></button>
       <span class="ms-2 text-muted"><?php echo count($records); ?> <?php echo __('labels'); ?></span>
     <?php endif; ?>
     <a class="btn btn-link" href="<?php echo url_for(['module' => 'label', 'action' => 'templates']); ?>"><?php echo __('Templates'); ?></a>

@@ -7,7 +7,7 @@
  */
 ?>
 <div class="ai-suggest-section mb-3">
-    <button type="button" class="btn btn-outline-primary w-100" id="aiSuggestBtn" onclick="openSuggestModal(<?php echo $resource->id ?>)">
+    <button type="button" class="btn btn-outline-primary w-100" id="aiSuggestBtn" data-ahg-call="openSuggestModal" data-ahg-types="x" data-ahg-a0="<?php echo $resource->id ?>">
         <i class="bi bi-magic me-1"></i>Suggest Description (AI)
     </button>
 </div>
@@ -23,13 +23,13 @@
             <div class="modal-body" id="suggestModalBody">
                 <!-- Loading state -->
                 <div id="suggestLoading" class="text-center py-5">
-                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                    <div class="spinner-border text-primary" data-ahg-style="width: 3rem; height: 3rem;"></div>
                     <p class="mt-3 text-muted">Generating description suggestion...</p>
                     <small class="text-muted">This may take 30-60 seconds depending on content length</small>
                 </div>
 
                 <!-- Result state -->
-                <div id="suggestResult" style="display: none;">
+                <div id="suggestResult" data-ahg-style="display: none;">
                     <!-- Metadata summary -->
                     <div class="alert alert-info mb-3" id="suggestMeta"></div>
 
@@ -41,7 +41,7 @@
                                     <i class="bi bi-file-text me-1"></i>Current Description
                                 </div>
                                 <div class="card-body">
-                                    <div id="existingText" class="small" style="max-height: 400px; overflow-y: auto;"></div>
+                                    <div id="existingText" class="small" data-ahg-style="max-height: 400px; overflow-y: auto;"></div>
                                 </div>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                                     <span class="badge bg-light text-primary float-end" id="suggestModel"></span>
                                 </div>
                                 <div class="card-body">
-                                    <textarea id="suggestedText" class="form-control" rows="15" style="font-size: 0.9rem;"></textarea>
+                                    <textarea id="suggestedText" class="form-control" rows="15" data-ahg-style="font-size: 0.9rem;"></textarea>
                                     <small class="text-muted mt-1 d-block">
                                         <i class="bi bi-pencil me-1"></i>You can edit before approving
                                     </small>
@@ -69,7 +69,7 @@
                 </div>
 
                 <!-- Error state -->
-                <div id="suggestError" style="display: none;">
+                <div id="suggestError" data-ahg-style="display: none;">
                     <div class="alert alert-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         <span id="suggestErrorMsg"></span>
@@ -79,7 +79,7 @@
                     </button>
                 </div>
             </div>
-            <div class="modal-footer" id="suggestFooter" style="display: none;">
+            <div class="modal-footer" id="suggestFooter" data-ahg-style="display: none;">
                 <div class="me-auto small text-muted" id="suggestStats"></div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-outline-danger" data-ahg-call="rejectSuggestion">
@@ -146,7 +146,7 @@ function generateSuggestion(objectId) {
         // Existing text
         var existingEl = document.getElementById('existingText');
         if (data.existing_text && data.existing_text.trim()) {
-            existingEl.innerHTML = '<pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(data.existing_text) + '</pre>';
+            existingEl.innerHTML = '<pre class="mb-0" data-ahg-style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(data.existing_text) + '</pre>';
         } else {
             existingEl.innerHTML = '<em class="text-muted">No existing description</em>';
         }

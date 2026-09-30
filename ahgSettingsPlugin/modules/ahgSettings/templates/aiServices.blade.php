@@ -392,7 +392,7 @@
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th data-ahg-style="width:40px;"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>
@@ -421,11 +421,11 @@
             </div>
 
             <!-- Library fields -->
-            <div id="sector-fields-library" class="sector-fields" style="display:none;">
+            <div id="sector-fields-library" class="sector-fields" data-ahg-style="display:none;">
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th data-ahg-style="width:40px;"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>
@@ -450,11 +450,11 @@
             </div>
 
             <!-- Museum fields -->
-            <div id="sector-fields-museum" class="sector-fields" style="display:none;">
+            <div id="sector-fields-museum" class="sector-fields" data-ahg-style="display:none;">
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th data-ahg-style="width:40px;"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>
@@ -479,11 +479,11 @@
             </div>
 
             <!-- Gallery fields -->
-            <div id="sector-fields-gallery" class="sector-fields" style="display:none;">
+            <div id="sector-fields-gallery" class="sector-fields" data-ahg-style="display:none;">
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th data-ahg-style="width:40px;"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>
@@ -508,11 +508,11 @@
             </div>
 
             <!-- DAM fields -->
-            <div id="sector-fields-dam" class="sector-fields" style="display:none;">
+            <div id="sector-fields-dam" class="sector-fields" data-ahg-style="display:none;">
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th data-ahg-style="width:40px;"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>

@@ -5,10 +5,10 @@
  */
 ?>
 <div class="ai-summarize-section mb-3">
-    <button type="button" class="btn btn-outline-info w-100" id="aiSummarizeBtn" onclick="generateSummary(<?php echo $resource->id ?>)">
+    <button type="button" class="btn btn-outline-info w-100" id="aiSummarizeBtn" data-ahg-call="generateSummary" data-ahg-types="x" data-ahg-a0="<?php echo $resource->id ?>">
         <i class="bi bi-file-text me-1"></i>Generate Summary (AI)
     </button>
-    <div id="summaryResult" class="mt-2" style="display: none;"></div>
+    <div id="summaryResult" class="mt-2" data-ahg-style="display: none;"></div>
 </div>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
@@ -50,7 +50,7 @@ function generateSummary(objectId) {
                     </div>
                 </div>
                 <div class="mt-2">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                    <button class="btn btn-sm btn-outline-secondary" data-ahg-action="reload">
                         <i class="bi bi-arrow-clockwise me-1"></i>Refresh Page
                     </button>
                 </div>

@@ -28,7 +28,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
         <p class="text-muted"><?php echo __('Open your authenticator app (Google Authenticator, Authy, or Microsoft Authenticator) and scan this QR code:') ?></p>
 
         <div class="text-center my-4">
-          <img src="<?php echo esc_entities($qrCodeUrl) ?>" alt="QR Code" class="border rounded p-2" style="max-width: 220px;">
+          <img src="<?php echo esc_entities($qrCodeUrl) ?>" alt="QR Code" class="border rounded p-2" data-ahg-style="max-width: 220px;">
         </div>
 
         <div class="mb-4">
@@ -56,7 +56,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
                 <input type="text" name="code" class="form-control form-control-lg text-center"
                        maxlength="6" pattern="\d{6}" placeholder="000000" required
                        autocomplete="one-time-code" inputmode="numeric"
-                       style="font-size: 2rem; letter-spacing: 0.5rem;">
+                       data-ahg-style="font-size: 2rem; letter-spacing: 0.5rem;">
               </div>
               <div class="d-grid">
                 <button type="submit" class="btn btn-success btn-lg">

@@ -158,7 +158,7 @@ function cco_edit_url($asset): string
 <div class="grap-dashboard">
 
     <!-- Action Buttons -->
-    <div style="margin-bottom: 20px;">
+    <div data-ahg-style="margin-bottom: 20px;">
         <?php echo link_to(__('Export Full Report'), ['module' => 'cco', 'action' => 'grapExportReport'], ['class' => 'btn btn-primary']); ?>
         <?php echo link_to(__('Browse Objects'), ['module' => 'cco', 'action' => 'browse'], ['class' => 'btn btn-secondary']); ?>
     </div>
@@ -196,7 +196,7 @@ function cco_edit_url($asset): string
     <div class="stat-card">
         <h3>Recognition Status (GRAP 103 para 7-21)</h3>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div data-ahg-style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div>
                 <h4>Recognised: <?php echo $stats['recognised']; ?></h4>
                 <div class="progress-bar">
@@ -204,7 +204,7 @@ function cco_edit_url($asset): string
                     $recognisedPct = $stats['total_objects'] > 0 ? 
                         ($stats['recognised'] / $stats['total_objects']) * 100 : 0;
                     ?>
-                    <div class="progress-fill green" style="width: <?php echo $recognisedPct; ?>%">
+                    <div class="progress-fill green" data-ahg-style="width: <?php echo $recognisedPct; ?>%">
                         <?php echo round($recognisedPct, 1); ?>%
                     </div>
                 </div>
@@ -217,7 +217,7 @@ function cco_edit_url($asset): string
                     $notRecognisedPct = $stats['total_objects'] > 0 ? 
                         ($stats['not_recognised'] / $stats['total_objects']) * 100 : 0;
                     ?>
-                    <div class="progress-fill orange" style="width: <?php echo $notRecognisedPct; ?>%">
+                    <div class="progress-fill orange" data-ahg-style="width: <?php echo $notRecognisedPct; ?>%">
                         <?php echo round($notRecognisedPct, 1); ?>%
                     </div>
                 </div>
@@ -255,8 +255,8 @@ function cco_edit_url($asset): string
                     <td><?php echo number_format($data->count); ?></td>
                     <td>R <?php echo number_format($data->total_value, 2); ?></td>
                     <td>
-                        <div class="progress-bar" style="height: 20px;">
-                            <div class="progress-fill" style="width: <?php echo $pct; ?>%">
+                        <div class="progress-bar" data-ahg-style="height: 20px;">
+                            <div class="progress-fill" data-ahg-style="width: <?php echo $pct; ?>%">
                                 <?php echo round($pct, 1); ?>%
                             </div>
                         </div>
@@ -271,26 +271,26 @@ function cco_edit_url($asset): string
     <div class="stat-card">
         <h3>Depreciation Analysis (GRAP 103 para 22-28)</h3>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 24px; font-weight: bold; color: #667eea;">
+        <div data-ahg-style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 24px; font-weight: bold; color: #667eea;">
                     R <?php echo number_format($stats['total_accumulated_depreciation'], 0); ?>
                 </div>
-                <div style="font-size: 14px; color: #666;">Total Accumulated Depreciation</div>
+                <div data-ahg-style="font-size: 14px; color: #666;">Total Accumulated Depreciation</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 24px; font-weight: bold; color: #11998e;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 24px; font-weight: bold; color: #11998e;">
                     R <?php echo number_format($stats['total_value'], 0); ?>
                 </div>
-                <div style="font-size: 14px; color: #666;">Gross Asset Value</div>
+                <div data-ahg-style="font-size: 14px; color: #666;">Gross Asset Value</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 24px; font-weight: bold; color: #f5576c;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 24px; font-weight: bold; color: #f5576c;">
                     R <?php echo number_format($stats['net_book_value'], 0); ?>
                 </div>
-                <div style="font-size: 14px; color: #666;">Net Book Value</div>
+                <div data-ahg-style="font-size: 14px; color: #666;">Net Book Value</div>
             </div>
         </div>
 
@@ -326,33 +326,33 @@ function cco_edit_url($asset): string
     <div class="stat-card">
         <h3>Revaluation Status (GRAP 103 para 29-39)</h3>
         
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold;">
+        <div data-ahg-style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 20px; font-weight: bold;">
                     <?php echo number_format($revaluationStats['with_revaluation']); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">With Revaluation</div>
+                <div data-ahg-style="font-size: 12px; color: #666;">With Revaluation</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 20px; font-weight: bold;">
                     <?php echo number_format($revaluationStats['without_revaluation']); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">No Revaluation</div>
+                <div data-ahg-style="font-size: 12px; color: #666;">No Revaluation</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 20px; font-weight: bold;">
                     <?php echo number_format($revaluationStats['revalued_last_year']); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">Revalued Last Year</div>
+                <div data-ahg-style="font-size: 12px; color: #666;">Revalued Last Year</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 20px; font-weight: bold;">
                     R <?php echo number_format($revaluationStats['total_revaluation_amount'], 0); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">Total Revaluation</div>
+                <div data-ahg-style="font-size: 12px; color: #666;">Total Revaluation</div>
             </div>
         </div>
     </div>
@@ -369,40 +369,40 @@ function cco_edit_url($asset): string
         </div>
         <?php endif; ?>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 20px;">
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold; color: #dc3545;">
+        <div data-ahg-style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 20px;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 20px; font-weight: bold; color: #dc3545;">
                     R <?php echo number_format($insuranceStats['total_required'], 0); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">Required Coverage</div>
+                <div data-ahg-style="font-size: 12px; color: #666;">Required Coverage</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold; color: #28a745;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 20px; font-weight: bold; color: #28a745;">
                     R <?php echo number_format($insuranceStats['total_actual'], 0); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">Actual Coverage</div>
+                <div data-ahg-style="font-size: 12px; color: #666;">Actual Coverage</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold; color: <?php echo $insuranceStats['gap'] > 0 ? '#dc3545' : '#28a745'; ?>;">
+            <div data-ahg-style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                <div data-ahg-style="font-size: 20px; font-weight: bold; color: <?php echo $insuranceStats['gap'] > 0 ? '#dc3545' : '#28a745'; ?>;">
                     R <?php echo number_format(abs($insuranceStats['gap']), 0); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">
+                <div data-ahg-style="font-size: 12px; color: #666;">
                     <?php echo $insuranceStats['gap'] > 0 ? 'Shortfall' : 'Surplus'; ?>
                 </div>
             </div>
         </div>
 
-        <div style="margin-top: 20px;">
-            <div class="progress-bar" style="height: 40px;">
+        <div data-ahg-style="margin-top: 20px;">
+            <div class="progress-bar" data-ahg-style="height: 40px;">
                 <?php 
                 $coveragePct = $insuranceStats['total_required'] > 0 ? 
                     ($insuranceStats['total_actual'] / $insuranceStats['total_required']) * 100 : 0;
                 $coveragePct = min($coveragePct, 100);
                 $colorClass = $coveragePct >= 90 ? 'green' : 'orange';
                 ?>
-                <div class="progress-fill <?php echo $colorClass; ?>" style="width: <?php echo $coveragePct; ?>%">
+                <div class="progress-fill <?php echo $colorClass; ?>" data-ahg-style="width: <?php echo $coveragePct; ?>%">
                     <?php echo round($coveragePct, 1); ?>% Coverage
                 </div>
             </div>

@@ -36,7 +36,7 @@
 
   <!-- Scrollable children list -->
   <?php if ($totalChildren > 0): ?>
-  <div class="holdings-scroll-container<?php echo $hasMany ? ' has-scroll' : ''; ?>" style="<?php echo $hasMany ? 'max-height: 300px; overflow-y: auto;' : ''; ?>">
+  <div class="holdings-scroll-container<?php echo $hasMany ? ' has-scroll' : ''; ?>" data-ahg-style="<?php echo $hasMany ? 'max-height: 300px; overflow-y: auto;' : ''; ?>">
     <ul class="list-group list-group-flush">
       <?php foreach ($children as $child): ?>
       <li class="list-group-item list-group-item-action ps-4 py-2">
@@ -130,7 +130,7 @@ if ($resource && ($hasCondition || $hasSpectrum || $hasResearch)):
 <section class="sidebar-widget">
   <h4><?php echo __('Named Entity Recognition'); ?></h4>
   <ul>
-    <li><a href="#" onclick="extractEntities(<?php echo $resource->id ?>); return false;"><i class="bi bi-cpu me-1"></i><?php echo __('Extract Entities'); ?></a></li>
+    <li><a href="#" data-ahg-call="extractEntities" data-ahg-types="x" data-ahg-a0="<?php echo $resource->id ?>" data-ahg-prevent="1"><i class="bi bi-cpu me-1"></i><?php echo __('Extract Entities'); ?></a></li>
     <li><a href="/ner/review"><i class="bi bi-list-check me-1"></i><?php echo __('Review Dashboard'); ?></a></li>
   </ul>
 </section>

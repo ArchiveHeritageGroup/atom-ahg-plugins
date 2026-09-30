@@ -27,10 +27,10 @@ $showSidebar = $config['show_sidebar'] ?? true;
   </div>
 
   <!-- Content loaded via AJAX -->
-  <div class="glam-browser-content" style="display: none;"></div>
+  <div class="glam-browser-content" data-ahg-style="display: none;"></div>
 
   <!-- Error state -->
-  <div class="glam-browser-error" style="display: none;">
+  <div class="glam-browser-error" data-ahg-style="display: none;">
     <div class="alert alert-warning">
       <i class="fas fa-exclamation-triangle me-2"></i>
       Unable to load browse interface.

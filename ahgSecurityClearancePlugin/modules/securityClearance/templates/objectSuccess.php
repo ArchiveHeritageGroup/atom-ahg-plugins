@@ -47,7 +47,7 @@
             <div class="col-md-6 mb-3">
               <label class="form-label text-muted small"><?php echo __('Classification Level'); ?></label>
               <p class="mb-0">
-                <span class="badge fs-6" style="background-color: <?php echo $classification->classificationColor; ?>;">
+                <span class="badge fs-6" data-ahg-style="background-color: <?php echo $classification->classificationColor; ?>;">
                   <i class="<?php echo $classification->classificationIcon ?? 'fa-lock'; ?> me-1"></i>
                   <?php echo $classification->classificationName; ?>
                 </span>

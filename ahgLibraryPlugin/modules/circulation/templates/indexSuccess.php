@@ -155,7 +155,7 @@
         <?php if ($rawPatron): ?>
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Name'); ?></th>
+              <th class="text-muted" data-ahg-style="width:40%"><?php echo __('Name'); ?></th>
               <td class="fw-bold"><?php echo esc_entities($rawPatron->name); ?></td>
             </tr>
             <tr>

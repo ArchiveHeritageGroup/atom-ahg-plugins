@@ -246,9 +246,9 @@
       row.className = 'd-flex align-items-center gap-1 mb-1';
       var lbl = (typeof d.edge === 'number') ? (t('wall') + ' ' + (d.edge + 1)) : (DOOR_LBL[d.wall] || '?');
       var opts = [['open', t('doorway')], ['single', t('single')], ['double', t('double')], ['glass', t('glass')], ['sliding', t('sliding')], ['ornate', t('ornate')]];
-      var sel = '<select class="form-select form-select-sm doortype" style="width:96px">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + ((d.type || 'open') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>';
+      var sel = '<select class="form-select form-select-sm doortype" data-ahg-style="width:96px">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + ((d.type || 'open') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>';
       row.innerHTML = '<span class="badge bg-secondary">' + lbl + '</span>' +
-        '<input type="number" class="form-control form-control-sm" style="width:60px" min="0.5" max="6" step="0.1" value="' + d.width + '"><span class="small text-muted">m</span>' +
+        '<input type="number" class="form-control form-control-sm" data-ahg-style="width:60px" min="0.5" max="6" step="0.1" value="' + d.width + '"><span class="small text-muted">m</span>' +
         sel +
         '<button class="btn btn-sm btn-outline-danger ms-auto" type="button" title="' + t('remove') + '">&times;</button>';
       row.querySelector('input').addEventListener('change', function (e) { d.width = Math.max(0.5, Math.min(6, parseFloat(e.target.value) || 1.6)); drawDoors(g); saveDoors(g); });
@@ -788,7 +788,7 @@
     CORRIDOR.forEach(function (c) {
       var row = document.createElement('div');
       row.className = 'd-flex align-items-center gap-1 mb-1';
-      row.innerHTML = '<i class="fas fa-shoe-prints text-warning"></i> <span class="text-truncate" style="max-width:150px">' + (c.title || ('#' + c.information_object_id)) + '</span><button class="btn btn-sm btn-outline-danger ms-auto" type="button" title="' + t('remove') + '">&times;</button>';
+      row.innerHTML = '<i class="fas fa-shoe-prints text-warning"></i> <span class="text-truncate" data-ahg-style="max-width:150px">' + (c.title || ('#' + c.information_object_id)) + '</span><button class="btn btn-sm btn-outline-danger ms-auto" type="button" title="' + t('remove') + '">&times;</button>';
       row.querySelector('button').addEventListener('click', function () { removeCorr(c); });
       el.appendChild(row);
     });
@@ -837,14 +837,14 @@
     STAIRS.forEach(function (st, i) {
       var row = document.createElement('div'); row.className = 'd-flex flex-wrap align-items-center gap-1 mb-2 pb-1 border-bottom';
       row.innerHTML = '<span class="badge bg-warning text-dark">' + t('stair') + ' ' + (i + 1) + '</span>' +
-        '<label class="small text-muted mb-0 w-100">' + t('from') + ' <select class="form-select form-select-sm d-inline-block sfr" style="width:160px">' + roomOpts(st.from_room) + '</select></label>' +
-        '<label class="small text-muted mb-0 w-100">' + t('to') + ' <select class="form-select form-select-sm d-inline-block str" style="width:160px">' + roomOpts(st.to_room) + '</select></label>' +
-        '<label class="small text-muted mb-0">' + t('width') + ' <input type="number" step="0.1" min="0.6" class="form-control form-control-sm d-inline-block sw" style="width:58px" value="' + (st.width || 1.6) + '"></label>' +
-        '<label class="small text-muted mb-0">' + t('len') + ' <input type="number" step="0.5" min="1.5" class="form-control form-control-sm d-inline-block sl" style="width:54px" value="' + (st.length || 3) + '"></label>' +
-        '<label class="small text-muted mb-0">' + t('len2') + ' <input type="number" step="0.5" min="1.5" class="form-control form-control-sm d-inline-block sl2" style="width:54px" value="' + (st.length2 || st.length || 3) + '"></label>' +
-        '<select class="form-select form-select-sm sk d-inline-block" style="width:86px"><option value="straight">' + t('straight') + '</option><option value="elbow">' + t('elbow') + '</option></select>' +
-        '<select class="form-select form-select-sm sh d-inline-block" style="width:74px"><option value="right">' + t('right') + '</option><option value="left">' + t('left') + '</option></select>' +
-        '<label class="small text-muted mb-0">' + t('rot') + ' <input type="number" step="90" class="form-control form-control-sm d-inline-block sr" style="width:54px" value="' + (st.rot || 0) + '"></label>' +
+        '<label class="small text-muted mb-0 w-100">' + t('from') + ' <select class="form-select form-select-sm d-inline-block sfr" data-ahg-style="width:160px">' + roomOpts(st.from_room) + '</select></label>' +
+        '<label class="small text-muted mb-0 w-100">' + t('to') + ' <select class="form-select form-select-sm d-inline-block str" data-ahg-style="width:160px">' + roomOpts(st.to_room) + '</select></label>' +
+        '<label class="small text-muted mb-0">' + t('width') + ' <input type="number" step="0.1" min="0.6" class="form-control form-control-sm d-inline-block sw" data-ahg-style="width:58px" value="' + (st.width || 1.6) + '"></label>' +
+        '<label class="small text-muted mb-0">' + t('len') + ' <input type="number" step="0.5" min="1.5" class="form-control form-control-sm d-inline-block sl" data-ahg-style="width:54px" value="' + (st.length || 3) + '"></label>' +
+        '<label class="small text-muted mb-0">' + t('len2') + ' <input type="number" step="0.5" min="1.5" class="form-control form-control-sm d-inline-block sl2" data-ahg-style="width:54px" value="' + (st.length2 || st.length || 3) + '"></label>' +
+        '<select class="form-select form-select-sm sk d-inline-block" data-ahg-style="width:86px"><option value="straight">' + t('straight') + '</option><option value="elbow">' + t('elbow') + '</option></select>' +
+        '<select class="form-select form-select-sm sh d-inline-block" data-ahg-style="width:74px"><option value="right">' + t('right') + '</option><option value="left">' + t('left') + '</option></select>' +
+        '<label class="small text-muted mb-0">' + t('rot') + ' <input type="number" step="90" class="form-control form-control-sm d-inline-block sr" data-ahg-style="width:54px" value="' + (st.rot || 0) + '"></label>' +
         '<button class="btn btn-sm btn-outline-danger ms-auto" type="button" title="' + t('remove') + '">&times;</button>';
       row.querySelector('.sfr').addEventListener('change', function (e) {
         var nf = floorOf(+e.target.value);

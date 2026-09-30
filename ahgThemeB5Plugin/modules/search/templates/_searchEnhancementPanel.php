@@ -160,7 +160,7 @@ $savedSearches = $isAuthenticated ? $searchService->getSavedSearches($userId) : 
             <?php echo __('Notify me of new results'); ?>
           </label>
         </div>
-        <div class="mb-3" id="notify-frequency-group" style="display:none;">
+        <div class="mb-3" id="notify-frequency-group" data-ahg-style="display:none;">
           <label class="form-label"><?php echo __('Notification frequency'); ?></label>
           <select id="save-search-frequency" class="form-select">
             <option value="daily"><?php echo __('Daily'); ?></option>

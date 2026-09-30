@@ -57,7 +57,7 @@
 
           <div class="mb-3">
             <label class="form-label" for="auto_update_frequency">{{ __('Frequency') }}</label>
-            <select class="form-select" id="auto_update_frequency" name="auto_update_frequency" style="max-width: 16rem;">
+            <select class="form-select" id="auto_update_frequency" name="auto_update_frequency" data-ahg-style="max-width: 16rem;">
               <option value="daily" {{ $freq === 'daily' ? 'selected' : '' }}>{{ __('Daily (02:00)') }}</option>
               <option value="weekly" {{ $freq === 'weekly' ? 'selected' : '' }}>{{ __('Weekly (Sunday 02:00)') }}</option>
             </select>
@@ -66,7 +66,7 @@
 
           <div class="mb-3">
             <label class="form-label" for="auto_update_notify_email">{{ __('Notification email (optional)') }}</label>
-            <input type="email" class="form-control" id="auto_update_notify_email" name="auto_update_notify_email" value="{{ $email }}" placeholder="ops@example.org" style="max-width: 24rem;">
+            <input type="email" class="form-control" id="auto_update_notify_email" name="auto_update_notify_email" value="{{ $email }}" placeholder="ops@example.org" data-ahg-style="max-width: 24rem;">
             <div class="form-text">{{ __('Emailed on a successful update, a warning (skipped dirty repo), or a rollback. Requires a working mail command.') }}</div>
           </div>
         </div>

@@ -56,7 +56,7 @@ $searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api')
     </div>
     <?php endif; ?>
     
-    <div id="ric-sidebar-results" class="ric-results" style="display: none;"></div>
+    <div id="ric-sidebar-results" class="ric-results" data-ahg-style="display: none;"></div>
   </div>
   
   <div class="ric-widget-footer">

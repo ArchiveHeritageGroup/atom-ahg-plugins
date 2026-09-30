@@ -40,7 +40,7 @@
           <i class="fas fa-check-circle me-2"></i>
           <?php if (strpos($sendResult, '{') === 0): ?>
             <strong><?php echo __('Dry run preview:'); ?></strong><br>
-            <pre class="mb-0 mt-2" style="max-height:300px; overflow:auto; font-size:12px;"><?php echo $sendResult; ?></pre>
+            <pre class="mb-0 mt-2" data-ahg-style="max-height:300px; overflow:auto; font-size:12px;"><?php echo $sendResult; ?></pre>
           <?php else: ?>
             <?php echo $sendResult; ?>
           <?php endif; ?>

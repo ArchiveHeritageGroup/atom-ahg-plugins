@@ -70,7 +70,7 @@
             <label class="form-label fw-bold"><?php echo __('Genre'); ?></label>
             <input type="text" class="form-control" name="genre" id="genreInput" value="<?php echo esc_entities($iptc->genre ?? ''); ?>" placeholder="<?php echo __('e.g., Documentary, Drama, Portrait'); ?>">
           </div>
-          <div class="col-md-4 mb-3 field-video field-audio" style="display:none;">
+          <div class="col-md-4 mb-3 field-video field-audio" data-ahg-style="display:none;">
             <label class="form-label fw-bold"><?php echo __('Color Type'); ?></label>
             <select class="form-select" name="color_type">
               <option value=""><?php echo __('-- Select --'); ?></option>
@@ -128,7 +128,7 @@
     </div>
 
     <!-- Film/Video Production (Only for video types) -->
-    <div class="card mb-3 field-video" style="display:none;">
+    <div class="card mb-3 field-video" data-ahg-style="display:none;">
       <div class="card-header bg-danger text-white">
         <i class="fas fa-film"></i> <?php echo __('Production Details'); ?>
       </div>
@@ -169,7 +169,7 @@
     </div>
 
     <!-- Production Credits (Video/Audio) -->
-    <div class="card mb-3 field-video field-audio" style="display:none;">
+    <div class="card mb-3 field-video field-audio" data-ahg-style="display:none;">
       <div class="card-header bg-info text-white">
         <i class="fas fa-users"></i> <?php echo __('Production Credits'); ?>
       </div>
@@ -223,7 +223,7 @@
     </div>
 
     <!-- Audio/Video Language -->
-    <div class="card mb-3 field-video field-audio" style="display:none;">
+    <div class="card mb-3 field-video field-audio" data-ahg-style="display:none;">
       <div class="card-header bg-secondary text-white">
         <i class="fas fa-language"></i> <?php echo __('Language'); ?>
       </div>
@@ -253,7 +253,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label"><?php echo __('Running Time'); ?> <small class="text-muted">(<?php echo __('Minutes, for video/audio'); ?>)</small></label>
-          <div class="input-group" style="max-width: 200px;">
+          <div class="input-group" data-ahg-style="max-width: 200px;">
             <input type="number" class="form-control" name="duration_minutes" min="1" value="<?php echo esc_entities($iptc->duration_minutes ?? ''); ?>">
             <span class="input-group-text"><?php echo __('min'); ?></span>
           </div>
@@ -492,7 +492,7 @@
 
     <!-- Artwork/Object (for reproductions - photo only) -->
     <div class="card mb-3 field-photo field-artwork">
-      <div class="card-header" style="background-color: #6f42c1; color: white;">
+      <div class="card-header" data-ahg-style="background-color: #6f42c1; color: white;">
         <i class="fas fa-palette"></i> <?php echo __('Artwork / Object in Image'); ?> <small>(<?php echo __('for reproductions'); ?>)</small>
       </div>
       <div class="card-body">
@@ -525,7 +525,7 @@
 
     <!-- Alternative Versions -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #17a2b8; color: white;">
+      <div class="card-header" data-ahg-style="background-color: #17a2b8; color: white;">
         <i class="fas fa-language"></i> <?php echo __('Alternative Versions'); ?>
       </div>
       <div class="card-body">
@@ -559,7 +559,7 @@
               <input type="text" class="form-control form-control-sm" name="version_notes[]" value="<?php echo esc_entities($v->notes); ?>" placeholder="<?php echo __('Notes'); ?>">
             </div>
             <div class="col-md-1">
-              <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.version-row').remove()"><i class="fas fa-times"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-remove-closest=".version-row"><i class="fas fa-times"></i></button>
             </div>
           </div>
           <?php endforeach; ?>
@@ -572,7 +572,7 @@
 
     <!-- Format Holdings -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #6c757d; color: white;">
+      <div class="card-header" data-ahg-style="background-color: #6c757d; color: white;">
         <i class="fas fa-film"></i> <?php echo __('Format Holdings & Access'); ?>
       </div>
       <div class="card-body">
@@ -618,7 +618,7 @@
               <input type="text" class="form-control form-control-sm" name="holding_notes[]" value="<?php echo esc_entities($h->notes); ?>" placeholder="<?php echo __('Notes'); ?>">
             </div>
             <div class="col-md-1">
-              <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.holding-row').remove()"><i class="fas fa-times"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-remove-closest=".holding-row"><i class="fas fa-times"></i></button>
             </div>
           </div>
           <?php endforeach; ?>
@@ -631,7 +631,7 @@
 
     <!-- External Links (ESAT, IMDb, etc.) -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #28a745; color: white;">
+      <div class="card-header" data-ahg-style="background-color: #28a745; color: white;">
         <i class="fas fa-external-link-alt"></i> <?php echo __('External References'); ?>
       </div>
       <div class="card-body">
@@ -669,7 +669,7 @@
               <input type="text" class="form-control form-control-sm" name="link_role[]" value="<?php echo esc_entities($l->person_role); ?>" placeholder="<?php echo __('Role'); ?>">
             </div>
             <div class="col-md-1">
-              <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.link-row').remove()"><i class="fas fa-times"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-remove-closest=".link-row"><i class="fas fa-times"></i></button>
             </div>
           </div>
           <?php endforeach; ?>
@@ -788,7 +788,7 @@
           <i class="fas fa-list me-1"></i><?php echo __('Full embedded metadata'); ?>
           <span class="badge bg-secondary ms-1"><?php echo (int) $fullEmbeddedCount ?> <?php echo __('tags'); ?></span>
         </strong>
-        <input type="search" id="ahgFullMetaFilter" class="form-control form-control-sm" style="max-width: 16rem;"
+        <input type="search" id="ahgFullMetaFilter" class="form-control form-control-sm" data-ahg-style="max-width: 16rem;"
                placeholder="<?php echo __('Filter tags…'); ?>" autocomplete="off">
       </div>
       <?php if (!empty($fullEmbeddedGated)): ?>
@@ -807,7 +807,7 @@
               <tbody>
                 <?php foreach ((array) $tags as $tag => $value): ?>
                   <tr class="ahg-meta-row">
-                    <td style="width: 32%;"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
+                    <td data-ahg-style="width: 32%;"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
                     <td class="small"><?php
                       if (is_array($value)) {
                           echo htmlspecialchars(json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
@@ -1007,7 +1007,7 @@
           <input type="text" class="form-control form-control-sm" name="version_notes[]" placeholder="<?php echo __('Notes'); ?>">
         </div>
         <div class="col-md-1">
-          <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.version-row').remove()"><i class="fas fa-times"></i></button>
+          <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-remove-closest=".version-row"><i class="fas fa-times"></i></button>
         </div>
       `;
       container.appendChild(row);
@@ -1054,7 +1054,7 @@
           <input type="text" class="form-control form-control-sm" name="holding_notes[]" placeholder="<?php echo __('Notes'); ?>">
         </div>
         <div class="col-md-1">
-          <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.holding-row').remove()"><i class="fas fa-times"></i></button>
+          <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-remove-closest=".holding-row"><i class="fas fa-times"></i></button>
         </div>
       `;
       container.appendChild(row);
@@ -1093,7 +1093,7 @@
           <input type="text" class="form-control form-control-sm" name="link_role[]" placeholder="<?php echo __('Role'); ?>">
         </div>
         <div class="col-md-1">
-          <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.link-row').remove()"><i class="fas fa-times"></i></button>
+          <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-remove-closest=".link-row"><i class="fas fa-times"></i></button>
         </div>
       `;
       container.appendChild(row);

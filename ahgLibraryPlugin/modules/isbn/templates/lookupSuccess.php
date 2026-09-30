@@ -105,7 +105,7 @@
     for (var i = 0; i < rows.length; i++) {
       var val = rows[i][1];
       if (!val) continue;
-      html += '<tr><th style="width:30%" class="text-end text-muted">' + rows[i][0] + ':</th>';
+      html += '<tr><th data-ahg-style="width:30%" class="text-end text-muted">' + rows[i][0] + ':</th>';
       html += '<td>' + val + '</td></tr>';
     }
     html += '</table>';

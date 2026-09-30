@@ -19,11 +19,11 @@
 
         <!-- Horizontal Scroll Container -->
         <div class="heritage-recent-scroll position-relative">
-            <div class="d-flex gap-3 overflow-auto pb-3" style="scroll-snap-type: x mandatory;">
+            <div class="d-flex gap-3 overflow-auto pb-3" data-ahg-style="scroll-snap-type: x mandatory;">
                 <?php foreach ($items as $item): ?>
                 <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $item['slug']]); ?>"
                    class="heritage-recent-item flex-shrink-0 text-decoration-none"
-                   style="width: 180px; scroll-snap-align: start;">
+                   data-ahg-style="width: 180px; scroll-snap-align: start;">
 
                     <!-- Thumbnail -->
                     <?php
@@ -45,13 +45,13 @@
                         default => 'primary'
                     };
                     ?>
-                    <div class="heritage-recent-thumb rounded overflow-hidden mb-2" style="height: 180px;">
+                    <div class="heritage-recent-thumb rounded overflow-hidden mb-2" data-ahg-style="height: 180px;">
                         <?php if (!empty($item['thumbnail'])): ?>
                         <img src="<?php echo esc_specialchars($item['thumbnail']); ?>"
                              alt="<?php echo esc_specialchars($item['title']); ?>"
                              class="w-100 h-100 object-fit-cover"
                              loading="lazy"
-                             onerror="this.parentElement.innerHTML='<div class=\'w-100 h-100 bg-<?php echo $bgColor; ?> bg-opacity-25 d-flex align-items-center justify-content-center\'><i class=\'bi <?php echo $iconClass; ?> display-4 text-<?php echo $bgColor; ?>\'></i></div>';">
+                             data-ahg-onerror="parent-html" data-ahg-fallback="<div class='w-100 h-100 bg-<?php echo $bgColor; ?> bg-opacity-25 d-flex align-items-center justify-content-center'><i class='bi <?php echo $iconClass; ?> display-4 text-<?php echo $bgColor; ?>'></i></div>">
                         <?php else: ?>
                         <div class="w-100 h-100 bg-<?php echo $bgColor; ?> bg-opacity-25 d-flex align-items-center justify-content-center">
                             <i class="fas <?php echo $iconClass; ?> display-4 text-<?php echo $bgColor; ?>"></i>
@@ -69,11 +69,11 @@
 
             <!-- Scroll Indicators (optional, can be enhanced with JS) -->
             <button class="heritage-scroll-btn heritage-scroll-prev btn btn-light rounded-circle position-absolute start-0 top-50 translate-middle-y shadow d-none d-md-flex"
-                    aria-label="Previous" style="z-index: 5;">
+                    aria-label="Previous" data-ahg-style="z-index: 5;">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <button class="heritage-scroll-btn heritage-scroll-next btn btn-light rounded-circle position-absolute end-0 top-50 translate-middle-y shadow d-none d-md-flex"
-                    aria-label="Next" style="z-index: 5;">
+                    aria-label="Next" data-ahg-style="z-index: 5;">
                 <i class="fas fa-chevron-right"></i>
             </button>
         </div>

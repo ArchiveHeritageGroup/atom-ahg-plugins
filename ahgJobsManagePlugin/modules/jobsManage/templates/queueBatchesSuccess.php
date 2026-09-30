@@ -36,7 +36,7 @@
       <table class="table table-bordered table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 60px;"><?php echo __('ID'); ?></th>
+            <th data-ahg-style="width: 60px;"><?php echo __('ID'); ?></th>
             <th><?php echo __('Name'); ?></th>
             <th><?php echo __('Queue'); ?></th>
             <th><?php echo __('Status'); ?></th>
@@ -44,7 +44,7 @@
             <th><?php echo __('Jobs'); ?></th>
             <th><?php echo __('User'); ?></th>
             <th><?php echo __('Created'); ?></th>
-            <th style="width: 100px;"><?php echo __('Actions'); ?></th>
+            <th data-ahg-style="width: 100px;"><?php echo __('Actions'); ?></th>
           </tr>
         </thead>
         <tbody>
@@ -60,10 +60,10 @@
                 </span>
               </td>
               <td>
-                <div class="progress" style="height: 18px; min-width: 120px;">
+                <div class="progress" data-ahg-style="height: 18px; min-width: 120px;">
                   <?php $pct = (float) $batch->progress_percent; ?>
                   <div class="progress-bar <?php echo ($batch->status === 'failed') ? 'bg-danger' : ''; ?>"
-                       role="progressbar" style="width: <?php echo $pct; ?>%">
+                       role="progressbar" data-ahg-style="width: <?php echo $pct; ?>%">
                     <?php echo round($pct); ?>%
                   </div>
                 </div>

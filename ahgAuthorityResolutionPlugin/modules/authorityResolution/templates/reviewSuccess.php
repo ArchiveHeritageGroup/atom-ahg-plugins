@@ -128,7 +128,7 @@
         <?php if (!$context_row): ?>
           <p class="text-muted small mb-0"><?php echo __('No context packet computed for this mention.'); ?></p>
         <?php else: ?>
-          <div class="bg-light p-2 rounded small" style="font-family: monospace; line-height: 1.5;">
+          <div class="bg-light p-2 rounded small" data-ahg-style="font-family: monospace; line-height: 1.5;">
             <span class="text-muted">...<?php echo htmlspecialchars($textBefore); ?></span><mark class="bg-warning"><strong><?php echo htmlspecialchars((string) $mention->entity_value); ?></strong></mark><span class="text-muted"><?php echo htmlspecialchars($textAfter); ?>...</span>
           </div>
           <div class="row mt-2 small text-muted">
@@ -255,7 +255,7 @@
 
   <!-- ================ RIGHT: ACTIONS ================ -->
   <div class="col-lg-3">
-    <div class="card mb-3 sticky-top" style="top: 70px;">
+    <div class="card mb-3 sticky-top" data-ahg-style="top: 70px;">
       <div class="card-header"><strong><i class="fas fa-gavel me-1"></i><?php echo __('Decisions'); ?></strong></div>
       <div class="card-body d-grid gap-2">
 
@@ -398,7 +398,7 @@
               );
           }
         ?>
-        <div class="border rounded p-3 bg-light" style="white-space: pre-wrap; line-height: 1.6;"><?php echo $fullText; ?></div>
+        <div class="border rounded p-3 bg-light" data-ahg-style="white-space: pre-wrap; line-height: 1.6;"><?php echo $fullText; ?></div>
       </div>
       <div class="modal-footer">
         <?php if ($mention->io_slug): ?>
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (haveParas) {
           // [0,pStart) + <para>[pStart,oStart) + <mark>[oStart,oEnd)</mark> + [oEnd,pEnd)</para> + [pEnd,end)
           html = esc(text.slice(0, pStart))
-               + '<span style="background-color: rgba(255,193,7,0.18);">'
+               + '<span data-ahg-style="background-color: rgba(255,193,7,0.18);">'
                + esc(text.slice(pStart, oStart))
                + '<mark class="bg-warning">' + esc(text.slice(oStart, oEnd)) + '</mark>'
                + esc(text.slice(oEnd, pEnd))

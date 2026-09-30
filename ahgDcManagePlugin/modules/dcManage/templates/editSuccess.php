@@ -301,7 +301,7 @@
                       <th><?php echo __('Identifier'); ?></th>
                       <th><?php echo __('Level'); ?></th>
                       <th><?php echo __('Title'); ?></th>
-                      <th style="width:80px"></th>
+                      <th data-ahg-style="width:80px"></th>
                     </tr>
                   </thead>
                   <tbody></tbody>

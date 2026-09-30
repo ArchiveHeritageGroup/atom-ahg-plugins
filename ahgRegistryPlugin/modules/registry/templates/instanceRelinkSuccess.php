@@ -52,7 +52,7 @@
           <div class="mb-3">
             <input type="text" class="form-control mb-3" id="inst-filter" placeholder="<?php echo __('Filter institutions...'); ?>">
           </div>
-          <div class="list-group" id="inst-list" style="max-height: 400px; overflow-y: auto;">
+          <div class="list-group" id="inst-list" data-ahg-style="max-height: 400px; overflow-y: auto;">
             <?php foreach ($institutions as $inst): ?>
             <label class="list-group-item list-group-item-action d-flex align-items-center inst-item">
               <input type="radio" name="institution_id" value="<?php echo (int) $inst->id; ?>" class="form-check-input me-3" required>

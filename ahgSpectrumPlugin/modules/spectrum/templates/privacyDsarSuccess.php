@@ -45,8 +45,8 @@
                             <span class="badge bg-<?php echo $statusClass; ?>"><?php echo ucfirst($r->status ?? 'pending'); ?></span>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-outline-success" onclick="updateDsarStatus(<?php echo $r->id; ?>, 'completed')" title="Mark Complete"><i class="fas fa-check"></i></button>
-                            <button class="btn btn-sm btn-outline-info" onclick="updateDsarStatus(<?php echo $r->id; ?>, 'in_progress')" title="In Progress"><i class="fas fa-spinner"></i></button>
+                            <button class="btn btn-sm btn-outline-success" data-ahg-call="updateDsarStatus" data-ahg-types="x,s" data-ahg-a0="<?php echo $r->id; ?>" data-ahg-a1="completed" title="Mark Complete"><i class="fas fa-check"></i></button>
+                            <button class="btn btn-sm btn-outline-info" data-ahg-call="updateDsarStatus" data-ahg-types="x,s" data-ahg-a0="<?php echo $r->id; ?>" data-ahg-a1="in_progress" title="In Progress"><i class="fas fa-spinner"></i></button>
                         </td>
                     </tr>
                 <?php endforeach; ?>

@@ -107,8 +107,8 @@
                   <thead>
                     <tr>
                       <th><?php echo __('Level'); ?></th>
-                      <th style="width: 100px;"><?php echo __('Order'); ?></th>
-                      <th style="width: 80px;"><?php echo __('Actions'); ?></th>
+                      <th data-ahg-style="width: 100px;"><?php echo __('Order'); ?></th>
+                      <th data-ahg-style="width: 80px;"><?php echo __('Actions'); ?></th>
                     </tr>
                   </thead>
                   <tbody>

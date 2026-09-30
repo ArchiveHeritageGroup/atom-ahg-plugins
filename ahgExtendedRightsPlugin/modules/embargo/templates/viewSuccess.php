@@ -136,7 +136,7 @@
                 <?php endif; ?>
               </td>
               <td>
-                <form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'removeException', 'id' => $exception['id'], 'embargo_id' => $embargo['id']]); ?>" style="display:inline;">
+                <form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'removeException', 'id' => $exception['id'], 'embargo_id' => $embargo['id']]); ?>" data-ahg-style="display:inline;">
                   <button type="submit" class="btn btn-sm btn-outline-danger" data-ahg-confirm="<?php echo __('Are you sure?'); ?>">
                     <i class="fas fa-trash"></i>
                   </button>
@@ -235,7 +235,7 @@
             <input type="number" name="exception_id" id="exception_id" class="form-control">
           </div>
           
-          <div id="ip_range_fields" style="display:none;">
+          <div id="ip_range_fields" data-ahg-style="display:none;">
             <div class="mb-3">
               <label for="ip_range_start" class="form-label"><?php echo __('IP Range Start'); ?></label>
               <input type="text" name="ip_range_start" id="ip_range_start" class="form-control" placeholder="192.168.1.1">

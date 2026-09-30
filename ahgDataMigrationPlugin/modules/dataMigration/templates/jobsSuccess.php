@@ -79,13 +79,13 @@
                       };
                     ?>"><?php echo ucfirst($job->status) ?></span>
                   </td>
-                  <td style="min-width: 120px;">
+                  <td data-ahg-style="min-width: 120px;">
                     <?php 
                       $percent = $job->total_records > 0 ? round(($job->processed_records / $job->total_records) * 100) : 0;
                     ?>
-                    <div class="progress" style="height: 20px;">
+                    <div class="progress" data-ahg-style="height: 20px;">
                       <div class="progress-bar <?php echo $job->status === 'running' ? 'progress-bar-striped progress-bar-animated' : '' ?>" 
-                           style="width: <?php echo $percent ?>%">
+                           data-ahg-style="width: <?php echo $percent ?>%">
                         <?php echo $percent ?>%
                       </div>
                     </div>
@@ -107,7 +107,7 @@
                     </a>
                     <?php if (in_array($job->status, ['pending', 'running'])): ?>
                     <button type="button" class="btn btn-sm btn-outline-danger" 
-                            onclick="cancelJob(<?php echo $job->id ?>)" title="Cancel">
+                            data-ahg-call="cancelJob" data-ahg-types="x" data-ahg-a0="<?php echo $job->id ?>" title="Cancel">
                       <i class="bi bi-x"></i>
                     </button>
                     <?php endif ?>
@@ -119,7 +119,7 @@
           </div>
           <?php else: ?>
           <div class="text-center py-5">
-            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <i class="bi bi-inbox" data-ahg-style="font-size: 3rem; color: #ccc;"></i>
             <p class="text-muted mt-2">No migration jobs yet</p>
             <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']) ?>" class="btn btn-primary">
               <i class="bi bi-plus-circle me-1"></i> Start New Import

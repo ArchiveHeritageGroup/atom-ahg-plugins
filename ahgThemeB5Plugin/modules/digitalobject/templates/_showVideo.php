@@ -33,14 +33,14 @@
       ]); ?>
     <?php } else { ?>
       <?php // Native HTML5 player (no ahgIiifPlugin) ?>
-      <video controls class="w-100" style="max-height:500px;" preload="metadata">
+      <video controls class="w-100" data-ahg-style="max-height:500px;" preload="metadata">
         <source src="<?php echo public_path($representation->getFullPath()); ?>" type="<?php echo htmlspecialchars($resource->mimeType); ?>">
         Your browser does not support video playback.
       </video>
     <?php } ?>
 
   <?php } else { ?>
-    <div style="text-align: center">
+    <div data-ahg-style="text-align: center">
       <?php echo image_tag($representation->getFullPath(), ['style' => 'border: #999 1px solid', 'alt' => '']); ?>
     </div>
   <?php } ?>

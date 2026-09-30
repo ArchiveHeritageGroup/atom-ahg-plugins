@@ -47,7 +47,7 @@
       <?php foreach ($recentDiscussions as $disc): ?>
       <div class="list-group-item px-0">
         <div class="d-flex align-items-start">
-          <div class="me-3 text-center" style="min-width: 50px;">
+          <div class="me-3 text-center" data-ahg-style="min-width: 50px;">
             <div class="fw-bold text-primary"><?php echo (int) $disc->reply_count; ?></div>
             <small class="text-muted"><?php echo __('replies'); ?></small>
           </div>
@@ -94,7 +94,7 @@
         <div class="col">
           <div class="card h-100">
             <?php if (!empty($post->featured_image_path)): ?>
-            <img src="<?php echo htmlspecialchars($post->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" style="height: 120px; object-fit: cover;">
+            <img src="<?php echo htmlspecialchars($post->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" data-ahg-style="height: 120px; object-fit: cover;">
             <?php endif; ?>
             <div class="card-body py-2">
               <h6 class="card-title mb-1">

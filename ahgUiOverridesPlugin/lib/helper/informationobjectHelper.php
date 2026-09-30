@@ -140,7 +140,7 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
                 return '<audio controls class="w-100"><source src="' . htmlspecialchars($url) . '" type="' . htmlspecialchars($mimeType) . '">Your browser does not support audio.</audio>';
             }
 
-            return '<video controls class="w-100" style="max-height:500px;"><source src="' . htmlspecialchars($url) . '" type="' . htmlspecialchars($mimeType) . '">Your browser does not support video.</video>';
+            return '<video controls class="w-100" data-ahg-style="max-height:500px;"><source src="' . htmlspecialchars($url) . '" type="' . htmlspecialchars($mimeType) . '">Your browser does not support video.</video>';
         }
     }
 
@@ -150,7 +150,7 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
         if (in_array($imgExt, ['webp', 'bmp', 'gif'])) {
             $imgUrl = ($digitalObject->path ?? '') . ($digitalObject->name ?? '');
             $html = '<div class="text-center">';
-            $html .= '<img src="' . htmlspecialchars($imgUrl) . '" alt="" class="img-fluid" style="max-height:600px;">';
+            $html .= '<img src="' . htmlspecialchars($imgUrl) . '" alt="" class="img-fluid" data-ahg-style="max-height:600px;">';
             $html .= '</div>';
 
             return $html;
@@ -169,7 +169,7 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
             // Try reference image first, fall back to master
             $refPath = '/uploads/r/' . $digitalObject->path . $digitalObject->name;
             $html = '<div class="text-center">';
-            $html .= '<img src="' . htmlspecialchars($refPath) . '" alt="" class="img-fluid" style="max-height:600px;">';
+            $html .= '<img src="' . htmlspecialchars($refPath) . '" alt="" class="img-fluid" data-ahg-style="max-height:600px;">';
             $html .= '</div>';
 
             return $html;
@@ -326,8 +326,8 @@ function _render_svg_viewer(int $doId, $digitalObject): string
     $html .= '<span><i class="fas fa-bezier-curve me-2"></i>SVG Vector Image</span>';
     $html .= '<a href="' . htmlspecialchars($url) . '" download class="btn btn-sm btn-outline-secondary">';
     $html .= '<i class="fas fa-download me-1"></i>Download</a></div>';
-    $html .= '<div class="card-body text-center p-2" style="background:#f8f9fa;">';
-    $html .= '<img src="' . htmlspecialchars($url) . '" alt="SVG" class="img-fluid" style="max-height:600px;">';
+    $html .= '<div class="card-body text-center p-2" data-ahg-style="background:#f8f9fa;">';
+    $html .= '<img src="' . htmlspecialchars($url) . '" alt="SVG" class="img-fluid" data-ahg-style="max-height:600px;">';
     $html .= '</div></div>';
 
     return $html;
@@ -355,7 +355,7 @@ function _render_document_viewer(int $doId, $digitalObject, string $ext): string
     $html .= '<a href="' . htmlspecialchars($downloadUrl) . '" download class="btn btn-sm btn-outline-secondary">';
     $html .= '<i class="fas fa-download me-1"></i>Download Original</a></div>';
     $html .= '<div class="card-body p-0">';
-    $html .= '<iframe src="/media/convert/' . $doId . '" style="width:100%;height:600px;border:none;"';
+    $html .= '<iframe src="/media/convert/' . $doId . '" data-ahg-style="width:100%;height:600px;border:none;"';
     $html .= ' title="' . htmlspecialchars($label) . '"></iframe>';
     $html .= '</div></div>';
 
@@ -381,7 +381,7 @@ function _render_text_viewer(int $doId, $digitalObject, string $ext): string
     $html .= '<a href="' . htmlspecialchars($downloadUrl) . '" download class="btn btn-sm btn-outline-secondary">';
     $html .= '<i class="fas fa-download me-1"></i>Download</a></div>';
     $html .= '<div class="card-body p-0">';
-    $html .= '<pre id="text-content-' . $doId . '" class="p-3 m-0" style="max-height:500px;overflow:auto;background:#f8f9fa;font-size:0.85rem;white-space:pre-wrap;word-wrap:break-word;">';
+    $html .= '<pre id="text-content-' . $doId . '" class="p-3 m-0" data-ahg-style="max-height:500px;overflow:auto;background:#f8f9fa;font-size:0.85rem;white-space:pre-wrap;word-wrap:break-word;">';
     $html .= '<i class="fas fa-spinner fa-spin"></i> Loading...</pre>';
     $html .= '</div></div>';
 
@@ -434,7 +434,7 @@ function _render_archive_viewer(int $doId, $digitalObject, string $ext): string
     $html .= 'if(d.count>200)h+=\'<tr><td colspan="2" class="text-muted">... and \'+(d.count-200)+\' more files</td></tr>\';';
     $html .= 'h+=\'</tbody></table></div>\';c.innerHTML=h;';
     // RAR/other text listing
-    $html .= '}else if(d.listing){c.innerHTML=\'<pre class="p-2 m-0" style="max-height:400px;overflow:auto;font-size:0.8rem;">\'+d.listing+\'</pre>\';';
+    $html .= '}else if(d.listing){c.innerHTML=\'<pre class="p-2 m-0" data-ahg-style="max-height:400px;overflow:auto;font-size:0.8rem;">\'+d.listing+\'</pre>\';';
     $html .= '}else{c.innerHTML=\'<div class="text-muted">No file listing available</div>\';}';
     $html .= '}).catch(function(){document.getElementById("archive-content-' . $doId . '").innerHTML=\'<div class="text-muted">Failed to read archive</div>\';});';
     $html .= '</script>';
@@ -485,7 +485,7 @@ function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
     $html .= '<span class="badge bg-primary"><i class="fas fa-cube me-1"></i>' . htmlspecialchars($digitalObject->name ?? '') . ' (3D)</span>';
     $html .= '</div>';
 
-    $html .= '<div id="' . $viewerId . '-container" style="width:100%;height:400px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border-radius:8px;position:relative;">';
+    $html .= '<div id="' . $viewerId . '-container" data-ahg-style="width:100%;height:400px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border-radius:8px;position:relative;">';
 
     if (in_array($ext, ['glb', 'gltf'])) {
         // Google model-viewer for GLB/GLTF
@@ -493,7 +493,7 @@ function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
         $html .= '<model-viewer id="' . $viewerId . '"';
         $html .= ' src="' . htmlspecialchars($fullPath) . '"';
         $html .= ' camera-controls touch-action="pan-y" auto-rotate shadow-intensity="1" exposure="1"';
-        $html .= ' style="width:100%;height:100%;background:transparent;border-radius:8px;">';
+        $html .= ' data-ahg-style="width:100%;height:100%;background:transparent;border-radius:8px;">';
         $html .= '<div slot="poster" class="d-flex flex-column align-items-center justify-content-center h-100 text-white">';
         $html .= '<div class="spinner-border text-primary mb-3" role="status"></div>';
         $html .= '<span>Loading 3D model...</span>';
@@ -501,7 +501,7 @@ function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
         $html .= '</model-viewer>';
     } elseif (in_array($ext, ['obj', 'stl'])) {
         // Three.js for OBJ/STL
-        $html .= '<div id="' . $viewerId . '-threejs" style="width:100%;height:100%;border-radius:8px;"></div>';
+        $html .= '<div id="' . $viewerId . '-threejs" data-ahg-style="width:100%;height:100%;border-radius:8px;"></div>';
         $html .= '<script src="/plugins/ahgIiifPlugin/web/js/vendor/three.min.js"></script>';
         $html .= '<script src="/plugins/ahgIiifPlugin/web/js/vendor/OBJLoader.js"></script>';
         $html .= '<script src="/plugins/ahgIiifPlugin/web/js/vendor/STLLoader.js"></script>';
@@ -534,7 +534,7 @@ function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
 
     // Fullscreen button (uses open3DFullscreen from _3dFullscreenModal.php)
     if (in_array($ext, ['glb', 'gltf', 'obj', 'stl'])) {
-        $html .= '<button onclick="if(typeof open3DFullscreen===\'function\')open3DFullscreen(\'' . htmlspecialchars($fullPath, ENT_QUOTES) . '\',\'' . $ext . '\')" class="btn btn-sm btn-primary position-absolute" style="bottom:10px;right:10px;z-index:10;">';
+        $html .= '<button data-ahg-call="open3DFullscreen" data-ahg-types="s,s" data-ahg-a0="' . htmlspecialchars($fullPath, ENT_QUOTES) . '" data-ahg-a1="' . htmlspecialchars($ext, ENT_QUOTES) . '" class=""btn btn-sm btn-primary position-absolute" data-ahg-style="bottom:10px;right:10px;z-index:10;">';
         $html .= '<i class="fas fa-expand me-1"></i>Fullscreen</button>';
     }
 

@@ -34,7 +34,7 @@ $pageUrl = function ($p) use ($search) {
   <?php endif ?>
 
   <form method="get" action="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'browse']) ?>" class="mb-3" role="search">
-    <div class="input-group input-group-sm" style="max-width: 32rem;">
+    <div class="input-group input-group-sm" data-ahg-style="max-width: 32rem;">
       <input type="search" name="subquery" class="form-control" placeholder="<?php echo __('Search by name or building...') ?>" value="<?php echo esc_entities($search) ?>">
       <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search"></i></button>
       <?php if ($search !== ''): ?>
@@ -77,8 +77,8 @@ $pageUrl = function ($p) use ($search) {
                 <?php if ($row->capacity_value !== null && (float) $row->capacity_value > 0): ?>
                   <?php $pct = min(100, ((float) $row->used_units_today / (float) $row->capacity_value) * 100); ?>
                   <div class="d-flex align-items-center gap-2">
-                    <div class="progress flex-grow-1" style="height: 8px; min-width: 6rem;">
-                      <div class="progress-bar <?php echo $pct >= 90 ? 'bg-danger' : ($pct >= 70 ? 'bg-warning' : 'bg-success') ?>" style="width: <?php echo $pct ?>%"></div>
+                    <div class="progress flex-grow-1" data-ahg-style="height: 8px; min-width: 6rem;">
+                      <div class="progress-bar <?php echo $pct >= 90 ? 'bg-danger' : ($pct >= 70 ? 'bg-warning' : 'bg-success') ?>" data-ahg-style="width: <?php echo $pct ?>%"></div>
                     </div>
                     <small class="text-muted"><?php echo (float) $row->used_units_today ?> / <?php echo (float) $row->capacity_value ?></small>
                   </div>

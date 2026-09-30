@@ -97,8 +97,8 @@
                                         <span class="badge bg-<?php echo $color; ?>"><?php echo $syn->relationship_type; ?></span>
                                     </td>
                                     <td>
-                                        <div class="progress" style="width: 60px; height: 6px;">
-                                            <div class="progress-bar" style="width: <?php echo ($syn->weight * 100); ?>%"></div>
+                                        <div class="progress" data-ahg-style="width: 60px; height: 6px;">
+                                            <div class="progress-bar" data-ahg-style="width: <?php echo ($syn->weight * 100); ?>%"></div>
                                         </div>
                                         <small class="text-muted"><?php echo number_format($syn->weight, 2); ?></small>
                                     </td>

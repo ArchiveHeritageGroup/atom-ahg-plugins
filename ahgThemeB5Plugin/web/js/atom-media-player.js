@@ -139,7 +139,7 @@
                     <div class="atom-player__status"></div>
                 </div>
                 
-                <div class="atom-player__modal" id="snippet-modal-${id}" style="display:none;">
+                <div class="atom-player__modal" id="snippet-modal-${id}" data-ahg-style="display:none;">
                     <div class="atom-player__modal-content">
                         <div class="atom-player__modal-header">
                             <h5><i class="fas fa-cut"></i> Save Snippet</h5>

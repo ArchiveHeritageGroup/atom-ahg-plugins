@@ -219,15 +219,15 @@
         <div class="card-body">
           <?php if (!empty($f->logo_path)): ?>
             <div class="mb-2">
-              <img src="<?php echo htmlspecialchars($f->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded border" style="max-height: 60px;">
+              <img src="<?php echo htmlspecialchars($f->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded border" data-ahg-style="max-height: 60px;">
             </div>
           <?php endif; ?>
-          <div class="border rounded p-3 text-center position-relative" id="sf-logo-drop" style="min-height: 80px; cursor: pointer;">
+          <div class="border rounded p-3 text-center position-relative" id="sf-logo-drop" data-ahg-style="min-height: 80px; cursor: pointer;">
             <div id="sf-logo-preview">
               <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-1"></i>
               <p class="mb-0 small"><?php echo __('Drag and drop, or click to upload.'); ?> <span class="text-muted"><?php echo __('PNG, JPG, SVG'); ?></span></p>
             </div>
-            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="sf-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" style="cursor: pointer;">
+            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="sf-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" data-ahg-style="cursor: pointer;">
           </div>
         </div>
       </div>
@@ -272,7 +272,7 @@
 <script <?php echo $na; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var inp = document.getElementById('sf-logo'), prev = document.getElementById('sf-logo-preview'), drop = document.getElementById('sf-logo-drop');
-  if (inp) { inp.addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { var r = new FileReader(); r.onload = function(ev) { prev.innerHTML = '<img src="'+ev.target.result+'" alt="Preview" style="max-height:60px;" class="mb-1"><br><small class="text-muted">'+e.target.files[0].name+'</small>'; }; r.readAsDataURL(e.target.files[0]); } }); }
+  if (inp) { inp.addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { var r = new FileReader(); r.onload = function(ev) { prev.innerHTML = '<img src="'+ev.target.result+'" alt="Preview" data-ahg-style="max-height:60px;" class="mb-1"><br><small class="text-muted">'+e.target.files[0].name+'</small>'; }; r.readAsDataURL(e.target.files[0]); } }); }
   if (drop) { ['dragenter','dragover'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('border-primary');});}); ['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('border-primary');});}); drop.addEventListener('drop',function(e){if(e.dataTransfer.files.length){inp.files=e.dataTransfer.files;inp.dispatchEvent(new Event('change'));}}); }
 });
 </script>

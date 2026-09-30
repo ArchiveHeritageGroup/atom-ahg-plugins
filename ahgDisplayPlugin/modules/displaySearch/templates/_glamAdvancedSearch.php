@@ -269,14 +269,14 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
                   }
                   foreach ($activeFieldSearches as $idx => $fs): ?>
                   <div class="input-group mb-2 field-search-row">
-                    <select class="form-select field-select" style="max-width: 200px;" onchange="this.nextElementSibling.name = this.value">
+                    <select class="form-select field-select" data-ahg-style="max-width: 200px;" data-ahg-name-next="1">
                       <?php foreach ($fieldSearchOptions as $key => $label): ?>
                         <option value="<?php echo $key; ?>" <?php echo $fs['field'] === $key ? 'selected' : ''; ?>><?php echo $label; ?></option>
                       <?php endforeach; ?>
                     </select>
                     <input type="text" name="<?php echo $fs['field']; ?>" class="form-control" value="<?php echo htmlspecialchars($fs['value']); ?>" placeholder="<?php echo __('Enter search term...'); ?>">
                     <?php if ($idx > 0): ?>
-                    <button type="button" class="btn btn-outline-danger" onclick="this.closest('.field-search-row').remove()"><i class="fas fa-times"></i></button>
+                    <button type="button" class="btn btn-outline-danger" data-ahg-remove-closest=".field-search-row"><i class="fas fa-times"></i></button>
                     <?php endif; ?>
                   </div>
                   <?php endforeach; ?>

@@ -26,12 +26,12 @@
     <table class="table table-striped table-hover mb-0">
       <thead>
         <tr>
-          <th style="width:50px"><?php echo __('Priority'); ?></th>
+          <th data-ahg-style="width:50px"><?php echo __('Priority'); ?></th>
           <th><?php echo __('Provider'); ?></th>
           <th><?php echo __('API Endpoint'); ?></th>
-          <th style="width:100px"><?php echo __('Rate Limit'); ?></th>
-          <th style="width:100px"><?php echo __('Status'); ?></th>
-          <th style="width:120px"><?php echo __('Actions'); ?></th>
+          <th data-ahg-style="width:100px"><?php echo __('Rate Limit'); ?></th>
+          <th data-ahg-style="width:100px"><?php echo __('Status'); ?></th>
+          <th data-ahg-style="width:120px"><?php echo __('Actions'); ?></th>
         </tr>
       </thead>
       <tbody>

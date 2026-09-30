@@ -43,7 +43,7 @@ $galleryId = 'mkt-gallery-' . mt_rand(1000, 9999);
              role="button">
           <img src="<?php echo esc_entities($thumb->file_path); ?>"
                alt="<?php echo esc_entities($thumb->caption ?? __('Image %1%', ['%1%' => $idx + 1])); ?>"
-               class="w-100 h-100" style="object-fit: cover;">
+               class="w-100 h-100" data-ahg-style="object-fit: cover;">
         </div>
       <?php endforeach; ?>
     </div>
@@ -59,7 +59,7 @@ $galleryId = 'mkt-gallery-' . mt_rand(1000, 9999);
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="<?php echo __('Close'); ?>"></button>
         </div>
         <div class="modal-body text-center p-2">
-          <img src="<?php echo esc_entities($primaryImage->file_path); ?>" alt="" class="img-fluid" id="<?php echo $galleryId; ?>-lightbox-img" style="max-height: 80vh;">
+          <img src="<?php echo esc_entities($primaryImage->file_path); ?>" alt="" class="img-fluid" id="<?php echo $galleryId; ?>-lightbox-img" data-ahg-style="max-height: 80vh;">
         </div>
       </div>
     </div>

@@ -93,7 +93,7 @@
               </tr>
               <!-- Expandable criteria detail -->
               <?php if ($criteriaCount > 0): ?>
-              <tr class="criteria-row" id="criteria_<?php echo htmlspecialchars($t->id); ?>" style="display:none;">
+              <tr class="criteria-row" id="criteria_<?php echo htmlspecialchars($t->id); ?>" data-ahg-style="display:none;">
                 <td colspan="5" class="bg-light">
                   <div class="px-3 py-2">
                     <strong class="small text-uppercase text-muted"><?php echo __('Criteria:'); ?></strong>
@@ -101,7 +101,7 @@
                       <thead>
                         <tr class="text-muted small">
                           <th><?php echo __('Criterion'); ?></th>
-                          <th style="width:80px;"><?php echo __('Weight'); ?></th>
+                          <th data-ahg-style="width:80px;"><?php echo __('Weight'); ?></th>
                           <th><?php echo __('Description'); ?></th>
                         </tr>
                       </thead>

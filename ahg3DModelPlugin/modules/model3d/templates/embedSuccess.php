@@ -134,14 +134,14 @@ if (!$model): ?>
     exposure="<?php echo $model->exposure ?>"
     shadow-intensity="<?php echo $model->shadow_intensity ?>"
     <?php if ($model->environment_image): ?>environment-image="/uploads/<?php echo $model->environment_image ?>"<?php endif ?>
-    style="background-color: <?php echo $model->background_color ?>;"
+    data-ahg-style="background-color: <?php echo $model->background_color ?>;"
 >
     <?php foreach ($hotspots as $hotspot): ?>
     <button class="hotspot" 
             slot="hotspot-<?php echo $hotspot->id ?>"
             data-position="<?php echo $hotspot->position_x ?>m <?php echo $hotspot->position_y ?>m <?php echo $hotspot->position_z ?>m"
             data-normal="<?php echo $hotspot->normal_x ?>m <?php echo $hotspot->normal_y ?>m <?php echo $hotspot->normal_z ?>m"
-            style="--hotspot-color: <?php echo $hotspot->color ?>;">
+            data-ahg-style="--hotspot-color: <?php echo $hotspot->color ?>;">
         <div class="hotspot-annotation">
             <?php if ($hotspot->title): ?>
             <strong><?php echo esc_entities($hotspot->title) ?></strong>

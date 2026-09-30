@@ -69,7 +69,7 @@
           <div class="col-6 col-md-4 col-lg-3">
             <div class="card h-100">
               <div class="position-relative">
-                <img src="<?php echo esc_entities($img->file_path); ?>" alt="<?php echo esc_entities($img->caption ?? ''); ?>" class="card-img-top" style="height: 180px; object-fit: cover;">
+                <img src="<?php echo esc_entities($img->file_path); ?>" alt="<?php echo esc_entities($img->caption ?? ''); ?>" class="card-img-top" data-ahg-style="height: 180px; object-fit: cover;">
                 <?php if (!empty($img->is_primary)): ?>
                   <span class="badge bg-success position-absolute top-0 start-0 m-2"><?php echo __('Primary'); ?></span>
                 <?php endif; ?>

@@ -19,7 +19,7 @@
     <!-- Filter by Type -->
     <div class="row mb-3">
         <div class="col-md-4">
-            <select class="form-select" onchange="window.location.href='<?php echo url_for(['module' => 'forms', 'action' => 'templates']) ?>?type=' + this.value">
+            <select class="form-select" data-ahg-navigate="<?php echo url_for(['module' => 'forms', 'action' => 'templates']) ?>?type=">
                 <option value="">All Types</option>
                 <option value="information_object" <?php echo $currentType === 'information_object' ? 'selected' : '' ?>>Information Object</option>
                 <option value="actor" <?php echo $currentType === 'actor' ? 'selected' : '' ?>>Authority Record</option>

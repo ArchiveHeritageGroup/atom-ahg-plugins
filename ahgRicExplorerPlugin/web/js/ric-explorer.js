@@ -154,7 +154,7 @@
             '    <button class="ric-modal-close">&times;</button>',
             '  </div>',
             '  <div class="ric-modal-body">',
-            '    <iframe src="' + (window.ricExplorerUrl || '/ric/') + '?focus=' + encodeURIComponent(window.ricCurrentUri || '') + '" style="width:100%;height:100%;border:none;"></iframe>',
+            '    <iframe src="' + (window.ricExplorerUrl || '/ric/') + '?focus=' + encodeURIComponent(window.ricCurrentUri || '') + '" data-ahg-style="width:100%;height:100%;border:none;"></iframe>',
             '  </div>',
             '</div>'
         ].join('\n');

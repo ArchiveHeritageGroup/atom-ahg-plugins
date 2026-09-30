@@ -18,7 +18,7 @@ $dailyAccess = $sf_data->getRaw('dailyAccess');
     <div>
         <form method="get" class="d-inline">
             <input type="hidden" name="object_id" value="<?php echo $object->id ?>">
-            <select name="period" class="form-select form-select-sm d-inline-block" style="width: auto;" data-ahg-submit-form="1">
+            <select name="period" class="form-select form-select-sm d-inline-block" data-ahg-style="width: auto;" data-ahg-submit-form="1">
                 <option value="7 days" <?php echo $period === '7 days' ? 'selected' : '' ?>>Last 7 Days</option>
                 <option value="30 days" <?php echo $period === '30 days' ? 'selected' : '' ?>>Last 30 Days</option>
                 <option value="90 days" <?php echo $period === '90 days' ? 'selected' : '' ?>>Last 90 Days</option>
@@ -76,7 +76,7 @@ $dailyAccess = $sf_data->getRaw('dailyAccess');
             <div class="card-header bg-warning text-dark">
                 <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Security Events') ?></h5>
             </div>
-            <div class="card-body p-0" style="max-height: 300px; overflow-y: auto;">
+            <div class="card-body p-0" data-ahg-style="max-height: 300px; overflow-y: auto;">
                 <?php if (empty($securityLogs)): ?>
                 <p class="text-muted text-center py-3"><?php echo __('No security events') ?></p>
                 <?php else: ?>

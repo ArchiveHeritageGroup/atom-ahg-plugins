@@ -76,7 +76,7 @@ $filters = $historyData['filters'] ?? [];
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 140px;">Timestamp</th>
+                        <th data-ahg-style="width: 140px;">Timestamp</th>
                         <th>User</th>
                         <th>Action</th>
                         <th>Object</th>

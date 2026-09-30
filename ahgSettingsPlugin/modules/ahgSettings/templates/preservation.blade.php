@@ -127,14 +127,14 @@
                             <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editTargetModal{{ $target->id }}" title="{{ __('Edit') }}">
                               <i class="fas fa-edit"></i>
                             </button>
-                            <form method="post" style="display:inline;">
+                            <form method="post" data-ahg-style="display:inline;">
                               <input type="hidden" name="action_type" value="toggle_target">
                               <input type="hidden" name="target_id" value="{{ $target->id }}">
                               <button type="submit" class="btn btn-outline-{{ $target->is_active ? 'warning' : 'success' }}" title="{{ $target->is_active ? __('Disable') : __('Enable') }}">
                                 <i class="fas fa-{{ $target->is_active ? 'pause' : 'play' }}"></i>
                               </button>
                             </form>
-                            <form method="post" style="display:inline;" data-ahg-confirm="{{ __('Delete this target?') }}">
+                            <form method="post" data-ahg-style="display:inline;" data-ahg-confirm="{{ __('Delete this target?') }}">
                               <input type="hidden" name="action_type" value="delete_target">
                               <input type="hidden" name="target_id" value="{{ $target->id }}">
                               <button type="submit" class="btn btn-outline-danger" title="{{ __('Delete') }}">
@@ -210,7 +210,7 @@
             <div class="card-header">
               <i class="fas fa-history me-2"></i>{{ __('Recent Sync Logs') }}
             </div>
-            <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+            <div class="list-group list-group-flush" data-ahg-style="max-height: 300px; overflow-y: auto;">
               @if (empty($recentLogs))
                 <div class="list-group-item text-center text-muted">
                   {{ __('No sync logs yet') }}
@@ -292,23 +292,23 @@ php symfony preservation:verify-backup --status</code></pre>
                 <label class="form-label">{{ __('Path') }} *</label>
                 <input type="text" name="path" class="form-control" placeholder="/var/backups/atom">
               </div>
-              <div class="mb-3 remote-field" style="display:none;">
+              <div class="mb-3 remote-field" data-ahg-style="display:none;">
                 <label class="form-label">{{ __('Host') }}</label>
                 <input type="text" name="host" class="form-control" placeholder="backup.server.com">
               </div>
-              <div class="mb-3 remote-field" style="display:none;">
+              <div class="mb-3 remote-field" data-ahg-style="display:none;">
                 <label class="form-label">{{ __('Port') }}</label>
                 <input type="number" name="port" class="form-control" value="22">
               </div>
-              <div class="mb-3 remote-field" style="display:none;">
+              <div class="mb-3 remote-field" data-ahg-style="display:none;">
                 <label class="form-label">{{ __('User') }}</label>
                 <input type="text" name="user" class="form-control" placeholder="backup">
               </div>
-              <div class="mb-3 s3-field" style="display:none;">
+              <div class="mb-3 s3-field" data-ahg-style="display:none;">
                 <label class="form-label">{{ __('Bucket') }}</label>
                 <input type="text" name="bucket" class="form-control" placeholder="my-archive-bucket">
               </div>
-              <div class="mb-3 s3-field" style="display:none;">
+              <div class="mb-3 s3-field" data-ahg-style="display:none;">
                 <label class="form-label">{{ __('Region') }}</label>
                 <input type="text" name="region" class="form-control" placeholder="af-south-1">
               </div>

@@ -88,7 +88,7 @@
         li.className = 'list-group-item list-group-item-action py-2 d-flex justify-content-between align-items-center sortable-item';
         li.dataset.column = column;
         li.innerHTML = `
-            <div class="d-flex align-items-center flex-grow-1 drag-handle" style="cursor: grab;">
+            <div class="d-flex align-items-center flex-grow-1 drag-handle" data-ahg-style="cursor: grab;">
                 <i class="bi bi-grip-vertical text-muted me-2"></i>
                 <span class="small">${colConfig.label || column}</span>
             </div>
@@ -592,7 +592,7 @@
         config.columns.forEach(function(col) {
             const colConfig = config.allColumns[col] || {};
             html += '<th class="small draggable-col" data-column="' + col + '">' +
-                '<i class="bi bi-grip-vertical text-muted me-1" style="font-size:0.7rem;"></i>' +
+                '<i class="bi bi-grip-vertical text-muted me-1" data-ahg-style="font-size:0.7rem;"></i>' +
                 (colConfig.label || col) + '</th>';
         });
         headers.innerHTML = html;

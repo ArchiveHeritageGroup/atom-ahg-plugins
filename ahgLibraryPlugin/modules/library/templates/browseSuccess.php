@@ -97,18 +97,18 @@
 
           <?php /* Cover */ ?>
           <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
-               style="height: 100px; overflow: hidden;">
+               data-ahg-style="height: 100px; overflow: hidden;">
             <?php if (!empty($cleanIsbn)): ?>
               <img src="https://covers.openlibrary.org/b/isbn/<?php echo $cleanIsbn; ?>-M.jpg?default=false"
-                   alt="Cover" class="img-fluid" style="max-height: 100px; width: auto;"
-                   onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
+                   alt="Cover" class="img-fluid" data-ahg-style="max-height: 100px; width: auto;"
+                   data-ahg-onerror="parent-html" data-ahg-fallback="<i class='fas fa-book fa-4x text-muted'></i>">
             <?php else: ?>
               <i class="fas fa-book fa-4x text-muted"></i>
             <?php endif; ?>
           </div>
 
           <div class="card-body">
-            <h5 class="card-title" style="font-size:1rem;">
+            <h5 class="card-title" data-ahg-style="font-size:1rem;">
               <?php if (!empty($primarySlug)): ?>
                 <a href="<?php echo url_for(['module' => 'library', 'action' => 'index', 'slug' => $primarySlug]); ?>"
                    class="text-decoration-none">
@@ -153,7 +153,7 @@
             <?php if ($count > 1): ?>
               <div class="manifestations-panel mt-2 border-top pt-2">
                 <details class="frbr-manifestations">
-                  <summary class="small text-primary fw-bold" style="cursor:pointer; list-style:none;">
+                  <summary class="small text-primary fw-bold" data-ahg-style="cursor:pointer; list-style:none;">
                     <i class="fas fa-chevron-down me-1"></i>
                     <?php echo __('Show editions (%1%)', ['%1%' => $count]); ?>
                   </summary>
@@ -243,11 +243,11 @@
       <div class="col-md-6 col-lg-4 mb-4">
         <div class="card h-100 shadow-sm">
           <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
-               style="height: 100px; overflow: hidden;">
+               data-ahg-style="height: 100px; overflow: hidden;">
             <?php if (!empty($cleanIsbn)): ?>
               <img src="https://covers.openlibrary.org/b/isbn/<?php echo $cleanIsbn; ?>-M.jpg?default=false"
-                   alt="Cover" class="img-fluid" style="max-height: 100px; width: auto;"
-                   onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
+                   alt="Cover" class="img-fluid" data-ahg-style="max-height: 100px; width: auto;"
+                   data-ahg-onerror="parent-html" data-ahg-fallback="<i class='fas fa-book fa-4x text-muted'></i>">
             <?php else: ?>
               <i class="fas fa-book fa-4x text-muted"></i>
             <?php endif; ?>

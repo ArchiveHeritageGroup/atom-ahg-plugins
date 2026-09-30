@@ -60,7 +60,7 @@
         <h1 class="h3 mb-1">
           <?php echo htmlspecialchars($detail->name, ENT_QUOTES, 'UTF-8'); ?>
           <?php if (!empty($detail->acronym)): ?>
-            <span class="badge bg-light text-dark border ms-2" style="font-size: 0.5em; vertical-align: middle;"><?php echo htmlspecialchars($detail->acronym, ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="badge bg-light text-dark border ms-2" data-ahg-style="font-size: 0.5em; vertical-align: middle;"><?php echo htmlspecialchars($detail->acronym, ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>
         </h1>
         <?php if ($_isAdmin): ?>
@@ -206,7 +206,7 @@
         <li class="list-group-item">
           <i class="fas fa-globe me-2 text-muted"></i>
           <a href="<?php echo htmlspecialchars($detail->website_url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
-            <?php echo __('Official Website'); ?> <i class="fas fa-external-link-alt ms-1" style="font-size: 0.7em;"></i>
+            <?php echo __('Official Website'); ?> <i class="fas fa-external-link-alt ms-1" data-ahg-style="font-size: 0.7em;"></i>
           </a>
         </li>
         <?php endif; ?>

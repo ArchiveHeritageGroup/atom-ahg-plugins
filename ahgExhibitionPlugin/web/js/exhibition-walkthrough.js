@@ -18,8 +18,8 @@
     el.style.width = it.w + 'px'; el.style.height = it.h + 'px';
     el.title = it.title;
     el.innerHTML = it.thumb
-      ? '<img src="' + esc(it.thumb) + '" alt="" style="width:100%;height:100%;object-fit:cover;border:1px solid #ccc">'
-      : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:#333;background:#efe9d8;border:1px solid #cbb98f">' + esc(it.title) + '</div>';
+      ? '<img src="' + esc(it.thumb) + '" alt="" data-ahg-style="width:100%;height:100%;object-fit:cover;border:1px solid #ccc">'
+      : '<div data-ahg-style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:#333;background:#efe9d8;border:1px solid #cbb98f">' + esc(it.title) + '</div>';
     scene.appendChild(el);
   });
 
@@ -109,7 +109,7 @@
 
   // init
   if (!items.length) {
-    vp.insertAdjacentHTML('beforeend', '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;opacity:.7">No objects placed yet — open the Builder to lay out this space.</div>');
+    vp.insertAdjacentHTML('beforeend', '<div data-ahg-style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;opacity:.7">No objects placed yet — open the Builder to lay out this space.</div>');
   } else {
     fit();
   }

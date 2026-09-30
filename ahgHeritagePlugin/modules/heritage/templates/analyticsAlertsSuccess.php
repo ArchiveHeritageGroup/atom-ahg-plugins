@@ -152,7 +152,7 @@ $stats = $alertData['stats'] ?? [];
                         </a>
                         <?php endif; ?>
                         <button type="button" class="btn btn-sm btn-outline-secondary"
-                                onclick="dismissAlert(<?php echo $alert->id; ?>)" title="Dismiss">
+                                data-ahg-call="dismissAlert" data-ahg-types="x" data-ahg-a0="<?php echo $alert->id; ?>" title="Dismiss">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>

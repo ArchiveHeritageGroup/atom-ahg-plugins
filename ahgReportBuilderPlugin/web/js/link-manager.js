@@ -54,7 +54,7 @@
                                     '<option value="internal"' + (existing && existing.link_type === 'internal' ? ' selected' : '') + '>Internal (AtoM Entity)</option>' +
                                 '</select>' +
                             '</div>' +
-                            '<div id="lm-external-fields"' + (existing && existing.link_type === 'internal' ? ' style="display:none"' : '') + '>' +
+                            '<div id="lm-external-fields"' + (existing && existing.link_type === 'internal' ? ' data-ahg-style="display:none"' : '') + '>' +
                                 '<div class="mb-3">' +
                                     '<label class="form-label">URL</label>' +
                                     '<div class="input-group">' +
@@ -63,11 +63,11 @@
                                     '</div>' +
                                     '<div class="form-text">Paste a URL and click Fetch to auto-fill title and description from OpenGraph metadata.</div>' +
                                 '</div>' +
-                                '<div id="lm-og-preview" class="mb-3" style="display:none;">' +
+                                '<div id="lm-og-preview" class="mb-3" data-ahg-style="display:none;">' +
                                     '<div class="card">' +
                                         '<div class="row g-0">' +
-                                            '<div class="col-md-4" id="lm-og-image-col" style="display:none;">' +
-                                                '<img id="lm-og-image" class="img-fluid rounded-start" alt="Preview" style="max-height:150px;object-fit:cover;width:100%;">' +
+                                            '<div class="col-md-4" id="lm-og-image-col" data-ahg-style="display:none;">' +
+                                                '<img id="lm-og-image" class="img-fluid rounded-start" alt="Preview" data-ahg-style="max-height:150px;object-fit:cover;width:100%;">' +
                                             '</div>' +
                                             '<div class="col" id="lm-og-text-col">' +
                                                 '<div class="card-body py-2">' +
@@ -79,11 +79,11 @@
                                     '</div>' +
                                 '</div>' +
                             '</div>' +
-                            '<div id="lm-internal-fields"' + (existing && existing.link_type === 'internal' ? '' : ' style="display:none"') + '>' +
+                            '<div id="lm-internal-fields"' + (existing && existing.link_type === 'internal' ? '' : ' data-ahg-style="display:none"') + '>' +
                                 '<div class="mb-3">' +
                                     '<label class="form-label">Search AtoM Entities</label>' +
                                     '<input type="text" class="form-control" id="lm-entity-search" placeholder="Type to search descriptions, actors, repositories..." autocomplete="off">' +
-                                    '<div id="lm-entity-results" class="list-group mt-1" style="max-height:200px;overflow-y:auto;display:none;"></div>' +
+                                    '<div id="lm-entity-results" class="list-group mt-1" data-ahg-style="max-height:200px;overflow-y:auto;display:none;"></div>' +
                                     '<input type="hidden" id="lm-entity-id" value="' + self._escAttr(existing ? existing.entity_id : '') + '">' +
                                     '<input type="hidden" id="lm-entity-type" value="' + self._escAttr(existing ? existing.entity_type : '') + '">' +
                                 '</div>' +

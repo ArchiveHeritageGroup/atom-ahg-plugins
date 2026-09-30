@@ -9,7 +9,7 @@
   <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header bg-success text-white"><h5 class="mb-0"><?php echo __('Recent Logins') ?></h5></div>
-      <div class="table-responsive" style="max-height: 400px;">
+      <div class="table-responsive" data-ahg-style="max-height: 400px;">
         <table class="table table-hover table-sm mb-0">
           <thead class="table-light"><tr><th><?php echo __('Time') ?></th><th><?php echo __('User') ?></th><th><?php echo __('IP') ?></th></tr></thead>
           <tbody>
@@ -31,7 +31,7 @@
   <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header bg-danger text-white"><h5 class="mb-0"><?php echo __('Suspicious Activity') ?> <span class="badge bg-light text-dark"><?php echo count($suspiciousActivity) ?></span></h5></div>
-      <div class="table-responsive" style="max-height: 400px;">
+      <div class="table-responsive" data-ahg-style="max-height: 400px;">
         <table class="table table-hover table-sm mb-0">
           <thead class="table-light"><tr><th><?php echo __('Time') ?></th><th><?php echo __('Event') ?></th><th><?php echo __('Username') ?></th><th><?php echo __('IP') ?></th></tr></thead>
           <tbody>

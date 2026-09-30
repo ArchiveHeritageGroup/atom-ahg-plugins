@@ -288,8 +288,8 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         <div class="card">
             <div class="card-header"><?php echo __('Preview'); ?></div>
             <div class="card-body text-center">
-                <div class="label-preview" id="labelContent" style="max-width: 300px;">
-                    <div id="labelTitle" class="fw-bold mb-2" style="font-size: 11pt;">
+                <div class="label-preview" id="labelContent" data-ahg-style="max-width: 300px;">
+                    <div id="labelTitle" class="fw-bold mb-2" data-ahg-style="font-size: 11pt;">
                         <?php echo esc_entities($resource->title ?? $resource->slug); ?>
                     </div>
                     
@@ -389,7 +389,7 @@ function updateDownloadLink() {
 }
 
 // Event wiring, not inline handlers: AtoM's CSP script-src has no 'unsafe-inline',
-// so onclick="" / onchange="" attributes are refused by the browser and every
+// so  /  attributes are refused by the browser and every
 // control on this page silently did nothing. This block carries the nonce, so it
 // runs; the listeners it registers are what make the page work.
 (function () {

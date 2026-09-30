@@ -37,9 +37,9 @@
                 <thead class="table-light">
                     <tr>
                         <th>Object</th>
-                        <th class="text-center" style="width: 120px">Pending</th>
-                        <th class="text-center" style="width: 120px">Approved</th>
-                        <th style="width: 220px">Actions</th>
+                        <th class="text-center" data-ahg-style="width: 120px">Pending</th>
+                        <th class="text-center" data-ahg-style="width: 120px">Approved</th>
+                        <th data-ahg-style="width: 220px">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -82,7 +82,7 @@
                                         <i class="fas fa-eye me-1"></i>Review
                                     </a>
                                     <?php else: ?>
-                                    <button class="btn btn-primary" onclick="reviewObject(<?php echo $obj->id; ?>)" title="Review pending entities">
+                                    <button class="btn btn-primary" data-ahg-call="reviewObject" data-ahg-types="x" data-ahg-a0="<?php echo $obj->id; ?>" title="Review pending entities">
                                         <i class="fas fa-eye me-1"></i>Review
                                     </button>
                                     <?php endif; ?>
@@ -120,10 +120,10 @@
             <div class="modal-body" id="reviewModalBody"></div>
             <div class="modal-footer">
                 <div class="me-auto">
-                    <button class="btn btn-outline-success btn-sm me-1" onclick="document.querySelectorAll('.action-select').forEach(function(s){ for(var i=0;i<s.options.length;i++){ if(s.options[i].value==='create'||s.options[i].value.indexOf('link_')===0){s.selectedIndex=i;break;} } }); alert('All set to Create/Link')">
+                    <button class="btn btn-outline-success btn-sm me-1" data-ahg-call="aiReviewSetAll" data-ahg-types="s" data-ahg-a0="create">
                         <i class="fas fa-check-double me-1"></i>Create All
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="document.querySelectorAll('.action-select').forEach(function(s){ for(var i=0;i<s.options.length;i++){ if(s.options[i].value==='reject'){s.selectedIndex=i;break;} } }); alert('All set to Reject')">
+                    <button class="btn btn-outline-danger btn-sm" data-ahg-call="aiReviewSetAll" data-ahg-types="s" data-ahg-a0="reject">
                         <i class="fas fa-times me-1"></i>Reject All
                     </button>
                 </div>
@@ -211,8 +211,8 @@ function renderEntities(entities) {
             // Editable value column
             html += '<div class="col-md-5">';
             html += '<div class="input-group input-group-sm">';
-            html += '<input type="text" class="form-control entity-value" id="value-' + entity.id + '" value="' + escapeHtml(entity.value) + '" onchange="updateEntityValue(' + entity.id + ')">';
-            html += '<button class="btn btn-outline-secondary" type="button" onclick="resetValue(' + entity.id + ', \'' + escapeHtml(entity.value) + '\')" title="Reset"><i class="fas fa-undo"></i></button>';
+            html += '<input type="text" class="form-control entity-value" id="value-' + entity.id + '" value="' + escapeHtml(entity.value) + '" data-ahg-call="updateEntityValue" data-ahg-on="change" data-ahg-types="x" data-ahg-a0="' + entity.id + '">';
+            html += '<button class="btn btn-outline-secondary" type="button" data-ahg-call="resetValue" data-ahg-types="x,s" data-ahg-a0="' + entity.id + '" data-ahg-a1="' + escapeHtml(entity.value) + '" title="Reset"><i class="fas fa-undo"></i></button>';
             html += '</div>';
             if (hasExact) {
                 html += '<small class="text-success"><i class="fas fa-check-circle me-1"></i>Match: ' + entity.exact_matches[0].name + '</small>';
@@ -221,7 +221,7 @@ function renderEntities(entities) {
                 var partialLinks = [];
                 for (var j = 0; j < Math.min(entity.partial_matches.length, 3); j++) {
                     var m = entity.partial_matches[j];
-                    partialLinks.push('<a href="#" onclick="useMatch(' + entity.id + ', ' + m.id + ', \'' + escapeHtml(m.name) + '\'); return false;">' + m.name + '</a>');
+                    partialLinks.push('<a href="#" data-ahg-call="useMatch" data-ahg-types="x,x,s" data-ahg-a0="' + entity.id + '" data-ahg-a1="' + m.id + '" data-ahg-a2="' + escapeHtml(m.name) + '" data-ahg-prevent="1">' + m.name + '</a>');
                 }
                 html += partialLinks.join(', ') + '</small>';
             }
@@ -229,7 +229,7 @@ function renderEntities(entities) {
             
             // Type selector column
             html += '<div class="col-md-2">';
-            html += '<select class="form-select form-select-sm type-select" id="type-' + entity.id + '" onchange="updateEntityType(' + entity.id + ')">';
+            html += '<select class="form-select form-select-sm type-select" id="type-' + entity.id + '" data-ahg-call="updateEntityType" data-ahg-on="change" data-ahg-types="x" data-ahg-a0="' + entity.id + '">';
             html += '<option value="PERSON"' + (type === 'PERSON' ? ' selected' : '') + '>Person</option>';
             html += '<option value="ORG"' + (type === 'ORG' ? ' selected' : '') + '>Organization</option>';
             html += '<option value="GPE"' + (type === 'GPE' ? ' selected' : '') + '>Place</option>';
@@ -289,6 +289,21 @@ function renderEntities(entities) {
     }
     
     document.getElementById('reviewModalBody').innerHTML = html;
+}
+
+// "Create All" / "Reject All" in the review modal. Called through data-ahg-call:
+// an inline onclick is blocked by the enforcing CSP.
+function aiReviewSetAll(mode) {
+    document.querySelectorAll('.action-select').forEach(function (s) {
+        for (var i = 0; i < s.options.length; i++) {
+            var v = s.options[i].value;
+            if ('create' === mode ? ('create' === v || 0 === v.indexOf('link_')) : 'reject' === v) {
+                s.selectedIndex = i;
+                break;
+            }
+        }
+    });
+    alert('create' === mode ? 'All set to Create/Link' : 'All set to Reject');
 }
 
 function escapeHtml(text) {
@@ -431,10 +446,10 @@ function processBatch(batches, batchIndex, results, total) {
     // Update progress display
     document.getElementById('reviewModalBody').innerHTML = 
         '<div class="text-center py-4">' +
-        '<div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>' +
+        '<div class="spinner-border text-primary mb-3" data-ahg-style="width: 3rem; height: 3rem;"></div>' +
         '<h5>Processing Entities...</h5>' +
-        '<div class="progress my-3" style="height: 25px;">' +
-        '<div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: ' + progress + '%">' + progress + '%</div>' +
+        '<div class="progress my-3" data-ahg-style="height: 25px;">' +
+        '<div class="progress-bar progress-bar-striped progress-bar-animated bg-success" data-ahg-style="width: ' + progress + '%">' + progress + '%</div>' +
         '</div>' +
         '<p class="text-muted mb-1">' + processed + ' of ' + total + ' processed</p>' +
         '<p class="small"><span class="text-success">' + results.success + ' succeeded</span> | <span class="text-danger">' + results.failed + ' failed</span></p>' +
@@ -445,11 +460,11 @@ function processBatch(batches, batchIndex, results, total) {
         setTimeout(function() {
             document.getElementById('reviewModalBody').innerHTML = 
                 '<div class="text-center py-5">' +
-                '<i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>' +
+                '<i class="fas fa-check-circle text-success" data-ahg-style="font-size: 4rem;"></i>' +
                 '<h4 class="mt-3">Processing Complete</h4>' +
                 '<p class="text-muted">' + results.success + ' succeeded, ' + results.failed + ' failed</p>' +
                 (results.errors.length > 0 ? '<details class="text-start"><summary class="text-danger">Show errors</summary><pre class="small bg-light p-2 mt-2">' + results.errors.join('\n') + '</pre></details>' : '') +
-                '<button class="btn btn-primary mt-3" onclick="location.reload()">Refresh Dashboard</button>' +
+                '<button class="btn btn-primary mt-3" data-ahg-action="reload">Refresh Dashboard</button>' +
                 '</div>';
         }, 300);
         return;

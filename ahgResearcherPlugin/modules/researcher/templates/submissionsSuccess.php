@@ -43,7 +43,7 @@
     <div class="card-body p-0">
       <?php if (empty($submissions)): ?>
         <div class="text-center text-muted py-5">
-          <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+          <i class="bi bi-inbox" data-ahg-style="font-size: 2rem;"></i>
           <p class="mt-2 mb-0">No submissions found.</p>
         </div>
       <?php else: ?>
@@ -64,7 +64,7 @@
             </thead>
             <tbody>
               <?php foreach ($submissions as $sub): ?>
-              <tr class="cursor-pointer" onclick="window.location='<?php echo url_for(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $sub->id]) ?>'">
+              <tr class="cursor-pointer" data-ahg-href="<?php echo url_for(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $sub->id]) ?>">
                 <td class="text-muted"><?php echo $sub->id ?></td>
                 <td><strong><?php echo htmlspecialchars($sub->title) ?></strong></td>
                 <?php if ($isAdmin): ?>

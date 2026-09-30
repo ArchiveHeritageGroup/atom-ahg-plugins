@@ -58,7 +58,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th style="width: 60px;"></th>
+                <th data-ahg-style="width: 60px;"></th>
                 <th>Object</th>
                 <th>Section</th>
                 <th>Location</th>
@@ -71,7 +71,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
               <?php foreach ($objects as $object): ?>
                 <tr data-id="<?php echo $object['id']; ?>">
                   <td class="text-center">
-                    <i class="fas fa-grip-vertical text-muted drag-handle" style="cursor: move;"></i>
+                    <i class="fas fa-grip-vertical text-muted drag-handle" data-ahg-style="cursor: move;"></i>
                   </td>
                   <td>
                     <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $object['object_slug']]); ?>">
@@ -139,7 +139,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
                         <i class="fas fa-edit"></i>
                       </button>
                       <button type="button" class="btn btn-outline-danger"
-                              onclick="removeObject(<?php echo $object['id']; ?>, '<?php echo htmlspecialchars(addslashes($object['object_title'] ?? $object['identifier'])); ?>')"
+                              data-ahg-call="removeObject" data-ahg-types="x,s" data-ahg-a0="<?php echo $object['id']; ?>" data-ahg-a1="<?php echo htmlspecialchars($object['object_title'] ?? $object['identifier']); ?>"
                               title="Remove">
                         <i class="fas fa-times"></i>
                       </button>
@@ -165,7 +165,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>
@@ -226,7 +226,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
           <div class="mb-3">
             <label class="form-label">Search Objects</label>
             <input type="text" id="objectSearch" class="form-control" placeholder="Search by title, number, or description...">
-            <div id="searchResults" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;"></div>
+            <div id="searchResults" class="list-group mt-2" data-ahg-style="max-height: 200px; overflow-y: auto;"></div>
             <input type="hidden" name="museum_object_id" id="selectedObjectId" required>
             <div id="selectedObject" class="alert alert-info mt-2 d-none"></div>
           </div>
@@ -256,10 +256,10 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
           <hr>
           <h6 class="text-muted"><i class="fas fa-handshake me-1"></i> Loan Details</h6>
           <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" name="requires_loan" id="addRequiresLoan" value="1" onchange="document.getElementById('addLenderFields').style.display = this.checked ? 'block' : 'none';">
+            <input type="checkbox" class="form-check-input" name="requires_loan" id="addRequiresLoan" value="1" data-ahg-show-if-checked="#addLenderFields">
             <label class="form-check-label" for="addRequiresLoan"><?php echo __('Requires loan from another institution'); ?></label>
           </div>
-          <div id="addLenderFields" style="display: none;">
+          <div id="addLenderFields" data-ahg-style="display: none;">
             <div class="mb-3">
               <label class="form-label"><?php echo __('Lender Institution'); ?></label>
               <input type="text" name="lender_institution" class="form-control" placeholder="<?php echo __('Institution lending the object'); ?>">
@@ -316,10 +316,10 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
           <hr>
           <h6 class="text-muted"><i class="fas fa-handshake me-1"></i> Loan Details</h6>
           <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" name="requires_loan" id="editRequiresLoan" value="1" onchange="document.getElementById('editLenderFields').style.display = this.checked ? 'block' : 'none';">
+            <input type="checkbox" class="form-check-input" name="requires_loan" id="editRequiresLoan" value="1" data-ahg-show-if-checked="#editLenderFields">
             <label class="form-check-label" for="editRequiresLoan"><?php echo __('Requires loan from another institution'); ?></label>
           </div>
-          <div id="editLenderFields" style="display: none;">
+          <div id="editLenderFields" data-ahg-style="display: none;">
             <div class="mb-3">
               <label class="form-label"><?php echo __('Lender Institution'); ?></label>
               <input type="text" name="lender_institution" id="editLenderInstitution" class="form-control" placeholder="<?php echo __('Institution lending the object'); ?>">

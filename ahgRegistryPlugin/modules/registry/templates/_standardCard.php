@@ -73,7 +73,7 @@
       <?php if (!empty($sectors)): ?>
       <div class="mb-2">
         <?php foreach ($sectors as $s): ?>
-          <span class="badge bg-light text-dark border me-1" style="font-size: 0.7em;"><?php echo htmlspecialchars(ucfirst($s), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="badge bg-light text-dark border me-1" data-ahg-style="font-size: 0.7em;"><?php echo htmlspecialchars(ucfirst($s), ENT_QUOTES, 'UTF-8'); ?></span>
         <?php endforeach; ?>
       </div>
       <?php endif; ?>

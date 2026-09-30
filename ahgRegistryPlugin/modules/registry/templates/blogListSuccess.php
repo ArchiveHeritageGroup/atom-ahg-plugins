@@ -71,7 +71,7 @@
     <div class="row g-0">
       <?php if (!empty($post->featured_image_path)): ?>
       <div class="col-md-4">
-        <img src="<?php echo htmlspecialchars($post->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="img-fluid rounded-start h-100" alt="" style="object-fit: cover; max-height: 200px;">
+        <img src="<?php echo htmlspecialchars($post->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="img-fluid rounded-start h-100" alt="" data-ahg-style="object-fit: cover; max-height: 200px;">
       </div>
       <?php endif; ?>
       <div class="col-md-<?php echo !empty($post->featured_image_path) ? '8' : '12'; ?>">

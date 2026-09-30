@@ -84,7 +84,7 @@
                             <?php echo $resource->degraded_access ? 'Yes (' . $resource->degraded_width . 'px)' : 'No' ?>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-danger" onclick="removeProtection(<?php echo $resource->object_id ?>)">
+                            <button class="btn btn-sm btn-danger" data-ahg-call="removeProtection" data-ahg-types="x" data-ahg-a0="<?php echo $resource->object_id ?>">
                                 Remove
                             </button>
                         </td>

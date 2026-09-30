@@ -6,13 +6,13 @@
   <table class="table table-bordered multiRow" id="childsTable">
     <thead>
       <tr>
-        <th style="width: 15%">
+        <th data-ahg-style="width: 15%">
           <?php echo __('Identifier'); ?>
-        </th><th style="width: 15%">
+        </th><th data-ahg-style="width: 15%">
           <?php echo __('Level'); ?>
-        </th><th style="width: 50%">
+        </th><th data-ahg-style="width: 50%">
           <?php echo __('Title'); ?>
-        </th><th style="width: 20%">
+        </th><th data-ahg-style="width: 20%">
           <?php echo __('Date'); ?>
         </th>
       </tr>

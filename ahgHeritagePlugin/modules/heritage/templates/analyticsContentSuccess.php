@@ -227,11 +227,11 @@ $summary = [
         <div class="row">
             <div class="col-md-6">
                 <h6>By Level of Description</h6>
-                <canvas id="levelChart" style="height: 250px;"></canvas>
+                <canvas id="levelChart" data-ahg-style="height: 250px;"></canvas>
             </div>
             <div class="col-md-6">
                 <h6>By Repository</h6>
-                <canvas id="repoChart" style="height: 250px;"></canvas>
+                <canvas id="repoChart" data-ahg-style="height: 250px;"></canvas>
             </div>
         </div>
     </div>

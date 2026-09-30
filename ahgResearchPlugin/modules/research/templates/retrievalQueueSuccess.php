@@ -41,7 +41,7 @@
                 <?php echo htmlspecialchars($currentQueue->name) ?>
             </h5>
             <div>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.print()">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-ahg-action="print">
                     <i class="fas fa-print me-1" aria-hidden="true"></i> Print List
                 </button>
             </div>

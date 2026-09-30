@@ -143,7 +143,7 @@
         </div>
       </div>
 
-      <div class="mb-3" id="frame-description-group" style="<?php echo empty($listing->is_framed) ? 'display: none;' : ''; ?>">
+      <div class="mb-3" id="frame-description-group" data-ahg-style="<?php echo empty($listing->is_framed) ? 'display: none;' : ''; ?>">
         <label for="frame_description" class="form-label"><?php echo __('Frame Description'); ?></label>
         <input type="text" class="form-control" id="frame_description" name="frame_description" value="<?php echo esc_entities($listing->frame_description ?? ''); ?>" maxlength="255">
       </div>
@@ -201,7 +201,7 @@
         </div>
       </div>
 
-      <div id="auction-fields" style="display: none;">
+      <div id="auction-fields" data-ahg-style="display: none;">
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="starting_bid" class="form-label"><?php echo __('Starting Bid'); ?></label>
@@ -218,7 +218,7 @@
         </div>
       </div>
 
-      <div id="offer-only-fields" style="display: none;">
+      <div id="offer-only-fields" data-ahg-style="display: none;">
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="minimum_offer_only" class="form-label"><?php echo __('Minimum Offer'); ?></label>

@@ -32,9 +32,9 @@
       <div class="card-body">
         <div class="d-flex align-items-center">
           <?php if (!empty($entity->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($entity->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 50px; height: 50px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($entity->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" data-ahg-style="width: 50px; height: 50px; object-fit: contain;">
           <?php else: ?>
-            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" data-ahg-style="width: 50px; height: 50px;">
               <i class="fas fa-<?php echo 'vendor' === $entityType ? 'handshake' : 'laptop-code'; ?> text-muted"></i>
             </div>
           <?php endif; ?>
@@ -56,7 +56,7 @@
             <label class="form-label fw-semibold"><?php echo __('Rating'); ?> <span class="text-danger">*</span></label>
             <div id="star-rating" class="d-flex gap-1" role="group" aria-label="<?php echo __('Star rating'); ?>">
               <?php for ($i = 1; $i <= 5; $i++): ?>
-                <span class="star-btn fs-3" data-value="<?php echo $i; ?>" style="cursor: pointer; color: #ddd;" title="<?php echo $i; ?> <?php echo __('star'); ?><?php echo $i > 1 ? 's' : ''; ?>">
+                <span class="star-btn fs-3" data-value="<?php echo $i; ?>" data-ahg-style="cursor: pointer; color: #ddd;" title="<?php echo $i; ?> <?php echo __('star'); ?><?php echo $i > 1 ? 's' : ''; ?>">
                   <i class="fas fa-star"></i>
                 </span>
               <?php endfor; ?>

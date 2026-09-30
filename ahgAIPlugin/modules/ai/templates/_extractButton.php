@@ -5,11 +5,11 @@
  */
 ?>
 <div class="ner-extract-section mb-3">
-    <button type="button" class="btn btn-outline-primary w-100" id="nerExtractBtn" onclick="extractEntities(<?php echo $resource->id ?>)">
+    <button type="button" class="btn btn-outline-primary w-100" id="nerExtractBtn" data-ahg-call="extractEntities" data-ahg-types="x" data-ahg-a0="<?php echo $resource->id ?>">
         <i class="bi bi-cpu me-1"></i>Extract Entities (NER)
     </button>
     
-    <div id="nerResults" class="mt-3" style="display: none;">
+    <div id="nerResults" class="mt-3" data-ahg-style="display: none;">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-list-check me-1"></i>Extracted Entities</span>

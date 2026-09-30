@@ -13,7 +13,7 @@
       <h1 class="h3 fw-bold mb-1"><?php echo __('AtoM Community Hub'); ?></h1>
       <p class="mb-2 small opacity-75"><?php echo __('The global directory for AtoM institutions, vendors, and archival software.'); ?></p>
       <form method="get" action="<?php echo url_for(['module' => 'registry', 'action' => 'search']); ?>">
-        <div class="input-group input-group-sm" style="max-width:500px;">
+        <div class="input-group input-group-sm" data-ahg-style="max-width:500px;">
           <input type="text" class="form-control" name="q" placeholder="<?php echo __('Search institutions, vendors, software...'); ?>">
           <button type="submit" class="btn btn-light">
             <i class="fas fa-search"></i>

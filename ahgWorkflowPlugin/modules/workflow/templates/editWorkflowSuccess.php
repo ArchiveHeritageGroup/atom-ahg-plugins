@@ -64,9 +64,9 @@
                                     <option value="collection" <?php echo $workflow->scope_type === 'collection' ? 'selected' : '' ?>>Collection</option>
                                 </select>
                             </div>
-                            <div class="col-md-8" id="scope_id_container" style="<?php echo $workflow->scope_type === 'global' ? 'display:none' : '' ?>">
+                            <div class="col-md-8" id="scope_id_container" data-ahg-style="<?php echo $workflow->scope_type === 'global' ? 'display:none' : '' ?>">
                                 <label for="scope_id" class="form-label">Scope Target</label>
-                                <select class="form-select" id="scope_id_repo" name="scope_id" style="<?php echo $workflow->scope_type !== 'repository' ? 'display:none' : '' ?>" <?php echo $workflow->scope_type !== 'repository' ? 'disabled' : '' ?>>
+                                <select class="form-select" id="scope_id_repo" name="scope_id" data-ahg-style="<?php echo $workflow->scope_type !== 'repository' ? 'display:none' : '' ?>" <?php echo $workflow->scope_type !== 'repository' ? 'disabled' : '' ?>>
                                     <option value="">Select repository...</option>
                                     <?php foreach ($repositories as $repo): ?>
                                         <option value="<?php echo $repo->id ?>" <?php echo ($workflow->scope_type === 'repository' && $workflow->scope_id == $repo->id) ? 'selected' : '' ?>>
@@ -74,7 +74,7 @@
                                         </option>
                                     <?php endforeach ?>
                                 </select>
-                                <select class="form-select" id="scope_id_collection" name="scope_id" style="<?php echo $workflow->scope_type !== 'collection' ? 'display:none' : '' ?>" <?php echo $workflow->scope_type !== 'collection' ? 'disabled' : '' ?>>
+                                <select class="form-select" id="scope_id_collection" name="scope_id" data-ahg-style="<?php echo $workflow->scope_type !== 'collection' ? 'display:none' : '' ?>" <?php echo $workflow->scope_type !== 'collection' ? 'disabled' : '' ?>>
                                     <option value="">Select collection...</option>
                                     <?php foreach ($collections as $col): ?>
                                         <option value="<?php echo $col->id ?>" <?php echo ($workflow->scope_type === 'collection' && $workflow->scope_id == $col->id) ? 'selected' : '' ?>>

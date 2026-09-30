@@ -74,7 +74,7 @@ if (isset($resource) && $resource->id) {
         <small class="text-muted"><?php echo __('Security classification watermarks override all other watermarks.'); ?></small>
       </div>
 
-      <div id="classification-details" style="<?php echo $currentClassification ? '' : 'display: none;'; ?>">
+      <div id="classification-details" data-ahg-style="<?php echo $currentClassification ? '' : 'display: none;'; ?>">
         <div class="mb-3">
           <label for="security_reason" class="form-label"><?php echo __('Classification Reason'); ?></label>
           <textarea class="form-control" id="security_reason" name="security_reason" rows="2"><?php echo $currentClassification ? htmlspecialchars($currentClassification->reason ?? '') : ''; ?></textarea>
@@ -132,7 +132,7 @@ if (isset($resource) && $resource->id) {
         </div>
       </div>
 
-      <div id="watermark-options" style="<?php echo $watermarkEnabled ? '' : 'display: none;'; ?>">
+      <div id="watermark-options" data-ahg-style="<?php echo $watermarkEnabled ? '' : 'display: none;'; ?>">
       
         <!-- System Watermarks -->
         <div class="mb-3">

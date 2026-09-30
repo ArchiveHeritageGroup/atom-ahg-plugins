@@ -91,13 +91,13 @@
     <table class="table table-sm table-hover mb-0">
       <thead class="table-dark">
         <tr>
-          <th style="width: 40px">#</th>
-          <th style="width: 140px">{{ __('Time') }}</th>
-          <th style="width: 70px">{{ __('Level') }}</th>
+          <th data-ahg-style="width: 40px">#</th>
+          <th data-ahg-style="width: 140px">{{ __('Time') }}</th>
+          <th data-ahg-style="width: 70px">{{ __('Level') }}</th>
           <th>{{ __('Error') }}</th>
-          <th style="width: 160px">{{ __('Location') }}</th>
-          <th style="width: 120px">{{ __('Client') }}</th>
-          <th style="width: 100px">{{ __('Actions') }}</th>
+          <th data-ahg-style="width: 160px">{{ __('Location') }}</th>
+          <th data-ahg-style="width: 120px">{{ __('Client') }}</th>
+          <th data-ahg-style="width: 100px">{{ __('Actions') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -126,9 +126,9 @@
           </td>
           <td>
             <div class="fw-bold small">{{ e($err->exception_class ?? '') }}</div>
-            <div class="small" style="word-break: break-word">{{ e($err->message) }}</div>
+            <div class="small" data-ahg-style="word-break: break-word">{{ e($err->message) }}</div>
             @if ($err->url)
-              <div class="small text-muted" style="word-break: break-all">
+              <div class="small text-muted" data-ahg-style="word-break: break-all">
                 <span class="badge bg-light text-dark">{{ $err->http_method ?? 'GET' }}</span>
                 {{ e($err->url) }}
               </div>
@@ -137,7 +137,7 @@
               <div class="small text-success"><i class="fas fa-check me-1"></i>Resolved {{ $err->resolved_at }}</div>
             @endif
           </td>
-          <td class="small text-truncate" style="max-width: 160px" title="{{ e($err->file ?? '') }}">
+          <td class="small text-truncate" data-ahg-style="max-width: 160px" title="{{ e($err->file ?? '') }}">
             {{ $err->file ? basename($err->file) . ':' . $err->line : '-' }}
           </td>
           <td class="small">
@@ -176,7 +176,7 @@
         @if ($err->trace)
         <tr class="collapse" id="trace-{{ $err->id }}">
           <td colspan="7">
-            <pre class="bg-dark text-light p-2 rounded small mb-0" style="max-height: 300px; overflow: auto">{{ e($err->trace) }}</pre>
+            <pre class="bg-dark text-light p-2 rounded small mb-0" data-ahg-style="max-height: 300px; overflow: auto">{{ e($err->trace) }}</pre>
             @if ($err->user_agent)
               <small class="text-muted">UA: {{ e(substr($err->user_agent, 0, 150)) }}</small>
             @endif

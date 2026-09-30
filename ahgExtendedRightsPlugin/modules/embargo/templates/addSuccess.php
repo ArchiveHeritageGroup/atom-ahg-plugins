@@ -88,7 +88,7 @@
             <?php echo __('This will create the same embargo on all child records below this item in the hierarchy.'); ?>
           </div>
         </div>
-        <div class="alert alert-warning mb-0" id="propagation-warning" style="display: none;">
+        <div class="alert alert-warning mb-0" id="propagation-warning" data-ahg-style="display: none;">
           <i class="fas fa-exclamation-triangle me-2"></i>
           <?php echo __('Warning: This action cannot be easily undone. Each child record will have its own embargo that must be lifted individually.'); ?>
         </div>

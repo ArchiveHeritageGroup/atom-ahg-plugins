@@ -72,9 +72,9 @@
               </td>
               <td>
                 <?php if ($orphan->status === 'detected'): ?>
-                  <button class="btn btn-sm btn-outline-info" onclick="updateOrphan(<?php echo $orphan->id; ?>, 'reviewed')"><i class="fa fa-eye"></i></button>
-                  <button class="btn btn-sm btn-outline-secondary" onclick="updateOrphan(<?php echo $orphan->id; ?>, 'retained')"><i class="fa fa-lock"></i></button>
-                  <button class="btn btn-sm btn-outline-danger" onclick="updateOrphan(<?php echo $orphan->id; ?>, 'cleaned')"><i class="fa fa-trash"></i></button>
+                  <button class="btn btn-sm btn-outline-info" data-ahg-call="updateOrphan" data-ahg-types="x,s" data-ahg-a0="<?php echo $orphan->id; ?>" data-ahg-a1="reviewed"><i class="fa fa-eye"></i></button>
+                  <button class="btn btn-sm btn-outline-secondary" data-ahg-call="updateOrphan" data-ahg-types="x,s" data-ahg-a0="<?php echo $orphan->id; ?>" data-ahg-a1="retained"><i class="fa fa-lock"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" data-ahg-call="updateOrphan" data-ahg-types="x,s" data-ahg-a0="<?php echo $orphan->id; ?>" data-ahg-a1="cleaned"><i class="fa fa-trash"></i></button>
                 <?php endif; ?>
               </td>
             </tr>

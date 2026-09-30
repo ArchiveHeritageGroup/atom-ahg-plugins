@@ -70,7 +70,7 @@
             <?php echo __('Export Error:') ?> <?php echo $error ?>
           </div>
         <?php elseif ($preview): ?>
-          <pre class="bg-light p-3" style="max-height: 600px; overflow: auto;"><code><?php echo htmlspecialchars($preview) ?></code></pre>
+          <pre class="bg-light p-3" data-ahg-style="max-height: 600px; overflow: auto;"><code><?php echo htmlspecialchars($preview) ?></code></pre>
         <?php else: ?>
           <div class="alert alert-warning">
             <?php echo __('No preview available.') ?>

@@ -31,14 +31,14 @@
                 <input type="file" name="import_file" id="importFile" class="d-none" 
                        accept=".csv,.xls,.xlsx,.xml,.json,.opex,.pax,.zip">
                 <div id="dropText">
-                  <p class="mb-2"><i class="bi bi-file-earmark-arrow-up" style="font-size: 3rem;"></i></p>
-                  <p class="mb-2">Drag & drop file here or <a href="#" onclick="document.getElementById('importFile').click(); return false;">browse</a></p>
+                  <p class="mb-2"><i class="bi bi-file-earmark-arrow-up" data-ahg-style="font-size: 3rem;"></i></p>
+                  <p class="mb-2">Drag & drop file here or <a href="#" data-ahg-click="#importFile">browse</a></p>
                   <small class="text-muted">Supported: CSV, Excel (XLS/XLSX), XML, JSON, OPEX, PAX</small>
                 </div>
                 <div id="fileInfo" class="d-none">
                   <p class="mb-1"><strong id="fileName"></strong></p>
                   <small class="text-muted" id="fileSize"></small>
-                  <br><a href="#" onclick="clearFile(); return false;" class="text-danger small">Remove</a>
+                  <br><a href="#" data-ahg-call="clearFile" data-ahg-types="" data-ahg-prevent="1" class="text-danger small">Remove</a>
                 </div>
               </div>
             </div>
@@ -229,7 +229,7 @@
             <!-- File Preview -->
             <div class="mb-4 d-none" id="previewSection">
               <h6 class="text-primary"><span class="badge bg-primary me-2">4</span>Preview</h6>
-              <div class="table-responsive border rounded" style="max-height: 200px; overflow: auto;">
+              <div class="table-responsive border rounded" data-ahg-style="max-height: 200px; overflow: auto;">
                 <table class="table table-sm table-striped mb-0" id="previewTable">
                   <thead class="table-light sticky-top" id="previewHead"></thead>
                   <tbody id="previewBody"></tbody>

@@ -24,7 +24,7 @@
 ?>
 <a href="<?php echo $discUrl; ?>" class="list-group-item list-group-item-action<?php echo $isPinned ? ' list-group-item-warning' : ''; ?>">
   <div class="d-flex align-items-start">
-    <div class="me-3 text-center flex-shrink-0" style="min-width: 30px;">
+    <div class="me-3 text-center flex-shrink-0" data-ahg-style="min-width: 30px;">
       <i class="<?php echo $tIcon; ?>" title="<?php echo htmlspecialchars(ucfirst($tt), ENT_QUOTES, 'UTF-8'); ?>"></i>
     </div>
     <div class="flex-grow-1 min-width-0">

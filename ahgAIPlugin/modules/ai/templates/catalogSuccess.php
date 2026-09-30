@@ -44,7 +44,7 @@ $entityBuckets = ['persons' => 'People', 'organizations' => 'Organisations', 'pl
         </div>
         <div class="table-responsive"><table class="table table-sm align-middle mb-0">
           <thead class="table-light"><tr>
-            <th style="width:42px"></th><th style="width:160px"><?php echo __('Field') ?></th>
+            <th data-ahg-style="width:42px"></th><th data-ahg-style="width:160px"><?php echo __('Field') ?></th>
             <th><?php echo __('AI draft') ?></th><th class="text-muted"><?php echo __('Current value') ?></th>
           </tr></thead>
           <tbody>

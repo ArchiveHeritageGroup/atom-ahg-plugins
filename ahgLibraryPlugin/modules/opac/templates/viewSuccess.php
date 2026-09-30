@@ -41,7 +41,7 @@
           <tbody>
             <?php if (!empty($item->material_type)): ?>
               <tr>
-                <th style="width: 200px;"><?php echo __('Material Type'); ?></th>
+                <th data-ahg-style="width: 200px;"><?php echo __('Material Type'); ?></th>
                 <td><span class="badge bg-info text-dark"><?php echo esc_entities($item->material_type); ?></span></td>
               </tr>
             <?php endif; ?>
@@ -135,7 +135,7 @@
         <div class="card-body">
           <?php foreach ($subjects as $subj): ?>
             <a href="<?php echo url_for(['module' => 'opac', 'action' => 'index']); ?>?q=<?php echo urlencode($subj->heading ?? ''); ?>&search_type=subject"
-               class="badge bg-secondary text-decoration-none me-1 mb-1" style="font-size: 0.9em;">
+               class="badge bg-secondary text-decoration-none me-1 mb-1" data-ahg-style="font-size: 0.9em;">
               <?php echo esc_entities($subj->heading ?? ''); ?>
             </a>
           <?php endforeach; ?>

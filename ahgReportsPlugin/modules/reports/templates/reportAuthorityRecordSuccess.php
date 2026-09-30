@@ -2,7 +2,7 @@
 
 <?php slot('title'); ?>
   <h1><?php echo __('Browse Authority Record/Actor Report'); ?></h1>
-  <div style="margin-bottom: 1rem;">
+  <div data-ahg-style="margin-bottom: 1rem;">
     <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>" class="c-btn">
       <i class="fa fa-arrow-left"></i> <?php echo __("Back to Reports"); ?>
     </a>
@@ -49,8 +49,8 @@
         <input class="c-btn c-btn-submit" type="submit" value="<?php echo __('Search'); ?>"/>
       </section>
 
-      <div style="margin-top: 1rem;">
-        <button type="button" data-ahg-call="exportTableToCSV" class="c-btn" style="width:100%;">
+      <div data-ahg-style="margin-top: 1rem;">
+        <button type="button" data-ahg-call="exportTableToCSV" class="c-btn" data-ahg-style="width:100%;">
           <i class="fa fa-download"></i> <?php echo __('Export CSV'); ?>
         </button>
       </div>

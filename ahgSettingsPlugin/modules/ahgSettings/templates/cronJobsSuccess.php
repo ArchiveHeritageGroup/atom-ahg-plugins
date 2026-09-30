@@ -112,7 +112,7 @@ $atomRoot = $sf_data->getRaw('atomRoot');
                 <h6><i class="bi bi-terminal me-1"></i> Command</h6>
                 <div class="command-box mb-3">
                   <code><?php echo htmlspecialchars($job['command']); ?></code>
-                  <i class="bi bi-clipboard copy-btn float-end" onclick="copyToClipboard('<?php echo htmlspecialchars(addslashes($job['command'])); ?>')" title="Copy"></i>
+                  <i class="bi bi-clipboard copy-btn float-end" data-ahg-call="copyToClipboard" data-ahg-types="s" data-ahg-a0="<?php echo htmlspecialchars($job['command']); ?>" title="Copy"></i>
                 </div>
 
                 <?php if (!empty($job['options'])): ?>
@@ -133,7 +133,7 @@ $atomRoot = $sf_data->getRaw('atomRoot');
                 <h6><i class="bi bi-code-square me-1"></i> Example Cron Entry</h6>
                 <div class="command-box">
                   <code><?php echo nl2br(htmlspecialchars(str_replace('{root}', $atomRoot, $job['example']))); ?></code>
-                  <i class="bi bi-clipboard copy-btn float-end" onclick="copyToClipboard('<?php echo htmlspecialchars(addslashes(str_replace('{root}', $atomRoot, $job['example']))); ?>')" title="Copy"></i>
+                  <i class="bi bi-clipboard copy-btn float-end" data-ahg-call="copyToClipboard" data-ahg-types="s" data-ahg-a0="<?php echo htmlspecialchars(str_replace('{root}', $atomRoot, $job['example'])); ?>" title="Copy"></i>
                 </div>
               </div>
             </div>

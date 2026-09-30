@@ -8,7 +8,7 @@
 
 <div class="d-flex gap-3">
   <div id="cy" class="border rounded flex-grow-1"></div>
-  <div id="sm-detail" class="border rounded p-3" style="width:280px;min-width:280px;">
+  <div id="sm-detail" class="border rounded p-3" data-ahg-style="width:280px;min-width:280px;">
     <p class="text-muted mb-0"><?php echo __('Select a node to see details.'); ?></p>
   </div>
 </div>

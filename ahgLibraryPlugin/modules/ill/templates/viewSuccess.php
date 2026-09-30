@@ -40,7 +40,7 @@
         <div class="card-body">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:35%"><?php echo __('Title'); ?></th>
+              <th class="text-muted" data-ahg-style="width:35%"><?php echo __('Title'); ?></th>
               <td class="fw-bold"><?php echo esc_entities($req->title ?? '-'); ?></td>
             </tr>
             <tr>
@@ -77,7 +77,7 @@
         <div class="card-body">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Direction'); ?></th>
+              <th class="text-muted" data-ahg-style="width:40%"><?php echo __('Direction'); ?></th>
               <td>
                 <?php
                   $dir = $req->direction ?? '';
@@ -102,7 +102,7 @@
             <h6 class="fw-bold"><?php echo __('Patron'); ?></h6>
             <table class="table table-sm mb-0">
               <tr>
-                <th class="text-muted" style="width:40%"><?php echo __('Name'); ?></th>
+                <th class="text-muted" data-ahg-style="width:40%"><?php echo __('Name'); ?></th>
                 <td><?php echo esc_entities(trim(($req->first_name ?? '') . ' ' . ($req->last_name ?? '')) ?: '-'); ?></td>
               </tr>
               <tr>
@@ -130,7 +130,7 @@
         <div class="col-md-6">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Status'); ?></th>
+              <th class="text-muted" data-ahg-style="width:40%"><?php echo __('Status'); ?></th>
               <td>
                 <?php
                   $st = $req->status ?? '';
@@ -160,7 +160,7 @@
         <div class="col-md-6">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Sent date'); ?></th>
+              <th class="text-muted" data-ahg-style="width:40%"><?php echo __('Sent date'); ?></th>
               <td><?php echo esc_entities($req->sent_date ?? '-'); ?></td>
             </tr>
             <tr>

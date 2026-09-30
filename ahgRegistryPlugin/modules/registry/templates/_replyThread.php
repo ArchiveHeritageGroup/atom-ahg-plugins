@@ -17,7 +17,7 @@
 <div class="card mb-2<?php echo $currentLevel > 0 ? ' ms-' . min($currentLevel * 3, 12) : ''; ?>" id="reply-<?php echo (int) ($r->id ?? 0); ?>">
   <div class="card-body py-2">
     <div class="d-flex align-items-start">
-      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width: 32px; height: 32px;">
+      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" data-ahg-style="width: 32px; height: 32px;">
         <i class="fas fa-user text-muted small"></i>
       </div>
       <div class="flex-grow-1">
@@ -69,7 +69,7 @@
           <button type="button" class="btn btn-sm btn-outline-secondary reply-toggle-btn" data-reply-id="<?php echo (int) ($r->id ?? 0); ?>">
             <i class="fas fa-reply me-1"></i><?php echo __('Reply'); ?>
           </button>
-          <div class="reply-form mt-2" id="reply-form-<?php echo (int) ($r->id ?? 0); ?>" style="display: none;">
+          <div class="reply-form mt-2" id="reply-form-<?php echo (int) ($r->id ?? 0); ?>" data-ahg-style="display: none;">
             <?php
               $formAction = isset($replyUrl) && $replyUrl
                 ? $replyUrl

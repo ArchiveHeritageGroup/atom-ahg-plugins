@@ -32,7 +32,7 @@
                     <h5 class="card-title text-muted">Overall Compliance Score</h5>
                     <div class="position-relative d-inline-block my-3">
                         <div class="compliance-score-circle" 
-                             style="--score: {{ $complianceScore['percentage'] }}; --color: {{ $complianceScore['percentage'] >= 75 ? '#198754' : ($complianceScore['percentage'] >= 50 ? '#ffc107' : '#dc3545') }}">
+                             data-ahg-style="--score: {{ $complianceScore['percentage'] }}; --color: {{ $complianceScore['percentage'] >= 75 ? '#198754' : ($complianceScore['percentage'] >= 50 ? '#ffc107' : '#dc3545') }}">
                             <span class="score-value">{{ $complianceScore['percentage'] }}%</span>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                     <div class="row text-center small">
                         @foreach($complianceScore['breakdown'] as $key => $item)
                         <div class="col-3">
-                            <div class="text-muted text-uppercase" style="font-size: 0.7rem;">{{ strtoupper($key) }}</div>
+                            <div class="text-muted text-uppercase" data-ahg-style="font-size: 0.7rem;">{{ strtoupper($key) }}</div>
                             <div class="fw-bold">{{ $item['score'] }}/{{ $item['max'] }}</div>
                         </div>
                         @endforeach

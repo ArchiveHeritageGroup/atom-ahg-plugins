@@ -36,7 +36,7 @@
     <?php /* Collections Procedures#A — filter UI */ ?>
     <?php if (!empty($spectrumProcedures ?? [])): ?>
         <form method="get" action="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="d-flex flex-wrap gap-2 align-items-end mb-3">
-            <div class="flex-grow-1" style="max-width: 28rem;">
+            <div class="flex-grow-1" data-ahg-style="max-width: 28rem;">
                 <label for="spectrum" class="form-label small mb-1"><?php echo __('Filter by Collections Procedures procedure') ?></label>
                 <select name="spectrum" id="spectrum" class="form-select form-select-sm" data-ahg-submit-form="1">
                     <option value=""><?php echo __('All workflows') ?></option>

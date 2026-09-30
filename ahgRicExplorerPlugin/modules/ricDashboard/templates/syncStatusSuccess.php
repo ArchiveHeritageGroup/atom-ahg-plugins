@@ -66,7 +66,7 @@
             </td>
             <td class="small text-muted"><?php echo $record->last_synced_at ? date('Y-m-d H:i', strtotime($record->last_synced_at)) : '-'; ?></td>
             <td>
-              <button class="btn btn-sm btn-outline-primary" onclick="resync('<?php echo $record->entity_type; ?>', <?php echo $record->entity_id; ?>)">
+              <button class="btn btn-sm btn-outline-primary" data-ahg-call="resync" data-ahg-types="s,x" data-ahg-a0="<?php echo $record->entity_type; ?>" data-ahg-a1="<?php echo $record->entity_id; ?>">
                 <i class="fa fa-sync"></i>
               </button>
             </td>

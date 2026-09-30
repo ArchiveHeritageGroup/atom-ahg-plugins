@@ -85,7 +85,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <small class="opacity-75"><?php echo __('Generated'); ?></small>
-                        <h3 class="mb-0" style="font-size: 1rem;"><?php echo date('Y-m-d H:i'); ?></h3>
+                        <h3 class="mb-0" data-ahg-style="font-size: 1rem;"><?php echo date('Y-m-d H:i'); ?></h3>
                     </div>
                     <i class="bi bi-clock fs-2 opacity-50"></i>
                 </div>
@@ -100,7 +100,7 @@
         <span><i class="bi bi-table me-2"></i><?php echo __('Report Data'); ?></span>
         <div>
             <label class="me-2 small"><?php echo __('Per page:'); ?></label>
-            <select class="form-select form-select-sm d-inline-block w-auto" id="perPage" onchange="window.location.href='?page=1&limit='+this.value">
+            <select class="form-select form-select-sm d-inline-block w-auto" id="perPage" data-ahg-navigate="?page=1&limit=">
                 <option value="25" <?php echo $results['limit'] == 25 ? 'selected' : ''; ?>>25</option>
                 <option value="50" <?php echo $results['limit'] == 50 ? 'selected' : ''; ?>>50</option>
                 <option value="100" <?php echo $results['limit'] == 100 ? 'selected' : ''; ?>>100</option>
@@ -213,17 +213,17 @@
         </div>
         <div class="btn-group">
             <?php if ($rawReport->status === 'in_review'): ?>
-                <button class="btn btn-success btn-sm" onclick="updateReportStatus('approved')">
+                <button class="btn btn-success btn-sm" data-ahg-call="updateReportStatus" data-ahg-types="s" data-ahg-a0="approved">
                     <i class="bi bi-check-circle me-1"></i><?php echo __('Approve'); ?>
                 </button>
-                <button class="btn btn-outline-secondary btn-sm" onclick="updateReportStatus('draft')">
+                <button class="btn btn-outline-secondary btn-sm" data-ahg-call="updateReportStatus" data-ahg-types="s" data-ahg-a0="draft">
                     <i class="bi bi-arrow-return-left me-1"></i><?php echo __('Return to Draft'); ?>
                 </button>
             <?php elseif ($rawReport->status === 'approved'): ?>
-                <button class="btn btn-primary btn-sm" onclick="updateReportStatus('published')">
+                <button class="btn btn-primary btn-sm" data-ahg-call="updateReportStatus" data-ahg-types="s" data-ahg-a0="published">
                     <i class="bi bi-globe me-1"></i><?php echo __('Publish'); ?>
                 </button>
-                <button class="btn btn-outline-warning btn-sm" onclick="updateReportStatus('in_review')">
+                <button class="btn btn-outline-warning btn-sm" data-ahg-call="updateReportStatus" data-ahg-types="s" data-ahg-a0="in_review">
                     <i class="bi bi-arrow-repeat me-1"></i><?php echo __('Request Revision'); ?>
                 </button>
             <?php endif; ?>

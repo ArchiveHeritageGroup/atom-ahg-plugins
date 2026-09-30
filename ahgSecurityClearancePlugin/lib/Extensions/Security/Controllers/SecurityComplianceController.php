@@ -804,7 +804,7 @@ class SecurityComplianceController
     </style>
 </head>
 <body>
-    <div class="no-print"><button class="print-btn" onclick="window.print()">Print / Save as PDF</button></div>
+    <div class="no-print"><button class="print-btn" data-ahg-action="print">Print / Save as PDF</button></div>
     <h1>Security Compliance Report</h1>
     <div class="meta">Generated: ' . date('Y-m-d H:i:s') . '</div>';
 

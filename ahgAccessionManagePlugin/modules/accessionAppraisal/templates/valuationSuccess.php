@@ -186,7 +186,7 @@
           <div class="mb-3">
             <label class="form-label"><?php echo __('Value'); ?> <span class="text-danger">*</span></label>
             <div class="input-group">
-              <select name="currency" class="form-select" style="max-width: 80px;">
+              <select name="currency" class="form-select" data-ahg-style="max-width: 80px;">
                 <?php foreach (['ZAR', 'USD', 'EUR', 'GBP'] as $cur): ?>
                 <option value="<?php echo $cur; ?>"><?php echo $cur; ?></option>
                 <?php endforeach; ?>

@@ -36,7 +36,7 @@ $statusInfo = $statuses[$agreement->status] ?? ['label' => ucfirst($agreement->s
         <div class="card-body">
           <?php if (!empty($agreement->logo_path)): ?>
           <div class="text-center mb-4 pb-3 border-bottom">
-            <img src="/uploads<?php echo esc_entities($agreement->logo_path) ?>" alt="Agreement Logo" class="img-fluid" style="max-height: 120px;">
+            <img src="/uploads<?php echo esc_entities($agreement->logo_path) ?>" alt="Agreement Logo" class="img-fluid" data-ahg-style="max-height: 120px;">
           </div>
           <?php endif ?>
           <dl class="row mb-0">
@@ -46,7 +46,7 @@ $statusInfo = $statuses[$agreement->status] ?? ['label' => ucfirst($agreement->s
             <dt class="col-sm-4"><?php echo __('Type') ?></dt>
             <dd class="col-sm-8">
               <?php if (!empty($agreement->agreement_type_color)): ?>
-                <span class="badge" style="background-color: <?php echo $agreement->agreement_type_color ?>"><?php echo esc_entities($agreement->agreement_type_name) ?></span>
+                <span class="badge" data-ahg-style="background-color: <?php echo $agreement->agreement_type_color ?>"><?php echo esc_entities($agreement->agreement_type_name) ?></span>
               <?php else: ?>
                 <?php echo esc_entities($agreement->agreement_type_name ?? '-') ?>
               <?php endif ?>
@@ -494,7 +494,7 @@ $statusInfo = $statuses[$agreement->status] ?? ['label' => ucfirst($agreement->s
         <div class="card-header">
           <h5 class="mb-0"><i class="fas fa-history me-2"></i><?php echo __('History') ?></h5>
         </div>
-        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+        <div class="card-body" data-ahg-style="max-height: 300px; overflow-y: auto;">
           <ul class="list-group list-group-flush">
             <?php foreach ($history as $entry): ?>
               <li class="list-group-item px-0 py-2">

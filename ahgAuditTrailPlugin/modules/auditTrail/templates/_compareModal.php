@@ -42,7 +42,7 @@
                 <table class="table table-sm table-striped mb-0" id="oldValuesTable">
                   <thead class="table-light">
                     <tr>
-                      <th style="width: 35%;"><?php echo __('Field') ?></th>
+                      <th data-ahg-style="width: 35%;"><?php echo __('Field') ?></th>
                       <th><?php echo __('Value') ?></th>
                     </tr>
                   </thead>
@@ -60,7 +60,7 @@
                 <table class="table table-sm table-striped mb-0" id="newValuesTable">
                   <thead class="table-light">
                     <tr>
-                      <th style="width: 35%;"><?php echo __('Field') ?></th>
+                      <th data-ahg-style="width: 35%;"><?php echo __('Field') ?></th>
                       <th><?php echo __('Value') ?></th>
                     </tr>
                   </thead>

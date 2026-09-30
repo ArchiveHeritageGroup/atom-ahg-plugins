@@ -75,7 +75,7 @@ if ($rawShare) {
                 </small>
             </div>
             <div class="no-print">
-                <button class="btn btn-outline-light btn-sm" onclick="window.print();">
+                <button class="btn btn-outline-light btn-sm" data-ahg-action="print">
                     <i class="bi bi-printer me-1"></i><?php echo __('Print'); ?>
                 </button>
             </div>
@@ -176,7 +176,7 @@ if ($rawShare) {
                     <!-- Image Section -->
                     <?php if (!empty($section->image_url)): ?>
                     <div class="text-center">
-                        <img src="<?php echo htmlspecialchars($section->image_url); ?>" class="img-fluid rounded" alt="<?php echo htmlspecialchars($sectionTitle); ?>" style="max-height:500px;">
+                        <img src="<?php echo htmlspecialchars($section->image_url); ?>" class="img-fluid rounded" alt="<?php echo htmlspecialchars($sectionTitle); ?>" data-ahg-style="max-height:500px;">
                     </div>
                     <?php endif; ?>
 

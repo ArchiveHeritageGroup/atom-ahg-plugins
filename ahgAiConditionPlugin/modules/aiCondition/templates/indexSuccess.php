@@ -80,7 +80,7 @@
                     <input type="text" class="form-control form-control-sm" name="ai_condition_api_key" value="<?php echo esc_entities($settings['ai_condition_api_key']) ?>">
                 </div>
             </div>
-            <div id="testResult" style="display:none"></div>
+            <div id="testResult" data-ahg-style="display:none"></div>
         </div>
     </div>
 
@@ -175,7 +175,7 @@
                             <?php if ($c->is_active): ?>
                             <div class="form-check form-switch d-inline-block">
                                 <input class="form-check-input" type="checkbox" <?php echo !empty($c->can_contribute_training) ? 'checked' : '' ?>
-                                    onchange="toggleTraining(<?php echo $c->id ?>, this.checked ? 1 : 0)"
+                                    data-ahg-call="toggleTraining" data-ahg-on="change" data-ahg-types="x,checked01" data-ahg-a0="<?php echo $c->id ?>"
                                     title="<?php echo __('Allow client to contribute training data') ?>">
                             </div>
                             <?php else: ?>
@@ -191,7 +191,7 @@
                         </td>
                         <td class="text-end">
                             <?php if ($c->is_active): ?>
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeClient(<?php echo $c->id ?>)">
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="revokeClient" data-ahg-types="x" data-ahg-a0="<?php echo $c->id ?>">
                                 <i class="fas fa-ban"></i>
                             </button>
                             <?php endif ?>
@@ -277,7 +277,7 @@
                             <?php else: ?>
                                 <span class="small text-warning"><i class="fas fa-exclamation-triangle me-1"></i><?php echo __('Not uploaded') ?></span>
                             <?php endif ?>
-                            <button type="button" class="btn btn-outline-secondary btn-sm ms-1" onclick="uploadConsent(<?php echo $ac->id ?>, '<?php echo esc_entities($ac->name) ?>')">
+                            <button type="button" class="btn btn-outline-secondary btn-sm ms-1" data-ahg-call="uploadConsent" data-ahg-types="x,s" data-ahg-a0="<?php echo $ac->id ?>" data-ahg-a1="<?php echo esc_entities($ac->name) ?>">
                                 <i class="fas fa-upload"></i>
                             </button>
                         </td>
@@ -293,15 +293,15 @@
                         </td>
                         <td class="text-end">
                             <?php if (!$ac->training_approved): ?>
-                                <button type="button" class="btn btn-sm btn-success" onclick="approveTraining(<?php echo $ac->id ?>, '<?php echo esc_entities($ac->name) ?>')"
+                                <button type="button" class="btn btn-sm btn-success" data-ahg-call="approveTraining" data-ahg-types="x,s" data-ahg-a0="<?php echo $ac->id ?>" data-ahg-a1="<?php echo esc_entities($ac->name) ?>"
                                     <?php echo empty($ac->training_approval_doc) ? 'disabled title="' . __('Upload consent document first') . '"' : '' ?>>
                                     <i class="fas fa-check me-1"></i><?php echo __('Approve') ?>
                                 </button>
                             <?php else: ?>
-                                <button type="button" class="btn btn-sm btn-outline-info me-1" onclick="pushTrainingData(<?php echo $ac->id ?>)" <?php echo $approvedContrib < 1 ? 'disabled' : '' ?>>
+                                <button type="button" class="btn btn-sm btn-outline-info me-1" data-ahg-call="pushTrainingData" data-ahg-types="x" data-ahg-a0="<?php echo $ac->id ?>" <?php echo $approvedContrib < 1 ? 'disabled' : '' ?>>
                                     <i class="fas fa-paper-plane me-1"></i><?php echo __('Push to Training') ?>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="revokeTrainingApproval(<?php echo $ac->id ?>)">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-call="revokeTrainingApproval" data-ahg-types="x" data-ahg-a0="<?php echo $ac->id ?>">
                                     <i class="fas fa-ban"></i>
                                 </button>
                             <?php endif ?>

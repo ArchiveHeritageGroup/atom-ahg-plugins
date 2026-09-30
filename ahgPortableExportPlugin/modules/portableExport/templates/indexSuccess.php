@@ -66,15 +66,15 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
             </div>
           </div>
 
-          <div class="row mb-3" id="scope-slug-group" style="display:none;">
+          <div class="row mb-3" id="scope-slug-group" data-ahg-style="display:none;">
             <div class="col-md-6">
               <label for="fonds-search" class="form-label fw-bold"><?php echo __('Fonds / Collection'); ?></label>
               <div class="position-relative">
                 <input type="text" class="form-control" id="fonds-search" placeholder="<?php echo __('Type to search...'); ?>" autocomplete="off">
                 <input type="hidden" id="export-slug" name="scope_slug">
-                <div id="fonds-results" class="list-group position-absolute w-100 shadow-sm" style="display:none; z-index:1050; max-height:250px; overflow-y:auto;"></div>
+                <div id="fonds-results" class="list-group position-absolute w-100 shadow-sm" data-ahg-style="display:none; z-index:1050; max-height:250px; overflow-y:auto;"></div>
               </div>
-              <div id="fonds-selected" class="mt-2" style="display:none;">
+              <div id="fonds-selected" class="mt-2" data-ahg-style="display:none;">
                 <span class="badge bg-primary fs-6 px-3 py-2" id="fonds-selected-label"></span>
                 <button type="button" class="btn btn-sm btn-outline-danger ms-1" id="fonds-clear" title="<?php echo __('Clear'); ?>">
                   <i class="bi bi-x"></i>
@@ -84,7 +84,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
             </div>
           </div>
 
-          <div class="row mb-3" id="scope-repo-group" style="display:none;">
+          <div class="row mb-3" id="scope-repo-group" data-ahg-style="display:none;">
             <div class="col-md-6">
               <label for="export-repository" class="form-label fw-bold"><?php echo __('Repository'); ?></label>
               <select class="form-select" id="export-repository" name="repository_id">
@@ -104,7 +104,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
         </div>
 
         <!-- Step 2: Content -->
-        <div class="wizard-panel" data-step="2" style="display:none;">
+        <div class="wizard-panel" data-step="2" data-ahg-style="display:none;">
           <h5 class="mb-3"><i class="bi bi-files me-2"></i><?php echo __('Content Options'); ?></h5>
           <p class="text-muted mb-3"><?php echo __('Choose the export type and which content to include.'); ?></p>
 
@@ -153,10 +153,10 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
                 <br><small class="fw-normal"><?php echo __('Uncompressed — for large collections / mounted server drive'); ?></small>
               </label>
             </div>
-            <div id="destination-local-note" class="form-text mt-2" style="display:none;">
+            <div id="destination-local-note" class="form-text mt-2" data-ahg-style="display:none;">
               <i class="bi bi-info-circle me-1"></i><?php echo __('You will be asked to choose a folder or drive on this computer after the export is built; the catalogue is written there uncompressed so it runs straight off the drive (double-click index.html). Requires a Chromium browser (Chrome, Edge, Opera) — on other browsers it falls back to a ZIP download.'); ?>
             </div>
-            <div id="destination-path-wrap" class="mt-2" style="display:none;">
+            <div id="destination-path-wrap" class="mt-2" data-ahg-style="display:none;">
               <input type="text" class="form-control" name="destination_path" id="destination-path"
                      placeholder="<?php echo __('Existing writable directory on the server, e.g. /mnt/usb/catalogue'); ?>">
               <div class="form-text"><?php echo __('The bundle is written uncompressed straight to this path on the server (no ZIP, no size cap). It must exist and be writable by the web server.'); ?></div>
@@ -164,7 +164,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
           </div>
 
           <!-- Archive Entity Types (shown only for archive mode) -->
-          <div id="archive-entity-types" style="display:none;" class="mb-4">
+          <div id="archive-entity-types" data-ahg-style="display:none;" class="mb-4">
             <label class="form-label fw-bold"><?php echo __('Entity Types to Export'); ?></label>
             <div class="row g-2">
               <div class="col-md-4"><div class="form-check"><input class="form-check-input archive-entity" type="checkbox" value="descriptions" id="ent-desc" checked><label class="form-check-label" for="ent-desc"><?php echo __('Descriptions'); ?></label></div></div>
@@ -186,14 +186,14 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
           </div>
 
           <!-- Estimate Panel (archive mode) -->
-          <div id="estimate-panel" style="display:none;" class="mb-4">
+          <div id="estimate-panel" data-ahg-style="display:none;" class="mb-4">
             <div class="d-flex align-items-center mb-2">
               <button type="button" class="btn btn-outline-info btn-sm" id="btn-estimate">
                 <i class="bi bi-calculator me-1"></i><?php echo __('Estimate Export Size'); ?>
               </button>
-              <span id="estimate-spinner" class="spinner-border spinner-border-sm ms-2" style="display:none;"></span>
+              <span id="estimate-spinner" class="spinner-border spinner-border-sm ms-2" data-ahg-style="display:none;"></span>
             </div>
-            <div id="estimate-result" style="display:none;" class="card bg-light">
+            <div id="estimate-result" data-ahg-style="display:none;" class="card bg-light">
               <div class="card-body py-2">
                 <div class="row text-center" id="estimate-counts"></div>
                 <div class="text-center mt-2">
@@ -265,7 +265,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
         </div>
 
         <!-- Step 3: Configure -->
-        <div class="wizard-panel" data-step="3" style="display:none;">
+        <div class="wizard-panel" data-step="3" data-ahg-style="display:none;">
           <h5 class="mb-3"><i class="bi bi-sliders me-2"></i><?php echo __('Configuration'); ?></h5>
           <p class="text-muted mb-3"><?php echo __('Set the title, language, and optional branding for the viewer.'); ?></p>
 
@@ -312,7 +312,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
         </div>
 
         <!-- Step 4: Generate -->
-        <div class="wizard-panel" data-step="4" style="display:none;">
+        <div class="wizard-panel" data-step="4" data-ahg-style="display:none;">
           <h5 class="mb-3"><i class="bi bi-check2-square me-2"></i><?php echo __('Review & Generate'); ?></h5>
           <p class="text-muted mb-3"><?php echo __('Review your export settings and start generation.'); ?></p>
 
@@ -320,13 +320,13 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
             <div class="card-body">
               <table class="table table-sm mb-0" id="review-table">
                 <tbody>
-                  <tr><th style="width:30%"><?php echo __('Title'); ?></th><td id="review-title">-</td></tr>
+                  <tr><th data-ahg-style="width:30%"><?php echo __('Title'); ?></th><td id="review-title">-</td></tr>
                   <tr><th><?php echo __('Scope'); ?></th><td id="review-scope">-</td></tr>
                   <tr><th><?php echo __('Export Type'); ?></th><td id="review-mode">-</td></tr>
                   <tr><th><?php echo __('Language'); ?></th><td id="review-culture">-</td></tr>
                   <tr><th><?php echo __('Digital Objects'); ?></th><td id="review-objects">-</td></tr>
                   <tr><th><?php echo __('Branding'); ?></th><td id="review-branding">-</td></tr>
-                  <tr id="review-estimate-row" style="display:none;"><th><?php echo __('Estimated Size'); ?></th><td id="review-estimate">-</td></tr>
+                  <tr id="review-estimate-row" data-ahg-style="display:none;"><th><?php echo __('Estimated Size'); ?></th><td id="review-estimate">-</td></tr>
                 </tbody>
               </table>
             </div>
@@ -347,29 +347,29 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
   </div>
 
   <!-- Progress Panel (hidden initially) -->
-  <div class="card mb-4" id="progress-panel" style="display:none;">
+  <div class="card mb-4" id="progress-panel" data-ahg-style="display:none;">
     <div class="card-header">
       <h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i><?php echo __('Export Progress'); ?></h5>
     </div>
     <div class="card-body">
-      <div class="progress mb-3" style="height: 25px;">
-        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;">0%</div>
+      <div class="progress mb-3" data-ahg-style="height: 25px;">
+        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" data-ahg-style="width: 0%;">0%</div>
       </div>
       <div id="progress-status" class="text-muted"></div>
-      <div id="progress-result" style="display:none;" class="mt-3">
+      <div id="progress-result" data-ahg-style="display:none;" class="mt-3">
         <div class="alert alert-success">
           <i class="bi bi-check-circle me-1"></i>
           <span id="result-message"></span>
-          <button type="button" id="result-save-local" class="btn btn-sm btn-primary ms-2" style="display:none;">
+          <button type="button" id="result-save-local" class="btn btn-sm btn-primary ms-2" data-ahg-style="display:none;">
             <i class="bi bi-laptop me-1"></i><?php echo __('Save to folder on this computer'); ?>
           </button>
           <a id="result-download" href="#" class="btn btn-sm btn-success ms-2">
             <i class="bi bi-download me-1"></i><?php echo __('Download ZIP'); ?>
           </a>
         </div>
-        <div id="result-save-status" class="small text-muted mt-2" style="display:none;"></div>
+        <div id="result-save-status" class="small text-muted mt-2" data-ahg-style="display:none;"></div>
       </div>
-      <div id="progress-error" style="display:none;" class="mt-3">
+      <div id="progress-error" data-ahg-style="display:none;" class="mt-3">
         <div class="alert alert-danger">
           <i class="bi bi-exclamation-triangle me-1"></i>
           <span id="error-message"></span>
@@ -490,7 +490,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
             <label class="form-label"><?php echo __('Expires After (hours)'); ?></label>
             <input type="number" class="form-control" id="share-expires-hours" value="168" min="1">
           </div>
-          <div id="share-result" style="display:none;">
+          <div id="share-result" data-ahg-style="display:none;">
             <label class="form-label"><?php echo __('Share URL'); ?></label>
             <div class="input-group">
               <input type="text" class="form-control" id="share-url" readonly>

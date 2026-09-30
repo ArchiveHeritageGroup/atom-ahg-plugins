@@ -14,12 +14,12 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
 ?>
 
 <!-- Voice: Listening indicator bar -->
-<div id="voice-indicator" class="voice-indicator voice-ui" style="display:none"></div>
+<div id="voice-indicator" class="voice-indicator voice-ui" data-ahg-style="display:none"></div>
 
 <!-- Voice: Floating mic button (bottom-right) -->
 <button id="voice-floating-btn"
   class="voice-floating-btn voice-ui"
-  style="display:none"
+  data-ahg-style="display:none"
   type="button"
   aria-label="<?php echo __('Toggle voice commands'); ?>"
   title="<?php echo __('Click: voice | Right-click: type command'); ?>">
@@ -27,10 +27,10 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
 </button>
 
 <!-- Voice: Toast container -->
-<div id="voice-toast-container" class="voice-toast-container voice-ui" style="display:none" aria-live="polite"></div>
+<div id="voice-toast-container" class="voice-toast-container voice-ui" data-ahg-style="display:none" aria-live="polite"></div>
 
 <!-- Voice: Help modal -->
-<div class="modal fade voice-ui" id="voice-help-modal" tabindex="-1" aria-labelledby="voice-help-label" aria-hidden="true" style="display:none">
+<div class="modal fade voice-ui" id="voice-help-modal" tabindex="-1" aria-labelledby="voice-help-label" aria-hidden="true" data-ahg-style="display:none">
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">

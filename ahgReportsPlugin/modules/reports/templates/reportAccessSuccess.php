@@ -31,7 +31,7 @@ input[type="date"] {
 
 			<?php echo $form->renderHiddenFields(); ?>
 
-			<div id='typeOfReport' style="display: none">
+			<div id='typeOfReport' data-ahg-style="display: none">
 				<?php echo $form->className->label('Types of Reports')->renderRow(); ?>
 			</div>
 
@@ -76,8 +76,8 @@ input[type="date"] {
   <table class="table table-bordered" border="1" cellpadding="0" cellspacing="0" bordercolor="#999999">
     <thead>
       <tr>
-		<th style="width: 110px"><?php echo __('Identifier'); ?></th>
-		<th style="width: 250px"><?php echo __('Title'); ?></th>
+		<th data-ahg-style="width: 110px"><?php echo __('Identifier'); ?></th>
+		<th data-ahg-style="width: 250px"><?php echo __('Title'); ?></th>
 		<th><?php echo __('Refusal'); ?></th>
 		<th><?php echo __('Sensitive'); ?></th>
 		<th><?php echo __('Publish'); ?></th>
@@ -86,9 +86,9 @@ input[type="date"] {
 
 
         <?php if ('CREATED_AT' != $form->getValue('dateOf')) { ?>
-          <th style="width: 110px"><?php echo __('Updated'); ?></th>
+          <th data-ahg-style="width: 110px"><?php echo __('Updated'); ?></th>
         <?php } else { ?>
-          <th style="width: 110px"><?php echo __('Created'); ?></th>
+          <th data-ahg-style="width: 110px"><?php echo __('Created'); ?></th>
         <?php } ?>
       </tr>
     </thead><tbody>

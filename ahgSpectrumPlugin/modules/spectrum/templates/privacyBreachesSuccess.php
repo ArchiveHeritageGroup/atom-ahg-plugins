@@ -44,9 +44,9 @@
                         </td>
                         <td>
                             <?php if (($b->status ?? 'open') !== 'closed'): ?>
-                                <button class="btn btn-sm btn-outline-success" onclick="closeBreach(<?php echo $b->id; ?>)" title="Close"><i class="fas fa-check"></i></button>
+                                <button class="btn btn-sm btn-outline-success" data-ahg-call="closeBreach" data-ahg-types="x" data-ahg-a0="<?php echo $b->id; ?>" title="Close"><i class="fas fa-check"></i></button>
                                 <?php if (!($b->regulator_notified ?? false)): ?>
-                                    <button class="btn btn-sm btn-outline-info" onclick="notifyRegulator(<?php echo $b->id; ?>)" title="Mark Notified"><i class="fas fa-bell"></i></button>
+                                    <button class="btn btn-sm btn-outline-info" data-ahg-call="notifyRegulator" data-ahg-types="x" data-ahg-a0="<?php echo $b->id; ?>" title="Mark Notified"><i class="fas fa-bell"></i></button>
                                 <?php endif; ?>
                             <?php endif; ?>
                         </td>

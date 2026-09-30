@@ -59,7 +59,7 @@ $urls = [
     <?php if ($isAuth): ?><button type="button" id="addRoomBtn" class="btn btn-sm btn-success"><i class="fas fa-plus me-1"></i><?php echo __('Add room') ?></button><?php endif ?>
     <?php if ($isAuth): ?><button type="button" id="joinBtn" class="btn btn-sm btn-outline-warning" title="<?php echo __('Click a corner dot on one room, then a corner dot on another - the second room moves so the corners meet.') ?>"><i class="fas fa-link me-1"></i><?php echo __('Join corners') ?></button><?php endif ?>
     <?php if ($isAuth): ?><button type="button" id="undoBtn" class="btn btn-sm btn-outline-secondary" disabled title="<?php echo __('Undo the last room move (Ctrl+Z)') ?>"><i class="fas fa-undo me-1"></i><?php echo __('Undo move') ?></button><?php endif ?>
-    <?php if ($isAuth): ?><select id="floorView" class="form-select form-select-sm" style="width:auto" title="<?php echo __('Show only rooms on one floor') ?>"></select><?php endif ?>
+    <?php if ($isAuth): ?><select id="floorView" class="form-select form-select-sm" data-ahg-style="width:auto" title="<?php echo __('Show only rooms on one floor') ?>"></select><?php endif ?>
     <?php if ($isAuth): ?><div class="form-check form-switch small d-inline-block align-middle ms-1" title="<?php echo __('When locking, extend walls to close gaps between rooms') ?>"><input class="form-check-input" type="checkbox" id="lockFloorFill"><label class="form-check-label" for="lockFloorFill"><?php echo __('fill gaps') ?></label></div><?php endif ?>
     <?php if ($isAuth): ?><button type="button" id="lockFloorBtn" class="btn btn-sm btn-outline-dark" title="<?php echo __('Lock this whole floor: align all walls flush (and fill gaps if ticked); rooms can no longer be moved/resized. Click again to unlock the floor.') ?>"><i class="fas fa-lock me-1"></i><?php echo __('Lock floor') ?></button><?php endif ?>
     <a href="<?php echo $u('builder') ?>" class="btn btn-sm btn-outline-info"><i class="fas fa-cubes me-1"></i><?php echo __('Builder') ?></a>
@@ -95,7 +95,7 @@ $urls = [
         <div class="card-body p-2"><div id="planRoomList" class="small text-muted"></div></div>
       </div>
       <?php if ($isAuth): ?>
-      <div class="card mb-3" id="roomCard" style="display:none;">
+      <div class="card mb-3" id="roomCard" data-ahg-style="display:none;">
         <div class="card-header py-2"><strong><i class="fas fa-sync-alt me-1"></i><?php echo __('Selected room') ?></strong> <span class="small text-muted" id="roomCardName"></span></div>
         <div class="card-body p-2">
           <a href="#" target="_blank" rel="noopener" id="roomEditLink" class="btn btn-sm btn-outline-secondary w-100 mb-2"><i class="fas fa-edit me-1"></i><?php echo __('Edit room details') ?></a>
@@ -122,13 +122,13 @@ $urls = [
           <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="shapeReset"><?php echo __('Reset to rectangle') ?></button>
           <small class="text-muted d-block mt-1" id="shapeHint"><?php echo __('Make L-shapes or cut corners. Drag a corner; click a + to add one; double-click to remove.') ?></small>
           <hr class="my-2">
-          <button type="button" class="btn btn-sm btn-outline-warning w-100" id="ungroupBtn" style="display:none;"><i class="fas fa-object-ungroup me-1"></i><?php echo __('Ungroup from suite') ?></button>
+          <button type="button" class="btn btn-sm btn-outline-warning w-100" id="ungroupBtn" data-ahg-style="display:none;"><i class="fas fa-object-ungroup me-1"></i><?php echo __('Ungroup from suite') ?></button>
           <small class="text-muted d-block mt-1"><?php echo __('Rooms that share a wall auto-group and move together (matching dashed outline). Ungroup to move this one on its own.') ?></small>
           <hr class="my-2">
           <button type="button" class="btn btn-sm btn-outline-danger w-100" id="deleteRoomBtn"><i class="fas fa-trash me-1"></i><?php echo __('Delete room') ?></button>
         </div>
       </div>
-      <div class="card mb-3" id="doorCard" style="display:none;">
+      <div class="card mb-3" id="doorCard" data-ahg-style="display:none;">
         <div class="card-header py-2"><strong><i class="fas fa-door-open me-1"></i><?php echo __('Doors') ?></strong> <span class="small text-muted" id="doorRoomName"></span></div>
         <div class="card-body p-2">
           <p class="small text-muted mb-2"><?php echo __('Add a door to a wall, then drag it along that wall to position it. Double-click a door to remove it.') ?></p>
@@ -138,11 +138,11 @@ $urls = [
             <button type="button" class="btn btn-outline-primary" data-door="west"><?php echo __('Left') ?></button>
             <button type="button" class="btn btn-outline-primary" data-door="east"><?php echo __('Right') ?></button>
           </div>
-          <div id="edgeDoorBtns" class="d-flex flex-wrap gap-1 mb-2" style="display:none;"></div>
+          <div id="edgeDoorBtns" class="d-flex flex-wrap gap-1 mb-2" data-ahg-style="display:none;"></div>
           <div id="doorList" class="small"></div>
         </div>
       </div>
-      <div class="card mb-3" id="winCard" style="display:none;">
+      <div class="card mb-3" id="winCard" data-ahg-style="display:none;">
         <div class="card-header py-2"><strong><i class="fas fa-window-maximize me-1"></i><?php echo __('Windows') ?></strong> <span class="small text-muted" id="winRoomName"></span></div>
         <div class="card-body p-2">
           <p class="small text-muted mb-2"><?php echo __('Add windows to a wall - they show as glass openings in the 3D walkthrough, inside and out. Works on rectangular and shaped rooms (pick the wall below).') ?></p>
@@ -183,7 +183,7 @@ $urls = [
           <strong><?php echo __('Plan') ?></strong>
           <span class="small text-muted"><span id="planSave"><?php echo __('All changes saved') ?></span></span>
         </div>
-        <div class="card-body p-0"><div id="planWrap" style="width:100%;background:#f4f4f4;border-radius:0 0 .375rem .375rem;overflow:hidden;"></div></div>
+        <div class="card-body p-0"><div id="planWrap" data-ahg-style="width:100%;background:#f4f4f4;border-radius:0 0 .375rem .375rem;overflow:hidden;"></div></div>
       </div>
     </div>
   </div>

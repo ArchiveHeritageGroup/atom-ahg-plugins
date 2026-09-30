@@ -69,9 +69,9 @@
               <td>
                 <div class="d-flex align-items-center">
                   <?php if (isset($offer->featured_image_path) && $offer->featured_image_path): ?>
-                    <img src="<?php echo esc_entities($offer->featured_image_path); ?>" alt="" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                    <img src="<?php echo esc_entities($offer->featured_image_path); ?>" alt="" class="rounded me-2" data-ahg-style="width: 40px; height: 40px; object-fit: cover;">
                   <?php else: ?>
-                    <div class="bg-light rounded d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center me-2" data-ahg-style="width: 40px; height: 40px;">
                       <i class="fas fa-image text-muted small"></i>
                     </div>
                   <?php endif; ?>

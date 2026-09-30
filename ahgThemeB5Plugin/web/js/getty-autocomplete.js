@@ -117,11 +117,11 @@
                 });
                 
                 $item.html(
-                    '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+                    '<div data-ahg-style="display: flex; justify-content: space-between; align-items: center;">' +
                         '<strong>' + self.escapeHtml(result.label) + '</strong>' +
-                        '<span class="badge" style="background-color: ' + vocabColors[result.vocabulary] + '; color: #fff; font-size: 0.7em;">' + result.vocabulary + '</span>' +
+                        '<span class="badge" data-ahg-style="background-color: ' + vocabColors[result.vocabulary] + '; color: #fff; font-size: 0.7em;">' + result.vocabulary + '</span>' +
                     '</div>' +
-                    (result.scopeNote ? '<small style="color: #666;">' + self.escapeHtml(result.scopeNote) + '</small>' : '')
+                    (result.scopeNote ? '<small data-ahg-style="color: #666;">' + self.escapeHtml(result.scopeNote) + '</small>' : '')
                 );
                 
                 $item.data('getty', result);
@@ -140,7 +140,7 @@
             });
 
             // Add "Powered by Getty" footer
-            var $footer = $('<div style="padding: 5px 12px; background: #f8f9fa; font-size: 0.75em; color: #666; text-align: right;">Powered by Getty Vocabularies</div>');
+            var $footer = $('<div data-ahg-style="padding: 5px 12px; background: #f8f9fa; font-size: 0.75em; color: #666; text-align: right;">Powered by Getty Vocabularies</div>');
             $dropdown.append($footer);
 
             // Position dropdown
@@ -172,7 +172,7 @@
             // Add visual indicator
             var $badge = $input.siblings('.getty-selected-badge');
             if ($badge.length === 0) {
-                $badge = $('<span class="getty-selected-badge badge bg-info ms-2" style="font-size: 0.8em;"></span>');
+                $badge = $('<span class="getty-selected-badge badge bg-info ms-2" data-ahg-style="font-size: 0.8em;"></span>');
                 $input.after($badge);
             }
             $badge.text(result.vocabulary).attr('title', result.uri);

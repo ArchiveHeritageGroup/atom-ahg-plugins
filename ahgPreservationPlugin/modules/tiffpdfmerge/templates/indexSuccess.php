@@ -275,7 +275,7 @@ if ($informationObject) {
                     <div class="fw-semibold">${escapeHtml(f.name)}</div>
                     <small class="text-muted">${formatSize(f.size)}${f.width ? ` • ${f.width}×${f.height}px` : ''}</small>
                 </div>
-                <button class="btn btn-sm btn-outline-danger" onclick="window.removeFile(${f.id})"><i class="fas fa-times"></i></button>
+                <button class="btn btn-sm btn-outline-danger" data-ahg-call="removeFile" data-ahg-types="x" data-ahg-a0="${f.id}"><i class="fas fa-times"></i></button>
             </div>
         `).join('');
     }

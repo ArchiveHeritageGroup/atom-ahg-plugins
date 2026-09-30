@@ -27,14 +27,14 @@ try {
 
     <!-- Generate Summary Button -->
     <div class="mb-2">
-        <button type="button" class="btn btn-outline-info btn-sm w-100" id="aiSummarizeBtn" onclick="generateSummary(<?php echo $resource->id ?>)">
+        <button type="button" class="btn btn-outline-info btn-sm w-100" id="aiSummarizeBtn" data-ahg-call="generateSummary" data-ahg-types="x" data-ahg-a0="<?php echo $resource->id ?>">
             <i class="bi bi-file-text me-1"></i>Generate Summary
         </button>
     </div>
 
     <!-- Extract Entities Button -->
     <div class="mb-2">
-        <button type="button" class="btn btn-outline-primary btn-sm w-100" id="nerExtractBtn" onclick="extractEntities(<?php echo $resource->id ?>)">
+        <button type="button" class="btn btn-outline-primary btn-sm w-100" id="nerExtractBtn" data-ahg-call="extractEntities" data-ahg-types="x" data-ahg-a0="<?php echo $resource->id ?>">
             <i class="bi bi-diagram-3 me-1"></i>Extract Entities
         </button>
     </div>
@@ -84,14 +84,14 @@ try {
     ?>
     <?php if ($hasImage): ?>
     <div class="mb-2">
-        <button type="button" class="btn btn-outline-warning btn-sm w-100" id="aiDescribeBtn" onclick="describeObject(<?php echo $resource->id ?>)">
+        <button type="button" class="btn btn-outline-warning btn-sm w-100" id="aiDescribeBtn" data-ahg-call="describeObject" data-ahg-types="x" data-ahg-a0="<?php echo $resource->id ?>">
             <i class="bi bi-eye me-1"></i>Describe Object/Image
         </button>
     </div>
     <?php endif; ?>
 
     <!-- Results Area -->
-    <div id="aiResultsArea" class="mt-2" style="display: none;"></div>
+    <div id="aiResultsArea" class="mt-2" data-ahg-style="display: none;"></div>
 </div>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
@@ -161,7 +161,7 @@ function showResult(type, message, showRefresh = false) {
     const resultDiv = document.getElementById('aiResultsArea');
     let html = `<div class="alert alert-${type} py-2 small mb-0">${message}</div>`;
     if (showRefresh) {
-        html += `<button class="btn btn-sm btn-outline-secondary mt-2 w-100" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>`;
+        html += `<button class="btn btn-sm btn-outline-secondary mt-2 w-100" data-ahg-action="reload"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>`;
     }
     resultDiv.innerHTML = html;
     resultDiv.style.display = 'block';

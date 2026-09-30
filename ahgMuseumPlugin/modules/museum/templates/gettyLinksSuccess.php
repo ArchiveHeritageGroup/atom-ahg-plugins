@@ -149,7 +149,7 @@
         <td><?php echo number_format($link->confidence * 100, 0); ?>%</td>
         <td>
           <?php if ($link->status !== 'confirmed'): ?>
-          <form method="post" style="display: inline;">
+          <form method="post" data-ahg-style="display: inline;">
             <input type="hidden" name="link_id" value="<?php echo $link->id; ?>">
             <button type="submit" name="form_action" value="confirm" class="btn btn-sm btn-success">
               <?php echo __('Confirm'); ?>
@@ -157,7 +157,7 @@
           </form>
           <?php endif; ?>
           <?php if ($link->status !== 'rejected'): ?>
-          <form method="post" style="display: inline;">
+          <form method="post" data-ahg-style="display: inline;">
             <input type="hidden" name="link_id" value="<?php echo $link->id; ?>">
             <button type="submit" name="form_action" value="reject" class="btn btn-sm btn-danger">
               <?php echo __('Reject'); ?>

@@ -68,14 +68,14 @@
       <table class="table table-hover table-striped mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 100px;"><?php echo __('Status') ?></th>
+            <th data-ahg-style="width: 100px;"><?php echo __('Status') ?></th>
             <th><?php echo __('Archival Item') ?></th>
             <th><?php echo __('Requester') ?></th>
             <th><?php echo __('Institution') ?></th>
             <th><?php echo __('Planned Use') ?></th>
             <th><?php echo __('Need By') ?></th>
             <th><?php echo __('Submitted') ?></th>
-            <th style="width: 80px;"><?php echo __('Actions') ?></th>
+            <th data-ahg-style="width: 80px;"><?php echo __('Actions') ?></th>
           </tr>
         </thead>
         <tbody>
@@ -121,7 +121,7 @@
             </td>
             <td>
               <?php if (!empty($item->rtp_planned_use)): ?>
-                <div class="text-truncate" style="max-width: 150px;" title="<?php echo esc_entities($item->rtp_planned_use) ?>">
+                <div class="text-truncate" data-ahg-style="max-width: 150px;" title="<?php echo esc_entities($item->rtp_planned_use) ?>">
                   <?php echo esc_entities($item->rtp_planned_use) ?>
                 </div>
               <?php else: ?>

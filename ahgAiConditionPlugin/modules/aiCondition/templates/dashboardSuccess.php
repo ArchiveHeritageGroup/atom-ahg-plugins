@@ -95,13 +95,13 @@
                     $icon = $gradeIcons[$grade] ?? 'fa-question';
                 ?>
                 <div class="d-flex align-items-center mb-3">
-                    <span class="badge bg-<?php echo $color ?> me-2" style="min-width:100px">
+                    <span class="badge bg-<?php echo $color ?> me-2" data-ahg-style="min-width:100px">
                         <i class="fas <?php echo $icon ?> me-1"></i><?php echo ucfirst($grade) ?>
                     </span>
-                    <div class="progress flex-grow-1" style="height:12px">
-                        <div class="progress-bar bg-<?php echo $color ?>" style="width:<?php echo $pct ?>%"></div>
+                    <div class="progress flex-grow-1" data-ahg-style="height:12px">
+                        <div class="progress-bar bg-<?php echo $color ?>" data-ahg-style="width:<?php echo $pct ?>%"></div>
                     </div>
-                    <span class="ms-2 fw-bold" style="min-width:40px"><?php echo $count ?></span>
+                    <span class="ms-2 fw-bold" data-ahg-style="min-width:40px"><?php echo $count ?></span>
                     <span class="ms-1 text-muted small">(<?php echo $pct ?>%)</span>
                 </div>
                 <?php endforeach; ?>
@@ -131,13 +131,13 @@
                         $srcIcon = $sourceIcons[$src->source] ?? 'fa-question';
                 ?>
                 <div class="d-flex align-items-center mb-3">
-                    <span class="badge bg-<?php echo $srcColor ?> me-2" style="min-width:120px">
+                    <span class="badge bg-<?php echo $srcColor ?> me-2" data-ahg-style="min-width:120px">
                         <i class="fas <?php echo $srcIcon ?> me-1"></i><?php echo ucfirst(str_replace('_', ' ', $src->source)) ?>
                     </span>
-                    <div class="progress flex-grow-1" style="height:12px">
-                        <div class="progress-bar bg-<?php echo $srcColor ?>" style="width:<?php echo $srcPct ?>%"></div>
+                    <div class="progress flex-grow-1" data-ahg-style="height:12px">
+                        <div class="progress-bar bg-<?php echo $srcColor ?>" data-ahg-style="width:<?php echo $srcPct ?>%"></div>
                     </div>
-                    <span class="ms-2 fw-bold" style="min-width:40px"><?php echo $src->count ?></span>
+                    <span class="ms-2 fw-bold" data-ahg-style="min-width:40px"><?php echo $src->count ?></span>
                 </div>
                 <?php endforeach;
                 endif; ?>
@@ -169,9 +169,9 @@
                         $dmgColor = $damageColors[$dmg->damage_type] ?? '#6c757d';
                 ?>
                 <div class="d-flex align-items-center mb-2">
-                    <span class="badge me-2" style="min-width:110px;background:<?php echo $dmgColor ?>"><?php echo ucfirst(str_replace('_', ' ', $dmg->damage_type)) ?></span>
-                    <div class="progress flex-grow-1" style="height:10px">
-                        <div class="progress-bar" style="width:<?php echo $dmgPct ?>%;background:<?php echo $dmgColor ?>"></div>
+                    <span class="badge me-2" data-ahg-style="min-width:110px;background:<?php echo $dmgColor ?>"><?php echo ucfirst(str_replace('_', ' ', $dmg->damage_type)) ?></span>
+                    <div class="progress flex-grow-1" data-ahg-style="height:10px">
+                        <div class="progress-bar" data-ahg-style="width:<?php echo $dmgPct ?>%;background:<?php echo $dmgColor ?>"></div>
                     </div>
                     <span class="ms-2 small fw-bold"><?php echo $dmg->count ?></span>
                 </div>

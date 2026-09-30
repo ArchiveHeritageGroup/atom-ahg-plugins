@@ -45,7 +45,7 @@ $badge = ['captured' => 'secondary', 'classified' => 'warning', 'declared' => 's
                 <?php if ($e->status !== 'declared'): ?>
                 <form method="post" class="d-flex gap-1 align-items-center" action="<?php echo url_for(['module' => 'recordsManage', 'action' => 'emailCapture']); ?>">
                     <input type="hidden" name="do" value="classify"><input type="hidden" name="id" value="<?php echo $e->id; ?>">
-                    <select name="fileplan_node_id" class="form-select form-select-sm" style="max-width:240px" required>
+                    <select name="fileplan_node_id" class="form-select form-select-sm" data-ahg-style="max-width:240px" required>
                         <option value=""><?php echo __('— file-plan node —'); ?></option>
                         <?php foreach ((array) $nodes as $n): ?><option value="<?php echo $n->id; ?>" <?php echo $e->fileplan_node_id == $n->id ? 'selected' : ''; ?>><?php echo str_repeat('— ', (int) $n->depth).htmlspecialchars($n->code.' '.$n->title); ?></option><?php endforeach; ?>
                     </select>

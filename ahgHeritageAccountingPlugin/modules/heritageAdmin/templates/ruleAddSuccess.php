@@ -48,7 +48,7 @@
                                 <label class="form-label"><?php echo __('Rule Code'); ?> <span class="text-danger">*</span></label>
                                 <input type="text" name="code" class="form-control" required
                                        value="<?php echo $isEdit ? esc_entities($rule->code) : ''; ?>"
-                                       placeholder="e.g. REC001" maxlength="50" style="text-transform: uppercase;">
+                                       placeholder="e.g. REC001" maxlength="50" data-ahg-style="text-transform: uppercase;">
                             </div>
                         </div>
 

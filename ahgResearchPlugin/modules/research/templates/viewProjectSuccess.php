@@ -445,7 +445,7 @@
                                         <?php endif; ?>
                                     </div>
 
-                                    <form method="post" action="<?php echo url_for('@research_project_remove_resource?id=' . $project->id); ?>" onsubmit="return confirm('<?php echo __('Remove this item?'); ?>');">
+                                    <form method="post" action="<?php echo url_for('@research_project_remove_resource?id=' . $project->id); ?>" data-ahg-confirm="<?php echo __('Remove this item?'); ?>">
                                         <input type="hidden" name="resource_id" value="<?php echo (int) $res->id; ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="<?php echo __('Remove'); ?>"><i class="fas fa-times"></i></button>
                                     </form>

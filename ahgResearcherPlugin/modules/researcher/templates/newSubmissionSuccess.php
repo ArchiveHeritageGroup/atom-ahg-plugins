@@ -65,7 +65,7 @@
               <input type="hidden" name="parent_object_id" id="parentObjectId" value="">
               <input type="text" class="form-control" id="parentSearch" placeholder="Type to search for a parent record..." autocomplete="off">
               <small class="text-muted">Place this submission under an existing archival record. Leave blank for root level.</small>
-              <div id="parentResults" class="list-group mt-1" style="display:none; position:absolute; z-index:999; max-height:200px; overflow-y:auto;"></div>
+              <div id="parentResults" class="list-group mt-1" data-ahg-style="display:none; position:absolute; z-index:999; max-height:200px; overflow-y:auto;"></div>
             </div>
 
             <hr>

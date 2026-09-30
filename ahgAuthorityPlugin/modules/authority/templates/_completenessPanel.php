@@ -23,10 +23,10 @@ $color = $levelColors[$level] ?? 'secondary';
   <div class="card-body py-2">
     <div class="d-flex align-items-center">
       <div class="flex-grow-1 me-2">
-        <div class="progress" style="height:20px">
+        <div class="progress" data-ahg-style="height:20px">
           <div class="progress-bar bg-<?php echo $color; ?>"
                role="progressbar"
-               style="width:<?php echo $score; ?>%"
+               data-ahg-style="width:<?php echo $score; ?>%"
                aria-valuenow="<?php echo $score; ?>"
                aria-valuemin="0" aria-valuemax="100">
             <?php echo $score; ?>%

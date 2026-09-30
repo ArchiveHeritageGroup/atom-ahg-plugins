@@ -121,7 +121,7 @@
                 <table class="table table-striped table-bordered mb-3">
                   <thead>
                     <tr>
-                      <th style="width: 3rem;"><span class="visually-hidden"><?php echo __('Select') ?></span></th>
+                      <th data-ahg-style="width: 3rem;"><span class="visually-hidden"><?php echo __('Select') ?></span></th>
                       <th><?php echo __('Object') ?></th>
                       <th><?php echo __('Here since') ?></th>
                     </tr>

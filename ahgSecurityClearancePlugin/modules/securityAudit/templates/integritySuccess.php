@@ -1,5 +1,5 @@
 <?php $r = $sf_data->getRaw('result'); $intact = !empty($r['intact']); ?>
-<div class="container py-4" style="max-width: 720px">
+<div class="container py-4" data-ahg-style="max-width: 720px">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="h2"><i class="fas fa-link me-2"></i><?php echo __('Audit trail integrity'); ?></span>
         <a href="<?php echo url_for(['module' => 'securityAudit', 'action' => 'dashboard']); ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Back to dashboard'); ?></a>

@@ -142,7 +142,7 @@ $activitySummary = $dashboardData['activity_summary'] ?? [];
                         <span class="badge bg-light text-dark ms-2"><?php echo $log->action; ?></span>
                     </div>
                     <?php if ($log->object_title): ?>
-                    <small class="text-truncate" style="max-width: 200px;"><?php echo esc_specialchars($log->object_title); ?></small>
+                    <small class="text-truncate" data-ahg-style="max-width: 200px;"><?php echo esc_specialchars($log->object_title); ?></small>
                     <?php endif; ?>
                 </div>
             </div>

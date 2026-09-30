@@ -88,7 +88,7 @@
                 <button class="ql-clean"></button>
               </span>
             </div>
-            <div id="editor-container" style="min-height:300px;"></div>
+            <div id="editor-container" data-ahg-style="min-height:300px;"></div>
             <textarea name="content" id="nl-content" class="d-none"><?php echo htmlspecialchars($newsletter->content ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
           </div>
 

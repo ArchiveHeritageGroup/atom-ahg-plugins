@@ -51,8 +51,8 @@ $categories = [
 ?>
     <div class="col-md-6 col-lg-4 mb-4">
         <div class="card h-100 template-card">
-            <div class="card-header" style="background-color: <?php echo $info['color']; ?>;">
-                <h6 class="mb-0" style="color: #fff;"><i class="fas <?php echo $info['icon']; ?> me-2" style="color: #fff;"></i><?php echo __($info['label']); ?></h6>
+            <div class="card-header" data-ahg-style="background-color: <?php echo $info['color']; ?>;">
+                <h6 class="mb-0" data-ahg-style="color: #fff;"><i class="fas <?php echo $info['icon']; ?> me-2" data-ahg-style="color: #fff;"></i><?php echo __($info['label']); ?></h6>
             </div>
             <ul class="list-group list-group-flush">
             <?php if (count($catTemplates) > 0): ?>
@@ -75,10 +75,10 @@ $categories = [
                                     <i class="fas fa-download"></i>
                                 </a>
                             <?php endif; ?>
-                            <button class="btn btn-outline-warning" onclick="replaceTemplate(<?php echo $t->id; ?>, '<?php echo esc_entities(addslashes($t->name)); ?>')" title="Replace">
+                            <button class="btn btn-outline-warning" data-ahg-call="replaceTemplate" data-ahg-types="x,s" data-ahg-a0="<?php echo $t->id; ?>" data-ahg-a1="<?php echo esc_entities($t->name); ?>" title="Replace">
                                 <i class="fas fa-sync"></i>
                             </button>
-                            <button class="btn btn-outline-danger" onclick="deleteTemplate(<?php echo $t->id; ?>)" title="Delete">
+                            <button class="btn btn-outline-danger" data-ahg-call="deleteTemplate" data-ahg-types="x" data-ahg-a0="<?php echo $t->id; ?>" title="Delete">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -101,8 +101,8 @@ $categories = [
             <form method="post" action="/admin/privacy/templates" enctype="multipart/form-data">
 <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <input type="hidden" name="form_action" value="upload">
-                <div class="modal-header" style="background-color: #1a5f2a;">
-                    <h5 class="modal-title" style="color: #fff;"><i class="fas fa-upload me-2"></i>Upload Template</h5>
+                <div class="modal-header" data-ahg-style="background-color: #1a5f2a;">
+                    <h5 class="modal-title" data-ahg-style="color: #fff;"><i class="fas fa-upload me-2"></i>Upload Template</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -145,8 +145,8 @@ $categories = [
 <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <input type="hidden" name="form_action" value="replace">
                 <input type="hidden" name="id" id="replace_id">
-                <div class="modal-header" style="background-color: #d4a200;">
-                    <h5 class="modal-title" style="color: #fff;"><i class="fas fa-sync me-2"></i>Replace Template</h5>
+                <div class="modal-header" data-ahg-style="background-color: #d4a200;">
+                    <h5 class="modal-title" data-ahg-style="color: #fff;"><i class="fas fa-sync me-2"></i>Replace Template</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">

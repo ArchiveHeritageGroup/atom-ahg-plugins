@@ -428,12 +428,12 @@
     },
 
     showTooltip: function(event, d) {
-      var html = '<div style="border-bottom:2px solid ' +
+      var html = '<div data-ahg-style="border-bottom:2px solid ' +
         (this.options.colors[d.ownerType] || '#999') + ';padding-bottom:6px;margin-bottom:6px">' +
-        '<strong style="font-size:14px">' + (d.label || 'Unknown') + '</strong>';
+        '<strong data-ahg-style="font-size:14px">' + (d.label || 'Unknown') + '</strong>';
 
       if (d.ownerType && d.ownerType !== 'unknown') {
-        html += ' <span style="color:#888;font-size:12px">(' +
+        html += ' <span data-ahg-style="color:#888;font-size:12px">(' +
           d.ownerType.replace(/_/g, ' ') + ')</span>';
       }
       html += '</div>';
@@ -449,14 +449,14 @@
           probable: '#8bc34a', possible: '#ffb74d',
           uncertain: '#ef5350', unknown: '#bdbdbd'
         };
-        html += '<div style="margin-top:4px">' +
-          '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' +
+        html += '<div data-ahg-style="margin-top:4px">' +
+          '<span data-ahg-style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' +
           (certaintyColors[d.certainty] || '#bdbdbd') + ';margin-right:4px"></span>' +
           'Certainty: ' + d.certainty + '</div>';
       }
 
       if (d.isGap) {
-        html += '<div style="color:#e65100;margin-top:4px">\u{26A0}\u{FE0F} Gap in provenance chain</div>';
+        html += '<div data-ahg-style="color:#e65100;margin-top:4px">\u{26A0}\u{FE0F} Gap in provenance chain</div>';
       }
 
       this.tooltip

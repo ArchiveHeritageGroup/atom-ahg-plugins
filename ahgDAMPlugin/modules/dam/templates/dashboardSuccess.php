@@ -14,7 +14,7 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
 <?php end_slot(); ?>
 
 <?php slot('sidebar'); ?>
-  <div class="card mb-3" style="background-color: #dc3545;">
+  <div class="card mb-3" data-ahg-style="background-color: #dc3545;">
     <div class="card-body py-2 text-white text-center">
       <i class="fas fa-cog"></i> <?php echo __('DAM Actions'); ?>
     </div>
@@ -39,7 +39,7 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
   </div>
 
   <?php if (ahg_is_plugin_enabled('ahgLoanPlugin')): ?>
-  <div class="card mb-3" style="background-color: #ffc107;">
+  <div class="card mb-3" data-ahg-style="background-color: #ffc107;">
     <div class="card-body py-2 text-dark text-center">
       <i class="fas fa-exchange-alt"></i> <?php echo __('Licensing'); ?>
     </div>
@@ -184,8 +184,8 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
           <thead class="table-light">
             <tr>
               <th><?php echo __('Title'); ?></th>
-              <th style="width:150px"><?php echo __('Identifier'); ?></th>
-              <th style="width:100px"></th>
+              <th data-ahg-style="width:150px"><?php echo __('Identifier'); ?></th>
+              <th data-ahg-style="width:100px"></th>
             </tr>
           </thead>
           <tbody>

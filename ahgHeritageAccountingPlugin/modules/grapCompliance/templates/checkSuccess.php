@@ -61,7 +61,7 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 100px;"><?php echo __('Code') ?></th>
+                        <th data-ahg-style="width: 100px;"><?php echo __('Code') ?></th>
                         <th><?php echo __('Check') ?></th>
                         <th><?php echo __('Reference') ?></th>
                         <th><?php echo __('Category') ?></th>

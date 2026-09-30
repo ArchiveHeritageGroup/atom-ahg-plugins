@@ -89,7 +89,7 @@
                                 <tr>
                                     <th>Month</th>
                                     <th class="text-end">DOIs Minted</th>
-                                    <th style="width: 50%"></th>
+                                    <th data-ahg-style="width: 50%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -102,8 +102,8 @@
                                         <td><?php echo htmlspecialchars($month->month) ?></td>
                                         <td class="text-end"><?php echo $month->count ?></td>
                                         <td>
-                                            <div class="progress" style="height: 20px;">
-                                                <div class="progress-bar bg-primary" style="width: <?php echo $percentage ?>%"></div>
+                                            <div class="progress" data-ahg-style="height: 20px;">
+                                                <div class="progress-bar bg-primary" data-ahg-style="width: <?php echo $percentage ?>%"></div>
                                             </div>
                                         </td>
                                     </tr>
@@ -130,7 +130,7 @@
                                 <tr>
                                     <th>Repository</th>
                                     <th class="text-end">Count</th>
-                                    <th style="width: 40%"></th>
+                                    <th data-ahg-style="width: 40%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,8 +143,8 @@
                                         <td><?php echo htmlspecialchars($repo->repository ?? 'No repository') ?></td>
                                         <td class="text-end"><?php echo $repo->count ?></td>
                                         <td>
-                                            <div class="progress" style="height: 20px;">
-                                                <div class="progress-bar bg-success" style="width: <?php echo $percentage ?>%"></div>
+                                            <div class="progress" data-ahg-style="height: 20px;">
+                                                <div class="progress-bar bg-success" data-ahg-style="width: <?php echo $percentage ?>%"></div>
                                             </div>
                                         </td>
                                     </tr>

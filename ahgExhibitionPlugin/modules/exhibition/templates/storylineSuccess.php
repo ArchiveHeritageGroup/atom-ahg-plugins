@@ -63,11 +63,11 @@ if ($stopsRaw instanceof sfOutputEscaperArrayDecorator) {
               <div class="d-flex">
                 <div class="stop-number me-3">
                   <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                       style="width: 40px; height: 40px; font-weight: bold;">
+                       data-ahg-style="width: 40px; height: 40px; font-weight: bold;">
                     <?php echo $stop['stop_order']; ?>
                   </div>
                   <?php if ($index < count($stops) - 1): ?>
-                    <div class="stop-connector" style="width: 2px; height: 30px; background: #dee2e6; margin: 5px auto;"></div>
+                    <div class="stop-connector" data-ahg-style="width: 2px; height: 30px; background: #dee2e6; margin: 5px auto;"></div>
                   <?php endif; ?>
                 </div>
                 <div class="flex-grow-1">
@@ -95,7 +95,7 @@ if ($stopsRaw instanceof sfOutputEscaperArrayDecorator) {
                         <i class="fas fa-edit"></i>
                       </button>
                       <button type="button" class="btn btn-outline-danger"
-                              onclick="deleteStop(<?php echo $stop['id']; ?>, '<?php echo htmlspecialchars(addslashes($stop['title'])); ?>')">
+                              data-ahg-call="deleteStop" data-ahg-types="x,s" data-ahg-a0="<?php echo $stop['id']; ?>" data-ahg-a1="<?php echo htmlspecialchars($stop['title']); ?>">
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
@@ -167,7 +167,7 @@ if ($stopsRaw instanceof sfOutputEscaperArrayDecorator) {
           <i class="fas fa-arrow-left me-2"></i> Back to Storylines
         </a>
         <a href="#" class="list-group-item list-group-item-action"
-           onclick="window.print(); return false;">
+           data-ahg-action="print" data-ahg-prevent="1">
           <i class="fas fa-print me-2"></i> Print Script
         </a>
       </div>
@@ -177,7 +177,7 @@ if ($stopsRaw instanceof sfOutputEscaperArrayDecorator) {
       <div class="card-header">
         <h5 class="mb-0">Available Objects</h5>
       </div>
-      <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+      <div class="card-body" data-ahg-style="max-height: 300px; overflow-y: auto;">
         <?php if (!empty($exhibitionObjects)): ?>
           <ul class="list-unstyled small mb-0">
             <?php foreach ($exhibitionObjects as $obj): ?>

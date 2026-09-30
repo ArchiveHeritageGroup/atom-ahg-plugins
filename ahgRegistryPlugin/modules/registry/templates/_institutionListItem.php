@@ -35,9 +35,9 @@
    class="list-group-item list-group-item-action">
   <div class="d-flex align-items-start">
     <?php if (!empty($item->logo_path)): ?>
-      <img src="<?php echo htmlspecialchars($item->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 flex-shrink-0" style="width: 56px; height: 56px; object-fit: contain;">
+      <img src="<?php echo htmlspecialchars($item->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 flex-shrink-0" data-ahg-style="width: 56px; height: 56px; object-fit: contain;">
     <?php else: ?>
-      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 56px; height: 56px;">
+      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" data-ahg-style="width: 56px; height: 56px;">
         <i class="fas fa-university text-muted"></i>
       </div>
     <?php endif; ?>
@@ -62,7 +62,7 @@
 
       <div class="mb-1">
         <?php if (!empty($type)): ?>
-          <span class="badge <?php echo $typeClass; ?>" style="<?php echo $typeStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $type)), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="badge <?php echo $typeClass; ?>" data-ahg-style="<?php echo $typeStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $type)), ENT_QUOTES, 'UTF-8'); ?></span>
         <?php endif; ?>
         <?php if ($isMine): ?>
           <span class="badge bg-info ms-1"><i class="fas fa-user me-1"></i><?php echo __('My Institution'); ?></span>

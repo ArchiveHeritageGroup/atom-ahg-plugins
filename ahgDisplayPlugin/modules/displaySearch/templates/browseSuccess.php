@@ -115,7 +115,7 @@
                     </div>
                     
                     <!-- Sort -->
-                    <select class="form-select form-select-sm" style="width: auto;" onchange="location=this.value">
+                    <select class="form-select form-select-sm" data-ahg-style="width: auto;" data-ahg-navigate="">
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'title_asc'])); ?>" <?php echo ($params['sort'] ?? '') === 'title_asc' ? 'selected' : ''; ?>>Title A-Z</option>
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'title_desc'])); ?>" <?php echo ($params['sort'] ?? '') === 'title_desc' ? 'selected' : ''; ?>>Title Z-A</option>
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'date_desc'])); ?>" <?php echo ($params['sort'] ?? '') === 'date_desc' ? 'selected' : ''; ?>>Date Newest</option>

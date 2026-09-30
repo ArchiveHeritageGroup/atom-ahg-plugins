@@ -154,9 +154,9 @@ $badges = [
                             <thead class="table-light">
                                 <tr>
                                     <th>Object</th>
-                                    <th class="text-center" style="width: 100px;">PII Count</th>
-                                    <th style="width: 150px;">Scanned</th>
-                                    <th style="width: 120px;">Actions</th>
+                                    <th class="text-center" data-ahg-style="width: 100px;">PII Count</th>
+                                    <th data-ahg-style="width: 150px;">Scanned</th>
+                                    <th data-ahg-style="width: 120px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

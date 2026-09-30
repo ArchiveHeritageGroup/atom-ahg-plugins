@@ -48,7 +48,7 @@
                 <hr>
                 <h6 class="small fw-semibold mb-2"><i class="fas fa-users me-1 text-info"></i> Join User Groups (optional)</h6>
                 <p class="text-muted small mb-2">Select groups to join when you create your account.</p>
-                <div class="row row-cols-1 g-2 mb-3" style="max-height:280px;overflow-y:auto;">
+                <div class="row row-cols-1 g-2 mb-3" data-ahg-style="max-height:280px;overflow-y:auto;">
                   <?php foreach ($groups as $g): ?>
                     <div class="col">
                       <div class="form-check border rounded p-2 ps-4">

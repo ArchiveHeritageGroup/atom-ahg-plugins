@@ -71,7 +71,7 @@ if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
           <div class="card mb-3 <?php echo $isPast ? 'opacity-75' : ''; ?>">
             <div class="card-body">
               <div class="row align-items-center">
-                <div class="col-auto text-center" style="min-width: 80px;">
+                <div class="col-auto text-center" data-ahg-style="min-width: 80px;">
                   <div class="<?php echo $isToday ? 'bg-primary text-white' : ($isPast ? 'bg-secondary text-white' : 'bg-light'); ?> rounded p-2">
                     <div class="h4 mb-0"><?php echo date('d', strtotime($eventDate)); ?></div>
                     <small><?php echo date('M', strtotime($eventDate)); ?></small>
@@ -113,7 +113,7 @@ if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
                         <i class="fas fa-edit"></i>
                       </button>
                       <button type="button" class="btn btn-outline-danger"
-                              onclick="deleteEvent(<?php echo $event['id']; ?>, '<?php echo htmlspecialchars(addslashes($event['title'])); ?>')">
+                              data-ahg-call="deleteEvent" data-ahg-types="x,s" data-ahg-a0="<?php echo $event['id']; ?>" data-ahg-a1="<?php echo htmlspecialchars($event['title']); ?>">
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
@@ -156,7 +156,7 @@ if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>
@@ -291,7 +291,7 @@ if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
             </div>
           </div>
 
-          <div class="mb-3" id="addPriceRow" style="display: none;">
+          <div class="mb-3" id="addPriceRow" data-ahg-style="display: none;">
             <label class="form-label">Ticket Price (ZAR)</label>
             <input type="number" name="ticket_price" class="form-control" min="0" step="0.01">
           </div>

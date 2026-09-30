@@ -95,8 +95,8 @@
                   <?php if ($totalValue > 0): ?>
                   <?php $pct = ($amount / $totalValue) * 100; ?>
                   <div class="d-flex align-items-center justify-content-end">
-                    <div class="progress me-2" style="width: 60px; height: 6px;">
-                      <div class="progress-bar bg-primary" style="width: <?php echo $pct; ?>%"></div>
+                    <div class="progress me-2" data-ahg-style="width: 60px; height: 6px;">
+                      <div class="progress-bar bg-primary" data-ahg-style="width: <?php echo $pct; ?>%"></div>
                     </div>
                     <span class="small"><?php echo number_format($pct, 1); ?>%</span>
                   </div>

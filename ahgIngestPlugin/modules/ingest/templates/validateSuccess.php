@@ -26,8 +26,8 @@ $rowCount = $sf_data->getRaw('rowCount') ?? 0;
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 58%"></div>
+    <div class="progress mt-2" data-ahg-style="height: 4px;">
+        <div class="progress-bar" data-ahg-style="width: 58%"></div>
     </div>
 </div>
 
@@ -78,11 +78,11 @@ $rowCount = $sf_data->getRaw('rowCount') ?? 0;
             <table class="table table-sm table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 8%"><?php echo __('Row') ?></th>
-                        <th style="width: 10%"><?php echo __('Severity') ?></th>
-                        <th style="width: 15%"><?php echo __('Field') ?></th>
+                        <th data-ahg-style="width: 8%"><?php echo __('Row') ?></th>
+                        <th data-ahg-style="width: 10%"><?php echo __('Severity') ?></th>
+                        <th data-ahg-style="width: 15%"><?php echo __('Field') ?></th>
                         <th><?php echo __('Message') ?></th>
-                        <th style="width: 20%"><?php echo __('Actions') ?></th>
+                        <th data-ahg-style="width: 20%"><?php echo __('Actions') ?></th>
                     </tr>
                 </thead>
                 <tbody>

@@ -146,7 +146,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
       <!-- TK Labels -->
       <div class="col-md-4 mb-4">
         <div class="card h-100" id="tk-labels">
-          <div class="card-header" style="background-color: #1a4d2e; color: white;">
+          <div class="card-header" data-ahg-style="background-color: #1a4d2e; color: white;">
             <h5 class="mb-0">Traditional Knowledge Labels</h5>
           </div>
           <div class="card-body">
@@ -156,7 +156,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
                 <?php foreach ($tkLabelsRaw as $tk): ?>
                   <li class="mb-2">
                     <?php if (!empty($tk->icon_url)): ?>
-                      <img src="<?php echo htmlspecialchars($tk->icon_url); ?>" alt="" style="width: 20px; height: 20px;" class="me-1">
+                      <img src="<?php echo htmlspecialchars($tk->icon_url); ?>" alt="" data-ahg-style="width: 20px; height: 20px;" class="me-1">
                     <?php endif; ?>
                     <?php if (!empty($tk->uri)): ?>
                       <a href="<?php echo htmlspecialchars($tk->uri); ?>" target="_blank">

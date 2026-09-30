@@ -107,7 +107,7 @@
               <a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'show', 'id' => $exhibition['id']]); ?>" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
                   <h6 class="mb-1"><?php echo htmlspecialchars($exhibition['title']); ?></h6>
-                  <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+                  <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
                     <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
                   </span>
                 </div>
@@ -138,7 +138,7 @@
             <div class="col">
               <div class="p-2">
                 <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
-                     style="width: 50px; height: 50px; background-color: <?php echo $statusInfo['color'] ?? '#999'; ?>; color: white;">
+                     data-ahg-style="width: 50px; height: 50px; background-color: <?php echo $statusInfo['color'] ?? '#999'; ?>; color: white;">
                   <strong><?php echo $count; ?></strong>
                 </div>
                 <p class="mb-0 small"><?php echo $statusInfo['label'] ?? $status; ?></p>

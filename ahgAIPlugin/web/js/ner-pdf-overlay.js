@@ -417,8 +417,8 @@ class NerPdfOverlay {
 
             html += `
                 <div class="entity-type-group">
-                    <div class="entity-type-header" style="border-left: 3px solid ${typeData.borderColor};">
-                        <span class="badge" style="background: ${typeData.borderColor};">${typeData.label}</span>
+                    <div class="entity-type-header" data-ahg-style="border-left: 3px solid ${typeData.borderColor};">
+                        <span class="badge" data-ahg-style="background: ${typeData.borderColor};">${typeData.label}</span>
                         <span class="badge bg-secondary ms-1">${typeEntities.length}</span>
                     </div>
                     <div class="entity-type-items">

@@ -14,7 +14,7 @@
     </div>
     <form method="post" class="d-flex gap-2">
         <input type="hidden" name="do" value="update_status">
-        <select name="status" class="form-select form-select-sm" style="width:auto">
+        <select name="status" class="form-select form-select-sm" data-ahg-style="width:auto">
             <?php foreach (['inquiry', 'requested', 'approved', 'agreed', 'in_transit_out', 'on_loan', 'in_transit_return', 'returned', 'cancelled', 'declined'] as $s): ?>
                 <option value="<?php echo $s; ?>" <?php echo $loan->status === $s ? 'selected' : ''; ?>><?php echo ucfirst(str_replace('_', ' ', $s)); ?></option>
             <?php endforeach; ?>

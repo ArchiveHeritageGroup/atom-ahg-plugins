@@ -207,9 +207,9 @@
             <i class="fas fa-lock fa-2x text-success mb-2"></i>
             <p class="small text-muted mb-0"><?php echo __('Your payment is secured with SSL encryption'); ?></p>
             <div class="mt-2">
-              <img src="/plugins/ahgCartPlugin/web/images/payfast-logo.png" alt="PayFast" height="30" class="me-2" onerror="this.style.display='none'">
-              <img src="/plugins/ahgCartPlugin/web/images/visa.png" alt="Visa" height="20" class="me-1" onerror="this.style.display='none'">
-              <img src="/plugins/ahgCartPlugin/web/images/mastercard.png" alt="Mastercard" height="20" onerror="this.style.display='none'">
+              <img src="/plugins/ahgCartPlugin/web/images/payfast-logo.png" alt="PayFast" height="30" class="me-2" data-ahg-onerror="hide">
+              <img src="/plugins/ahgCartPlugin/web/images/visa.png" alt="Visa" height="20" class="me-1" data-ahg-onerror="hide">
+              <img src="/plugins/ahgCartPlugin/web/images/mastercard.png" alt="Mastercard" height="20" data-ahg-onerror="hide">
             </div>
           </div>
         </div>

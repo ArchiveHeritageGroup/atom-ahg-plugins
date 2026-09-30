@@ -169,7 +169,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_primary_color"><?php echo __('Primary Color'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_primary_color_picker" value="<?php echo htmlspecialchars($settings['ahg_primary_color'] ?? '#1a5f7a'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_primary_color_picker" value="<?php echo htmlspecialchars($settings['ahg_primary_color'] ?? '#1a5f7a'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_primary_color" name="settings[ahg_primary_color]" value="<?php echo htmlspecialchars($settings['ahg_primary_color'] ?? '#1a5f7a'); ?>">
                                             </div>
                                         </div>
@@ -179,7 +179,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_secondary_color"><?php echo __('Secondary Color'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_secondary_color_picker" value="<?php echo htmlspecialchars($settings['ahg_secondary_color'] ?? '#57837b'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_secondary_color_picker" value="<?php echo htmlspecialchars($settings['ahg_secondary_color'] ?? '#57837b'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_secondary_color" name="settings[ahg_secondary_color]" value="<?php echo htmlspecialchars($settings['ahg_secondary_color'] ?? '#57837b'); ?>">
                                             </div>
                                         </div>
@@ -192,7 +192,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_card_header_bg"><?php echo __('Card Header Background'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_card_header_bg" name="settings[ahg_card_header_bg]" value="<?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Background color for card headers'); ?></small>
@@ -203,7 +203,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_card_header_text"><?php echo __('Card Header Text'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_text_picker" value="<?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_text_picker" value="<?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_card_header_text" name="settings[ahg_card_header_text]" value="<?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Text color for card headers'); ?></small>
@@ -214,7 +214,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_button_bg"><?php echo __('Button Background'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_button_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_button_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_button_bg" name="settings[ahg_button_bg]" value="<?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Background color for primary buttons'); ?></small>
@@ -225,7 +225,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_button_text"><?php echo __('Button Text'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_button_text_picker" value="<?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_button_text_picker" value="<?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_button_text" name="settings[ahg_button_text]" value="<?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Text color for primary buttons'); ?></small>
@@ -236,7 +236,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_link_color"><?php echo __('Link Color'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_link_color_picker" value="<?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_link_color_picker" value="<?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_link_color" name="settings[ahg_link_color]" value="<?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>">
                                             </div>
                                             <small class="form-text text-muted"><?php echo __('Color for hyperlinks'); ?></small>
@@ -247,7 +247,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_sidebar_bg"><?php echo __('Sidebar Background'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_sidebar_bg'] ?? '#f8f9fa'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_bg_picker" value="<?php echo htmlspecialchars($settings['ahg_sidebar_bg'] ?? '#f8f9fa'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_sidebar_bg" name="settings[ahg_sidebar_bg]" value="<?php echo htmlspecialchars($settings['ahg_sidebar_bg'] ?? '#f8f9fa'); ?>">
                                             </div>
                                         </div>
@@ -257,7 +257,7 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label" for="ahg_sidebar_text"><?php echo __('Sidebar Text'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_text_picker" value="<?php echo htmlspecialchars($settings['ahg_sidebar_text'] ?? '#333333'); ?>" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_text_picker" value="<?php echo htmlspecialchars($settings['ahg_sidebar_text'] ?? '#333333'); ?>" data-ahg-style="width: 50px; padding: 2px;">
                                                 <input type="text" class="form-control" id="ahg_sidebar_text" name="settings[ahg_sidebar_text]" value="<?php echo htmlspecialchars($settings['ahg_sidebar_text'] ?? '#333333'); ?>">
                                             </div>
                                         </div>
@@ -268,12 +268,12 @@ slot('title', $title);
                                         <label class="col-sm-3 col-form-label"><?php echo __('Preview'); ?></label>
                                         <div class="col-sm-9">
                                             <div class="card" id="theme-preview-card">
-                                                <div class="card-header" id="preview-card-header" style="background-color: <?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>; color: <?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>;">
-                                                    <h6 class="mb-0" style="color: inherit;"><i class="fas fa-eye me-2"></i>Preview Header</h6>
+                                                <div class="card-header" id="preview-card-header" data-ahg-style="background-color: <?php echo htmlspecialchars($settings['ahg_card_header_bg'] ?? '#1a5f2a'); ?>; color: <?php echo htmlspecialchars($settings['ahg_card_header_text'] ?? '#ffffff'); ?>;">
+                                                    <h6 class="mb-0" data-ahg-style="color: inherit;"><i class="fas fa-eye me-2"></i>Preview Header</h6>
                                                 </div>
                                                 <div class="card-body">
-                                                    <p>Sample text with <a href="#" id="preview-link" style="color: <?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>;">a link</a>.</p>
-                                                    <button type="button" class="btn" id="preview-button" style="background-color: <?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>; color: <?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>;">Sample Button</button>
+                                                    <p>Sample text with <a href="#" id="preview-link" data-ahg-style="color: <?php echo htmlspecialchars($settings['ahg_link_color'] ?? '#1a5f2a'); ?>;">a link</a>.</p>
+                                                    <button type="button" class="btn" id="preview-button" data-ahg-style="background-color: <?php echo htmlspecialchars($settings['ahg_button_bg'] ?? '#1a5f2a'); ?>; color: <?php echo htmlspecialchars($settings['ahg_button_text'] ?? '#ffffff'); ?>;">Sample Button</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -955,7 +955,7 @@ slot('title', $title);
                                     <legend><?php echo __('Field Mapping'); ?></legend>
                                     <p class="text-muted"><?php echo __('Configure where extracted metadata is saved:'); ?></p>
                                     <table class="table table-sm table-bordered">
-                                        <thead class="thead-dark"><tr><th style="width:20%">Metadata Source</th><th style="width:26%">Archives (ISAD)</th><th style="width:27%">Museum (Collections Procedures)</th><th style="width:27%">DAM</th></tr></thead>
+                                        <thead class="thead-dark"><tr><th data-ahg-style="width:20%">Metadata Source</th><th data-ahg-style="width:26%">Archives (ISAD)</th><th data-ahg-style="width:27%">Museum (Collections Procedures)</th><th data-ahg-style="width:27%">DAM</th></tr></thead>
                                         <tbody>
                                             <tr>
                                                 <td><i class="fas fa-heading text-muted"></i> Title</td>
@@ -1746,7 +1746,7 @@ slot('title', $title);
                                                    name="settings[voice_confidence_threshold]"
                                                    min="0.3" max="0.95" step="0.05"
                                                    value="<?php echo htmlspecialchars($settings['voice_confidence_threshold'] ?? '0.4') ?>"
-                                                   oninput="document.getElementById('voice_confidence_threshold_val').textContent=this.value">
+                                                   data-ahg-mirror="#voice_confidence_threshold_val">
                                             <div class="form-text"><?php echo __('Minimum confidence score for voice recognition (0.3 = lenient, 0.95 = strict).') ?></div>
                                         </div>
                                         <div class="col-md-6">
@@ -1755,7 +1755,7 @@ slot('title', $title);
                                                    name="settings[voice_speech_rate]"
                                                    min="0.5" max="2.0" step="0.1"
                                                    value="<?php echo htmlspecialchars($settings['voice_speech_rate'] ?? '1.0') ?>"
-                                                   oninput="document.getElementById('voice_speech_rate_val').textContent=this.value">
+                                                   data-ahg-mirror="#voice_speech_rate_val">
                                             <div class="form-text"><?php echo __('Text-to-speech playback rate (0.5 = slow, 2.0 = fast).') ?></div>
                                         </div>
                                     </div>
@@ -1803,7 +1803,7 @@ slot('title', $title);
                                                    name="settings[voice_hover_read_delay]"
                                                    min="100" max="1000" step="50"
                                                    value="<?php echo htmlspecialchars($settings['voice_hover_read_delay'] ?? '400') ?>"
-                                                   oninput="document.getElementById('voice_hover_read_delay_val').textContent=this.value">
+                                                   data-ahg-mirror="#voice_hover_read_delay_val">
                                             <div class="form-text"><?php echo __('Milliseconds to wait before reading (100 = instant, 1000 = slow). Lower values are more responsive.') ?></div>
                                         </div>
                                     </div>
@@ -2376,12 +2376,12 @@ slot('title', $title);
                                             <tr>
                                                 <td><strong><?php echo esc_specialchars($rule->material_type); ?></strong></td>
                                                 <td><?php echo $rule->patron_type === '*' ? __('All') : esc_specialchars($rule->patron_type); ?></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][loan_period_days]" value="<?php echo $rule->loan_period_days; ?>" min="0" style="width:70px;display:inline-block"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][renewal_period_days]" value="<?php echo $rule->renewal_period_days; ?>" min="0" style="width:70px;display:inline-block"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][max_renewals]" value="<?php echo $rule->max_renewals; ?>" min="0" style="width:70px;display:inline-block"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][fine_per_day]" value="<?php echo $rule->fine_per_day; ?>" min="0" step="0.01" style="width:80px;display:inline-block"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][fine_cap]" value="<?php echo $rule->fine_cap ?? ''; ?>" min="0" step="0.01" style="width:80px;display:inline-block" placeholder="∞"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][grace_period_days]" value="<?php echo $rule->grace_period_days; ?>" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][loan_period_days]" value="<?php echo $rule->loan_period_days; ?>" min="0" data-ahg-style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][renewal_period_days]" value="<?php echo $rule->renewal_period_days; ?>" min="0" data-ahg-style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][max_renewals]" value="<?php echo $rule->max_renewals; ?>" min="0" data-ahg-style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][fine_per_day]" value="<?php echo $rule->fine_per_day; ?>" min="0" step="0.01" data-ahg-style="width:80px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][fine_cap]" value="<?php echo $rule->fine_cap ?? ''; ?>" min="0" step="0.01" data-ahg-style="width:80px;display:inline-block" placeholder="∞"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][grace_period_days]" value="<?php echo $rule->grace_period_days; ?>" min="0" data-ahg-style="width:70px;display:inline-block"></td>
                                                 <td class="text-center"><input type="checkbox" class="form-check-input" name="loan_rule[<?php echo $rule->id; ?>][is_loanable]" value="1" <?php echo $rule->is_loanable ? 'checked' : ''; ?>></td>
                                                 <td>
                                                     <button type="button" class="btn btn-sm btn-outline-danger btn-delete-rule" data-rule-id="<?php echo $rule->id; ?>" title="<?php echo __('Delete'); ?>">
@@ -2695,7 +2695,7 @@ slot('title', $title);
                                             <i class="fas fa-exclamation-triangle me-1"></i>
                                             <?php echo __('Rotation runbook: php symfony share-link:rotate-secret (future enhancement).'); ?>
                                         </div>
-                                        <code style="word-break: break-all;">
+                                        <code data-ahg-style="word-break: break-all;">
                                             <?php $hs = $settings['share_link.hmac_secret'] ?? ''; ?>
                                             <?php echo $hs ? htmlspecialchars(substr($hs, 0, 12) . '…', ENT_QUOTES) : __('(auto-generated on first share-link issue)'); ?>
                                         </code>

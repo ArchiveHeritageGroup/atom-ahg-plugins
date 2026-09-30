@@ -148,7 +148,7 @@
         </div>
 
         <!-- Test Results -->
-        <div class="card mb-4" id="testResultCard" style="display: none;">
+        <div class="card mb-4" id="testResultCard" data-ahg-style="display: none;">
           <div class="card-header">
             <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Connection Test</h6>
           </div>

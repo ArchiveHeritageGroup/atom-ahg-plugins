@@ -4,4 +4,4 @@
  */
 $height = $config['height'] ?? '50px';
 ?>
-<div class="spacer-block" style="height: <?php echo esc_entities($height) ?>;"></div>
+<div class="spacer-block" data-ahg-style="height: <?php echo esc_entities($height) ?>;"></div>

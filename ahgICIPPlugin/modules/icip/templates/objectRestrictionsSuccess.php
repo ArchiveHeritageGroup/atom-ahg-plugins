@@ -99,7 +99,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-3" id="customTextGroup" style="display: none;">
+                        <div class="mb-3" id="customTextGroup" data-ahg-style="display: none;">
                             <label class="form-label">Custom Restriction Text</label>
                             <textarea name="custom_restriction_text" class="form-control" rows="2"></textarea>
                         </div>

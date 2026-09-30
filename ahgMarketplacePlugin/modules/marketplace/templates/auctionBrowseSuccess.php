@@ -26,11 +26,11 @@
           <div class="card h-100 border-danger">
             <?php if (isset($auc->featured_image_path) && $auc->featured_image_path): ?>
               <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'listing', 'slug' => $auc->slug]); ?>">
-                <img src="<?php echo esc_entities($auc->featured_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($auc->title); ?>" style="height: 180px; object-fit: cover;">
+                <img src="<?php echo esc_entities($auc->featured_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($auc->title); ?>" data-ahg-style="height: 180px; object-fit: cover;">
               </a>
             <?php else: ?>
               <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'listing', 'slug' => $auc->slug]); ?>">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" data-ahg-style="height: 180px;">
                   <i class="fas fa-gavel fa-2x text-muted"></i>
                 </div>
               </a>
@@ -69,11 +69,11 @@
         <div class="card h-100">
           <?php if (isset($auc->featured_image_path) && $auc->featured_image_path): ?>
             <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'listing', 'slug' => $auc->slug]); ?>">
-              <img src="<?php echo esc_entities($auc->featured_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($auc->title); ?>" style="height: 200px; object-fit: cover;">
+              <img src="<?php echo esc_entities($auc->featured_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($auc->title); ?>" data-ahg-style="height: 200px; object-fit: cover;">
             </a>
           <?php else: ?>
             <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'listing', 'slug' => $auc->slug]); ?>">
-              <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+              <div class="card-img-top bg-light d-flex align-items-center justify-content-center" data-ahg-style="height: 200px;">
                 <i class="fas fa-gavel fa-2x text-muted"></i>
               </div>
             </a>
