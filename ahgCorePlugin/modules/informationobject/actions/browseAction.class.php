@@ -133,6 +133,23 @@ class InformationObjectBrowseAction extends DefaultBrowseAction
             $this->collection = QubitInformationObject::getById($this->getParameters['collection']);
         }
 
+        // Only the five media type terms are valid; anything else becomes
+        // "other". Ported from AtoM 2.11 (artefactual/atom#2385) - this action
+        // shadows base, so the upstream fix does not reach it on its own.
+        if (isset($this->getParameters['mediatypes'])) {
+            $validMediaTypes = [
+                'audio' => QubitTerm::AUDIO_ID,
+                'image' => QubitTerm::IMAGE_ID,
+                'text' => QubitTerm::TEXT_ID,
+                'video' => QubitTerm::VIDEO_ID,
+                'other' => QubitTerm::OTHER_ID,
+            ];
+
+            if (false == array_search($this->getParameters['mediatypes'], $validMediaTypes)) {
+                $this->getParameters['mediatypes'] = QubitTerm::OTHER_ID;
+            }
+        }
+
         // Set search realm if searching by repository
         if (isset($request->repos) && ctype_digit($request->repos)) {
             // Add repo to the user session as realm

@@ -328,6 +328,29 @@ class ClipboardExportAction extends DefaultEditAction
             }
         }
 
+        // Cap XML exports: one selection with descendants can expand to the whole
+        // archive. Ported from AtoM 2.11 (artefactual/atom#2361), which this action
+        // shadows. Upstream's condition reads `!$options['current-level-only'] ??
+        // false`, where ! binds before ??; parenthesised here so a missing key does
+        // not raise a warning.
+        if ('arInformationObjectXmlExportJob' == $jobName && !($options['current-level-only'] ?? false)) {
+            $countRecords = $this->countInformationObjectsToExport($options);
+            $xmlExportLimit = (int) sfConfig::get('app_clipboard_export_xml_limit', 1000);
+
+            if ($countRecords > $xmlExportLimit) {
+                $message = $this->context->i18n->__(
+                    'This XML export would include %1% records, which exceeds the maximum of %2%. '
+                    .'Please refine the scope of your export by reducing the number of selected '
+                    .'items or de-selecting the "Include descendants" option.',
+                    ['%1%' => $countRecords, '%2%' => $xmlExportLimit],
+                );
+
+                $this->response->setStatusCode(400);
+
+                return $this->renderText(json_encode(['error' => $message]));
+            }
+        }
+
         $job = QubitJob::runJob($jobName, $options);
 
         // Generate, store and return a token to associate unauthenticated users
@@ -568,6 +591,43 @@ class ClipboardExportAction extends DefaultEditAction
             default:
                 return parent::processField($field);
         }
+    }
+
+    /**
+     * Records an export would include: the selection plus descendants, published
+     * only when drafts are excluded. Ported from AtoM 2.11 (#2361).
+     */
+    private function countInformationObjectsToExport($options)
+    {
+        $slugs = $options['params']['slugs'] ?? [];
+
+        if (empty($slugs)) {
+            return 0;
+        }
+
+        if ($options['current-level-only'] ?? false) {
+            return count($slugs);
+        }
+
+        $placeholders = implode(',', array_fill(0, count($slugs), '?'));
+        $params = array_values($slugs);
+
+        $sql = "SELECT COUNT(DISTINCT d.id) AS total
+            FROM slug s
+            INNER JOIN information_object io ON s.object_id = io.id
+            INNER JOIN information_object d
+                ON d.lft >= io.lft AND d.rgt <= io.rgt
+            WHERE s.slug IN ({$placeholders})";
+
+        if ($options['public'] ?? false) {
+            $sql .= ' AND d.id IN (SELECT st.object_id FROM status st WHERE st.type_id = ? AND st.status_id = ?)';
+            $params[] = QubitTerm::STATUS_TYPE_PUBLICATION_ID;
+            $params[] = QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID;
+        }
+
+        $result = QubitPdo::fetchOne($sql, $params);
+
+        return (int) $result->total;
     }
 
     private function getJobNameString()
