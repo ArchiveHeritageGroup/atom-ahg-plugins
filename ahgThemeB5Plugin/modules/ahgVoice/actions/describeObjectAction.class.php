@@ -306,12 +306,12 @@ class ahgVoiceDescribeObjectAction extends sfAction
             if ($result['success']) {
                 return $result;
             }
-            if ($provider === 'local') {
-                return $result;
-            }
+            // Hybrid is local until the gateway has a cloud route (see
+            // callCollageCloud); return the local error rather than a refusal.
+            return $result;
         }
 
-        if ($provider === 'cloud' || $provider === 'hybrid') {
+        if ($provider === 'cloud') {
             return $this->callCollageCloud($base64Collage, $viewLabels, $context, $config, $fileName, $scopeContent);
         }
 
@@ -361,109 +361,21 @@ class ahgVoiceDescribeObjectAction extends sfAction
     }
 
     /**
-     * Call Anthropic Claude API with single collage image.
+     * Cloud vision is not available.
+     *
+     * This used to call api.anthropic.com directly with an API key from the
+     * voice settings. Every AI call must go through the AHG AI gateway
+     * (ai.theahg.co.za), which is keyed, metered and audited, and the gateway
+     * has no cloud-vendor route: /ai/v1/anthropic/* returns 404. So the direct
+     * call is removed rather than routed. When the gateway gains a cloud route,
+     * add it to AiGatewayClient and call that here. "hybrid" therefore behaves
+     * as "local", and "cloud" reports why it cannot run.
      */
     protected function callCollageCloud(string $base64Collage, array $viewLabels, string $context, array $config, string $fileName = '', string $scopeContent = ''): array
     {
-        require_once dirname(__FILE__) . '/../lib/VoicePromptTemplates.php';
-
-        $apiKey = $config['anthropic_api_key'] ?? '';
-        if (empty($apiKey)) {
-            return ['success' => false, 'error' => 'Anthropic API key not configured'];
-        }
-
-        // Check daily limit
-        $dailyLimit = (int) ($config['daily_cloud_limit'] ?? 50);
-        $todayCount = $this->getDailyCloudUsage();
-        if ($todayCount >= $dailyLimit) {
-            return ['success' => false, 'error' => 'Daily cloud limit reached (' . $dailyLimit . ')'];
-        }
-
-        $model = $config['cloud_model'] ?? 'claude-sonnet-4-20250514';
-        $prompt = \VoicePromptTemplates::get3DCloudPrompt($context, $fileName, $scopeContent);
-        $viewList = implode(', ', array_map('ucfirst', $viewLabels));
-
-        $content = [
-            [
-                'type' => 'text',
-                'text' => 'This collage shows a 3D object from 6 angles: ' . $viewList . '.',
-            ],
-            [
-                'type' => 'image',
-                'source' => [
-                    'type' => 'base64',
-                    'media_type' => 'image/jpeg',
-                    'data' => $base64Collage,
-                ],
-            ],
-            [
-                'type' => 'text',
-                'text' => $prompt,
-            ],
-        ];
-
-        $payload = json_encode([
-            'model' => $model,
-            'max_tokens' => 2000,
-            'messages' => [
-                [
-                    'role' => 'user',
-                    'content' => $content,
-                ],
-            ],
-        ]);
-
-        $ch = curl_init('https://api.anthropic.com/v1/messages');
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'x-api-key: ' . $apiKey,
-                'anthropic-version: 2023-06-01',
-            ],
-            CURLOPT_TIMEOUT => 60,
-            CURLOPT_CONNECTTIMEOUT => 10,
-        ]);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error || $httpCode !== 200) {
-            $errMsg = 'Cloud AI unavailable';
-            if ($error) {
-                $errMsg .= ': ' . $error;
-            } elseif ($response) {
-                $errData = json_decode($response, true);
-                if (!empty($errData['error']['message'])) {
-                    $errMsg = $errData['error']['message'];
-                }
-            }
-            return ['success' => false, 'error' => $errMsg];
-        }
-
-        $data = json_decode($response, true);
-        $description = '';
-        if (!empty($data['content'])) {
-            foreach ($data['content'] as $block) {
-                if (($block['type'] ?? '') === 'text') {
-                    $description .= $block['text'];
-                }
-            }
-        }
-
-        if (empty($description)) {
-            return ['success' => false, 'error' => 'Cloud AI returned empty response'];
-        }
-
         return [
-            'success' => true,
-            'description' => trim($description),
-            'source' => 'cloud',
-            'model' => $model,
+            'success' => false,
+            'error' => 'Cloud AI is not available: AI requests must go through the AHG AI gateway, which has no cloud model route yet. Use the local provider.',
         ];
     }
 
@@ -498,20 +410,6 @@ class ahgVoiceDescribeObjectAction extends sfAction
         }
 
         return 'isad';
-    }
-
-    protected function getDailyCloudUsage(): int
-    {
-        try {
-            return DB::table('audit_log')
-                ->where('action', 'voice_ai_describe_3d')
-                ->where('created_at', '>=', date('Y-m-d 00:00:00'))
-                ->where('source', 'cloud')
-                ->count();
-        } catch (\Exception $e) {
-            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
-            return 0;
-        }
     }
 
     protected function logAudit($doId, $objectId, array $result): void
