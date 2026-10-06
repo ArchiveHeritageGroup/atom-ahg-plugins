@@ -24,6 +24,7 @@ class chatbotPurgeLogsTask extends sfBaseTask
         \AhgCore\Core\AhgDb::init();
         require_once __DIR__.'/../Services/ChatbotVectorIndex.php';
         require_once __DIR__.'/../Services/ChatbotRetriever.php';
+        require_once __DIR__.'/../Services/ChatbotSiteInfo.php';
         require_once __DIR__.'/../Services/ChatbotService.php';
 
         $days = null !== $options['days'] ? max(1, (int) $options['days']) : null;

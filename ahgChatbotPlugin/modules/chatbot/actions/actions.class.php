@@ -2,6 +2,7 @@
 
 require_once __DIR__.'/../../../lib/Services/ChatbotVectorIndex.php';
 require_once __DIR__.'/../../../lib/Services/ChatbotRetriever.php';
+require_once __DIR__.'/../../../lib/Services/ChatbotSiteInfo.php';
 require_once __DIR__.'/../../../lib/Services/ChatbotService.php';
 
 use AhgChatbotPlugin\Services\ChatbotService;
@@ -54,9 +55,9 @@ class chatbotActions extends sfActions
 
         $result['message_id'] = ChatbotService::log($sessionId, 'assistant', $result['answer'], $result);
         $result['session_id'] = $sessionId;
-        $result['sources'] = array_map(fn ($s) => $s + [
-            'url' => $this->getController()->genUrl(['module' => 'informationobject', 'slug' => $s['slug']]),
-        ], $result['sources']);
+        $result['sources'] = array_map(fn ($s) => [
+            'url' => $this->getController()->genUrl(['module' => $s['module'] ?? 'informationobject', 'slug' => $s['slug']]),
+        ] + array_diff_key($s, ['module' => 1]), $result['sources']);
         unset($result['model']);
 
         return $this->json($result);

@@ -38,10 +38,33 @@ class ChatbotService
             'thumbnail' => $r->thumbnail,
         ], $records);
 
+        // Visiting, opening times, contacts, services: answered from the
+        // institution's own public information, not from the records.
+        $info = ['text' => '', 'sources' => []];
+        if (ChatbotSiteInfo::isAbout($question)) {
+            $pageId = null !== $pageSlug ? (int) DB::table('slug')->where('slug', $pageSlug)->value('object_id') : 0;
+            $info = ChatbotSiteInfo::forQuestion($culture, $pageId ?: null);
+            if ('' !== $info['text']) {
+                // Records matched on words like "open" or "copy" are noise
+                // here; keep only the record being viewed.
+                $records = array_values(array_filter($records, static fn ($r) => $r->slug === $pageSlug));
+                $sources = array_merge($info['sources'], array_values(array_filter($sources, static fn ($s) => $s['slug'] === $pageSlug)));
+            }
+        }
+
         $system = 'You are "Ask the archive", an assistant for a public archival catalogue. '
-            .'Answer ONLY from the catalogue records below; never use outside knowledge about the records. '
-            .'Name the records you used by their title. If the records do not answer the question, say so plainly '
+            .'Answer ONLY from the information below; never use outside knowledge. '
+            .'Name the records you used by their title. If the information does not answer the question, say so plainly '
             .'and suggest a better search. Keep answers short. Reply in the language of the question.'
+            .('' !== $info['text']
+                ? "\n\nFor questions about visiting, opening times, contacting the institution or its services, answer from the institution information. "
+                    .'Give only contact details that appear there, exactly as written. If opening times are not listed, say so and give the contact details instead.'
+                    ."\n\nInstitution information:\n".$info['text']
+                : '')
+            // The retriever puts the page's record first when it is visible.
+            .(isset($records[0]) && null !== $pageSlug && $records[0]->slug === $pageSlug
+                ? "\n\nThe visitor is viewing the record \"".($records[0]->title ?: $pageSlug).'". Words like "this", "it" and "here" refer to that record.'
+                : '')
             ."\n\nCatalogue records:\n".self::context($records);
 
         $messages = [['role' => 'system', 'content' => $system]];
@@ -57,7 +80,10 @@ class ChatbotService
         try {
             $client = AiGatewayClient::fromSettings();
             $model = (string) AhgSettingsService::get('chatbot_model', '') ?: $client->getChatModel();
-            $result = $client->chat($messages, ['model' => $model, 'temperature' => 0.2, 'max_tokens' => 800, 'timeout' => 90]);
+            // think=false: qwen3 otherwise spends the token budget on a hidden
+            // reasoning pass and can return an empty answer (needs framework
+            // v2.18.47+; older frameworks ignore the option).
+            $result = $client->chat($messages, ['model' => $model, 'temperature' => 0.2, 'max_tokens' => 800, 'timeout' => 90, 'think' => false]);
             if (!empty($result['success'])) {
                 return ['answer' => self::stripThinking($result['text']), 'sources' => $sources, 'mode' => 'ai', 'model' => $result['model']];
             }

@@ -2,7 +2,7 @@
 
 A public assistant that answers questions from the published catalogue and links every answer to the records it came from.
 
-The plugin is self-contained. It touches no base AtoM file and does not depend on the AHG theme or on ahgAIPlugin. It needs only atom-framework (the AI gateway client, `SearchAccessFilterService` and `AhgSettingsService`) and ahgCorePlugin, whose fetch wrapper adds the CSRF header.
+The plugin is self-contained. It touches no base AtoM file and does not depend on the AHG theme or on ahgAIPlugin. It needs atom-framework v2.18.47 or later (the AI gateway client, `SearchAccessFilterService` and `AhgSettingsService`) and ahgCorePlugin, whose fetch wrapper adds the CSRF header.
 
 ## What it does
 
@@ -20,17 +20,16 @@ The plugin is self-contained. It touches no base AtoM file and does not depend o
   - e-mail addresses, phone numbers and SA ID numbers are masked before a question is logged;
   - no IP address is stored;
   - logs are deleted after `chatbot_retention_days`.
+- Questions about visiting, opening times, contacts and services are answered from the institution's own public information: the repository records (opening times, access, services, and the repository's contacts, primary first) and the static pages in `chatbot_info_pages`. Contact details of donors, rights holders, authority records and users are never read.
 - Each answer has a "Was this helpful?" rating. The admin page (`/chatbot/admin`) shows usage and lists the questions that found no records or were rated unhelpful, which shows what visitors look for and cannot find.
 - Other plugins can open the panel with `window.AhgChatbot.open('question')`, for example a voice "ask" command.
 
 ## Install
 
 ```bash
-cd /usr/share/nginx/archive
-ln -s ../atom-ahg-plugins/ahgChatbotPlugin plugins/ahgChatbotPlugin
-mysql archive < atom-ahg-plugins/ahgChatbotPlugin/database/install.sql
-php bin/atom extension:enable ahgChatbotPlugin
-rm -rf cache/* && php symfony cc
+cd /usr/share/nginx/archive/atom-framework
+php bin/atom extension:install ahgChatbotPlugin   # links it, loads database/install.sql, enables it
+cd .. && php symfony cc
 ```
 
 Then build the index. If ahgAIPlugin has already built `{db}_io_nomic`, that index is used as it is.
@@ -59,6 +58,7 @@ php symfony chatbot:index --prune
 | chatbot_model | (gateway default) | Chat model on the gateway, e.g. qwen3:8b |
 | chatbot_button_label | Ask the archive | Launcher text |
 | chatbot_notice | (AI notice) | Shown under the conversation |
+| chatbot_info_pages | contact,about,accessibility | Static pages used for visiting and contact questions |
 | chatbot_qdrant_url | http://localhost:6333 | Vector store |
 | chatbot_vector_collection | {db}_io_nomic | Qdrant collection |
 

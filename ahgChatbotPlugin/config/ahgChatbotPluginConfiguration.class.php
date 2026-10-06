@@ -12,7 +12,7 @@
 class ahgChatbotPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Ask the Archive - public chatbot over the published catalogue';
-    public static $version = '1.0.1';
+    public static $version = '1.1.0';
 
     public function initialize()
     {
