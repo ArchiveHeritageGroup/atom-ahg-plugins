@@ -1,0 +1,28 @@
+{
+    "name": "Ask the Archive (Chatbot)",
+    "machine_name": "ahgChatbotPlugin",
+    "version": "1.0.1",
+    "description": "Public assistant that answers questions from the published catalogue, citing the records it used. Retrieval is filtered to what the visitor may see; generation goes through the AHG AI gateway only.",
+    "author": "The Archive and Heritage Group",
+    "license": "AGPL-3.0-or-later",
+    "category": "ai",
+    "requires": {
+        "atom_framework": ">=2.18.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "ahg_chatbot_message"
+    ],
+    "menu": [
+        {
+            "name": "chatbot",
+            "parent": "admin",
+            "path": "chatbot/admin",
+            "label": "Ask the Archive"
+        }
+    ]
+}

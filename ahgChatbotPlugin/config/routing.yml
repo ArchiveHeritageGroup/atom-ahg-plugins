@@ -1,0 +1,13 @@
+# Ask the Archive - public chatbot
+
+ahg_chatbot_ask:
+  url: /chatbot/ask
+  param: { module: chatbot, action: ask }
+
+ahg_chatbot_feedback:
+  url: /chatbot/feedback
+  param: { module: chatbot, action: feedback }
+
+ahg_chatbot_admin:
+  url: /chatbot/admin
+  param: { module: chatbot, action: admin }

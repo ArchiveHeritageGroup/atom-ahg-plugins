@@ -1,0 +1,6 @@
+admin:
+  is_secure: true
+  credentials: administrator
+
+all:
+  is_secure: false
