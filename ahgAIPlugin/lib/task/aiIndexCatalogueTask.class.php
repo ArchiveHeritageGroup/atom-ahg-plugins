@@ -20,6 +20,8 @@ class aiIndexCatalogueTask extends sfBaseTask
             new sfCommandOption('batch', null, sfCommandOption::PARAMETER_OPTIONAL, 'Records per batch', 200),
             new sfCommandOption('limit', null, sfCommandOption::PARAMETER_OPTIONAL, 'Max records to process (0 = all)', 0),
             new sfCommandOption('dry-run', null, sfCommandOption::PARAMETER_NONE, 'Count + report only, no embedding/upsert'),
+            new sfCommandOption('prune', null, sfCommandOption::PARAMETER_NONE, 'After indexing, remove points for descriptions no longer published'),
+            new sfCommandOption('prune-only', null, sfCommandOption::PARAMETER_NONE, 'Only prune; do not (re)index'),
         ]);
         $this->namespace = 'ai';
         $this->name = 'index-catalogue';
@@ -32,6 +34,8 @@ Examples:
   [php symfony ai:index-catalogue --dry-run|INFO]      Show how many records would be indexed
   [php symfony ai:index-catalogue|INFO]                Index all published descriptions
   [php symfony ai:index-catalogue --limit=500|INFO]    Index up to 500
+  [php symfony ai:index-catalogue --prune|INFO]        Index, then drop unpublished/deleted records (nightly)
+  [php symfony ai:index-catalogue --prune-only --dry-run|INFO]  Report what pruning would remove
 EOD;
     }
 
@@ -52,7 +56,7 @@ EOD;
         $total = $svc->publishedCount($culture);
         $this->logSection('ai', "Published descriptions for culture '{$culture}': {$total}");
 
-        if ($dryRun) {
+        if ($dryRun && !$options['prune-only']) {
             $this->logSection('ai', 'Dry run — no embedding/upsert performed.');
 
             return 0;
@@ -68,7 +72,7 @@ EOD;
 
         $offset = 0;
         $totals = ['indexed' => 0, 'skipped' => 0, 'failed' => 0];
-        while (true) {
+        while (!$options['prune-only']) {
             $thisBatch = $batch;
             if ($hardLimit > 0) {
                 $remaining = $hardLimit - ($totals['indexed'] + $totals['skipped'] + $totals['failed']);
@@ -94,10 +98,30 @@ EOD;
             }
         }
 
-        $this->logSection('ai', sprintf(
-            'Done. indexed=%d skipped=%d failed=%d',
-            $totals['indexed'], $totals['skipped'], $totals['failed']
-        ));
+        if (!$options['prune-only']) {
+            $this->logSection('ai', sprintf(
+                'Done. indexed=%d skipped=%d failed=%d',
+                $totals['indexed'], $totals['skipped'], $totals['failed']
+            ));
+        }
+
+        // Indexing only adds. Without this, a description deleted or
+        // unpublished after it was embedded stays in the index for good.
+        if ($options['prune'] || $options['prune-only']) {
+            $p = $svc->prune($culture, $dryRun);
+            $this->logSection('ai', sprintf(
+                '%s: checked=%d %s=%d%s',
+                $dryRun ? 'Prune (dry run)' : 'Pruned',
+                $p['checked'],
+                $dryRun ? 'would_remove' : 'removed',
+                $p['removed'],
+                $p['failed'] ? ' - FAILED part-way, see Qdrant' : ''
+            ), null, $p['failed'] ? 'ERROR' : 'INFO');
+
+            if ($p['failed']) {
+                return 1;
+            }
+        }
 
         return 0;
     }

@@ -297,6 +297,62 @@ class CatalogueVectorService
     }
 
     /** @param array<int,array> $points */
+    /**
+     * Remove points whose description is no longer published (or no longer
+     * exists). Indexing only ever adds, so a record deleted or unpublished
+     * after it was embedded stayed in the index and came back as a phantom
+     * hit. The chatbot re-checks visibility at fetch time regardless; this
+     * keeps the index honest so those hits stop crowding out real ones.
+     *
+     * Point ids are the information_object ids (see indexBatch).
+     *
+     * @return array{checked:int,removed:int,failed:bool}
+     */
+    public function prune(string $culture = 'en', bool $dryRun = false): array
+    {
+        $stats = ['checked' => 0, 'removed' => 0, 'failed' => false];
+        $path = '/collections/' . rawurlencode($this->collection) . '/points';
+        $offset = null;
+
+        do {
+            $body = ['limit' => 1000, 'with_payload' => false, 'with_vector' => false];
+            if (null !== $offset) {
+                $body['offset'] = $offset;
+            }
+            $res = $this->qdrant('POST', $path . '/scroll', json_encode($body));
+            if (($res['status'] ?? 0) !== 200) {
+                $stats['failed'] = true;
+
+                break;
+            }
+            $data = json_decode($res['body'] ?? '', true);
+            $ids = array_map(static fn ($p) => (int) $p['id'], $data['result']['points'] ?? []);
+            $offset = $data['result']['next_page_offset'] ?? null;
+            if ($ids === []) {
+                break;
+            }
+            $stats['checked'] += count($ids);
+
+            $keep = array_flip(array_map('intval', $this->publishedQuery($culture)
+                ->whereIn('io.id', $ids)
+                ->pluck('io.id')
+                ->all()));
+            $gone = array_values(array_filter($ids, static fn ($id) => !isset($keep[$id])));
+
+            if ($gone !== [] && !$dryRun) {
+                $del = $this->qdrant('POST', $path . '/delete?wait=true', json_encode(['points' => $gone]));
+                if (($del['status'] ?? 0) !== 200) {
+                    $stats['failed'] = true;
+
+                    break;
+                }
+            }
+            $stats['removed'] += count($gone);
+        } while (null !== $offset);
+
+        return $stats;
+    }
+
     private function upsert(array $points): bool
     {
         $body = json_encode(['points' => $points]);

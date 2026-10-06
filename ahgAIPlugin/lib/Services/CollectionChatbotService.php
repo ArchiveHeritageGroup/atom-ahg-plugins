@@ -18,20 +18,23 @@ class CollectionChatbotService
     private const PUBLICATION_STATUS_TYPE_ID = 158;
     private const PUBLICATION_STATUS_PUBLISHED_ID = 160;
     private const MAX_RECORDS = 6;
+    // Fetched from each retrieval path before the visibility filter, so that
+    // dropping restricted hits still leaves enough to answer from.
+    private const CANDIDATES = 18;
     private const MAX_CONTEXT_CHARS = 5000;
 
     /**
      * @param array<int,array{role:string,content:string}> $history
      * @return array{answer:string,sources:array,mode:string,error?:string,tokens_used?:int}
      */
-    public static function chat(string $message, array $history = [], string $culture = 'en'): array
+    public static function chat(string $message, array $history = [], string $culture = 'en', ?int $userId = null): array
     {
         $message = trim($message);
         if ('' === $message) {
             return ['answer' => 'Please ask a question about the collection.', 'sources' => [], 'mode' => 'empty'];
         }
 
-        $records = self::retrieve($message, $culture);
+        $records = self::retrieve($message, $culture, $userId);
         $context = self::buildContext($records);
 
         $systemPrompt = "You are a research assistant for an archival catalogue. "
@@ -50,11 +53,7 @@ class CollectionChatbotService
         $sources = array_map(static fn ($r) => ['slug' => $r->slug, 'title' => $r->title ?: $r->slug], $records);
 
         try {
-            $aiDir = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin';
-            require_once $aiDir . '/lib/Services/LlmService.php';
-
-            $provider = (new \LlmService())->getProvider();
-            $result = $provider->complete($systemPrompt, $userPrompt, ['max_tokens' => 800, 'temperature' => 0.2]);
+            $result = self::provider()->complete($systemPrompt, $userPrompt, ['max_tokens' => 800, 'temperature' => 0.2]);
 
             if (!empty($result['success']) && !empty($result['text'])) {
                 return [
@@ -75,9 +74,7 @@ class CollectionChatbotService
     public static function isAvailable(): bool
     {
         try {
-            require_once \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin/lib/Services/LlmService.php';
-
-            return (new \LlmService())->getProvider()->isAvailable();
+            return self::provider()->isAvailable();
         } catch (\Throwable $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             return false;
@@ -91,28 +88,135 @@ class CollectionChatbotService
      * semantic index is unavailable, so behaviour is unchanged before the
      * gateway key + index exist.
      */
-    public static function retrieve(string $message, string $culture = 'en'): array
+    public static function retrieve(string $message, string $culture = 'en', ?int $userId = null): array
     {
         $fulltext = self::retrieveFulltext($message, $culture);
-
         $semantic = self::retrieveSemantic($message, $culture);
-        if (empty($semantic)) {
-            return $fulltext;
-        }
 
-        // Merge, semantic-first, dedupe by id, cap at MAX_RECORDS.
+        // Merge, semantic-first, dedupe by id.
         $merged = [];
         foreach (array_merge($semantic, $fulltext) as $row) {
             $id = (int) ($row->id ?? 0);
             if ($id > 0 && !isset($merged[$id])) {
                 $merged[$id] = $row;
             }
-            if (count($merged) >= self::MAX_RECORDS) {
-                break;
+        }
+
+        // Visibility is decided here, on every hit, at the moment it is used -
+        // not trusted from either index. The vector index can hold records
+        // unpublished or restricted since it was built, and neither path
+        // checked embargo or security classification.
+        return array_slice(self::visibleOnly(array_values($merged), $userId), 0, self::MAX_RECORDS);
+    }
+
+    /**
+     * Keep only what this user may see: published, and not restricted by
+     * security classification, donor agreement or a full embargo
+     * (SearchAccessFilterService). FAILS CLOSED: if visibility cannot be
+     * established, nothing is returned - the alternative is a public
+     * assistant quoting a record it should never have seen.
+     *
+     * @param array<int,object> $rows
+     *
+     * @return array<int,object>
+     */
+    public static function visibleOnly(array $rows, ?int $userId = null): array
+    {
+        if ($rows === []) {
+            return [];
+        }
+
+        try {
+            $ids = array_map(static fn ($r) => (int) $r->id, $rows);
+
+            $published = array_flip(array_map('intval', DB::table('status')
+                ->whereIn('object_id', $ids)
+                ->where('type_id', self::PUBLICATION_STATUS_TYPE_ID)
+                ->where('status_id', self::PUBLICATION_STATUS_PUBLISHED_ID)
+                ->pluck('object_id')
+                ->all()));
+
+            $restricted = array_flip(array_map('intval',
+                \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()->getRestrictedObjectIds($userId)
+            ));
+
+            return array_values(array_filter($rows, static function ($r) use ($published, $restricted) {
+                $id = (int) $r->id;
+
+                return isset($published[$id]) && !isset($restricted[$id]);
+            }));
+        } catch (\Throwable $e) {
+            error_log('chatbot.visibility_check_failed: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    /** Longest question accepted; longer ones are refused, not truncated. */
+    public const MAX_MESSAGE_CHARS = 1000;
+
+    /**
+     * Refuse a question before it costs a model call. Returns the reason to
+     * show the user, or null to proceed.
+     *
+     * A chat answer costs far more than a page view, and PSIS was flooded at
+     * 37 requests a second in August (#264). Three limits, cheapest first:
+     *   - per IP: 10 a minute and 100 a day (APCu, shared by the fpm pool);
+     *   - per installation: ai_chatbot_daily_cap questions a day (default
+     *     1000), counted from the stored turns, so it holds across restarts.
+     *
+     * ponytail: without APCu the per-IP limits are skipped and only the daily
+     * cap applies; nginx limit_req in front of /ai/assistantAsk is the
+     * upgrade for that case and for anything beyond one host.
+     */
+    public static function throttle(string $ip, string $message): ?string
+    {
+        if (mb_strlen($message) > self::MAX_MESSAGE_CHARS) {
+            return sprintf('Please keep your question under %d characters.', self::MAX_MESSAGE_CHARS);
+        }
+
+        if ('' !== $ip && \function_exists('apcu_add')) {
+            foreach (['m' => [60, 10], 'd' => [86400, 100]] as $window => [$ttl, $max]) {
+                $key = 'ahg_chat_'.$window.'_'.$ip;
+                apcu_add($key, 0, $ttl);
+                if (apcu_inc($key) > $max) {
+                    return 'm' === $window
+                        ? 'You are asking faster than the assistant can answer. Please wait a minute and try again.'
+                        : 'You have reached today\'s limit for questions. Please come back tomorrow.';
+                }
             }
         }
 
-        return array_values($merged);
+        try {
+            $cap = (int) (DB::table('ahg_settings')->where('setting_key', 'ai_chatbot_daily_cap')->value('setting_value') ?: 1000);
+            $today = DB::table('ahg_ai_chatbot_message')
+                ->where('role', 'user')
+                ->where('created_at', '>=', date('Y-m-d 00:00:00'))
+                ->count();
+            if ($today >= $cap) {
+                return 'The assistant is very busy today. Please try again tomorrow, or search the catalogue directly.';
+            }
+        } catch (\Throwable $e) {
+            // No table or setting yet: the per-IP limits above still apply.
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+        }
+
+        return null;
+    }
+
+    /**
+     * The gateway, and only the gateway (catalog #242). LlmService can be set
+     * to Anthropic, OpenAI or a direct Ollama port, each of which bypasses the
+     * keyed, metered and audited AHG AI gateway - which a public assistant
+     * must never do. The model comes from the gateway's own settings.
+     */
+    private static function provider(): \LlmProviderInterface
+    {
+        $dir = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin/lib/Services';
+        require_once $dir . '/LlmProviderInterface.php';
+        require_once $dir . '/providers/GatewayProvider.php';
+
+        return new \GatewayProvider(['max_tokens' => 800, 'temperature' => 0.2]);
     }
 
     /**
@@ -129,7 +233,7 @@ class CollectionChatbotService
             }
             require_once $svcFile;
 
-            $hits = (new \CatalogueVectorService())->search($message, self::MAX_RECORDS);
+            $hits = (new \CatalogueVectorService())->search($message, self::CANDIDATES);
             if (empty($hits)) {
                 return [];
             }
@@ -185,7 +289,7 @@ class CollectionChatbotService
                     '(MATCH(ioi.title) AGAINST(?) * 2 + MATCH(ioi.scope_and_content) AGAINST(?)) DESC',
                     [$message, $message]
                 )
-                ->limit(self::MAX_RECORDS)
+                ->limit(self::CANDIDATES)
                 ->get(['io.id', 'io.identifier', 'ioi.title', 'ioi.scope_and_content', 's.slug'])
                 ->all();
         } catch (\Throwable $e) {

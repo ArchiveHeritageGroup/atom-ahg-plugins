@@ -2775,9 +2775,23 @@ class aiActions extends AhgController
         if ('' === $sessionId) {
             $sessionId = \CollectionChatbotService::newSessionId();
         }
+
+        // Refused before anything is stored or any model is called.
+        $refusal = \CollectionChatbotService::throttle((string) $request->getRemoteAddress(), $message);
+        if (null !== $refusal) {
+            $this->getResponse()->setStatusCode(429);
+
+            return $this->renderText(json_encode(
+                ['answer' => $refusal, 'sources' => [], 'mode' => 'limited', 'session_id' => $sessionId],
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            ));
+        }
+
         \CollectionChatbotService::persistTurn($sessionId, 'user', $message);
 
-        $result = \CollectionChatbotService::chat($message, $history, $this->getUserCulture());
+        // The user id drives the visibility filter: what this person may see.
+        $userId = $this->getUser()->getAttribute('user_id');
+        $result = \CollectionChatbotService::chat($message, $history, $this->getUserCulture(), $userId ? (int) $userId : null);
 
         \CollectionChatbotService::persistTurn($sessionId, 'assistant', (string) ($result['answer'] ?? ''), [
             'sources' => $result['sources'] ?? [],
