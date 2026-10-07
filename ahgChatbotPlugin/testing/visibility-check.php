@@ -43,6 +43,29 @@ if ($restricted) {
     echo "SKIP no restricted records on this install\n";
 }
 
+// ICIP: any record with an active access restriction must be filtered out.
+if (DB::getSchemaBuilder()->hasTable('icip_access_restriction')) {
+    $today = date('Y-m-d');
+    $icip = DB::table('icip_access_restriction')
+        ->where(fn ($w) => $w->whereNull('start_date')->orWhere('start_date', '<=', $today))
+        ->where(fn ($w) => $w->whereNull('end_date')->orWhere('end_date', '>=', $today))
+        ->limit(50)->pluck('information_object_id')->map(fn ($v) => (int) $v)->all();
+    if ($icip) {
+        $check(R::visibleOnly($icip, null) === [], 'ICIP-restricted records are filtered out');
+    } else {
+        echo "SKIP no active ICIP restrictions on this install\n";
+    }
+}
+
+// ODRL: records with a 'use' prohibition must be filtered out.
+if (DB::getSchemaBuilder()->hasTable('research_rights_policy')) {
+    $odrl = DB::table('research_rights_policy')->whereIn('target_type', ['archival_description', 'information_object'])
+        ->where('policy_type', 'prohibition')->where('action_type', 'use')->limit(50)->pluck('target_id')->map(fn ($v) => (int) $v)->all();
+    if ($odrl) {
+        $check(R::visibleOnly($odrl, null) === [], 'ODRL use-prohibited records are filtered out');
+    }
+}
+
 foreach (['photograph', 'archive', 'letter'] as $q) {
     $ids = array_map(fn ($r) => (int) $r->id, R::retrieve($q, 'en', null));
     $check($ids === [] || $published()->whereIn('object_id', $ids)->count() === count($ids), "every hit for '{$q}' is published");

@@ -82,8 +82,11 @@ class ChatbotRetriever
                 ->where('status_id', self::PUBLICATION_STATUS_PUBLISHED_ID)
                 ->pluck('object_id')->all()));
 
-            $restricted = array_flip(array_map('intval',
-                SearchAccessFilterService::getInstance()->getRestrictedObjectIds($userId)));
+            $restricted = array_flip(array_map('intval', array_merge(
+                SearchAccessFilterService::getInstance()->getRestrictedObjectIds($userId),
+                self::icipBlocked($ids),
+                self::odrlBlocked($ids)
+            )));
 
             return array_values(array_filter($ids, static fn ($id) => isset($published[$id]) && !isset($restricted[$id])));
         } catch (\Throwable $e) {
@@ -91,6 +94,79 @@ class ChatbotRetriever
 
             return [];
         }
+    }
+
+    /**
+     * Ids under an active ICIP (Indigenous cultural and intellectual property)
+     * protection: an access restriction of any type, or a cultural notice
+     * whose type blocks access - on the record itself, or on an ancestor whose
+     * entry applies to descendants. SearchAccessFilterService does not cover
+     * these. The chatbot cannot run the notice-acknowledgement step, so it
+     * leaves such records out for everyone.
+     *
+     * Reads ahgICIPPlugin's tables when they exist; throws on any other
+     * failure so visibleOnly() fails closed.
+     *
+     * @param int[] $ids
+     *
+     * @return int[]
+     */
+    private static function icipBlocked(array $ids): array
+    {
+        $schema = DB::getSchemaBuilder();
+        if (!$schema->hasTable('icip_access_restriction')) {
+            return [];
+        }
+
+        $today = date('Y-m-d');
+        $active = static function ($q, string $alias) use ($today) {
+            $q->where(static fn ($w) => $w->whereNull("{$alias}.start_date")->orWhere("{$alias}.start_date", '<=', $today))
+                ->where(static fn ($w) => $w->whereNull("{$alias}.end_date")->orWhere("{$alias}.end_date", '>=', $today));
+        };
+        // The candidate, or an ancestor (nested set) whose entry covers descendants.
+        $covering = static fn (string $table, string $alias) => DB::table('information_object as c')
+            ->join('information_object as a', static fn ($j) => $j->on('a.lft', '<=', 'c.lft')->on('a.rgt', '>=', 'c.rgt'))
+            ->join("{$table} as {$alias}", "{$alias}.information_object_id", '=', 'a.id')
+            ->whereIn('c.id', $ids)
+            ->where(static fn ($w) => $w->whereColumn('a.id', 'c.id')->orWhere("{$alias}.applies_to_descendants", 1));
+
+        $blocked = $covering('icip_access_restriction', 'r')
+            ->where(static fn ($q) => $active($q, 'r'))
+            ->distinct()->pluck('c.id')->all();
+
+        if ($schema->hasTable('icip_cultural_notice')) {
+            $blocked = array_merge($blocked, $covering('icip_cultural_notice', 'n')
+                ->join('icip_cultural_notice_type as t', 't.id', '=', 'n.notice_type_id')
+                ->where('t.is_active', 1)->where('t.blocks_access', 1)
+                ->where(static fn ($q) => $active($q, 'n'))
+                ->distinct()->pluck('c.id')->all());
+        }
+
+        return array_map('intval', $blocked);
+    }
+
+    /**
+     * Ids carrying an ODRL "use" prohibition (ahgResearchPlugin's
+     * research_rights_policy) - the same rule ahgPortableExportPlugin's
+     * DisclosureGate applies. Reads the table when it exists; throws on any
+     * other failure so visibleOnly() fails closed.
+     *
+     * @param int[] $ids
+     *
+     * @return int[]
+     */
+    private static function odrlBlocked(array $ids): array
+    {
+        if (!DB::getSchemaBuilder()->hasTable('research_rights_policy')) {
+            return [];
+        }
+
+        return array_map('intval', DB::table('research_rights_policy')
+            ->whereIn('target_type', ['archival_description', 'information_object'])
+            ->where('policy_type', 'prohibition')
+            ->where('action_type', 'use')
+            ->whereIn('target_id', $ids)
+            ->pluck('target_id')->all());
     }
 
     /**

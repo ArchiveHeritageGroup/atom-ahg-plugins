@@ -10,7 +10,7 @@ The plugin is self-contained. It touches no base AtoM file and does not depend o
 - Retrieval comes from two paths, merged:
   - semantic search: Qdrant, with embeddings through the AHG AI gateway;
   - MySQL full-text on title and scope, with a prefix retry so plurals still match.
-- **Visibility is decided on every hit when it is used, never trusted from an index.** A record must be published and not restricted (security classification, donor agreement, full embargo). If the check cannot run, nothing is returned.
+- **Visibility is decided on every hit when it is used, never trusted from an index.** A record must be published and not restricted (security classification, donor agreement, full embargo, an active ICIP access restriction or access-blocking cultural notice inherited from ancestors, or an ODRL "use" prohibition). If the check cannot run, nothing is returned.
 - Generation goes through the AHG AI gateway only. No provider setting can send it elsewhere.
 - Limits are checked before any model call:
   - questions longer than 1000 characters are refused;

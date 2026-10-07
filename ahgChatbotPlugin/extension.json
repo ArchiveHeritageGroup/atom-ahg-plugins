@@ -1,7 +1,7 @@
 {
     "name": "Ask the Archive (Chatbot)",
     "machine_name": "ahgChatbotPlugin",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "Public assistant that answers questions from the published catalogue, citing the records it used. Retrieval is filtered to what the visitor may see; generation goes through the AHG AI gateway only.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
