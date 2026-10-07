@@ -162,9 +162,9 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         $request->setParameter('id', $objectId);
         // The title of a hidden description can itself be sensitive.
         $request->setAttribute('ahg_hide_title', true);
-        // ponytail: the page still answers 200 - something after the forward
-        // resets the status. Content is withheld either way; find the reset
-        // before relying on the status code.
+        // accessFilter/denied sets 403. (It answered 200 until v3.114.8: the
+        // denied template threw on Symfony's escaped arrays, and the error
+        // fallback sent the page as 200.)
         $context->getController()->forward('accessFilter', 'denied');
 
         throw new sfStopException();
