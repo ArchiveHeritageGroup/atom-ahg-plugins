@@ -9,8 +9,10 @@ use Illuminate\Database\Capsule\Manager as DB;
  * Finds the catalogue records a question is about, and only ones this visitor
  * may see.
  *
- * Two paths, merged semantic-first: gateway-fed vector search (Qdrant) and
- * MySQL FULLTEXT on title and scope. Neither index decides visibility. Every
+ * Three paths, merged semantic-first: gateway-fed vector search (Qdrant) over
+ * descriptions, the same over passages of digital object text (transcripts),
+ * and MySQL FULLTEXT on title and scope. ponytail: transcripts have no MySQL
+ * full-text index in AtoM, so without Qdrant they are not searched. Neither index decides visibility. Every
  * hit is re-checked when it is used (visibleOnly), because the vector index can
  * hold records unpublished or restricted since it was built.
  */
@@ -23,6 +25,9 @@ class ChatbotRetriever
 
     /** Records handed to the model. */
     public const MAX_RECORDS = 6;
+
+    /** Matching passages of a record's digital object text given to the model. */
+    private const PASSAGES_PER_RECORD = 2;
 
     /** Fetched per path before filtering, so dropped hits still leave enough. */
     private const CANDIDATES = 18;
@@ -44,8 +49,25 @@ class ChatbotRetriever
             }
         }
 
+        // Passages from digital object text (PDF / OCR transcripts), keyed by
+        // the description they belong to.
+        $passages = [];
         try {
-            $ids = array_merge($ids, (new ChatbotVectorIndex())->search($question, self::CANDIDATES));
+            $index = new ChatbotVectorIndex();
+            $described = $index->search($question, self::CANDIDATES);
+            $inText = [];
+            foreach ($index->searchText($question, self::CANDIDATES) as $hit) {
+                $inText[] = $hit['object_id'];
+                if (count($passages[$hit['object_id']] ?? []) < self::PASSAGES_PER_RECORD) {
+                    $passages[$hit['object_id']][] = $hit['text'];
+                }
+            }
+            // Take turns, so a strong match inside a document is not pushed
+            // below every weaker match on a description.
+            $inText = array_values(array_unique($inText));
+            for ($i = 0, $n = max(count($described), count($inText)); $i < $n; ++$i) {
+                array_push($ids, ...array_slice($described, $i, 1), ...array_slice($inText, $i, 1));
+            }
         } catch (\Throwable $e) {
             error_log('chatbot.semantic_failed: '.$e->getMessage());
         }
@@ -54,7 +76,14 @@ class ChatbotRetriever
         $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
         $visible = array_slice(self::visibleOnly($ids, $userId), 0, self::MAX_RECORDS);
 
-        return self::hydrate($visible, $culture);
+        // Passages are attached only after the visibility check: text from a
+        // hidden record never reaches the context.
+        $rows = self::hydrate($visible, $culture);
+        foreach ($rows as $r) {
+            $r->passages = $passages[(int) $r->id] ?? [];
+        }
+
+        return $rows;
     }
 
     /**

@@ -1,3 +1,26 @@
+<?php
+  // A description hidden from this user (classification, donor restriction,
+  // embargo, ICIP, ODRL) never renders here. This partial lists search hits
+  // straight from the index - term pages, search results, the clipboard - and
+  // the index knows none of those rules. The hidden list is built once per
+  // request; if it cannot be built, nothing renders (fail closed).
+  // ponytail: page counts still include hidden hits; filtering the query
+  // itself means changing base AtoM's search actions.
+  $ahgHidden = sfConfig::get('ahg_hidden_io_ids');
+  if (null === $ahgHidden) {
+      try {
+          $ahgHidden = array_flip(\AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+              ->getRestrictedObjectIds($sf_user->getAttribute('user_id') ? (int) $sf_user->getAttribute('user_id') : null));
+      } catch (\Throwable $e) {
+          error_log('searchResult.visibility_failed: '.$e->getMessage());
+          $ahgHidden = false;
+      }
+      sfConfig::set('ahg_hidden_io_ids', $ahgHidden);
+  }
+  if (false === $ahgHidden || isset($ahgHidden[(int) $hit->getId()])) {
+      return;
+  }
+?>
 <?php $doc = $hit->getData(); ?>
 
 <article class="search-result row g-0 p-3 border-bottom">

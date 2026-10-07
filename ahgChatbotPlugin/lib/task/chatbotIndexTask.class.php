@@ -20,6 +20,7 @@ class chatbotIndexTask extends sfBaseTask
             new sfCommandOption('prune', null, sfCommandOption::PARAMETER_NONE, 'After indexing, remove descriptions no longer published'),
             new sfCommandOption('prune-only', null, sfCommandOption::PARAMETER_NONE, 'Only prune; do not index'),
             new sfCommandOption('dry-run', null, sfCommandOption::PARAMETER_NONE, 'Report only (counts; with --prune-only, what would be removed)'),
+            new sfCommandOption('skip-text', null, sfCommandOption::PARAMETER_NONE, 'Do not index digital object text (transcripts)'),
         ]);
         $this->namespace = 'chatbot';
         $this->name = 'index';
@@ -44,6 +45,7 @@ EOD;
         $pruneOnly = (bool) $options['prune-only'];
 
         $this->logSection('chatbot', sprintf("Published descriptions (%s): %d - collection %s", $culture, $index->publishedCount($culture), $index->getCollection()));
+        $this->logSection('chatbot', sprintf('Digital object texts of published descriptions: %d - collection %s', $index->transcriptCount($culture), $index->textCollection()));
 
         if ($dryRun && !$pruneOnly) {
             return 0;
@@ -73,9 +75,24 @@ EOD;
             } while (!$res['done']);
         }
 
+        if (!$pruneOnly && !$options['skip-text']) {
+            $offset = 0;
+            $t = ['indexed' => 0, 'passages' => 0, 'skipped' => 0, 'failed' => 0];
+            do {
+                $res = $index->indexTextBatch(max(1, (int) $options['batch']), $offset, $culture);
+                foreach ($t as $k => $v) {
+                    $t[$k] += $res[$k];
+                }
+                $offset = $res['next_offset'];
+                $this->logSection('chatbot', sprintf('texts indexed=%d passages=%d skipped=%d failed=%d', $t['indexed'], $t['passages'], $t['skipped'], $t['failed']));
+            } while (!$res['done']);
+        }
+
         if ($options['prune'] || $pruneOnly) {
             $p = $index->prune($culture, $dryRun);
-            $this->logSection('chatbot', sprintf('%s: checked=%d %s=%d%s', $dryRun ? 'Prune (dry run)' : 'Pruned', $p['checked'], $dryRun ? 'would_remove' : 'removed', $p['removed'], $p['failed'] ? ' - FAILED part-way' : ''), null, $p['failed'] ? 'ERROR' : 'INFO');
+            $this->logSection('chatbot', sprintf('%s: descriptions checked=%d %s=%d; text passages checked=%d %s=%d%s',
+                $dryRun ? 'Prune (dry run)' : 'Pruned', $p['checked'], $dryRun ? 'would_remove' : 'removed', $p['removed'],
+                $p['text_checked'], $dryRun ? 'would_remove' : 'removed', $p['text_removed'], $p['failed'] ? ' - FAILED part-way' : ''), null, $p['failed'] ? 'ERROR' : 'INFO');
 
             return $p['failed'] ? 1 : 0;
         }

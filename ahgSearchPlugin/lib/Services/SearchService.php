@@ -37,6 +37,22 @@ class SearchService
      * Returns array with keys: descriptions, repositories, actors, places, subjects.
      * Each value has 'hits' (array of doc data) and 'total' (int).
      */
+    /** @return array<int,array> must_not clauses for descriptions hidden from the current user */
+    private function hiddenDescriptionsClause(): array
+    {
+        try {
+            $userId = \sfContext::hasInstance() ? \sfContext::getInstance()->getUser()->getAttribute('user_id') : null;
+            $ids = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ? (int) $userId : null);
+
+            return [] === $ids ? [] : [['ids' => ['values' => array_map('strval', $ids)]]];
+        } catch (\Throwable $e) {
+            error_log('autocomplete.visibility_failed: '.$e->getMessage());
+
+            return [['match_all' => new \stdClass()]];
+        }
+    }
+
     public function autocomplete(string $query, array $options = []): array
     {
         $repoFilter = $options['repos'] ?? null;
@@ -102,6 +118,13 @@ class SearchService
 
             // Hide draft/embargoed authority records from anonymous users.
             $mustNot = [];
+
+            // Descriptions hidden from this user (classification, donor
+            // restriction, embargo, ICIP, ODRL) are never suggested. The
+            // index knows none of those rules. Fails closed.
+            if ($key === 'descriptions') {
+                $mustNot = array_merge($mustNot, $this->hiddenDescriptionsClause());
+            }
             if ($key === 'actors') {
                 $actorHidden = $this->hiddenActorIdsForPublic();
                 if (!empty($actorHidden)) {

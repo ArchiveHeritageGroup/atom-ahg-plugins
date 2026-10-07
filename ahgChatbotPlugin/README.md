@@ -7,9 +7,10 @@ The plugin is self-contained. It touches no base AtoM file and does not depend o
 ## What it does
 
 - A launcher button on every HTML page, injected by the plugin itself. It opens a chat panel. On a description page, a question like "who made this?" is taken to mean that record.
-- Retrieval comes from two paths, merged:
-  - semantic search: Qdrant, with embeddings through the AHG AI gateway;
-  - MySQL full-text on title and scope, with a prefix retry so plurals still match.
+- Retrieval comes from three paths, merged:
+  - semantic search over descriptions: Qdrant, with embeddings through the AI gateway;
+  - semantic search over **digital object text** - the text AtoM extracts from PDFs and OCR'd scans (the "transcript" property), split into overlapping passages of about 1,000 characters in a second collection, `{collection}_text`. Matching passages are given to the model with their record, only after the record has passed the visibility check;
+  - MySQL full-text on title and scope, with a prefix retry so plurals still match. (Transcripts have no MySQL full-text index, so without Qdrant they are not searched.)
 - **Visibility is decided on every hit when it is used, never trusted from an index.** A record must be published and not restricted (security classification, donor agreement, full embargo, an active ICIP access restriction or access-blocking cultural notice inherited from ancestors, or an ODRL "use" prohibition). If the check cannot run, nothing is returned.
 - Generation goes through the AHG AI gateway only. No provider setting can send it elsewhere.
 - Limits are checked before any model call:
@@ -35,7 +36,7 @@ php bin/atom extension:install ahgChatbotPlugin   # links it, loads database/ins
 cd .. && php symfony cc
 ```
 
-Then build the index. If ahgAIPlugin has already built `{db}_io_nomic`, that index is used as it is.
+Then build the index: descriptions, then digital object text (`--skip-text` to leave the text out). If ahgAIPlugin has already built `{db}_io_nomic`, that index is used as it is; the text collection is created on first run.
 
 ```bash
 php symfony chatbot:index --prune
@@ -64,6 +65,7 @@ php symfony chatbot:index --prune
 | chatbot_info_pages | contact,about,accessibility | Static pages used for visiting and contact questions |
 | chatbot_help_categories_public | Public Access,Browse & Search,Research,Viewers & Media | Help categories for visitors and researchers |
 | chatbot_help_categories_staff | (public list plus User Guide, User Manual, Admin & Settings, Collection Mgmt, Import/Export, Rights, Compliance, Exhibitions, GLAM Sectors, Labels & Forms, AI & Automation) | Help categories for editors, contributors, administrators |
+| chatbot_text_collection | {collection}_text | Qdrant collection for digital object text passages |
 | chatbot_qdrant_url | http://localhost:6333 | Vector store |
 | chatbot_vector_collection | {db}_io_nomic | Qdrant collection |
 

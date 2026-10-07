@@ -15,7 +15,7 @@ class ChatbotService
     /** Longest question accepted; longer ones are refused, not truncated. */
     public const MAX_MESSAGE_CHARS = 1000;
 
-    private const MAX_CONTEXT_CHARS = 5000;
+    private const MAX_CONTEXT_CHARS = 9000;
     private const HISTORY_TURNS = 4;
 
     /**
@@ -51,7 +51,9 @@ class ChatbotService
             // think=false: qwen3 otherwise spends the token budget on a hidden
             // reasoning pass and can return an empty answer (needs framework
             // v2.18.47+; older frameworks ignore the option).
-            $result = $client->chat($messages, ['model' => $model, 'temperature' => 0.2, 'max_tokens' => 800, 'timeout' => 90, 'think' => false]);
+            $result = $client->chat($messages, ['model' => $model, 'temperature' => 0.2, 'max_tokens' => 800, 'timeout' => 90, 'think' => false,
+                // Ollama's default window is small; the context above would be cut off silently.
+                'num_ctx' => 8192]);
             if (!empty($result['success'])) {
                 return ['answer' => self::stripThinking($result['text']), 'sources' => $sources, 'mode' => 'ai', 'model' => $result['model']];
             }
@@ -97,7 +99,8 @@ class ChatbotService
 
         $system = 'You are "Ask the archive", an assistant for a public archival catalogue. '
             .'Answer ONLY from the information below; never use outside knowledge. '
-            .'Name the records you used by their title. If the information does not answer the question, say so plainly '
+            .'Name the records you used by their title; when the answer comes from a record\'s digital object text, still name that record. '
+            .'If the information does not answer the question, say so plainly '
             .'and suggest a better search. Keep answers short. Reply in the language of the question.'
             .('' !== $info['text']
                 ? "\n\nFor questions about visiting, opening times, contacting the institution or its services, answer from the institution information. "
@@ -247,8 +250,15 @@ class ChatbotService
         $out = '';
         foreach ($records as $r) {
             $scope = trim(strip_tags((string) $r->scope_and_content));
+            // A record that matched inside its document gets a shorter
+            // summary, leaving room for the passages that matched.
+            $passages = $r->passages ?? [];
             $block = '--- '.($r->identifier ? '['.$r->identifier.'] ' : '').($r->title ?: $r->slug)." ---\n"
-                .('' !== $scope ? mb_substr($scope, 0, 1200) : '(no scope and content recorded)')."\n\n";
+                .('' !== $scope ? mb_substr($scope, 0, [] === $passages ? 1200 : 400) : '(no scope and content recorded)')."\n";
+            foreach ($passages as $passage) {
+                $block .= "Text from the record's digital object: ".$passage."\n";
+            }
+            $block .= "\n";
             if (strlen($out) + strlen($block) > self::MAX_CONTEXT_CHARS) {
                 break;
             }
