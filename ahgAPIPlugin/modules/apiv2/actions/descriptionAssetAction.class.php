@@ -1,5 +1,7 @@
 <?php
 
+require_once sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/ApiVisibility.php';
+
 use AtomFramework\Http\Controllers\AhgApiController;
 class apiv2DescriptionAssetAction extends AhgApiController
 {
@@ -10,6 +12,10 @@ class apiv2DescriptionAssetAction extends AhgApiController
         }
 
         $slug = $request->getParameter('slug');
+        // Hidden descriptions answer exactly like missing ones (ApiVisibility).
+        if (!ApiVisibility::canSeeSlug((string) $slug, $this->getUser())) {
+            return $this->error(404, 'Not Found', 'Description not found');
+        }
         $objectId = $this->repository->getObjectIdBySlug($slug);
 
         if (!$objectId) {

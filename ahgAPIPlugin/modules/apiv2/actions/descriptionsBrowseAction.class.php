@@ -1,5 +1,7 @@
 <?php
 
+require_once sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/ApiVisibility.php';
+
 use AtomFramework\Http\Controllers\AhgApiController;
 class apiv2DescriptionsBrowseAction extends AhgApiController
 {
@@ -16,7 +18,8 @@ class apiv2DescriptionsBrowseAction extends AhgApiController
             'sort_direction' => $request->getParameter('sort_direction', 'desc'),
             'repository' => $request->getParameter('repository'),
             'level' => $request->getParameter('level'),
-            'parent' => $request->getParameter('parent')
+            'parent' => $request->getParameter('parent'),
+            'visibility' => fn ($query) => ApiVisibility::applyToQuery($query, $this->getUser()),
         ];
 
         $result = $this->repository->getDescriptions($params);

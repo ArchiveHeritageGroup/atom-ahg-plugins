@@ -10,8 +10,22 @@
     </span>
   </h5>
 
+  <?php
+    // Descriptions hidden from this user (classification, donor restriction,
+    // embargo, ICIP, ODRL) must not appear here either - the list comes
+    // straight from the search index. Fails closed.
+    try {
+        $hiddenIds = array_flip(\AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+            ->getRestrictedObjectIds($sf_user->getAttribute('user_id') ? (int) $sf_user->getAttribute('user_id') : null));
+        $listOk = true;
+    } catch (\Throwable $e) {
+        $hiddenIds = [];
+        $listOk = false;
+    }
+  ?>
   <ul class="list-group list-group-flush">
-    <?php foreach ($pager->getResults() as $hit) { ?>
+    <?php foreach ($listOk ? $pager->getResults() : [] as $hit) { ?>
+      <?php if (isset($hiddenIds[(int) $hit->getId()])) { continue; } ?>
       <?php $doc = $hit->getData(); ?>
       <?php echo link_to(render_value_inline(get_search_i18n($doc, 'title', ['allowEmpty' => false])), ['module' => 'informationobject', 'slug' => $doc['slug']], ['class' => 'list-group-item list-group-item-action']); ?>
     <?php } ?>

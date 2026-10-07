@@ -1,5 +1,7 @@
 <?php
 
+require_once sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/ApiVisibility.php';
+
 use AtomFramework\Http\Controllers\AhgApiController;
 class apiv2SearchAction extends AhgApiController
 {
@@ -49,6 +51,9 @@ class apiv2SearchAction extends AhgApiController
                     ];
                 }
 
+                // ponytail: total still counts hidden hits; the rows do not include them.
+                $results = ApiVisibility::filterRows($results, $this->getUser());
+
                 return $this->success([
                     'total' => $result['total'] ?? 0,
                     'limit' => $limit,
@@ -87,6 +92,8 @@ class apiv2SearchAction extends AhgApiController
                     'score' => $hit->getScore(),
                 ];
             }
+
+            $results = ApiVisibility::filterRows($results, $this->getUser());
 
             return $this->success([
                 'total' => $resultSet->getTotalHits(),

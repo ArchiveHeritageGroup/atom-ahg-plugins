@@ -57,6 +57,50 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         // as labels but never enforced: a CONFIDENTIAL description rendered in
         // full for a logged-out visitor (tested on PSIS, 2026-10-07).
         $this->dispatcher->connect('controller.change_action', [$this, 'enforceRecordAccess']);
+
+        // The repository page's holdings list pages through base AtoM's
+        // repository/holdings JSON, straight from the search index.
+        $this->dispatcher->connect('response.filter_content', [$this, 'filterHoldingsJson']);
+    }
+
+    /**
+     * Drop hidden descriptions from base AtoM's repository/holdings JSON
+     * (pages 2+ of the holdings list; page 1 is the theme partial). Base is
+     * not touched: this filters its output. Fails closed (empty list).
+     */
+    public function filterHoldingsJson(sfEvent $event, $content)
+    {
+        try {
+            $context = sfContext::getInstance();
+            if ('repository' !== $context->getModuleName() || 'holdings' !== $context->getActionName()) {
+                return $content;
+            }
+            $data = json_decode((string) $content, true);
+            if (!is_array($data) || !isset($data['results']) || !is_array($data['results'])) {
+                return $content;
+            }
+
+            $userId = $context->getUser()->getAttribute('user_id');
+            $hidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ? (int) $userId : null);
+            if ([] === $hidden) {
+                return $content;
+            }
+            $hiddenSlugs = array_flip(\Illuminate\Database\Capsule\Manager::table('slug')
+                ->whereIn('object_id', $hidden)->pluck('slug')->all());
+
+            $data['results'] = array_values(array_filter($data['results'], static function ($row) use ($hiddenSlugs) {
+                $slug = basename((string) parse_url((string) ($row['url'] ?? ''), PHP_URL_PATH));
+
+                return !isset($hiddenSlugs[$slug]);
+            }));
+
+            return json_encode($data);
+        } catch (\Throwable $e) {
+            error_log('holdings.filter_failed: ' . $e->getMessage());
+
+            return json_encode(['results' => [], 'start' => 0, 'end' => 0, 'currentPage' => 1, 'lastPage' => 1]);
+        }
     }
 
     /**
@@ -73,12 +117,21 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
     {
         $params = $event->getParameters();
         $module = $params['module'] ?? '';
-        if (in_array($module, ['accessFilter', 'securityClearance', 'securityAudit', 'default', 'user'], true)) {
+        // apiv2: the API signs its key holder in only inside the action, so
+        // here every caller would look anonymous; ApiVisibility filters there.
+        if (in_array($module, ['accessFilter', 'securityClearance', 'securityAudit', 'default', 'user', 'apiv2'], true)) {
             return;
         }
 
         $context = sfContext::getInstance();
         $request = $context->getRequest();
+
+        if ('digitalobject' === $module && 'view' === ($params['action'] ?? '')) {
+            $this->enforceFileAccess($context);
+
+            return;
+        }
+
         $slug = (string) $request->getParameter('slug', '');
         if ('' === $slug || $request->getAttribute('ahg_record_access_checked')) {
             return;
@@ -180,6 +233,45 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         }
     }
     
+    /**
+     * /uploads/r/... files are served by base AtoM's digitalobject/view, which
+     * gives the public reference and thumbnail copies regardless of the
+     * description's classification or embargo. Refuse the file - as a plain
+     * 404, so its existence is not confirmed - when the description it belongs
+     * to is hidden from this user. Fails closed.
+     */
+    private function enforceFileAccess(sfContext $context): void
+    {
+        $path = rawurldecode((string) parse_url($context->getRequest()->getUri(), PHP_URL_PATH));
+        $slash = strrpos($path, '/');
+        if (false === $slash) {
+            return;
+        }
+
+        try {
+            $file = \Illuminate\Database\Capsule\Manager::table('digital_object as d')
+                ->leftJoin('digital_object as master', 'master.id', '=', 'd.parent_id')
+                ->where('d.path', substr($path, 0, $slash + 1))
+                ->where('d.name', substr($path, $slash + 1))
+                ->first(['d.object_id', 'master.object_id as master_object_id']);
+            $objectId = (int) ($file->object_id ?? 0) ?: (int) ($file->master_object_id ?? 0);
+            if ($objectId <= 1) {
+                return; // not a description's file (or unknown - base AtoM decides)
+            }
+
+            $userId = $context->getUser()->getAttribute('user_id');
+            $hidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->isRestricted($objectId, $userId ? (int) $userId : null);
+        } catch (\Throwable $e) {
+            error_log('file.access.check_failed: ' . $e->getMessage());
+            $hidden = true;
+        }
+
+        if ($hidden) {
+            throw new sfError404Exception('File not found');
+        }
+    }
+
     public function addRoutes(sfEvent $event)
     {
         $router = new \AtomFramework\Routing\RouteLoader('securityClearance');

@@ -121,6 +121,11 @@ class ApiRepository
             $query->where('dss.sector', $params['sector']);
         }
 
+        // Caller-specific visibility (drafts, restricted records) - see ApiVisibility.
+        if (isset($params['visibility']) && is_callable($params['visibility'])) {
+            ($params['visibility'])($query);
+        }
+
         $total = $query->count();
         $results = $query->orderBy('io.id', 'desc')->skip($skip)->take($limit)->get();
 
