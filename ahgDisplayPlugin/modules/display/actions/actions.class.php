@@ -191,6 +191,7 @@ class displayActions extends AhgController
         $sfx = $this->isAuthenticated ? '_all' : '';
         $facetService = new \AhgDisplay\Services\DynamicFacetService([
             'isAuthenticated' => $this->isAuthenticated,
+            'hiddenIds' => $this->hiddenIds(),
             'typeFilter' => $this->typeFilter,
             'parentId' => $this->parentId,
             'topLevelOnly' => $this->topLevelOnly,
@@ -229,7 +230,9 @@ class displayActions extends AhgController
             'languageFilter' => $this->languageFilter,
         ]);
 
-        if ($facetService->hasActiveFacetFilters()) {
+        // The cached counts include every description, so whenever this user
+        // has hidden ones, count live instead.
+        if ($facetService->hasActiveFacetFilters() || [] !== $this->hiddenIds()) {
             // Dynamic disjunctive faceting: each facet excludes its own filter
             $this->types = $facetService->getFacetCounts('glam_type');
             $this->levels = $facetService->getFacetCounts('level');
@@ -298,7 +301,7 @@ class displayActions extends AhgController
                     $this->esIds = $pageIds;
 
                     // Recompute facets scoped to full Discovery result set
-                    $this->recomputeDiscoveryFacets($discoveryIds);
+                    $this->recomputeDiscoveryFacets($this->withoutHidden($discoveryIds));
                 }
             } catch (\Exception $e) {
                 error_log('Discovery integration error: ' . $e->getMessage());

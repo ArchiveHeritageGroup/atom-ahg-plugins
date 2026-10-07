@@ -36,7 +36,26 @@
   <div class="card-body p-0">
     <a class="btn atom-btn-white border-0 w-100" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse', 'repos' => $resource->id]); ?>">
       <i class="fas fa-search me-1" aria-hidden="true"></i>
-      <?php echo __('Browse %1% results', ['%1%' => $pager->getNbResults()]); ?>
+      <?php
+        // The pager counts hidden descriptions too; take them off, so the
+        // number does not confirm they exist.
+        $visibleTotal = $pager->getNbResults();
+        if (!$listOk) {
+            $visibleTotal = 0;
+        } elseif ([] !== $hiddenIds) {
+            $hiddenHere = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+                ->where('io.repository_id', $resource->id)
+                ->whereIn('io.id', array_keys($hiddenIds));
+            if (!$sf_user->isAuthenticated()) {
+                $hiddenHere->whereExists(function ($q) {
+                    $q->select(\Illuminate\Database\Capsule\Manager::raw(1))->from('status')
+                        ->whereColumn('status.object_id', 'io.id')->where('status.type_id', 158)->where('status.status_id', 160);
+                });
+            }
+            $visibleTotal = max(0, $visibleTotal - $hiddenHere->count());
+        }
+      ?>
+      <?php echo __('Browse %1% results', ['%1%' => $visibleTotal]); ?>
     </a>
   </div>
 

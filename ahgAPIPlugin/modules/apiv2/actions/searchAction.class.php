@@ -20,6 +20,13 @@ class apiv2SearchAction extends AhgApiController
             return $this->error(400, 'Bad Request', 'query is required');
         }
 
+        // Descriptions hidden from this caller are excluded in the search
+        // itself, so the total is right as well as the rows. Unknown = none.
+        $hidden = ApiVisibility::hiddenIds($this->getUser());
+        if (null === $hidden) {
+            return $this->success(['total' => 0, 'limit' => $limit, 'skip' => $skip, 'results' => []]);
+        }
+
         try {
             // Dual-mode: Framework SearchService (standalone) or Elastica (legacy)
             if (class_exists('\\AtomFramework\\Services\\Search\\SearchService')) {
@@ -38,6 +45,7 @@ class apiv2SearchAction extends AhgApiController
                     'page' => $page,
                     'limit' => $limit,
                     'publicationStatus' => 'published',
+                    'excludeIds' => $hidden,
                 ]);
 
                 $results = [];
@@ -51,7 +59,6 @@ class apiv2SearchAction extends AhgApiController
                     ];
                 }
 
-                // ponytail: total still counts hidden hits; the rows do not include them.
                 $results = ApiVisibility::filterRows($results, $this->getUser());
 
                 return $this->success([
@@ -67,6 +74,9 @@ class apiv2SearchAction extends AhgApiController
 
             $esQuery = new \Elastica\Query\BoolQuery();
             $esQuery->addMust(new \Elastica\Query\QueryString($queryStr));
+            if ([] !== $hidden) {
+                $esQuery->addMustNot(new \Elastica\Query\Ids(array_map('strval', $hidden)));
+            }
 
             if (!empty($filters['repository'])) {
                 $esQuery->addFilter(new \Elastica\Query\Term(['repository.slug' => $filters['repository']]));

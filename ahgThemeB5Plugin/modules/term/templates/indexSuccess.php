@@ -1,5 +1,37 @@
 <?php decorate_with('layout_3col'); ?>
 <?php use_helper('Text'); ?>
+<?php
+  // The pager counts descriptions hidden from this user (classification,
+  // donor restriction, embargo, ICIP, ODRL) - the list already skips them,
+  // and the number must not confirm they exist. Subtract the hidden ones
+  // linked to this term (and its narrower terms, unless onlyDirect), as base
+  // AtoM's count does. ponytail: with a sidebar filter applied this can
+  // subtract a little too much - the count errs low, never high.
+  $ahgVisibleNb = $pager->getNbResults();
+  try {
+      $ahgUserId = $sf_user->getAttribute('user_id');
+      $ahgHidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+          ->getRestrictedObjectIds($ahgUserId ? (int) $ahgUserId : null);
+      if ([] !== $ahgHidden && $ahgVisibleNb > 0) {
+          $ahgDb = \Illuminate\Database\Capsule\Manager::class;
+          $ahgTerms = isset($sf_request->onlyDirect)
+              ? [(int) $resource->id]
+              : $ahgDb::table('term')->whereBetween('lft', [$resource->lft, $resource->rgt])->pluck('id')->all();
+          $ahgQ = $ahgDb::table('object_term_relation as otr')
+              ->whereIn('otr.term_id', $ahgTerms)->whereIn('otr.object_id', $ahgHidden);
+          if (!$sf_user->isAuthenticated()) {
+              $ahgQ->whereExists(function ($q) use ($ahgDb) {
+                  $q->select($ahgDb::raw(1))->from('status')->whereColumn('status.object_id', 'otr.object_id')
+                      ->where('status.type_id', 158)->where('status.status_id', 160);
+              });
+          }
+          $ahgVisibleNb = max(0, $ahgVisibleNb - $ahgQ->distinct()->count('otr.object_id'));
+      }
+  } catch (\Throwable $e) {
+      error_log('term.count_visibility_failed: '.$e->getMessage());
+      $ahgVisibleNb = 0;
+  }
+?>
 
 <?php slot('sidebar'); ?>
 
@@ -35,7 +67,7 @@
     <?php echo get_partial('term/format', ['resource' => $resource]); ?>
 
     <?php if ($addBrowseElements) { ?>
-      <?php echo get_partial('term/rightContextMenu', ['resource' => $resource, 'results' => $pager->getNbResults()]); ?>
+      <?php echo get_partial('term/rightContextMenu', ['resource' => $resource, 'results' => $ahgVisibleNb]); ?>
     <?php } ?>
 
   </nav>
@@ -60,7 +92,7 @@
   <?php if ($addBrowseElements) { ?>
     <h1>
       <?php echo __('%1% %2% results for %3%', [
-          '%1%' => $pager->getNbResults(),
+          '%1%' => $ahgVisibleNb,
           '%2%' => sfConfig::get('app_ui_label_informationobject'),
           '%3%' => render_title($resource), ]);
       ?>

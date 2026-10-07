@@ -14,6 +14,9 @@ use Illuminate\Database\Capsule\Manager as DB;
 class DynamicFacetService
 {
     private bool $isAuthenticated;
+
+    /** @var int[]|null descriptions hidden from this user; null = unknown (count nothing) */
+    private ?array $hiddenIds = [];
     private ?string $typeFilter;
     private ?string $parentId;
     private string $topLevelOnly;
@@ -62,6 +65,7 @@ class DynamicFacetService
     public function __construct(array $filters)
     {
         $this->isAuthenticated = $filters['isAuthenticated'] ?? false;
+        $this->hiddenIds = array_key_exists('hiddenIds', $filters) ? $filters['hiddenIds'] : [];
         $this->typeFilter = $filters['typeFilter'] ?? null;
         $this->parentId = $filters['parentId'] ?? null;
         $this->topLevelOnly = $filters['topLevelOnly'] ?? '1';
@@ -189,6 +193,15 @@ class DynamicFacetService
                   ->where('pub_st.type_id', '=', 158)
                   ->where('pub_st.status_id', '=', 160);
             });
+        }
+
+        // Descriptions hidden from this user (classification, donor
+        // restriction, embargo, ICIP, ODRL) are not counted either - a count
+        // that includes them confirms they exist. Unknown = count nothing.
+        if (null === $this->hiddenIds) {
+            $query->whereRaw('1 = 0');
+        } elseif ([] !== $this->hiddenIds) {
+            $query->whereNotIn('io.id', $this->hiddenIds);
         }
 
         // Structural filters (always applied)
