@@ -7,29 +7,29 @@
     <div class="row">
         <?php if ($digitalObject && $data['thumbnail_size'] !== 'none'): ?>
         <div class="col-md-3 mb-3">
-            <img src="<?php echo $digitalObject->path; ?>" 
+            <img src="<?php echo display_e($digitalObject->path); ?>" 
                  class="img-fluid rounded" 
-                 alt="<?php echo $object->title ?? ''; ?>">
+                 alt="<?php echo display_e($object->title ?? ''); ?>">
         </div>
         <?php endif; ?>
         
-        <div class="col-md-<?php echo $digitalObject ? '9' : '12'; ?>">
+        <div class="col-md-<?php echo display_e($digitalObject ? '9' : '12'); ?>">
             <div class="catalog-header mb-3">
                 <?php if (!empty($fields['identity']['identifier'])): ?>
-                <span class="catalog-number text-muted me-3"><?php echo $fields['identity']['identifier']['value']; ?></span>
+                <span class="catalog-number text-muted me-3"><?php echo display_e($fields['identity']['identifier']['value']); ?></span>
                 <?php endif; ?>
                 
                 <?php if (!empty($fields['identity']['artist']) || !empty($fields['identity']['creator'])): ?>
                 <span class="catalog-creator">
-                    <strong><?php echo $fields['identity']['artist']['value'] ?? $fields['identity']['creator']['value'] ?? ''; ?></strong>
+                    <strong><?php echo display_e($fields['identity']['artist']['value'] ?? $fields['identity']['creator']['value'] ?? ''); ?></strong>
                 </span>
                 <?php endif; ?>
             </div>
             
             <h4 class="catalog-title mb-2">
-                <em><?php echo $object->title ?? 'Untitled'; ?></em>
+                <em><?php echo display_e($object->title ?? 'Untitled'); ?></em>
                 <?php if (!empty($fields['identity']['date'])): ?>
-                <span class="text-muted">, <?php echo $fields['identity']['date']['value']; ?></span>
+                <span class="text-muted">, <?php echo display_e($fields['identity']['date']['value']); ?></span>
                 <?php endif; ?>
             </h4>
             
@@ -47,14 +47,14 @@
             <?php // Description ?>
             <?php if (!empty($fields['description']['description']) || !empty($fields['description']['scope_content'])): ?>
             <p class="catalog-description">
-                <?php echo substr(strip_tags($fields['description']['description']['value'] ?? $fields['description']['scope_content']['value'] ?? ''), 0, 400); ?>...
+                <?php echo display_e(substr(strip_tags($fields['description']['description']['value'] ?? $fields['description']['scope_content']['value'] ?? ''), 0, 400)); ?>...
             </p>
             <?php endif; ?>
             
             <?php // Provenance ?>
             <?php if (!empty($fields['context']['provenance'])): ?>
             <p class="catalog-provenance small text-muted">
-                <strong>Provenance:</strong> <?php echo substr(strip_tags($fields['context']['provenance']['value']), 0, 200); ?>...
+                <strong>Provenance:</strong> <?php echo display_e(substr(strip_tags($fields['context']['provenance']['value']), 0, 200)); ?>...
             </p>
             <?php endif; ?>
         </div>

@@ -1,4 +1,8 @@
 <?php use_helper('Text'); ?>
+<?php
+// Symfony decorates template arrays; normalise nested access data before in_array().
+$access = json_decode(json_encode(sfOutputEscaper::unescape($access ?? [])), true) ?: [];
+?>
 
 <div class="container py-5">
     <div class="row justify-content-center">

@@ -40,12 +40,22 @@ function get_field_value(object $object, string $fieldCode): mixed
     return get_display_service()->getFieldValue($object, $fieldCode);
 }
 
+/**
+ * Escape a value for HTML output in the display layouts. They print catalogue
+ * data (titles, dates, paths) straight from the search index, where nothing
+ * else escapes it.
+ */
+function display_e($value): string
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
 function format_field_value(array $field): string
 {
     $value = $field['value'];
     
     if (is_array($value)) {
-        return implode(', ', $value);
+        return htmlspecialchars(implode(', ', $value));
     }
     
     if ($field['type'] === 'textarea') {

@@ -1,5 +1,13 @@
 <?php use_helper('Display'); ?>
 <?php $requestParams = $sf_request->getParameterHolder()->getAll(); ?>
+<?php $requestParams = is_object($requestParams) && method_exists($requestParams, 'getRawValue') ? $requestParams->getRawValue() : $requestParams; ?>
+<?php $results = is_object($results) && method_exists($results, 'getRawValue') ? $results->getRawValue() : $results; ?>
+<?php $params = is_object($params) && method_exists($params, 'getRawValue') ? $params->getRawValue() : $params; ?>
+<?php $adapter = is_object($adapter) && method_exists($adapter, 'getRawValue') ? $adapter->getRawValue() : $adapter; ?>
+<?php $layout = is_object($layout) && method_exists($layout, 'getRawValue') ? $layout->getRawValue() : $layout; ?>
+<?php $requestParams = is_array($requestParams) ? $requestParams : []; ?>
+<?php $results = is_array($results) ? $results : []; ?>
+<?php $params = is_array($params) ? $params : []; ?>
 
 <div class="container-fluid">
     <!-- Type Header -->
@@ -73,7 +81,10 @@
                             </div>
                         </form>
                         
-                        <?php echo $adapter->renderFacets($results['aggregations'] ?? []); ?>
+                        <?php $aggregations = $results['aggregations'] ?? []; ?>
+                        <?php $aggregations = is_object($aggregations) && method_exists($aggregations, 'getRawValue')
+                            ? $aggregations->getRawValue() : $aggregations; ?>
+                        <?php echo $adapter->renderFacets($aggregations); ?>
 
                         <!-- Advanced Search Enhancements -->
                         <?php include_partial("search/advancedSearchEnhancements"); ?>

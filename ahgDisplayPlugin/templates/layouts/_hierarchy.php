@@ -13,11 +13,11 @@ $children = $data['children'] ?? [];
         <?php foreach ($ancestors as $a): ?>
         <li class="breadcrumb-item">
             <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $a->slug]); ?>">
-                <?php echo $a->title ?? $a->identifier; ?>
+                <?php echo display_e($a->title ?? $a->identifier); ?>
             </a>
         </li>
         <?php endforeach; ?>
-        <li class="breadcrumb-item active"><?php echo $object->title ?? $object->identifier; ?></li>
+        <li class="breadcrumb-item active"><?php echo display_e($object->title ?? $object->identifier); ?></li>
     </ol>
 </nav>
 <?php endif; ?>
@@ -27,18 +27,18 @@ $children = $data['children'] ?? [];
     <div class="card-body">
         <div class="d-flex align-items-start">
             <?php if ($digitalObject): ?>
-            <img src="<?php echo $digitalObject->path; ?>" class="me-3 rounded" data-ahg-style="max-width: 80px;" alt="">
+            <img src="<?php echo display_e($digitalObject->path); ?>" class="me-3 rounded" data-ahg-style="max-width: 80px;" alt="">
             <?php endif; ?>
             <div class="flex-grow-1">
                 <h4 class="mb-1">
-                    <span class="badge bg-secondary me-2"><?php echo $object->level_name; ?></span>
-                    <?php echo $object->title ?? 'Untitled'; ?>
+                    <span class="badge bg-secondary me-2"><?php echo display_e($object->level_name); ?></span>
+                    <?php echo display_e($object->title ?? 'Untitled'); ?>
                 </h4>
                 <?php if ($object->identifier): ?>
-                <p class="text-muted mb-2"><?php echo $object->identifier; ?></p>
+                <p class="text-muted mb-2"><?php echo display_e($object->identifier); ?></p>
                 <?php endif; ?>
                 <?php if (!empty($fields['description']['scope_content'])): ?>
-                <p class="mb-0"><?php echo substr(strip_tags($fields['description']['scope_content']['value']), 0, 300); ?>...</p>
+                <p class="mb-0"><?php echo display_e(substr(strip_tags($fields['description']['scope_content']['value']), 0, 300)); ?>...</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -57,19 +57,19 @@ $children = $data['children'] ?? [];
         <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $child->slug]); ?>" 
            class="list-group-item list-group-item-action d-flex align-items-center">
             <?php if ($child->thumbnail_path): ?>
-            <img src="<?php echo $child->thumbnail_path; ?>" class="me-3 rounded" data-ahg-style="width: 50px; height: 50px; object-fit: cover;" alt="">
+            <img src="<?php echo display_e($child->thumbnail_path); ?>" class="me-3 rounded" data-ahg-style="width: 50px; height: 50px; object-fit: cover;" alt="">
             <?php else: ?>
             <div class="me-3 text-muted" data-ahg-style="width: 50px; text-align: center;">
                 <i class="fas <?php echo get_level_icon(strtolower($child->level_name ?? 'file')); ?> fa-2x"></i>
             </div>
             <?php endif; ?>
             <div class="flex-grow-1">
-                <strong><?php echo $child->title ?? 'Untitled'; ?></strong>
+                <strong><?php echo display_e($child->title ?? 'Untitled'); ?></strong>
                 <?php if ($child->identifier): ?>
-                <br><small class="text-muted"><?php echo $child->identifier; ?></small>
+                <br><small class="text-muted"><?php echo display_e($child->identifier); ?></small>
                 <?php endif; ?>
             </div>
-            <span class="badge bg-light text-dark"><?php echo $child->level_name; ?></span>
+            <span class="badge bg-light text-dark"><?php echo display_e($child->level_name); ?></span>
         </a>
         <?php endforeach; ?>
     </div>

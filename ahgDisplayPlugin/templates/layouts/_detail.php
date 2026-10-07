@@ -16,24 +16,24 @@ $colContent = $colImage > 0 && $colImage < 12 ? 12 - $colImage : 12;
 
 <div class="row">
     <?php if ($digitalObject && $thumbnailSize !== 'none'): ?>
-    <div class="col-md-<?php echo $colImage; ?> <?php echo $thumbnailPosition === 'right' ? 'order-md-2' : ''; ?> mb-4">
-        <div class="digital-object-display thumbnail-<?php echo $thumbnailSize; ?>">
-            <a href="<?php echo $digitalObject->path; ?>" data-lightbox="object" data-title="<?php echo $object->title ?? ''; ?>">
-                <img src="<?php echo $digitalObject->path; ?>" 
+    <div class="col-md-<?php echo display_e($colImage); ?> <?php echo display_e($thumbnailPosition === 'right' ? 'order-md-2' : ''); ?> mb-4">
+        <div class="digital-object-display thumbnail-<?php echo display_e($thumbnailSize); ?>">
+            <a href="<?php echo display_e($digitalObject->path); ?>" data-lightbox="object" data-title="<?php echo display_e($object->title ?? ''); ?>">
+                <img src="<?php echo display_e($digitalObject->path); ?>" 
                      class="img-fluid rounded shadow-sm" 
-                     alt="<?php echo $object->title ?? ''; ?>">
+                     alt="<?php echo display_e($object->title ?? ''); ?>">
             </a>
         </div>
     </div>
     <?php endif; ?>
     
-    <div class="col-md-<?php echo $colContent; ?>">
+    <div class="col-md-<?php echo display_e($colContent); ?>">
         <?php // Identity Section ?>
         <?php if (!empty($fields['identity'])): ?>
         <section class="field-section identity-section mb-4">
             <dl class="row mb-0">
                 <?php foreach ($fields['identity'] as $field): ?>
-                <dt class="col-sm-3 text-muted"><?php echo $field['label']; ?></dt>
+                <dt class="col-sm-3 text-muted"><?php echo display_e($field['label']); ?></dt>
                 <dd class="col-sm-9"><?php echo format_field_value($field); ?></dd>
                 <?php endforeach; ?>
             </dl>
@@ -48,7 +48,7 @@ $colContent = $colImage > 0 && $colImage < 12 ? 12 - $colImage : 12;
             </h5>
             <?php foreach ($fields['description'] as $field): ?>
             <div class="field-block mb-3">
-                <h6 class="field-label text-muted"><?php echo $field['label']; ?></h6>
+                <h6 class="field-label text-muted"><?php echo display_e($field['label']); ?></h6>
                 <div class="field-value"><?php echo format_field_value($field); ?></div>
             </div>
             <?php endforeach; ?>
@@ -63,7 +63,7 @@ $colContent = $colImage > 0 && $colImage < 12 ? 12 - $colImage : 12;
             </h5>
             <?php foreach ($fields['context'] as $field): ?>
             <div class="field-block mb-3">
-                <h6 class="field-label text-muted"><?php echo $field['label']; ?></h6>
+                <h6 class="field-label text-muted"><?php echo display_e($field['label']); ?></h6>
                 <div class="field-value"><?php echo format_field_value($field); ?></div>
             </div>
             <?php endforeach; ?>
@@ -78,7 +78,7 @@ $colContent = $colImage > 0 && $colImage < 12 ? 12 - $colImage : 12;
             </h5>
             <?php foreach ($fields['access'] as $field): ?>
             <div class="field-block mb-3">
-                <h6 class="field-label text-muted"><?php echo $field['label']; ?></h6>
+                <h6 class="field-label text-muted"><?php echo display_e($field['label']); ?></h6>
                 <div class="field-value"><?php echo format_field_value($field); ?></div>
             </div>
             <?php endforeach; ?>
@@ -93,7 +93,7 @@ $colContent = $colImage > 0 && $colImage < 12 ? 12 - $colImage : 12;
             </h5>
             <dl class="row mb-0">
                 <?php foreach ($fields['technical'] as $field): ?>
-                <dt class="col-sm-4 text-muted"><?php echo $field['label']; ?></dt>
+                <dt class="col-sm-4 text-muted"><?php echo display_e($field['label']); ?></dt>
                 <dd class="col-sm-8"><?php echo format_field_value($field); ?></dd>
                 <?php endforeach; ?>
             </dl>

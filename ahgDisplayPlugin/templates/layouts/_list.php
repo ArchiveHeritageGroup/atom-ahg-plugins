@@ -3,10 +3,10 @@
  * List layout - tabular view for libraries/search
  */
 ?>
-<tr class="list-item" data-id="<?php echo $object->id; ?>">
+<tr class="list-item" data-id="<?php echo display_e($object->id); ?>">
     <?php if ($digitalObject && $data['thumbnail_size'] !== 'none'): ?>
     <td width="60">
-        <img src="<?php echo $digitalObject->path; ?>" class="rounded" data-ahg-style="width: 50px; height: 50px; object-fit: cover;" alt="">
+        <img src="<?php echo display_e($digitalObject->path); ?>" class="rounded" data-ahg-style="width: 50px; height: 50px; object-fit: cover;" alt="">
     </td>
     <?php endif; ?>
     
@@ -14,7 +14,7 @@
     <td>
         <?php if ($field['code'] === 'title'): ?>
         <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $object->slug]); ?>">
-            <strong><?php echo $field['value']; ?></strong>
+            <strong><?php echo display_e($field['value']); ?></strong>
         </a>
         <?php else: ?>
         <?php echo format_field_value($field); ?>

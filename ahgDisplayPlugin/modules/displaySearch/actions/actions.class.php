@@ -44,7 +44,10 @@ class displaySearchActions extends AhgController
         $this->results = $this->esService->search($params);
         $this->params = $params;
         $this->layout = $request->getParameter('layout', 'card');
-        $this->adapter = $this->adapter;
+        // Protected action properties are not exposed to Symfony templates.
+        // Pass the initialized adapter explicitly so searchSuccess.php can
+        // render facets and results.
+        $this->getVarHolder()->set('adapter', $this->adapter);
     }
     
     /**
@@ -73,7 +76,8 @@ class displaySearchActions extends AhgController
         $this->objectType = $objectType;
         $this->results = $this->esService->browseByType($objectType, $params);
         $this->params = $params;
-        $this->adapter = $this->adapter;
+        // browseSuccess.php uses the adapter for facets and result rendering.
+        $this->getVarHolder()->set('adapter', $this->adapter);
         
         // Set default layout based on type
         $this->layout = $request->getParameter('layout') ?? match($objectType) {
