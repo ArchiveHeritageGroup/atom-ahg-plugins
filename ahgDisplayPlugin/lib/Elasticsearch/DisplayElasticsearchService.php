@@ -442,6 +442,7 @@ class DisplayElasticsearchService
                 'bool' => [
                     'must' => $must,
                     'filter' => $filter,
+                    'must_not' => $this->hiddenClause(),
                 ],
             ],
             'sort' => $sortArray,
@@ -599,6 +600,27 @@ class DisplayElasticsearchService
     }
     
     /**
+     * Descriptions hidden from the current user (security classification,
+     * donor restriction, full embargo, ICIP, ODRL - SearchAccessFilterService)
+     * as an Elasticsearch must_not clause. Fails closed: if the list cannot be
+     * built, the clause excludes everything.
+     */
+    private function hiddenClause(): array
+    {
+        try {
+            $userId = \sfContext::hasInstance() ? \sfContext::getInstance()->getUser()->getAttribute('user_id') : null;
+            $ids = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ? (int) $userId : null);
+
+            return [] === $ids ? [] : [['ids' => ['values' => array_map('strval', $ids)]]];
+        } catch (\Throwable $e) {
+            error_log('display.es_visibility_failed: ' . $e->getMessage());
+
+            return [['match_all' => new \stdClass()]];
+        }
+    }
+
+    /**
      * Autocomplete search
      */
     public function autocomplete(string $query, int $size = 10): array
@@ -620,6 +642,7 @@ class DisplayElasticsearchService
                     'filter' => [
                         ['term' => ['publicationStatusId' => QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID]],
                     ],
+                    'must_not' => $this->hiddenClause(),
                 ],
             ],
             'size' => $size,

@@ -16,10 +16,13 @@ class accessFilterActions extends AhgController
         $this->access = $service->checkAccess((int)$this->objectId, $userId);
         $this->userContext = $service->getUserContext($userId);
         
-        // Get object title
-        $this->objectTitle = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+        // Get object title - withheld when the record itself is hidden, since
+        // the title of classified material can be sensitive too.
+        $this->objectTitle = $request->getAttribute('ahg_hide_title') ? 'This record' : \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
             ->where('id', $this->objectId)
             ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->value('title') ?? 'Unknown';
+
+        $this->getResponse()->setStatusCode(403);
     }
 }

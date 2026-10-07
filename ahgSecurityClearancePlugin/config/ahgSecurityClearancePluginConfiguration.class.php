@@ -52,6 +52,69 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         // before the action runs; redirects MFA-required roles to /security/2fa
         // until they hold a valid 2FA session.
         $this->dispatcher->connect('controller.change_action', [$this, 'enforcePerRoleMfa']);
+
+        // Classification, donor restrictions, embargo, ICIP and ODRL were shown
+        // as labels but never enforced: a CONFIDENTIAL description rendered in
+        // full for a logged-out visitor (tested on PSIS, 2026-10-07).
+        $this->dispatcher->connect('controller.change_action', [$this, 'enforceRecordAccess']);
+    }
+
+    /**
+     * Refuse any page addressed by the slug of a description that
+     * SearchAccessFilterService hides from this user: the view page, and
+     * every other action reached through that slug (print, exports, finding
+     * aids). Administrators are never refused - the service returns no ids
+     * for them.
+     *
+     * Fails CLOSED for a slug that is a description: if the check cannot run,
+     * the page is refused. Pages without a description slug are untouched.
+     */
+    public function enforceRecordAccess(sfEvent $event)
+    {
+        $params = $event->getParameters();
+        $module = $params['module'] ?? '';
+        if (in_array($module, ['accessFilter', 'securityClearance', 'securityAudit', 'default', 'user'], true)) {
+            return;
+        }
+
+        $context = sfContext::getInstance();
+        $request = $context->getRequest();
+        $slug = (string) $request->getParameter('slug', '');
+        if ('' === $slug || $request->getAttribute('ahg_record_access_checked')) {
+            return;
+        }
+        $request->setAttribute('ahg_record_access_checked', true);
+
+        try {
+            $objectId = (int) \Illuminate\Database\Capsule\Manager::table('slug as s')
+                ->join('information_object as io', 'io.id', '=', 's.object_id')
+                ->where('s.slug', $slug)
+                ->value('io.id');
+            if ($objectId <= 1) {
+                return; // not a description
+            }
+
+            $userId = $context->getUser()->getAttribute('user_id');
+            $hidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->isRestricted($objectId, $userId ? (int) $userId : null);
+        } catch (\Throwable $e) {
+            error_log('record.access.check_failed: ' . $e->getMessage());
+            $hidden = isset($objectId) && $objectId > 1;
+        }
+
+        if (!$hidden) {
+            return;
+        }
+
+        $request->setParameter('id', $objectId);
+        // The title of a hidden description can itself be sensitive.
+        $request->setAttribute('ahg_hide_title', true);
+        // ponytail: the page still answers 200 - something after the forward
+        // resets the status. Content is withheld either way; find the reset
+        // before relying on the status code.
+        $context->getController()->forward('accessFilter', 'denied');
+
+        throw new sfStopException();
     }
 
     /**

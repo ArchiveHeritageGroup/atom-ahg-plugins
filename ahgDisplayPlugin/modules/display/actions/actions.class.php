@@ -7,6 +7,9 @@ use AhgDisplay\Services\DisplayModeService;
 
 class displayActions extends AhgController
 {
+    /** @var int[]|null|false false = not computed yet */
+    protected $hiddenIdsCache = false;
+
     protected $service;
     protected $modeService;
 
@@ -285,7 +288,7 @@ class displayActions extends AhgController
                     $this->discoveryMode = true;
 
                     // Apply facet filters to narrow the Discovery ID set
-                    $filteredIds = $this->applyFacetFiltersToIds($discoveryIds);
+                    $filteredIds = $this->withoutHidden($this->applyFacetFiltersToIds($discoveryIds));
 
                     $this->total = count($filteredIds);
                     $this->totalPages = (int) ceil($this->total / $this->limit);
@@ -314,7 +317,7 @@ class displayActions extends AhgController
 
             if ($this->total === 0 && $this->queryFilter) {
                 try {
-                    $esIds = $this->tryElasticsearchFuzzy($this->queryFilter);
+                    $esIds = $this->withoutHidden($this->tryElasticsearchFuzzy($this->queryFilter));
                     if (!empty($esIds)) {
                         $this->esIds = $esIds;
                         $this->esAssistedSearch = true;
@@ -350,66 +353,9 @@ class displayActions extends AhgController
         if ($this->esIds) {
             // ES fallback: override filters with ES-matched IDs
             $query->whereIn('io.id', $this->esIds);
+            $this->applyVisibility($query);
         } else {
             $this->applyFilters($query);
-        }
-
-        // ── Embargo enforcement: exclude fully embargoed records from browse ──
-        if (!$this->isAuthenticated || !$this->getContext()->getUser()->isAdministrator()) {
-            try {
-                $embargoedIds = DB::table('rights_embargo')
-                    ->where('status', 'active')
-                    ->where('embargo_type', 'full')
-                    ->where(function ($q) {
-                        $q->whereNull('end_date')
-                          ->orWhere('end_date', '>=', date('Y-m-d'));
-                    })
-                    ->where(function ($q) {
-                        $q->whereNull('start_date')
-                          ->orWhere('start_date', '<=', date('Y-m-d'));
-                    })
-                    ->pluck('object_id')
-                    ->toArray();
-
-                if (!empty($embargoedIds)) {
-                    // Check for user exceptions
-                    $userId = $this->getContext()->getUser()->getAttribute('user_id');
-                    if ($userId) {
-                        $exceptionIds = DB::table('embargo_exception as ex')
-                            ->join('rights_embargo as re', 'ex.embargo_id', '=', 're.id')
-                            ->where('re.status', 'active')
-                            ->where('re.embargo_type', 'full')
-                            ->where(function ($q) use ($userId) {
-                                $q->where(function ($q2) use ($userId) {
-                                    $q2->where('ex.exception_type', 'user')
-                                       ->where('ex.exception_id', $userId);
-                                })->orWhere(function ($q2) use ($userId) {
-                                    $q2->where('ex.exception_type', 'group')
-                                       ->whereIn('ex.exception_id', function ($sub) use ($userId) {
-                                           $sub->select('group_id')
-                                               ->from('aclUserGroup')
-                                               ->where('user_id', $userId);
-                                       });
-                                });
-                            })
-                            ->where(function ($q) {
-                                $q->whereNull('ex.valid_until')
-                                  ->orWhere('ex.valid_until', '>=', date('Y-m-d'));
-                            })
-                            ->pluck('re.object_id')
-                            ->toArray();
-
-                        $embargoedIds = array_diff($embargoedIds, $exceptionIds);
-                    }
-
-                    if (!empty($embargoedIds)) {
-                        $query->whereNotIn('io.id', $embargoedIds);
-                    }
-                }
-            } catch (\Exception $e) {
-                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
-                // rights_embargo table may not exist — silently continue
-            }
         }
 
         // Handle parent/breadcrumb
@@ -566,19 +512,69 @@ class displayActions extends AhgController
         ];
     }
 
-    protected function applyFilters($query)
+    /**
+     * The one visibility rule for browse, print and CSV export. Guests see
+     * published descriptions only; nobody but an administrator sees one that
+     * SearchAccessFilterService hides (security classification above their
+     * clearance, donor restriction, full embargo, ICIP, ODRL "use"
+     * prohibition). Print and CSV export used to apply neither, so a guest
+     * could download every draft.
+     *
+     * Fails closed: if the restricted list cannot be built, nothing is listed.
+     */
+    protected function applyVisibility($query): void
     {
-        // Filter by publication status - only show Published items (status_id = 160) for guests
-        // Authenticated users (editors/admins) can see all items
         if (!$this->getContext()->getUser()->isAuthenticated()) {
-            $query->whereExists(function($q) {
+            $query->whereExists(function ($q) {
                 $q->select(DB::raw(1))
-                  ->from('status')
-                  ->whereRaw('status.object_id = io.id')
-                  ->where('status.type_id', 158)   // publication status type
-                  ->where('status.status_id', 160); // Published
+                    ->from('status')
+                    ->whereRaw('status.object_id = io.id')
+                    ->where('status.type_id', 158)   // publication status
+                    ->where('status.status_id', 160); // published
             });
         }
+
+        $hidden = $this->hiddenIds();
+        if (null === $hidden) {
+            $query->whereRaw('1 = 0');
+        } elseif ([] !== $hidden) {
+            $query->whereNotIn('io.id', $hidden);
+        }
+    }
+
+    /** @param int[] $ids */
+    protected function withoutHidden(array $ids): array
+    {
+        $hidden = $this->hiddenIds();
+        if (null === $hidden) {
+            return [];
+        }
+
+        return [] === $hidden ? $ids : array_values(array_diff($ids, $hidden));
+    }
+
+    /** @return int[]|null ids hidden from this user, or null when that cannot be determined */
+    protected function hiddenIds(): ?array
+    {
+        if (false !== $this->hiddenIdsCache) {
+            return $this->hiddenIdsCache;
+        }
+        try {
+            $userId = $this->getContext()->getUser()->getAttribute('user_id');
+            $ids = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ? (int) $userId : null);
+            $this->hiddenIdsCache = array_map('intval', $ids);
+        } catch (\Throwable $e) {
+            error_log('display.visibility_failed: ' . $e->getMessage());
+            $this->hiddenIdsCache = null;
+        }
+
+        return $this->hiddenIdsCache;
+    }
+
+    protected function applyFilters($query)
+    {
+        $this->applyVisibility($query);
 
         if ($this->parentId) {
             // Use MPTT lft/rgt range to include the record itself and all descendants
@@ -912,6 +908,7 @@ class displayActions extends AhgController
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', '>', 1)
             ->select('io.id', 'io.identifier', 'i18n.title', 'i18n.scope_and_content', 'level.name as level_name', 'doc.object_type', 'slug.slug');
+        $this->applyVisibility($query);
 
         if ($this->parentId) {
             $query->where('io.parent_id', $this->parentId);
@@ -996,6 +993,7 @@ class displayActions extends AhgController
                 'doc.object_type',
                 'repo_name.authorized_form_of_name as repository'
             );
+        $this->applyVisibility($query);
 
         if ($parentId) {
             $query->where('io.parent_id', $parentId);
