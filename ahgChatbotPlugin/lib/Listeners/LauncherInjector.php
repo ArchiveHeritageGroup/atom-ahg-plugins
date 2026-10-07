@@ -65,12 +65,21 @@ class LauncherInjector
             .' data-label="'.$e(AhgSettingsService::get('chatbot_button_label', 'Ask the archive')).'"'
             .' data-notice="'.$e(AhgSettingsService::get('chatbot_notice', '')).'"'
             .' data-page-slug="'.$e(self::pageSlug($context)).'"'
+            .' data-help="'.(self::helpAvailable() ? '1' : '0').'"'
             .'></div>'
             .'<script src="'.$base.'/js/chatbot.js?v='.$ver.'"'.$nonceAttr.' defer></script>';
 
         $pos = strripos($content, '</body>');
 
         return substr_replace($content, $block."\n", $pos, 0);
+    }
+
+    /** The "Help using the site" tab needs ahgHelpPlugin's articles. */
+    private static function helpAvailable(): bool
+    {
+        require_once __DIR__.'/../Services/ChatbotHelp.php';
+
+        return \AhgChatbotPlugin\Services\ChatbotHelp::available();
     }
 
     /**

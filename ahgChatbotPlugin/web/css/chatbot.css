@@ -93,6 +93,29 @@
   cursor: pointer;
 }
 
+.ahg-chatbot-tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  background: #fff;
+}
+
+.ahg-chatbot-tab {
+  flex: 1;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  padding: 0.45rem 0.25rem;
+  font-size: 0.85rem;
+  color: #555;
+  cursor: pointer;
+}
+
+.ahg-chatbot-tab[aria-selected="true"] {
+  border-bottom-color: var(--ahg-chatbot-accent);
+  color: #262626;
+  font-weight: 600;
+}
+
 .ahg-chatbot-log {
   flex: 1;
   overflow-y: auto;
@@ -119,7 +142,8 @@
   margin-bottom: 0;
 }
 
-.ahg-chatbot-msg ul {
+.ahg-chatbot-msg ul,
+.ahg-chatbot-msg ol {
   margin: 0 0 0.4rem;
   padding-left: 1.2rem;
 }

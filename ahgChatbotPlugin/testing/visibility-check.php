@@ -7,7 +7,7 @@
 define('ATOM_ROOT', realpath(__DIR__.'/../../..'));
 chdir(ATOM_ROOT);
 require ATOM_ROOT.'/atom-framework/bootstrap.php';
-foreach (['ChatbotVectorIndex', 'ChatbotRetriever', 'ChatbotService'] as $c) {
+foreach (['ChatbotVectorIndex', 'ChatbotRetriever', 'ChatbotSiteInfo', 'ChatbotHelp', 'ChatbotService'] as $c) {
     require __DIR__.'/../lib/Services/'.$c.'.php';
 }
 
@@ -47,6 +47,22 @@ foreach (['photograph', 'archive', 'letter'] as $q) {
     $ids = array_map(fn ($r) => (int) $r->id, R::retrieve($q, 'en', null));
     $check($ids === [] || $published()->whereIn('object_id', $ids)->count() === count($ids), "every hit for '{$q}' is published");
     $check([] === array_intersect($ids, array_map('intval', $restricted)), "no restricted hit for '{$q}'");
+}
+
+// Help mode: visitors only ever get the public categories, staff never get
+// the internal ones (Technical, Plugin Reference, Reference).
+if (AhgChatbotPlugin\Services\ChatbotHelp::available()) {
+    $public = array_map('trim', explode(',', (string) AtomExtensions\Services\AhgSettingsService::get('chatbot_help_categories_public', 'Public Access,Browse & Search,Research,Viewers & Media')));
+    foreach (['security audit report', 'key management', 'install the plugin', 'search', 'request access'] as $q) {
+        $slugs = array_map(fn ($r) => $r->slug, AhgChatbotPlugin\Services\ChatbotHelp::retrieve($q, false));
+        $cats = $slugs ? DB::table('help_article')->whereIn('slug', $slugs)->distinct()->pluck('category')->all() : [];
+        $check([] === array_diff($cats, $public), "visitor help for '{$q}' stays in public categories");
+        $slugs = array_map(fn ($r) => $r->slug, AhgChatbotPlugin\Services\ChatbotHelp::retrieve($q, true));
+        $cats = $slugs ? DB::table('help_article')->whereIn('slug', $slugs)->distinct()->pluck('category')->all() : [];
+        $check([] === array_intersect($cats, ['Technical', 'Plugin Reference', 'Reference']), "staff help for '{$q}' has no internal documents");
+    }
+} else {
+    echo "SKIP help articles not installed\n";
 }
 
 $m = C::mask('jan@example.com 0823371406 8001015009087 1952');

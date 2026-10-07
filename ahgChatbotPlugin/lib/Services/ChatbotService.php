@@ -23,13 +23,56 @@ class ChatbotService
      *
      * @return array{answer:string,sources:array,mode:string,model?:string,error?:string}
      */
-    public static function answer(string $question, array $history, string $culture, ?int $userId, ?string $pageSlug = null): array
+    public static function answer(string $question, array $history, string $culture, ?int $userId, ?string $pageSlug = null, string $mode = 'collection', string $root = '', bool $staff = false): array
     {
         $question = trim($question);
         if ('' === $question) {
-            return ['answer' => 'Please ask a question about the collection.', 'sources' => [], 'mode' => 'empty'];
+            return ['answer' => 'Please ask a question.', 'sources' => [], 'mode' => 'empty'];
         }
 
+        // Help mode reads ahgHelpPlugin's articles; staff see the staff set.
+        [$system, $sources] = 'help' === $mode && ChatbotHelp::available()
+            ? self::helpPrompt($question, $staff, $root)
+            : self::collectionPrompt($question, $culture, $userId, $pageSlug);
+
+        $messages = [['role' => 'system', 'content' => $system]];
+        foreach (array_slice($history, -self::HISTORY_TURNS) as $turn) {
+            $role = 'user' === ($turn['role'] ?? '') ? 'user' : 'assistant';
+            $content = mb_substr(trim((string) ($turn['content'] ?? '')), 0, self::MAX_MESSAGE_CHARS);
+            if ('' !== $content) {
+                $messages[] = ['role' => $role, 'content' => $content];
+            }
+        }
+        $messages[] = ['role' => 'user', 'content' => $question];
+
+        try {
+            $client = AiGatewayClient::fromSettings();
+            $model = (string) AhgSettingsService::get('chatbot_model', '') ?: $client->getChatModel();
+            // think=false: qwen3 otherwise spends the token budget on a hidden
+            // reasoning pass and can return an empty answer (needs framework
+            // v2.18.47+; older frameworks ignore the option).
+            $result = $client->chat($messages, ['model' => $model, 'temperature' => 0.2, 'max_tokens' => 800, 'timeout' => 90, 'think' => false]);
+            if (!empty($result['success'])) {
+                return ['answer' => self::stripThinking($result['text']), 'sources' => $sources, 'mode' => 'ai', 'model' => $result['model']];
+            }
+            $error = (string) ($result['error'] ?? 'no answer');
+        } catch (\Throwable $e) {
+            $error = $e->getMessage();
+        }
+        error_log('chatbot.generation_failed: '.$error);
+
+        return [
+            'answer' => [] === $sources
+                ? 'The assistant is unavailable right now, and nothing matching was found. Please try the search.'
+                : 'The assistant is unavailable right now, but these are the most relevant pages for your question.',
+            'sources' => $sources,
+            'mode' => 'fallback',
+        ];
+    }
+
+    /** @return array{0:string,1:array} system prompt and sources for a catalogue question */
+    private static function collectionPrompt(string $question, string $culture, ?int $userId, ?string $pageSlug): array
+    {
         $records = ChatbotRetriever::retrieve($question, $culture, $userId, $pageSlug);
         $sources = array_map(static fn ($r) => [
             'slug' => $r->slug,
@@ -67,39 +110,20 @@ class ChatbotService
                 : '')
             ."\n\nCatalogue records:\n".self::context($records);
 
-        $messages = [['role' => 'system', 'content' => $system]];
-        foreach (array_slice($history, -self::HISTORY_TURNS) as $turn) {
-            $role = 'user' === ($turn['role'] ?? '') ? 'user' : 'assistant';
-            $content = mb_substr(trim((string) ($turn['content'] ?? '')), 0, self::MAX_MESSAGE_CHARS);
-            if ('' !== $content) {
-                $messages[] = ['role' => $role, 'content' => $content];
-            }
-        }
-        $messages[] = ['role' => 'user', 'content' => $question];
+        return [$system, $sources];
+    }
 
-        try {
-            $client = AiGatewayClient::fromSettings();
-            $model = (string) AhgSettingsService::get('chatbot_model', '') ?: $client->getChatModel();
-            // think=false: qwen3 otherwise spends the token budget on a hidden
-            // reasoning pass and can return an empty answer (needs framework
-            // v2.18.47+; older frameworks ignore the option).
-            $result = $client->chat($messages, ['model' => $model, 'temperature' => 0.2, 'max_tokens' => 800, 'timeout' => 90, 'think' => false]);
-            if (!empty($result['success'])) {
-                return ['answer' => self::stripThinking($result['text']), 'sources' => $sources, 'mode' => 'ai', 'model' => $result['model']];
-            }
-            $error = (string) ($result['error'] ?? 'no answer');
-        } catch (\Throwable $e) {
-            $error = $e->getMessage();
-        }
-        error_log('chatbot.generation_failed: '.$error);
+    /** @return array{0:string,1:array} system prompt and sources for a how-to question */
+    private static function helpPrompt(string $question, bool $staff, string $root): array
+    {
+        $sections = ChatbotHelp::retrieve($question, $staff);
+        $system = 'You are "Ask the archive", helping people use this archive website. '
+            .'Answer ONLY from the help articles below; never use outside knowledge. Give clear, numbered steps where the '
+            .'question is about how to do something, and name the help article you used. If the articles do not cover the '
+            .'question, say so plainly. Keep answers short. Reply in the language of the question.'
+            ."\n\nHelp articles:\n".ChatbotHelp::context($sections);
 
-        return [
-            'answer' => [] === $records
-                ? 'The assistant is unavailable right now, and no matching records were found. Please try the catalogue search.'
-                : 'The assistant is unavailable right now, but these are the records most relevant to your question.',
-            'sources' => $sources,
-            'mode' => 'fallback',
-        ];
+        return [$system, ChatbotHelp::sources($sections, $root)];
     }
 
     /**

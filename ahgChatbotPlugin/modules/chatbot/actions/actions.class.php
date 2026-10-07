@@ -3,6 +3,7 @@
 require_once __DIR__.'/../../../lib/Services/ChatbotVectorIndex.php';
 require_once __DIR__.'/../../../lib/Services/ChatbotRetriever.php';
 require_once __DIR__.'/../../../lib/Services/ChatbotSiteInfo.php';
+require_once __DIR__.'/../../../lib/Services/ChatbotHelp.php';
 require_once __DIR__.'/../../../lib/Services/ChatbotService.php';
 
 use AhgChatbotPlugin\Services\ChatbotService;
@@ -12,7 +13,8 @@ use Illuminate\Database\Capsule\Manager as DB;
 /**
  * Ask the Archive endpoints.
  *
- *   POST /chatbot/ask       {message, history[], session_id, page_slug} -> JSON answer
+ *   POST /chatbot/ask       {message, history[], session_id, page_slug, mode} -> JSON answer
+ *                           mode: collection (default) or help (how to use the site)
  *   POST /chatbot/feedback  {session_id, message_id, rating}            -> JSON
  *   GET  /chatbot/admin     administrators: usage, unanswered, feedback
  *
@@ -51,12 +53,16 @@ class chatbotActions extends sfActions
 
         // The user id drives the visibility filter: what this person may see.
         $userId = $this->getUser()->getAttribute('user_id');
-        $result = ChatbotService::answer($message, $history, $this->getUser()->getCulture(), $userId ? (int) $userId : null, $pageSlug);
+        $mode = 'help' === ($payload['mode'] ?? '') ? 'help' : 'collection';
+        // Staff help (cataloguing, admin) is for people who do that work, not
+        // for every signed-in account - researchers sign in too.
+        $staff = $this->getUser()->hasCredential(['administrator', 'editor', 'contributor'], false);
+        $result = ChatbotService::answer($message, $history, $this->getUser()->getCulture(), $userId ? (int) $userId : null, $pageSlug, $mode, $request->getRelativeUrlRoot(), $staff);
 
         $result['message_id'] = ChatbotService::log($sessionId, 'assistant', $result['answer'], $result);
         $result['session_id'] = $sessionId;
         $result['sources'] = array_map(fn ($s) => [
-            'url' => $this->getController()->genUrl(['module' => $s['module'] ?? 'informationobject', 'slug' => $s['slug']]),
+            'url' => $s['url'] ?? $this->getController()->genUrl(['module' => $s['module'] ?? 'informationobject', 'slug' => $s['slug']]),
         ] + array_diff_key($s, ['module' => 1]), $result['sources']);
         unset($result['model']);
 
@@ -109,7 +115,7 @@ class chatbotActions extends sfActions
         }
 
         $this->settings = [];
-        foreach (['chatbot_enabled', 'chatbot_public', 'chatbot_daily_cap', 'chatbot_retention_days', 'chatbot_model', 'chatbot_button_label'] as $key) {
+        foreach (['chatbot_enabled', 'chatbot_public', 'chatbot_daily_cap', 'chatbot_retention_days', 'chatbot_model', 'chatbot_button_label', 'chatbot_info_pages', 'chatbot_help_categories_public', 'chatbot_help_categories_staff'] as $key) {
             $this->settings[$key] = AhgSettingsService::get($key, '');
         }
     }

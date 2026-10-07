@@ -21,8 +21,11 @@ The plugin is self-contained. It touches no base AtoM file and does not depend o
   - no IP address is stored;
   - logs are deleted after `chatbot_retention_days`.
 - Questions about visiting, opening times, contacts and services are answered from the institution's own public information: the repository records (opening times, access, services, and the repository's contacts, primary first) and the static pages in `chatbot_info_pages`. Contact details of donors, rights holders, authority records and users are never read.
+- A second tab, **Help using the site**, answers how-to questions from the help articles of ahgHelpPlugin. It reads them only, and the tab appears only when those articles are installed. Both audiences get an allow-list of categories, so internal material (Technical, Plugin Reference, Reference) never reaches the assistant:
+  - visitors and researchers: `chatbot_help_categories_public`;
+  - editors, contributors and administrators: `chatbot_help_categories_staff`.
 - Each answer has a "Was this helpful?" rating. The admin page (`/chatbot/admin`) shows usage and lists the questions that found no records or were rated unhelpful, which shows what visitors look for and cannot find.
-- Other plugins can open the panel with `window.AhgChatbot.open('question')`, for example a voice "ask" command.
+- Other plugins can open the panel with `window.AhgChatbot.open('question', 'collection' | 'help')`, for example a voice "ask" command.
 
 ## Install
 
@@ -59,6 +62,8 @@ php symfony chatbot:index --prune
 | chatbot_button_label | Ask the archive | Launcher text |
 | chatbot_notice | (AI notice) | Shown under the conversation |
 | chatbot_info_pages | contact,about,accessibility | Static pages used for visiting and contact questions |
+| chatbot_help_categories_public | Public Access,Browse & Search,Research,Viewers & Media | Help categories for visitors and researchers |
+| chatbot_help_categories_staff | (public list plus User Guide, User Manual, Admin & Settings, Collection Mgmt, Import/Export, Rights, Compliance, Exhibitions, GLAM Sectors, Labels & Forms, AI & Automation) | Help categories for editors, contributors, administrators |
 | chatbot_qdrant_url | http://localhost:6333 | Vector store |
 | chatbot_vector_collection | {db}_io_nomic | Qdrant collection |
 
