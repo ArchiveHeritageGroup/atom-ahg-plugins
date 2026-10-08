@@ -44,6 +44,14 @@ try {
 } catch (Exception $e) {
     \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
+// Storage location tree (ahgStorageManagePlugin). Where it is installed it
+// replaces strongrooms: a strongroom is a room in the tree.
+$hasStorageLocations = false;
+try {
+    $hasStorageLocations = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_storage_location');
+} catch (Exception $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
+
 // heratio#143 Phase 1 - Workflow visual diagram + designer surface
 // (gated by ahg_workflow table existence).
 $hasWorkflow = false;
@@ -216,10 +224,14 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'custodianDashboard']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Custodian'); ?></a></li>
     <?php endif; ?>
 
-    <?php if ($hasStrongroom): ?>
+    <?php if ($hasStorageLocations || $hasStrongroom): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Storage'); ?></h6></li>
+    <?php if ($hasStorageLocations): ?>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'storageLocation', 'action' => 'browse']); ?>"><i class="fas fa-sitemap fa-fw me-1"></i><?php echo __('Storage locations'); ?></a></li>
+    <?php else: ?>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'strongroom', 'action' => 'browse']); ?>"><i class="fas fa-warehouse fa-fw me-1"></i><?php echo __('Strongrooms'); ?></a></li>
+    <?php endif; ?>
     <?php endif; ?>
 
     <?php if ($hasExhibitionSpace): ?>

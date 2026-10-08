@@ -60,6 +60,14 @@ class physicalobjectActions extends AhgController
             $this->extendedData = $repo->getExtendedData($this->resource->id) ?? [];
         }
 
+        // Building ... Shelf from the storage location tree when the box is placed
+        // there (ahgStorageManagePlugin), so a move made elsewhere is not undone
+        // by the next save of this form.
+        $this->storageLevels = null;
+        if ($this->resource->id && class_exists('\\AhgStorageManage\\Services\\StoragePlacementService')) {
+            $this->storageLevels = \AhgStorageManage\Services\StoragePlacementService::prefill((int) $this->resource->id);
+        }
+
         // Load type choices for dropdown
         $this->typeChoices = QubitTerm::getIndentedChildTree(QubitTerm::CONTAINER_ID, '&nbsp;', ['returnObjectInstances' => true]);
 
@@ -116,6 +124,14 @@ class physicalobjectActions extends AhgController
                 'notes' => $request->getParameter('notes'),
             ];
             $repo->saveExtendedData($this->resource->id, $extendedData);
+
+            // Place the box in the storage location tree (ahgStorageManagePlugin).
+            if (class_exists('\\AhgStorageManage\\Services\\StoragePlacementService')) {
+                $message = \AhgStorageManage\Services\StoragePlacementService::fromEditForm((int) $this->resource->id, $extendedData, $this->getUser());
+                if ($message) {
+                    $this->getUser()->setFlash($message[0], $this->context->i18n->__($message[1], ['%1%' => $message[2]]));
+                }
+            }
 
             $next = $request->getParameter('next');
             if ($next) {

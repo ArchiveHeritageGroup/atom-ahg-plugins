@@ -57,6 +57,8 @@
       </div>
 
       <!-- Extended Location -->
+      <?php // Building ... Shelf come from the storage location tree when the box is placed there. ?>
+      <?php $loc = null !== ($storageLevels ?? null) ? $storageLevels : $extendedData; ?>
       <div class="card mb-4">
         <div class="card-header bg-success text-white">
           <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i><?php echo __('Location Details'); ?></h5>
@@ -67,21 +69,21 @@
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Building'); ?></label>
                 <input type="text" name="building" class="form-control"
-                       value="<?php echo esc_entities($extendedData['building'] ?? ''); ?>">
+                       value="<?php echo esc_entities($loc['building'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Floor'); ?></label>
                 <input type="text" name="floor" class="form-control"
-                       value="<?php echo esc_entities($extendedData['floor'] ?? ''); ?>">
+                       value="<?php echo esc_entities($loc['floor'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Room'); ?></label>
                 <input type="text" name="room" class="form-control"
-                       value="<?php echo esc_entities($extendedData['room'] ?? ''); ?>">
+                       value="<?php echo esc_entities($loc['room'] ?? ''); ?>">
               </div>
             </div>
           </div>
@@ -90,31 +92,34 @@
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Aisle'); ?></label>
                 <input type="text" name="aisle" class="form-control"
-                       value="<?php echo esc_entities($extendedData['aisle'] ?? ''); ?>">
+                       value="<?php echo esc_entities($loc['aisle'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-3">
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Bay'); ?></label>
                 <input type="text" name="bay" class="form-control"
-                       value="<?php echo esc_entities($extendedData['bay'] ?? ''); ?>">
+                       value="<?php echo esc_entities($loc['bay'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-3">
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Rack'); ?></label>
                 <input type="text" name="rack" class="form-control"
-                       value="<?php echo esc_entities($extendedData['rack'] ?? ''); ?>">
+                       value="<?php echo esc_entities($loc['rack'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-3">
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Shelf'); ?></label>
                 <input type="text" name="shelf" class="form-control"
-                       value="<?php echo esc_entities($extendedData['shelf'] ?? ''); ?>">
+                       value="<?php echo esc_entities($loc['shelf'] ?? ''); ?>">
               </div>
             </div>
           </div>
+          <?php if (class_exists('\\AhgStorageManage\\Services\\StoragePlacementService') && \AhgStorageManage\Services\StoragePlacementService::available()): ?>
+            <div class="mb-3"><?php include_partial('storageLocation/locationPickers'); ?></div>
+          <?php endif; ?>
           <div class="row">
             <div class="col-md-4">
               <div class="mb-3">
@@ -350,61 +355,7 @@
         </div>
       </div>
 
-      <?php /* heratio#145 follow-up - Strongroom assignment, only when feature installed. */ ?>
-      <?php if (!empty($strongroomChoices ?? []) || !empty($currentAssignment ?? null)): ?>
-      <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-          <h5 class="mb-0"><i class="fas fa-warehouse me-2"></i><?php echo __('Strongroom assignment'); ?></h5>
-        </div>
-        <div class="card-body">
-          <?php if (!empty($currentAssignment)): ?>
-            <div class="alert alert-secondary py-2 mb-3">
-              <?php echo __('Currently in:'); ?>
-              <strong><?php echo esc_entities($currentAssignment->strongroom_name); ?></strong>
-              - <?php echo (float) $currentAssignment->size_units_used; ?>
-              <?php echo esc_entities(__($currentAssignment->capacity_unit)); ?>
-            </div>
-          <?php endif; ?>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold"><?php echo __('Action'); ?></label>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="strongroom_action" id="sra_none" value="" checked>
-              <label class="form-check-label" for="sra_none"><?php echo __('No change'); ?></label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="strongroom_action" id="sra_assign" value="assign">
-              <label class="form-check-label" for="sra_assign"><?php echo !empty($currentAssignment) ? __('Move to another strongroom (or update units)') : __('Assign to a strongroom'); ?></label>
-            </div>
-            <?php if (!empty($currentAssignment)): ?>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="strongroom_action" id="sra_unassign" value="unassign">
-              <label class="form-check-label" for="sra_unassign"><?php echo __('Remove from current strongroom'); ?></label>
-            </div>
-            <?php endif; ?>
-          </div>
-
-          <div class="row g-3">
-            <div class="col-md-8">
-              <label class="form-label"><?php echo __('Strongroom'); ?></label>
-              <select name="strongroom_id" class="form-select">
-                <option value=""><?php echo __('-- Select a strongroom --'); ?></option>
-                <?php foreach (($strongroomChoices ?? []) as $rid => $label): ?>
-                  <option value="<?php echo (int) $rid; ?>" <?php echo (!empty($currentAssignment) && (int) $currentAssignment->strongroom_id === (int) $rid) ? 'selected' : ''; ?>><?php echo esc_entities($label); ?></option>
-                <?php endforeach; ?>
-              </select>
-              <small class="text-muted"><?php echo __('Used only when "Assign" or "Move" is selected above.'); ?></small>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label"><?php echo __('Units used'); ?></label>
-              <input type="number" name="size_units_used" class="form-control" min="0" step="0.01"
-                     value="<?php echo !empty($currentAssignment) ? (float) $currentAssignment->size_units_used : ''; ?>">
-              <small class="text-muted"><?php echo __('Matched to the room\'s unit (linear-metres, boxes, etc).'); ?></small>
-            </div>
-          </div>
-        </div>
-      </div>
-      <?php endif; ?>
+      <?php /* Strongrooms are rooms in the storage location tree (Building ... Shelf above); the separate strongroom block is gone. */ ?>
 
     </div>
   </div>

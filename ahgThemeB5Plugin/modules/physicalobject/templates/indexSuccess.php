@@ -42,6 +42,10 @@
       </div>
     </div>
 
+    <?php if ($resource->id && class_exists('\\AhgStorageManage\\Services\\StoragePlacementService')): ?>
+      <?php include_partial('storageLocation/objectPlacement', ['objectId' => $resource->id]); ?>
+    <?php endif; ?>
+
     <?php if (!empty($extendedData)): ?>
     <!-- Extended Location -->
     <?php
