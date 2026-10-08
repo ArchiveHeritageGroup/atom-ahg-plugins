@@ -590,6 +590,43 @@ AtoM timeout of 30 minutes is now the one that applies (php-fpm must be restarte
 to load it). Check what a server actually allows with `GET /session/status`, which
 reports the effective timeout in seconds.
 
+### Remote logging
+
+On a web request AtoM writes one log that matters: PHP's error log. Plugin and
+framework messages (`error_log()`), PHP warnings and AtoM's own "forwarded to a 404"
+lines all go there. AtoM's Symfony log is switched off in production
+(`logging_enabled: false`), and the php-fpm pool usually pins the error log to a
+file with `php_admin_value[error_log]`, which code cannot override. So the reliable
+way to send the logs to a central server is the syslog daemon reading that file,
+not a setting inside AtoM (#206). No AtoM or plugin file changes.
+
+On Ubuntu, with rsyslog:
+
+1. Let rsyslog read the log. It runs as the `syslog` user, and the pool's log is
+   often `www-data` only: `sudo usermod -aG www-data syslog`.
+2. Create `/etc/rsyslog.d/60-atom-remote.conf`, using the path from the pool's
+   `php_admin_value[error_log]` and your collector's address:
+
+   ```
+   module(load="imfile")
+   input(type="imfile" File="/var/log/php-psis-error.log"
+         Tag="psis-php:" Facility="local0" Severity="warning")
+   local0.* action(type="omfwd" target="logs.example.org" port="514" protocol="tcp"
+                   queue.type="LinkedList" queue.filename="atom_fwd"
+                   action.resumeRetryCount="-1")
+   ```
+
+   Add one `input(...)` per instance, each with its own tag. Use `protocol="udp"`
+   if the collector only takes UDP. The queue keeps lines while the collector is
+   down.
+3. `sudo rsyslogd -N1` to check the file, then `sudo systemctl restart rsyslog`.
+4. Test: `logger -p local0.warning -t psis-php "remote logging test"` should
+   arrive at the collector. Lines then follow as PHP writes them.
+
+Errors that AtoM records in the database (Admin > Error log, `ahg_error_log`) stay
+in the database. Uncaught exceptions are also written to the PHP log and so are
+forwarded; other entries there are not, so keep an eye on Admin > Error log too.
+
 ### If the AtoM root is under /usr/share/nginx
 
 Some php-fpm packaging sets `ProtectSystem=full`, which mounts `/usr` read-only for the
