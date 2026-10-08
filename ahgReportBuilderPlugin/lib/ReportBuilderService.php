@@ -689,27 +689,38 @@ class ReportBuilderService
      */
     private function getComputedColumnSelect(string $alias, array $source, string $column)
     {
+        $sql = $this->computedColumnSql($alias, $column);
+
+        return null === $sql ? null : DB::raw("({$sql}) as {$column}");
+    }
+
+    /**
+     * The subquery behind a computed column, shared by the column itself and
+     * by any filter on it (a computed column has no real table column to
+     * filter on). Null when the column is not computed.
+     */
+    private function computedColumnSql(string $alias, string $column): ?string
+    {
+        $culture = preg_replace('/[^A-Za-z_]/', '', (string) $this->culture);
+
         switch ($column) {
             case 'publication_status':
-                return DB::raw("(SELECT t.name FROM status s
-                    JOIN term_i18n t ON s.status_id = t.id AND t.culture = '{$this->culture}'
-                    WHERE s.object_id = {$alias}.id AND s.type_id = 159 LIMIT 1) as publication_status");
+                // Status type 158 is "publication"; 159/160 are Draft/Published.
+                return "SELECT t.name FROM status s
+                    JOIN term_i18n t ON s.status_id = t.id AND t.culture = '{$culture}'
+                    WHERE s.object_id = {$alias}.id AND s.type_id = 158 LIMIT 1";
 
             case 'has_digital_object':
-                return DB::raw("(SELECT COUNT(*) > 0 FROM digital_object d
-                    WHERE d.information_object_id = {$alias}.id) as has_digital_object");
+                return "SELECT COUNT(*) > 0 FROM digital_object d WHERE d.object_id = {$alias}.id";
 
             case 'child_count':
-                return DB::raw("(SELECT COUNT(*) FROM information_object c
-                    WHERE c.parent_id = {$alias}.id) as child_count");
+                return "SELECT COUNT(*) FROM information_object c WHERE c.parent_id = {$alias}.id";
 
             case 'holdings_count':
-                return DB::raw("(SELECT COUNT(*) FROM information_object i
-                    WHERE i.repository_id = {$alias}.id) as holdings_count");
+                return "SELECT COUNT(*) FROM information_object i WHERE i.repository_id = {$alias}.id";
 
             case 'linked_descriptions_count':
-                return DB::raw("(SELECT COUNT(*) FROM relation r
-                    WHERE r.object_id = {$alias}.id OR r.subject_id = {$alias}.id) as linked_descriptions_count");
+                return "SELECT COUNT(*) FROM relation r WHERE r.object_id = {$alias}.id OR r.subject_id = {$alias}.id";
         }
 
         return null;
@@ -734,8 +745,12 @@ class ReportBuilderService
             $operator = $filter['operator'];
             $value = $filter['value'] ?? null;
 
-            // Determine the qualified column name
-            $qualifiedColumn = $this->getQualifiedColumnName($alias, $column, $source);
+            // Determine the qualified column name. A computed column has no
+            // table column, so filter on its subquery instead.
+            $computedSql = $this->computedColumnSql($alias, $column);
+            $qualifiedColumn = null !== $computedSql
+                ? DB::raw('('.$computedSql.')')
+                : $this->getQualifiedColumnName($alias, $column, $source);
 
             switch ($operator) {
                 case 'equals':
@@ -866,10 +881,15 @@ class ReportBuilderService
                 continue;
             }
 
-            $column = $this->getQualifiedColumnName($alias, $sort['column'], $source);
             $direction = isset($sort['direction']) && strtolower($sort['direction']) === 'asc' ? 'asc' : 'desc';
+            $computedSql = $this->computedColumnSql($alias, $sort['column']);
+            if (null !== $computedSql) {
+                $query->orderByRaw('('.$computedSql.') '.$direction);
 
-            $query->orderBy($column, $direction);
+                continue;
+            }
+
+            $query->orderBy($this->getQualifiedColumnName($alias, $sort['column'], $source), $direction);
         }
     }
 

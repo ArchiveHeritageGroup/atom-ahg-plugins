@@ -72,7 +72,7 @@ and the issues split from it.
 | Provenance and authenticity | 2026 | [Provenance](ahgProvenancePlugin/), [C2PA content credentials](ahgC2paPlugin/) |
 | Independent institutions on one shared instance; hosting for small archives | 2026, 2020 #4 | [Multi-tenant](ahgMultiTenantPlugin/) |
 | Reports without phpMyAdmin | 2026, 2020 #14 | [Reports](ahgReportsPlugin/), [Report builder](ahgReportBuilderPlugin/) |
-| A better REST API, with examples and full create, update and delete | 2026, 2020 #27, #29 | [REST API v2](ahgAPIPlugin/), [GraphQL](ahgGraphQLPlugin/) |
+| A better REST API, with examples and full create, update and delete | 2026, 2020 #27, #29 | [REST API v2](ahgAPIPlugin/), [GraphQL](ahgGraphQLPlugin/) ([video](https://youtu.be/7DxzoBgzFfI)) |
 | Records in Contexts (RiC) | 2026 | [RiC explorer](ahgRicExplorerPlugin/), [RiC manage](ahgRicManagePlugin/) |
 | Audit trail and change tracking | 2020 #10 | [Audit trail](ahgAuditTrailPlugin/) |
 | Reading-room requests, circulation, researcher accounts | 2020 #15-16 | [Research](ahgResearchPlugin/), [Access requests](ahgAccessRequestPlugin/) |
@@ -290,7 +290,7 @@ Install top to bottom: nothing in a section depends on anything below it.
 | [`ahgFunctionsDocsPlugin`](ahgFunctionsDocsPlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | Auto-generated, browsable catalogue of routes, CLI tasks and services (#148, parity with Heratio ahg-functions-docs) |
 | [`ahgGISPlugin`](ahgGISPlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | Geospatial search and GeoJSON export for heritage records with coordinates |
 | [`ahgGalleryPlugin`](ahgGalleryPlugin/) | 12 | [`ahgCorePlugin`](ahgCorePlugin/) | Gallery and exhibition management with artist tracking, loans, insurance, and facility reports |
-| [`ahgGraphQLPlugin`](ahgGraphQLPlugin/) | 1 | [`ahgAPIPlugin`](ahgAPIPlugin/) | GraphQL API endpoint providing flexible querying with security safeguards including depth limiting and complexity analysis |
+| [`ahgGraphQLPlugin`](ahgGraphQLPlugin/) | 1 | [`ahgAPIPlugin`](ahgAPIPlugin/) | GraphQL API endpoint providing flexible querying with security safeguards including depth limiting and complexity analysis ([video](https://youtu.be/7DxzoBgzFfI)) |
 | [`ahgHelpPlugin`](ahgHelpPlugin/) | 2 | [`ahgCorePlugin`](ahgCorePlugin/) | Online help system with searchable documentation, contextual help, and FlexSearch-powered instant search |
 | [`ahgHeritageAccountingPlugin`](ahgHeritageAccountingPlugin/) | 11 | [`ahgCorePlugin`](ahgCorePlugin/) | Multi-regional heritage asset financial accounting with support for IPSAS, GRAP, FRS, GASB, AASB, PSAS standards |
 | [`ahgICIPPlugin`](ahgICIPPlugin/) | 13 | [`ahgCorePlugin`](ahgCorePlugin/) | Indigenous Cultural and Intellectual Property management - community registration, TK Labels, cultural notices, consent tracking, consultations, and access restrictions |

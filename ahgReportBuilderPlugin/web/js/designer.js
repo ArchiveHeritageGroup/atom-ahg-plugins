@@ -729,14 +729,19 @@
     function initFilters() {
         const addBtn = document.getElementById('btnAddFilter');
         if (addBtn) {
-            addBtn.addEventListener('click', addFilter);
+            addBtn.addEventListener('click', function () { addFilter(); });
         }
+
+        // Show the report's saved filters. They used to stay invisible, and the
+        // first change to any filter rebuilt the list from the rows on screen,
+        // silently dropping every saved one.
+        (config.filters || []).forEach(function (f) { addFilter(f); });
     }
 
     /**
      * Add a new filter
      */
-    function addFilter() {
+    function addFilter(saved) {
         const container = document.getElementById('filtersContainer');
 
         // Remove empty message
@@ -789,6 +794,19 @@
                 markDirty();
             });
         });
+
+        if (saved && saved.column) {
+            filterDiv.querySelector('.filter-column').value = saved.column;
+            const op = filterDiv.querySelector('.filter-operator');
+            if (saved.operator && !op.querySelector('option[value="' + saved.operator + '"]')) {
+                const o = document.createElement('option');
+                o.value = saved.operator;
+                o.textContent = saved.operator.replace(/_/g, ' ');
+                op.appendChild(o);
+            }
+            op.value = saved.operator || 'equals';
+            filterDiv.querySelector('.filter-value').value = saved.value || '';
+        }
 
         container.appendChild(filterDiv);
     }

@@ -486,7 +486,7 @@ window.reportBuilder = {
 <script src="/plugins/ahgReportBuilderPlugin/web/js/chart.umd.min.js"></script>
 
 <!-- Load designer.js (handles all Sortable init for columns + layout + headers + sections) -->
-<script src="/plugins/ahgReportBuilderPlugin/web/js/designer.js"></script>
+<script src="/plugins/ahgReportBuilderPlugin/web/js/designer.js?v=20261008"></script>
 
 <!-- Wire up section/comment UI -->
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

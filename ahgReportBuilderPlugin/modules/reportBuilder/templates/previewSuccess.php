@@ -139,7 +139,7 @@
                             } elseif ($colType === 'date' && $value) {
                                 echo date('Y-m-d', strtotime($value));
                             } elseif ($colType === 'boolean') {
-                                echo $value ? '<i class="bi bi-check-circle text-success"></i>' : '<i class="bi bi-x-circle text-muted"></i>';
+                                echo $value ? '<i class="bi bi-check-circle text-success" aria-hidden="true"></i><span class="visually-hidden">'.__('Yes').'</span>' : '<i class="bi bi-x-circle text-muted" aria-hidden="true"></i><span class="visually-hidden">'.__('No').'</span>';
                             } elseif ($colType === 'text' && strlen($value) > 100) {
                                 echo '<span title="' . htmlspecialchars($value) . '">' . htmlspecialchars(substr($value, 0, 100)) . '...</span>';
                             } elseif ($col === 'id') {
