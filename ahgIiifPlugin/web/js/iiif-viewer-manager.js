@@ -535,9 +535,19 @@ export class IiifViewerManager {
 
             console.log('Initializing Mirador with manifest:', this.options.manifestUrl);
 
+            // Hand Mirador the manifest object already fetched and validated
+            // above, instead of a URL for it to fetch again. Under a strict
+            // Content-Security-Policy Mirador then makes no manifest request,
+            // and the double fetch goes. The copy gets a non-fetchable id so
+            // nothing can try to resolve it over the network. If this build of
+            // Mirador lacks the store actions, fall back to the URL.
+            const actions = window.Mirador.actions || {};
+            const inline = typeof actions.receiveManifest === 'function' && typeof actions.addWindow === 'function';
+            const inlineId = 'urn:ahg:inline-manifest:' + encodeURIComponent(this.options.manifestUrl);
+
             this.miradorInstance = Mirador.viewer({
                 id: `mirador-${vid}`,
-                windows: [{ manifestId: this.options.manifestUrl }],
+                windows: inline ? [] : [{ manifestId: this.options.manifestUrl }],
                 window: {
                     allowClose: false,
                     allowMaximize: true,
@@ -575,6 +585,17 @@ export class IiifViewerManager {
                 },
                 ...this.options.miradorConfig
             });
+
+            if (inline) {
+                const copy = JSON.parse(JSON.stringify(manifest));
+                if (hasV3) {
+                    copy.id = inlineId;
+                } else {
+                    copy['@id'] = inlineId;
+                }
+                this.miradorInstance.store.dispatch(actions.receiveManifest(inlineId, copy));
+                this.miradorInstance.store.dispatch(actions.addWindow({ manifestId: inlineId }));
+            }
 
             this.loaded.mirador = true;
         } catch (error) {
