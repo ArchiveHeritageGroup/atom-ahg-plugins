@@ -1,0 +1,5 @@
+# Staff only: editors and administrators (double brackets = either group).
+# The actions also check in code; this stops anonymous requests first.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

@@ -51,7 +51,13 @@ class InformationObjectGenerateFindingAidAction extends sfAction
             ),
         ];
 
-        QubitJob::runJob('arFindingAidJob', $params);
+        // The AHG job puts custom fields in the PDF (#202). Until the workers
+        // have been restarted with it, no worker takes it, so fall back.
+        try {
+            QubitJob::runJob('ahgFindingAidJob', $params);
+        } catch (\Throwable $e) {
+            QubitJob::runJob('arFindingAidJob', $params);
+        }
 
         $this->redirect([$this->resource, 'module' => 'informationobject']);
     }

@@ -16,6 +16,35 @@
   <?php end_slot(); ?>
 
   <?php slot('content', ' '); ?>
+
+  <?php if ($sf_user->hasCredential(['editor', 'administrator'], false)) { ?>
+    <?php slot('after-content'); ?>
+      <?php // The list below is fetched by Ajax and swapped in, so the click handler is bound here, once, on the document. ?>
+      <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+        document.addEventListener('click', function (e) {
+          var b = e.target.closest ? e.target.closest('#clipboard-batch-edit') : null;
+          if (!b) { return; }
+          e.preventDefault();
+          var items = {};
+          try { items = JSON.parse(localStorage.getItem('clipboard')) || {}; } catch (x) {}
+          var slugs = items.informationObject || [];
+          if (!slugs.length) { return; }
+          var f = document.createElement('form');
+          f.method = 'post';
+          f.action = b.getAttribute('data-url');
+          var add = function (name, value) {
+            var i = document.createElement('input');
+            i.type = 'hidden'; i.name = name; i.value = value;
+            f.appendChild(i);
+          };
+          add('_ahg_csrf_token', b.getAttribute('data-csrf'));
+          slugs.forEach(function (s) { add('slugs[]', s); });
+          document.body.appendChild(f);
+          f.submit();
+        });
+      </script>
+    <?php end_slot(); ?>
+  <?php } ?>
 <?php } else { ?>
   <?php slot('title'); ?>
     <?php echo get_partial('default/printPreviewBar'); ?>
@@ -77,6 +106,18 @@
         <li><button class="btn atom-btn-outline-danger" id="clipboard-clear" data-clipboard-type="<?php echo $type; ?>"><?php echo __('Clear %1 clipboard', ['%1' => lcfirst($uiLabels[$type])]); ?></button></li>
         <li><?php echo link_to(__('Save'), ['module' => 'clipboard', 'action' => 'save'], ['class' => 'btn atom-btn-outline-light', 'id' => 'clipboard-save']); ?></li>
         <li><?php echo link_to(__('Export'), ['module' => 'clipboard', 'action' => 'export', 'type' => $type], ['class' => 'btn atom-btn-outline-light']); ?></li>
+        <?php if ('informationObject' === $type && $sf_user->hasCredential(['editor', 'administrator'], false) && in_array('batchEdit', (array) sfConfig::get('sf_enabled_modules', []))) { ?>
+          <li>
+            <button
+              class="btn atom-btn-outline-light"
+              id="clipboard-batch-edit"
+              type="button"
+              data-url="<?php echo url_for(['module' => 'batchEdit', 'action' => 'batch']); ?>"
+              data-csrf="<?php echo class_exists('\AtomFramework\Services\CsrfService') ? esc_entities(\AtomFramework\Services\CsrfService::generateToken()) : ''; ?>">
+              <?php echo __('Batch edit'); ?>
+            </button>
+          </li>
+        <?php } ?>
         <?php if (sfConfig::get('app_clipboard_send_enabled', false) && !empty(sfConfig::get('app_clipboard_send_url', ''))) { ?>
           <li>
             <button

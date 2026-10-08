@@ -876,6 +876,15 @@ class IngestService
 
     public function processUpload(int $sessionId, array $fileInfo): int
     {
+        // Excel workbooks are converted to a UTF-8 CSV and then follow the CSV
+        // path unchanged (issue #208).
+        if (($fileInfo['mime_type'] ?? '') !== 'directory') {
+            require_once __DIR__ . '/XlsxConverter.php';
+            if (XlsxConverter::isSpreadsheet((string) $fileInfo['original_name'])) {
+                return $this->processSpreadsheetUpload($sessionId, $fileInfo);
+            }
+        }
+
         // Determine file type
         if (($fileInfo['mime_type'] ?? '') === 'directory') {
             $fileType = 'directory';
@@ -934,7 +943,61 @@ class IngestService
         return $fileId;
     }
 
-    public function detectCsvFormat(string $filePath): array
+    /**
+     * Register an Excel workbook: keep the workbook as an 'xlsx' entry for
+     * provenance and cleanup, convert the chosen worksheet ($fileInfo['sheet'],
+     * index or name, default the first) to a CSV beside it, and register that
+     * CSV as the session's 'csv' file. Returns the CSV entry's id. Throws when
+     * the workbook or worksheet cannot be read.
+     */
+    public function processSpreadsheetUpload(int $sessionId, array $fileInfo): int
+    {
+        require_once __DIR__ . '/XlsxConverter.php';
+
+        $source = $fileInfo['stored_path'];
+        $csvPath = preg_replace('/\.[^.\/]+$/', '', $source) . '.csv';
+        $result = XlsxConverter::toCsv($source, $csvPath, $fileInfo['sheet'] ?? 0);
+
+        DB::table('ingest_file')->insert([
+            'session_id' => $sessionId,
+            'file_type' => 'xlsx',
+            'original_name' => $fileInfo['original_name'],
+            'stored_path' => $source,
+            'file_size' => $fileInfo['file_size'] ?? 0,
+            'mime_type' => $fileInfo['mime_type'] ?? null,
+            'row_count' => $result['row_count'],
+            'encoding' => 'UTF-8',
+            'headers' => json_encode($result['headers'], JSON_UNESCAPED_UNICODE),
+            'status' => 'converted',
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $fileId = DB::table('ingest_file')->insertGetId([
+            'session_id' => $sessionId,
+            'file_type' => 'csv',
+            'original_name' => $fileInfo['original_name'] . ' [' . $result['sheet'] . ']',
+            'stored_path' => $csvPath,
+            'file_size' => (int) @filesize($csvPath),
+            'mime_type' => 'text/csv',
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        // The converter writes comma-separated UTF-8; do not guess either.
+        $detection = $this->detectCsvFormat($csvPath, ',');
+        DB::table('ingest_file')->where('id', $fileId)->update([
+            'row_count' => $detection['row_count'],
+            'delimiter' => ',',
+            'encoding' => 'UTF-8',
+            'headers' => json_encode($detection['headers'], JSON_UNESCAPED_UNICODE),
+        ]);
+
+        return $fileId;
+    }
+
+    /**
+     * @param string|null $delimiter known delimiter; null to detect it
+     */
+    public function detectCsvFormat(string $filePath, ?string $delimiter = null): array
     {
         $result = [
             'delimiter' => ',',
@@ -966,7 +1029,7 @@ class IngestService
             $count = substr_count($firstLine, $d);
         }
         arsort($delimiters);
-        $result['delimiter'] = array_key_first($delimiters);
+        $result['delimiter'] = $delimiter ?? array_key_first($delimiters);
 
         // Parse headers and count rows
         $handle = fopen($filePath, 'r');

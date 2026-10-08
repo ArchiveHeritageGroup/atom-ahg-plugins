@@ -9,6 +9,7 @@ class ingestActions extends sfActions
             $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgIngestPlugin';
             require_once $pluginDir . '/lib/Services/IngestService.php';
             require_once $pluginDir . '/lib/Services/IngestCommitService.php';
+            require_once $pluginDir . '/lib/Services/XlsxConverter.php';
             $loaded = true;
         }
     }
@@ -179,7 +180,33 @@ class ingestActions extends sfActions
         }
         $this->requireSessionOwner($this->session);
 
+        $pendingKey = 'ingest_xlsx_pending_' . $id;
+
         if ($request->isMethod('post')) {
+            // Second step of an Excel upload with several worksheets: the
+            // workbook is already on disk, the user has now picked a sheet.
+            $formAction = $request->getParameter('form_action');
+            if ('xlsx_sheet' === $formAction || 'xlsx_cancel' === $formAction) {
+                $pending = $this->getUser()->getAttribute($pendingKey);
+                $this->getUser()->getAttributeHolder()->remove($pendingKey);
+                if (!is_array($pending) || empty($pending['stored_path'])) {
+                    $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
+                }
+                if ('xlsx_cancel' === $formAction) {
+                    @unlink($pending['stored_path']);
+                    $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
+                }
+                $sheet = (int) $request->getParameter('xlsx_sheet', 0);
+                if (!in_array($sheet, array_column($pending['sheets'] ?? [], 'index'), true)) {
+                    $sheet = 0;
+                }
+                unset($pending['sheets']);
+                $this->registerSpreadsheet($svc, $id, $pending, $sheet);
+                $svc->parseRows($id);
+                $svc->updateSessionStatus($id, 'map');
+                $this->redirect(['module' => 'ingest', 'action' => 'map', 'id' => $id]);
+            }
+
             $uploadDir = sfConfig::get('sf_upload_dir') . '/ingest/' . $id;
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
@@ -233,12 +260,24 @@ class ingestActions extends sfActions
                 $storedPath = $uploadDir . '/' . $storedName;
 
                 if (move_uploaded_file($file['tmp_name'], $storedPath)) {
-                    $svc->processUpload($id, [
+                    $info = [
                         'original_name' => $file['name'],
                         'stored_path' => $storedPath,
                         'file_size' => $file['size'],
                         'mime_type' => $file['type'],
-                    ]);
+                    ];
+                    // A fresh upload replaces any workbook still waiting for a sheet choice.
+                    $stale = $this->getUser()->getAttribute($pendingKey);
+                    if (is_array($stale) && !empty($stale['stored_path'])) {
+                        @unlink($stale['stored_path']);
+                    }
+                    $this->getUser()->getAttributeHolder()->remove($pendingKey);
+
+                    if (\AhgIngestPlugin\Services\XlsxConverter::isSpreadsheet((string) $file['name'])) {
+                        $this->registerSpreadsheet($svc, $id, $info, null);
+                    } else {
+                        $svc->processUpload($id, $info);
+                    }
                 } else {
                     $this->getUser()->setFlash('error', 'Failed to save uploaded file');
                     return;
@@ -286,6 +325,7 @@ class ingestActions extends sfActions
         }
 
         $this->files = $svc->getFiles($id);
+        $this->xlsxPending = $this->getUser()->getAttribute($pendingKey);
 
         // SharePoint picker — populate tenants + drives if plugin is enabled
         $this->sp_tenants = [];
@@ -305,6 +345,39 @@ class ingestActions extends sfActions
                 \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // Plugin not installed yet — leave empty
             }
+        }
+    }
+
+    /**
+     * Register an uploaded Excel workbook (issue #208). With one worksheet
+     * holding data, or with $sheet given, it is converted and registered at
+     * once. With several, the workbook is parked in the user session and the
+     * upload page asks which sheet to use. An unreadable workbook is removed
+     * and reported back on the upload page.
+     */
+    protected function registerSpreadsheet(\AhgIngestPlugin\Services\IngestService $svc, int $id, array $info, ?int $sheet): void
+    {
+        try {
+            if (null === $sheet) {
+                $sheets = \AhgIngestPlugin\Services\XlsxConverter::listSheets($info['stored_path']);
+                // A sheet needs a header row plus at least one record.
+                $withData = array_values(array_filter($sheets, static function ($s) {
+                    return $s['rows'] > 1;
+                }));
+                $choices = $withData ?: $sheets;
+                if (count($choices) > 1) {
+                    $this->getUser()->setAttribute('ingest_xlsx_pending_' . $id, $info + ['sheets' => $choices]);
+                    $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
+                }
+                $sheet = (int) ($choices[0]['index'] ?? 0);
+            }
+            $svc->processUpload($id, $info + ['sheet' => $sheet]);
+        } catch (\sfStopException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            @unlink($info['stored_path']);
+            $this->getUser()->setFlash('error', 'The spreadsheet could not be read: ' . $e->getMessage());
+            $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
         }
     }
 

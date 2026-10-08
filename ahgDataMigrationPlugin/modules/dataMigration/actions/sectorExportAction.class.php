@@ -12,7 +12,7 @@ class sectorExportAction extends AhgController
     public function execute($request)
     {
         // Check user authentication
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->context->user->hasCredential(['administrator', 'editor'], false)) {
             $this->forward('admin', 'secure');
         }
 

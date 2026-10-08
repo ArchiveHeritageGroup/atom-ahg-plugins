@@ -145,8 +145,11 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
         }
     }
 
-    // For image formats not supported by Cantaloupe, render as simple <img>
-    if (is_object($digitalObject)) {
+    // WebP, BMP and GIF masters: Cantaloupe cannot read these files, but the
+    // IIIF manifest serves the JPEG reference copy, so the viewer works whenever
+    // an image server is there. Only without one fall back to a plain <img>.
+    $iiifUsable = function_exists('render_iiif_viewer') && function_exists('is_iiif_available') && is_iiif_available();
+    if (is_object($digitalObject) && !$iiifUsable) {
         $imgExt = strtolower(pathinfo($digitalObject->name ?? '', PATHINFO_EXTENSION));
         if (in_array($imgExt, ['webp', 'bmp', 'gif'])) {
             $imgUrl = ($digitalObject->path ?? '') . ($digitalObject->name ?? '');

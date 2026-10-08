@@ -1,0 +1,8 @@
+# AHG background jobs (#202): base AtoM's finding aid and CSV export jobs,
+# with custom fields added. Merged with config/gearman.yml; workers started
+# without --types take every type, this one included.
+all:
+  worker_types:
+    ahg_custom_fields:
+      - ahgFindingAidJob
+      - ahgInformationObjectCsvExportJob

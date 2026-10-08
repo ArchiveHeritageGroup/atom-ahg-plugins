@@ -12,7 +12,7 @@ class dataMigrationBatchExportAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->context->user->isAdministrator()) {
+        if (!$this->context->user->hasCredential(['administrator', 'editor'], false)) {
             $this->forward('admin', 'secure');
         }
 

@@ -553,6 +553,11 @@ function scanForPii(objectId) {
 
 <?php if (isPluginActive('ahgResearchPlugin')): ?>
 <?php include_partial('informationobject/researchToolsContextMenu', ['resource' => $resource]); ?>
+
+<?php // Wikidata links for this description's creators and name access points (#209). ?>
+<?php if (in_array('authority', sfConfig::get('sf_enabled_modules', []), true)) { ?>
+  <?php include_partial('authority/descriptionWikidata', ['ioId' => $resource->id]); ?>
+<?php } ?>
 <?php endif; ?>
 
 <?php // Indigenous cultural & IP - manage cultural notices, TK labels, consent

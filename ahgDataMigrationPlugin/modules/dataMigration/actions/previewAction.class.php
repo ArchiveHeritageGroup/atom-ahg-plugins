@@ -21,7 +21,7 @@ class dataMigrationPreviewAction extends AhgController
     
     protected function handleMappingSubmit($request)
     {
-        if (!$this->getUser()->isAdministrator()) {
+        if (!$this->getUser()->hasCredential(['administrator', 'editor'], false)) {
             $this->forward('admin', 'secure');
         }
         
@@ -67,7 +67,7 @@ class dataMigrationPreviewAction extends AhgController
     {
         $this->getResponse()->setContentType('application/json');
         
-        if (!$this->getUser()->isAdministrator()) {
+        if (!$this->getUser()->hasCredential(['administrator', 'editor'], false)) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
         

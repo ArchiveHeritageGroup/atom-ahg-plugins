@@ -21,3 +21,10 @@ dashboard:
 all:
   is_secure:   true
   credentials: [[ contributor, editor, administrator ]]
+
+# CAAIS export carries donor contact details: administrators only, as in
+# Heratio. The action checks this too, so it holds before the config cache
+# picks this file up.
+caaisExport:
+  is_secure:   true
+  credentials: [[ administrator ]]

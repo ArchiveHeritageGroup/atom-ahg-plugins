@@ -15,6 +15,10 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
         // component. See dropUnresolvableDonor() for why.
         $this->dispatcher->connect('request.filter_parameters', [$this, 'dropUnresolvableDonor']);
 
+        // CAAIS profile (#199, #203): saved once base AtoM has saved the
+        // accession. See saveCaaisProfile() for why it is done this way.
+        $this->dispatcher->connect('response.filter_content', [$this, 'saveCaaisProfile']);
+
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'accessionManage';
         $enabledModules[] = 'accession';
@@ -130,6 +134,90 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
         }
     }
 
+    /**
+     * Save the CAAIS section of the accession form and log the CAAIS 7.2
+     * creation or revision entry, after base AtoM has saved the accession.
+     *
+     * The accession form is handled by qtAccessionPlugin's edit action, which
+     * always wins over this plugin's (see dropUnresolvableDonor) and is base
+     * code, so there is no save hook to call. Base dispatches no model-save
+     * event either. What it does do, on a valid POST and only then, is save
+     * and redirect to the record; so a 302 from accession/edit is a completed
+     * save, and the action instance still holds the saved resource, new
+     * accessions included. ahgVersionControlPlugin reads saves the same way.
+     *
+     * The accession is already committed here, so CAAIS values that fail the
+     * checks cannot stop it: they are dropped and listed on the record page
+     * through the caais_errors flash.
+     */
+    public function saveCaaisProfile(sfEvent $event, $content)
+    {
+        try {
+            $context = sfContext::hasInstance() ? sfContext::getInstance() : null;
+
+            // Cheap tests first: this runs on every response.
+            if (null === $context
+                || 'accession' !== $context->getModuleName()
+                || 'edit' !== $context->getActionName()
+                || 302 !== (int) $context->getResponse()->getStatusCode()
+                || !$context->getRequest()->isMethod('post')) {
+                return $content;
+            }
+
+            $entry = $context->getController()->getActionStack()->getLastEntry();
+            $resource = $entry ? $entry->getActionInstance()->getVar('resource') : null;
+            $accessionId = (is_object($resource) && isset($resource->id)) ? (int) $resource->id : 0;
+
+            if ($accessionId <= 0) {
+                return $content;
+            }
+
+            require_once __DIR__.'/../lib/Services/CaaisProfileService.php';
+            $service = new \AhgAccessionManage\Services\CaaisProfileService();
+
+            if (!$service->installed()) {
+                return $content;
+            }
+
+            $request = $context->getRequest();
+            $user = $context->getUser();
+            $input = $request->getPostParameter('caais');
+            $clean = null;
+
+            if (is_array($input)) {
+                [$clean, $errors] = $service->clean($input);
+
+                if ($errors) {
+                    $user->setFlash('caais_errors', $errors);
+                }
+            }
+
+            // The add route carries no slug; the edit route always does.
+            $userId = $user->isAuthenticated() ? (int) $user->getUserID() : null;
+            $kind = $request->getParameter('slug') ? 'revised' : 'created';
+
+            // Write after base commits. redirect() sends this response from
+            // inside base's open transaction, which still holds the accession
+            // row, so writing here waited out the lock timeout and failed.
+            register_shutdown_function(static function () use ($service, $accessionId, $clean, $kind, $userId) {
+                try {
+                    if (null !== $clean) {
+                        $service->save($accessionId, $clean);
+                    }
+                    $service->recordRevision($accessionId, $kind, $userId ?: null);
+                } catch (\Throwable $e) {
+                    error_log('ahgAccessionManagePlugin CAAIS save: '.$e->getMessage());
+                }
+            });
+        } catch (\Throwable $e) {
+            // The accession is saved; a CAAIS failure must not turn that into
+            // an error page.
+            error_log('ahgAccessionManagePlugin CAAIS save: '.$e->getMessage());
+        }
+
+        return $content;
+    }
+
     protected function registerAutoloader()
     {
         spl_autoload_register(function ($class) {
@@ -194,6 +282,7 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
         $manage = new \AtomFramework\Routing\RouteLoader('accessionManage');
         $manage->any('accession_browse_override', '/accession/browse', 'browse');
         $manage->any('accession_dashboard', '/admin/accessions/dashboard', 'dashboard');
+        $manage->any('accession_caais_export', '/accession/caais/export', 'caaisExport');
         $manage->register($routing);
 
         // =====================================================================

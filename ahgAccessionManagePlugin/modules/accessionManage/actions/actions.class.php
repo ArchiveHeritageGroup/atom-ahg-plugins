@@ -81,6 +81,7 @@ class accessionManageActions extends AhgController
             'sort' => $sort,
             'sortDir' => $sortDir,
             'subquery' => $subquery,
+            'repository' => (int) $request->getParameter('repository'),
         ]);
 
         // Build pager
@@ -96,6 +97,92 @@ class accessionManageActions extends AhgController
 
         // Selected culture for template
         $this->selectedCulture = $culture;
+
+        // CAAIS 1.1 repository (#203): the filter's options, and whether the
+        // CAAIS export of a selection is offered (admin only, as in Heratio,
+        // because the export carries donor contact details).
+        require_once dirname(__DIR__, 3).'/lib/Services/CaaisProfileService.php';
+        $caais = new \AhgAccessionManage\Services\CaaisProfileService($culture);
+        $this->caaisInstalled = $caais->installed();
+        $this->repositoryOptions = $this->caaisInstalled ? $caais->repositoryOptions() : [];
+        $this->selectedRepository = (int) $request->getParameter('repository');
+        // The route check covers the window after a deploy in which this file
+        // is live but the plugin configuration that registers the route is not.
+        $this->canExportCaais = $this->caaisInstalled && $this->getUser()->isAdministrator()
+            && $this->context->getRouting()->hasRouteName('accession_caais_export');
+    }
+
+    /**
+     * CAAIS 1.0 export of one accession (id=N) or a selection (ids[]=N...), as
+     * Heratio's JSON (format=json, the default), CSV or XML. external=1
+     * withholds sources marked confidential (CAAIS 2.1.6), for sharing.
+     *
+     * Administrators only, like Heratio's export: the full record carries
+     * donor contact details.
+     */
+    public function executeCaaisExport($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+
+        require_once dirname(__DIR__, 3).'/lib/Services/CaaisProfileService.php';
+        $service = new \AhgAccessionManage\Services\CaaisProfileService($this->culture());
+
+        $ids = $request->getParameter('ids', $request->getParameter('id'));
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', (array) $ids),
+            fn ($id) => $id > 0
+        )));
+        // ponytail: a selection is held in memory; 1000 accessions is far past
+        // any page of the browse list. Exporting a whole register would need
+        // Heratio's streamed caaisExportAll.
+        $ids = array_slice($ids, 0, 1000);
+
+        if (!$service->installed() || [] === $ids) {
+            $this->forward404();
+        }
+
+        $external = (bool) $request->getParameter('external');
+        $records = [];
+        foreach ($ids as $id) {
+            if (null !== $record = $service->exportRecord($id, $external)) {
+                $records[] = $record;
+            }
+        }
+        if ([] === $records) {
+            $this->forward404();
+        }
+
+        $format = $request->getParameter('format', 'json');
+        if (!in_array($format, ['json', 'csv', 'xml'], true)) {
+            $format = 'json';
+        }
+
+        if (1 === count($ids)) {
+            $identifier = (string) $records[0]['identity']['identifiers'][0]['value'];
+            $name = 'caais-'.preg_replace('/[^A-Za-z0-9._-]+/', '_', '' !== $identifier ? $identifier : (string) $ids[0]);
+        } else {
+            $name = 'caais-accessions-'.date('Y-m-d');
+        }
+
+        if ('csv' === $format) {
+            $type = 'text/csv; charset=utf-8';
+            $body = \AhgAccessionManage\Services\CaaisProfileService::toCsv($records);
+        } elseif ('xml' === $format) {
+            $type = 'application/xml; charset=utf-8';
+            $body = $service->toXml($service->envelope($records));
+        } else {
+            $type = 'application/json; charset=utf-8';
+            $body = json_encode($service->envelope($records), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+
+        $response = $this->getResponse();
+        $response->setContentType($type);
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="'.$name.'.'.$format.'"');
+        $response->setHttpHeader('X-Content-Type-Options', 'nosniff');
+
+        return $this->renderText($body);
     }
 
     public function executeDashboard($request)

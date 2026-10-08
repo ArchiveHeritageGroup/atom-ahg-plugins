@@ -92,6 +92,18 @@ class AccessionBrowseService
             $boolQuery['must'] = [['match_all' => new \stdClass()]];
         }
 
+        // CAAIS 1.1 repository filter (#203). The repository lives in the
+        // accession_caais side table, not in the search index, so the matching
+        // accession ids are looked up here and handed to the search as a filter.
+        $repositoryId = (int) ($params['repository'] ?? 0);
+        if ($repositoryId > 0) {
+            $repoIds = $this->accessionIdsForRepository($repositoryId);
+            if ([] === $repoIds) {
+                return ['hits' => [], 'total' => 0, 'page' => $page, 'limit' => $limit];
+            }
+            $boolQuery['filter'] = [['ids' => ['values' => array_map('strval', $repoIds)]]];
+        }
+
         // Sort
         $sort = $this->buildSort(
             $params['sort'] ?? 'lastUpdated',
@@ -160,12 +172,60 @@ class AccessionBrowseService
             // V2 tables may not exist yet
         }
 
+        // CAAIS 1.1 repository name for the browse column (#203).
+        try {
+            $ids = array_filter(array_map(fn($h) => $h['_id'] ?? null, $hits));
+            if (!empty($ids) && $this->caaisInstalled()) {
+                $c = $this->culture;
+                $names = DB::table('accession_caais')
+                    ->join('actor', 'actor.id', '=', 'accession_caais.repository_id')
+                    ->leftJoin('actor_i18n as cur', function ($j) use ($c) {
+                        $j->on('cur.id', '=', 'actor.id')->where('cur.culture', '=', $c);
+                    })
+                    ->leftJoin('actor_i18n as src', function ($j) {
+                        $j->on('src.id', '=', 'actor.id')->on('src.culture', '=', 'actor.source_culture');
+                    })
+                    ->whereIn('accession_caais.accession_id', $ids)
+                    ->selectRaw('accession_caais.accession_id, COALESCE(cur.authorized_form_of_name, src.authorized_form_of_name) AS name')
+                    ->pluck('name', 'accession_id')
+                    ->all();
+
+                foreach ($hits as &$hit) {
+                    $hit['repository_name'] = $names[$hit['_id'] ?? 0] ?? null;
+                }
+                unset($hit);
+            }
+        } catch (\Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+        }
+
         return [
             'hits' => $hits,
             'total' => $total,
             'page' => $page,
             'limit' => $limit,
         ];
+    }
+
+    /** Accession ids whose CAAIS 1.1 repository is $repositoryId. */
+    protected function accessionIdsForRepository(int $repositoryId): array
+    {
+        if (!$this->caaisInstalled()) {
+            return [];
+        }
+
+        return DB::table('accession_caais')
+            ->where('repository_id', $repositoryId)
+            ->pluck('accession_id')
+            ->map(fn($id) => (int) $id)
+            ->all();
+    }
+
+    protected function caaisInstalled(): bool
+    {
+        require_once __DIR__.'/CaaisProfileService.php';
+
+        return (new CaaisProfileService($this->culture))->installed();
     }
 
     protected function buildSort(string $sort, string $dir): array

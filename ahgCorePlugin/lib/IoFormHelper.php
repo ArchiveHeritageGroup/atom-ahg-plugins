@@ -286,6 +286,7 @@ class IoFormHelper
             }
 
             $action->io = self::getNewDefaults($parentId, $parentTitle, $parentSlug, $culture);
+            self::applyFormDefaults($action->io, (int) $parentId);
 
             $action->getResponse()->setTitle(
                 $action->getContext()->getI18N()->__('Add new archival description')
@@ -320,6 +321,103 @@ class IoFormHelper
         $action->standard = $standard;
 
         return $standard;
+    }
+
+    /**
+     * Put a description saved by this form into the search index. The form
+     * writes through the query builder, which - unlike a Propel save - never
+     * touched the index, so new and edited descriptions were missing from
+     * search, facets and the clipboard until someone ran search:populate.
+     * Runs once the request (and AtoM's transaction) is over, so the search
+     * model, which reads the record back from the database, sees the save.
+     */
+    public static function reindexAfterRequest(int $id): void
+    {
+        if ($id <= 1) {
+            return;
+        }
+        register_shutdown_function(static function () use ($id) {
+            try {
+                $io = \QubitInformationObject::getById($id);
+                if (null !== $io) {
+                    \QubitSearch::getInstance()->update($io);
+                }
+            } catch (\Throwable $e) {
+                error_log('io.reindex_failed: '.$id.': '.$e->getMessage());
+            }
+        });
+    }
+
+    /**
+     * Fill a new description with the default values of its form template
+     * (ahgFormsPlugin, #209 / 2020 wish list #32).
+     *
+     * Template: the active assignment that matches the parent's repository,
+     * level or top-level collection (highest priority first), else the active
+     * default template for descriptions. Each field with a default and a mapping
+     * to information_object(_i18n) fills the matching empty value; *_id columns
+     * take a numeric id only. Without ahgFormsPlugin's tables nothing happens.
+     */
+    public static function applyFormDefaults(array &$io, int $parentId): void
+    {
+        try {
+            $db = \Illuminate\Database\Capsule\Manager::class;
+            if (!$db::schema()->hasTable('ahg_form_template') || !$db::schema()->hasTable('ahg_form_field_mapping')) {
+                return;
+            }
+
+            $parent = $parentId > 1 ? $db::table('information_object')->where('id', $parentId)->first(['id', 'repository_id', 'level_of_description_id', 'lft', 'rgt']) : null;
+            $collectionId = null;
+            if ($parent) {
+                $collectionId = $db::table('information_object')->where('lft', '<=', $parent->lft)->where('rgt', '>=', $parent->rgt)
+                    ->where('parent_id', 1)->value('id');
+            }
+
+            $templateId = $db::table('ahg_form_assignment as a')
+                ->join('ahg_form_template as t', 't.id', '=', 'a.template_id')
+                ->where('a.is_active', 1)->where('t.is_active', 1)->where('t.form_type', 'information_object')
+                ->where(function ($q) use ($parent, $collectionId) {
+                    $q->whereRaw('1 = 0');
+                    if ($parent && $parent->repository_id) {
+                        $q->orWhere('a.repository_id', $parent->repository_id);
+                    }
+                    if ($parent && $parent->level_of_description_id) {
+                        $q->orWhere('a.level_of_description_id', $parent->level_of_description_id);
+                    }
+                    if ($collectionId) {
+                        $q->orWhere('a.collection_id', $collectionId);
+                    }
+                })
+                ->orderByDesc('a.priority')->value('a.template_id')
+                ?? $db::table('ahg_form_template')->where('form_type', 'information_object')
+                    ->where('is_default', 1)->where('is_active', 1)->value('id');
+            if (!$templateId) {
+                return;
+            }
+
+            $rows = $db::table('ahg_form_field as f')
+                ->join('ahg_form_field_mapping as m', 'm.field_id', '=', 'f.id')
+                ->where('f.template_id', $templateId)
+                ->whereIn('m.target_table', ['information_object', 'information_object_i18n'])
+                ->whereNotNull('f.default_value')->where('f.default_value', '<>', '')
+                ->get(['m.target_column', 'f.default_value']);
+
+            foreach ($rows as $row) {
+                $key = lcfirst(str_replace('_', '', ucwords((string) $row->target_column, '_')));
+                if (!array_key_exists($key, $io)) {
+                    continue;
+                }
+                if (str_ends_with($key, 'Id')) {
+                    if (null === $io[$key] && ctype_digit((string) $row->default_value)) {
+                        $io[$key] = (int) $row->default_value;
+                    }
+                } elseif (is_string($io[$key]) && '' === $io[$key]) {
+                    $io[$key] = (string) $row->default_value;
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('io.form_defaults_failed: '.$e->getMessage());
+        }
     }
 
     /**
@@ -807,6 +905,7 @@ class IoFormHelper
                 self::saveSecurityClassification($request, $action, (int) $newId);
                 self::saveWatermarkSettings($request, $action, (int) $newId);
                 $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
+                self::reindexAfterRequest((int) $newId);
                 $action->redirect($returnToEdit ? '/informationobject/' . $newSlug . '/edit' : '/' . $newSlug);
 
                 return true;
@@ -817,6 +916,7 @@ class IoFormHelper
             // persist the security classification if the fieldset was on the form.
             self::saveSecurityClassification($request, $action, (int) $action->io['id']);
             self::saveWatermarkSettings($request, $action, (int) $action->io['id']);
+            self::reindexAfterRequest((int) $action->io['id']);
             $action->redirect($returnToEdit ? '/informationobject/' . $action->io['slug'] . '/edit' : '/' . $action->io['slug']);
 
             return true;
@@ -892,6 +992,24 @@ class IoFormHelper
      * work, and the dedicated screen at securityClearance/watermarkSettings
      * already does it properly. See #256.
      */
+    /**
+     * The opacity slider posts a percentage (10-100); the column holds a
+     * fraction (DECIMAL(3,2)), so a raw 40 failed the save as out of range.
+     * A value already given as a fraction is kept.
+     */
+    public static function watermarkOpacity($value): ?float
+    {
+        if (null === $value || '' === $value || !is_numeric($value)) {
+            return null;
+        }
+        $value = (float) $value;
+        if ($value > 1) {
+            $value /= 100;
+        }
+
+        return max(0.0, min(1.0, round($value, 2)));
+    }
+
     private static function saveWatermarkSettings(sfWebRequest $request, sfActions $action, int $objectId): void
     {
         if ($objectId <= 0
@@ -916,9 +1034,7 @@ class IoFormHelper
                 (bool) $request->getParameter('watermark_enabled'),
                 $customId,
                 $request->getParameter('new_watermark_position') ?: null,
-                null !== $request->getParameter('new_watermark_opacity')
-                    ? (float) $request->getParameter('new_watermark_opacity')
-                    : null
+                self::watermarkOpacity($request->getParameter('new_watermark_opacity'))
             );
         } catch (\Throwable $e) {
             // Never cost the editor their description over a watermark row.

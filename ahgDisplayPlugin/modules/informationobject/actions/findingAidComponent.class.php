@@ -50,7 +50,8 @@ class findingAidComponent extends AhgComponents
         }
 
         // Get last job status
-        $lastJobStatus = arFindingAidJob::getStatus($this->resource->id);
+        // Either job name: the AHG finding aid job (custom fields, #202) or base.
+        $lastJobStatus = class_exists('ahgFindingAidJob') ? ahgFindingAidJob::getStatus($this->resource->id) : arFindingAidJob::getStatus($this->resource->id);
 
         // For authenticated users, if no job has been executed
         if (!isset($lastJobStatus)) {

@@ -43,6 +43,7 @@ class ahgTermTaxonomyPluginConfiguration extends sfPluginConfiguration
         $router = new \AtomFramework\Routing\RouteLoader('termTaxonomy');
         $router->any('term_edit_override', '/term/:slug/edit', 'edit', ['slug' => '[a-zA-Z0-9_-]+']);
         $router->any('term_delete_override', '/term/:slug/delete', 'delete', ['slug' => '[a-zA-Z0-9_-]+']);
+        $router->any('term_move', '/term/:slug/move', 'move', ['slug' => '[a-zA-Z0-9_-]+']);
         $router->any('term_browse_override', '/term/:slug', 'index', ['slug' => '[a-zA-Z0-9_-]+']);
         // Taxonomy route with numeric ID
         $router->any('taxonomy_browse_override', '/taxonomy/:id', 'taxonomyIndex', ['id' => '\d+']);

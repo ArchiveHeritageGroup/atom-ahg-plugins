@@ -44,6 +44,7 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'securityClearance';
         $enabledModules[] = 'securityAudit';
         $enabledModules[] = 'accessFilter';
+        $enabledModules[] = 'sso';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
@@ -274,6 +275,18 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
 
     public function addRoutes(sfEvent $event)
     {
+        // Single sign-on (#200). The SAML response arrives as a POST, which
+        // any() does not match here, so it has its own post() route.
+        $sso = new \AtomFramework\Routing\RouteLoader('sso');
+        $sso->any('sso_oidc_login', '/sso/oidc/login', 'oidcLogin');
+        $sso->any('sso_oidc_callback', '/sso/oidc/callback', 'oidcCallback');
+        $sso->any('sso_saml_login', '/sso/saml/login', 'samlLogin');
+        $sso->post('sso_saml_acs', '/sso/saml/acs', 'samlAcs');
+        $sso->any('sso_saml_metadata', '/sso/saml/metadata', 'samlMetadata');
+        $sso->any('sso_admin', '/admin/sso', 'admin');
+        $sso->post('sso_admin_save', '/admin/sso', 'admin');
+        $sso->register($event->getSubject());
+
         $router = new \AtomFramework\Routing\RouteLoader('securityClearance');
 
         // Admin clearance management routes

@@ -4,6 +4,7 @@ $files = $sf_data->getRaw('files') ?? [];
 $spEnabled = file_exists(sfConfig::get('sf_plugins_dir') . '/ahgSharePointPlugin');
 $spTenants = $sf_data->getRaw('sp_tenants') ?? [];
 $spDrives = $sf_data->getRaw('sp_drives') ?? [];
+$xlsxPending = isset($xlsxPending) ? $sf_data->getRaw('xlsxPending') : null;
 ?>
 
 <h1><?php echo __('Upload Files') ?></h1>
@@ -42,6 +43,37 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
 <div class="row">
     <div class="col-md-8">
 
+        <?php if (is_array($xlsxPending) && !empty($xlsxPending['sheets'])): ?>
+        <div class="card mb-4 border-primary">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-file-excel me-2"></i><?php echo __('Choose a worksheet') ?></h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">
+                    <?php echo __('%1% has more than one worksheet. Pick the one that holds the descriptions; its first row must be the column headings.', ['%1%' => '<strong>' . esc_entities($xlsxPending['original_name']) . '</strong>']) ?>
+                </p>
+                <form method="post" action="<?php echo url_for(['module' => 'ingest', 'action' => 'upload', 'id' => $session->id]) ?>">
+                    <div class="mb-3">
+                        <label for="xlsx_sheet" class="form-label"><?php echo __('Worksheet') ?></label>
+                        <select class="form-select" id="xlsx_sheet" name="xlsx_sheet">
+                            <?php foreach ($xlsxPending['sheets'] as $sh): ?>
+                                <option value="<?php echo (int) $sh['index'] ?>"><?php echo esc_entities($sh['name']) ?> (<?php echo __('%1% rows', ['%1%' => (int) $sh['rows']]) ?>)</option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" name="form_action" value="xlsx_cancel" class="btn btn-outline-secondary" formnovalidate>
+                            <?php echo __('Cancel') ?>
+                        </button>
+                        <button type="submit" name="form_action" value="xlsx_sheet" class="btn btn-primary">
+                            <?php echo __('Use this worksheet & continue') ?> <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <?php endif ?>
+
         <ul class="nav nav-tabs mb-3" id="ingestSourceTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-fileupload-tab" data-bs-toggle="tab" data-bs-target="#tab-fileupload" type="button" role="tab">
@@ -69,13 +101,13 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label for="ingest_file" class="form-label"><?php echo __('Select CSV, ZIP, or EAD file') ?></label>
+                                <label for="ingest_file" class="form-label"><?php echo __('Select CSV, Excel, ZIP, or EAD file') ?></label>
                                 <div id="drop-zone" class="border border-2 border-dashed rounded p-5 text-center mb-3">
                                     <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
                                     <p class="mb-1"><?php echo __('Drag and drop file here, or click to browse') ?></p>
-                                    <small class="text-muted"><?php echo __('Supported: CSV, ZIP (with CSV + digital objects), EAD XML') ?></small>
+                                    <small class="text-muted"><?php echo __('Supported: CSV, Excel (.xlsx, .xls), ZIP (with CSV + digital objects), EAD XML') ?></small>
                                     <input type="file" class="form-control mt-3" id="ingest_file" name="ingest_file"
-                                           accept=".csv,.zip,.xml,.ead">
+                                           accept=".csv,.xlsx,.xls,.zip,.xml,.ead">
                                 </div>
                                 <div id="file-info" class="alert alert-info" data-ahg-style="display:none;"></div>
                             </div>
@@ -213,7 +245,7 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
                 <?php foreach ($files as $f): ?>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
-                            <i class="fas fa-file-<?php echo $f->file_type === 'csv' ? 'csv' : ($f->file_type === 'zip' ? 'archive' : ($f->file_type === 'sharepoint' ? 'cloud' : 'code')) ?> me-1"></i>
+                            <i class="fas fa-file-<?php echo $f->file_type === 'csv' ? 'csv' : ($f->file_type === 'xlsx' ? 'excel' : ($f->file_type === 'zip' ? 'archive' : ($f->file_type === 'sharepoint' ? 'cloud' : 'code'))) ?> me-1"></i>
                             <small><?php echo esc_entities($f->original_name) ?></small>
                         </div>
                         <small class="text-muted"><?php echo $f->row_count ? $f->row_count . ' rows' : '' ?></small>

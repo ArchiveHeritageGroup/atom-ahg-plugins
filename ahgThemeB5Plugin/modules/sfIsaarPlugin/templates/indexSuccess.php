@@ -44,6 +44,11 @@
 
 <?php slot('context-menu'); ?>
 
+  <?php // External identifiers (Wikidata, VIAF, ...) from ahgAuthorityPlugin (#209). ?>
+  <?php if (in_array('authority', sfConfig::get('sf_enabled_modules', []), true)) { ?>
+    <?php include_partial('authority/identifierPanel', ['actorId' => $resource->id]); ?>
+  <?php } ?>
+
   <?php if ($sf_context->getConfiguration()->isPluginEnabled('sfEacPlugin')) { ?>
 
     <nav>

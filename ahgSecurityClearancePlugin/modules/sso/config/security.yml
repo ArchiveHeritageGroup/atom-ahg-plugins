@@ -1,0 +1,4 @@
+# Sign-in pages must answer signed-out visitors. The settings page checks for an
+# administrator itself.
+all:
+  is_secure: false

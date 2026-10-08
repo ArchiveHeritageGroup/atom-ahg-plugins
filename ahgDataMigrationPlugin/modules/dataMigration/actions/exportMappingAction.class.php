@@ -9,7 +9,7 @@ class exportMappingAction extends AhgController
     public function execute($request)
     {
         // Check user authentication
-        if (!$this->getUser()->isAdministrator()) {
+        if (!$this->getUser()->hasCredential(['administrator', 'editor'], false)) {
             $this->forward('admin', 'secure');
         }
 

@@ -10,6 +10,24 @@ class ItemType
     private static ?ObjectType $type = null;
     private static ?ObjectType $digitalObjectType = null;
     private static ?ObjectType $eventType = null;
+    private static ?ObjectType $customFieldType = null;
+
+    public static function getCustomFieldType(): ObjectType
+    {
+        if (null === self::$customFieldType) {
+            self::$customFieldType = new ObjectType([
+                'name' => 'CustomField',
+                'description' => 'A custom metadata field and its value(s)',
+                'fields' => [
+                    'key' => ['type' => Type::nonNull(Type::string()), 'description' => 'Field key'],
+                    'label' => ['type' => Type::nonNull(Type::string()), 'description' => 'Field label'],
+                    'values' => ['type' => Type::nonNull(Type::listOf(Type::nonNull(Type::string()))), 'description' => 'Value(s) as text; repeatable fields give several'],
+                ],
+            ]);
+        }
+
+        return self::$customFieldType;
+    }
 
     public static function getType(): ObjectType
     {
@@ -151,6 +169,11 @@ class ItemType
 
                                 return $context['resolvers']->item->resolveDates($item['id']);
                             },
+                        ],
+                        'customFields' => [
+                            'type' => Type::nonNull(Type::listOf(Type::nonNull(self::getCustomFieldType()))),
+                            'description' => 'Custom metadata fields (ahgCustomFieldsPlugin); non-public fields for staff only',
+                            'resolve' => fn ($item, $args, $context) => $context['resolvers']->item->resolveCustomFields((int) $item['id']),
                         ],
                         'subjects' => [
                             'type' => Type::nonNull(Type::listOf(Type::nonNull(TermType::getType()))),

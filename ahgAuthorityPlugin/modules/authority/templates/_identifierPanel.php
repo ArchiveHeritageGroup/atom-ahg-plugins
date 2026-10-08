@@ -27,9 +27,11 @@ if (empty($identifiers)) return;
         <?php endif; ?>
       </a>
     <?php endforeach; ?>
+    <?php if ($sf_user->hasCredential(['administrator', 'editor'], false)): ?>
     <a href="<?php echo url_for('@ahg_authority_identifiers?actorId=' . $actorId); ?>"
-       class="btn btn-sm btn-outline-primary ms-2">
-      <i class="fas fa-edit"></i>
+       class="btn btn-sm btn-outline-primary ms-2" title="<?php echo __('Edit identifiers'); ?>">
+      <i class="fas fa-edit" aria-hidden="true"></i><span class="visually-hidden"><?php echo __('Edit identifiers'); ?></span>
     </a>
+    <?php endif; ?>
   </div>
 </div>

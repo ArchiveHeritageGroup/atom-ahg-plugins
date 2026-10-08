@@ -28,6 +28,11 @@
 
             <li><?php echo link_to(__('Rename'), [$resource, 'module' => 'informationobject', 'action' => 'rename'], ['class' => 'dropdown-item']); ?></li>
 
+            <?php // Sort the records below this one (#205): editors and administrators, when it has children. ?>
+            <?php if ($resource->rgt - $resource->lft > 1 && $sf_user->hasCredential(['administrator', 'editor'], false)) { ?>
+              <li><a class="dropdown-item" href="<?php echo url_for('@io_sort_children?slug='.$resource->slug); ?>"><?php echo __('Sort the records below'); ?></a></li>
+            <?php } ?>
+
             <?php if (\AtomExtensions\Services\AclService::check($resource, 'publish')) { ?>
               <li><?php echo link_to(
                   __('Update publication status'),

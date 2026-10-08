@@ -13,6 +13,7 @@ class ahgInformationObjectManagePluginConfiguration extends sfPluginConfiguratio
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'ioManage';
+        $enabledModules[] = 'batchEdit';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
@@ -44,6 +45,7 @@ class ahgInformationObjectManagePluginConfiguration extends sfPluginConfiguratio
         // standard plugin calls them but declares only ahgCorePlugin, so they were
         // an undeclared cross-plugin dependency that broke a standalone install.
         $router->any('io_delete_override', '/informationobject/:slug/delete', 'delete');
+        $router->any('io_sort_children', '/informationobject/:slug/sortChildren', 'sortChildren');
 
         // Digital object routes (checked after treeview, before slug catch-alls)
         // NB: URL must NOT be '/digitalobject/upload' — that is base AtoM's own
@@ -65,5 +67,11 @@ class ahgInformationObjectManagePluginConfiguration extends sfPluginConfiguratio
         // Specific routes (checked first after prepending)
 
         $router->register($event->getSubject());
+
+        // Batch edit and rename from the clipboard (#204). Three segments, and
+        // prepended, so base AtoM's /:slug/:module/:action cannot claim it.
+        $batch = new \AtomFramework\Routing\RouteLoader('batchEdit');
+        $batch->any('io_batch_edit', '/informationobject/batchEdit/run', 'batch');
+        $batch->register($event->getSubject());
     }
 }

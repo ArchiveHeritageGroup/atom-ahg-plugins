@@ -33,6 +33,17 @@ class apiv2DescriptionsReadAction extends AhgApiController
             return $this->error(404, 'Not Found', "Description '{$slug}' not found");
         }
 
+        // Custom fields (#202): staff keys see every field, other keys only the
+        // fields marked visible to the public. Added before redaction, so the
+        // privacy rules below apply to them too.
+        if (class_exists('\\AtomFramework\\Services\\CustomFieldValues')) {
+            $result['custom_fields'] = \AtomFramework\Services\CustomFieldValues::forObject(
+                (int) $result['id'],
+                'informationobject',
+                !ApiVisibility::isStaff($this->getUser())
+            );
+        }
+
         // #130 refinement 2 - field-level redaction on the REST layer, using the
         // same authority as the web view so the two cannot drift. Both service
         // files must be required: the namespace is not autoloaded here, and a

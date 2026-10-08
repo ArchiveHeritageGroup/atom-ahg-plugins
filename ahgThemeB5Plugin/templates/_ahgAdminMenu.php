@@ -144,6 +144,9 @@ if ($isAdmin && $hasResearcher) {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Security'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'index']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Clearances'); ?></a></li>
+    <?php if ($sf_user->isAdministrator()): ?>
+    <li><a class="dropdown-item" href="<?php echo url_for('@sso_admin'); ?>"><i class="fas fa-key fa-fw me-1"></i><?php echo __('Single sign-on'); ?></a></li>
+    <?php endif; ?>
     <?php endif; ?>
 
     <?php if ($hasResearch): ?>
@@ -207,6 +210,7 @@ if ($isAdmin && $hasResearcher) {
     <li><h6 class="dropdown-header"><?php echo __('Data Ingest'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ingest', 'action' => 'index']); ?>"><i class="fas fa-file-upload fa-fw me-1"></i><?php echo __('Ingest Dashboard'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ingest', 'action' => 'configure']); ?>"><i class="fas fa-plus-circle fa-fw me-1"></i><?php echo __('New Ingest'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for('@ingest_grid'); ?>"><i class="fas fa-table fa-fw me-1"></i><?php echo __('Grid entry'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasDoiPlugin): ?>
@@ -247,6 +251,14 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']); ?>"><i class="fas fa-university fa-fw me-1"></i><?php echo __('Collections Procedures compliance'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumChain']); ?>"><i class="fas fa-link fa-fw me-1"></i><?php echo __('Collections Procedures chain rules'); ?></a></li>
     <?php endif; ?>
+    <?php endif; ?>
+
+    <?php // Digital preservation pages (ahgPreservationPlugin), incl. the triage dashboard (#154). ?>
+    <?php if (ahgIsPluginEnabled('ahgPreservationPlugin')): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Preservation'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for('@preservation_index'); ?>"><i class="fas fa-shield-alt fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for('@preservation_triage'); ?>"><i class="fas fa-list-ol fa-fw me-1"></i><?php echo __('Triage'); ?></a></li>
     <?php endif; ?>
 
     <li><hr class="dropdown-divider"></li>

@@ -707,17 +707,17 @@ class IngestCommitService
 
                 try {
                     $event = new \QubitEvent();
-                    $event->informationObjectId = $ioId;
+                    $event->objectId = $ioId;
                     $event->actorId = $actorId;
                     $event->typeId = \QubitTerm::CREATION_ID ?? 111;
                     if (!empty($dates[$i])) {
                         $event->date = $dates[$i];
                     }
                     if (!empty($starts[$i])) {
-                        $event->startDate = $starts[$i];
+                        $event->startDate = self::fullDate($starts[$i], false);
                     }
                     if (!empty($ends[$i])) {
-                        $event->endDate = $ends[$i];
+                        $event->endDate = self::fullDate($ends[$i], true);
                     }
                     $event->sourceCulture = 'en';
                     $event->save();
@@ -737,14 +737,14 @@ class IngestCommitService
             foreach ($dates as $i => $dateStr) {
                 try {
                     $event = new \QubitEvent();
-                    $event->informationObjectId = $ioId;
+                    $event->objectId = $ioId;
                     $event->typeId = \QubitTerm::CREATION_ID ?? 111;
                     $event->date = $dateStr;
                     if (!empty($starts[$i])) {
-                        $event->startDate = $starts[$i];
+                        $event->startDate = self::fullDate($starts[$i], false);
                     }
                     if (!empty($ends[$i])) {
-                        $event->endDate = $ends[$i];
+                        $event->endDate = self::fullDate($ends[$i], true);
                     }
                     $event->sourceCulture = 'en';
                     $event->save();
@@ -754,6 +754,32 @@ class IngestCommitService
                 }
             }
         }
+    }
+
+    /**
+     * A start or end date as MySQL accepts it. The event columns are DATE and
+     * the server runs in strict mode, so "1950" or "1920-05" was rejected and
+     * the event silently dropped: no ingest kept a year-only date. A year or
+     * year-month becomes the first (start) or last (end) day; anything that is
+     * not a recognisable date is left out rather than failing the event. The
+     * display date (event.date) keeps the text exactly as entered.
+     */
+    public static function fullDate(string $value, bool $end): ?string
+    {
+        $value = trim($value);
+        if (preg_match('/^(\d{4})$/', $value, $m)) {
+            return $end ? $m[1].'-12-31' : $m[1].'-01-01';
+        }
+        if (preg_match('/^(\d{4})-(\d{1,2})$/', $value, $m) && (int) $m[2] >= 1 && (int) $m[2] <= 12) {
+            $first = sprintf('%s-%02d-01', $m[1], (int) $m[2]);
+
+            return $end ? date('Y-m-t', strtotime($first)) : $first;
+        }
+        if (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value, $m) && checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
+            return sprintf('%s-%02d-%02d', $m[1], (int) $m[2], (int) $m[3]);
+        }
+
+        return null;
     }
 
     protected function importDigitalObject(int $ioId, string $filePath, object $session): ?int

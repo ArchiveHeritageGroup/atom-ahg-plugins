@@ -44,12 +44,19 @@ class ahgIngestPluginConfiguration extends sfPluginConfiguration
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 351,
             ]);
+            AhgNav::register('manage', 'ingest_grid', [
+                'route' => ['module' => 'ingestGrid', 'action' => 'index'],
+                'label' => 'Grid entry',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 352,
+            ]);
         }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'ingest';
+        $enabledModules[] = 'ingestGrid';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
 
         // Register queue handler for ingest:commit
@@ -96,6 +103,12 @@ class ahgIngestPluginConfiguration extends sfPluginConfiguration
         $r->any('ingest_set_watch_folder', '/ingest/:id/watch-folder', 'setWatchFolder', ['id' => '\d+']);
 
         $r->register($routing);
+
+        // Grid entry (issue #208)
+        $g = new \AtomFramework\Routing\RouteLoader('ingestGrid');
+        $g->any('ingest_grid', '/ingest/grid', 'index');
+        $g->post('ingest_grid_save', '/ingest/grid/save', 'save');
+        $g->register($routing);
     }
 
     public static function getPluginInfo()
@@ -107,7 +120,8 @@ class ahgIngestPluginConfiguration extends sfPluginConfiguration
             'author' => 'The Archive and Heritage Group (Pty) Ltd',
             'features' => [
                 '6-step wizard: configure, upload, map, validate, preview, commit',
-                'CSV/ZIP/EAD upload with auto-detection',
+                'CSV/Excel/ZIP/EAD upload with auto-detection',
+                'Spreadsheet-style grid entry of many descriptions under one parent',
                 'Auto field mapping with confidence indicators',
                 'Embedded metadata extraction (EXIF/IPTC/XMP)',
                 'Hierarchical tree preview with approval',

@@ -46,11 +46,20 @@ class ahgC2paPluginConfiguration extends sfPluginConfiguration
         $c2pa = new \AtomFramework\Routing\RouteLoader('c2pa');
 
         // Capability discovery + verify (POST) first; specific before catch-alls.
-        $c2pa->get('ahg_c2pa_well_known', '/.well-known/c2pa-info', 'wellKnown');
         $c2pa->any('ahg_c2pa_verify', '/c2pa/verify', 'verify');
         $c2pa->get('ahg_c2pa_manifest', '/c2pa/manifest/:id', 'manifest', ['id' => '\d+']);
         $c2pa->get('ahg_c2pa_manifests', '/c2pa/manifests/:id', 'manifests', ['id' => '\d+']);
 
         $c2pa->register($routing);
+
+        // Capability discovery at /.well-known/c2pa-info. Symfony treats "." as a
+        // segment separator, so a path starting "/." never matched and answered
+        // 404. With "/" as the only separator the dot is plain text.
+        $routing->prependRoute('ahg_c2pa_well_known', new \ExplicitRoute(
+            '/.well-known/c2pa-info',
+            ['module' => 'c2pa', 'action' => 'wellKnown'],
+            [],
+            ['segment_separators' => ['/']]
+        ));
     }
 }

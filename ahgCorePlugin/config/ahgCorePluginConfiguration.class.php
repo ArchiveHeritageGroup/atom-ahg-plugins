@@ -1280,6 +1280,17 @@ APPLIER;
     protected function registerAutoloader()
     {
         spl_autoload_register(function ($class) {
+            // AHG background jobs (lib/job): plain class names, because Gearman
+            // abilities are class names. Not in Symfony's cached autoload map.
+            if (in_array($class, ['ahgFindingAidJob', 'ahgInformationObjectCsvExportJob'], true)) {
+                $filePath = __DIR__.'/../lib/job/'.$class.'.class.php';
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+
+                    return true;
+                }
+            }
+
             // Handle AhgCore namespace
             if (strpos($class, 'AhgCore\\') === 0) {
                 $relativePath = str_replace('AhgCore\\', '', $class);

@@ -8,6 +8,11 @@ class ItemResolver extends BaseResolver
 {
     public function resolveBySlug(string $slug): ?array
     {
+        $id = DB::table('slug as s')->join('information_object as io', 'io.id', '=', 's.object_id')->where('s.slug', $slug);
+        if (!$this->visible($id)->exists()) {
+            return null; // hidden answers exactly like missing
+        }
+
         return $this->repository->getFullDescription($slug);
     }
 
@@ -24,7 +29,8 @@ class ItemResolver extends BaseResolver
                     ->where('lod.culture', '=', $this->culture);
             })
             ->leftJoin('display_standard_sector as dss', 'io.display_standard_id', '=', 'dss.term_id')
-            ->where('io.id', $id)
+            ->where('io.id', $id);
+        $row = $this->visible($row)
             ->select([
                 'io.id',
                 'slug.slug',
@@ -69,6 +75,8 @@ class ItemResolver extends BaseResolver
             $params['sector'] = $sector;
         }
 
+        $params['visibility'] = fn ($query) => $this->visible($query);
+
         $result = $this->repository->getDescriptions($params);
 
         return $this->buildConnection($result['results'], $result['total'], $offset, $first);
@@ -87,7 +95,8 @@ class ItemResolver extends BaseResolver
                     ->where('lod.culture', '=', $this->culture);
             })
             ->leftJoin('display_standard_sector as dss', 'io.display_standard_id', '=', 'dss.term_id')
-            ->where('io.parent_id', $parentId)
+            ->where('io.parent_id', $parentId);
+        $query = $this->visible($query)
             ->select([
                 'io.id',
                 'slug.slug',
@@ -113,9 +122,7 @@ class ItemResolver extends BaseResolver
 
     public function countChildren(int $parentId): int
     {
-        return DB::table('information_object')
-            ->where('parent_id', $parentId)
-            ->count();
+        return $this->visible(DB::table('information_object as io')->where('io.parent_id', $parentId))->count();
     }
 
     public function resolveAncestors(int $itemId): array
@@ -137,7 +144,8 @@ class ItemResolver extends BaseResolver
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.lft', '<', $current->lft)
             ->where('io.rgt', '>', $current->rgt)
-            ->where('io.id', '!=', 1)
+            ->where('io.id', '!=', 1);
+        $ancestors = $this->visible($ancestors)
             ->select(['io.id', 'slug.slug', 'ioi.title', 'io.lft'])
             ->orderBy('io.lft', 'asc')
             ->get()
@@ -318,7 +326,8 @@ class ItemResolver extends BaseResolver
             })
             ->leftJoin('display_standard_sector as dss', 'io.display_standard_id', '=', 'dss.term_id')
             ->where('io.repository_id', $repositoryId)
-            ->where('io.id', '!=', 1)
+            ->where('io.id', '!=', 1);
+        $query = $this->visible($query)
             ->select([
                 'io.id',
                 'slug.slug',
@@ -344,10 +353,7 @@ class ItemResolver extends BaseResolver
 
     public function countByRepository(int $repositoryId): int
     {
-        return DB::table('information_object')
-            ->where('repository_id', $repositoryId)
-            ->where('id', '!=', 1)
-            ->count();
+        return $this->visible(DB::table('information_object as io')->where('io.repository_id', $repositoryId)->where('io.id', '!=', 1))->count();
     }
 
     public function resolveSearch(string $query, int $first, int $offset): array
@@ -368,7 +374,8 @@ class ItemResolver extends BaseResolver
                 $q->where('ioi.title', 'LIKE', "%{$query}%")
                     ->orWhere('io.identifier', 'LIKE', "%{$query}%")
                     ->orWhere('ioi.scope_and_content', 'LIKE', "%{$query}%");
-            })
+            });
+        $searchQuery = $this->visible($searchQuery)
             ->select([
                 'io.id',
                 'slug.slug',
@@ -390,5 +397,19 @@ class ItemResolver extends BaseResolver
             ->toArray();
 
         return $this->buildConnection($results, $total, $offset, $first);
+    }
+
+    /** Custom field values (#202): every field for staff, public fields for others. */
+    public function resolveCustomFields(int $itemId): array
+    {
+        if (!class_exists('\\AtomFramework\\Services\\CustomFieldValues')) {
+            return [];
+        }
+        $out = [];
+        foreach (\AtomFramework\Services\CustomFieldValues::forObject($itemId, 'informationobject', !$this->isStaff()) as $key => $field) {
+            $out[] = ['key' => $key, 'label' => $field['label'], 'values' => $field['values']];
+        }
+
+        return $out;
     }
 }

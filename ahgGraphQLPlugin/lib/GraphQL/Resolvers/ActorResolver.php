@@ -91,7 +91,8 @@ class ActorResolver extends BaseResolver
             })
             ->leftJoin('display_standard_sector as dss', 'io.display_standard_id', '=', 'dss.term_id')
             ->where('e.actor_id', $actorId)
-            ->where('io.id', '!=', 1)
+            ->where('io.id', '!=', 1);
+        $query = $this->visible($query)
             ->select([
                 'io.id',
                 'slug.slug',

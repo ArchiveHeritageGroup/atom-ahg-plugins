@@ -174,6 +174,49 @@ class ioManageActions extends AhgController
      *
      * POST params: id (node to move), target (node to move after)
      */
+    /**
+     * Sort the records below a description: /informationobject/:slug/sortChildren (#205).
+     * GET shows the form and, once a key is chosen, a preview; POST sorts.
+     */
+    public function executeSortChildren($request)
+    {
+        $user = $this->getUser();
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
+        ) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+
+        $this->resource = \QubitObject::getBySlug((string) $request->getParameter('slug'));
+        if (!$this->resource instanceof \QubitInformationObject) {
+            $this->forward404();
+        }
+
+        $svc = '\\AhgInformationObjectManage\\Services\\SortChildrenService';
+        $culture = $this->culture();
+        $this->key = in_array($request->getParameter('key'), $svc::KEYS, true) ? $request->getParameter('key') : null;
+        $this->direction = 'desc' === $request->getParameter('direction') ? 'desc' : 'asc';
+        $this->plan = null;
+        $this->error = null;
+
+        try {
+            if ($this->key && $request->isMethod('post')) {
+                $result = $svc::apply((int) $this->resource->id, $this->key, $this->direction, $culture);
+                $message = $this->context->i18n->__('Sorted: %1% record(s) moved.', ['%1%' => $result['moved']]);
+                if ($result['deferred'] > 0) {
+                    $message .= ' '.$this->context->i18n->__('Run php symfony search:populate to update the search order.');
+                }
+                $this->getUser()->setFlash('notice', $message);
+                $this->redirect(['module' => 'informationobject', 'slug' => $this->resource->slug]);
+            }
+            if ($this->key) {
+                $this->plan = $svc::plan((int) $this->resource->id, $this->key, $this->direction, $culture);
+            }
+        } catch (\RuntimeException $e) {
+            $this->error = $e->getMessage();
+        }
+    }
+
     public function executeTreeviewSort($request)
     {
         $this->getResponse()->setContentType('application/json');

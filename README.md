@@ -78,23 +78,23 @@ and the issues split from it.
 | Reading-room requests, circulation, researcher accounts | 2020 #15-16 | [Research](ahgResearchPlugin/), [Access requests](ahgAccessRequestPlugin/) |
 | Merge duplicate authorities and terms | 2020 #53 | [Dedupe](ahgDedupePlugin/) |
 | More usable rights, with embargoes enforced across search, browse, the API and files | 2026, 2020 #44 | [Rights](ahgRightsPlugin/), [Extended rights](ahgExtendedRightsPlugin/), [Security clearance](ahgSecurityClearancePlugin/) |
-| Custom metadata fields without code changes | 2026 | [Custom fields](ahgCustomFieldsPlugin/) (on screen; not yet in exports, [#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)) |
+| Custom metadata fields without code changes | 2026 | [Custom fields](ahgCustomFieldsPlugin/), carried into EAD, PDF finding aids, CSV, the REST API and GraphQL ([#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)) |
 | OAI-PMH that respects embargo, classification and other access rules | 2020 #40 | [REST API v2](ahgAPIPlugin/) filters OAI responses ([#212](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/212)) |
 | LDAP login | 2020 #58 | [Security clearance](ahgSecurityClearancePlugin/), using base AtoM's LDAP user |
 | Search and replace within a collection | 2020 #33 | [Core](ahgCorePlugin/) global replace, scoped to a fonds or series |
 
 ### To do
 
-- [ ] CAAIS-compliant accessions and a CAAIS export, with each accession linked to its repository (2026; 2020 #7) - [#199](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/199), [#203](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/203)
-- [ ] Single sign-on with SAML or OIDC (2026; 2020 #59-60) - [#200](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/200)
-- [ ] Custom fields in the API, GraphQL and CSV export; EAD and PDF finding aids need a separate AHG exporter (2026) - [#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)
+- [x] CAAIS-compliant accessions and a CAAIS export, with each accession linked to its repository (2026; 2020 #7) - [#199](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/199), [#203](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/203)
+- [ ] Single sign-on with SAML or OIDC (2026; 2020 #59-60) - OIDC done (Google first); SAML built, waiting for its library - [#200](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/200)
+- [x] Custom fields in EAD, PDF finding aids, CSV, the API and GraphQL (2026) - [#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)
 - [ ] Bulk relocation screen for physical storage; containers nested in containers; capacity roll-up (2026) - [#193](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/193)
-- [ ] Batch edit and batch rename of descriptions (2020 #37) - [#204](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/204)
-- [ ] Sort a description's children numerically (2020 #55) - [#205](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/205)
-- [ ] Remote logging (2020 #13) - [#206](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/206)
-- [ ] Session length setting with a warning before logout (2020 #61) - [#207](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/207)
-- [ ] Spreadsheet-style entry; Excel import with diacritics (2020 #30-31) - [#208](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/208)
-- [ ] Default text on new records, moving terms between taxonomies, accession CSV update, non-admin CSV import, "last modified" only on a real change, carousel options, Wikidata links on descriptions (2020) - [#209](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/209)
+- [x] Batch edit and batch rename of descriptions (2020 #37) - [#204](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/204)
+- [x] Sort a description's children numerically (2020 #55) - [#205](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/205)
+- [x] Remote logging (2020 #13) - [#206](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/206)
+- [x] Session length setting with a warning before logout (2020 #61) - [#207](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/207)
+- [x] Spreadsheet-style entry; Excel import with diacritics (2020 #30-31) - [#208](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/208)
+- [x] Default text on new records, moving terms between taxonomies, accession CSV update, non-admin CSV import, carousel options, Wikidata links on descriptions (2020); "last modified" only on a real change cannot be done without changing base AtoM - [#209](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/209)
 
 Two 2020 wishes are answered only by Heratio, the Laravel platform built on the same
 data: replacing nested sets for performance (#41) and a modern long-term-support

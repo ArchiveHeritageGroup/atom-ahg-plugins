@@ -183,6 +183,11 @@
 
 </div> <!-- /.section#administrativeArea -->
 
+<?php // Repository (CAAIS 1.1) and the CAAIS profile - ahgAccessionManagePlugin (#199, #203). ?>
+<?php if (in_array('accessionManage', sfConfig::get('sf_enabled_modules', []))) { ?>
+  <?php echo get_partial('accessionManage/caaisShow', ['accessionId' => $sf_data->getRaw('resource')->id, 'slug' => $sf_data->getRaw('resource')->slug, 'canEdit' => $headingsCondition]); ?>
+<?php } ?>
+
 <div class="section border-bottom" id="rightsArea">
 
   <?php echo render_b5_section_heading(__('Rights area')); ?>

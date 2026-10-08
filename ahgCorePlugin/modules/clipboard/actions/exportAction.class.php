@@ -314,7 +314,20 @@ class ClipboardExportAction extends DefaultEditAction
         $jobName = $this->getJobNameString();
 
         // Check if query matches any records, before attempting export
-        if (method_exists($jobName, 'findExportRecords')) {
+        if ('arInformationObjectCsvExportJob' === $jobName && !empty($options['params']['fromClipboard'])
+            && class_exists('ahgInformationObjectCsvExportJob')) {
+            // Base's check goes through the search index with an API the
+            // OpenSearch wrapper lacks; the AHG job reads the database instead.
+            if (!ahgInformationObjectCsvExportJob::clipboardRecordIds($options)) {
+                throw new sfException($this->context->i18n->__(
+                    'No records were exported for your current selection. Please %open_link%refresh the page and choose different export options %close_link%.',
+                    [
+                        '%open_link%' => '<a class="alert-link" href="javascript:location.reload();">',
+                        '%close_link%' => '</a>',
+                    ]
+                ));
+            }
+        } elseif (method_exists($jobName, 'findExportRecords')) {
             $search = $jobName::findExportRecords($options);
 
             if (0 == $search->count()) {
@@ -351,7 +364,17 @@ class ClipboardExportAction extends DefaultEditAction
             }
         }
 
-        $job = QubitJob::runJob($jobName, $options);
+        // Description CSV: the AHG job adds custom field columns (#202). Until the
+        // workers have been restarted with it, no worker takes it, so fall back.
+        if ('arInformationObjectCsvExportJob' === $jobName) {
+            try {
+                $job = QubitJob::runJob('ahgInformationObjectCsvExportJob', $options);
+            } catch (\Throwable $e) {
+                $job = QubitJob::runJob($jobName, $options);
+            }
+        } else {
+            $job = QubitJob::runJob($jobName, $options);
+        }
 
         // Generate, store and return a token to associate unauthenticated users
         // with their export jobs to be able to download the result later and
@@ -414,8 +437,12 @@ class ClipboardExportAction extends DefaultEditAction
                 $this->form->setValidator('exportType', new sfValidatorString(
                     ['required' => true]
                 ));
+                // Posted as exportType, but the element keeps id "type": the
+                // theme's clipboard script reads select#type, and without it
+                // the Export button threw before sending anything.
                 $this->form->setWidget('exportType', new sfWidgetFormSelect(
-                    ['label' => __('Type'), 'choices' => $this->typeChoices]
+                    ['label' => __('Type'), 'choices' => $this->typeChoices],
+                    ['id' => 'type']
                 ));
                 $this->form->setDefault('exportType', $this->objectType);
 

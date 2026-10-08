@@ -150,6 +150,10 @@
           </div>
         </div>
       </div>
+      <?php // Repository (CAAIS 1.1) and the CAAIS profile - ahgAccessionManagePlugin (#199, #203). ?>
+      <?php if (in_array('accessionManage', sfConfig::get('sf_enabled_modules', []))) { ?>
+        <?php echo get_partial('accessionManage/caaisEdit', ['accessionId' => $sf_data->getRaw('resource')->id]); ?>
+      <?php } ?>
       <div class="accordion-item">
         <h2 class="accordion-header" id="io-heading">
           <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#io-collapse" aria-expanded="true" aria-controls="io-collapse">

@@ -37,6 +37,43 @@ class termTaxonomyActions extends AhgController
     }
 
     // -----------------------------------------------------------------------
+    // Move to another taxonomy: /term/:slug/move (administrators, #209)
+    // -----------------------------------------------------------------------
+
+    public function executeMove($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            \QubitAcl::forwardUnauthorized();
+        }
+
+        $this->resource = \QubitObject::getBySlug((string) $request->getParameter('slug'));
+        if (!$this->resource instanceof \QubitTerm) {
+            $this->forward404();
+        }
+
+        $svc = '\\AhgTermTaxonomy\\Services\\TermMoveService';
+        $culture = $this->getUser()->getCulture() ?: 'en';
+        $this->movable = $svc::canMoveFrom($this->resource);
+        $this->targets = $this->movable ? $svc::targets($this->resource, $culture) : [];
+        $this->impact = $svc::impact($this->resource);
+        $this->error = null;
+
+        if ($request->isMethod('post') && $this->movable) {
+            try {
+                $result = $svc::move($this->resource, (int) $request->getParameter('taxonomy_id'));
+                $message = $this->context->i18n->__('Moved %1% term(s).', ['%1%' => $result['terms']]);
+                if ($result['deferred'] > 0) {
+                    $message .= ' '.$this->context->i18n->__('%1% descriptions use them: run php symfony search:populate to refresh their facets.', ['%1%' => $result['deferred']]);
+                }
+                $this->getUser()->setFlash('notice', $message);
+                $this->redirect([$this->resource, 'module' => 'term']);
+            } catch (\RuntimeException $e) {
+                $this->error = $e->getMessage();
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------
     // Related authorities: /term/:slug/related-authorities
     // -----------------------------------------------------------------------
 

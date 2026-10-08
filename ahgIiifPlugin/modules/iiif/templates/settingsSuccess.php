@@ -196,6 +196,44 @@
         </div>
     </div>
 
+    <div class="card mb-4" id="descriptionCarouselOptions">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-images me-2"></i><?php echo __('Description Page Carousel') ?></h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small"><?php echo __('The strip of images from the records below a description, shown on its page.') ?></p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label" for="descCarouselHeight"><?php echo __('Image height') ?></label>
+                        <select name="description_carousel_height" id="descCarouselHeight" class="form-select">
+                            <?php foreach (['120' => __('120px (default)'), '160' => '160px', '200' => '200px', '240' => '240px'] as $v => $l) { ?>
+                                <option value="<?php echo $v ?>" <?php echo ($settings['description_carousel_height'] ?? '120') === (string) $v ? 'selected' : '' ?>><?php echo $l ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="description_carousel_collapsed" value="1" id="descCarouselCollapsed"
+                               <?php echo ($settings['description_carousel_collapsed'] ?? '0') === '1' ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="descCarouselCollapsed"><?php echo __('Start collapsed (visitors open it)') ?></label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="description_carousel_autoplay" value="1" id="descCarouselAutoplay"
+                               <?php echo ($settings['description_carousel_autoplay'] ?? '0') === '1' ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="descCarouselAutoplay"><?php echo __('Advance automatically') ?></label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="descCarouselInterval"><?php echo __('Interval (ms)') ?></label>
+                        <input type="number" name="description_carousel_interval" id="descCarouselInterval" class="form-control"
+                               value="<?php echo (int) ($settings['description_carousel_interval'] ?? 5000) ?>" min="2000" max="15000" step="500">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card mb-4">
         <div class="card-header bg-light">
             <h5 class="mb-0"><i class="fas fa-palette me-2"></i><?php echo __('Appearance') ?></h5>

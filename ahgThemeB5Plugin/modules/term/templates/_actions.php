@@ -5,6 +5,10 @@
       <li><?php echo link_to(__('Edit'), [$resource, 'module' => 'term', 'action' => 'edit'], ['class' => 'btn atom-btn-outline-light']); ?></li>
     <?php } ?>
 
+    <?php if ($sf_user->isAdministrator() && class_exists('\\AhgTermTaxonomy\\Services\\TermMoveService') && \AhgTermTaxonomy\Services\TermMoveService::canMoveFrom(sfOutputEscaper::unescape($resource))) { ?>
+      <li><?php echo link_to(__('Move to another taxonomy'), '@term_move?slug='.$resource->slug, ['class' => 'btn atom-btn-outline-light']); ?></li>
+    <?php } ?>
+
     <?php if (\AtomExtensions\Services\AclService::check($resource, 'delete') && !QubitTerm::isProtected($resource->id)) { ?>
       <li><?php echo link_to(__('Delete'), [$resource, 'module' => 'term', 'action' => 'delete'], ['class' => 'btn atom-btn-outline-danger']); ?></li>
     <?php } ?>

@@ -146,7 +146,9 @@ class c2paActions extends AhgController
             'signing_available' => $service->canSign(),
             'active_kid'        => $activeKid,
             'embed_available'   => $service->canEmbed(),
-            'c2patool'          => $service->toolPath(),
+            // Whether the tool is installed, not where: a public reply should
+            // not map the server's filesystem.
+            'c2patool'          => null !== $service->toolPath(),
             'crypto_library'    => class_exists(\AhgInferenceReceipts\Signer::class),
             'manifest_store'    => $this->tableExists('ahg_c2pa_manifest'),
         ]);

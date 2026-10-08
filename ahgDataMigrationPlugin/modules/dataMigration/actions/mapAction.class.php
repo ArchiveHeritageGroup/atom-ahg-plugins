@@ -5,7 +5,7 @@ class dataMigrationMapAction extends AhgController
 {
     public function execute($request)
     {
-        if (!$this->getUser()->isAdministrator()) {
+        if (!$this->getUser()->hasCredential(['administrator', 'editor'], false)) {
             $this->forward('admin', 'secure');
         }
 

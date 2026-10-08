@@ -671,6 +671,11 @@ class iiifActions extends AhgController
                 'carousel_interval' => $request->getParameter('carousel_interval', '5000'),
                 'carousel_show_thumbnails' => $request->getParameter('carousel_show_thumbnails', '0'),
                 'carousel_show_controls' => $request->getParameter('carousel_show_controls', '0'),
+                // Description page carousel: the strip of child-record images (#209)
+                'description_carousel_height' => in_array($request->getParameter('description_carousel_height'), ['120', '160', '200', '240'], true) ? $request->getParameter('description_carousel_height') : '120',
+                'description_carousel_collapsed' => $request->getParameter('description_carousel_collapsed', '0'),
+                'description_carousel_autoplay' => $request->getParameter('description_carousel_autoplay', '0'),
+                'description_carousel_interval' => (string) max(2000, min(15000, (int) $request->getParameter('description_carousel_interval', '5000'))),
                 'viewer_height' => $request->getParameter('viewer_height', '500px'),
                 'show_zoom_controls' => $request->getParameter('show_zoom_controls', '0'),
                 'enable_fullscreen' => $request->getParameter('enable_fullscreen', '0'),

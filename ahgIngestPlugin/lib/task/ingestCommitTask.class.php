@@ -39,6 +39,11 @@ EOF;
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();
 
+        // AtoM's settings, as base tasks load them (arBaseTask). Without them
+        // app_i18n_languages is null and every search index update throws, which
+        // the commit swallowed: ingested records never reached the search index.
+        sfConfig::add(QubitSetting::getSettingsArray());
+
         // Load services
         $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgIngestPlugin';
         require_once $pluginDir . '/lib/Services/IngestService.php';

@@ -31,7 +31,7 @@ class GraphQLService
 
     public function __construct(array $options = [])
     {
-        $this->debugMode = $options['debug'] ?? (sfConfig::get('sf_debug', false) || sfConfig::get('sf_environment') === 'dev');
+        $this->debugMode = $options['debug'] ?? (\sfConfig::get('sf_debug', false) || \sfConfig::get('sf_environment') === 'dev');
         $this->maxDepth = $options['maxDepth'] ?? 10;
         $this->maxComplexity = $options['maxComplexity'] ?? 1000;
         $this->introspectionEnabled = $options['introspection'] ?? $this->debugMode;
@@ -60,7 +60,7 @@ class GraphQLService
 
         // Disable introspection in production
         if (!$this->introspectionEnabled) {
-            $this->validationRules['DisableIntrospection'] = new DisableIntrospection();
+            $this->validationRules['DisableIntrospection'] = new DisableIntrospection(DisableIntrospection::ENABLED);
         }
     }
 
@@ -91,6 +91,7 @@ class GraphQLService
 
             return $output;
         } catch (\Throwable $e) {
+            error_log('graphql.internal_error: '.get_class($e).': '.$e->getMessage().' at '.$e->getFile().':'.$e->getLine());
             $this->logQuery($apiKeyInfo, $query, $startTime, false);
 
             return [
@@ -139,13 +140,10 @@ class GraphQLService
         }
 
         // Check if user has admin group membership
-        $adminGroup = DB::table('aclUserGroup')
-            ->join('aclGroup', 'aclUserGroup.group_id', '=', 'aclGroup.id')
-            ->where('aclUserGroup.user_id', $apiKeyInfo['user_id'])
-            ->where('aclGroup.name', 'administrator')
+        return DB::table('acl_user_group')
+            ->where('user_id', $apiKeyInfo['user_id'])
+            ->where('group_id', \QubitAclGroup::ADMINISTRATOR_ID)
             ->exists();
-
-        return $adminGroup;
     }
 
     private function getDebugFlags(): int

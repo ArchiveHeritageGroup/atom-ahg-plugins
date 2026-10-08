@@ -36,6 +36,7 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'preservation';
         $enabledModules[] = 'tiffpdfmerge';
+        $enabledModules[] = 'preservationTriage';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
@@ -108,6 +109,12 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
 
         $preservation->any('preservation_index', '/admin/preservation', 'index');
         $preservation->register($routing);
+
+        // Preservation triage dashboard (issue #154): ranked, read-only.
+        $triage = new \AtomFramework\Routing\RouteLoader('preservationTriage');
+        $triage->any('preservation_triage_export', '/admin/preservation/triage/export', 'export');
+        $triage->any('preservation_triage', '/admin/preservation/triage', 'index');
+        $triage->register($routing);
 
         // TIFF to PDF Merge module routes
         $tiffpdf = new \AtomFramework\Routing\RouteLoader('tiffpdfmerge');

@@ -94,6 +94,19 @@ $_extIconMap = [
 ];
 $_imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'svg'];
 
+// Description page carousel options (Admin > IIIF settings, #209). Defaults keep
+// the carousel as it was: 120px, open, no autoplay.
+$_carousel = ['description_carousel_height' => '120', 'description_carousel_collapsed' => '0', 'description_carousel_autoplay' => '0', 'description_carousel_interval' => '5000'];
+try {
+    foreach (\Illuminate\Database\Capsule\Manager::table('iiif_viewer_settings')->whereIn('setting_key', array_keys($_carousel))->pluck('setting_value', 'setting_key') as $k => $v) {
+        $_carousel[$k] = (string) $v;
+    }
+} catch (\Throwable $e) {
+    // settings table absent: keep the defaults
+}
+$_carouselHeight = in_array($_carousel['description_carousel_height'], ['120', '160', '200', '240'], true) ? (int) $_carousel['description_carousel_height'] : 120;
+$_carouselOpen = '1' !== $_carousel['description_carousel_collapsed'];
+
 /**
  * Get file extension icon class or null if it's a displayable image
  */
@@ -118,11 +131,11 @@ function _getFileIcon($path, $extIconMap, $imageExts)
   data-carousel-title-region-label="<?php echo __('Archival description title link'); ?>">
   <div class="accordion-item border-0">
     <h2 class="accordion-header rounded-0 rounded-top border border-bottom-0" id="heading-carousel">
-      <button class="accordion-button rounded-0 rounded-top text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-carousel" aria-expanded="true" aria-controls="collapse-carousel">
+      <button class="accordion-button rounded-0 rounded-top text-primary<?php echo $_carouselOpen ? '' : ' collapsed'; ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-carousel" aria-expanded="<?php echo $_carouselOpen ? 'true' : 'false'; ?>" aria-controls="collapse-carousel">
         <span><?php echo __('Image carousel'); ?></span>
       </button>
     </h2>
-    <div id="collapse-carousel" class="accordion-collapse collapse show" aria-labelledby="heading-carousel">
+    <div id="collapse-carousel" class="accordion-collapse collapse<?php echo $_carouselOpen ? ' show' : ''; ?>" aria-labelledby="heading-carousel">
       <div class="accordion-body bg-secondary px-5 pt-4 pb-3">
         <div id="atom-slider-images" class="mb-0">
           <?php foreach ($thumbnails as $idx => $item) { ?>
@@ -136,11 +149,11 @@ function _getFileIcon($path, $extIconMap, $imageExts)
             ?>
             <a title="<?php echo esc_entities($title); ?>" href="<?php echo $href; ?>">
               <?php if ($iconClass): ?>
-              <span class="img-thumbnail mx-2 d-inline-flex align-items-center justify-content-center" data-ahg-style="width:120px;height:120px;background:#f8f9fa;">
+              <span class="img-thumbnail mx-2 d-inline-flex align-items-center justify-content-center" data-ahg-style="width:<?php echo $_carouselHeight; ?>px;height:<?php echo $_carouselHeight; ?>px;background:#f8f9fa;">
                 <i class="<?php echo $iconClass; ?> fa-3x text-secondary"></i>
               </span>
               <?php else: ?>
-              <?php echo image_tag($filePath, ['class' => 'img-thumbnail mx-2', 'longdesc' => $href, 'alt' => strip_markdown($item->getDigitalObjectAltText() ?: $title), 'style' => 'max-height:120px;']); ?>
+              <?php echo image_tag($filePath, ['class' => 'img-thumbnail mx-2', 'longdesc' => $href, 'alt' => strip_markdown($item->getDigitalObjectAltText() ?: $title), 'style' => 'max-height:'.$_carouselHeight.'px;']); ?>
               <?php endif; ?>
             </a>
           <?php } ?>
@@ -176,3 +189,15 @@ function _getFileIcon($path, $extIconMap, $imageExts)
     </div>
   </div>
 </div>
+<?php if ('1' === $_carousel['description_carousel_autoplay']) { ?>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Autoplay for the description carousel. The slider is started by AtoM's own
+// script; switch autoplay on once it has started.
+window.addEventListener('load', function () {
+  var el = window.jQuery && window.jQuery('#atom-slider-images');
+  if (el && el.length && el.hasClass('slick-initialized')) {
+    el.slick('slickSetOption', { autoplay: true, autoplaySpeed: <?php echo (int) max(2000, min(15000, (int) $_carousel['description_carousel_interval'])); ?> }, true);
+  }
+});
+</script>
+<?php } ?>

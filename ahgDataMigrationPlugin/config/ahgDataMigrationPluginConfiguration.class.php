@@ -36,7 +36,7 @@ class ahgDataMigrationPluginConfiguration extends sfPluginConfiguration
             AhgNav::register('manage', 'dataMigration_index', [
                 'route' => ['module' => 'dataMigration', 'action' => 'index'],
                 'label' => 'Data migration',
-                'credentials' => ['administrator'],
+                'credentials' => ['administrator', 'editor'],
                 'weight' => 310,
             ]);
         }

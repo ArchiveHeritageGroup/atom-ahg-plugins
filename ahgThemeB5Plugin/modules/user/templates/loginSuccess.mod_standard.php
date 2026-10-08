@@ -33,6 +33,22 @@
     </div>
   </form>
 
+  <?php // Single sign-on buttons (#200), shown only when a provider is set up. ?>
+  <?php $ssoSettings = sfConfig::get('sf_plugins_dir').'/ahgSecurityClearancePlugin/lib/Sso/SsoSettings.php'; ?>
+  <?php if (is_file($ssoSettings)) { require_once $ssoSettings; } ?>
+  <?php if (class_exists('SsoSettings', false) && (SsoSettings::oidcReady() || SsoSettings::samlReady())) { ?>
+    <?php $ssoNext = (string) $sf_request->getParameter('next', ''); ?>
+    <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+      <span class="text-muted small"><?php echo __('Or sign in with'); ?></span>
+      <?php if (SsoSettings::oidcReady()) { ?>
+        <a class="btn atom-btn-outline-light" href="<?php echo url_for('@sso_oidc_login').('' !== $ssoNext ? '?next='.rawurlencode($ssoNext) : ''); ?>"><?php echo esc_entities(SsoSettings::get('sso_oidc_label')); ?></a>
+      <?php } ?>
+      <?php if (SsoSettings::samlReady()) { ?>
+        <a class="btn atom-btn-outline-light" href="<?php echo url_for('@sso_saml_login').('' !== $ssoNext ? '?next='.rawurlencode($ssoNext) : ''); ?>"><?php echo esc_entities(SsoSettings::get('sso_saml_label')); ?></a>
+      <?php } ?>
+    </div>
+  <?php } ?>
+
   <hr class="my-4">
 
   <?php

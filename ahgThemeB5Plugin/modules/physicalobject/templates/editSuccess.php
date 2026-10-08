@@ -27,15 +27,15 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Name'); ?> <span class="text-danger">*</span></label>
-                <input type="text" name="name" class="form-control" required
+                <label class="form-label" for="po-name"><?php echo __('Name'); ?> <span class="text-danger">*</span></label>
+                <input id="po-name" type="text" name="name" class="form-control" required
                        value="<?php echo esc_entities($resource->id ? $resource->getName(['cultureFallback' => true]) : ''); ?>">
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Type'); ?></label>
-                <select name="type" class="form-select">
+                <label class="form-label" for="po-type"><?php echo __('Type'); ?></label>
+                <select id="po-type" name="type" class="form-select">
                   <option value=""><?php echo __('Select...'); ?></option>
                   <?php foreach ($typeChoices as $url => $label): ?>
                     <option value="<?php echo $url; ?>" <?php echo ($resource->type && $url === $sf_context->routing->generate(null, [$resource->type, 'module' => 'term'])) ? 'selected' : ''; ?>>
@@ -47,8 +47,8 @@
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label"><?php echo __('Location (legacy)'); ?></label>
-            <input type="text" name="location" class="form-control"
+            <label class="form-label" for="po-location"><?php echo __('Location (legacy)'); ?></label>
+            <input id="po-location" type="text" name="location" class="form-control"
                    value="<?php echo esc_entities($resource->id ? $resource->getLocation(['cultureFallback' => true]) : ''); ?>"
                    placeholder="<?php echo __('Use extended location fields below instead'); ?>">
             <small class="text-muted"><?php echo __('For backwards compatibility. Use the detailed fields below.'); ?></small>
@@ -67,22 +67,22 @@
           <div class="row">
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Building'); ?></label>
-                <input type="text" name="building" class="form-control"
+                <label class="form-label" for="po-building"><?php echo __('Building'); ?></label>
+                <input id="po-building" type="text" name="building" class="form-control"
                        value="<?php echo esc_entities($loc['building'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Floor'); ?></label>
-                <input type="text" name="floor" class="form-control"
+                <label class="form-label" for="po-floor"><?php echo __('Floor'); ?></label>
+                <input id="po-floor" type="text" name="floor" class="form-control"
                        value="<?php echo esc_entities($loc['floor'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Room'); ?></label>
-                <input type="text" name="room" class="form-control"
+                <label class="form-label" for="po-room"><?php echo __('Room'); ?></label>
+                <input id="po-room" type="text" name="room" class="form-control"
                        value="<?php echo esc_entities($loc['room'] ?? ''); ?>">
               </div>
             </div>
@@ -90,29 +90,29 @@
           <div class="row">
             <div class="col-md-3">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Aisle'); ?></label>
-                <input type="text" name="aisle" class="form-control"
+                <label class="form-label" for="po-aisle"><?php echo __('Aisle'); ?></label>
+                <input id="po-aisle" type="text" name="aisle" class="form-control"
                        value="<?php echo esc_entities($loc['aisle'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-3">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Bay'); ?></label>
-                <input type="text" name="bay" class="form-control"
+                <label class="form-label" for="po-bay"><?php echo __('Bay'); ?></label>
+                <input id="po-bay" type="text" name="bay" class="form-control"
                        value="<?php echo esc_entities($loc['bay'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-3">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Rack'); ?></label>
-                <input type="text" name="rack" class="form-control"
+                <label class="form-label" for="po-rack"><?php echo __('Rack'); ?></label>
+                <input id="po-rack" type="text" name="rack" class="form-control"
                        value="<?php echo esc_entities($loc['rack'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-3">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Shelf'); ?></label>
-                <input type="text" name="shelf" class="form-control"
+                <label class="form-label" for="po-shelf"><?php echo __('Shelf'); ?></label>
+                <input id="po-shelf" type="text" name="shelf" class="form-control"
                        value="<?php echo esc_entities($loc['shelf'] ?? ''); ?>">
               </div>
             </div>
@@ -123,22 +123,22 @@
           <div class="row">
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Position'); ?></label>
-                <input type="text" name="position" class="form-control"
+                <label class="form-label" for="po-position"><?php echo __('Position'); ?></label>
+                <input id="po-position" type="text" name="position" class="form-control"
                        value="<?php echo esc_entities($extendedData['position'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Barcode'); ?></label>
-                <input type="text" name="barcode" class="form-control"
+                <label class="form-label" for="po-barcode"><?php echo __('Barcode'); ?></label>
+                <input id="po-barcode" type="text" name="barcode" class="form-control"
                        value="<?php echo esc_entities($extendedData['barcode'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Reference Code'); ?></label>
-                <input type="text" name="reference_code" class="form-control"
+                <label class="form-label" for="po-reference_code"><?php echo __('Reference Code'); ?></label>
+                <input id="po-reference_code" type="text" name="reference_code" class="form-control"
                        value="<?php echo esc_entities($extendedData['reference_code'] ?? ''); ?>">
               </div>
             </div>
@@ -155,22 +155,22 @@
           <div class="row">
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Width'); ?></label>
-                <input type="number" step="0.01" name="width" class="form-control"
+                <label class="form-label" for="po-width"><?php echo __('Width'); ?></label>
+                <input id="po-width" type="number" step="0.01" name="width" class="form-control"
                        value="<?php echo esc_entities($extendedData['width'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Height'); ?></label>
-                <input type="number" step="0.01" name="height" class="form-control"
+                <label class="form-label" for="po-height"><?php echo __('Height'); ?></label>
+                <input id="po-height" type="number" step="0.01" name="height" class="form-control"
                        value="<?php echo esc_entities($extendedData['height'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Depth'); ?></label>
-                <input type="number" step="0.01" name="depth" class="form-control"
+                <label class="form-label" for="po-depth"><?php echo __('Depth'); ?></label>
+                <input id="po-depth" type="number" step="0.01" name="depth" class="form-control"
                        value="<?php echo esc_entities($extendedData['depth'] ?? ''); ?>">
               </div>
             </div>
@@ -187,22 +187,22 @@
           <div class="row">
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Total Capacity'); ?></label>
-                <input type="number" name="total_capacity" class="form-control"
+                <label class="form-label" for="po-total_capacity"><?php echo __('Total Capacity'); ?></label>
+                <input id="po-total_capacity" type="number" name="total_capacity" class="form-control"
                        value="<?php echo esc_entities($extendedData['total_capacity'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Used Capacity'); ?></label>
-                <input type="number" name="used_capacity" class="form-control"
+                <label class="form-label" for="po-used_capacity"><?php echo __('Used Capacity'); ?></label>
+                <input id="po-used_capacity" type="number" name="used_capacity" class="form-control"
                        value="<?php echo esc_entities($extendedData['used_capacity'] ?? 0); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Capacity Unit'); ?></label>
-                <select name="capacity_unit" class="form-select">
+                <label class="form-label" for="po-capacity_unit"><?php echo __('Capacity Unit'); ?></label>
+                <select id="po-capacity_unit" name="capacity_unit" class="form-select">
                   <option value=""><?php echo __('Select...'); ?></option>
                   <option value="boxes" <?php echo ($extendedData['capacity_unit'] ?? '') === 'boxes' ? 'selected' : ''; ?>><?php echo __('Boxes'); ?></option>
                   <option value="files" <?php echo ($extendedData['capacity_unit'] ?? '') === 'files' ? 'selected' : ''; ?>><?php echo __('Files'); ?></option>
@@ -235,15 +235,15 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Total Linear Metres'); ?></label>
-                <input type="number" step="0.01" name="total_linear_metres" class="form-control"
+                <label class="form-label" for="po-total_linear_metres"><?php echo __('Total Linear Metres'); ?></label>
+                <input id="po-total_linear_metres" type="number" step="0.01" name="total_linear_metres" class="form-control"
                        value="<?php echo esc_entities($extendedData['total_linear_metres'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Used Linear Metres'); ?></label>
-                <input type="number" step="0.01" name="used_linear_metres" class="form-control"
+                <label class="form-label" for="po-used_linear_metres"><?php echo __('Used Linear Metres'); ?></label>
+                <input id="po-used_linear_metres" type="number" step="0.01" name="used_linear_metres" class="form-control"
                        value="<?php echo esc_entities($extendedData['used_linear_metres'] ?? 0); ?>">
               </div>
             </div>
@@ -262,8 +262,8 @@
         </div>
         <div class="card-body">
           <div class="mb-3">
-            <label class="form-label"><?php echo __('Status'); ?></label>
-            <select name="status" class="form-select">
+            <label class="form-label" for="po-status"><?php echo __('Status'); ?></label>
+            <select id="po-status" name="status" class="form-select">
               <option value="active" <?php echo ($extendedData['status'] ?? 'active') === 'active' ? 'selected' : ''; ?>><?php echo __('Active'); ?></option>
               <option value="full" <?php echo ($extendedData['status'] ?? '') === 'full' ? 'selected' : ''; ?>><?php echo __('Full'); ?></option>
               <option value="maintenance" <?php echo ($extendedData['status'] ?? '') === 'maintenance' ? 'selected' : ''; ?>><?php echo __('Under Maintenance'); ?></option>
@@ -287,15 +287,15 @@
           <div class="row">
             <div class="col-6">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Temp Min (°C)'); ?></label>
-                <input type="number" step="0.1" name="temperature_min" class="form-control"
+                <label class="form-label" for="po-temperature_min"><?php echo __('Temp Min (°C)'); ?></label>
+                <input id="po-temperature_min" type="number" step="0.1" name="temperature_min" class="form-control"
                        value="<?php echo esc_entities($extendedData['temperature_min'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-6">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Temp Max (°C)'); ?></label>
-                <input type="number" step="0.1" name="temperature_max" class="form-control"
+                <label class="form-label" for="po-temperature_max"><?php echo __('Temp Max (°C)'); ?></label>
+                <input id="po-temperature_max" type="number" step="0.1" name="temperature_max" class="form-control"
                        value="<?php echo esc_entities($extendedData['temperature_max'] ?? ''); ?>">
               </div>
             </div>
@@ -303,15 +303,15 @@
           <div class="row">
             <div class="col-6">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Humidity Min (%)'); ?></label>
-                <input type="number" step="0.1" name="humidity_min" class="form-control"
+                <label class="form-label" for="po-humidity_min"><?php echo __('Humidity Min (%)'); ?></label>
+                <input id="po-humidity_min" type="number" step="0.1" name="humidity_min" class="form-control"
                        value="<?php echo esc_entities($extendedData['humidity_min'] ?? ''); ?>">
               </div>
             </div>
             <div class="col-6">
               <div class="mb-3">
-                <label class="form-label"><?php echo __('Humidity Max (%)'); ?></label>
-                <input type="number" step="0.1" name="humidity_max" class="form-control"
+                <label class="form-label" for="po-humidity_max"><?php echo __('Humidity Max (%)'); ?></label>
+                <input id="po-humidity_max" type="number" step="0.1" name="humidity_max" class="form-control"
                        value="<?php echo esc_entities($extendedData['humidity_max'] ?? ''); ?>">
               </div>
             </div>
@@ -326,8 +326,8 @@
         </div>
         <div class="card-body">
           <div class="mb-3">
-            <label class="form-label"><?php echo __('Security Level'); ?></label>
-            <select name="security_level" class="form-select">
+            <label class="form-label" for="po-security_level"><?php echo __('Security Level'); ?></label>
+            <select id="po-security_level" name="security_level" class="form-select">
               <option value=""><?php echo __('Select...'); ?></option>
               <option value="public" <?php echo ($extendedData['security_level'] ?? '') === 'public' ? 'selected' : ''; ?>><?php echo __('Public'); ?></option>
               <option value="restricted" <?php echo ($extendedData['security_level'] ?? '') === 'restricted' ? 'selected' : ''; ?>><?php echo __('Restricted'); ?></option>
@@ -337,8 +337,8 @@
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label"><?php echo __('Access Restrictions'); ?></label>
-            <textarea name="access_restrictions" class="form-control" rows="3"><?php echo esc_entities($extendedData['access_restrictions'] ?? ''); ?></textarea>
+            <label class="form-label" for="po-access_restrictions"><?php echo __('Access Restrictions'); ?></label>
+            <textarea id="po-access_restrictions" name="access_restrictions" class="form-control" rows="3"><?php echo esc_entities($extendedData['access_restrictions'] ?? ''); ?></textarea>
           </div>
         </div>
       </div>
