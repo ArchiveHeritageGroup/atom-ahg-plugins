@@ -1,5 +1,5 @@
 {
-    "name": "AHG Settings",
+    "name": "Settings",
     "machine_name": "ahgSettingsPlugin",
     "version": "1.0.1",
     "description": "Extended settings management for AtoM with sections, metadata templates, and configuration tools",

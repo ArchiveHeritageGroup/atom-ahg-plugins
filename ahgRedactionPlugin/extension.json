@@ -1,5 +1,5 @@
 {
-    "name": "AHG Redaction Plugin",
+    "name": "Redaction",
     "machine_name": "ahgRedactionPlugin",
     "version": "1.0.0",
     "description": "Manual visual redaction of digital objects: draw regions over a PDF or image, save them, and generate a redacted copy. The original file is never modified.",

@@ -5,7 +5,7 @@
     "description": "Field recording for archaeological, heritage and rock art sites - site records attached to authority records, with role-gated locality",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
-    "category": "heritage",
+    "category": "sector",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

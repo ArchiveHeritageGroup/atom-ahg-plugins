@@ -1,5 +1,5 @@
 {
-    "name": "AHG GraphQL Plugin",
+    "name": "GraphQL",
     "machine_name": "ahgGraphQLPlugin",
     "version": "1.0.0",
     "description": "GraphQL API endpoint providing flexible querying with security safeguards including depth limiting and complexity analysis",

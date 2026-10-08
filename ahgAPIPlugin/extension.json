@@ -1,5 +1,5 @@
 {
-    "name": "AHG API Plugin",
+    "name": "REST API",
     "machine_name": "ahgAPIPlugin",
     "version": "1.2.0",
     "description": "Enhanced REST API v2 with API key management, full CRUD operations, batch processing, webhooks with HMAC signatures and retry logic, rate limiting, and GLAM/DAM sector support",

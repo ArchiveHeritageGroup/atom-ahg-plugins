@@ -5,7 +5,7 @@
     "description": "Multi-regional heritage asset financial accounting with support for IPSAS, GRAP, FRS, GASB, AASB, PSAS standards",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
-    "category": "accounting",
+    "category": "finance",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

@@ -2,10 +2,10 @@
     "name": "AI Compliance",
     "machine_name": "ahgAiCompliancePlugin",
     "version": "0.1.0",
-    "description": "EU AI Act Article 12 record-keeping (PSIS port of ahg/ai-compliance). Tamper-evident receipt chain over every AI inference call using the ahg/inference-receipts library (SHA-256 chain + RFC 8785 JCS + Ed25519).",
+    "description": "EU AI Act Article 12 record-keeping: a tamper-evident receipt chain over every AI inference call (SHA-256 chain, RFC 8785 JCS canonical JSON, Ed25519 signatures).",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
-    "category": "ahg",
+    "category": "compliance",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

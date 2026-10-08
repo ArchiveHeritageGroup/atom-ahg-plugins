@@ -1,8 +1,8 @@
 {
-    "name": "AHG Image AR Plugin",
+    "name": "Image AR",
     "machine_name": "ahgImageArPlugin",
     "version": "1.0.0",
-    "description": "Place a flat 2D archival image into augmented reality (WebXR hit-test). #147, parity with Heratio ahg-image-ar.",
+    "description": "Place a flat archival image into augmented reality on a supported phone or tablet (WebXR hit-test).",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "requires": {
@@ -15,5 +15,5 @@
     ],
     "tables": [],
     "shared_tables": [],
-    "category": "advanced_features"
+    "category": "viewer"
 }

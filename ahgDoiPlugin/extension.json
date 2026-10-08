@@ -2,7 +2,7 @@
     "name": "DOI Integration",
     "machine_name": "ahgDoiPlugin",
     "version": "1.0.0",
-    "description": "DOI integration via DataCite \u2014 mint, deactivate, sync, queue processing, badge display, and verification",
+    "description": "DOI integration via DataCite - mint, deactivate, sync, queue processing, badge display, and verification",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",

@@ -2,7 +2,7 @@
     "name": "Menu Configuration Manage",
     "machine_name": "ahgMenuManagePlugin",
     "version": "1.0.0",
-    "description": "Menu configuration management \u2014 list, edit, and delete AtoM navigation menus via Laravel Query Builder",
+    "description": "Menu configuration management - list, edit, and delete AtoM navigation menus via Laravel Query Builder",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",

@@ -1,5 +1,5 @@
 {
-    "name": "AHG Export",
+    "name": "Export",
     "machine_name": "ahgExportPlugin",
     "version": "1.0.0",
     "description": "Archival export functionality for CSV, EAD, and other formats",

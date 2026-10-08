@@ -15,7 +15,7 @@
         "ahgSettingsPlugin"
     ],
     "tables": [],
-    "category": "import",
+    "category": "ingest",
     "features": [
         "Browser-based drag-and-drop file upload to FTP/SFTP server",
         "Multi-file upload with per-file progress bars",

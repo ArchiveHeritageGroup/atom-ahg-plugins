@@ -17,7 +17,7 @@
         "atom_validation_rule",
         "atom_validation_log"
     ],
-    "category": "ahg",
+    "category": "ingest",
     "features": [
         "Web UI import with visual field mapping",
         "Preservica OPEX/PAX import and export",

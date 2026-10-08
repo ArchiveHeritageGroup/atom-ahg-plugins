@@ -56,6 +56,6 @@
     ],
     "shared_tables": [],
     "helpers": [],
-    "category": "museum",
+    "category": "sector",
     "load_order": 50
 }

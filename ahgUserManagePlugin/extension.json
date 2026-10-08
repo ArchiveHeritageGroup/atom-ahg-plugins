@@ -1,5 +1,5 @@
 {
-    "name": "AHG User Manage",
+    "name": "User Manage",
     "machine_name": "ahgUserManagePlugin",
     "version": "1.0.0",
     "description": "User browse and management using Laravel Query Builder",

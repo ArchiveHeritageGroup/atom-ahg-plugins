@@ -1,5 +1,5 @@
 {
-    "name": "AHG Help Plugin",
+    "name": "Help",
     "machine_name": "ahgHelpPlugin",
     "version": "1.0.0",
     "description": "Online help system with searchable documentation, contextual help, and FlexSearch-powered instant search",

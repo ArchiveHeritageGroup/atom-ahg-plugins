@@ -1,5 +1,5 @@
 {
-    "name": "Heritage Plugin",
+    "name": "Heritage",
     "machine_name": "ahgHeritagePlugin",
     "version": "1.1.0",
     "description": "Heritage discovery platform with contributor system, custodian management, and analytics",
@@ -65,5 +65,6 @@
         "heritage_entity_graph_edge",
         "heritage_entity_graph_object",
         "heritage_graph_build_log"
-    ]
+    ],
+    "category": "sector"
 }

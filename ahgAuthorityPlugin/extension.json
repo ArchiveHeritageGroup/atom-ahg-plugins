@@ -1,5 +1,5 @@
 {
-    "name": "AHG Authority Records Enhancement",
+    "name": "Authority Records Enhancement",
     "machine_name": "ahgAuthorityPlugin",
     "version": "1.0.0",
     "description": "Comprehensive authority record enhancements: external linking (Wikidata, VIAF, ULAN, LCNAF), completeness dashboard, NER-to-authority pipeline, relationship graph, merge/split workflow, bulk deduplication, structured occupations, ISDF functions, EAC-CPF export enrichment, and contact panel surfacing.",

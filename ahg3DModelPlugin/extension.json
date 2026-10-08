@@ -5,7 +5,7 @@
     "description": "3D model viewing with Google Model Viewer, Gaussian Splat support, AR, hotspots, and IIIF 3D manifests",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
-    "category": "ahg",
+    "category": "viewer",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

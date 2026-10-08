@@ -1,5 +1,5 @@
 {
-    "name": "AHG ResourceSync Plugin",
+    "name": "ResourceSync",
     "machine_name": "ahgResourceSyncPlugin",
     "version": "1.0.0",
     "description": "ResourceSync 1.1 (NISO Z39.99-2017) Source endpoints: Source Description, Capability List, Resource List and Change List as sitemap-formatted XML. Mirrors the OAI-PMH publication filter so aggregators see the same record + tombstone set across both federation surfaces.",

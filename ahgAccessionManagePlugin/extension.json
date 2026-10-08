@@ -1,5 +1,5 @@
 {
-    "name": "AHG Accession Manage",
+    "name": "Accession Manage",
     "machine_name": "ahgAccessionManagePlugin",
     "version": "2.0.1",
     "description": "First-class accession management with intake queue, appraisal workflow, container tracking, rights inheritance, and multi-tenant isolation",

@@ -1,12 +1,12 @@
 {
-    "name": "AHG User Registration",
+    "name": "User Registration",
     "machine_name": "ahgUserRegistrationPlugin",
     "version": "1.0.0",
     "description": "Public user self-registration with email verification and admin approval workflow",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
-    "category": "user",
+    "category": "user-engagement",
     "keywords": [
         "registration",
         "signup",

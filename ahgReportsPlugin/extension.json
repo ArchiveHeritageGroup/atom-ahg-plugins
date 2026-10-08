@@ -1,5 +1,5 @@
 {
-    "name": "AHG Reports",
+    "name": "Reports",
     "machine_name": "ahgReportsPlugin",
     "version": "1.1.0",
     "description": "Central reporting dashboard with accession, authority, repository, storage and taxonomy reports",

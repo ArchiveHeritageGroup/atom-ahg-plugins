@@ -1,5 +1,5 @@
 {
-    "name": "AHG Feedback Plugin",
+    "name": "Feedback",
     "machine_name": "ahgFeedbackPlugin",
     "version": "1.0.6",
     "description": "User feedback and suggestions management for archival records",
@@ -21,7 +21,7 @@
         "feedback",
         "feedback_i18n"
     ],
-    "category": "user_engagement",
+    "category": "user-engagement",
     "menu": [
         {
             "name": "feedback",

@@ -5,7 +5,7 @@
     "description": "Comprehensive audit trail logging for AtoM with POPIA/NARSSA compliance. Provides AhgAuditService for centralized audit logging.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
-    "category": "ahg",
+    "category": "provenance",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

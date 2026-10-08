@@ -1,5 +1,5 @@
 {
-    "name": "Registry Plugin",
+    "name": "Registry",
     "machine_name": "ahgRegistryPlugin",
     "version": "1.0.0",
     "description": "AtoM/Heratio Community Hub & Registry - Directory of institutions, vendors, software, user groups, discussions, blog, and sync API for the GLAM community.",
@@ -50,5 +50,6 @@
         "registry_standard_extension",
         "registry_software_standard",
         "registry_setup_guide"
-    ]
+    ],
+    "category": "integration"
 }

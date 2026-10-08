@@ -1,5 +1,5 @@
 {
-    "name": "AHG Core Plugin",
+    "name": "Core",
     "machine_name": "ahgCorePlugin",
     "version": "1.0.0",
     "description": "Core utilities and shared services for AHG plugins. Provides centralized database access, configuration, taxonomy resolution, file storage, and cross-plugin contracts.",

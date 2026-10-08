@@ -6,7 +6,7 @@
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
-    "category": "loans",
+    "category": "collection-management",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

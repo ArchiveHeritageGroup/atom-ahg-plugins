@@ -1,5 +1,5 @@
 {
-    "name": "AHG Donor Manage",
+    "name": "Donor Manage",
     "machine_name": "ahgDonorManagePlugin",
     "version": "1.0.0",
     "description": "Donor browse and management using Laravel Query Builder",

@@ -26,6 +26,6 @@
     ],
     "shared_tables": [],
     "helpers": [],
-    "category": "ahg",
+    "category": "metadata",
     "load_order": 65
 }

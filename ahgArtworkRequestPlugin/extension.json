@@ -23,7 +23,7 @@
         "artwork_request_approver",
         "artwork_request_log"
     ],
-    "category": "collection_management",
+    "category": "collection-management",
     "menu": [
         {
             "name": "artworkRequest",

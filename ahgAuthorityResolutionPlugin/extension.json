@@ -1,5 +1,5 @@
 {
-    "name": "AHG Authority Resolution Engine",
+    "name": "Authority Resolution Engine",
     "machine_name": "ahgAuthorityResolutionPlugin",
     "version": "0.1.0",
     "description": "Evidence-based authority resolution for persons, places, and organisations. Replaces name-only matching with an archivist-driven workflow that surfaces neighbourhood-context evidence, ranked candidates, and provenance-tracked decisions. Provenance writes to Fuseki as RDF-Star.",

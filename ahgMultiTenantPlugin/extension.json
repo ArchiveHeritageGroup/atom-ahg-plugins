@@ -1,5 +1,5 @@
 {
-    "name": "AHG Multi-Tenant",
+    "name": "Multi-Tenant",
     "machine_name": "ahgMultiTenantPlugin",
     "version": "1.3.0",
     "description": "Multi-tenancy with domain routing, dedicated tenant tables, and user hierarchy",

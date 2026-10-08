@@ -23,7 +23,7 @@
         "ingest_job",
         "ingest_watch_folder"
     ],
-    "category": "ingestion",
+    "category": "ingest",
     "features": [
         "6-step wizard: configure, upload, map & enrich, validate, preview, commit",
         "CSV/ZIP/EAD upload with auto-detection",
