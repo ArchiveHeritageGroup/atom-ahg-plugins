@@ -83,8 +83,6 @@
 <?php endif; ?>
 
 </div>
-<?php end_slot() ?>
-
 <script <?php echo $nonceAttr ?>>
 (function () {
     var root = document.getElementById('ai-extract-review');
@@ -139,3 +137,4 @@
     });
 })();
 </script>
+<?php end_slot() ?>

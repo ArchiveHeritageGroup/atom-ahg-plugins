@@ -160,9 +160,6 @@
       </div>
     </div>
   </div>
-
-<?php end_slot(); ?>
-
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof Chart !== 'undefined') {
@@ -188,3 +185,4 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+<?php end_slot(); ?>

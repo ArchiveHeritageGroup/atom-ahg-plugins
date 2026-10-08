@@ -132,9 +132,6 @@
       </div>
     </div>
   </div>
-
-<?php end_slot(); ?>
-
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 var actorId = <?php echo (int) $actor->id; ?>;
 
@@ -161,3 +158,4 @@ document.querySelectorAll('.btn-delete-func').forEach(function(btn) {
   });
 });
 </script>
+<?php end_slot(); ?>

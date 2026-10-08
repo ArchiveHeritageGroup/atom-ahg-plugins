@@ -40,8 +40,8 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $apiv2->post('apiv2_descriptionsCreate', '/api/v2/descriptions', 'descriptionsCreate');
         $apiv2->get('apiv2_descriptionsCitation', '/api/v2/descriptions/:slug/citation', 'descriptionsCitation', ['slug' => '[a-z0-9_-]+']);
         $apiv2->get('apiv2_descriptionsRead', '/api/v2/descriptions/:slug', 'descriptionsRead', ['slug' => '[a-z0-9_-]+']);
-        $apiv2->any('apiv2_descriptionsUpdate', '/api/v2/descriptions/:slug', 'descriptionsUpdate', ['slug' => '[a-z0-9_-]+']);
-        $apiv2->any('apiv2_descriptionsDelete', '/api/v2/descriptions/:slug', 'descriptionsDelete', ['slug' => '[a-z0-9_-]+']);
+        $apiv2->put('apiv2_descriptionsUpdate', '/api/v2/descriptions/:slug', 'descriptionsUpdate', ['slug' => '[a-z0-9_-]+']);
+        $apiv2->delete('apiv2_descriptionsDelete', '/api/v2/descriptions/:slug', 'descriptionsDelete', ['slug' => '[a-z0-9_-]+']);
 
         // Authorities
         $apiv2->get('apiv2_authoritiesBrowse', '/api/v2/authorities', 'authoritiesBrowse');
@@ -64,8 +64,8 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $apiv2->get('apiv2_conditionsBrowse', '/api/v2/conditions', 'conditionsBrowse');
         $apiv2->post('apiv2_conditionsCreate', '/api/v2/conditions', 'conditionsCreate');
         $apiv2->get('apiv2_conditionsRead', '/api/v2/conditions/:id', 'conditionsRead', ['id' => '\d+']);
-        $apiv2->any('apiv2_conditionsUpdate', '/api/v2/conditions/:id', 'conditionsUpdate', ['id' => '\d+']);
-        $apiv2->any('apiv2_conditionsDelete', '/api/v2/conditions/:id', 'conditionsDelete', ['id' => '\d+']);
+        $apiv2->put('apiv2_conditionsUpdate', '/api/v2/conditions/:id', 'conditionsUpdate', ['id' => '\d+']);
+        $apiv2->delete('apiv2_conditionsDelete', '/api/v2/conditions/:id', 'conditionsDelete', ['id' => '\d+']);
         $apiv2->get('apiv2_descriptionConditions', '/api/v2/descriptions/:slug/conditions', 'descriptionConditions', ['slug' => '[a-z0-9_-]+']);
 
         // Condition Photos (Mobile Upload)
@@ -77,7 +77,7 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $apiv2->get('apiv2_assetsBrowse', '/api/v2/assets', 'assetsBrowse');
         $apiv2->post('apiv2_assetsCreate', '/api/v2/assets', 'assetsCreate');
         $apiv2->get('apiv2_assetsRead', '/api/v2/assets/:id', 'assetsRead', ['id' => '\d+']);
-        $apiv2->any('apiv2_assetsUpdate', '/api/v2/assets/:id', 'assetsUpdate', ['id' => '\d+']);
+        $apiv2->put('apiv2_assetsUpdate', '/api/v2/assets/:id', 'assetsUpdate', ['id' => '\d+']);
         $apiv2->get('apiv2_descriptionAsset', '/api/v2/descriptions/:slug/asset', 'descriptionAsset', ['slug' => '[a-z0-9_-]+']);
 
         // Valuations
@@ -89,7 +89,7 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $apiv2->get('apiv2_dsarsBrowse', '/api/v2/privacy/dsars', 'dsarsBrowse');
         $apiv2->post('apiv2_dsarsCreate', '/api/v2/privacy/dsars', 'dsarsCreate');
         $apiv2->get('apiv2_dsarsRead', '/api/v2/privacy/dsars/:id', 'dsarsRead', ['id' => '\d+']);
-        $apiv2->any('apiv2_dsarsUpdate', '/api/v2/privacy/dsars/:id', 'dsarsUpdate', ['id' => '\d+']);
+        $apiv2->put('apiv2_dsarsUpdate', '/api/v2/privacy/dsars/:id', 'dsarsUpdate', ['id' => '\d+']);
         $apiv2->get('apiv2_breachesBrowse', '/api/v2/privacy/breaches', 'breachesBrowse');
         $apiv2->post('apiv2_breachesCreate', '/api/v2/privacy/breaches', 'breachesCreate');
 
@@ -110,8 +110,8 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $apiv2->get('apiv2_webhooksBrowse', '/api/v2/webhooks', 'webhooksBrowse');
         $apiv2->post('apiv2_webhooksCreate', '/api/v2/webhooks', 'webhooksCreate');
         $apiv2->get('apiv2_webhooksRead', '/api/v2/webhooks/:id', 'webhooksRead', ['id' => '\d+']);
-        $apiv2->any('apiv2_webhooksUpdate', '/api/v2/webhooks/:id', 'webhooksUpdate', ['id' => '\d+']);
-        $apiv2->any('apiv2_webhooksDelete', '/api/v2/webhooks/:id', 'webhooksDelete', ['id' => '\d+']);
+        $apiv2->put('apiv2_webhooksUpdate', '/api/v2/webhooks/:id', 'webhooksUpdate', ['id' => '\d+']);
+        $apiv2->delete('apiv2_webhooksDelete', '/api/v2/webhooks/:id', 'webhooksDelete', ['id' => '\d+']);
         $apiv2->get('apiv2_webhookDeliveries', '/api/v2/webhooks/:id/deliveries', 'webhookDeliveries', ['id' => '\d+']);
         $apiv2->post('apiv2_webhookRegenerateSecret', '/api/v2/webhooks/:id/regenerate-secret', 'webhookRegenerateSecret', ['id' => '\d+']);
 

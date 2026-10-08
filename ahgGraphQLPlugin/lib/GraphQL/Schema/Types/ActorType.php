@@ -28,7 +28,7 @@ class ActorType
                         'authorizedFormOfName' => [
                             'type' => Type::nonNull(Type::string()),
                             'description' => 'Authorized form of name',
-                            'resolve' => fn($actor) => $actor['authorized_form_of_name'] ?? $actor['authorizedFormOfName'] ?? '',
+                            'resolve' => fn($actor) => $actor['authorized_form_of_name'] ?? $actor['authorizedFormOfName'] ?? $actor['name'] ?? '', // the REST repository's names rows call it name
                         ],
                         'entityType' => [
                             'type' => TermType::getType(),

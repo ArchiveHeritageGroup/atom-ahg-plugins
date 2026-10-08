@@ -5,6 +5,10 @@ class apiv2KeysCreateAction extends AhgApiController
 {
     public function POST($request, $data = null)
     {
+        if (empty($this->apiKeyInfo['user_id'])) {
+            return $this->error(401, 'Unauthorized', 'Sign in, or send an X-API-Key header.');
+        }
+
         if (empty($data['name'])) {
             return $this->error(400, 'Bad Request', 'name is required');
         }

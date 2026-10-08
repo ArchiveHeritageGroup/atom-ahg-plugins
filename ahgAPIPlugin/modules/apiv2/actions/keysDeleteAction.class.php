@@ -7,6 +7,10 @@ class apiv2KeysDeleteAction extends AhgApiController
 {
     public function DELETE($request)
     {
+        if (empty($this->apiKeyInfo['user_id'])) {
+            return $this->error(401, 'Unauthorized', 'Sign in, or send an X-API-Key header.');
+        }
+
         $keyId = (int) $request->getParameter('id');
 
         // Only delete own keys

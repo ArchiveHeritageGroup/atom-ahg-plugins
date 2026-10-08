@@ -107,9 +107,6 @@
       </div>
     </div>
   <?php endif; ?>
-
-<?php end_slot(); ?>
-
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 var primaryId = <?php echo (int) $actor->id; ?>;
 
@@ -125,3 +122,4 @@ document.getElementById('btn-merge-search').addEventListener('click', function()
     });
 });
 </script>
+<?php end_slot(); ?>

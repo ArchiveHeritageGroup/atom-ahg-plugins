@@ -7,6 +7,10 @@ class apiv2KeysBrowseAction extends AhgApiController
 {
     public function GET($request)
     {
+        if (empty($this->apiKeyInfo['user_id'])) {
+            return $this->error(401, 'Unauthorized', 'Sign in, or send an X-API-Key header.');
+        }
+
         // Only show user's own keys
         $keys = DB::table('ahg_api_key')
             ->where('user_id', $this->apiKeyInfo['user_id'])

@@ -14,56 +14,56 @@ class authorityActions extends sfActions
 
     protected function identifierService(): \AhgAuthority\Services\AuthorityIdentifierService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/AuthorityIdentifierService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/AuthorityIdentifierService.php';
 
         return new \AhgAuthority\Services\AuthorityIdentifierService();
     }
 
     protected function lookupService(): \AhgAuthority\Services\AuthorityLookupService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/AuthorityLookupService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/AuthorityLookupService.php';
 
         return new \AhgAuthority\Services\AuthorityLookupService();
     }
 
     protected function completenessService(): \AhgAuthority\Services\AuthorityCompletenessService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/AuthorityCompletenessService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/AuthorityCompletenessService.php';
 
         return new \AhgAuthority\Services\AuthorityCompletenessService();
     }
 
     protected function graphService(): \AhgAuthority\Services\AuthorityGraphService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/AuthorityGraphService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/AuthorityGraphService.php';
 
         return new \AhgAuthority\Services\AuthorityGraphService();
     }
 
     protected function eacService(): \AhgAuthority\Services\AuthorityEacExportService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/AuthorityEacExportService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/AuthorityEacExportService.php';
 
         return new \AhgAuthority\Services\AuthorityEacExportService();
     }
 
     protected function mergeService(): \AhgAuthority\Services\AuthorityMergeService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/AuthorityMergeService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/AuthorityMergeService.php';
 
         return new \AhgAuthority\Services\AuthorityMergeService();
     }
 
     protected function occupationService(): \AhgAuthority\Services\AuthorityOccupationService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/AuthorityOccupationService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/AuthorityOccupationService.php';
 
         return new \AhgAuthority\Services\AuthorityOccupationService();
     }
 
     protected function functionService(): \AhgAuthority\Services\AuthorityFunctionService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/AuthorityFunctionService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/AuthorityFunctionService.php';
 
         return new \AhgAuthority\Services\AuthorityFunctionService();
     }

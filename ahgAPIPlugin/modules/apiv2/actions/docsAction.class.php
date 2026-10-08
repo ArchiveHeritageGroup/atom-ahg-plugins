@@ -30,7 +30,7 @@ class apiv2DocsAction extends AhgApiController
   <script{$nonce}>
     window.onload = function () {
       window.ui = SwaggerUIBundle({
-        url: '/api/v2/openapi.json',
+        url: '/api/v2/openapi', // the route has no .json; that path 404s
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [SwaggerUIBundle.presets.apis]

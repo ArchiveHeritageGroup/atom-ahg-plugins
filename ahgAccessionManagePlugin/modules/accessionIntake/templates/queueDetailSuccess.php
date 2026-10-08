@@ -533,8 +533,6 @@
     </div>
 
   </div>
-<?php end_slot(); ?>
-
 <!-- Reject Modal -->
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
@@ -701,3 +699,4 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<?php end_slot(); ?>

@@ -164,7 +164,7 @@ class ItemType
                             'description' => 'Date events associated with this item',
                             'resolve' => function ($item, $args, $context) {
                                 if (isset($item['dates']) && is_array($item['dates'])) {
-                                    return $item['dates'];
+                                    return array_map(fn ($r) => (array) $r, $item['dates']); // repository rows are objects; the types read arrays
                                 }
 
                                 return $context['resolvers']->item->resolveDates($item['id']);
@@ -180,7 +180,7 @@ class ItemType
                             'description' => 'Subject access points',
                             'resolve' => function ($item, $args, $context) {
                                 if (isset($item['subjects']) && is_array($item['subjects'])) {
-                                    return $item['subjects'];
+                                    return array_map(fn ($r) => (array) $r, $item['subjects']); // repository rows are objects; the types read arrays
                                 }
 
                                 return $context['resolvers']->item->resolveSubjects($item['id']);
@@ -191,7 +191,7 @@ class ItemType
                             'description' => 'Place access points',
                             'resolve' => function ($item, $args, $context) {
                                 if (isset($item['places']) && is_array($item['places'])) {
-                                    return $item['places'];
+                                    return array_map(fn ($r) => (array) $r, $item['places']); // repository rows are objects; the types read arrays
                                 }
 
                                 return $context['resolvers']->item->resolvePlaces($item['id']);
@@ -202,7 +202,7 @@ class ItemType
                             'description' => 'Creators and related actors',
                             'resolve' => function ($item, $args, $context) {
                                 if (isset($item['names']) && is_array($item['names'])) {
-                                    return $item['names'];
+                                    return array_map(fn ($r) => (array) $r, $item['names']); // repository rows are objects; the types read arrays
                                 }
 
                                 return $context['resolvers']->item->resolveCreators($item['id']);
@@ -213,7 +213,7 @@ class ItemType
                             'description' => 'Digital objects attached to this item',
                             'resolve' => function ($item, $args, $context) {
                                 if (isset($item['digital_objects']) && is_array($item['digital_objects'])) {
-                                    return $item['digital_objects'];
+                                    return array_map(fn ($r) => (array) $r, $item['digital_objects']); // repository rows are objects; the types read arrays
                                 }
 
                                 return $context['resolvers']->item->resolveDigitalObjects($item['id']);

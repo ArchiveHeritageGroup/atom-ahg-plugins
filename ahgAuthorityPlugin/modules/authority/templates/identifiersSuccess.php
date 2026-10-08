@@ -172,9 +172,6 @@
       </div>
     </div>
   </div>
-
-<?php end_slot(); ?>
-
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 var actorId = <?php echo (int) $actor->id; ?>;
 
@@ -253,3 +250,4 @@ function linkResult(source, id, label, uri) {
     .then(function(d) { if (d.success) location.reload(); });
 }
 </script>
+<?php end_slot(); ?>

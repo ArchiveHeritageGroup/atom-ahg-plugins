@@ -166,9 +166,6 @@
       </table>
     </div>
   </div>
-
-<?php end_slot(); ?>
-
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.querySelectorAll('.btn-create-stub').forEach(function(btn) {
   btn.addEventListener('click', function() {
@@ -196,3 +193,4 @@ document.querySelectorAll('.btn-reject').forEach(function(btn) {
   });
 });
 </script>
+<?php end_slot(); ?>

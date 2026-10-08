@@ -8,7 +8,10 @@ if (!$actorId) return;
 
 require_once dirname(__FILE__, 4).'/lib/Services/AuthorityIdentifierService.php';
 $identifiers = (new \AhgAuthority\Services\AuthorityIdentifierService())->getIdentifiers($actorId);
-if (empty($identifiers)) return;
+$canEdit = $sf_user->hasCredential(['administrator', 'editor'], false);
+// Visitors see the panel only when there is something to show; staff always
+// see it, or they could never reach the page that adds the first identifier.
+if (empty($identifiers) && !$canEdit) return;
 ?>
 
 <div class="card mb-3 authority-identifier-panel">
@@ -27,11 +30,18 @@ if (empty($identifiers)) return;
         <?php endif; ?>
       </a>
     <?php endforeach; ?>
-    <?php if ($sf_user->hasCredential(['administrator', 'editor'], false)): ?>
-    <a href="<?php echo url_for('@ahg_authority_identifiers?actorId=' . $actorId); ?>"
-       class="btn btn-sm btn-outline-primary ms-2" title="<?php echo __('Edit identifiers'); ?>">
-      <i class="fas fa-edit" aria-hidden="true"></i><span class="visually-hidden"><?php echo __('Edit identifiers'); ?></span>
-    </a>
+    <?php if ($canEdit): ?>
+      <?php if (empty($identifiers)): ?>
+        <span class="text-muted small me-2"><?php echo __('None yet.'); ?></span>
+        <a href="<?php echo url_for('@ahg_authority_identifiers?actorId=' . $actorId); ?>" class="btn btn-sm btn-outline-primary">
+          <i class="fas fa-plus me-1" aria-hidden="true"></i><?php echo __('Add Wikidata, VIAF and other identifiers'); ?>
+        </a>
+      <?php else: ?>
+        <a href="<?php echo url_for('@ahg_authority_identifiers?actorId=' . $actorId); ?>"
+           class="btn btn-sm btn-outline-primary ms-2" title="<?php echo __('Edit identifiers'); ?>">
+          <i class="fas fa-edit" aria-hidden="true"></i><span class="visually-hidden"><?php echo __('Edit identifiers'); ?></span>
+        </a>
+      <?php endif; ?>
     <?php endif; ?>
   </div>
 </div>

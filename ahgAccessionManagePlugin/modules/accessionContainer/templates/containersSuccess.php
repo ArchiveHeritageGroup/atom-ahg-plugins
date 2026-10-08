@@ -316,8 +316,6 @@
       <?php echo __('Back to accession'); ?>
     </a>
   </section>
-<?php end_slot(); ?>
-
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var accessionId = <?php echo json_encode($accession['id'] ?? 0); ?>;
@@ -492,3 +490,4 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<?php end_slot(); ?>

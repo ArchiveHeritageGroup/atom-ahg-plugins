@@ -45,8 +45,6 @@
     </table>
 </div>
 <?php endif; ?>
-<?php end_slot(); ?>
-
 <?php $cspNonce = sfConfig::get('csp_nonce', ''); ?>
 <style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
   .td-swatch { display: inline-block; width: 20px; height: 20px; border: 1px solid #ccc; }
@@ -57,3 +55,4 @@
     if (el.dataset.colour) { el.style.background = el.dataset.colour; }
   });
 </script>
+<?php end_slot(); ?>

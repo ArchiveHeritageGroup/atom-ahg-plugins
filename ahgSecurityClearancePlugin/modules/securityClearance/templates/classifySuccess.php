@@ -167,11 +167,9 @@
     </form>
 
   </section>
-
-<?php end_slot(); ?>
-
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .form-check.card { cursor: pointer; }
 .form-check.card:hover { border-color: #0d6efd; }
 .form-check-input:checked + .form-check-label .badge { box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25); }
 </style>
+<?php end_slot(); ?>

@@ -180,8 +180,6 @@
       <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to intake detail'); ?>
     </a>
   </section>
-<?php end_slot(); ?>
-
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   // Attachment upload
@@ -270,3 +268,4 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<?php end_slot(); ?>
