@@ -363,7 +363,7 @@
   <!-- Actions -->
   <div class="card">
     <div class="card-body">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex gap-2">
         <?php if ($resource->id): ?>
           <a href="<?php echo url_for([$resource, 'module' => 'physicalobject']); ?>" class="btn btn-secondary">
             <i class="fas fa-times me-1"></i><?php echo __('Cancel'); ?>

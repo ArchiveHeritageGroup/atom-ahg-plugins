@@ -51,7 +51,16 @@
               <?php echo link_to(render_title($doc['name']), ['module' => 'physicalobject', 'slug' => $doc['slug']]); ?>
             </td>
             <td>
-              <?php echo esc_entities($doc['location']); ?>
+              <?php // The tree path when the box is placed, else the flat location fields; the old free-text Location, if any, as a note. ?>
+              <?php if ($doc['tree_path']) { ?>
+                <?php $links = []; foreach ($doc['tree_path'] as $place) { $links[] = link_to(esc_entities($place['name']), 'storageLocation/view?id='.$place['id']); } ?>
+                <?php echo implode(' &gt; ', $links); ?>
+              <?php } elseif ('' !== $doc['flat_path']) { ?>
+                <?php echo esc_entities($doc['flat_path']); ?>
+              <?php } ?>
+              <?php if ('' !== trim($doc['location'])) { ?>
+                <div class="small text-muted"><?php echo __('Note: %1%', ['%1%' => esc_entities($doc['location'])]); ?></div>
+              <?php } ?>
             </td>
             <td>
               <?php echo esc_entities($doc['type_name']); ?>
