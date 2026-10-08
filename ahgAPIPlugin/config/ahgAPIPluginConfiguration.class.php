@@ -14,6 +14,8 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         sfConfig::set('sf_enabled_modules', $enabledModules);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
         // #212: hide restricted descriptions from OAI-PMH responses.
+        // Required directly: a new class is missing from the cached autoload map until the cache is cleared.
+        require_once dirname(__DIR__).'/lib/OaiVisibility.php';
         $this->dispatcher->connect('response.filter_content', ['OaiVisibility', 'filterContent']);
     }
 

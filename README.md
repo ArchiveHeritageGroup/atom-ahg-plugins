@@ -83,8 +83,6 @@ and the issues split from it.
 
 ### To do
 
-Building:
-
 - [ ] CAAIS-compliant accessions and a CAAIS export, with each accession linked to its repository (2026; 2020 #7) - [#199](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/199), [#203](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/203)
 - [ ] Single sign-on with SAML or OIDC (2026; 2020 #59-60) - [#200](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/200)
 - [ ] Custom fields in the API, GraphQL and CSV export; EAD and PDF finding aids need a separate AHG exporter (2026) - [#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)
@@ -95,12 +93,6 @@ Building:
 - [ ] Session length setting with a warning before logout (2020 #61) - [#207](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/207)
 - [ ] Spreadsheet-style entry; Excel import with diacritics (2020 #30-31) - [#208](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/208)
 - [ ] Default text on new records, moving terms between taxonomies, accession CSV update, non-admin CSV import, "last modified" only on a real change, carousel options, Wikidata links on descriptions (2020) - [#209](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/209)
-
-Checking before the Foundation demo:
-
-- [ ] Formal WCAG 2.1 AA audit of [Accessibility](ahgAccessibilityPlugin/) and the public pages (2026; 2020) - [#201](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/201)
-- [ ] Walk through every "available to demonstrate" item above on a live instance, with a IIIF image server configured - [#210](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/210)
-- [ ] Storage locations: render check as administrator, flat-location migration dry run, code style pass - [#211](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/211)
 
 Two 2020 wishes are answered only by Heratio, the Laravel platform built on the same
 data: replacing nested sets for performance (#41) and a modern long-term-support
