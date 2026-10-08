@@ -5,10 +5,15 @@ namespace AhgStorageManage;
 class SimplePager
 {
     protected int $page;
+
     protected int $maxPerPage;
+
     protected int $nbResults;
+
     protected int $lastPage;
+
     protected array $results;
+
     protected int $currentMaxLink = 1;
 
     public function __construct(array $results, int $total, int $page, int $maxPerPage)

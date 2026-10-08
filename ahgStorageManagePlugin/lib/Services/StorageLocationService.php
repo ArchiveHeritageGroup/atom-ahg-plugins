@@ -499,7 +499,7 @@ class StorageLocationService
 
         // A name of only non-Latin characters folds away to nothing, and an empty
         // slug would collide with the next such name.
-        return '' === $slug ? 'location-'.substr(md5($name.microtime()), 0, 8) : $slug;
+        return '' === $slug ? 'location-' . substr(md5($name . microtime()), 0, 8) : $slug;
     }
 
     /**
@@ -526,14 +526,14 @@ class StorageLocationService
         }
 
         for ($n = 2; $n < 1000; ++$n) {
-            $candidate = $slug.'-'.$n;
+            $candidate = $slug . '-' . $n;
 
             if (!$exists($candidate)) {
                 return $candidate;
             }
         }
 
-        return $slug.'-'.substr(md5($slug.microtime()), 0, 8);
+        return $slug . '-' . substr(md5($slug . microtime()), 0, 8);
     }
 
     /** Depth of a location under $parentId: zero at the root. */
@@ -677,6 +677,6 @@ class StorageLocationService
     /** Escape the wildcards, so a search for "50%" does not match everything. */
     protected function likeTerm(string $search): string
     {
-        return '%'.addcslashes(trim($search), '%_\\').'%';
+        return '%' . addcslashes(trim($search), '%_\\') . '%';
     }
 }

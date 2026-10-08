@@ -3,6 +3,7 @@
 class ahgStorageManagePluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'High-performance physical storage browse and management';
+
     public static $version = '1.0.0';
 
     public function initialize()
@@ -54,6 +55,7 @@ class ahgStorageManagePluginConfiguration extends sfPluginConfiguration
 
                 if (file_exists($filePath)) {
                     require_once $filePath;
+
                     return true;
                 }
             }

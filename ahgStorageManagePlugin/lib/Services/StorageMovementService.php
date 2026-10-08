@@ -190,8 +190,13 @@ class StorageMovementService
                 ->orderBy('l.name')
                 ->orderBy('i.name')
                 ->select(
-                    'pol.physical_object_id', 'pol.location_id', 'pol.updated_at', 'i.name',
-                    'l.name as location_name', 'l.location_type', 'c.depth'
+                    'pol.physical_object_id',
+                    'pol.location_id',
+                    'pol.updated_at',
+                    'i.name',
+                    'l.name as location_name',
+                    'l.location_type',
+                    'c.depth'
                 )
         );
     }
@@ -217,7 +222,7 @@ class StorageMovementService
         $search = trim($search);
 
         if ('' !== $search) {
-            $query->where('i.name', 'LIKE', '%'.addcslashes($search, '%_\\').'%');
+            $query->where('i.name', 'LIKE', '%' . addcslashes($search, '%_\\') . '%');
         }
 
         $total = (clone $query)->count();
@@ -311,7 +316,7 @@ class StorageMovementService
     protected function requireSubjectType(string $subjectType): void
     {
         if (!in_array($subjectType, self::SUBJECTS, true)) {
-            throw new Exception('Unknown movement subject type: '.$subjectType);
+            throw new Exception('Unknown movement subject type: ' . $subjectType);
         }
     }
 

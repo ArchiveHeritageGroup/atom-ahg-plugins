@@ -13,6 +13,8 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'identifierApi';
         sfConfig::set('sf_enabled_modules', $enabledModules);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
+        // #212: hide restricted descriptions from OAI-PMH responses.
+        $this->dispatcher->connect('response.filter_content', ['OaiVisibility', 'filterContent']);
     }
 
     public function routingLoadConfiguration(sfEvent $event)

@@ -62,7 +62,7 @@ class StorageCrudService
                 ->where('physical_object_id', $id)
                 ->first();
         } catch (\Exception $e) {
-            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__) . ':' . __LINE__);
             // Table does not exist on this installation
         }
 
@@ -227,7 +227,7 @@ class StorageCrudService
                     ->where('physical_object_id', $id)
                     ->delete();
             } catch (\Exception $e) {
-                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__) . ':' . __LINE__);
                 // Table may not exist
             }
 
@@ -335,7 +335,7 @@ class StorageCrudService
                 DB::table('physical_object_extended')->insert($fields);
             }
         } catch (\Exception $e) {
-            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__) . ':' . __LINE__);
             // Table may not exist on this installation
         }
     }

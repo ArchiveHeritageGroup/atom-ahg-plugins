@@ -21,6 +21,7 @@ class storageLocationActions extends AhgController
     public const PLACE_LIMIT = 100;
 
     protected StorageLocationService $locationService;
+
     protected StorageMovementService $movementService;
 
     public function preExecute()
@@ -34,7 +35,7 @@ class storageLocationActions extends AhgController
     public function executeBrowse($request)
     {
         $label = $this->config('app_ui_label_storage_location', 'Storage Locations');
-        $this->response->setTitle(__('Browse %1%', ['%1%' => $label]).' - '.$this->response->getTitle());
+        $this->response->setTitle(__('Browse %1%', ['%1%' => $label]) . ' - ' . $this->response->getTitle());
 
         $search = trim((string) $request->getParameter('search', ''));
         $type = trim((string) $request->getParameter('type', ''));
@@ -201,7 +202,7 @@ class storageLocationActions extends AhgController
     public function executeCreate($request)
     {
         $label = $this->config('app_ui_label_storage_location', 'Storage Location');
-        $this->response->setTitle(__('Create %1%', ['%1%' => $label]).' - '.$this->response->getTitle());
+        $this->response->setTitle(__('Create %1%', ['%1%' => $label]) . ' - ' . $this->response->getTitle());
 
         $parentId = $request->getParameter('parent_id');
         $parentLocation = null;
@@ -249,7 +250,7 @@ class storageLocationActions extends AhgController
         $this->location = $this->findLocation($request);
 
         $label = $this->config('app_ui_label_storage_location', 'Storage Location');
-        $this->response->setTitle(__('Edit %1%', ['%1%' => $label]).' - '.$this->response->getTitle());
+        $this->response->setTitle(__('Edit %1%', ['%1%' => $label]) . ' - ' . $this->response->getTitle());
 
         $id = (int) $this->location['id'];
         $this->path = $this->locationService->getLocationPath($id);

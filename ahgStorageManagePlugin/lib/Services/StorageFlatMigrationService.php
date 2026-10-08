@@ -42,13 +42,18 @@ class StorageFlatMigrationService
     public const ACTOR = 'storage:migrate-flat-locations';
 
     protected string $culture;
+
     protected StorageLocationService $locations;
+
     protected StorageMovementService $movements;
 
     /** @var array<string, int> "parent|type|name" => location id; negative while only planned */
     protected array $known = [];
+
     protected int $planned = 0;
+
     protected bool $apply = false;
+
     protected array $report = [];
 
     public function __construct(string $culture = 'en')
@@ -71,7 +76,7 @@ class StorageFlatMigrationService
         $freeTextType = $options['free_text_type'] ?? null;
 
         if (null !== $freeTextType && !array_key_exists($freeTextType, $this->locations->types())) {
-            throw new Exception('Unknown location type for free text: '.$freeTextType);
+            throw new Exception('Unknown location type for free text: ' . $freeTextType);
         }
 
         $this->apply = $apply;
@@ -90,7 +95,7 @@ class StorageFlatMigrationService
 
             foreach ($this->objects() as $object) {
                 $id = (int) $object['id'];
-                $name = $object['name'] ?: 'Object '.$id;
+                $name = $object['name'] ?: 'Object ' . $id;
 
                 if (null !== $this->movements->currentLocationOf($id)) {
                     $this->report['skipped'][] = ['object_id' => $id, 'name' => $name, 'reason' => 'already has a place in the tree'];
@@ -114,7 +119,7 @@ class StorageFlatMigrationService
                     $source = 'structured fields';
 
                     if (null !== $room) {
-                        $source .= ' (also assigned to strongroom "'.$room.'", not used)';
+                        $source .= ' (also assigned to strongroom "' . $room . '", not used)';
                     }
                 } elseif (null !== $room) {
                     $path = [['room', $room]];
@@ -123,7 +128,7 @@ class StorageFlatMigrationService
                     if (null === $freeTextType) {
                         $this->report['skipped'][] = [
                             'object_id' => $id, 'name' => $name,
-                            'reason' => 'free text only: "'.trim((string) $object['location']).'"',
+                            'reason' => 'free text only: "' . trim((string) $object['location']) . '"',
                         ];
 
                         continue;
@@ -141,7 +146,7 @@ class StorageFlatMigrationService
 
                 if ($this->apply) {
                     $this->movements->moveObject($id, $locationId, [
-                        'note' => self::NOTE.' ('.$source.')',
+                        'note' => self::NOTE . ' (' . $source . ')',
                         'user_id' => null,
                         'username' => self::ACTOR,
                     ]);
@@ -180,7 +185,7 @@ class StorageFlatMigrationService
 
         foreach ($path as $index => [$type, $name]) {
             $trail[] = $name;
-            $key = ($parentId ?? 0).'|'.$type.'|'.mb_strtolower($name);
+            $key = ($parentId ?? 0) . '|' . $type . '|' . mb_strtolower($name);
 
             if (!isset($this->known[$key])) {
                 $existing = null;
@@ -195,7 +200,7 @@ class StorageFlatMigrationService
                     $existing = $query->orderBy('id')->first();
                 }
 
-                $label = implode(' > ', $trail).' ('.$type.')';
+                $label = implode(' > ', $trail) . ' (' . $type . ')';
 
                 if ($existing) {
                     $this->known[$key] = (int) $existing->id;
@@ -235,7 +240,7 @@ class StorageFlatMigrationService
             $query->leftJoin('physical_object_extended as e', 'e.physical_object_id', '=', 'p.id');
 
             foreach (self::LEVELS as $level) {
-                $query->addSelect('e.'.$level);
+                $query->addSelect('e.' . $level);
             }
         }
 

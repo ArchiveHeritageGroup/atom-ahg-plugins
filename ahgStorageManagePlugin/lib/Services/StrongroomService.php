@@ -25,9 +25,9 @@ class StrongroomService
      */
     public const CAPACITY_UNITS = [
         'linear_meters' => 'Linear meters',
-        'shelves'       => 'Shelves',
-        'boxes'         => 'Boxes',
-        'cubic_meters'  => 'Cubic meters',
+        'shelves' => 'Shelves',
+        'boxes' => 'Boxes',
+        'cubic_meters' => 'Cubic meters',
     ];
 
     // ---------- Read --------------------------------------------------
@@ -50,14 +50,22 @@ class StrongroomService
         $query = DB::table('ahg_strongroom as sr')
             ->leftJoin('ahg_physical_object_storage as ps', 'ps.strongroom_id', '=', 'sr.id')
             ->select(
-                'sr.id', 'sr.slug', 'sr.name', 'sr.location_description',
-                'sr.capacity_value', 'sr.capacity_unit',
+                'sr.id',
+                'sr.slug',
+                'sr.name',
+                'sr.location_description',
+                'sr.capacity_value',
+                'sr.capacity_unit',
                 DB::raw('COALESCE(SUM(ps.size_units_used), 0) AS used_units'),
                 DB::raw('COUNT(DISTINCT ps.physical_object_id) AS occupant_count')
             )
             ->groupBy(
-                'sr.id', 'sr.slug', 'sr.name', 'sr.location_description',
-                'sr.capacity_value', 'sr.capacity_unit'
+                'sr.id',
+                'sr.slug',
+                'sr.name',
+                'sr.location_description',
+                'sr.capacity_value',
+                'sr.capacity_unit'
             );
 
         if ('' !== $search) {
@@ -159,14 +167,14 @@ class StrongroomService
         $now = $this->nowStr();
 
         return DB::table('ahg_strongroom')->insertGetId([
-            'slug'                 => $this->generateUniqueSlug($name),
-            'name'                 => $name,
+            'slug' => $this->generateUniqueSlug($name),
+            'name' => $name,
             'location_description' => $data['location_description'] ?? null,
-            'capacity_value'       => $this->nullableDecimal($data['capacity_value'] ?? null),
-            'capacity_unit'        => $this->normalizeCapacityUnit($data['capacity_unit'] ?? 'linear_meters'),
-            'notes'                => $data['notes'] ?? null,
-            'created_at'           => $now,
-            'updated_at'           => $now,
+            'capacity_value' => $this->nullableDecimal($data['capacity_value'] ?? null),
+            'capacity_unit' => $this->normalizeCapacityUnit($data['capacity_unit'] ?? 'linear_meters'),
+            'notes' => $data['notes'] ?? null,
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
     }
 
@@ -219,10 +227,10 @@ class StrongroomService
         DB::table('ahg_physical_object_storage')->updateOrInsert(
             ['physical_object_id' => $physicalObjectId],
             [
-                'strongroom_id'   => $strongroomId,
+                'strongroom_id' => $strongroomId,
                 'size_units_used' => max(0.0, $sizeUnitsUsed),
-                'updated_at'      => $this->nowStr(),
-                'created_at'      => DB::raw('COALESCE(created_at, NOW())'),
+                'updated_at' => $this->nowStr(),
+                'created_at' => DB::raw('COALESCE(created_at, NOW())'),
             ]
         );
     }

@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+
 /*
  * This file is part of the Access to Memory (AtoM) software.
  *

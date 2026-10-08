@@ -214,11 +214,11 @@ class strongroomActions extends AhgController
     private function extractFormData($request): array
     {
         return [
-            'name'                 => $request->getParameter('name'),
+            'name' => $request->getParameter('name'),
             'location_description' => $request->getParameter('location_description'),
-            'capacity_value'       => $request->getParameter('capacity_value'),
-            'capacity_unit'        => $request->getParameter('capacity_unit'),
-            'notes'                => $request->getParameter('notes'),
+            'capacity_value' => $request->getParameter('capacity_value'),
+            'capacity_unit' => $request->getParameter('capacity_unit'),
+            'notes' => $request->getParameter('notes'),
         ];
     }
 

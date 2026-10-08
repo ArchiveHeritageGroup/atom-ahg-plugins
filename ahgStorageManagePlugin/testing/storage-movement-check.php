@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Storage movement log check (atom-ahg-plugins#193).
  *
@@ -18,32 +19,41 @@
 // path means the check only runs on the machine it was written on.
 $autoload = null;
 
-foreach ([dirname(__DIR__, 3).'/atom-framework/vendor/autoload.php',
-          dirname(__DIR__, 4).'/atom-framework/vendor/autoload.php',
+foreach ([dirname(__DIR__, 3) . '/atom-framework/vendor/autoload.php',
+          dirname(__DIR__, 4) . '/atom-framework/vendor/autoload.php',
           '/usr/share/nginx/archive/atom-framework/vendor/autoload.php'] as $candidate) {
-    if (file_exists($candidate)) { $autoload = $candidate; break; }
+    if (file_exists($candidate)) {
+        $autoload = $candidate;
+        break;
+    }
 }
 
-if (null === $autoload) { fwrite(STDERR, "cannot find atom-framework/vendor/autoload.php\n"); exit(2); }
+if (null === $autoload) {
+    fwrite(STDERR, "cannot find atom-framework/vendor/autoload.php\n");
+    exit(2);
+}
 require $autoload;
-require dirname(__DIR__).'/lib/Services/StorageLocationService.php';
-require dirname(__DIR__).'/lib/Services/StorageMovementService.php';
+require dirname(__DIR__) . '/lib/Services/StorageLocationService.php';
+require dirname(__DIR__) . '/lib/Services/StorageMovementService.php';
 
 use Illuminate\Database\Capsule\Manager as DB;
 
 $scratch = 'scratch_storage_movement_check';
 $ini = parse_ini_file($argv[1] ?? '', true)['client'] ?? null;
-if (!$ini) { fwrite(STDERR, "usage: php {$argv[0]} /path/to/client.cnf\n"); exit(2); }
+if (!$ini) {
+    fwrite(STDERR, "usage: php {$argv[0]} /path/to/client.cnf\n");
+    exit(2);
+}
 
 // The storage tables only. physical_object is stubbed below, because this check
 // must not need an AtoM database to run.
-$sql = file_get_contents(dirname(__DIR__).'/database/install.sql');
+$sql = file_get_contents(dirname(__DIR__) . '/database/install.sql');
 $sql = substr($sql, strpos($sql, 'CREATE TABLE IF NOT EXISTS ahg_storage_location ('));
 
 $db = new DB();
-$base = ['driver'=>'mysql','host'=>$ini['host'] ?? 'localhost','port'=>$ini['port'] ?? 3306,'username'=>$ini['user'],'password'=>$ini['password'],'charset'=>'utf8mb4','collation'=>'utf8mb4_unicode_ci'];
-$db->addConnection($base + ['database'=>'mysql'], 'admin');
-$db->addConnection($base + ['database'=>$scratch]);
+$base = ['driver' => 'mysql', 'host' => $ini['host'] ?? 'localhost', 'port' => $ini['port'] ?? 3306, 'username' => $ini['user'], 'password' => $ini['password'], 'charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci'];
+$db->addConnection($base + ['database' => 'mysql'], 'admin');
+$db->addConnection($base + ['database' => $scratch]);
 $db->setAsGlobal();
 DB::connection('admin')->statement("DROP DATABASE IF EXISTS {$scratch}");
 DB::connection('admin')->statement("CREATE DATABASE {$scratch} CHARACTER SET utf8mb4");
@@ -66,7 +76,14 @@ $loc = new AhgStorageManage\Services\StorageLocationService();
 $mv = new AhgStorageManage\Services\StorageMovementService();
 
 $fail = 0;
-function ok($c, $m) { global $fail; echo ($c ? "PASS " : "FAIL ").$m."\n"; if (!$c) { ++$fail; } }
+function ok($c, $m)
+{
+    global $fail;
+    echo ($c ? 'PASS ' : 'FAIL ') . $m . "\n";
+    if (!$c) {
+        ++$fail;
+    }
+}
 
 /** The current-location index must equal the latest movement per object. */
 function agrees(): bool
@@ -107,8 +124,12 @@ ok(2 === count($mv->historyFor('physical_object', 1)), 'history has both moves')
 ok(agrees(), 'index agrees with log after a move');
 
 // Moving to where it already is is refused, rather than logged as a non-move
-try { $mv->moveObject(1, (int) $roomB['id']); ok(false, 'no-op move refused'); }
-catch (Exception $e) { ok(str_contains($e->getMessage(), 'already'), 'no-op move refused: '.$e->getMessage()); }
+try {
+    $mv->moveObject(1, (int) $roomB['id']);
+    ok(false, 'no-op move refused');
+} catch (Exception $e) {
+    ok(str_contains($e->getMessage(), 'already'), 'no-op move refused: ' . $e->getMessage());
+}
 
 // Removal from storage
 $m3 = $mv->moveObject(1, null, ['note' => 'sent for conservation']);
@@ -148,12 +169,20 @@ ok(DB::table('ahg_storage_movement')->count() === $before, 'a rename logs nothin
 ok('Shelf 1' === $mv->historyFor('physical_object', 2)[0]['to_location_name'], 'history reads after the location was renamed');
 
 // Deletion rules
-try { $loc->deleteLocation((int) $shelf['id']); ok(false, 'delete refused while it holds objects'); }
-catch (Exception $e) { ok(str_contains($e->getMessage(), 'physical objects'), 'delete refused while it holds objects'); }
+try {
+    $loc->deleteLocation((int) $shelf['id']);
+    ok(false, 'delete refused while it holds objects');
+} catch (Exception $e) {
+    ok(str_contains($e->getMessage(), 'physical objects'), 'delete refused while it holds objects');
+}
 
 $mv->moveObjects([1, 2, 3], (int) $roomA['id']);
-try { $loc->deleteLocation((int) $shelf['id']); ok(false, 'delete refused while it has history'); }
-catch (Exception $e) { ok(str_contains($e->getMessage(), 'movement log'), 'delete refused while it has history: keeps the record'); }
+try {
+    $loc->deleteLocation((int) $shelf['id']);
+    ok(false, 'delete refused while it has history');
+} catch (Exception $e) {
+    ok(str_contains($e->getMessage(), 'movement log'), 'delete refused while it has history: keeps the record');
+}
 
 // An unused location still deletes
 $spare = $loc->createLocation(['name' => 'Spare', 'location_type' => 'room']);

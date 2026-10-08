@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Storage contents check (atom-ahg-plugins#193): the managed type list, the
  * capacity roll-up, containers inside containers, placing objects, and the
@@ -15,17 +16,23 @@
  */
 $autoload = null;
 
-foreach ([dirname(__DIR__, 3).'/atom-framework/vendor/autoload.php',
-          dirname(__DIR__, 4).'/atom-framework/vendor/autoload.php',
+foreach ([dirname(__DIR__, 3) . '/atom-framework/vendor/autoload.php',
+          dirname(__DIR__, 4) . '/atom-framework/vendor/autoload.php',
           '/usr/share/nginx/archive/atom-framework/vendor/autoload.php'] as $candidate) {
-    if (file_exists($candidate)) { $autoload = $candidate; break; }
+    if (file_exists($candidate)) {
+        $autoload = $candidate;
+        break;
+    }
 }
 
-if (null === $autoload) { fwrite(STDERR, "cannot find atom-framework/vendor/autoload.php\n"); exit(2); }
+if (null === $autoload) {
+    fwrite(STDERR, "cannot find atom-framework/vendor/autoload.php\n");
+    exit(2);
+}
 require $autoload;
-require dirname(__DIR__).'/lib/Services/StorageLocationService.php';
-require dirname(__DIR__).'/lib/Services/StorageMovementService.php';
-require dirname(__DIR__).'/lib/Services/StorageFlatMigrationService.php';
+require dirname(__DIR__) . '/lib/Services/StorageLocationService.php';
+require dirname(__DIR__) . '/lib/Services/StorageMovementService.php';
+require dirname(__DIR__) . '/lib/Services/StorageFlatMigrationService.php';
 
 use AhgStorageManage\Services\StorageFlatMigrationService;
 use AhgStorageManage\Services\StorageLocationService;
@@ -34,18 +41,21 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 $scratch = 'scratch_storage_contents_check';
 $ini = parse_ini_file($argv[1] ?? '', true)['client'] ?? null;
-if (!$ini) { fwrite(STDERR, "usage: php {$argv[0]} /path/to/client.cnf\n"); exit(2); }
+if (!$ini) {
+    fwrite(STDERR, "usage: php {$argv[0]} /path/to/client.cnf\n");
+    exit(2);
+}
 
-$install = file_get_contents(dirname(__DIR__).'/database/install.sql');
+$install = file_get_contents(dirname(__DIR__) . '/database/install.sql');
 $storage = substr($install, strpos($install, 'CREATE TABLE IF NOT EXISTS ahg_storage_location ('));
 // The flat tables too, as install.sql makes them, since the migration reads them.
 $flat = substr($install, strpos($install, 'CREATE TABLE IF NOT EXISTS `physical_object_extended`'));
 $flat = substr($flat, 0, strpos($flat, 'CREATE TABLE IF NOT EXISTS ahg_storage_location ('));
 
 $db = new DB();
-$base = ['driver'=>'mysql','host'=>$ini['host'] ?? 'localhost','port'=>$ini['port'] ?? 3306,'username'=>$ini['user'],'password'=>$ini['password'],'charset'=>'utf8mb4','collation'=>'utf8mb4_unicode_ci'];
-$db->addConnection($base + ['database'=>'mysql'], 'admin');
-$db->addConnection($base + ['database'=>$scratch]);
+$base = ['driver' => 'mysql', 'host' => $ini['host'] ?? 'localhost', 'port' => $ini['port'] ?? 3306, 'username' => $ini['user'], 'password' => $ini['password'], 'charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci'];
+$db->addConnection($base + ['database' => 'mysql'], 'admin');
+$db->addConnection($base + ['database' => $scratch]);
 $db->setAsGlobal();
 DB::connection('admin')->statement("DROP DATABASE IF EXISTS {$scratch}");
 DB::connection('admin')->statement("CREATE DATABASE {$scratch} CHARACTER SET utf8mb4");
@@ -58,15 +68,30 @@ DB::unprepared($flat);
 DB::unprepared($storage);
 
 $fail = 0;
-function ok($c, $m) { global $fail; echo ($c ? "PASS " : "FAIL ").$m."\n"; if (!$c) { ++$fail; } }
-function refused(callable $do, string $needle, string $m) {
-    try { $do(); ok(false, $m.' (was allowed)'); }
-    catch (Exception $e) { ok(str_contains($e->getMessage(), $needle), $m.': '.$e->getMessage()); }
+function ok($c, $m)
+{
+    global $fail;
+    echo ($c ? 'PASS ' : 'FAIL ') . $m . "\n";
+    if (!$c) {
+        ++$fail;
+    }
 }
-function box(int $id, string $name, ?string $location = null, array $extended = []) {
+function refused(callable $do, string $needle, string $m)
+{
+    try {
+        $do();
+        ok(false, $m . ' (was allowed)');
+    } catch (Exception $e) {
+        ok(str_contains($e->getMessage(), $needle), $m . ': ' . $e->getMessage());
+    }
+}
+function box(int $id, string $name, ?string $location = null, array $extended = [])
+{
     DB::table('physical_object')->insert(['id' => $id]);
     DB::table('physical_object_i18n')->insert(['id' => $id, 'culture' => 'en', 'name' => $name, 'location' => $location]);
-    if ($extended) { DB::table('physical_object_extended')->insert(['physical_object_id' => $id] + $extended); }
+    if ($extended) {
+        DB::table('physical_object_extended')->insert(['physical_object_id' => $id] + $extended);
+    }
 }
 /** The current-location index must equal the latest movement per object. */
 function agrees(): bool
@@ -79,7 +104,8 @@ function agrees(): bool
     foreach (DB::table('ahg_physical_object_location')->get()->all() as $row) {
         $index[(int) $row->physical_object_id] = (int) $row->location_id;
     }
-    ksort($latest); ksort($index);
+    ksort($latest);
+    ksort($index);
 
     return array_filter($latest, static function ($v) { return null !== $v; }) === $index;
 }
@@ -114,7 +140,9 @@ ok(10 === DB::table('ahg_dropdown')->where('taxonomy', 'storage_location_type')-
 // ── Containers inside containers, and the roll-up ───────────────────────────
 $loc = new StorageLocationService();
 $mv = new StorageMovementService();
-foreach ([1 => 'Box 1', 2 => 'Box 2', 3 => 'Box 3', 4 => 'Box 4'] as $id => $name) { box($id, $name); }
+foreach ([1 => 'Box 1', 2 => 'Box 2', 3 => 'Box 3', 4 => 'Box 4'] as $id => $name) {
+    box($id, $name);
+}
 
 $room = $loc->createLocation(['name' => 'Strongroom B', 'location_type' => 'room', 'capacity_value' => 200, 'capacity_unit' => 'boxes']);
 $bay = $loc->createLocation(['name' => 'Bay 1', 'location_type' => 'bay', 'parent_id' => $room['id'], 'capacity_value' => 12.5, 'capacity_unit' => 'linear_meters']);
@@ -158,7 +186,9 @@ ok(agrees(), 'index agrees with log');
 
 // ── The flat fields, carried into the tree ──────────────────────────────────
 DB::unprepared('SET FOREIGN_KEY_CHECKS = 0');
-foreach (['ahg_storage_movement', 'ahg_physical_object_location', 'ahg_storage_location_closure', 'ahg_storage_location', 'physical_object_extended', 'physical_object_i18n', 'physical_object'] as $table) { DB::table($table)->delete(); }
+foreach (['ahg_storage_movement', 'ahg_physical_object_location', 'ahg_storage_location_closure', 'ahg_storage_location', 'physical_object_extended', 'physical_object_i18n', 'physical_object'] as $table) {
+    DB::table($table)->delete();
+}
 DB::unprepared('SET FOREIGN_KEY_CHECKS = 1');
 
 box(10, 'Box 10', null, ['building' => 'Main Building', 'floor' => '1', 'room' => 'C3', 'shelf' => 'S4']);

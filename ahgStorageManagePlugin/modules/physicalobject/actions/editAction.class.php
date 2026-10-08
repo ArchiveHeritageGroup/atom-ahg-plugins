@@ -1,4 +1,5 @@
 <?php
+
 use AtomFramework\Http\Controllers\AhgEditController;
 use AtomFramework\Services\Write\WriteServiceFactory;
 
@@ -76,7 +77,8 @@ class PhysicalObjectEditAction extends AhgEditController
                 return;
             }
         } catch (Exception $e) {
-            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__) . ':' . __LINE__);
+
             return;
         }
 
@@ -109,6 +111,7 @@ class PhysicalObjectEditAction extends AhgEditController
 
         if ('unassign' === $action) {
             $svc->unassign($physicalObjectId);
+
             return;
         }
         if ('assign' === $action) {

@@ -49,6 +49,64 @@ Preservation, Provenance, Backup, Favourites and Feedback are packaged as
 The rest install from this repository, plugin directory by plugin directory, each
 with its own README.
 
+## AtoM community wish lists: what we can show
+
+The AtoM Foundation's AGM 2026 wish-list board repeats much of the "AtoM 3 Wishlist"
+collected around TAATU in 2020: accessibility, CAAIS accessions, single sign-on,
+physical storage, rights, API examples and search were all asked for six years ago.
+AtoM 3 never shipped, so the wishes carried over. The tables below combine both lists
+and say plainly which wishes these plugins answer today and which are still open. Work
+is tracked in [#193](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/193)
+and the issues split from it.
+
+### Available to demonstrate
+
+| Wish | List | Answered by |
+|---|---|---|
+| Nested physical locations (building, room, shelf, box), with a movement log | 2026 | [Storage manage](ahgStorageManagePlugin/) |
+| Barcodes in physical storage | 2020 #63 | [Storage manage](ahgStorageManagePlugin/) |
+| IIIF manifests, IIIF collections, deep-zoom and comparison viewers | 2026, 2020 #18-20 | [IIIF](ahgIiifPlugin/), [Mirador](ahgMiradorPlugin/), [Seadragon](ahgSeadragonPlugin/) |
+| Better search | 2026 | [Search](ahgSearchPlugin/), [Semantic search](ahgSemanticSearchPlugin/), [Discovery](ahgDiscoveryPlugin/), [Ask the Archive chatbot](ahgChatbotPlugin/) |
+| Provenance and authenticity | 2026 | [Provenance](ahgProvenancePlugin/), [C2PA content credentials](ahgC2paPlugin/) |
+| Independent institutions on one shared instance; hosting for small archives | 2026, 2020 #4 | [Multi-tenant](ahgMultiTenantPlugin/) |
+| Reports without phpMyAdmin | 2026, 2020 #14 | [Reports](ahgReportsPlugin/), [Report builder](ahgReportBuilderPlugin/) |
+| A better REST API, with examples and full create, update and delete | 2026, 2020 #27, #29 | [REST API v2](ahgAPIPlugin/), [GraphQL](ahgGraphQLPlugin/) |
+| Records in Contexts (RiC) | 2026 | [RiC explorer](ahgRicExplorerPlugin/), [RiC manage](ahgRicManagePlugin/) |
+| Audit trail and change tracking | 2020 #10 | [Audit trail](ahgAuditTrailPlugin/) |
+| Reading-room requests, circulation, researcher accounts | 2020 #15-16 | [Research](ahgResearchPlugin/), [Access requests](ahgAccessRequestPlugin/) |
+| Merge duplicate authorities and terms | 2020 #53 | [Dedupe](ahgDedupePlugin/) |
+| More usable rights, with embargoes enforced across search, browse, the API and files | 2026, 2020 #44 | [Rights](ahgRightsPlugin/), [Extended rights](ahgExtendedRightsPlugin/), [Security clearance](ahgSecurityClearancePlugin/) |
+| Custom metadata fields without code changes | 2026 | [Custom fields](ahgCustomFieldsPlugin/) (on screen; not yet in exports, [#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)) |
+| OAI-PMH that respects embargo, classification and other access rules | 2020 #40 | [REST API v2](ahgAPIPlugin/) filters OAI responses ([#212](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/212)) |
+| LDAP login | 2020 #58 | [Security clearance](ahgSecurityClearancePlugin/), using base AtoM's LDAP user |
+| Search and replace within a collection | 2020 #33 | [Core](ahgCorePlugin/) global replace, scoped to a fonds or series |
+
+### To do
+
+Building:
+
+- [ ] CAAIS-compliant accessions and a CAAIS export, with each accession linked to its repository (2026; 2020 #7) - [#199](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/199), [#203](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/203)
+- [ ] Single sign-on with SAML or OIDC (2026; 2020 #59-60) - [#200](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/200)
+- [ ] Custom fields in the API, GraphQL and CSV export; EAD and PDF finding aids need a separate AHG exporter (2026) - [#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)
+- [ ] Bulk relocation screen for physical storage; containers nested in containers; capacity roll-up (2026) - [#193](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/193)
+- [ ] Batch edit and batch rename of descriptions (2020 #37) - [#204](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/204)
+- [ ] Sort a description's children numerically (2020 #55) - [#205](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/205)
+- [ ] Remote logging (2020 #13) - [#206](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/206)
+- [ ] Session length setting with a warning before logout (2020 #61) - [#207](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/207)
+- [ ] Spreadsheet-style entry; Excel import with diacritics (2020 #30-31) - [#208](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/208)
+- [ ] Default text on new records, moving terms between taxonomies, accession CSV update, non-admin CSV import, "last modified" only on a real change, carousel options, Wikidata links on descriptions (2020) - [#209](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/209)
+
+Checking before the Foundation demo:
+
+- [ ] Formal WCAG 2.1 AA audit of [Accessibility](ahgAccessibilityPlugin/) and the public pages (2026; 2020) - [#201](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/201)
+- [ ] Walk through every "available to demonstrate" item above on a live instance, with a IIIF image server configured - [#210](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/210)
+- [ ] Storage locations: render check as administrator, flat-location migration dry run, code style pass - [#211](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/211)
+
+Two 2020 wishes are answered only by Heratio, the Laravel platform built on the same
+data: replacing nested sets for performance (#41) and a modern long-term-support
+framework (#42-43). AtoM 2.10 keeps its nested sets and Symfony 1.4, and these plugins
+do not change base AtoM.
+
 ## Why modular
 
 - **Install only what you need.** Nothing obliges an archive to carry museum, library

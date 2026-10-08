@@ -32,9 +32,9 @@ class storageMigrateFlatLocationsTask extends sfBaseTask
     {
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();
-        require_once __DIR__.'/../Services/StorageLocationService.php';
-        require_once __DIR__.'/../Services/StorageMovementService.php';
-        require_once __DIR__.'/../Services/StorageFlatMigrationService.php';
+        require_once __DIR__ . '/../Services/StorageLocationService.php';
+        require_once __DIR__ . '/../Services/StorageMovementService.php';
+        require_once __DIR__ . '/../Services/StorageFlatMigrationService.php';
 
         $apply = !empty($options['apply']);
         $service = new \AhgStorageManage\Services\StorageFlatMigrationService($options['culture'] ?: 'en');
@@ -42,7 +42,7 @@ class storageMigrateFlatLocationsTask extends sfBaseTask
         try {
             $report = $service->run($apply, array_filter(['free_text_type' => $options['free-text-type'] ?: null]));
         } catch (Exception $e) {
-            $this->logSection('storage', 'Nothing was changed: '.$e->getMessage(), null, 'ERROR');
+            $this->logSection('storage', 'Nothing was changed: ' . $e->getMessage(), null, 'ERROR');
 
             return 1;
         }
@@ -50,7 +50,7 @@ class storageMigrateFlatLocationsTask extends sfBaseTask
         $verb = $apply ? 'created' : 'would be created';
 
         foreach ($report['locations_created'] as $label) {
-            $this->logSection('location', $label.' - '.$verb);
+            $this->logSection('location', $label . ' - ' . $verb);
         }
 
         foreach ($report['placed'] as $row) {
