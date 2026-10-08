@@ -582,6 +582,14 @@ The theme warns signed-in users two minutes before the session ends, offers
 "Stay signed in", and holds a save made after it ends, so typed edits stay on
 the page while the user signs in again in another tab (#207).
 
+None of this changes base AtoM. The warning, the status check (`/session/status`)
+and the held save are all in `ahgThemeB5Plugin`; `config/factories.yml` is left as
+shipped. Raising the session lifetime is a server setting in `php.ini`, outside
+AtoM. On PSIS it was raised from 1440 to 1800 seconds on 8 October 2026, so the
+AtoM timeout of 30 minutes is now the one that applies (php-fpm must be restarted
+to load it). Check what a server actually allows with `GET /session/status`, which
+reports the effective timeout in seconds.
+
 ### If the AtoM root is under /usr/share/nginx
 
 Some php-fpm packaging sets `ProtectSystem=full`, which mounts `/usr` read-only for the
