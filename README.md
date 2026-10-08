@@ -65,7 +65,7 @@ and the issues split from it.
 
 | Wish | List | Answered by |
 |---|---|---|
-| Nested physical locations (building, room, shelf, box), with a movement log | 2026 | [Storage manage](ahgStorageManagePlugin/) |
+| Nested physical locations (building, room, shelf, box), with a movement log | 2026 | [Storage manage](ahgStorageManagePlugin/) ([video](https://youtu.be/cTexvvCn9u0)) |
 | Barcodes in physical storage | 2020 #63 | [Storage manage](ahgStorageManagePlugin/) |
 | IIIF manifests, IIIF collections, deep-zoom and comparison viewers | 2026, 2020 #18-20 | [IIIF](ahgIiifPlugin/), [Mirador](ahgMiradorPlugin/), [Seadragon](ahgSeadragonPlugin/) |
 | Better search | 2026 | [Search](ahgSearchPlugin/), [Semantic search](ahgSemanticSearchPlugin/), [Discovery](ahgDiscoveryPlugin/), [Ask the Archive chatbot](ahgChatbotPlugin/) |
@@ -335,7 +335,7 @@ Install top to bottom: nothing in a section depends on anything below it.
 | [`ahgSpectrumPlugin`](ahgSpectrumPlugin/) | 33 | [`ahgCorePlugin`](ahgCorePlugin/) | Museum collections procedures - acquisition, loans, movement, conservation, valuation, and workflow management |
 | [`ahgStaticPagePlugin`](ahgStaticPagePlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | Static page management - list, edit, and delete AtoM static pages via Laravel Query Builder |
 | [`ahgStatisticsPlugin`](ahgStatisticsPlugin/) | 5 | [`ahgCorePlugin`](ahgCorePlugin/) | Usage statistics tracking with page views, downloads, GeoIP lookup, bot filtering, and reporting dashboards |
-| [`ahgStorageManagePlugin`](ahgStorageManagePlugin/) | 3 | [`ahgCorePlugin`](ahgCorePlugin/) | Physical storage browse and management using Laravel Query Builder |
+| [`ahgStorageManagePlugin`](ahgStorageManagePlugin/) | 3 | [`ahgCorePlugin`](ahgCorePlugin/) | Physical storage browse and management using Laravel Query Builder ([video](https://youtu.be/cTexvvCn9u0)) |
 | [`ahgTermTaxonomyPlugin`](ahgTermTaxonomyPlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | High-performance term and taxonomy browse (subjects, places, genres) using Laravel Query Builder and direct ES queries |
 | [`ahgTiffPdfMergePlugin`](ahgTiffPdfMergePlugin/) | 3 | [`ahgCorePlugin`](ahgCorePlugin/) | TIFF and PDF merge job management for digital preservation |
 | [`ahgTimeLimitedShareLinkPlugin`](ahgTimeLimitedShareLinkPlugin/) | 2 | [`ahgCorePlugin`](ahgCorePlugin/) | Time-limited, auditable share links for information_object records. Anonymous bearer-token access with HMAC-derived URL-safe tokens, optional max-access count, expiry caps, classified-record gating, and admin revocation. Integrates with ahgAuditTrailPlugin and ahgSecurityClearancePlugin |
