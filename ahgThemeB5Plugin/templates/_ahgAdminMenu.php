@@ -224,14 +224,12 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'custodianDashboard']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Custodian'); ?></a></li>
     <?php endif; ?>
 
-    <?php if ($hasStorageLocations || $hasStrongroom): ?>
+    <?php // With the storage location tree installed, strongrooms are rooms in it
+          // and Storage locations sits in the Manage menu beside Physical storage. ?>
+    <?php if ($hasStrongroom && !$hasStorageLocations): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Storage'); ?></h6></li>
-    <?php if ($hasStorageLocations): ?>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'storageLocation', 'action' => 'browse']); ?>"><i class="fas fa-sitemap fa-fw me-1"></i><?php echo __('Storage locations'); ?></a></li>
-    <?php else: ?>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'strongroom', 'action' => 'browse']); ?>"><i class="fas fa-warehouse fa-fw me-1"></i><?php echo __('Strongrooms'); ?></a></li>
-    <?php endif; ?>
     <?php endif; ?>
 
     <?php if ($hasExhibitionSpace): ?>

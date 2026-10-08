@@ -145,9 +145,18 @@ class StoragePlacementService
 
     /**
      * For the physical storage form's save, which exists in two copies (the
-     * theme's and ahgDisplayPlugin's physicalobject actions): place the box and
-     * say what to tell the user, or null for nothing. Never throws: the box has
-     * already been saved, and a placement failure must not lose that.
+     * theme's and ahgDisplayPlugin's physicalobject actions). Returns what to
+     * tell the user, or null for nothing. Never throws: the box has already been
+     * saved, and a placement failure must not lose that.
+     *
+     * The placement itself runs after the request, not here. AtoM wraps every
+     * request in one transaction on its own (Propel) connection and commits at
+     * the end (QubitTransactionFilter). The tree is written through the
+     * framework's separate connection, so a new box is invisible to it until
+     * that commit, and its foreign key waits on Propel's row lock until MySQL
+     * gives up (lock wait timeout, seen on PSIS 8 Oct 2026). A shutdown function
+     * runs after the commit. Only the refusal can be reported on the next page;
+     * it is decided now with a read-only lookup.
      */
     public static function fromEditForm(int $objectId, array $posted, $user): ?array
     {
@@ -155,21 +164,31 @@ class StoragePlacementService
             return null;
         }
 
+        $levels = array_intersect_key($posted, array_flip(self::LEVELS));
+        $mayCreate = $user->hasCredential(['administrator', 'editor'], false);
+        $context = [];
+        if (method_exists($user, 'getUserID')) {
+            $context['user_id'] = $user->getUserID();
+            $context['username'] = method_exists($user, 'getUserName') ? $user->getUserName() : null;
+        }
+
         try {
-            $result = (new self())->saveFromForm(
-                $objectId,
-                array_intersect_key($posted, array_flip(self::LEVELS)),
-                $user->hasCredential(['administrator', 'editor'], false)
-            );
+            if (!$mayCreate && false === (new self())->resolve($levels, false)) {
+                return ['error', 'Saved, but the location was not changed: only editors and administrators can add new places. Choose existing places from the suggestions.', ''];
+            }
         } catch (\Throwable $e) {
             error_log('storage.placement_failed: '.$e->getMessage());
 
             return ['error', 'Saved, but the box could not be placed in the storage location tree: %1%', $e->getMessage()];
         }
 
-        if (self::NOT_ALLOWED === $result) {
-            return ['error', 'Saved, but the location was not changed: only editors and administrators can add new places. Choose existing places from the suggestions.', ''];
-        }
+        register_shutdown_function(static function () use ($objectId, $levels, $mayCreate, $context) {
+            try {
+                (new self())->saveFromForm($objectId, $levels, $mayCreate, $context);
+            } catch (\Throwable $e) {
+                error_log('storage.placement_failed: object '.$objectId.': '.$e->getMessage());
+            }
+        });
 
         return null;
     }

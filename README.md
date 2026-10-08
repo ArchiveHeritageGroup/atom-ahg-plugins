@@ -31,17 +31,19 @@ capability below depends on it.
 Each is a capability family rather than a single plugin: several plugins may deliver
 one capability, and the technical package names stay stable underneath.
 
-| Capability | What it gives an institution | Delivered by |
-|---|---|---|
-| **IIIF & Advanced Viewing** | Standards-based image delivery and rich viewing: deep zoom, side-by-side comparison, interoperable manifests, Content Search, OCR export. | [IIIF](ahgIiifPlugin/), [Seadragon](ahgSeadragonPlugin/), [Mirador](ahgMiradorPlugin/) |
-| **Digital Preservation** | Fixity, PREMIS events, format identification, BagIt packaging and condition assessment - digital continuity, not just storage. | [Preservation](ahgPreservationPlugin/), [Condition](ahgConditionPlugin/), [OCFL](ahgOcflPlugin/) |
-| **Provenance & Audit** | Chain of custody, authenticity and an account of how records and digital outputs were created or changed, including content credentials. | [Provenance](ahgProvenancePlugin/), [Audit trail](ahgAuditTrailPlugin/), [C2PA](ahgC2paPlugin/) |
-| **Records in Contexts & Graph Discovery** | Richer relationships between records, agents, functions, places and events, exposed as a graph rather than a tree. | [RiC explorer](ahgRicExplorerPlugin/), [RiC manage](ahgRicManagePlugin/) |
-| **AI & Semantic Discovery** | Entity extraction, assisted description, embedded metadata extraction and semantic search, with human review kept in the loop. | [AI](ahgAIPlugin/), [Semantic search](ahgSemanticSearchPlugin/), [Metadata extraction](ahgMetadataExtractionPlugin/), [Discovery](ahgDiscoveryPlugin/) |
-| **Museum Collections** | Collections procedures, object records, loans and exhibitions alongside archival description. | [Collections procedures](ahgSpectrumPlugin/), [Museum](ahgMuseumPlugin/), [Loans](ahgLoanPlugin/), [Exhibitions](ahgExhibitionPlugin/) |
-| **Library Services** | Bibliographic and library workflows on the same platform as the archive. | [Library](ahgLibraryPlugin/) |
-| **Digital Asset Management** | Media-oriented workflows: derivatives, display profiles, 3D models and asset delivery. | [DAM](ahgDAMPlugin/), [Display](ahgDisplayPlugin/), [3D models](ahg3DModelPlugin/) |
-| **Rights, Privacy & Security** | Institution-level governance: rights statements, embargoes, privacy regimes, security classification and clearance. | [Rights](ahgRightsPlugin/), [Extended rights](ahgExtendedRightsPlugin/), [Privacy](ahgPrivacyPlugin/), [Security clearance](ahgSecurityClearancePlugin/) |
+| Capability | What it gives an institution | Delivered by | Video |
+|---|---|---|---|
+| **IIIF & Advanced Viewing** | Standards-based image delivery and rich viewing: deep zoom, side-by-side comparison, interoperable manifests, Content Search, OCR export. | [IIIF](ahgIiifPlugin/), [Seadragon](ahgSeadragonPlugin/), [Mirador](ahgMiradorPlugin/) | [Watch](https://youtu.be/9tQ9Z79M_H0) |
+| **Digital Preservation** | Fixity, PREMIS events, format identification, BagIt packaging and condition assessment - digital continuity, not just storage. | [Preservation](ahgPreservationPlugin/), [Condition](ahgConditionPlugin/), [OCFL](ahgOcflPlugin/) | [Watch](https://youtu.be/8BKhG_I6iyI) |
+| **Provenance & Audit** | Chain of custody, authenticity and an account of how records and digital outputs were created or changed, including content credentials. | [Provenance](ahgProvenancePlugin/), [Audit trail](ahgAuditTrailPlugin/), [C2PA](ahgC2paPlugin/) | [Watch](https://youtu.be/B6lHwCby1Zk) |
+| **Records in Contexts & Graph Discovery** | Richer relationships between records, agents, functions, places and events, exposed as a graph rather than a tree. | [RiC explorer](ahgRicExplorerPlugin/), [RiC manage](ahgRicManagePlugin/) | |
+| **AI & Semantic Discovery** | Entity extraction, assisted description, embedded metadata extraction and semantic search, with human review kept in the loop. | [AI](ahgAIPlugin/), [Semantic search](ahgSemanticSearchPlugin/), [Metadata extraction](ahgMetadataExtractionPlugin/), [Discovery](ahgDiscoveryPlugin/) | [Watch](https://youtu.be/anX5gHeSt5w) |
+| **Museum Collections** | Collections procedures, object records, loans and exhibitions alongside archival description. | [Collections procedures](ahgSpectrumPlugin/), [Museum](ahgMuseumPlugin/), [Loans](ahgLoanPlugin/), [Exhibitions](ahgExhibitionPlugin/) | [Watch](https://youtu.be/D_uUDuzps7k) |
+| **Library Services** | Bibliographic and library workflows on the same platform as the archive. | [Library](ahgLibraryPlugin/) | |
+| **Digital Asset Management** | Media-oriented workflows: derivatives, display profiles, 3D models and asset delivery. | [DAM](ahgDAMPlugin/), [Display](ahgDisplayPlugin/), [3D models](ahg3DModelPlugin/) | [Watch](https://youtu.be/seJ8o9F46Tc) |
+| **Rights, Privacy & Security** | Institution-level governance: rights statements, embargoes, privacy regimes, security classification and clearance. | [Rights](ahgRightsPlugin/), [Extended rights](ahgExtendedRightsPlugin/), [Privacy](ahgPrivacyPlugin/), [Security clearance](ahgSecurityClearancePlugin/) | [Watch](https://youtu.be/aMzaOsFmq-0) |
+
+Every walkthrough is on the [AHG YouTube channel](https://www.youtube.com/@TheArchiveandHeritageGroup).
 
 **Maturity differs, and the catalogue says so.** IIIF, Seadragon, Mirador,
 Preservation, Provenance, Backup, Favourites and Feedback are packaged as
@@ -260,7 +262,7 @@ Install top to bottom: nothing in a section depends on anything below it.
 | [`ahgActorManagePlugin`](ahgActorManagePlugin/) | 1 | [`ahgCorePlugin`](ahgCorePlugin/) | High-performance actor browse and autocomplete using Laravel Query Builder and direct ES queries. Replaces base AtoM actor browse that causes N+1 query hangs |
 | [`ahgAiCompliancePlugin`](ahgAiCompliancePlugin/) | 6 | [`ahgCorePlugin`](ahgCorePlugin/) | EU AI Act Article 12 record-keeping (PSIS port of ahg/ai-compliance). Tamper-evident receipt chain over every AI inference call using the ahg/inference-receipts library (SHA-256 chain + RFC 8785 JCS + Ed25519) |
 | [`ahgAnnotationsPlugin`](ahgAnnotationsPlugin/) | 1 | [`ahgCorePlugin`](ahgCorePlugin/) | Standalone W3C Web Annotation Data Model + Protocol backend (#146, parity with Heratio ahg-annotations) |
-| [`ahgArchaeologyPlugin`](ahgArchaeologyPlugin/) | 4 | [`ahgCorePlugin`](ahgCorePlugin/) | Archaeological site, find and stratigraphic context recording - single-context recording with Harris Matrix, for excavation archives |
+| [`ahgArchaeologyPlugin`](ahgArchaeologyPlugin/) | 4 | [`ahgCorePlugin`](ahgCorePlugin/) | Archaeological site, find and stratigraphic context recording - single-context recording with Harris Matrix, for excavation archives ([video](https://youtu.be/nGyHa7TyCcI)) |
 | [`ahgArtworkRequestPlugin`](ahgArtworkRequestPlugin/) | 4 | [`ahgCorePlugin`](ahgCorePlugin/) | Staff requests to place artworks in offices and shared spaces. Captures the request, checks availability, notifies the responsible staff and records the decision - the conversation itself stays with people |
 | [`ahgAuditTrailPlugin`](ahgAuditTrailPlugin/) | 6 | [`ahgCorePlugin`](ahgCorePlugin/) | Comprehensive audit trail logging for AtoM with POPIA/NARSSA compliance. Provides AhgAuditService for centralized audit logging |
 | [`ahgBackupPlugin`](ahgBackupPlugin/) | 3 | [`ahgCorePlugin`](ahgCorePlugin/) | Database and file backup with scheduling, restore, upload and retention management |
@@ -281,8 +283,8 @@ Install top to bottom: nothing in a section depends on anything below it.
 | [`ahgDonorManagePlugin`](ahgDonorManagePlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | Donor browse and management using Laravel Query Builder |
 | [`ahgEmailDeliveryPlugin`](ahgEmailDeliveryPlugin/) | 1 | [`ahgCorePlugin`](ahgCorePlugin/) | Email deliverability: bounce capture + suppression list + send-time gate (#145, parity with Heratio EmailBounceController/EmailSuppressionGate) |
 | [`ahgExportPlugin`](ahgExportPlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | Archival export functionality for CSV, EAD, and other formats |
-| [`ahgFavoritesPlugin`](ahgFavoritesPlugin/) | 3 | [`ahgCorePlugin`](ahgCorePlugin/) | Full-featured favorites/bookmarks management with folders, notes, bulk operations, and AJAX toggle |
-| [`ahgFeedbackPlugin`](ahgFeedbackPlugin/) | 2 | [`ahgCorePlugin`](ahgCorePlugin/) | User feedback and suggestions management for archival records |
+| [`ahgFavoritesPlugin`](ahgFavoritesPlugin/) | 3 | [`ahgCorePlugin`](ahgCorePlugin/) | Full-featured favorites/bookmarks management with folders, notes, bulk operations, and AJAX toggle ([video](https://youtu.be/84hLXnTmO5k)) |
+| [`ahgFeedbackPlugin`](ahgFeedbackPlugin/) | 2 | [`ahgCorePlugin`](ahgCorePlugin/) | User feedback and suggestions management for archival records ([video](https://youtu.be/Y4zv4cjy-pI)) |
 | [`ahgFormsPlugin`](ahgFormsPlugin/) | 6 | [`ahgCorePlugin`](ahgCorePlugin/) | Configurable metadata entry forms per repository - drag-drop form builder, template library, field assignments, draft saving, and import/export |
 | [`ahgFunctionManagePlugin`](ahgFunctionManagePlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | ISDF function browse, view, edit, and delete management using Laravel Query Builder |
 | [`ahgFunctionsDocsPlugin`](ahgFunctionsDocsPlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | Auto-generated, browsable catalogue of routes, CLI tasks and services (#148, parity with Heratio ahg-functions-docs) |

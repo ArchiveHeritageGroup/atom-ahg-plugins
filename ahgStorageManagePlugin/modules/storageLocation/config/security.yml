@@ -1,5 +1,7 @@
-# Storage locations say where holdings physically sit, so writes are
-# administrator-only. Reads follow the strongroom module next door.
+# Storage locations say where holdings physically sit. Writes are
+# administrator-only; reads are for staff who can see physical storage records
+# (the physicalobject index credentials), not the public (8 Oct 2026). The
+# strongroom module next door follows the same rule.
 #
 # This file is not optional. The application default in
 # apps/qubit/config/security.yml is `is_secure: false`, so a module without a
@@ -7,19 +9,24 @@
 # delete - reachable by an anonymous visitor. The comment at the top of
 # storageManage/config/security.yml records the last time that happened here.
 all:
-  is_secure: false
+  is_secure: true
+  credentials: [[ administrator, contributor, editor, translator ]]
 
 browse:
-  is_secure: false
+  is_secure: true
+  credentials: [[ administrator, contributor, editor, translator ]]
 
 view:
-  is_secure: false
+  is_secure: true
+  credentials: [[ administrator, contributor, editor, translator ]]
 
 apiLocations:
-  is_secure: false
+  is_secure: true
+  credentials: [[ administrator, contributor, editor, translator ]]
 
 apiTree:
-  is_secure: false
+  is_secure: true
+  credentials: [[ administrator, contributor, editor, translator ]]
 
 create:
   is_secure: true
