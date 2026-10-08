@@ -1397,6 +1397,9 @@ APPLIER;
         'accession',                // accrual source on /accession/add
     ];
 
+    /** Posted AHG sections the guard leaves alone (see filterResourceValues()). */
+    protected const AHG_NAMESPACES = ['caais'];
+
     protected const RESOURCE_FIELDS = [
         'resource',                 // accession donor, relation targets
         'type', 'geographicSubregion', 'thematicArea',
@@ -1774,6 +1777,16 @@ APPLIER;
         $output = [];
 
         foreach ($input as $key => $value) {
+            // AHG form sections that base never parses as routes. Their field
+            // names can collide with RESOURCE_FIELDS - CAAIS posts a language
+            // code as caais[languages][n][language] - and dropping those codes
+            // protects nothing while silently losing what was entered.
+            if (is_array($value) && in_array((string) $key, self::AHG_NAMESPACES, true)) {
+                $output[$key] = $value;
+
+                continue;
+            }
+
             if (is_array($value)) {
                 $output[$key] = self::filterResourceValues($value, $context, $changed);
 
