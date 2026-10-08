@@ -44,3 +44,7 @@ delete:
 moveObjects:
   is_secure: true
   credentials: administrator
+
+placeObjects:
+  is_secure: true
+  credentials: administrator

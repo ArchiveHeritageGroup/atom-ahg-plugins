@@ -37,6 +37,9 @@
         "Export storage report link",
         "Theme-compatible templates (SimplePager)",
         "Hierarchical storage locations with parent, capacity and type",
-        "Movement log: append-only history of object and location moves, with bulk moves grouped by batch"
+        "Movement log: append-only history of object and location moves, with bulk moves grouped by batch",
+        "Location types from the Dropdown Manager",
+        "Containers inside containers, with contents and capacity counted down the tree",
+        "Migration of the flat location fields into the location tree"
     ]
 }

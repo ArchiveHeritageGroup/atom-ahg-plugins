@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS ahg_storage_location (
     name            VARCHAR(255) NOT NULL,
     slug            VARCHAR(255) NOT NULL,
     description     TEXT,
-    location_type   VARCHAR(50) DEFAULT NULL COMMENT 'building, floor, room, aisle, bay, rack, shelf, container, storage_unit',
+    location_type   VARCHAR(50) DEFAULT NULL COMMENT 'a code from ahg_dropdown, taxonomy storage_location_type',
     parent_id       BIGINT UNSIGNED DEFAULT NULL,
     capacity_value  DECIMAL(10,2) DEFAULT NULL,
     capacity_unit   VARCHAR(50) DEFAULT NULL COMMENT 'cubic_metres, linear_metres, items',
@@ -189,5 +189,23 @@ CREATE TABLE IF NOT EXISTS ahg_storage_movement (
     CONSTRAINT fk_movement_from FOREIGN KEY (from_location_id) REFERENCES ahg_storage_location(id) ON DELETE RESTRICT,
     CONSTRAINT fk_movement_to   FOREIGN KEY (to_location_id)   REFERENCES ahg_storage_location(id) ON DELETE RESTRICT
 );
+
+-- The location types, as a managed list (atom-ahg-plugins#193). They used to be
+-- nine words in the column comment above and nine hardcoded options in each
+-- form, so an archive that keeps things in a "cabinet" or a "drawer" had to
+-- file them as something else. ahg_dropdown belongs to ahgCorePlugin, which
+-- this plugin depends on. INSERT IGNORE on (taxonomy, code): a re-run adds only
+-- what is missing and leaves an archive's own labels, order and retirements
+-- alone.
+INSERT IGNORE INTO ahg_dropdown (taxonomy, taxonomy_label, code, label, sort_order) VALUES
+('storage_location_type', 'Storage Location Type', 'building',     'Building',     10),
+('storage_location_type', 'Storage Location Type', 'floor',        'Floor',        20),
+('storage_location_type', 'Storage Location Type', 'room',         'Room',         30),
+('storage_location_type', 'Storage Location Type', 'aisle',        'Aisle',        40),
+('storage_location_type', 'Storage Location Type', 'bay',          'Bay',          50),
+('storage_location_type', 'Storage Location Type', 'rack',         'Rack',         60),
+('storage_location_type', 'Storage Location Type', 'shelf',        'Shelf',        70),
+('storage_location_type', 'Storage Location Type', 'container',    'Container',    80),
+('storage_location_type', 'Storage Location Type', 'storage_unit', 'Storage Unit', 90);
 
 SET FOREIGN_KEY_CHECKS = 1;

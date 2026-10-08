@@ -61,15 +61,9 @@
               <label for="location_type"><?php echo __('Location Type') ?> *</label>
               <select class="form-control" id="location_type" name="location_type" required>
                 <option value=""><?php echo __('Select a type') ?></option>
-                <option value="building"><?php echo __('Building') ?></option>
-                <option value="floor"><?php echo __('Floor') ?></option>
-                <option value="room"><?php echo __('Room') ?></option>
-                <option value="aisle"><?php echo __('Aisle') ?></option>
-                <option value="bay"><?php echo __('Bay') ?></option>
-                <option value="rack"><?php echo __('Rack') ?></option>
-                <option value="shelf"><?php echo __('Shelf') ?></option>
-                <option value="container"><?php echo __('Container') ?></option>
-                <option value="storage_unit"><?php echo __('Storage Unit') ?></option>
+                <?php foreach ($types as $code => $label) { ?>
+                  <option value="<?php echo htmlspecialchars((string) $code, ENT_QUOTES) ?>"><?php echo __($label) ?></option>
+                <?php } ?>
               </select>
             </div>
 

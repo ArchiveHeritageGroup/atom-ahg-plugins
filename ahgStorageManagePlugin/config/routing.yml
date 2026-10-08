@@ -88,6 +88,10 @@ storagelocation_move_objects:
   url: /storagelocation/moveObjects
   param: { module: storageLocation, action: moveObjects }
 
+storagelocation_place_objects:
+  url: /storagelocation/placeObjects
+  param: { module: storageLocation, action: placeObjects }
+
 storagelocation_api_locations:
   url: /storagelocation/api/locations
   param: { module: storageLocation, action: apiLocations }

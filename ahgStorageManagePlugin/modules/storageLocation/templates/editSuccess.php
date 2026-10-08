@@ -61,15 +61,13 @@
               <label for="location_type"><?php echo __('Location Type') ?> *</label>
               <select class="form-control" id="location_type" name="location_type" required>
                 <option value=""><?php echo __('Select a type') ?></option>
-                <option value="building" <?php echo ($location['location_type'] == 'building' ? 'selected' : '') ?>><?php echo __('Building') ?></option>
-                <option value="floor" <?php echo ($location['location_type'] == 'floor' ? 'selected' : '') ?>><?php echo __('Floor') ?></option>
-                <option value="room" <?php echo ($location['location_type'] == 'room' ? 'selected' : '') ?>><?php echo __('Room') ?></option>
-                <option value="aisle" <?php echo ($location['location_type'] == 'aisle' ? 'selected' : '') ?>><?php echo __('Aisle') ?></option>
-                <option value="bay" <?php echo ($location['location_type'] == 'bay' ? 'selected' : '') ?>><?php echo __('Bay') ?></option>
-                <option value="rack" <?php echo ($location['location_type'] == 'rack' ? 'selected' : '') ?>><?php echo __('Rack') ?></option>
-                <option value="shelf" <?php echo ($location['location_type'] == 'shelf' ? 'selected' : '') ?>><?php echo __('Shelf') ?></option>
-                <option value="container" <?php echo ($location['location_type'] == 'container' ? 'selected' : '') ?>><?php echo __('Container') ?></option>
-                <option value="storage_unit" <?php echo ($location['location_type'] == 'storage_unit' ? 'selected' : '') ?>><?php echo __('Storage Unit') ?></option>
+                <?php foreach ($types as $code => $label) { ?>
+                  <option value="<?php echo htmlspecialchars((string) $code, ENT_QUOTES) ?>" <?php echo ($location['location_type'] == $code ? 'selected' : '') ?>><?php echo __($label) ?></option>
+                <?php } ?>
+                <?php // A type retired from the list since this location was made: keep it selectable here, or saving would change it. ?>
+                <?php if ($location['location_type'] && !isset($types[$location['location_type']])) { ?>
+                  <option value="<?php echo $location['location_type'] ?>" selected><?php echo __($location['location_type']) ?></option>
+                <?php } ?>
               </select>
             </div>
 

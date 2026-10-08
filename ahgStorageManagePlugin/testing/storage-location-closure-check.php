@@ -37,7 +37,7 @@ $sql = file_get_contents(dirname(__DIR__).'/database/install.sql');
 $sql = substr($sql, strpos($sql, 'CREATE TABLE IF NOT EXISTS ahg_storage_location ('));
 
 $db = new DB;
-$base = ['driver'=>'mysql','host'=>'localhost','username'=>$ini['user'],'password'=>$ini['password'],'charset'=>'utf8mb4','collation'=>'utf8mb4_unicode_ci'];
+$base = ['driver'=>'mysql','host'=>$ini['host'] ?? 'localhost','port'=>$ini['port'] ?? 3306,'username'=>$ini['user'],'password'=>$ini['password'],'charset'=>'utf8mb4','collation'=>'utf8mb4_unicode_ci'];
 $db->addConnection($base + ['database'=>'mysql'], 'admin');
 $db->addConnection($base + ['database'=>$scratch]);
 $db->setAsGlobal();
@@ -49,6 +49,9 @@ register_shutdown_function(function () use ($scratch) { DB::connection('admin')-
 // the slice of install.sql loaded here will not create without them.
 DB::unprepared('CREATE TABLE physical_object (id INT NOT NULL PRIMARY KEY);');
 DB::unprepared('CREATE TABLE physical_object_i18n (id INT NOT NULL, culture VARCHAR(16) NOT NULL, name VARCHAR(255), PRIMARY KEY (id, culture));');
+// ahg_dropdown belongs to ahgCorePlugin; install.sql seeds the location types
+// into it, so the scratch database needs the table to exist.
+DB::unprepared('CREATE TABLE ahg_dropdown (id INT AUTO_INCREMENT PRIMARY KEY, taxonomy VARCHAR(100) NOT NULL, taxonomy_label VARCHAR(255) NOT NULL, code VARCHAR(100) NOT NULL, label VARCHAR(255) NOT NULL, sort_order INT DEFAULT 0, is_active TINYINT(1) DEFAULT 1, UNIQUE KEY uk_taxonomy_code (taxonomy, code));');
 DB::unprepared($sql);
 $s = new AhgStorageManage\Services\StorageLocationService();
 $fail=0; function ok($c,$m){global $fail; echo ($c?"PASS ":"FAIL ").$m."\n"; if(!$c)$fail++;}

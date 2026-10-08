@@ -17,6 +17,9 @@ class storageLocationActions extends AhgController
     /** Rows per page, matching the SimplePager the rest of this plugin uses. */
     public const PER_PAGE = 30;
 
+    /** How many unplaced objects the view offers at once; the search narrows it. */
+    public const PLACE_LIMIT = 100;
+
     protected StorageLocationService $locationService;
     protected StorageMovementService $movementService;
 
@@ -65,7 +68,7 @@ class storageLocationActions extends AhgController
         $this->page = $page;
         $this->pages = $pages;
         $this->tree = $this->locationService->getLocationTree();
-        $this->types = StorageLocationService::TYPES;
+        $this->types = $this->locationService->types();
         $this->search = $search;
         $this->type = $type;
         $this->parentId = $parentId;
@@ -81,6 +84,22 @@ class storageLocationActions extends AhgController
         $this->descendants = $this->locationService->getDescendants($id);
         $this->objects = $this->movementService->objectsIn($id);
         $this->movements = $this->movementService->historyForLocation($id, 20);
+        $this->types = $this->locationService->types();
+        $this->rollup = $this->locationService->capacityRollup($id);
+
+        // What sits in the locations beneath this one: the boxes in the cartons
+        // on this pallet. Objects held here directly are already listed above.
+        $this->beneath = array_values(array_filter(
+            $this->movementService->objectsUnder($id),
+            static function ($object) { return (int) $object['depth'] > 0; }
+        ));
+
+        // Objects with no place yet, so one can be given this one. Only worked
+        // out for somebody who can act on it.
+        $this->unplacedSearch = trim((string) $request->getParameter('q', ''));
+        $this->unplaced = $this->getUser()->hasCredential('administrator')
+            ? $this->movementService->unplacedObjects($this->unplacedSearch, self::PLACE_LIMIT)
+            : ['rows' => [], 'total' => 0];
         // Somewhere to move things to: anywhere but here.
         $this->destinations = array_values(array_filter(
             $this->locationService->getLocations(),
@@ -134,6 +153,51 @@ class storageLocationActions extends AhgController
         $this->redirect(['module' => 'storageLocation', 'action' => 'view', 'id' => $fromId]);
     }
 
+    /**
+     * Put objects that have no place yet into this location, in one batch.
+     *
+     * This is how anything enters the tree. Until it existed the only move the
+     * interface offered was out of a location, and nothing had ever been put in
+     * one.
+     */
+    public function executePlaceObjects($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $toId = (int) $request->getParameter('id');
+
+        if (!$toId) {
+            $this->forward404();
+        }
+
+        $objectIds = array_filter(array_map('intval', (array) $request->getParameter('objects', [])));
+
+        if (!$objectIds) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('Select at least one object to place.'));
+            $this->redirect(['module' => 'storageLocation', 'action' => 'view', 'id' => $toId]);
+        }
+
+        try {
+            $placed = $this->movementService->moveObjects($objectIds, $toId, [
+                'note' => $request->getParameter('note'),
+            ]);
+
+            $this->getUser()->setFlash('notice', $this->context->i18n->__(
+                '%1% object(s) placed here.',
+                ['%1%' => count($placed)]
+            ));
+        } catch (Exception $e) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__(
+                'Error placing objects: %1%',
+                ['%1%' => $e->getMessage()]
+            ));
+        }
+
+        $this->redirect(['module' => 'storageLocation', 'action' => 'view', 'id' => $toId]);
+    }
+
     public function executeCreate($request)
     {
         $label = $this->config('app_ui_label_storage_location', 'Storage Location');
@@ -156,7 +220,7 @@ class storageLocationActions extends AhgController
         // Flat, so every level can be chosen as a parent. The hierarchical form
         // returns roots only, which made rooms impossible to nest under a floor.
         $this->allLocations = $this->locationService->getLocations();
-        $this->types = StorageLocationService::TYPES;
+        $this->types = $this->locationService->types();
         $this->location = null;
     }
 
@@ -189,7 +253,7 @@ class storageLocationActions extends AhgController
 
         $id = (int) $this->location['id'];
         $this->path = $this->locationService->getLocationPath($id);
-        $this->types = StorageLocationService::TYPES;
+        $this->types = $this->locationService->types();
 
         // A location cannot be its own parent, and cannot move inside its own
         // subtree - so neither belongs in the list.

@@ -90,7 +90,7 @@ with `level` carried alongside for ordering and recomputed whenever a location m
 | URL | Who |
 |---|---|
 | `/storageLocation/browse`, `/view?id=`, `/apiLocations`, `/apiTree`, `/apiSearch` | Anyone |
-| `/storageLocation/create`, `/save`, `/edit`, `/update`, `/delete` | Administrators |
+| `/storageLocation/create`, `/save`, `/edit`, `/update`, `/delete`, `/moveObjects`, `/placeObjects` | Administrators |
 
 `modules/storageLocation/config/security.yml` is what makes that table true. The
 application default is `is_secure: false`, so a module without its own security.yml
@@ -99,6 +99,82 @@ recorded at the top of `modules/storageManage/config/security.yml`.
 
 A location with children refuses to be deleted, rather than letting the foreign
 key quietly promote its children to the root.
+
+The location types are a managed list: the Dropdown Manager taxonomy
+`storage_location_type`, seeded with the nine above by `install.sql`. An archive
+that keeps things in a plan cabinet adds "cabinet" there and it appears in the
+forms. A type switched off is no longer offered; locations that already carry it
+keep it. If the list is empty, or `ahg_dropdown` is not there, the nine shipped
+types are used, because a form with no types in it cannot save anything.
+
+### Containers inside containers
+
+A box in a carton on a pallet in a bay is modelled with the tree, not beside it.
+The carton and the pallet are **locations** (types `container` and
+`storage_unit`); the box is the **physical object** placed in the carton. There
+is no parent link between physical objects.
+
+That choice is what makes moving a pallet one event. The pallet is a location,
+so moving it is a location move, logged once, and everything on it goes with it
+because it is still in the same carton on the same pallet. Had the carton been a
+physical object holding other physical objects, relocating it would have meant
+rewriting every box inside.
+
+A location's page lists what is held in it directly and, separately, what is
+held in every location beneath it, each with the location it is actually in.
+
+### Placing objects
+
+A location's page offers the physical objects that have no place yet, with a
+search by name, to administrators. Selecting some and pressing **Place here**
+is one batch in the movement log, each a first placement. Objects that already
+have a place are moved from the page of the location they are in.
+
+### Capacity
+
+Each location may declare a capacity and a unit. A location's page shows its own
+figure and, apart from it, the sum of what is declared beneath, **per unit**.
+Units are never added to each other, and the two figures are never added
+together: an archive may declare capacity on a room, on its shelves, or on both,
+and adding them would count the same space twice.
+
+What is held is counted in physical objects - here, beneath, and in all. The
+plugin does not know how much of a shelf a box takes up, so it does not claim a
+percentage full.
+
+### Bringing the old location fields into the tree
+
+Before the tree, where a box was kept was recorded in three places:
+`physical_object_extended` (building, floor, room, aisle, bay, rack, shelf), a
+strongroom assignment, and the free-text `location` on the physical object.
+
+    php symfony storage:migrate-flat-locations            # report only
+    php symfony storage:migrate-flat-locations --apply
+
+For each physical object without a place it finds or creates the chain of
+locations the structured fields name and places the object in the innermost one.
+Failing those it uses the strongroom, which becomes a room. Every strongroom
+becomes a room whether or not anything is in it, with its description and
+capacity.
+
+- Nothing is deleted or overwritten. The old fields stay as they were.
+- It can be run again. Objects already placed are left alone and existing
+  locations are reused, matched on parent, type and name without regard to case.
+- It is one transaction. If it cannot finish, nothing is changed.
+- **Free text is not guessed at.** An object with only free text is listed and
+  left. If an archive's free text always names, say, a room, pass
+  `--free-text-type=room` and each distinct text becomes a root location of that
+  type.
+
+Not carried over, because they are not locations of a physical object:
+`information_object_physical_location` records where a description sits *inside*
+its container (shelf, row, folder), and `spectrum_location` belongs to
+`ahgSpectrumPlugin` and records where a described object is, not a container.
+
+    php ahgStorageManagePlugin/testing/storage-contents-check.php /path/to/client.cnf
+
+checks the type list, the roll-up, nested containers, placing and the migration
+against a throwaway database.
 
 ## Movement log
 

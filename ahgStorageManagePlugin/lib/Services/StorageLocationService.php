@@ -29,10 +29,20 @@ class StorageLocationService
     /** Depth ceiling for tree assembly and the closure rebuild. */
     public const MAX_DEPTH = 100;
 
-    /** The values location_type accepts; mirrored in the column COMMENT. */
+    /**
+     * The location types this plugin ships with. The list an archive actually
+     * uses is the Dropdown Manager taxonomy below, where it can be added to and
+     * reordered; this is what types() falls back to when that list is not there.
+     */
     public const TYPES = ['building', 'floor', 'room', 'aisle', 'bay', 'rack', 'shelf', 'container', 'storage_unit'];
 
+    /** The ahg_dropdown taxonomy that holds the location types. */
+    public const TYPE_TAXONOMY = 'storage_location_type';
+
     protected string $culture;
+
+    /** @var null|array<string, string> code => label, read once per instance */
+    protected ?array $types = null;
 
     public function __construct(string $culture = 'en')
     {
@@ -151,6 +161,121 @@ class StorageLocationService
 
             return (bool) DB::table('ahg_storage_location')->where('id', $id)->delete();
         });
+    }
+
+    /**
+     * The location types, code => label, in the order the archive set.
+     *
+     * Read from the Dropdown Manager (ahg_dropdown, taxonomy
+     * storage_location_type), so a type can be added, renamed or retired without
+     * a release. Falls back to the shipped list when the table is not there or
+     * the taxonomy is empty: a location form with no types in it cannot save
+     * anything, and that is worse than an out-of-date list.
+     *
+     * A type switched off in the Dropdown Manager is no longer offered, and
+     * locations that already carry it keep it.
+     */
+    public function types(): array
+    {
+        if (null !== $this->types) {
+            return $this->types;
+        }
+
+        $types = [];
+
+        if (DB::schema()->hasTable('ahg_dropdown')) {
+            $rows = DB::table('ahg_dropdown')
+                ->where('taxonomy', self::TYPE_TAXONOMY)
+                ->where('is_active', 1)
+                ->orderBy('sort_order')
+                ->orderBy('label')
+                ->get(['code', 'label'])->all();
+
+            foreach ($rows as $row) {
+                $types[(string) $row->code] = (string) $row->label;
+            }
+        }
+
+        if (!$types) {
+            foreach (self::TYPES as $code) {
+                $types[$code] = ucfirst(str_replace('_', ' ', $code));
+            }
+        }
+
+        return $this->types = $types;
+    }
+
+    /** The label for a type code, or the code itself for one no longer listed. */
+    public function typeLabel(?string $code): string
+    {
+        if (null === $code || '' === $code) {
+            return '';
+        }
+
+        return $this->types()[$code] ?? ucfirst(str_replace('_', ' ', $code));
+    }
+
+    /**
+     * What a location can hold, and what it does hold, counted down the tree.
+     *
+     * Capacity is whatever was declared on each location, in whatever unit, so
+     * it is summed per unit and never across units: forty boxes and twelve
+     * linear metres are not fifty-two of anything. A location's own figure and
+     * the sum of what is declared beneath it are reported apart, because an
+     * archive may declare capacity on the room, on its shelves, or on both, and
+     * adding the two would count the same space twice.
+     *
+     * Occupancy is a count of physical objects. That is the one thing the
+     * movement log knows for certain; it does not know how many linear metres a
+     * box takes up.
+     *
+     * @return array own, beneath (unit => total), declared_beneath,
+     *               objects_here, objects_beneath, objects_total
+     */
+    public function capacityRollup(int $id): array
+    {
+        $own = $this->getLocationById($id);
+
+        if (null === $own) {
+            throw new Exception('Storage location not found');
+        }
+
+        $beneath = [];
+        $declared = 0;
+
+        $rows = DB::table('ahg_storage_location_closure as c')
+            ->join('ahg_storage_location as l', 'l.id', '=', 'c.descendant')
+            ->where('c.ancestor', $id)
+            ->where('c.depth', '>', 0)
+            ->whereNotNull('l.capacity_value')
+            ->groupBy('l.capacity_unit')
+            ->orderBy('l.capacity_unit')
+            ->selectRaw('l.capacity_unit as unit, SUM(l.capacity_value) as total, COUNT(*) as locations')
+            ->get()->all();
+
+        foreach ($rows as $row) {
+            $beneath[(string) ($row->unit ?? '')] = (float) $row->total;
+            $declared += (int) $row->locations;
+        }
+
+        $here = (int) DB::table('ahg_physical_object_location')->where('location_id', $id)->count();
+
+        $total = (int) DB::table('ahg_storage_location_closure as c')
+            ->join('ahg_physical_object_location as pol', 'pol.location_id', '=', 'c.descendant')
+            ->where('c.ancestor', $id)
+            ->count();
+
+        return [
+            'own' => null === $own['capacity_value'] ? null : [
+                'value' => (float) $own['capacity_value'],
+                'unit' => (string) ($own['capacity_unit'] ?? ''),
+            ],
+            'beneath' => $beneath,
+            'declared_beneath' => $declared,
+            'objects_here' => $here,
+            'objects_beneath' => $total - $here,
+            'objects_total' => $total,
+        ];
     }
 
     /** One location, or null when there is no such row. */
@@ -310,7 +435,11 @@ class StorageLocationService
                 throw new Exception('Location type is required');
             }
 
-            if (!in_array($data['location_type'], self::TYPES, true)) {
+            // A location being edited may keep a type that has since been
+            // retired from the list; it may not be given one.
+            $keeping = !$creating && ($this->getLocationById($id)['location_type'] ?? null) === $data['location_type'];
+
+            if (!$keeping && !array_key_exists((string) $data['location_type'], $this->types())) {
                 throw new Exception('Invalid location type');
             }
 

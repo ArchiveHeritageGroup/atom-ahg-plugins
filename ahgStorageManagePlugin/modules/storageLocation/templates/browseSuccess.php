@@ -36,15 +36,9 @@
             <div class="form-group">
               <select class="form-control" name="type">
                 <option value=""><?php echo __('All Types') ?></option>
-                <option value="building" <?php echo ($type == 'building' ? 'selected' : '') ?>><?php echo __('Building') ?></option>
-                <option value="floor" <?php echo ($type == 'floor' ? 'selected' : '') ?>><?php echo __('Floor') ?></option>
-                <option value="room" <?php echo ($type == 'room' ? 'selected' : '') ?>><?php echo __('Room') ?></option>
-                <option value="aisle" <?php echo ($type == 'aisle' ? 'selected' : '') ?>><?php echo __('Aisle') ?></option>
-                <option value="bay" <?php echo ($type == 'bay' ? 'selected' : '') ?>><?php echo __('Bay') ?></option>
-                <option value="rack" <?php echo ($type == 'rack' ? 'selected' : '') ?>><?php echo __('Rack') ?></option>
-                <option value="shelf" <?php echo ($type == 'shelf' ? 'selected' : '') ?>><?php echo __('Shelf') ?></option>
-                <option value="container" <?php echo ($type == 'container' ? 'selected' : '') ?>><?php echo __('Container') ?></option>
-                <option value="storage_unit" <?php echo ($type == 'storage_unit' ? 'selected' : '') ?>><?php echo __('Storage Unit') ?></option>
+                <?php foreach ($types as $code => $label) { ?>
+                  <option value="<?php echo htmlspecialchars((string) $code, ENT_QUOTES) ?>" <?php echo ($type == $code ? 'selected' : '') ?>><?php echo __($label) ?></option>
+                <?php } ?>
               </select>
             </div>
             <button type="submit" class="btn btn-primary"><?php echo __('Search') ?></button>
@@ -82,7 +76,7 @@
                     <?php echo str_repeat('&nbsp;&nbsp;', $location['level']) ?>
                     <?php echo link_to($location['name'], 'storageLocation/view?id=' . $location['id']) ?>
                   </td>
-                  <td><?php echo __($location['location_type']) ?></td>
+                  <td><?php echo __($types[$location['location_type']] ?? $location['location_type']) ?></td>
                   <td><?php echo $location['level'] ?></td>
                   <td>
                     <?php if ($location['capacity_value']): ?>
