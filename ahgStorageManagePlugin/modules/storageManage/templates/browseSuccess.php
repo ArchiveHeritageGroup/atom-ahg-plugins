@@ -70,6 +70,10 @@
     <ul class="actions mb-3 nav gap-2">
       <li><?php echo link_to(__('Add new'), ['module' => 'physicalobject', 'action' => 'add'], ['class' => 'btn atom-btn-outline-light']); ?></li>
       <li><?php echo link_to(__('Export storage report'), ['module' => 'physicalobject', 'action' => 'holdingsReportExport'], ['class' => 'btn atom-btn-outline-light']); ?></li>
+      <?php // The places boxes sit in: one click from the boxes, rather than a second menu entry. ?>
+      <?php if (\AhgStorageManage\Services\StoragePlacementService::available()) { ?>
+        <li><?php echo link_to(__('Storage locations'), ['module' => 'storageLocation', 'action' => 'browse'], ['class' => 'btn atom-btn-outline-light']); ?></li>
+      <?php } ?>
     </ul>
   <?php } ?>
 <?php end_slot(); ?>

@@ -23,17 +23,6 @@ $hasMuseum = checkPluginEnabled('ahgMuseumPlugin');
 $hasGallery = checkPluginEnabled('ahgGalleryPlugin');
 $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin');
 $hasRic = checkPluginEnabled('ahgRicManagePlugin');
-
-// Storage locations (ahgStorageManagePlugin) sit in Manage beside Physical
-// storage, for the same staff who can see physical storage records.
-$hasStorageLocations = false;
-if ($sf_user->hasCredential(['administrator', 'contributor', 'editor', 'translator'], false)) {
-    try {
-        $hasStorageLocations = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_storage_location');
-    } catch (Exception $e) {
-        $hasStorageLocations = false;
-    }
-}
 ?>
 <?php foreach ([$addMenu, $manageMenu, $importMenu, $adminMenu] as $menu) { ?>
   <?php $menuName = $menu ? $menu->getName() : ''; ?>
@@ -83,9 +72,6 @@ if ($sf_user->hasCredential(['administrator', 'contributor', 'editor', 'translat
                   ['class' => 'dropdown-item']
               ); ?>
             </li>
-            <?php if ($hasStorageLocations && 'browsePhysicalObjects' === $child->name) { ?>
-              <li id="node_storageLocations"><a class="dropdown-item" href="<?php echo url_for(['module' => 'storageLocation', 'action' => 'browse']); ?>"><?php echo __('Storage locations'); ?></a></li>
-            <?php } ?>
           <?php } ?>
         <?php } ?>
 
