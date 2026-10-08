@@ -568,6 +568,20 @@ sudo -u www-data php symfony search:populate
 sudo systemctl restart php8.3-fpm nginx
 ```
 
+### Session length
+
+An idle session ends at the shorter of two limits: AtoM's `timeout` in
+`config/factories.yml` (1800 seconds by default) and PHP's `session.gc_maxlifetime`
+in `php.ini` (1440 seconds on Ubuntu). Ubuntu's session clean-up job reads
+`php.ini`, so the PHP limit wins unless it is raised. To get 30 minutes, set
+`session.gc_maxlifetime = 1800` in `/etc/php/8.3/fpm/php.ini` and restart php-fpm
+(the clean-up job uses the largest value across PHP's configurations, so the fpm
+file is enough); for longer, raise both values together.
+
+The theme warns signed-in users two minutes before the session ends, offers
+"Stay signed in", and holds a save made after it ends, so typed edits stay on
+the page while the user signs in again in another tab (#207).
+
 ### If the AtoM root is under /usr/share/nginx
 
 Some php-fpm packaging sets `ProtectSystem=full`, which mounts `/usr` read-only for the

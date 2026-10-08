@@ -69,6 +69,24 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="/plugins/ahgHelpPlugin/js/help-search.js?v=1.1.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php } ?>
 
+<?php // Session guard (#207): warns before an idle session ends and holds a
+      // save made after it, so typed edits are not lost to the login page.
+      // Signed-in users only; the length comes from the server. ?>
+<?php $ahgSessionUser = sfContext::getInstance()->getUser(); ?>
+<?php if ($ahgSessionUser->isAuthenticated()) { ?>
+  <?php require_once sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/sessionStatus/actions/actions.class.php'; ?>
+  <script src="/plugins/ahgThemeB5Plugin/web/js/session-guard.js?v=1.0.0"
+    data-timeout="<?php echo (int) sessionStatusActions::effectiveTimeout($ahgSessionUser); ?>"
+    data-status-url="<?php echo url_for('@ahg_session_status'); ?>"
+    data-login-url="<?php echo url_for(['module' => 'user', 'action' => 'login']); ?>"
+    data-text-warn="<?php echo __('You will be signed out in %1% because you have not been active.'); ?>"
+    data-text-stay="<?php echo __('Stay signed in'); ?>"
+    data-text-ended="<?php echo __('Your session has ended because you were not active. Anything you typed on this page is still here: sign in again in a new tab, then come back and save.'); ?>"
+    data-text-signin="<?php echo __('Sign in (new tab)'); ?>"
+    data-text-held="<?php echo __('Not saved yet: your session has ended. Your changes are still on this page. Sign in again in a new tab, then come back here and press Save.'); ?>"
+    <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<?php } ?>
+
 <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_whatsappBubble.php'); ?>
 
 </body>

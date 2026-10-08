@@ -1,0 +1,4 @@
+# Answers "am I still signed in?", so it must answer signed-out callers too
+# instead of sending them to the login page. It reveals nothing else.
+all:
+  is_secure: false

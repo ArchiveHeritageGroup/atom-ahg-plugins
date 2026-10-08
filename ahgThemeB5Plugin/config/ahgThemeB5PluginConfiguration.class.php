@@ -36,6 +36,14 @@ class ahgThemeB5PluginConfiguration extends sfPluginConfiguration
         // Indicate this is a Bootstrap 5 theme
         sfConfig::set('app_b5_theme', true);
 
+        // Session guard (#207): GET /session/status for web/js/session-guard.js.
+        $enabledModules = sfConfig::get('sf_enabled_modules', []);
+        $enabledModules[] = 'sessionStatus';
+        sfConfig::set('sf_enabled_modules', $enabledModules);
+        $this->dispatcher->connect('routing.load_configuration', function (sfEvent $event) {
+            $event->getSubject()->prependRoute('ahg_session_status', new sfRoute('/session/status', ['module' => 'sessionStatus', 'action' => 'index']));
+        });
+
         // Check for and warn about competing themes
         $this->checkCompetingThemes($plugins, $pluginsDir);
     }
