@@ -4,6 +4,8 @@ namespace AhgIngestPlugin\Services;
 
 use Illuminate\Database\Capsule\Manager as DB;
 
+require_once __DIR__.'/HierarchyPlanner.php';
+
 class IngestService
 {
     // ─── AtoM CSV Field Definitions ─────────────────────────────────────
@@ -2182,22 +2184,26 @@ class IngestService
             }
         }
 
-        // Second pass: validate parent references (description mode only)
+        // Second pass: hierarchy (description mode only). A parentId must be a
+        // legacyId in this file or the slug of an existing description - the two
+        // things the commit can place under. A row that fails is not committed,
+        // rather than landing quietly at the top level.
         if (!$isAccession && $session->parent_placement === 'csv_hierarchy') {
+            $bad = HierarchyPlanner::problems($rows->all());
             foreach ($rows as $row) {
-                if (!empty($row->parent_id_ref) && !isset($legacyIds[$row->parent_id_ref])) {
-                    // Check if it exists in AtoM already
-                    $exists = DB::table('slug')->where('slug', $row->parent_id_ref)->exists()
-                        || DB::table('information_object')
-                            ->join('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')
-                            ->where('information_object_i18n.title', $row->parent_id_ref)
-                            ->exists();
-
-                    if (!$exists) {
-                        $this->addValidation($sessionId, $row->row_number, 'error', 'parentId',
-                            "Parent reference '{$row->parent_id_ref}' not found in batch or AtoM");
-                        $stats['errors']++;
-                    }
+                if (!empty($row->parent_id_ref) && !isset($legacyIds[$row->parent_id_ref]) && !isset($bad[$row->row_number])
+                    && !DB::table('slug')->join('information_object as io', 'io.id', '=', 'slug.object_id')->where('slug.slug', $row->parent_id_ref)->exists()) {
+                    $bad[$row->row_number] = "Parent reference '{$row->parent_id_ref}' is neither a legacyId in this file nor the slug of an existing description";
+                }
+            }
+            foreach ($rows as $row) {
+                if (!isset($bad[$row->row_number])) {
+                    continue;
+                }
+                $this->addValidation($sessionId, $row->row_number, 'error', 'parentId', $bad[$row->row_number]);
+                $stats['errors']++;
+                if (DB::table('ingest_row')->where('id', $row->id)->where('is_valid', 1)->update(['is_valid' => 0])) {
+                    $stats['valid']--;
                 }
             }
         }
@@ -2274,6 +2280,10 @@ class IngestService
             ->orderBy('row_number')
             ->get()
             ->toArray();
+
+        // Parents first, as the commit does: a child listed before its parent
+        // must still appear under it, not at the top of the tree.
+        $rows = HierarchyPlanner::order($rows);
 
         // Build lookup by legacyId
         $byLegacy = [];

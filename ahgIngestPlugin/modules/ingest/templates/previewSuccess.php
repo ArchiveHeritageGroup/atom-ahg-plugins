@@ -122,6 +122,11 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
         </button>
     </form>
     <div>
+        <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'dryRun', 'id' => $session->id]) ?>"
+           class="btn btn-outline-primary me-2" id="btn-dry-run"
+           title="<?php echo __('CSV of what the commit will do, row by row: create or update, and where each record goes. Nothing is written.') ?>">
+            <i class="fas fa-file-csv me-1"></i><?php echo __('Dry-run report') ?>
+        </a>
         <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'cancel', 'id' => $session->id]) ?>"
            class="btn btn-outline-danger me-2"
            data-ahg-confirm="<?php echo __('Cancel this ingest?') ?>">

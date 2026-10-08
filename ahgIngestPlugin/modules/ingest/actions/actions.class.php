@@ -119,12 +119,18 @@ class ingestActions extends sfActions
 
             $userId = $this->getUser()->getAttribute('user_id');
 
+            // Options with no column of their own live in the config JSON.
+            $options = [
+                'update_existing' => $request->getParameter('update_existing') ? 1 : 0,
+                'keymap_source' => trim((string) $request->getParameter('keymap_source', '')),
+            ];
+
             if ($id) {
-                $svc->updateSession((int) $id, $config);
+                $svc->updateSession((int) $id, $config + ['config' => json_encode($config + $options)]);
                 $svc->updateSessionStatus((int) $id, 'upload');
                 $sessionId = (int) $id;
             } else {
-                $sessionId = $svc->createSession($userId, $config);
+                $sessionId = $svc->createSession($userId, $config + $options);
                 $svc->updateSessionStatus($sessionId, 'upload');
             }
 
@@ -1138,6 +1144,31 @@ class ingestActions extends sfActions
         }
 
         $this->redirect(['module' => 'ingest', 'action' => 'index']);
+    }
+
+    /** Dry-run report (CSV): what a commit would do, without writing anything. */
+    public function executeDryRun(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $svc = $this->getIngestService();
+        $session = $svc->getSession((int) $request->getParameter('id'));
+        $this->forward404Unless($session);
+        $this->requireSessionOwner($session);
+        $this->getCommitService(); // loads the commit service class
+
+        $rows = \AhgIngestPlugin\Services\IngestCommitService::dryRun($session);
+        $out = fopen('php://temp', 'r+');
+        fwrite($out, "\xEF\xBB\xBF"); // UTF-8 mark, so Excel shows accents
+        fputcsv($out, ['order', 'row', 'legacyId', 'parentId', 'title', 'level', 'action', 'record', 'placed under']);
+        foreach ($rows as $r) {
+            fputcsv($out, array_values($r));
+        }
+        rewind($out);
+
+        $this->getResponse()->setContentType('text/csv; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="ingest-'.$session->id.'-dry-run.csv"');
+
+        return $this->renderText(stream_get_contents($out));
     }
 
     public function executeDownloadManifest(sfWebRequest $request)

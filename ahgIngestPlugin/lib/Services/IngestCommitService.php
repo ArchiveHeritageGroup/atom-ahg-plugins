@@ -4,9 +4,21 @@ namespace AhgIngestPlugin\Services;
 
 use Illuminate\Database\Capsule\Manager as DB;
 
+require_once __DIR__.'/HierarchyPlanner.php';
+
 class IngestCommitService
 {
     protected IngestService $ingestService;
+
+    /** Row fields copied straight onto the description, on create and on update. */
+    public const DIRECT_FIELDS = [
+        'identifier', 'title', 'alternateTitle', 'extentAndMedium',
+        'archivalHistory', 'acquisition', 'scopeAndContent', 'appraisal',
+        'accruals', 'arrangement', 'accessConditions', 'reproductionConditions',
+        'physicalCharacteristics', 'findingAids', 'relatedUnitsOfDescription',
+        'locationOfOriginals', 'locationOfCopies', 'rules',
+        'descriptionIdentifier', 'revisionHistory', 'sources',
+    ];
 
     public function __construct()
     {
@@ -79,6 +91,12 @@ class IngestCommitService
             ->where('is_valid', 1)
             ->orderBy('row_number')
             ->get();
+
+        // A child can only be placed under a parent that already exists, so a
+        // hierarchical CSV is committed parents-first whatever its row order.
+        if ('csv_hierarchy' === $session->parent_placement) {
+            $rows = HierarchyPlanner::order($rows->all());
+        }
 
         // Build legacyId → created AtoM ID map for hierarchy
         $legacyToAtomId = [];
@@ -381,12 +399,24 @@ class IngestCommitService
             return $this->processAccessionRow($row, $enriched, $session);
         }
 
-        // Default: create information_object
         // Resolve parent ID
         $parentId = $this->resolveParentId($row, $session, $legacyToAtomId);
 
-        // Create information_object via AtoM's object model
-        $atomId = $this->createInformationObject($enriched, $parentId, $session);
+        // Re-import: a legacyId already imported from this source is the same
+        // record, so it is updated rather than created a second time.
+        $existingId = (self::option($session, 'update_existing') && !empty($row->legacy_id))
+            ? self::keymapTarget((string) $row->legacy_id, self::keymapSource($session))
+            : null;
+
+        if ($existingId) {
+            $atomId = $this->updateInformationObject($existingId, $enriched, $parentId);
+        } else {
+            // Create information_object via AtoM's object model
+            $atomId = $this->createInformationObject($enriched, $parentId, $session);
+            if ($atomId && !empty($row->legacy_id)) {
+                self::recordKeymap((string) $row->legacy_id, $atomId, self::keymapSource($session));
+            }
+        }
 
         if (!$atomId) {
             throw new \RuntimeException("Failed to create record for row {$row->row_number}");
@@ -405,7 +435,202 @@ class IngestCommitService
             'created_do_id' => $doId,
         ]);
 
-        return ['atom_id' => $atomId, 'do_id' => $doId];
+        return ['atom_id' => $atomId, 'do_id' => $doId, 'updated' => (bool) $existingId];
+    }
+
+    /**
+     * What a commit of this session would do, row by row, in commit order,
+     * without writing anything: create or update (and which record), where
+     * each record goes and why. Rows that will not be committed (invalid or
+     * excluded) are listed last as skipped.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public static function dryRun(object $session): array
+    {
+        $all = DB::table('ingest_row')->where('session_id', $session->id)->orderBy('row_number')->get();
+        $commit = $all->filter(fn ($r) => !$r->is_excluded && $r->is_valid)->values()->all();
+        if ('csv_hierarchy' === $session->parent_placement) {
+            $commit = HierarchyPlanner::order($commit);
+        }
+        $update = (bool) self::option($session, 'update_existing');
+        $source = self::keymapSource($session);
+        $describe = function ($id) {
+            $r = DB::table('information_object_i18n as i')->join('slug as s', 's.object_id', '=', 'i.id')
+                ->where('i.id', $id)->first(['i.title', 's.slug']);
+
+            return $r ? ($r->title ?: $r->slug).' ('.$r->slug.')' : '#'.$id;
+        };
+        $sessionParent = $session->parent_id ? $describe($session->parent_id) : null;
+
+        $out = [];
+        $inBatch = [];
+        foreach ($commit as $i => $row) {
+            $data = json_decode((string) $row->enriched_data, true) ?: [];
+            $existing = ($update && $row->legacy_id) ? self::keymapTarget((string) $row->legacy_id, $source) : null;
+
+            switch ($session->parent_placement) {
+                case 'existing':
+                    $parent = $sessionParent ?: 'top level';
+                    break;
+                case 'new':
+                    $parent = 'new '.($session->new_parent_level ?: 'Fonds').': '.($session->new_parent_title ?: $session->title);
+                    break;
+                case 'csv_hierarchy':
+                    $ref = (string) $row->parent_id_ref;
+                    if ('' === $ref) {
+                        $parent = $sessionParent ?: 'top level';
+                    } elseif (isset($inBatch[$ref])) {
+                        $parent = 'this file, row '.$inBatch[$ref]." (legacyId {$ref})";
+                    } elseif ($slugId = DB::table('slug')->where('slug', $ref)->value('object_id')) {
+                        $parent = 'existing: '.$describe($slugId);
+                    } else {
+                        $parent = 'top level (parent not found)';
+                    }
+                    break;
+                default:
+                    $parent = 'top level';
+            }
+            if (!empty($row->legacy_id)) {
+                $inBatch[(string) $row->legacy_id] = $row->row_number;
+            }
+
+            $out[] = [
+                'order' => (string) ($i + 1),
+                'row' => (string) $row->row_number,
+                'legacyId' => (string) $row->legacy_id,
+                'parentId' => (string) $row->parent_id_ref,
+                'title' => (string) ($data['title'] ?? $row->title),
+                'level' => (string) ($data['levelOfDescription'] ?? $row->level_of_description),
+                'action' => $existing ? 'update' : 'create',
+                'record' => $existing ? $describe($existing) : '',
+                'placed under' => $parent,
+            ];
+        }
+        foreach ($all as $row) {
+            if ($row->is_excluded || !$row->is_valid) {
+                $out[] = ['order' => '', 'row' => (string) $row->row_number, 'legacyId' => (string) $row->legacy_id,
+                    'parentId' => (string) $row->parent_id_ref, 'title' => (string) $row->title, 'level' => (string) $row->level_of_description,
+                    'action' => $row->is_excluded ? 'skip (excluded)' : 'skip (invalid)', 'record' => '', 'placed under' => ''];
+            }
+        }
+
+        return $out;
+    }
+
+    /** An option stored in the session's config JSON (no column of its own). */
+    public static function option(object $session, string $key, $default = null)
+    {
+        $config = json_decode((string) ($session->config ?? ''), true) ?: [];
+
+        return $config[$key] ?? $default;
+    }
+
+    /**
+     * The keymap source name for this session: the name given on the configure
+     * step, else the uploaded file's name (what base AtoM's CSV import uses),
+     * else one per session.
+     */
+    public static function keymapSource(object $session): string
+    {
+        $name = trim((string) self::option($session, 'keymap_source', ''));
+        if ('' === $name) {
+            $name = (string) DB::table('ingest_file')->where('session_id', $session->id)->orderBy('id')->value('original_name');
+        }
+
+        return '' !== $name ? mb_substr($name, 0, 255) : 'ahg-ingest-'.$session->id;
+    }
+
+    /** The existing description a legacyId was imported as from this source, if it still exists. */
+    public static function keymapTarget(string $legacyId, string $source): ?int
+    {
+        $id = DB::table('keymap as k')
+            ->join('information_object as io', 'io.id', '=', 'k.target_id')
+            ->where('k.source_id', $legacyId)
+            ->where('k.source_name', $source)
+            ->where('k.target_name', 'information_object')
+            ->orderByDesc('k.id')
+            ->value('io.id');
+
+        return $id ? (int) $id : null;
+    }
+
+    /** Remember what a legacyId became, as base AtoM's CSV import does. */
+    public static function recordKeymap(string $legacyId, int $atomId, string $source): void
+    {
+        DB::table('keymap')->insert([
+            'source_id' => $legacyId,
+            'target_id' => $atomId,
+            'source_name' => $source,
+            'target_name' => 'information_object',
+        ]);
+    }
+
+    /**
+     * Update an existing description from a re-imported row. Non-empty fields
+     * overwrite; empty ones leave the record alone. Dates and creators, when
+     * the row has any, replace the record's creation events. Access points are
+     * added if missing. A changed parent moves the record (AtoM's nested set
+     * moves its descendants with it). Publication status changes only when the
+     * row gives one.
+     */
+    protected function updateInformationObject(int $id, array $data, int $parentId): ?int
+    {
+        $io = \QubitInformationObject::getById($id);
+        if (null === $io) {
+            return null;
+        }
+
+        foreach (self::DIRECT_FIELDS as $field) {
+            if (!empty($data[$field])) {
+                $io->{$field} = $data[$field];
+            }
+        }
+        if (!empty($data['levelOfDescription'])) {
+            $levelId = $this->termIdByName(\QubitTaxonomy::LEVEL_OF_DESCRIPTION_ID ?? 34, $data['levelOfDescription']);
+            if ($levelId) {
+                $io->levelOfDescriptionId = $levelId;
+            }
+        }
+        if ($parentId && (int) $io->parentId !== $parentId && $parentId !== $id) {
+            $io->parentId = $parentId;
+        }
+
+        try {
+            $io->save();
+        } catch (\Throwable $e) {
+            // As on create: a failing post-save hook (search indexing) leaves the
+            // record saved; the index is refreshed after the commit.
+            error_log('ingest.update_save_hook: '.$e->getMessage());
+        }
+
+        if (!empty($data['publicationStatus'])) {
+            DB::table('status')->where('object_id', $id)->where('type_id', \QubitTerm::STATUS_TYPE_PUBLICATION_ID ?? 158)
+                ->update(['status_id' => 'Published' === $data['publicationStatus']
+                    ? (\QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID ?? 160)
+                    : (\QubitTerm::PUBLICATION_STATUS_DRAFT_ID ?? 159)]);
+        }
+
+        if (!empty($data['creators']) || !empty($data['creationDates']) || !empty($data['creationDatesStart'])) {
+            $eventIds = DB::table('event')->where('object_id', $id)->where('type_id', \QubitTerm::CREATION_ID ?? 111)->pluck('id');
+            foreach ($eventIds as $eventId) {
+                if (null !== $event = \QubitEvent::getById((int) $eventId)) {
+                    $event->delete();
+                }
+            }
+            $this->createEvents($id, $data);
+        }
+        $this->createAccessPoints($id, $data);
+
+        return $id;
+    }
+
+    private function termIdByName(int $taxonomyId, string $name): ?int
+    {
+        $id = DB::table('term_i18n')->join('term', 'term.id', '=', 'term_i18n.id')
+            ->where('term.taxonomy_id', $taxonomyId)->where('term_i18n.name', $name)->value('term.id');
+
+        return $id ? (int) $id : null;
     }
 
     /**
@@ -504,16 +729,7 @@ class IngestCommitService
         }
 
         // Map standard columns
-        $directFields = [
-            'identifier', 'title', 'alternateTitle', 'extentAndMedium',
-            'archivalHistory', 'acquisition', 'scopeAndContent', 'appraisal',
-            'accruals', 'arrangement', 'accessConditions', 'reproductionConditions',
-            'physicalCharacteristics', 'findingAids', 'relatedUnitsOfDescription',
-            'locationOfOriginals', 'locationOfCopies', 'rules',
-            'descriptionIdentifier', 'revisionHistory', 'sources',
-        ];
-
-        foreach ($directFields as $field) {
+        foreach (self::DIRECT_FIELDS as $field) {
             if (!empty($data[$field])) {
                 $io->{$field} = $data[$field];
             }
@@ -633,6 +849,10 @@ class IngestCommitService
                 }
 
                 // Create object_term_relation
+                if (DB::table('object_term_relation')->where('object_id', $ioId)->where('term_id', $termId)->exists()) {
+                    continue; // already linked (a re-import)
+                }
+
                 try {
                     $relation = new \QubitObjectTermRelation();
                     $relation->objectId = $ioId;
@@ -656,7 +876,8 @@ class IngestCommitService
                     ->where('authorized_form_of_name', $name)
                     ->first();
 
-                if ($actor) {
+                if ($actor && !DB::table('relation')->where('subject_id', $ioId)->where('object_id', $actor->id)
+                    ->where('type_id', \QubitTerm::NAME_ACCESS_POINT_ID ?? 519)->exists()) {
                     try {
                         $relation = new \QubitRelation();
                         $relation->subjectId = $ioId;

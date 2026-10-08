@@ -154,6 +154,21 @@ $entityTypeVal = $session->entity_type ?? 'description';
                         </div>
                     </div>
 
+                    <!-- Re-import: update records already imported from the same source (keymap by legacyId) -->
+                    <?php $ingestOpts = json_decode((string) ($session->config ?? ''), true) ?: []; ?>
+                    <div class="mb-3 border rounded p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="update_existing" id="update_existing" value="1"
+                                   <?php echo !empty($ingestOpts['update_existing']) ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="update_existing"><?php echo __('Update records imported before from this source') ?></label>
+                        </div>
+                        <div class="form-text mb-2"><?php echo __('A row whose legacyId was already imported from the same source updates that record (fields, dates, parent) instead of creating a copy. Rows with a new legacyId are created.') ?></div>
+                        <label for="keymap_source" class="form-label small mb-1"><?php echo __('Source name') ?></label>
+                        <input type="text" class="form-control form-control-sm" name="keymap_source" id="keymap_source"
+                               value="<?php echo esc_entities($ingestOpts['keymap_source'] ?? '') ?>"
+                               placeholder="<?php echo __('Leave empty to use the uploaded file name, as AtoM\'s own CSV import does') ?>">
+                    </div>
+
                     <!-- Existing parent search (shown when 'existing' selected) -->
                     <div id="existing-parent-panel" class="mb-3" data-ahg-style="display:none;">
                         <label for="parent_search" class="form-label"><?php echo __('Search for parent record') ?></label>

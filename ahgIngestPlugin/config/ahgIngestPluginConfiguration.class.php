@@ -97,6 +97,7 @@ class ahgIngestPluginConfiguration extends sfPluginConfiguration
         $r->any('ingest_cancel', '/ingest/:id/cancel', 'cancel', ['id' => '\d+']);
         $r->any('ingest_rollback', '/ingest/:id/rollback', 'rollback', ['id' => '\d+']);
         $r->any('ingest_download_manifest', '/ingest/:id/manifest', 'downloadManifest', ['id' => '\d+']);
+        $r->any('ingest_dry_run', '/ingest/:id/dry-run', 'dryRun', ['id' => '\d+']);
         $r->any('ingest_download_template', '/ingest/template/:sector', 'downloadTemplate');
 
         // Watched (hot) folder — register the server directory as an auto-ingest source

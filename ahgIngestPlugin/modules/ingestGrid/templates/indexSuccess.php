@@ -26,7 +26,8 @@ foreach ($columns as $field => $label) {
 #grid-table { table-layout: fixed; min-width: 1100px; }
 #grid-table td { padding: 0; vertical-align: top; }
 #grid-table td.grid-rownum { padding: .35rem .4rem; text-align: right; color: #6c757d; width: 3.2rem; font-size: .85rem; }
-#grid-table td.grid-del { width: 2.6rem; text-align: center; }
+#grid-table td.grid-actions { width: 11.5rem; white-space: nowrap; padding: .25rem .4rem; }
+#grid-table td.grid-actions .btn { padding: .1rem .45rem; font-size: .8rem; }
 #grid-table .grid-cell { border: 0; border-radius: 0; width: 100%; padding: .3rem .4rem; font-size: .9rem; background: transparent; }
 #grid-table .grid-cell:focus { outline: 2px solid #0d6efd; outline-offset: -2px; background: #fff; box-shadow: none; }
 #grid-table textarea.grid-cell { resize: vertical; min-height: 2rem; }
@@ -130,16 +131,16 @@ foreach ($columns as $field => $label) {
             <table class="table table-bordered mb-0" id="grid-table">
                 <colgroup>
                     <col>
-                    <?php foreach ($columns as $field => $label): ?><col class="c-<?php echo $field ?>"><?php endforeach ?>
                     <col>
+                    <?php foreach ($columns as $field => $label): ?><col class="c-<?php echo $field ?>"><?php endforeach ?>
                 </colgroup>
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
+                        <th><span class="visually-hidden"><?php echo __('Row actions') ?></span></th>
                         <?php foreach ($columns as $field => $label): ?>
                             <th title="<?php echo esc_entities($labels[$field]) ?>"><?php echo esc_entities($labels[$field]) ?><?php echo 'title' === $field ? ' <span class="text-danger">*</span>' : '' ?></th>
                         <?php endforeach ?>
-                        <th><span class="visually-hidden"><?php echo __('Remove') ?></span></th>
                     </tr>
                 </thead>
                 <tbody id="grid-body"></tbody>
@@ -210,7 +211,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var labels = <?php echo json_encode($labels, JSON_UNESCAPED_UNICODE) ?>;
     var maxRows = <?php echo $maxRows ?>;
     var msg = {
-        removeRow: <?php echo json_encode(__('Remove row')) ?>,
+        removeRow: <?php echo json_encode(__('Delete')) ?>,
+        removeRowLabel: <?php echo json_encode(__('Delete row %1%')) ?>,
+        duplicateRow: <?php echo json_encode(__('Duplicate')) ?>,
+        duplicateRowLabel: <?php echo json_encode(__('Duplicate row %1% below it')) ?>,
         tooMany: <?php echo json_encode(__('The grid holds at most %1% rows.', ['%1%' => $maxRows])) ?>,
         saving: <?php echo json_encode(__('Validating and saving...')) ?>,
         failed: <?php echo json_encode(__('Saving failed. Nothing was written.')) ?>,
@@ -246,6 +250,17 @@ document.addEventListener('DOMContentLoaded', function () {
         var num = document.createElement('td');
         num.className = 'grid-rownum';
         tr.appendChild(num);
+        // Row actions sit next to the number, so they stay in view on a wide grid.
+        var actions = document.createElement('td');
+        actions.className = 'grid-actions';
+        [['grid-dup', 'btn-outline-secondary', 'fa-copy', msg.duplicateRow], ['grid-del', 'btn-outline-danger', 'fa-trash', msg.removeRow]].forEach(function (b) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-sm ' + b[1] + ' ' + b[0] + ' me-1';
+            btn.innerHTML = '<i class="fas ' + b[2] + ' me-1" aria-hidden="true"></i>' + esc(b[3]);
+            actions.appendChild(btn);
+        });
+        tr.appendChild(actions);
         fields.forEach(function (f) {
             var td = document.createElement('td');
             var cell = makeCell(f);
@@ -253,16 +268,6 @@ document.addEventListener('DOMContentLoaded', function () {
             td.appendChild(cell);
             tr.appendChild(td);
         });
-        var del = document.createElement('td');
-        del.className = 'grid-del';
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'btn btn-sm btn-link text-danger p-1';
-        btn.title = msg.removeRow;
-        btn.setAttribute('aria-label', msg.removeRow);
-        btn.innerHTML = '<i class="fas fa-times"></i>';
-        del.appendChild(btn);
-        tr.appendChild(del);
         body.appendChild(tr);
         renumber();
         return tr;
@@ -272,6 +277,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var filled = 0;
         Array.prototype.forEach.call(body.rows, function (tr, i) {
             tr.cells[0].textContent = i + 1;
+            tr.querySelector('.grid-dup').setAttribute('aria-label', msg.duplicateRowLabel.replace('%1%', i + 1));
+            tr.querySelector('.grid-del').setAttribute('aria-label', msg.removeRowLabel.replace('%1%', i + 1));
             if (rowValues(tr).some(function (v) { return v.trim() !== ''; })) { filled++; }
         });
         document.getElementById('grid-count').textContent = msg.rowsFilled.replace('%1%', filled);
@@ -292,7 +299,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     body.addEventListener('click', function (e) {
-        var btn = e.target.closest('.grid-del button');
+        var dup = e.target.closest('.grid-dup');
+        if (dup) {
+            var src = dup.closest('tr');
+            var values = {};
+            src.querySelectorAll('.grid-cell').forEach(function (c) { values[c.dataset.field] = c.value; });
+            var copy = addRow(values);
+            if (copy) {
+                src.after(copy);
+                copy.querySelector('.grid-cell').focus();
+                dirty = true;
+                renumber();
+            }
+            return;
+        }
+        var btn = e.target.closest('.grid-del');
         if (!btn) { return; }
         btn.closest('tr').remove();
         if (!body.rows.length) { addRow(); }
