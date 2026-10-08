@@ -1,6 +1,6 @@
 # ahgMultiTenantPlugin
 
-**Version:** 1.2.0
+**Version:** 1.3.0
 **Category:** Security
 **Status:** Active Development
 
@@ -15,6 +15,22 @@ Multi-tenancy plugin for AtoM providing dedicated tenant management with status 
 - **Custom Branding**: Per-tenant colors, logos, and custom CSS
 - **Settings Override**: Tenant-specific settings that override global defaults
 - **Theme Agnostic**: Branding works with any AtoM theme
+
+## Isolation (v1.3.0)
+
+A non-administrator with any tenant membership or repository assignment sees only
+descriptions under their own repositories: in GLAM browse, search, the REST API,
+GraphQL and the chatbot, and on every page reached through a description's slug
+(view, edit, delete, print, exports), which answers 403. The rule is registered with
+the framework's `SearchAccessFilterService`, so anything that honours embargo and
+security classification honours tenancy too.
+
+- Administrators see everything. Anonymous visitors are unaffected.
+- Users with no assignment are not scoped, so enabling the plugin hides nothing from
+  existing staff until they are assigned.
+- Membership of a suspended tenant still scopes the user but grants nothing.
+- Repository pages themselves stay visible; their holdings lists are filtered.
+- Check: `testing/tenant-isolation-check.js` (Playwright, against a test instance).
 
 ## What's New in v1.1.0
 
@@ -37,7 +53,7 @@ Multi-tenancy plugin for AtoM providing dedicated tenant management with status 
 | domain | VARCHAR(255) | Custom domain (optional) |
 | subdomain | VARCHAR(100) | Subdomain prefix (optional) |
 | settings | JSON | Tenant-specific settings |
-| status | ENUM | `active`, `suspended`, `trial` |
+| status | VARCHAR(20) | `active`, `suspended`, `trial` |
 | trial_ends_at | DATETIME | Trial expiration date |
 | suspended_at | DATETIME | Suspension timestamp |
 | suspended_reason | VARCHAR(500) | Reason for suspension |

@@ -112,6 +112,25 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
      * 1. Domain/subdomain resolution (Issue #85)
      * 2. Session-based context (fallback)
      */
+    /**
+     * Isolation: other tenants' descriptions join the records the framework
+     * hides from a user, so browse, search, the API, GraphQL and every record
+     * page (view, edit, delete, exports) leave them out. Registered here, once
+     * the framework is loaded, and once per process.
+     */
+    private static function registerIsolation(): void
+    {
+        static $done = false;
+        $filter = '\\AtomExtensions\\Services\\Search\\SearchAccessFilterService';
+        if ($done || !class_exists($filter) || !method_exists($filter, 'addRestrictionSource')) {
+            return;
+        }
+        $filter::addRestrictionSource(static function (?int $userId): array {
+            return \AhgMultiTenant\Services\TenantScope::hiddenObjectIds($userId);
+        });
+        $done = true;
+    }
+
     public function onContextLoadFactories(sfEvent $event): void
     {
         try {
@@ -120,6 +139,8 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
             if (file_exists($frameworkPath) && !class_exists('Illuminate\\Database\\Capsule\\Manager')) {
                 require_once $frameworkPath;
             }
+
+            self::registerIsolation();
 
             // Initialize resolver with configuration
             \AhgMultiTenant\Services\TenantResolver::initialize([
