@@ -154,7 +154,7 @@ class StorageFlatMigrationService
 
                 $this->report['placed'][] = [
                     'object_id' => $id, 'name' => $name,
-                    'path' => implode(' > ', array_column($path, 1)),
+                    'path' => implode(' > ', array_map(static fn ($step) => StorageLocationService::placeName($step[0], $step[1]), $path)),
                     'source' => $source,
                 ];
             }
@@ -184,6 +184,7 @@ class StorageFlatMigrationService
         $last = count($path) - 1;
 
         foreach ($path as $index => [$type, $name]) {
+            $name = StorageLocationService::placeName($type, $name);
             $trail[] = $name;
             $key = ($parentId ?? 0) . '|' . $type . '|' . mb_strtolower($name);
 

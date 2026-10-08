@@ -209,7 +209,7 @@ $mig = new StorageFlatMigrationService();
 $plan = $mig->run(false);
 ok(0 === DB::table('ahg_storage_location')->count() && 0 === DB::table('ahg_storage_movement')->count() && 0 === DB::table('ahg_physical_object_location')->count(), 'a dry run writes nothing');
 ok(5 === count($plan['placed']), 'the dry run would place five objects');
-ok(['Vault (room)', 'Empty Room (room)', 'Main Building (building)', 'Main Building > 1 (floor)', 'Main Building > 1 > C3 (room)', 'Main Building > 1 > C3 > S4 (shelf)', 'Main Building > 2 (floor)'] === $plan['locations_created'], 'and make seven locations, each once: two strongrooms, a building, two floors, a room and a shelf');
+ok(['Vault (room)', 'Empty Room (room)', 'Main Building (building)', 'Main Building > Floor 1 (floor)', 'Main Building > Floor 1 > Room C3 (room)', 'Main Building > Floor 1 > Room C3 > Shelf S4 (shelf)', 'Main Building > Floor 2 (floor)'] === $plan['locations_created'], 'and make seven locations, each once: two strongrooms, a building, two floors, a room and a shelf');
 ok(3 === count($plan['skipped']), 'three are left alone');
 $reasons = array_column($plan['skipped'], 'reason', 'object_id');
 ok(str_contains($reasons[13], 'free text only: "Annex"'), 'free text is reported, not guessed at');
@@ -219,12 +219,12 @@ $done = $mig->run(true);
 ok($done['placed'] == $plan['placed'] && $done['locations_created'] == $plan['locations_created'] && $done['skipped'] == $plan['skipped'], 'applying does exactly what the dry run said');
 ok(7 === DB::table('ahg_storage_location')->count(), 'seven locations exist');
 ok(1 === DB::table('ahg_storage_location')->where('location_type', 'building')->count(), '"Main Building" typed three ways is one building');
-ok(1 === DB::table('ahg_storage_location')->where('location_type', 'room')->where('name', 'C3')->count(), '"C3" and "c3" are one room');
+ok(1 === DB::table('ahg_storage_location')->where('location_type', 'room')->where('name', 'Room C3')->count(), '"C3" and "c3" are one room, named Room C3');
 
 $path = static function (int $objectId) use ($loc, $mv) { return implode(' > ', array_column($loc->getLocationPath((int) $mv->currentLocationOf($objectId)), 'name')); };
-ok('Main Building > 1 > C3 > S4' === $path(10), 'an object lands in its innermost location');
-ok('Main Building > 1 > C3' === $path(11), 'and one with fewer fields stops higher up');
-ok('Main Building > 2' === $path(12), 'a second floor is its own branch');
+ok('Main Building > Floor 1 > Room C3 > Shelf S4' === $path(10), 'an object lands in its innermost location');
+ok('Main Building > Floor 1 > Room C3' === $path(11), 'and one with fewer fields stops higher up');
+ok('Main Building > Floor 2' === $path(12), 'a second floor is its own branch');
 ok('Vault' === $path(16), 'a strongroom assignment becomes a room');
 ok('Main Building' === $path(17), 'structured fields win over a strongroom');
 ok(str_contains(array_column($done['placed'], 'source', 'object_id')[17], 'also assigned to strongroom "Vault"'), 'and the report says so');
@@ -251,7 +251,7 @@ ok(7 === DB::table('ahg_storage_location')->count() && $moves === DB::table('ahg
 // A box catalogued afterwards is picked up, into the room that already exists
 box(18, 'Box 18', null, ['building' => 'Main Building', 'floor' => '1', 'room' => 'C3']);
 $later = $mig->run(true);
-ok(1 === count($later['placed']) && 0 === count($later['locations_created']) && 'Main Building > 1 > C3' === $path(18), 'a later box joins the existing room');
+ok(1 === count($later['placed']) && 0 === count($later['locations_created']) && 'Main Building > Floor 1 > Room C3' === $path(18), 'a later box joins the existing room');
 
 // Free text, when the archive says what it means
 refused(function () use ($mig) { $mig->run(false, ['free_text_type' => 'cupboard']); }, 'Unknown location type', 'free text cannot be filed under a type that is not on the list');

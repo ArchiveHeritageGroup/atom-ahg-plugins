@@ -115,5 +115,15 @@ ok(null === $mv->currentLocationOf(2), '...and box 2 stays unplaced');
 ok('moved' === $pl->saveFromForm(2, ['building' => 'Main Building', 'room' => 'Room 3'], false), 'non-editor may still choose existing places');
 ok($mv->currentLocationOf(2) === (int) $r['id'], '...box 2 is in Room 3');
 
+// Naming: a bare number or code below building level gets its level's label.
+$PL = 'AhgStorageManage\\Services\\StorageLocationService';
+ok('Floor 1' === $PL::placeName('floor', ' 1 ') && 'Room C3' === $PL::placeName('room', 'C3'), 'bare floor and room codes get their label');
+ok('Strongroom B' === $PL::placeName('room', 'Strongroom B') && 'Floor 1' === $PL::placeName('floor', 'Floor 1'), 'names that are already words are kept');
+ok('B12' === $PL::placeName('building', 'B12'), 'building names are never changed');
+ok('moved' === $pl->saveFromForm(3, ['building' => 'Main Building', 'floor' => '2', 'room' => 'C3'], true), 'box placed with bare floor and room codes');
+$floor = DB::table('ahg_storage_location')->where('location_type', 'floor')->value('name');
+ok('Floor 2' === $floor && DB::table('ahg_storage_location')->where('name', 'Room C3')->exists(), '...stored as Floor 2 and Room C3');
+ok('unchanged' === $pl->saveFromForm(3, ['building' => 'Main Building', 'floor' => 'Floor 2', 'room' => 'Room C3'], true), 'the labelled names find the same places, no duplicates');
+
 echo $fail ? "\n{$fail} failed\n" : "\nall passed\n";
 exit($fail ? 1 : 0);

@@ -205,6 +205,25 @@ class StorageLocationService
         return $this->types = $types;
     }
 
+    /**
+     * The name a place is stored under. Below building level a bare number or
+     * code ("1", "C3", "12B") gets its level in front ("Floor 1", "Room C3"), so
+     * the tree reads on its own; a name that is already words ("Strongroom B",
+     * "Floor 1") is kept as typed. Used by the migration and the box form alike,
+     * so both find the same place.
+     */
+    public static function placeName(string $type, string $name): string
+    {
+        $name = trim($name);
+        $labels = ['floor' => 'Floor', 'room' => 'Room', 'aisle' => 'Aisle', 'bay' => 'Bay', 'rack' => 'Rack', 'shelf' => 'Shelf'];
+
+        if (isset($labels[$type]) && preg_match('/^[A-Za-z]{0,3}\d+[A-Za-z]{0,3}$/', $name)) {
+            return $labels[$type].' '.$name;
+        }
+
+        return $name;
+    }
+
     /** The label for a type code, or the code itself for one no longer listed. */
     public function typeLabel(?string $code): string
     {

@@ -84,7 +84,7 @@ class StoragePlacementService
         $parentId = null;
 
         foreach (self::LEVELS as $type) {
-            $name = trim((string) ($levels[$type] ?? ''));
+            $name = StorageLocationService::placeName($type, (string) ($levels[$type] ?? ''));
             if ('' === $name) {
                 continue;
             }
@@ -236,7 +236,7 @@ class StoragePlacementService
     {
         $out = [];
         foreach (self::LEVELS as $type) {
-            $name = mb_strtolower(trim((string) ($levels[$type] ?? '')));
+            $name = mb_strtolower(StorageLocationService::placeName($type, (string) ($levels[$type] ?? '')));
             if ('' !== $name) {
                 $out[$type] = $name;
             }
