@@ -78,7 +78,7 @@ and the issues split from it.
 | Reading-room requests, circulation, researcher accounts | 2020 #15-16 | [Research](ahgResearchPlugin/), [Access requests](ahgAccessRequestPlugin/) |
 | Merge duplicate authorities and terms | 2020 #53 | [Dedupe](ahgDedupePlugin/) |
 | More usable rights, with embargoes enforced across search, browse, the API and files | 2026, 2020 #44 | [Rights](ahgRightsPlugin/), [Extended rights](ahgExtendedRightsPlugin/), [Security clearance](ahgSecurityClearancePlugin/) |
-| Custom metadata fields without code changes | 2026 | [Custom fields](ahgCustomFieldsPlugin/), carried into EAD, PDF finding aids, CSV, the REST API and GraphQL ([#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)) |
+| Custom metadata fields without code changes | 2026 | [Custom fields](ahgCustomFieldsPlugin/), carried into EAD, PDF finding aids, CSV, the REST API and GraphQL ([#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)) ([video](https://youtu.be/A07MF2HrzN4)) |
 | OAI-PMH that respects embargo, classification and other access rules | 2020 #40 | [REST API v2](ahgAPIPlugin/) filters OAI responses ([#212](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/212)) |
 | LDAP login | 2020 #58 | [Security clearance](ahgSecurityClearancePlugin/), using base AtoM's LDAP user |
 | Search and replace within a collection | 2020 #33 | [Core](ahgCorePlugin/) global replace, scoped to a fonds or series |
@@ -87,7 +87,7 @@ and the issues split from it.
 
 - [x] CAAIS-compliant accessions and a CAAIS export, with each accession linked to its repository (2026; 2020 #7) - [#199](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/199), [#203](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/203) ([video](https://youtu.be/BzX_U1qephw)) ([training](https://youtu.be/LpKUEkOb-E4))
 - [ ] Single sign-on with SAML or OIDC (2026; 2020 #59-60) - OIDC done (Google first); SAML built, waiting for its library - [#200](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/200)
-- [x] Custom fields in EAD, PDF finding aids, CSV, the API and GraphQL (2026) - [#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202)
+- [x] Custom fields in EAD, PDF finding aids, CSV, the API and GraphQL (2026) - [#202](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/202) ([video](https://youtu.be/A07MF2HrzN4))
 - [ ] Bulk relocation screen for physical storage; containers nested in containers; capacity roll-up (2026) - [#193](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/193)
 - [x] Batch edit and batch rename of descriptions (2020 #37) - [#204](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/204) ([video](https://youtu.be/EDY8W2qkO3E))
 - [x] Sort a description's children numerically (2020 #55) - [#205](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues/205) ([video](https://youtu.be/b8BLKU32rjQ))
@@ -271,7 +271,7 @@ Install top to bottom: nothing in a section depends on anything below it.
 | [`ahgCartPlugin`](ahgCartPlugin/) | 8 | [`ahgCorePlugin`](ahgCorePlugin/) | Shopping cart with dual-mode support: Standard (Request to Publish) and E-Commerce with PayFast payment integration |
 | [`ahgConditionPlugin`](ahgConditionPlugin/) | 16 | [`ahgCorePlugin`](ahgCorePlugin/) | Condition assessment and reporting for museum objects |
 | [`ahgContactPlugin`](ahgContactPlugin/) | 1 | [`ahgCorePlugin`](ahgCorePlugin/) | Contact information management for actors and repositories |
-| [`ahgCustomFieldsPlugin`](ahgCustomFieldsPlugin/) | 2 | [`ahgCorePlugin`](ahgCorePlugin/) | Admin-configurable custom metadata fields for any entity type. Define fields via UI - no code changes needed |
+| [`ahgCustomFieldsPlugin`](ahgCustomFieldsPlugin/) | 2 | [`ahgCorePlugin`](ahgCorePlugin/) | Admin-configurable custom metadata fields for any entity type. Define fields via UI - no code changes needed ([video](https://youtu.be/A07MF2HrzN4)) |
 | [`ahgDAMPlugin`](ahgDAMPlugin/) | 12 | [`ahgCorePlugin`](ahgCorePlugin/) | Digital Asset Management with IPTC metadata, watermarks, derivatives, and Creative Commons licensing |
 | [`ahgDacsManagePlugin`](ahgDacsManagePlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | DACS (Describing Archives: A Content Standard) edit form for information objects |
 | [`ahgDcManagePlugin`](ahgDcManagePlugin/) | 0 | [`ahgCorePlugin`](ahgCorePlugin/) | Dublin Core descriptive standard edit form for information objects |
