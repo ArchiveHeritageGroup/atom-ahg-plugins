@@ -113,6 +113,7 @@ class AhgSettingsSectionAction extends AhgController
             'accession_require_appraisal',
             'accession_allow_container_barcodes',
             'accession_rights_inheritance_enabled',
+            'accession_caais_enabled',
         ],
         'authority' => [
             'authority_wikidata_enabled',

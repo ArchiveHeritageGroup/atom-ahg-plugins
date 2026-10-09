@@ -244,9 +244,14 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
         // accession module routes (catch-all slug routes registered first = checked last)
         // =====================================================================
         $accession = new \AtomFramework\Routing\RouteLoader('accession');
-        $accession->any('accession_view_override', '/accession/:slug', 'index', ['slug' => '[a-zA-Z0-9_.-]+']);
+        // The view route is registered last so it is CHECKED FIRST (this loader
+        // prepends). Matching does not care - a slug cannot hold '/' - but URL
+        // generation does: a link with no action (the redirect after Create,
+        // the form's Cancel button) takes the first route that fits, and with
+        // edit first every such link led back to the edit form.
         $accession->any('accession_delete_override', '/accession/:slug/delete', 'delete', ['slug' => '[a-zA-Z0-9_.-]+']);
         $accession->any('accession_edit_override', '/accession/:slug/edit', 'edit', ['slug' => '[a-zA-Z0-9_.-]+']);
+        $accession->any('accession_view_override', '/accession/:slug', 'index', ['slug' => '[a-zA-Z0-9_.-]+']);
         $accession->register($routing);
 
         // Add route uses AddActionRoute to prevent stealing edit/view URLs

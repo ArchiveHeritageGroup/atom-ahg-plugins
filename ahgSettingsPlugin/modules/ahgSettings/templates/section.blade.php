@@ -2227,6 +2227,19 @@
                                                 <div class="form-text">{{ __('Appraisal must be completed before an accession can be finalised.') }}</div>
                                             </div>
                                         </div>
+                                        <div class="row g-3 mt-2">
+                                            <div class="col-md-8">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="accession_caais_enabled"
+                                                           name="settings[accession_caais_enabled]" value="true"
+                                                           {{ ($settings['accession_caais_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="accession_caais_enabled">
+                                                        <strong>{{ __('CAAIS 1.0 accession profile') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Adds the CAAIS 1.0 section to the accession form and page: extent statements, events, languages and preservation requirements, mandatory-element warnings, revision history, and CAAIS export. Switching it off hides the section; what was recorded is kept.') }}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
