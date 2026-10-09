@@ -784,13 +784,20 @@ class IngestCommitService
             return null;
         }
 
-        // Set publication status via status table
+        // Set publication status. AtoM's save() has usually written the default
+        // already; set that row rather than add a second one beside it.
         try {
-            $status = new \QubitStatus();
-            $status->objectId = $io->id;
-            $status->typeId = \QubitTerm::STATUS_TYPE_PUBLICATION_ID ?? 158;
-            $status->statusId = $statusId;
-            $status->save();
+            $typeId = \QubitTerm::STATUS_TYPE_PUBLICATION_ID ?? 158;
+            $existing = DB::table('status')->where('object_id', $io->id)->where('type_id', $typeId);
+            if ($existing->exists()) {
+                $existing->update(['status_id' => $statusId]);
+            } else {
+                $status = new \QubitStatus();
+                $status->objectId = $io->id;
+                $status->typeId = $typeId;
+                $status->statusId = $statusId;
+                $status->save();
+            }
         } catch (\Throwable $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal

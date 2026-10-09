@@ -2263,6 +2263,9 @@ class IngestService
             $update['level_of_description'] = $value;
         } elseif ($field === 'legacyId') {
             $update['legacy_id'] = $value;
+        } elseif ($field === 'parentId' || $field === 'qubitParentSlug') {
+            // Validation, preview and commit read the hierarchy from parent_id_ref.
+            $update['parent_id_ref'] = $value;
         }
 
         DB::table('ingest_row')
