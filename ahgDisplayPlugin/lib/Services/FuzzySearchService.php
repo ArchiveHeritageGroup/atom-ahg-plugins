@@ -110,8 +110,10 @@ class FuzzySearchService
                 // Extract individual words from titles for matching
                 $words = preg_split('/\s+/', $title, -1, PREG_SPLIT_NO_EMPTY);
                 foreach ($words as $word) {
-                    $clean = preg_replace('/[^a-zA-Z0-9]/', '', $word);
-                    if (strlen($clean) >= 3) {
+                    // Unicode letters, not just ASCII: an ASCII-only class turned 'Rösch' into 'Rsch',
+                    // and the query word 'rösch' was then "corrected" to it.
+                    $clean = preg_replace('/[^\p{L}\p{N}]/u', '', $word);
+                    if (mb_strlen($clean) >= 3) {
                         $this->addToVocabulary($clean);
                     }
                 }
@@ -139,9 +141,9 @@ class FuzzySearchService
         // Also add individual words from multi-word terms
         $words = preg_split('/\s+/', $term, -1, PREG_SPLIT_NO_EMPTY);
         foreach ($words as $word) {
-            $clean = preg_replace('/[^a-zA-Z0-9\'-]/', '', $word);
+            $clean = preg_replace('/[^\p{L}\p{N}\'-]/u', '', $word);
             $normWord = mb_strtolower($clean);
-            if (strlen($normWord) >= 3 && !isset($this->vocabulary[$normWord])) {
+            if (mb_strlen($normWord) >= 3 && !isset($this->vocabulary[$normWord])) {
                 $this->vocabulary[$normWord] = $clean;
             }
         }
@@ -205,7 +207,7 @@ class FuzzySearchService
             $normalized = mb_strtolower($word);
 
             // Skip short words (1-2 chars) and numbers
-            if (strlen($normalized) <= 2 || is_numeric($normalized)) {
+            if (mb_strlen($normalized) <= 2 || is_numeric($normalized)) {
                 $correctedWords[] = $word;
                 continue;
             }
