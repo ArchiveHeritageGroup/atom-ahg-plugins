@@ -487,10 +487,15 @@ class ResearchService
             ->join('event_i18n as ei', function($join) { $join->on('e.id', '=', 'ei.id')->where('ei.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); })
             ->where('e.object_id', $objectId)->select('e.start_date', 'ei.date as date_display')->first();
 
-        $creators = DB::table('event as e')
+        $creatorRows = DB::table('event as e')
             ->join('actor_i18n as ai', function($join) { $join->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture()); })
+            ->join('actor as a', 'a.id', '=', 'e.actor_id')
             ->where('e.object_id', $objectId)->where('e.type_id', 111)
-            ->pluck('ai.authorized_form_of_name')->toArray();
+            ->select('ai.authorized_form_of_name as name', 'a.entity_type_id')->get();
+        $creators = $creatorRows->pluck('name')->toArray();
+        // Only names typed as Person (term 132) are inverted to "Surname, I.";
+        // families, corporate bodies and untyped names are cited as written.
+        $persons = $creatorRows->where('entity_type_id', 132)->pluck('name')->toArray();
 
         $dateStr = $dates->date_display ?? ($dates && $dates->start_date ? date('Y', strtotime($dates->start_date)) : 'n.d.');
         $siteUrl = DB::table('setting')->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')->where('setting.name', 'siteBaseUrl')->value('setting_i18n.value') ?? '';
@@ -504,22 +509,28 @@ class ResearchService
             'turabian' => $this->fmtChicago($object->title, $creators, $dateStr, $repo, $accessUrl, $accessDate),
             'apa' => $this->fmtAPA($object->title, $creators, $dateStr, $accessUrl),
             'harvard' => $this->fmtHarvard($object->title, $creators, $dateStr, $repo, $accessUrl, $accessDate),
-            'unisa' => $this->fmtUnisaHarvard($object->title, $creators, $dateStr, $repo, $accessUrl, $accessDate),
+            'unisa' => $this->fmtUnisaHarvard($object->title, $creators, $dateStr, $repo, $accessUrl, $accessDate, $persons),
             default => $this->fmtChicago($object->title, $creators, $dateStr, $repo, $accessUrl, $accessDate),
         };
         return ['style' => $style, 'citation' => $citation, 'object_title' => $object->title, 'url' => $accessUrl];
     }
 
+    /** End a citation element with exactly one full stop ("n.d." or "P." must not become "n.d.."). */
+    protected function stop(string $s): string
+    {
+        return rtrim($s, '.') . '.';
+    }
+
     protected function fmtChicago($title, $creators, $date, $repo, $url, $accessed): string
     {
-        $c = !empty($creators) ? implode(', ', $creators) . '. ' : '';
-        return "{$c}\"{$title}.\" {$date}. {$repo}. {$url} (accessed {$accessed}).";
+        $c = !empty($creators) ? $this->stop(implode(', ', $creators)) . ' ' : '';
+        return "{$c}\"{$title}.\" {$this->stop($date)} {$this->stop($repo)} {$url} (accessed {$accessed}).";
     }
 
     protected function fmtMLA($title, $creators, $date, $repo, $url, $accessed): string
     {
-        $c = !empty($creators) ? implode(', ', $creators) . '. ' : '';
-        return "{$c}\"{$title}.\" {$repo}, {$date}. {$url}. Accessed {$accessed}.";
+        $c = !empty($creators) ? $this->stop(implode(', ', $creators)) . ' ' : '';
+        return "{$c}\"{$title}.\" {$repo}, {$this->stop($date)} {$url}. Accessed {$accessed}.";
     }
 
     protected function fmtAPA($title, $creators, $date, $url): string
@@ -541,12 +552,12 @@ class ResearchService
     /**
      * Format citation in UNISA Harvard style
      */
-    protected function fmtUnisaHarvard($title, $creators, $date, $repo, $url, $accessed): string
+    protected function fmtUnisaHarvard($title, $creators, $date, $repo, $url, $accessed, array $persons = []): string
     {
         $formattedCreators = [];
         foreach ($creators as $creator) {
             $parts = explode(' ', trim($creator));
-            if (count($parts) >= 2) {
+            if (count($parts) >= 2 && in_array($creator, $persons, true)) {
                 $surname = array_pop($parts);
                 $initials = '';
                 foreach ($parts as $part) {
@@ -560,7 +571,7 @@ class ResearchService
         $c = !empty($formattedCreators) ? implode(' & ', $formattedCreators) : 'Anon';
         $year = is_numeric($date) ? $date : (preg_match('/\d{4}/', $date, $m) ? $m[0] : 'n.d.');
         $accessedDate = date('d F Y', strtotime($accessed));
-        return "{$c}. {$year}. <em>{$title}</em>. {$repo}. [Online]. Available from: {$url} [Accessed {$accessedDate}].";
+        return "{$this->stop($c)} {$this->stop($year)} <em>{$title}</em>. {$this->stop($repo)} [Online]. Available from: {$url} [Accessed {$accessedDate}].";
     }
 
     public function logCitation(?int $researcherId, int $objectId, string $style, string $text): void

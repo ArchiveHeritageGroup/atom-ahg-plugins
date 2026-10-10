@@ -118,7 +118,22 @@ class UserLoginAction extends sfAction
                         // Don't block login
                     }
 
-                    $this->form->getErrorSchema()->addError(new sfValidatorError(new sfValidatorPass(), 'Sorry, unrecognized email or password'));
+                    // A researcher whose registration is still pending got "unrecognized email
+                    // or password" with the right password, and assumed she had mistyped. Say
+                    // what is true - but only once the password is proven correct, so nothing
+                    // is revealed to someone guessing.
+                    $message = 'Sorry, unrecognized email or password';
+                    try {
+                        $row = \Illuminate\Database\Capsule\Manager::table('user')->where('email', $email)->where('active', 0)->first(['id', 'password_hash', 'salt']);
+                        if ($row && class_exists('\\AtomFramework\\Core\\Security\\PasswordService')
+                            && \AtomFramework\Core\Security\PasswordService::verify((string) $this->form->getValue('password'), (string) $row->password_hash, $row->salt)
+                            && \Illuminate\Database\Capsule\Manager::table('research_researcher')->where('user_id', $row->id)->where('status', 'pending')->exists()) {
+                            $message = 'Your researcher registration is awaiting approval. You will be emailed when it is approved.';
+                        }
+                    } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+                    }
+                    $this->form->getErrorSchema()->addError(new sfValidatorError(new sfValidatorPass(), $message));
                 }
             }
 

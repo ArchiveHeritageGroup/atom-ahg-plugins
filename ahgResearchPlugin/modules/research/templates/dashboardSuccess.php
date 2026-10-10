@@ -164,7 +164,8 @@
 </div>
 <?php endif; ?>
 
-<!-- Statistics -->
+<!-- Statistics: archive-wide figures, for reading-room staff only -->
+<?php if ($sf_user->isAdministrator() || $sf_user->hasCredential(['editor', 'staff'], false)): ?>
 <div class="row mb-4">
   <div class="col-md-3">
     <div class="card text-center h-100">
@@ -199,6 +200,7 @@
     </div>
   </div>
 </div>
+<?php endif; ?>
 
 <?php if ($sf_user->isAdministrator() && !empty($pendingResearchers)): ?>
 <div class="card mb-4">
@@ -227,6 +229,8 @@
 </div>
 <?php endif; ?>
 
+<?php // Names every researcher booked today: reading-room staff only. ?>
+<?php if ($sf_user->isAdministrator() || $sf_user->hasCredential(['editor', 'staff'], false)): ?>
 <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-calendar-day me-2"></i><?php echo __("Today's Schedule"); ?></span>
@@ -267,6 +271,7 @@
         </table>
       </div>
     </div>
+<?php endif; ?>
 
     <?php
     $ed = isset($enhancedData) ? (is_array($enhancedData) ? $enhancedData : (method_exists($enhancedData, 'getRawValue') ? $enhancedData->getRawValue() : [])) : [];

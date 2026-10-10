@@ -10,7 +10,7 @@
 <?php
 // Determine if current user is the booking owner or admin/staff
 $isAdmin = $sf_user->isAdministrator();
-$isStaff = $sf_user->hasCredential('staff') || $isAdmin;
+$isStaff = $isAdmin || $sf_user->hasCredential(['editor', 'staff'], false); // same rule as the action
 $currentUserId = $sf_user->getAttribute('user_id');
 
 // Get researcher for current user
@@ -152,7 +152,7 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
           <?php endif; ?>
         <?php endif; ?>
 
-        <?php if ($booking->status === 'confirmed'): ?>
+        <?php if ($booking->status === 'confirmed' && empty($booking->checked_in_at)): ?>
           <?php if ($isStaff): ?>
             <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkIn', 'id' => $booking->id]); ?>" class="btn btn-success w-100 mb-2" data-ahg-confirm="<?php echo __('Check in researcher?'); ?>">
               <i class="fas fa-sign-in-alt me-2"></i><?php echo __('Check In'); ?>
@@ -175,7 +175,8 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
           <?php endif; ?>
         <?php endif; ?>
 
-        <?php if ($booking->status === 'checked_in'): ?>
+        <?php /* No checked_in status exists: a checked-in booking stays confirmed with checked_in_at set. */ ?>
+        <?php if ($booking->status === 'confirmed' && !empty($booking->checked_in_at)): ?>
           <?php if ($isStaff): ?>
           <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkOut', 'id' => $booking->id]); ?>" class="btn btn-warning w-100" data-ahg-confirm="<?php echo __('Check out researcher?'); ?>">
             <i class="fas fa-sign-out-alt me-2"></i><?php echo __('Check Out'); ?>

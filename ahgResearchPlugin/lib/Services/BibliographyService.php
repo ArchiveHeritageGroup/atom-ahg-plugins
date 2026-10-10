@@ -468,7 +468,9 @@ class BibliographyService
             $fields[] = '  title = {' . $this->escapeBibTeX($entry->title) . '}';
         }
         if ($entry->authors) {
-            $fields[] = '  author = {' . $this->escapeBibTeX($entry->authors) . '}';
+            // Stored "A; B" (or "A and B" from a BibTeX import); BibTeX needs "and", each name braced.
+            $names = array_filter(array_map('trim', preg_split('/;|\s+and\s+/', $entry->authors)));
+            $fields[] = '  author = {' . implode(' and ', array_map(fn ($n) => '{' . $this->escapeBibTeX($n) . '}', $names)) . '}';
         }
         if ($entry->date) {
             $year = preg_match('/\d{4}/', $entry->date, $m) ? $m[0] : $entry->date;

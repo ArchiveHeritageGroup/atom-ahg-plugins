@@ -49,7 +49,8 @@ class ReportService
             foreach ($sections as $sectionDef) {
                 $parts = explode(':', $sectionDef, 2);
                 $type = $parts[0];
-                $title = $parts[1] ?? ucfirst($type);
+                // A readable default, not the raw key ("Toc", "Title_page").
+                $title = $parts[1] ?? (['toc' => 'Contents'][$type] ?? ucwords(str_replace('_', ' ', $type)));
 
                 DB::table('research_report_section')->insert([
                     'report_id' => $reportId,

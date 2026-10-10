@@ -163,7 +163,7 @@ class researchActions extends AhgController
             }
         }
         $this->pendingResearchers = $this->service->getResearchers(['status' => 'pending']);
-        $this->todayBookings = DB::table('research_booking as b')
+        $this->todayBookings = !$this->isReadingRoomStaff() ? [] : DB::table('research_booking as b')
             ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
             ->join('research_reading_room as rm', 'b.reading_room_id', '=', 'rm.id')
             ->where('b.booking_date', date('Y-m-d'))
@@ -226,6 +226,8 @@ class researchActions extends AhgController
                 // Send email notification
                 $this->sendResearcherEmail('pending', $data);
                 $this->redirect('research/registrationComplete');
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (Exception $e) {
                 if ($e->getMessage()) { $this->getUser()->setFlash('error', $e->getMessage()); }
             }
@@ -329,9 +331,34 @@ class researchActions extends AhgController
         $this->bookings = $this->service->getResearcherBookings($id);
     }
 
+    /** The signed-in user's id; ten request and custody actions call this name. */
+    protected function getCurrentUserId(): ?int
+    {
+        return $this->userId();
+    }
+
+    /** Reading-room staff: administrators and editors (the people who run the room). */
+    protected function isReadingRoomStaff(): bool
+    {
+        $u = $this->getUser();
+
+        return $u->isAuthenticated() && ($u->isAdministrator() || $u->hasCredential(['editor', 'staff'], false));
+    }
+
+    /** Staff-only reading-room pages: bookings, check-in/out, retrieval queue, walk-ins. */
+    protected function requireReadingRoomStaff(): void
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+        if (!$this->isReadingRoomStaff()) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+    }
+
     public function executeBookings($request)
     {
-        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $this->requireReadingRoomStaff(); // lists every booking with researchers' emails
         $this->rooms = $this->service->getReadingRooms();
         $this->pendingBookings = DB::table('research_booking as b')
             ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
@@ -345,6 +372,51 @@ class researchActions extends AhgController
             ->where('b.status', 'confirmed')->where('b.booking_date', '>=', date('Y-m-d'))
             ->select('b.*', 'r.first_name', 'r.last_name', 'rm.name as room_name')
             ->orderBy('b.booking_date')->limit(20)->get()->toArray();
+    }
+
+    /**
+     * Reasons a requested booking breaks its reading room's rules (empty = acceptable).
+     *
+     * @return string[]
+     */
+    protected function bookingErrors($request): array
+    {
+        $room = DB::table('research_reading_room')->where('id', (int) $request->getParameter('reading_room_id'))->where('is_active', 1)->first();
+        if (!$room) {
+            return ['Choose a reading room.'];
+        }
+        $date = \DateTime::createFromFormat('!Y-m-d', (string) $request->getParameter('booking_date'));
+        $start = substr((string) $request->getParameter('start_time'), 0, 5);
+        $end = substr((string) $request->getParameter('end_time'), 0, 5);
+        if (!$date) {
+            return ['Choose the date of your visit.'];
+        }
+        $errors = [];
+        $today = new \DateTime('today');
+        if ($date < $today) {
+            $errors[] = 'Choose a date from today onwards.';
+        }
+        $open = array_filter(array_map(static fn ($d) => ucfirst(strtolower(substr(trim($d), 0, 3))), explode(',', (string) $room->days_open)));
+        if ($open && !in_array($date->format('D'), $open, true)) {
+            $errors[] = sprintf('%s is closed on %ss. It is open %s.', $room->name, $date->format('l'), implode(', ', $open));
+        }
+        if ((int) $room->advance_booking_days > 0 && $date > (clone $today)->modify('+'.(int) $room->advance_booking_days.' days')) {
+            $errors[] = sprintf('Bookings can be made up to %d days ahead.', (int) $room->advance_booking_days);
+        }
+        $opening = substr((string) $room->opening_time, 0, 5);
+        $closing = substr((string) $room->closing_time, 0, 5);
+        if ('' === $start || '' === $end || $end <= $start) {
+            $errors[] = 'The end time must be after the start time.';
+        } elseif (($opening && $start < $opening) || ($closing && $end > $closing)) {
+            $errors[] = sprintf('%s is open from %s to %s.', $room->name, $opening, $closing);
+        } elseif ((int) $room->max_booking_hours > 0) {
+            $minutes = (strtotime('1970-01-01 '.$end) - strtotime('1970-01-01 '.$start)) / 60;
+            if ($minutes > 60 * (int) $room->max_booking_hours) {
+                $errors[] = sprintf('A booking can be at most %d hours.', (int) $room->max_booking_hours);
+            }
+        }
+
+        return $errors;
     }
 
     public function executeBook($request)
@@ -366,7 +438,13 @@ class researchActions extends AhgController
                 })->where('slug.slug', $this->objectSlug)
                 ->select('slug.object_id', 'i18n.title')->first();
         }
+        $this->errors = [];
         if ($request->isMethod('post')) {
+            // Check the booking against the room's own rules, which staff set on the room
+            // but nothing enforced: any day, any hour and any length used to be accepted.
+            $this->errors = $this->bookingErrors($request);
+        }
+        if ($request->isMethod('post') && !$this->errors) {
             $bookingId = $this->service->createBooking([
                 'researcher_id' => $this->researcher->id,
                 'reading_room_id' => $request->getParameter('reading_room_id'),
@@ -437,16 +515,28 @@ class researchActions extends AhgController
             $this->forward404('Booking not found');
         }
 
+        $isStaff = $this->isReadingRoomStaff();
+        $own = $this->service->getResearcherByUserId((int) $this->getUser()->getAttribute('user_id'));
+        $isOwner = $own && (int) $own->id === (int) $this->booking->researcher_id;
+        if (!$isStaff && !$isOwner) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+
         if ($request->isMethod('post')) {
             $action = $request->getParameter('booking_action');
             $adminId = $this->getUser()->getAttribute('user_id');
+            // The template hides these buttons, but a posted form must be checked here:
+            // only staff confirm or mark a no-show; the researcher may cancel their own.
+            if (!$isStaff && 'cancel' !== $action) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
+            }
 
             if ($action === 'confirm') {
                 $this->service->confirmBooking($bookingId, $adminId);
                 $this->sendBookingEmail($this->booking, 'confirmed');
                 $this->getUser()->setFlash('success', 'Booking confirmed');
             } elseif ($action === 'cancel') {
-                $this->service->cancelBooking($bookingId, 'Cancelled by staff');
+                $this->service->cancelBooking($bookingId, $isStaff ? 'Cancelled by staff' : 'Cancelled by researcher');
                 $this->sendBookingEmail($this->booking, 'cancelled');
                 $this->getUser()->setFlash('success', 'Booking cancelled');
             } elseif ($action === 'noshow') {
@@ -1089,6 +1179,8 @@ class researchActions extends AhgController
                 ]);
                 $this->getUser()->setFlash('success', 'Registration successful! Pending approval.');
                 $this->redirect('research/registrationComplete');
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (Exception $e) {
                 DB::rollBack();
                 if ($e->getMessage()) { $this->getUser()->setFlash('error', 'Registration failed: ' . $e->getMessage()); }
@@ -1521,9 +1613,7 @@ class researchActions extends AhgController
 
     public function executeCheckIn($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('user/login');
-        }
+        $this->requireReadingRoomStaff();
         $bookingId = (int) $request->getParameter('id');
         DB::table('research_booking')->where('id', $bookingId)->update([
             'checked_in_at' => date('Y-m-d H:i:s'),
@@ -1535,9 +1625,7 @@ class researchActions extends AhgController
 
     public function executeCheckOut($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('user/login');
-        }
+        $this->requireReadingRoomStaff();
         $bookingId = (int) $request->getParameter('id');
         DB::table('research_booking')->where('id', $bookingId)->update([
             'checked_out_at' => date('Y-m-d H:i:s'),
@@ -1580,7 +1668,7 @@ class researchActions extends AhgController
             ->first();
         
         if (!$collection) {
-            return $this->renderText(json_encode(['success' => false, 'error' => 'Collection not found']));
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Evidence set not found.']));
         }
         
         // Check if already in collection
@@ -1590,7 +1678,7 @@ class researchActions extends AhgController
             ->exists();
         
         if ($exists) {
-            return $this->renderText(json_encode(['success' => false, 'error' => 'Item already in collection']));
+            return $this->renderText(json_encode(['success' => false, 'error' => 'This record is already in that evidence set.']));
         }
         
         // Add to collection
@@ -2361,7 +2449,17 @@ class researchActions extends AhgController
         ]);
 
         // Handle project creation
+        $this->createError = null;
+        $this->old = [];
         if ($request->isMethod('post') && $request->getParameter('form_action') === 'create') {
+            $start = $request->getParameter('start_date');
+            $end = $request->getParameter('expected_end_date');
+            if ($start && $end && $end < $start) {
+                // Re-show the dialog with the error and everything typed.
+                $this->createError = 'The expected end date is before the start date.';
+                $this->old = $request->getPostParameters();
+                return sfView::SUCCESS;
+            }
             try {
                 $projectId = $projectService->createProject($this->researcher->id, [
                     'title' => $request->getParameter('title'),
@@ -2373,6 +2471,8 @@ class researchActions extends AhgController
                 ]);
                 $this->getUser()->setFlash('success', 'Project created');
                 $this->redirect('research/viewProject?id=' . $projectId);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -2831,6 +2931,8 @@ class researchActions extends AhgController
                 ]);
                 $this->getUser()->setFlash('success', 'Project updated');
                 $this->redirect('/research/project/' . $projectId);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Failed to update: ' . $e->getMessage());
                 $this->redirect('/research/project/' . $projectId . '/edit');
@@ -3086,6 +3188,8 @@ class researchActions extends AhgController
 
                 $this->getUser()->setFlash('success', 'Reproduction request created');
                 $this->redirect('/research/reproduction/' . $newId);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Failed to create request: ' . $e->getMessage());
             }
@@ -3231,6 +3335,8 @@ class researchActions extends AhgController
                 ]);
                 $this->getUser()->setFlash('success', 'Bibliography created');
                 $this->redirect('research/viewBibliography?id=' . $bibliographyId);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -3727,9 +3833,7 @@ class researchActions extends AhgController
      */
     public function executeRetrievalQueue($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('user/login');
-        }
+        $this->requireReadingRoomStaff();
 
         require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
         $retrievalService = new RetrievalService();
@@ -4140,9 +4244,7 @@ class researchActions extends AhgController
      */
     public function executeWalkIn($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('user/login');
-        }
+        $this->requireReadingRoomStaff();
 
         require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RetrievalService.php';
         require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/SeatService.php';
@@ -4379,11 +4481,13 @@ class researchActions extends AhgController
             ->get()->toArray();
         $this->filters = $filters;
 
-        if ($request->isMethod('post') && $request->getParameter('do') === 'create') {
+        // The entry dialog posts form_action=create; "do" was never sent, so nothing saved.
+        if ($request->isMethod('post') && 'create' === ($request->getParameter('form_action') ?: $request->getParameter('do'))) {
             $content = $request->getParameter('content');
             if ($content) {
                 $content = $this->service->sanitizeHtml($content);
                 $journalService->createEntry($this->researcher->id, [
+                    'is_private' => $request->getParameter('is_private') ? 1 : 0,
                     'title' => $request->getParameter('title'),
                     'content' => $content,
                     'content_format' => 'html',
@@ -5030,14 +5134,14 @@ class researchActions extends AhgController
         $notifService = $this->loadNotificationService();
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = ($request->getParameter('form_action') ?: $request->getParameter('do'));
 
             if ($action === 'mark_read') {
                 $notifService->markAsRead((int) $request->getParameter('id'), $this->researcher->id);
             } elseif ($action === 'mark_all_read') {
                 $notifService->markAllAsRead($this->researcher->id);
                 $this->getUser()->setFlash('success', 'All notifications marked as read');
-            } elseif ($action === 'update_preference') {
+            } elseif ($action === 'update_preference' || $action === 'update_preferences') {
                 $notifService->updatePreference($this->researcher->id, $request->getParameter('notification_type'), [
                     'email_enabled' => $request->getParameter('email_enabled') ? 1 : 0,
                     'in_app_enabled' => $request->getParameter('in_app_enabled') ? 1 : 0,
@@ -5189,7 +5293,7 @@ class researchActions extends AhgController
         $this->institutions = $shareService->getInstitutions();
 
         if ($request->isMethod('post')) {
-            $action = $request->getParameter('do');
+            $action = ($request->getParameter('form_action') ?: $request->getParameter('do'));
 
             if ($action === 'create_share') {
                 $shareService->createShare($projectId, $this->researcher->id, [
@@ -5244,7 +5348,7 @@ class researchActions extends AhgController
         }
 
         // If posting registration as external collaborator
-        if ($request->isMethod('post') && $request->getParameter('do') === 'register_external') {
+        if ($request->isMethod('post') && ($request->getParameter('form_action') ?: $request->getParameter('do')) === 'register_external') {
             $collabId = $shareService->addExternalCollaborator($this->share->id, [
                 'name' => $request->getParameter('name'),
                 'email' => $request->getParameter('email'),
@@ -6001,6 +6105,8 @@ class researchActions extends AhgController
                 }
                 $this->getUser()->setFlash('success', 'Snapshot created');
                 $this->redirect('/research/snapshot/' . $id);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -6096,6 +6202,8 @@ class researchActions extends AhgController
                 ]);
                 $this->getUser()->setFlash('success', 'Hypothesis created');
                 $this->redirect('/research/hypothesis/' . $id);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -6165,6 +6273,8 @@ class researchActions extends AhgController
                     ]);
                     $this->getUser()->setFlash('success', 'Hypothesis updated');
                 }
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -6803,6 +6913,8 @@ class researchActions extends AhgController
                 );
                 $this->getUser()->setFlash('success', 'Extraction job created');
                 $this->redirect('/research/extraction-job/' . $jobId);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -6981,6 +7093,8 @@ class researchActions extends AhgController
                     $this->getUser()->setFlash('success', 'Template created');
                 }
                 $this->redirect('research/document-templates');
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -8066,6 +8180,8 @@ class researchActions extends AhgController
                     $this->getUser()->setFlash('success', 'Milestone deleted');
                 }
                 $this->redirect('/research/ethics-milestones/' . $projectId);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -8097,6 +8213,8 @@ class researchActions extends AhgController
                 }
                 $this->getUser()->setFlash('success', $count . ' assertions updated to ' . $newStatus);
                 $this->redirect('/research/assertion-batch-review/' . $projectId);
+            } catch (\sfStopException $stop) {
+                throw $stop;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -9002,6 +9120,8 @@ class researchActions extends AhgController
             $artefactId = $svc->generate($projectId, $sources, $outputType, [], $researcherId);
             $this->getUser()->setFlash('success', 'Artefact generated successfully.');
             $this->redirect(url_for(['module' => 'research', 'action' => 'studioShow', 'projectId' => $projectId, 'artefactId' => $artefactId]));
+        } catch (\sfStopException $stop) {
+            throw $stop;
         } catch (\Throwable $e) {
             $this->getUser()->setFlash('error', 'Generation failed: ' . $e->getMessage());
             $this->redirect(url_for(['module' => 'research', 'action' => 'studio', 'projectId' => $projectId]));

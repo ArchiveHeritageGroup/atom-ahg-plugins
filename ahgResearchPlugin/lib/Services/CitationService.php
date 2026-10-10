@@ -122,6 +122,17 @@ class CitationService
             ->first();
 
         $row->creator      = $event->creator      ?? null;
+        // Every creator (event type 111), not just the first actor: RIS takes one
+        // AU line each and BibTeX joins them with "and".
+        $row->creators = DB::table('event as e')
+            ->join('actor_i18n as ai', function ($join) use ($culture) {
+                $join->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', $culture);
+            })
+            ->where('e.object_id', $objectId)->where('e.type_id', 111)
+            ->pluck('ai.authorized_form_of_name')->filter()->values()->all();
+        if (!$row->creators && $row->creator) {
+            $row->creators = [$row->creator];
+        }
         $row->start_date   = $event->start_date   ?? null;
         $row->end_date     = $event->end_date     ?? null;
         $row->date_display = $event->date_display ?? null;
@@ -172,7 +183,7 @@ class CitationService
         $lines = [];
         $lines[] = 'TY  - ARCHIVE';
         if ($r->title)               $lines[] = 'TI  - ' . $this->stripNl($r->title);
-        if ($r->creator)             $lines[] = 'AU  - ' . $this->stripNl($r->creator);
+        foreach ($r->creators ?? [] as $c) $lines[] = 'AU  - ' . $this->stripNl($c);
         if ($r->year)                $lines[] = 'PY  - ' . $r->year;
         if ($r->date_display)        $lines[] = 'DA  - ' . $this->stripNl($r->date_display);
         if ($r->repository_name)     $lines[] = 'PB  - ' . $this->stripNl($r->repository_name);
@@ -190,7 +201,8 @@ class CitationService
         $key = $this->bibtexKey($r);
         $entries = [];
         if ($r->title)             $entries[] = "  title       = {{" . $this->bibEscape($r->title) . "}}";
-        if ($r->creator)           $entries[] = "  author      = {" . $this->bibEscape($r->creator) . "}";
+        // Each name braced: kept as written, so a family or body is not split into given/surname.
+        if (!empty($r->creators))  $entries[] = "  author      = {" . implode(' and ', array_map(fn ($c) => '{' . $this->bibEscape($c) . '}', $r->creators)) . "}";
         if ($r->year)              $entries[] = "  year        = {" . $r->year . "}";
         if ($r->repository_name)   $entries[] = "  institution = {" . $this->bibEscape($r->repository_name) . "}";
         if ($r->ref_code)          $entries[] = "  number      = {" . $this->bibEscape($r->ref_code) . "}";

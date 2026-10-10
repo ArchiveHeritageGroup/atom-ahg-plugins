@@ -11,7 +11,11 @@
   <div class="col-md-8">
     <div class="card">
       <div class="card-body">
-        <form method="post">
+        <?php $bookErrors = $sf_data->getRaw('errors') ?: []; ?>
+<?php if ($bookErrors): ?>
+  <div class="alert alert-danger" role="alert"><?php foreach ($bookErrors as $e) { echo esc_entities(__($e)).'<br>'; } ?></div>
+<?php endif; ?>
+<form method="post">
           <h5 class="mb-3 border-bottom pb-2"><i class="fas fa-door-open me-2"></i><?php echo __('Select Reading Room'); ?></h5>
           
           <div class="mb-4">
@@ -24,7 +28,7 @@
                   <div class="card h-100">
                     <div class="card-body">
                       <div class="form-check">
-                        <input class="form-check-input" type="radio" name="reading_room_id" value="<?php echo $room->id; ?>" id="room_<?php echo $room->id; ?>" required>
+                        <input class="form-check-input" type="radio" name="reading_room_id" value="<?php echo $room->id; ?>" id="room_<?php echo $room->id; ?>" required<?php echo (int) $sf_request->getParameter('reading_room_id') === (int) $room->id ? ' checked' : ''; ?>>
                         <label class="form-check-label" for="room_<?php echo $room->id; ?>">
                           <strong><?php echo htmlspecialchars($room->name); ?></strong>
                         </label>
@@ -47,15 +51,15 @@
           <div class="row mb-4">
             <div class="col-md-4">
               <label class="form-label"><?php echo __('Date'); ?> <span class="text-danger">*</span></label>
-              <input type="date" name="booking_date" class="form-control" required min="<?php echo date('Y-m-d'); ?>">
+              <input type="date" name="booking_date" class="form-control" required min="<?php echo date('Y-m-d'); ?>" value="<?php echo esc_entities((string) $sf_request->getParameter('booking_date')); ?>">
             </div>
             <div class="col-md-4">
               <label class="form-label"><?php echo __('Start Time'); ?> <span class="text-danger">*</span></label>
-              <input type="time" name="start_time" class="form-control" required value="09:00">
+              <input type="time" name="start_time" class="form-control" required value="<?php echo esc_entities((string) $sf_request->getParameter('start_time', '09:00')); ?>">
             </div>
             <div class="col-md-4">
               <label class="form-label"><?php echo __('End Time'); ?> <span class="text-danger">*</span></label>
-              <input type="time" name="end_time" class="form-control" required value="17:00">
+              <input type="time" name="end_time" class="form-control" required value="<?php echo esc_entities((string) $sf_request->getParameter('end_time', '17:00')); ?>">
             </div>
           </div>
 
@@ -63,7 +67,7 @@
           
           <div class="mb-4">
             <label class="form-label"><?php echo __('Purpose of Visit'); ?></label>
-            <textarea name="purpose" class="form-control" rows="3" placeholder="<?php echo __('Describe the purpose of your visit and any materials you wish to consult...'); ?>"></textarea>
+            <textarea name="purpose" class="form-control" rows="3" placeholder="<?php echo __('Describe the purpose of your visit and any materials you wish to consult...'); ?>"><?php echo esc_entities((string) $sf_request->getParameter('purpose')); ?></textarea>
           </div>
 
           <div class="mb-3">

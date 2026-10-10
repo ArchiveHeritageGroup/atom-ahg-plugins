@@ -1,3 +1,9 @@
+<?php
+// After an error the form is shown again: give back what was typed (never the
+// passwords), so one mistake does not mean filling in the whole form again.
+$v = static function ($k) use ($sf_request) { return esc_entities((string) $sf_request->getParameter($k, '')); };
+$sel = static function ($k, $val) use ($sf_request) { return (string) $sf_request->getParameter($k) === (string) $val ? ' selected' : ''; };
+?>
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
 <h1><i class="fas fa-user-plus text-primary me-2"></i><?php echo __('Researcher Registration'); ?></h1>
@@ -25,13 +31,13 @@
               
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Username'); ?> <span class="text-danger">*</span></label>
-                <input type="text" name="username" class="form-control" required minlength="3" placeholder="<?php echo __('Choose a username'); ?>">
+                <input type="text" name="username" value="<?php echo $v('username'); ?>" class="form-control" required minlength="3" placeholder="<?php echo __('Choose a username'); ?>">
                 <small class="text-muted"><?php echo __('At least 3 characters, letters and numbers only'); ?></small>
               </div>
 
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Email Address'); ?> <span class="text-danger">*</span></label>
-                <input type="email" name="email" class="form-control" required placeholder="your.email@example.com">
+                <input type="email" name="email" value="<?php echo $v('email'); ?>" class="form-control" required placeholder="your.email@example.com">
               </div>
 
               <div class="mb-3">
@@ -51,16 +57,16 @@
                 <div class="col-md-5">
                   <label class="form-label"><?php echo __('ID Type'); ?></label>
                   <select name="id_type" class="form-select">
-                    <option value="">--</option>
-                    <option value="passport"><?php echo __('Passport'); ?></option>
-                    <option value="national_id"><?php echo __('National ID'); ?></option>
-                    <option value="drivers_license"><?php echo __("Driver's License"); ?></option>
-                    <option value="student_card"><?php echo __('Student Card'); ?></option>
+                    <option value=""<?php echo $sel('id_type', ''); ?>>--</option>
+                    <option value="passport"<?php echo $sel('id_type', 'passport'); ?>><?php echo __('Passport'); ?></option>
+                    <option value="national_id"<?php echo $sel('id_type', 'national_id'); ?>><?php echo __('National ID'); ?></option>
+                    <option value="drivers_license"<?php echo $sel('id_type', 'drivers_license'); ?>><?php echo __("Driver's License"); ?></option>
+                    <option value="student_card"<?php echo $sel('id_type', 'student_card'); ?>><?php echo __('Student Card'); ?></option>
                   </select>
                 </div>
                 <div class="col-md-7">
                   <label class="form-label"><?php echo __('ID Number'); ?></label>
-                  <input type="text" name="id_number" class="form-control">
+                  <input type="text" name="id_number" value="<?php echo $v('id_number'); ?>" class="form-control">
                 </div>
               </div>
             </div>
@@ -73,27 +79,27 @@
                 <div class="col-md-3">
                   <label class="form-label"><?php echo __('Title'); ?></label>
                   <select name="title" class="form-select">
-                    <option value="">--</option>
-                    <option value="Mr">Mr</option>
-                    <option value="Mrs">Mrs</option>
-                    <option value="Ms">Ms</option>
-                    <option value="Dr">Dr</option>
-                    <option value="Prof">Prof</option>
+                    <option value=""<?php echo $sel('title', ''); ?>>--</option>
+                    <option value="Mr"<?php echo $sel('title', 'Mr'); ?>>Mr</option>
+                    <option value="Mrs"<?php echo $sel('title', 'Mrs'); ?>>Mrs</option>
+                    <option value="Ms"<?php echo $sel('title', 'Ms'); ?>>Ms</option>
+                    <option value="Dr"<?php echo $sel('title', 'Dr'); ?>>Dr</option>
+                    <option value="Prof"<?php echo $sel('title', 'Prof'); ?>>Prof</option>
                   </select>
                 </div>
                 <div class="col-md-4">
                   <label class="form-label"><?php echo __('First Name'); ?> <span class="text-danger">*</span></label>
-                  <input type="text" name="first_name" class="form-control" required>
+                  <input type="text" name="first_name" value="<?php echo $v('first_name'); ?>" class="form-control" required>
                 </div>
                 <div class="col-md-5">
                   <label class="form-label"><?php echo __('Last Name'); ?> <span class="text-danger">*</span></label>
-                  <input type="text" name="last_name" class="form-control" required>
+                  <input type="text" name="last_name" value="<?php echo $v('last_name'); ?>" class="form-control" required>
                 </div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Phone'); ?></label>
-                <input type="tel" name="phone" class="form-control">
+                <input type="tel" name="phone" value="<?php echo $v('phone'); ?>" class="form-control">
               </div>
 
               <h5 class="mb-3 mt-4 border-bottom pb-2"><i class="fas fa-university me-2"></i><?php echo __('Affiliation'); ?></h5>
@@ -101,35 +107,35 @@
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Affiliation Type'); ?> <span class="text-danger">*</span></label>
                 <select name="affiliation_type" class="form-select" required>
-                  <option value="independent"><?php echo __('Independent Researcher'); ?></option>
-                  <option value="academic"><?php echo __('Academic Institution'); ?></option>
-                  <option value="government"><?php echo __('Government'); ?></option>
-                  <option value="private"><?php echo __('Private Organization'); ?></option>
-                  <option value="student"><?php echo __('Student'); ?></option>
-                  <option value="other"><?php echo __('Other'); ?></option>
+                  <option value="independent"<?php echo $sel('affiliation_type', 'independent'); ?>><?php echo __('Independent Researcher'); ?></option>
+                  <option value="academic"<?php echo $sel('affiliation_type', 'academic'); ?>><?php echo __('Academic Institution'); ?></option>
+                  <option value="government"<?php echo $sel('affiliation_type', 'government'); ?>><?php echo __('Government'); ?></option>
+                  <option value="private"<?php echo $sel('affiliation_type', 'private'); ?>><?php echo __('Private Organization'); ?></option>
+                  <option value="student"<?php echo $sel('affiliation_type', 'student'); ?>><?php echo __('Student'); ?></option>
+                  <option value="other"<?php echo $sel('affiliation_type', 'other'); ?>><?php echo __('Other'); ?></option>
                 </select>
               </div>
 
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Institution'); ?></label>
-                <input type="text" name="institution" class="form-control" placeholder="<?php echo __('University, Organization, etc.'); ?>">
+                <input type="text" name="institution" value="<?php echo $v('institution'); ?>" class="form-control" placeholder="<?php echo __('University, Organization, etc.'); ?>">
               </div>
 
               <div class="row mb-3">
                 <div class="col-md-6">
                   <label class="form-label"><?php echo __('Department'); ?></label>
-                  <input type="text" name="department" class="form-control">
+                  <input type="text" name="department" value="<?php echo $v('department'); ?>" class="form-control">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label"><?php echo __('Position'); ?></label>
-                  <input type="text" name="position" class="form-control">
+                  <input type="text" name="position" value="<?php echo $v('position'); ?>" class="form-control">
                 </div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label"><?php echo __('ORCID ID'); ?></label>
                 <div class="input-group">
-                  <input type="text" name="orcid_id" id="orcid_id_input" class="form-control" placeholder="0000-0000-0000-0000">
+                  <input type="text" name="orcid_id" value="<?php echo $v('orcid_id'); ?>" id="orcid_id_input" class="form-control" placeholder="0000-0000-0000-0000">
                   <button type="button" id="orcid_fetch_btn" class="btn btn-outline-success"><i class="fab fa-orcid me-1"></i><?php echo __('Fetch'); ?></button>
                 </div>
                 <div id="orcid_fetch_msg" class="form-text"></div>

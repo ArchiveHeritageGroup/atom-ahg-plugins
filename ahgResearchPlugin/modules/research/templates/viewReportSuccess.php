@@ -79,7 +79,7 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
         <div class="card mb-3 report-section" data-section-id="<?php echo $section->id; ?>">
           <div class="card-header d-flex justify-content-between align-items-center py-2">
             <div class="d-flex align-items-center gap-2">
-              <span class="badge bg-secondary"><?php echo ucwords(str_replace('_', ' ', $section->section_type ?? 'text')); ?></span>
+              <span class="badge bg-transparent border"><?php echo ucwords(str_replace('_', ' ', $section->section_type ?? 'text')); ?></span>
               <strong><?php echo htmlspecialchars($section->title ?? __('Untitled Section')); ?></strong>
             </div>
             <div class="d-flex gap-1">

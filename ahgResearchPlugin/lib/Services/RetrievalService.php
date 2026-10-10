@@ -383,6 +383,10 @@ class RetrievalService
             $updateData['location_current'] = $locationMap[$newStatus];
         }
 
+        $updated = DB::table('research_material_request')
+            ->where('id', $requestId)
+            ->update($updateData) > 0;
+
         // Log status change
         if ($updated) {
             DB::table('research_request_status_history')->insert([

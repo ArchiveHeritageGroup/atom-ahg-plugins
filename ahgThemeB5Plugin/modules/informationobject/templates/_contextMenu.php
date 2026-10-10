@@ -80,6 +80,12 @@ if (isset($resource)) {
     <?php endif; ?>
     <?php if ($hasResearch): ?>
     <li><a href="<?php echo url_for(['module' => 'research', 'action' => 'cite', 'slug' => $resourceSlug]); ?>"><i class="fas fa-quote-right fa-fw me-2"></i><?php echo __('Cite this Record'); ?></a></li>
+    <?php // Approved researchers can collect and request the record from here; the
+          // research plugin's partials check approval again before acting. ?>
+    <?php if ($sf_user->isAuthenticated() && \Illuminate\Database\Capsule\Manager::table('research_researcher')->where('user_id', $sf_user->getAttribute('user_id'))->where('status', 'approved')->exists()): ?>
+    <li class="mt-2"><?php include_partial('research/addToCollectionButton', ['objectId' => $resource->id]); ?></li>
+    <li><?php include_partial('research/requestButton', ['objectId' => $resource->id]); ?></li>
+    <?php endif; ?>
     <?php endif; ?>
   </ul>
 </section>

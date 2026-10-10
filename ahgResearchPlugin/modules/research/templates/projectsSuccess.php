@@ -90,42 +90,46 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <?php $old = $sf_data->getRaw('old') ?: []; $v = fn ($k) => htmlspecialchars($old[$k] ?? '', ENT_QUOTES); ?>
+                    <?php if ($createError): ?>
+                    <div class="alert alert-danger"><?php echo __($createError); ?></div>
+                    <?php endif; ?>
                     <div class="mb-3">
                         <label class="form-label">Project Title *</label>
-                        <input type="text" name="title" class="form-control" required>
+                        <input type="text" name="title" class="form-control" required value="<?php echo $v('title'); ?>">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="3"></textarea>
+                        <textarea name="description" class="form-control" rows="3"><?php echo $v('description'); ?></textarea>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Project Type</label>
                             <select name="project_type" class="form-select">
-                                <option value="personal">Personal Research</option>
-                                <option value="thesis">Thesis</option>
-                                <option value="dissertation">Dissertation</option>
-                                <option value="publication">Publication</option>
-                                <option value="exhibition">Exhibition</option>
-                                <option value="documentary">Documentary</option>
-                                <option value="genealogy">Genealogy</option>
-                                <option value="institutional">Institutional</option>
-                                <option value="other">Other</option>
+                                <option value="personal"<?php echo ($old['project_type'] ?? '') === 'personal' ? ' selected' : ''; ?>>Personal Research</option>
+                                <option value="thesis"<?php echo ($old['project_type'] ?? '') === 'thesis' ? ' selected' : ''; ?>>Thesis</option>
+                                <option value="dissertation"<?php echo ($old['project_type'] ?? '') === 'dissertation' ? ' selected' : ''; ?>>Dissertation</option>
+                                <option value="publication"<?php echo ($old['project_type'] ?? '') === 'publication' ? ' selected' : ''; ?>>Publication</option>
+                                <option value="exhibition"<?php echo ($old['project_type'] ?? '') === 'exhibition' ? ' selected' : ''; ?>>Exhibition</option>
+                                <option value="documentary"<?php echo ($old['project_type'] ?? '') === 'documentary' ? ' selected' : ''; ?>>Documentary</option>
+                                <option value="genealogy"<?php echo ($old['project_type'] ?? '') === 'genealogy' ? ' selected' : ''; ?>>Genealogy</option>
+                                <option value="institutional"<?php echo ($old['project_type'] ?? '') === 'institutional' ? ' selected' : ''; ?>>Institutional</option>
+                                <option value="other"<?php echo ($old['project_type'] ?? '') === 'other' ? ' selected' : ''; ?>>Other</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Institution</label>
-                            <input type="text" name="institution" class="form-control">
+                            <input type="text" name="institution" class="form-control" value="<?php echo $v('institution'); ?>">
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Start Date</label>
-                            <input type="date" name="start_date" class="form-control">
+                            <input type="date" name="start_date" class="form-control" value="<?php echo $v('start_date'); ?>">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Expected End Date</label>
-                            <input type="date" name="expected_end_date" class="form-control">
+                            <input type="date" name="expected_end_date" class="form-control<?php echo $createError ? ' is-invalid' : ''; ?>" value="<?php echo $v('expected_end_date'); ?>">
                         </div>
                     </div>
                 </div>
@@ -137,3 +141,8 @@
         </div>
     </div>
 </div>
+<?php if ($createError): ?>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function () { bootstrap.Modal.getOrCreateInstance(document.getElementById('createProjectModal')).show(); });
+</script>
+<?php endif; ?>
