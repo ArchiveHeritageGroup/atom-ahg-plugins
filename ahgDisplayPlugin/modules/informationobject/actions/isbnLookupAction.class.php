@@ -84,7 +84,7 @@ class InformationobjectIsbnLookupAction extends AhgController
     /**
      * Render JSON response.
      */
-    private function renderJson(array $data, int $status = 200): string
+    protected function renderJson(array $data, int $status = 200): string
     {
         $this->getResponse()->setStatusCode($status);
 

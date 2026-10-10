@@ -3,6 +3,42 @@
 use AtomFramework\Http\Controllers\AhgController;
 class apiActions extends AhgController
 {
+    /**
+     * API keys page: a signed-in user lists, creates and revokes their own REST API v2
+     * keys. Before this page a key could only be issued by a raw POST /api/v2/keys
+     * carrying the session's CSRF token, which no ordinary user can make.
+     */
+    public function executeKeys($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+        require_once \sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/Services/ApiKeyService.php';
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $this->scopes = ['read' => 'Read', 'write' => 'Create and update', 'delete' => 'Delete', 'batch' => 'Batch'];
+        $this->newKey = null;
+        $this->error = null;
+
+        if ($request->isMethod('post')) {
+            if ('revoke' === $request->getParameter('form_action')) {
+                \Illuminate\Database\Capsule\Manager::table('ahg_api_key')
+                    ->where('id', (int) $request->getParameter('key_id'))->where('user_id', $userId)->delete();
+                $this->redirect(['module' => 'api', 'action' => 'keys']);
+            }
+            $name = trim((string) $request->getParameter('name'));
+            $scopes = array_values(array_intersect((array) $request->getParameter('scopes', []), array_keys($this->scopes)));
+            if ('' === $name || !$scopes) {
+                $this->error = 'Give the key a name and at least one scope.';
+            } else {
+                // Shown once on this response only; the database keeps a hash.
+                $this->newKey = (new \AhgAPIPlugin\Service\ApiKeyService())->createApiKey($userId, mb_substr($name, 0, 100), $scopes);
+            }
+        }
+
+        $this->keys = \Illuminate\Database\Capsule\Manager::table('ahg_api_key')->where('user_id', $userId)
+            ->orderByDesc('created_at')->get(['id', 'name', 'api_key_prefix', 'scopes', 'last_used_at', 'is_active', 'created_at'])->all();
+    }
+
     public function executeSearchInformationObjects($request)
     {
         $this->getResponse()->setContentType('application/json');

@@ -16,7 +16,7 @@ class ahgUserManagePluginConfiguration extends sfPluginConfiguration
             AhgNav::register('manage', 'UserManage', [
                 'url' => '/index.php/user',
                 'label' => 'User Manage',
-                'credentials' => ['editor', 'administrator'],
+                'credentials' => ['administrator'], // the page admits administrators only
                 'weight' => 70,
             ]);
         }

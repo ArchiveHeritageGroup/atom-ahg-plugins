@@ -30,7 +30,7 @@ class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
             AhgNav::register('manage', 'PortableExport', [
                 'url' => '/index.php/portable-export',
                 'label' => 'Portable Export',
-                'credentials' => ['editor', 'administrator'],
+                'credentials' => ['administrator'], // the page admits administrators only
                 'weight' => 70,
             ]);
         }

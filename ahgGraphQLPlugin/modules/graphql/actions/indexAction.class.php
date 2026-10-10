@@ -129,6 +129,12 @@ class graphqlIndexAction extends AhgController
 
         $result = $service->execute($query, $variables, $this->apiKeyInfo);
 
+        // A key signs its owner in for this request only: left signed in, the session
+        // cookie outlived the key and later requests skipped the key check entirely.
+        if (($this->apiKeyInfo['type'] ?? null) === 'ahg_api_key' && $this->context->user->isAuthenticated()) {
+            $this->context->user->signOut();
+        }
+
         // Output result
         $this->response->setStatusCode(200);
         echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

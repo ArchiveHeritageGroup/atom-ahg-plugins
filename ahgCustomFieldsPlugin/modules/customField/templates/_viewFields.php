@@ -14,7 +14,7 @@ require_once $pluginDir . '/lib/Service/CustomFieldService.php';
 require_once $pluginDir . '/lib/Service/CustomFieldRenderService.php';
 
 $renderService = new \AhgCustomFieldsPlugin\Service\CustomFieldRenderService();
-$publicOnly = $publicOnly ?? true;
+$publicOnly = $publicOnly ?? !(sfContext::hasInstance() && sfContext::getInstance()->getUser()->hasCredential(['administrator', 'editor', 'contributor', 'translator'], false)); // staff see staff-only fields
 $html = $renderService->renderViewFields($entityType, $objectId, $publicOnly);
 
 if (empty($html)) {

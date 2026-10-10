@@ -38,7 +38,7 @@ class apiv2DescriptionsUpdateAction extends AhgApiController
             if (isset($data['repository_id'])) $ioUpdate['repository_id'] = $data['repository_id'];
             
             if (!empty($ioUpdate)) {
-                $ioUpdate['updated_at'] = date('Y-m-d H:i:s');
+                // updated_at lives on object (set below), not information_object.
                 DB::table('information_object')->where('id', $objectId)->update($ioUpdate);
             }
 
@@ -98,7 +98,7 @@ class apiv2DescriptionsUpdateAction extends AhgApiController
                 'message' => 'Description updated successfully'
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) { // an Error escaped as an HTML 500; API clients need JSON
             DB::rollBack();
             return $this->error(500, 'Server Error', $e->getMessage());
         }

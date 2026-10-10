@@ -23,7 +23,9 @@ if ($objectId <= 0) {
 }
 
 $renderService = new \AhgCustomFieldsPlugin\Service\CustomFieldRenderService();
-$html = $renderService->renderViewFields($entityType, $objectId, true);
+// Staff see every field; visitors only those marked visible to the public. Always
+// passing true hid staff-only fields from staff too, so they showed nowhere but the edit form.
+$html = $renderService->renderViewFields($entityType, $objectId, !(sfContext::hasInstance() && sfContext::getInstance()->getUser()->hasCredential(['administrator', 'editor', 'contributor', 'translator'], false)));
 
 if (empty($html)) {
     return;

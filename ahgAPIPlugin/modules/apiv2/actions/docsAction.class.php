@@ -25,6 +25,7 @@ class apiv2DocsAction extends AhgApiController
   <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/swagger-ui.css">
 </head>
 <body>
+  <div style="background:#10373E;color:#F2EDE6;padding:10px 20px;font:15px Arial,sans-serif">Requests need an API key in the X-API-Key header. <a href="/api/keys" style="color:#E1B34F;font-weight:bold">Get or manage your API keys</a></div>
   <div id="swagger-ui"></div>
   <script src="/plugins/ahgThemeB5Plugin/web/js/swagger-ui-bundle.js"></script>
   <script{$nonce}>

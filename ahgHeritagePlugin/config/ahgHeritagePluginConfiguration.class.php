@@ -94,7 +94,7 @@ class ahgHeritagePluginConfiguration extends sfPluginConfiguration
             AhgNav::register('manage', 'heritage_custodianDashboard', [
                 'route' => '@heritage_custodian_dashboard',
                 'label' => 'Heritage custodian',
-                'credentials' => ['editor', 'administrator'],
+                'credentials' => ['administrator'], // the page admits administrators only
                 'weight' => 342,
             ]);
         }

@@ -33,19 +33,19 @@ class ahgIngestPluginConfiguration extends sfPluginConfiguration
         // the plugin and disappears with it. Issue #292.
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'ingest_index', [
-                'route' => ['module' => 'ingest', 'action' => 'index'],
+                'route' => 'ingest_index', // a route NAME: AhgNav drops module/action arrays
                 'label' => 'Ingest dashboard',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 350,
             ]);
             AhgNav::register('manage', 'ingest_configure', [
-                'route' => ['module' => 'ingest', 'action' => 'configure'],
+                'route' => 'ingest_new',
                 'label' => 'New ingest',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 351,
             ]);
             AhgNav::register('manage', 'ingest_grid', [
-                'route' => ['module' => 'ingestGrid', 'action' => 'index'],
+                'route' => 'ingest_grid',
                 'label' => 'Grid entry',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 352,

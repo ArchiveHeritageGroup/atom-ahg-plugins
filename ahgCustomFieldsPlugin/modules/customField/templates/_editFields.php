@@ -55,6 +55,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var section = document.querySelector('.cf-edit-section');
     if (!section) return;
 
+    // A required field left empty makes the browser refuse to submit, but while this
+    // section is collapsed it has nowhere to show why: Save silently did nothing.
+    // Open the section and let the browser point at the field.
+    section.addEventListener('invalid', function (e) {
+        var body = section.querySelector('.collapse');
+        if (body && !body.classList.contains('show') && window.bootstrap) {
+            window.bootstrap.Collapse.getOrCreateInstance(body).show();
+            setTimeout(function () { e.target.focus(); e.target.reportValidity(); }, 400);
+        }
+    }, true);
+
     var saveUrl = <?php echo json_encode($saveUrl); ?>;
     var entityType = <?php echo json_encode($entityType); ?>;
     var objectId = <?php echo json_encode((int) $objectId); ?>;

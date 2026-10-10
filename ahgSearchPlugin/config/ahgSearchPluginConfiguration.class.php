@@ -14,9 +14,11 @@ class ahgSearchPluginConfiguration extends sfPluginConfiguration
         // Without it the plugin was reachable only by typing its URL.
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'Search', [
-                'url' => '/index.php/search/index',
-                'label' => 'Search',
-                'credentials' => ['editor', 'administrator'],
+                // search/index with no query is a 404; the plugin's own page is global
+                // search/replace, which admits administrators only.
+                'url' => '/index.php/search/globalReplace',
+                'label' => 'Global search/replace',
+                'credentials' => ['administrator'],
                 'weight' => 70,
             ]);
         }

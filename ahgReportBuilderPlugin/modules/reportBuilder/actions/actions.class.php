@@ -118,7 +118,9 @@ class reportBuilderActions extends AhgController
                 ]);
 
                 $this->getUser()->setFlash('success', 'Report created. Now configure your report.');
-                $this->redirect("admin/report-builder/{$reportId}/edit");
+                $this->redirect('@report_builder_edit?id='.$reportId);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() stops the action by throwing; let it through
             } catch (\Throwable $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -229,10 +231,12 @@ class reportBuilderActions extends AhgController
         try {
             $newId = $this->service->cloneReport($id, $this->getUserId());
             $this->getUser()->setFlash('success', 'Report cloned successfully');
-            $this->redirect("admin/report-builder/{$newId}/edit");
+            $this->redirect('@report_builder_edit?id='.$newId);
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() stops the action by throwing; let it through
         } catch (\Throwable $e) {
             $this->getUser()->setFlash('error', $e->getMessage());
-            $this->redirect('admin/report-builder');
+            $this->redirect('@report_builder_index');
         }
     }
 
@@ -261,7 +265,7 @@ class reportBuilderActions extends AhgController
             $this->getUser()->setFlash('success', 'Report deleted');
         }
 
-        $this->redirect('admin/report-builder');
+        $this->redirect('@report_builder_index');
     }
 
     /**
@@ -350,7 +354,7 @@ class reportBuilderActions extends AhgController
         // Check if PhpSpreadsheet is available
         if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
             $this->getUser()->setFlash('error', 'XLSX export requires PhpSpreadsheet library');
-            $this->redirect("admin/report-builder/{$report->id}/preview");
+            $this->redirect('@report_builder_preview?id='.$report->id);
         }
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -408,7 +412,7 @@ class reportBuilderActions extends AhgController
         // Check if Dompdf is available
         if (!class_exists('Dompdf\Dompdf')) {
             $this->getUser()->setFlash('error', 'PDF export requires Dompdf library');
-            $this->redirect("admin/report-builder/{$report->id}/preview");
+            $this->redirect('@report_builder_preview?id='.$report->id);
         }
 
         $html = $this->generatePdfHtml($report, $results, $allColumns);
@@ -508,7 +512,9 @@ class reportBuilderActions extends AhgController
                 ]);
 
                 $this->getUser()->setFlash('success', 'Schedule created');
-                $this->redirect("admin/report-builder/{$id}/schedule");
+                $this->redirect('@report_builder_schedule?id='.$id);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() stops the action by throwing; let it through
             } catch (\Throwable $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
@@ -537,7 +543,7 @@ class reportBuilderActions extends AhgController
         }
 
         $this->getUser()->setFlash('success', 'Schedule deleted');
-        $this->redirect("admin/report-builder/{$id}/schedule");
+        $this->redirect('@report_builder_schedule?id='.$id);
     }
 
     /**

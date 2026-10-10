@@ -66,8 +66,7 @@ class apiv2DescriptionsCreateAction extends AhgApiController
                 'lft' => $lft,
                 'rgt' => $rgt,
                 'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
-                'created_at' => $now,
-                'updated_at' => $now
+                // No timestamps here: information_object has none; the object row above holds them.
             ]);
 
             // Create i18n record
@@ -126,7 +125,7 @@ class apiv2DescriptionsCreateAction extends AhgApiController
                 'message' => 'Description created successfully'
             ], 201);
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) { // an Error escaped as an HTML 500; API clients need JSON
             DB::rollBack();
             return $this->error(500, 'Server Error', $e->getMessage());
         }

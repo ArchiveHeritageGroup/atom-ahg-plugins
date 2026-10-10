@@ -542,8 +542,15 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Loading...';
 
+        // Preview what is on screen, not the last save: send the current columns,
+        // filters and sort as an ad-hoc definition. Sending only the id ran the saved
+        // report, so a filter added since the last save changed nothing in the count.
+        updateFiltersConfig();
         const data = {
-            id: config.reportId,
+            data_source: config.dataSource,
+            columns: config.columns,
+            filters: config.filters || [],
+            sort_config: getSortConfig(),
             page: 1,
             limit: 5
         };

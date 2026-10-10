@@ -16,7 +16,7 @@ class ahgStaticPagePluginConfiguration extends sfPluginConfiguration
             AhgNav::register('manage', 'StaticPage', [
                 'url' => '/index.php/staticpage/list',
                 'label' => 'Static Page',
-                'credentials' => ['editor', 'administrator'],
+                'credentials' => ['administrator'], // the page admits administrators only
                 'weight' => 70,
             ]);
         }

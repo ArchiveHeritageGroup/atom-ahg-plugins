@@ -24,6 +24,11 @@ class preservationTriageActions extends AhgController
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
+        // Staff only: the list names drafts and conservation findings, which a
+        // signed-in researcher must not see. Same audience as the Preservation entry.
+        if (!$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
 
         $years = (int) $request->getParameter('years');
         $service = new PreservationTriageService($years > 0 ? $years : null, null, $this->culture());

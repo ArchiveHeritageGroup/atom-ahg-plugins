@@ -139,7 +139,8 @@
                             } elseif ($colType === 'date' && $value) {
                                 echo date('Y-m-d', strtotime($value));
                             } elseif ($colType === 'boolean') {
-                                echo $value ? '<i class="bi bi-check-circle text-success" aria-hidden="true"></i><span class="visually-hidden">'.__('Yes').'</span>' : '<i class="bi bi-x-circle text-muted" aria-hidden="true"></i><span class="visually-hidden">'.__('No').'</span>';
+                                // The service hands booleans over as 'Yes'/'No' text, and 'No' is truthy.
+                                echo !in_array(strtolower(trim((string) $value)), ['', '0', 'no', 'false'], true) ? '<i class="bi bi-check-circle text-success" aria-hidden="true"></i><span class="visually-hidden">'.__('Yes').'</span>' : '<i class="bi bi-x-circle text-muted" aria-hidden="true"></i><span class="visually-hidden">'.__('No').'</span>';
                             } elseif ($colType === 'text' && strlen($value) > 100) {
                                 echo '<span title="' . htmlspecialchars($value) . '">' . htmlspecialchars(substr($value, 0, 100)) . '...</span>';
                             } elseif ($col === 'id') {

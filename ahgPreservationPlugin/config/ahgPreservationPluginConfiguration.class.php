@@ -20,6 +20,13 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
         // exactly while this plugin is enabled and appears on any theme.
         // Without it the plugin was reachable only by typing its URL.
         if (class_exists('AhgNav')) {
+            // Triage had no link anywhere: reachable only by typing its URL.
+            AhgNav::register('manage', 'preservation_triage', [
+                'route' => 'preservation_triage',
+                'label' => 'Preservation triage',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 61,
+            ]);
             AhgNav::register('manage', 'preservation', [
                 'url' => '/index.php/admin/preservation/packages/',
                 'label' => 'Preservation',

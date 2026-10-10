@@ -366,7 +366,7 @@ class jobsManageActions extends AhgController
     /**
      * Helper: require admin access.
      */
-    private function requireAdmin()
+    protected function requireAdmin(): void
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');

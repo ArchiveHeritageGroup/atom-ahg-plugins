@@ -133,6 +133,7 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         // ===================
         $api = new \AtomFramework\Routing\RouteLoader('api');
         $api->any('api_search_io', '/api/search/io', 'searchInformationObjects');
+        $api->any('api_keys_manage', '/api/keys', 'keys');
         $api->any('api_autocomplete_glam', '/api/autocomplete/glam', 'autocompleteGlam');
         $api->any('api_plugin_protection', '/api/plugin-protection', 'pluginProtection');
         $api->register($routing);

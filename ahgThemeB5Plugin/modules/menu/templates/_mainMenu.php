@@ -111,6 +111,48 @@ $hasRic = checkPluginEnabled('ahgRicManagePlugin');
           <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt fa-fw me-2"></i><?php echo __('Central Dashboards'); ?></a></li>
         <?php endif; ?>
 
+        <?php // Plugins contribute their Manage entries through AhgNav. ahgCorePlugin only
+              // injects them on non-B5 themes (this theme builds its own menus), so on B5
+              // they were never shown: Custom Fields, Grid entry and others had no menu
+              // path, and editors could not reach features they may use. Listed here,
+              // filtered by the user's credentials, minus anything the menu already has.
+        if ('manage' == $menu->getName() && class_exists('AhgNav')) {
+            $norm = static fn ($u) => rtrim(str_replace('/index.php', '', (string) $u), '/');
+            // Skip what the menu already offers, by URL or by label ("Backup & Restore",
+            // "Central Dashboard" beside "Central Dashboards").
+            $have = [$norm(url_for(['module' => 'reports', 'action' => 'index'])) => true];
+            $labels = ['central dashboard' => true];
+            // ahgBackupPlugin adds its own Manage entry after rendering (MenuInjector).
+            if (class_exists('AhgBackup\\Listeners\\MenuInjector')) {
+                $have['/backup'] = true;
+                // The injector adds Backup & Restore for anyone with a Manage menu, but
+                // the page admits administrators only. It skips its entry when the page
+                // already holds node_ahgBackup, so mark it present for everyone else.
+                if (!$sf_user->isAdministrator()) {
+                    echo '<!-- node_ahgBackup: administrators only -->';
+                }
+            }
+            foreach ($menu->getChildren() as $child) {
+                $have[$norm(url_for($child->getPath(['getUrl' => true, 'resolveAlias' => true])))] = true;
+                $labels[rtrim(strtolower(trim(html_entity_decode(strip_tags($child->getLabel(['cultureFallback' => true]))))), 's')] = true;
+            }
+            // An entry that names no credentials is shown to administrators only: several
+            // such entries lead to admin-only pages, and an editor must not be offered a 403.
+            $isAdmin = $sf_user->isAdministrator();
+            $extra = array_filter(AhgNav::resolved('manage', $sf_user), static fn ($i) => !isset($have[$norm($i['href'])])
+                && !isset($labels[rtrim(strtolower(trim(html_entity_decode(__($i['label'])))), 's')])
+                && ($isAdmin || !empty($i['credentials'])));
+            uasort($extra, static fn ($a, $b) => strcasecmp(__($a['label']), __($b['label'])));
+            if ($extra) { ?>
+          <li><hr class="dropdown-divider"></li>
+          <li><h6 class="dropdown-header"><?php echo __('Extensions'); ?></h6></li>
+          <?php foreach ($extra as $item) { ?>
+            <li><a class="dropdown-item" href="<?php echo esc_entities($item['href']); ?>"><?php echo esc_entities(__($item['label'])); ?><?php echo empty($item['badgeCount']) ? '' : ' <span class="badge bg-secondary">'.(int) $item['badgeCount'].'</span>'; ?></a></li>
+          <?php } ?>
+          <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>#manage-menu + .dropdown-menu{max-height:80vh;overflow-y:auto}</style>
+        <?php }
+        } ?>
+
       </ul>
     </li>
   <?php } ?>

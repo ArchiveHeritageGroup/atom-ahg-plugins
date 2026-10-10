@@ -22,7 +22,7 @@ class ahgAiConditionPluginConfiguration extends sfPluginConfiguration
             AhgNav::register('manage', 'AiCondition', [
                 'url' => '/index.php/ai-condition',
                 'label' => 'Ai Condition',
-                'credentials' => ['editor', 'administrator'],
+                'credentials' => ['administrator'], // the page admits administrators only
                 'weight' => 70,
             ]);
         }

@@ -98,7 +98,7 @@ class apiv2DescriptionsDeleteAction extends AhgApiController
                 'message' => 'Description deleted successfully'
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) { // an Error escaped as an HTML 500; API clients need JSON
             DB::rollBack();
             return $this->error(500, 'Server Error', $e->getMessage());
         }

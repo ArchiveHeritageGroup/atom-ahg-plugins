@@ -572,6 +572,12 @@ class ReportBuilderService
 
         $query = DB::table("{$table} as {$alias}");
 
+        // AtoM's hidden root records are not data: counting them put every total one high.
+        $roots = ['information_object' => 1, 'actor' => 3];
+        if (isset($roots[$table])) {
+            $query->where("{$alias}.id", '<>', $roots[$table]);
+        }
+
         // Join object table if needed
         if (isset($source['object_table'])) {
             $query->join('object as o', "{$alias}.id", '=', 'o.id');
@@ -908,6 +914,12 @@ class ReportBuilderService
         $alias = substr($table, 0, 1);
 
         $query = DB::table("{$table} as {$alias}");
+
+        // AtoM's hidden root records are not data: counting them put every total one high.
+        $roots = ['information_object' => 1, 'actor' => 3];
+        if (isset($roots[$table])) {
+            $query->where("{$alias}.id", '<>', $roots[$table]);
+        }
 
         // Join object table if needed
         if (isset($source['object_table'])) {

@@ -16,7 +16,7 @@ class ahgMenuManagePluginConfiguration extends sfPluginConfiguration
             AhgNav::register('manage', 'MenuManage', [
                 'url' => '/index.php/menu/list',
                 'label' => 'Menu Manage',
-                'credentials' => ['editor', 'administrator'],
+                'credentials' => ['administrator'], // the page admits administrators only
                 'weight' => 70,
             ]);
         }
