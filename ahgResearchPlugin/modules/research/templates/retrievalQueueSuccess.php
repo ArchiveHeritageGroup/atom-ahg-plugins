@@ -145,19 +145,19 @@
                                             <i class="fas fa-print" aria-hidden="true"></i>
                                         </a>
                                         <?php if (in_array($request->status, ['retrieved', 'delivered'])): ?>
-                                        <a href="<?php echo url_for("research/custody/{$request->id}/checkout") ?>"
+                                        <a href="<?php echo url_for('@research_custody_checkout?id=' . $request->id) ?>"
                                            class="btn btn-outline-warning" title="<?php echo __('Checkout') ?>">
                                             <i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i>
                                         </a>
                                         <?php endif ?>
                                         <?php if ($request->status === 'in_use'): ?>
-                                        <a href="<?php echo url_for("research/custody/{$request->id}/checkin") ?>"
+                                        <a href="<?php echo url_for('@research_custody_checkin?id=' . $request->id) ?>"
                                            class="btn btn-outline-success" title="<?php echo __('Return') ?>">
                                             <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
                                         </a>
                                         <?php endif ?>
                                         <?php if ($request->object_id ?? null): ?>
-                                        <a href="<?php echo url_for("research/custody/chain/{$request->object_id}") ?>"
+                                        <a href="<?php echo url_for('@research_custody_chain?object_id=' . $request->object_id) ?>"
                                            class="btn btn-outline-info" title="<?php echo __('Custody Chain') ?>">
                                             <i class="fas fa-link" aria-hidden="true"></i>
                                         </a>

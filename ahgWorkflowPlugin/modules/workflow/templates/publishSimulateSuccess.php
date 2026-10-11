@@ -4,14 +4,14 @@
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/dashboard'); ?>">Workflow</a></li>
-      <li class="breadcrumb-item"><a href="<?php echo url_for("workflow/publish-readiness/{$objectId}"); ?>">Publish Readiness</a></li>
+      <li class="breadcrumb-item"><a href="<?php echo url_for('@workflow_publish_readiness?object_id=' . $objectId); ?>">Publish Readiness</a></li>
       <li class="breadcrumb-item active">Preview Public View</li>
     </ol>
   </nav>
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0"><i class="fas fa-eye me-2"></i>Publish Preview — What the Public Will See</h1>
-    <a href="<?php echo url_for("workflow/publish-readiness/{$objectId}"); ?>" class="btn btn-outline-secondary">
+    <a href="<?php echo url_for('@workflow_publish_readiness?object_id=' . $objectId); ?>" class="btn btn-outline-secondary">
       <i class="fas fa-arrow-left me-1"></i>Back to Readiness
     </a>
   </div>

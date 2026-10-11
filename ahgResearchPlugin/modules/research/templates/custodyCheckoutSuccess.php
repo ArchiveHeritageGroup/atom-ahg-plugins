@@ -45,7 +45,7 @@
         <div class="card">
             <div class="card-header"><h5 class="mb-0"><?php echo __('Checkout Details') ?></h5></div>
             <div class="card-body">
-                <form method="post" action="<?php echo url_for("research/custody/{$materialRequest->id}/checkout") ?>">
+                <form method="post" action="<?php echo url_for('@research_custody_checkout?id=' . $materialRequest->id) ?>">
                     <div class="mb-3">
                         <label for="condition" class="form-label fw-bold"><?php echo __('Condition at Checkout') ?> <span class="text-danger" aria-hidden="true">*</span></label>
                         <select name="condition" id="condition" class="form-select" aria-required="true" required>

@@ -45,7 +45,7 @@
         <div class="card mb-4">
             <div class="card-header"><h5 class="mb-0"><?php echo __('Condition Assessment') ?></h5></div>
             <div class="card-body">
-                <form method="post" action="<?php echo url_for("research/custody/{$materialRequest->id}/checkin") ?>">
+                <form method="post" action="<?php echo url_for('@research_custody_checkin?id=' . $materialRequest->id) ?>">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="conditionBefore" class="form-label fw-bold"><?php echo __('Condition Before (at checkout)') ?></label>

@@ -405,6 +405,12 @@ class WorkflowService
                     ->where('m.id', $task->object_id)
                     ->select('m.id', 'm.entity_type', 'n.entity_value as title')
                     ->first();
+            } elseif ($task->object_type === 'researcher_submission') {
+                // Researcher submission: its own title. No slug - it is not a record yet.
+                $task->object = DB::table('researcher_submission')
+                    ->where('id', $task->object_id)
+                    ->select('id', 'title')
+                    ->first();
             }
 
             // Get user info
@@ -1204,6 +1210,11 @@ class WorkflowService
             if ($value) {
                 return $value;
             }
+        } elseif ($objectType === 'researcher_submission') {
+            $title = DB::table('researcher_submission')->where('id', $objectId)->value('title');
+            if ($title) {
+                return $title;
+            }
         }
         return "Object #{$objectId}";
     }
@@ -1221,8 +1232,10 @@ class WorkflowService
     protected function decorateMentionTitles(array $rows): array
     {
         foreach ($rows as $row) {
-            if (($row->object_type ?? '') === 'ahg_mention') {
-                $row->object_title = $this->getObjectTitle((int) $row->object_id, 'ahg_mention');
+            // These lists join information_object_i18n on object_id, the wrong table
+            // for these types (and ids can collide), so their titles are recomputed.
+            if (in_array($row->object_type ?? '', ['ahg_mention', 'researcher_submission'], true)) {
+                $row->object_title = $this->getObjectTitle((int) $row->object_id, $row->object_type);
             }
         }
 

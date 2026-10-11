@@ -15,9 +15,6 @@
 
 <h1 class="h2 mb-4"><i class="fas fa-clipboard-check text-primary me-2" aria-hidden="true"></i><?php echo __('Triage Request') ?></h1>
 
-<?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger" role="alert"><i class="fas fa-exclamation-circle me-2" aria-hidden="true"></i><?php echo $sf_user->getFlash('error') ?></div>
-<?php endif ?>
 
 <?php if ($requestData): ?>
 <div class="row">
@@ -69,7 +66,7 @@
                     <?php endif ?>
                     <dt class="col-sm-4"><?php echo __('Correspondence') ?></dt>
                     <dd class="col-sm-8">
-                        <a href="<?php echo url_for("research/request/{$requestData->id}/correspond/{$requestType}") ?>">
+                        <a href="<?php echo url_for('@research_request_correspond?id=' . $requestData->id . '&type=' . $requestType) ?>">
                             <?php echo $requestData->correspondence_count ?? 0 ?> <?php echo __('messages') ?>
                         </a>
                     </dd>
@@ -81,7 +78,7 @@
         <div class="card mb-4">
             <div class="card-header"><h5 class="mb-0"><?php echo __('Triage Decision') ?></h5></div>
             <div class="card-body">
-                <form method="post" action="<?php echo url_for("research/request/{$requestData->id}/triage/{$requestType}") ?>">
+                <form method="post" action="<?php echo url_for('@research_request_triage?id=' . $requestData->id . '&type=' . $requestType) ?>">
                     <fieldset>
                         <legend class="visually-hidden"><?php echo __('Triage decision options') ?></legend>
                         <div class="mb-3">
@@ -122,7 +119,7 @@
                     <p class="text-muted p-3"><?php echo __('No events yet.') ?></p>
                 <?php else: ?>
                     <ul class="list-group list-group-flush" aria-label="<?php echo __('Request timeline') ?>">
-                        <?php foreach (array_slice($timeline, 0, 20) as $event): ?>
+                        <?php foreach (array_slice((array) $sf_data->getRaw('timeline'), 0, 20) as $event): ?>
                         <li class="list-group-item py-2">
                             <div class="d-flex justify-content-between">
                                 <small class="fw-bold"><?php echo htmlspecialchars($event->action) ?></small>

@@ -5,7 +5,7 @@
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/dashboard'); ?>">Workflow</a></li>
       <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/admin'); ?>">Admin</a></li>
-      <li class="breadcrumb-item"><a href="<?php echo url_for('workflow/admin/gates'); ?>">Publish Gates</a></li>
+      <li class="breadcrumb-item"><a href="<?php echo url_for('@workflow_gate_admin'); ?>">Publish Gates</a></li>
       <li class="breadcrumb-item active"><?php echo isset($rule) && $rule ? 'Edit Rule' : 'Add Rule'; ?></li>
     </ol>
   </nav>
@@ -136,7 +136,7 @@
     </div>
 
     <div class="d-flex justify-content-between">
-      <a href="<?php echo url_for('workflow/admin/gates'); ?>" class="btn btn-outline-secondary">
+      <a href="<?php echo url_for('@workflow_gate_admin'); ?>" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left me-1"></i>Cancel
       </a>
       <button type="submit" class="btn btn-primary">

@@ -18,9 +18,6 @@
   </div>
 
   <!-- Flash messages -->
-  <?php if ($sf_user->hasFlash('notice')): ?>
-    <div class="alert alert-success alert-dismissible fade show"><?php echo $sf_user->getFlash('notice') ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-  <?php endif ?>
 
   <!-- Status Filter -->
   <div class="mb-3">

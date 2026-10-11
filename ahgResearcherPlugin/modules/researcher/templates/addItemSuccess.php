@@ -10,10 +10,10 @@
     </ol>
   </nav>
 
-  <?php if ($sf_user->hasFlash('notice')): ?>
-    <div class="alert alert-success alert-dismissible fade show"><?php echo $sf_user->getFlash('notice') ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-  <?php endif ?>
 
+  <?php if (!empty($dateError)): ?>
+    <div class="alert alert-danger" role="alert"><?php echo __($dateError) ?></div>
+  <?php endif ?>
   <form method="post">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h4 class="mb-0">

@@ -283,6 +283,15 @@ class researcherActions extends AhgController
 
     // ─── 6. ADD ITEM ────────────────────────────────────────────
 
+    /** Both dates given and the end before the start. */
+    protected function datesOutOfOrder($request): bool
+    {
+        $start = $request->getParameter('date_start');
+        $end = $request->getParameter('date_end');
+
+        return $start && $end && $end < $start;
+    }
+
     public function executeAddItem($request)
     {
         $this->requireAuth();
@@ -307,8 +316,16 @@ class researcherActions extends AhgController
         $this->items = $data['items']; // For parent selection
         $this->item = null; // New item
         $this->itemFiles = [];
+        $this->dateError = null;
 
         if ($request->isMethod('post')) {
+            if ($this->datesOutOfOrder($request)) {
+                // Re-show the form with the error and everything typed.
+                $this->dateError = 'The end date is before the start date.';
+                $this->item = (object) array_merge(['id' => null], $request->getPostParameters());
+
+                return sfView::SUCCESS;
+            }
             $itemId = $service->addItem($submissionId, [
                 'item_type'             => $request->getParameter('item_type', 'description'),
                 'parent_item_id'        => $request->getParameter('parent_item_id') ?: null,
@@ -364,8 +381,15 @@ class researcherActions extends AhgController
         $this->item = $item;
         $this->items = $data['items']; // For parent selection
         $this->itemFiles = $data['files'][$itemId] ?? [];
+        $this->dateError = null;
 
         if ($request->isMethod('post')) {
+            if ($this->datesOutOfOrder($request)) {
+                $this->dateError = 'The end date is before the start date.';
+                $this->item = (object) array_merge((array) $item, $request->getPostParameters());
+
+                return sfView::SUCCESS;
+            }
             $service->updateItem($itemId, [
                 'parent_item_id'        => $request->getParameter('parent_item_id') ?: null,
                 'title'                 => $request->getParameter('title'),

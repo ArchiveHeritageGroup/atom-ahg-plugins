@@ -267,6 +267,11 @@ class RequestLifecycleService
             $updateData['closed_at'] = date('Y-m-d H:i:s');
             $updateData['closed_by'] = $userId;
             $updateData['closure_reason'] = $reason;
+            // Closing ends the request: fulfilled is completed, any other reason cancelled.
+            $updateData['status'] = 'fulfilled' === $reason ? 'completed' : 'cancelled';
+            if ('fulfilled' === $reason) {
+                $updateData['completed_at'] = date('Y-m-d H:i:s');
+            }
         }
 
         DB::table($table)->where('id', $requestId)->update($updateData);
@@ -458,11 +463,12 @@ class RequestLifecycleService
         $material = $this->getMaterialRequests($filters, $limit, $offset);
         $reproduction = $this->getReproductionRequests($filters, $limit, $offset);
 
-        // Compute SLA for each
-        foreach ($material as &$req) {
+        // Compute SLA for each. Rows are objects, so no "&": a by-reference $req left
+        // bound to the last row was overwritten by the loop below (a duplicated last row).
+        foreach ($material as $req) {
             $req->sla = $this->getRequestSla($req->id, 'material');
         }
-        foreach ($reproduction as &$req) {
+        foreach ($reproduction as $req) {
             $req->sla = $this->getRequestSla($req->id, 'reproduction');
         }
 

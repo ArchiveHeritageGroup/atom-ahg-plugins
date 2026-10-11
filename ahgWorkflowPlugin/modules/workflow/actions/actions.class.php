@@ -109,7 +109,7 @@ class workflowActions extends AhgController
             $this->getUser()->setFlash('error', $e->getMessage());
         }
 
-        $this->redirect("workflow/task/{$taskId}");
+        $this->redirect('@workflow_view_task?id=' . $taskId);
     }
 
     public function executeReleaseTask($request)
@@ -150,7 +150,7 @@ class workflowActions extends AhgController
                 $this->redirect('workflow/my-tasks');
             } catch (Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
-                $this->redirect("workflow/task/{$taskId}");
+                $this->redirect('@workflow_view_task?id=' . $taskId);
             }
         }
 
@@ -167,7 +167,7 @@ class workflowActions extends AhgController
 
             if (empty($comment)) {
                 $this->getUser()->setFlash('error', 'A comment is required when rejecting');
-                $this->redirect("workflow/task/{$taskId}");
+                $this->redirect('@workflow_view_task?id=' . $taskId);
             }
 
             try {
@@ -176,7 +176,7 @@ class workflowActions extends AhgController
                 $this->redirect('workflow/my-tasks');
             } catch (Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
-                $this->redirect("workflow/task/{$taskId}");
+                $this->redirect('@workflow_view_task?id=' . $taskId);
             }
         }
 
@@ -221,7 +221,7 @@ class workflowActions extends AhgController
             $taskId = $this->getService()->startWorkflow($objectId, $this->getCurrentUserId());
             if ($taskId) {
                 $this->getUser()->setFlash('notice', 'Workflow started successfully');
-                $this->redirect("workflow/task/{$taskId}");
+                $this->redirect('@workflow_view_task?id=' . $taskId);
             } else {
                 $this->getUser()->setFlash('error', 'No workflow configured for this item');
             }
@@ -277,7 +277,7 @@ class workflowActions extends AhgController
 
             $workflowId = $this->getService()->createWorkflow($data);
             $this->getUser()->setFlash('notice', 'Workflow created');
-            $this->redirect("workflow/admin/edit/{$workflowId}");
+            $this->redirect('@workflow_edit?id=' . $workflowId);
         }
 
         require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumProcedureCatalog.php';
@@ -311,7 +311,7 @@ class workflowActions extends AhgController
 
             $this->getService()->updateWorkflow($workflowId, $data);
             $this->getUser()->setFlash('notice', 'Workflow updated');
-            $this->redirect("workflow/admin/edit/{$workflowId}");
+            $this->redirect('@workflow_edit?id=' . $workflowId);
         }
 
         require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumProcedureCatalog.php';
@@ -369,7 +369,7 @@ class workflowActions extends AhgController
 
             $this->getService()->addStep($workflowId, $data);
             $this->getUser()->setFlash('notice', 'Step added');
-            $this->redirect("workflow/admin/edit/{$workflowId}");
+            $this->redirect('@workflow_edit?id=' . $workflowId);
         }
 
         $this->roles = $this->getRoles();
@@ -406,7 +406,7 @@ class workflowActions extends AhgController
 
             $this->getService()->updateStep($stepId, $data);
             $this->getUser()->setFlash('notice', 'Step updated');
-            $this->redirect("workflow/admin/edit/{$this->step->workflow_id}");
+            $this->redirect('@workflow_edit?id=' . $this->step->workflow_id);
         }
 
         $this->roles = $this->getRoles();
@@ -431,7 +431,7 @@ class workflowActions extends AhgController
             $this->getUser()->setFlash('error', $e->getMessage());
         }
 
-        $this->redirect("workflow/admin/edit/{$step->workflow_id}");
+        $this->redirect('@workflow_edit?id=' . $step->workflow_id);
     }
 
     public function executeReorderSteps($request)
@@ -760,7 +760,7 @@ class workflowActions extends AhgController
             $this->getUser()->setFlash('error', 'Cannot publish: ' . implode('; ', $blockerMessages));
         }
 
-        $this->redirect("workflow/publish-readiness/{$objectId}");
+        $this->redirect('@workflow_publish_readiness?object_id=' . $objectId);
     }
 
     public function executeGateAdmin($request)
@@ -805,7 +805,7 @@ class workflowActions extends AhgController
                 $this->getUser()->setFlash('notice', 'Rule created');
             }
 
-            $this->redirect('workflow/admin/gates');
+            $this->redirect('@workflow_gate_admin');
         }
 
         // Load dropdown data for form
@@ -836,7 +836,7 @@ class workflowActions extends AhgController
 
         $this->getGateService()->deleteRule($ruleId);
         $this->getUser()->setFlash('notice', 'Rule deleted');
-        $this->redirect('workflow/admin/gates');
+        $this->redirect('@workflow_gate_admin');
     }
 
     // =========================================================================

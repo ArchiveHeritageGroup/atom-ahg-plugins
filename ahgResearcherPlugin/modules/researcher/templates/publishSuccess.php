@@ -5,7 +5,7 @@
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb mb-0">
       <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'researcher', 'action' => 'dashboard']) ?>">Researcher</a></li>
-      <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $submission->id]) ?>"><?php echo htmlspecialchars($submission->title) ?></a></li>
+      <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'researcher', 'action' => 'viewSubmission', 'id' => $submission->id]) ?>"><?php echo $submission->title ?></a></li>
       <li class="breadcrumb-item active">Publish</li>
     </ol>
   </nav>
@@ -29,7 +29,7 @@
 
             <dl class="row">
               <dt class="col-3">Submission</dt>
-              <dd class="col-9"><?php echo htmlspecialchars($submission->title) ?></dd>
+              <dd class="col-9"><?php echo $submission->title ?></dd>
               <dt class="col-3">Items</dt>
               <dd class="col-9"><?php echo $submission->total_items ?> items, <?php echo $submission->total_files ?> files</dd>
               <dt class="col-3">Status</dt>
@@ -95,7 +95,7 @@
                     <tbody>
                       <?php foreach ($publishResult['created_objects'] as $obj): ?>
                       <tr>
-                        <td><?php echo htmlspecialchars($obj['title']) ?></td>
+                        <td><?php echo $obj['title'] ?></td>
                         <td><small><?php echo $obj['level'] ?? '-' ?></small></td>
                         <td>
                           <?php if (!empty($obj['slug'])): ?>
@@ -122,7 +122,7 @@
               <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                   <?php foreach ($publishResult['created_actors'] as $actor): ?>
-                    <li class="list-group-item"><?php echo htmlspecialchars($actor['title']) ?> (ID: <?php echo $actor['object_id'] ?>)</li>
+                    <li class="list-group-item"><?php echo $actor['title'] ?> (ID: <?php echo $actor['object_id'] ?>)</li>
                   <?php endforeach ?>
                 </ul>
               </div>
@@ -136,7 +136,7 @@
               <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                   <?php foreach ($publishResult['created_repos'] as $repo): ?>
-                    <li class="list-group-item"><?php echo htmlspecialchars($repo['title']) ?> (ID: <?php echo $repo['object_id'] ?>)</li>
+                    <li class="list-group-item"><?php echo $repo['title'] ?> (ID: <?php echo $repo['object_id'] ?>)</li>
                   <?php endforeach ?>
                 </ul>
               </div>
@@ -150,7 +150,7 @@
               <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                   <?php foreach ($publishResult['errors'] as $err): ?>
-                    <li class="list-group-item list-group-item-danger small"><?php echo htmlspecialchars($err) ?></li>
+                    <li class="list-group-item list-group-item-danger small"><?php echo $err ?></li>
                   <?php endforeach ?>
                 </ul>
               </div>

@@ -28,3 +28,9 @@ reportPhysicalStorage:
 reportAuthorityRecord:
   credentials: [[ editor, administrator ]]
   is_secure: true
+
+# The Central Dashboard (index) shows draft counts and links into the reports
+# above; it was open to everyone, including anonymous visitors.
+index:
+  credentials: [[ editor, administrator ]]
+  is_secure: true

@@ -29,6 +29,12 @@ passwordReset:
 cite:
   is_secure: false
 
+# A project share link, for collaborators outside the portal who have no account.
+# Gated inside the action: an active share token, and for notes an access token
+# that belongs to that share.
+externalAccess:
+  is_secure: false
+
 # Everything else, including dashboard.
 #
 # dashboard was public, and it is not a landing page: executeDashboard loads

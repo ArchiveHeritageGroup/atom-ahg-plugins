@@ -461,10 +461,10 @@ class SubmissionService
 
             if (file_exists($workflowServiceFile)) {
                 require_once $workflowServiceFile;
-                $workflowService = new \AhgWorkflowPlugin\Services\WorkflowService();
+                $workflowService = new \WorkflowService(); // a global class, not namespaced
                 $taskId = $workflowService->startWorkflow($id, $userId, 'researcher_submission', 100);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Workflow plugin not available — continue without it
         }
@@ -858,6 +858,8 @@ class SubmissionService
             ->join('actor_i18n as ai', function ($j) use ($culture) {
                 $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', $culture);
             })
+            ->where('r.id', '!=', 6) // QubitRepository::ROOT_ID, AtoM's nameless root
+            ->where('ai.authorized_form_of_name', '!=', '')
             ->select('r.id', 'ai.authorized_form_of_name as name')
             ->orderBy('ai.authorized_form_of_name')
             ->get()

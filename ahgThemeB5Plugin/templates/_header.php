@@ -59,7 +59,8 @@
       </div>
       <div class="d-flex flex-nowrap flex-column flex-lg-row align-items-strech align-items-lg-center">
         <ul class="navbar-nav mx-lg-2">
-	  <?php if (in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+	  <?php // Every RiC Tools entry is an administrator page. ?>
+	  <?php if ($sf_user->isAdministrator() && in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
           <!-- RiC Tools Dropdown -->
           <li class="nav-item dropdown d-flex flex-column">
             <a

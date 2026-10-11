@@ -49,7 +49,12 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <strong>Submitted:</strong><br>
-                        <?php echo $reproductionRequest->submitted_at ? date('M j, Y H:i', strtotime($reproductionRequest->submitted_at)) : 'Not submitted'; ?>
+                        <?php // No submitted_at column: the date is the "submitted" entry in the status history.
+                        $submittedAt = null;
+                        foreach ($sf_data->getRaw('reproductionRequest')->status_history ?? [] as $h) {
+                            if ('submitted' === ($h->new_status ?? null)) { $submittedAt = $h->created_at; }
+                        }
+                        echo $submittedAt ? date('M j, Y H:i', strtotime($submittedAt)) : __('Not submitted'); ?>
                     </div>
                 </div>
                 <?php if ($reproductionRequest->intended_use): ?>
@@ -106,7 +111,7 @@
                                     <td><?php echo ucfirst(str_replace('_', ' ', $item->reproduction_type)); ?></td>
                                     <td><?php echo $item->format ?: '-'; ?> <?php echo $item->size ?: ''; ?></td>
                                     <td><?php echo $item->quantity; ?></td>
-                                    <td><?php echo $item->unit_cost ? 'R' . number_format($item->unit_cost * $item->quantity, 2) : '-'; ?></td>
+                                    <td><?php echo $item->total_price ? 'R' . number_format((float) $item->total_price, 2) : '-'; ?></td>
                                     <?php if ($reproductionRequest->status === 'draft'): ?>
                                         <td>
                                             <form method="post" class="d-inline">
@@ -131,38 +136,107 @@
     </div>
 
     <div class="col-md-4">
+        <?php $rq = $sf_data->getRaw('reproductionRequest'); $staff = $sf_data->getRaw('isStaff'); $files = $sf_data->getRaw('deliveredFiles') ?: []; ?>
         <!-- Cost Summary -->
         <div class="card mb-4">
-            <div class="card-header"><h6 class="mb-0"><i class="fas fa-calculator me-2" aria-hidden="true"></i>Cost Summary</h6></div>
+            <div class="card-header"><h6 class="mb-0"><i class="fas fa-calculator me-2" aria-hidden="true"></i><?php echo __('Cost Summary'); ?></h6></div>
             <div class="card-body">
-                <table class="table table-sm mb-0" aria-label="Cost summary">
-                    <tr>
-                        <td>Subtotal:</td>
-                        <td class="text-end">R<?php echo number_format($reproductionRequest->subtotal ?? 0, 2); ?></td>
-                    </tr>
-                    <?php if ($reproductionRequest->rush_fee ?? 0): ?>
-                        <tr>
-                            <td>Rush Fee:</td>
-                            <td class="text-end">R<?php echo number_format($reproductionRequest->rush_fee, 2); ?></td>
-                        </tr>
+                <table class="table table-sm mb-0" aria-label="<?php echo __('Cost summary'); ?>">
+                    <tr><td><?php echo __('Estimate'); ?>:</td><td class="text-end">R<?php echo number_format((float) ($rq->estimated_cost ?? 0), 2); ?></td></tr>
+                    <?php if (null !== $rq->final_cost): ?>
+                    <tr class="fw-bold"><td><?php echo __('Quote'); ?>:</td><td class="text-end">R<?php echo number_format((float) $rq->final_cost, 2); ?></td></tr>
                     <?php endif; ?>
-                    <?php if ($reproductionRequest->delivery_fee ?? 0): ?>
-                        <tr>
-                            <td>Delivery:</td>
-                            <td class="text-end">R<?php echo number_format($reproductionRequest->delivery_fee, 2); ?></td>
-                        </tr>
+                    <?php if ($rq->invoice_number): ?>
+                    <tr><td><?php echo __('Invoice'); ?>:</td><td class="text-end"><?php echo htmlspecialchars($rq->invoice_number); ?></td></tr>
                     <?php endif; ?>
-                    <tr class="fw-bold">
-                        <td>Total:</td>
-                        <td class="text-end">R<?php echo number_format($reproductionRequest->total_cost ?? 0, 2); ?></td>
-                    </tr>
+                    <?php if ($rq->payment_date): ?>
+                    <tr><td><?php echo __('Paid'); ?>:</td><td class="text-end"><?php echo date('M j, Y', strtotime($rq->payment_date)); ?><?php echo $rq->payment_reference ? ' (' . htmlspecialchars($rq->payment_reference) . ')' : ''; ?></td></tr>
+                    <?php endif; ?>
                 </table>
-                <?php if ($reproductionRequest->status === 'quoted'): ?>
-                    <hr>
-                    <p class="small text-muted mb-0">Quote valid for 30 days from <?php echo date('M j, Y', strtotime($reproductionRequest->quoted_at)); ?></p>
+                <?php if ('awaiting_payment' === $rq->status && !$staff): ?>
+                    <p class="small mt-2 mb-0"><?php echo __('Please pay the quote, quoting the reference %1%. Work starts once payment is received.', ['%1%' => htmlspecialchars($rq->reference_number)]); ?></p>
                 <?php endif; ?>
             </div>
         </div>
+
+        <?php if (array_filter($files)): ?>
+        <!-- Delivered files -->
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0"><i class="fas fa-download me-2" aria-hidden="true"></i><?php echo __('Your files'); ?></h6></div>
+            <ul class="list-group list-group-flush">
+                <?php foreach ($files as $itemFiles): foreach ($itemFiles as $df): ?>
+                <li class="list-group-item small">
+                    <a href="<?php echo url_for('@research_reproduction_download?token=' . $df->download_token); ?>"><i class="fas fa-file me-1" aria-hidden="true"></i><?php echo htmlspecialchars($df->file_name); ?></a>
+                    <span class="text-muted">&middot; <?php echo round($df->file_size / 1024); ?> KB &middot; <?php echo __('until %1%', ['%1%' => date('M j, Y', strtotime($df->download_expires_at))]); ?></span>
+                </li>
+                <?php endforeach; endforeach; ?>
+            </ul>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($staff && !in_array($rq->status, ['draft', 'completed', 'cancelled'], true)): ?>
+        <!-- Staff: process the request -->
+        <div class="card mb-4 border-primary">
+            <div class="card-header"><h6 class="mb-0"><i class="fas fa-cogs me-2" aria-hidden="true"></i><?php echo __('Process request'); ?></h6></div>
+            <div class="card-body small">
+                <?php if (in_array($rq->status, ['submitted', 'processing', 'awaiting_payment'], true)): ?>
+                <form method="post" class="mb-3">
+                    <input type="hidden" name="form_action" value="send_quote">
+                    <label class="form-label" for="quoteAmount"><?php echo __('1. Quote (R, 0 for no charge)'); ?></label>
+                    <input type="number" step="0.01" min="0" class="form-control form-control-sm mb-1" id="quoteAmount" name="amount" required value="<?php echo htmlspecialchars((string) ($rq->final_cost ?? $rq->estimated_cost ?? '')); ?>">
+                    <textarea name="admin_notes" class="form-control form-control-sm mb-1" rows="2" placeholder="<?php echo __('Note to the researcher (optional)'); ?>"></textarea>
+                    <button type="submit" class="btn btn-sm btn-primary"><?php echo __('Send quote'); ?></button>
+                </form>
+                <?php endif; ?>
+                <?php if ('awaiting_payment' === $rq->status): ?>
+                <form method="post" class="mb-3">
+                    <input type="hidden" name="form_action" value="record_payment">
+                    <label class="form-label"><?php echo __('2. Record payment'); ?></label>
+                    <input type="text" name="payment_reference" class="form-control form-control-sm mb-1" required placeholder="<?php echo __('Payment reference'); ?>">
+                    <select name="payment_method" class="form-select form-select-sm mb-1">
+                        <option value="eft"><?php echo __('EFT'); ?></option><option value="card"><?php echo __('Card'); ?></option><option value="cash"><?php echo __('Cash'); ?></option><option value="invoice"><?php echo __('Invoice'); ?></option>
+                    </select>
+                    <input type="date" name="payment_date" class="form-control form-control-sm mb-1" value="<?php echo date('Y-m-d'); ?>">
+                    <button type="submit" class="btn btn-sm btn-primary"><?php echo __('Record payment'); ?></button>
+                </form>
+                <?php endif; ?>
+                <?php if ('in_production' === $rq->status): ?>
+                <form method="post" enctype="multipart/form-data" class="mb-3">
+                    <input type="hidden" name="form_action" value="deliver_file">
+                    <label class="form-label"><?php echo __('3. Deliver a file'); ?></label>
+                    <select name="item_id" class="form-select form-select-sm mb-1">
+                        <?php foreach ($sf_data->getRaw('items') as $it): ?>
+                        <option value="<?php echo (int) $it->id; ?>"><?php echo htmlspecialchars($it->object_title ?: 'Item ' . $it->id); ?><?php echo !empty($files[$it->id]) ? ' (' . __('delivered') . ')' : ''; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <input type="file" name="delivery_file" class="form-control form-control-sm mb-1" required>
+                    <button type="submit" class="btn btn-sm btn-primary"><?php echo __('Upload'); ?></button>
+                </form>
+                <form method="post">
+                    <input type="hidden" name="form_action" value="complete_request">
+                    <button type="submit" class="btn btn-sm btn-success" data-ahg-confirm="<?php echo __('Complete the request and email the researcher?'); ?>"><?php echo __('4. Complete and notify'); ?></button>
+                </form>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php $msgs = $sf_data->getRaw('messages') ?: []; ?>
+        <?php if ($msgs): ?>
+        <!-- Messages from the archive -->
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0"><i class="fas fa-envelope me-2" aria-hidden="true"></i><?php echo __('Messages'); ?></h6></div>
+            <ul class="list-group list-group-flush">
+                <?php foreach ($msgs as $m): ?>
+                <li class="list-group-item small">
+                    <?php if (!empty($m->subject)): ?><strong><?php echo htmlspecialchars($m->subject); ?></strong><br><?php endif; ?>
+                    <?php echo nl2br(htmlspecialchars($m->body)); ?>
+                    <div class="text-muted mt-1"><?php echo htmlspecialchars(trim($m->sender_name)); ?> &middot; <?php echo date('M j, Y H:i', strtotime($m->created_at)); ?><?php if (!empty($m->is_internal)): ?> &middot; <?php echo __('internal'); ?><?php endif; ?></div>
+                </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php endif; ?>
 
         <!-- Status Timeline -->
         <div class="card">

@@ -15,9 +15,6 @@
 
 <h1 class="h2 mb-4"><i class="fas fa-envelope text-primary me-2" aria-hidden="true"></i><?php echo __('Request Correspondence') ?></h1>
 
-<?php if ($sf_user->hasFlash('notice')): ?>
-    <div class="alert alert-success" role="status"><i class="fas fa-check-circle me-2" aria-hidden="true"></i><?php echo $sf_user->getFlash('notice') ?></div>
-<?php endif ?>
 
 <?php if ($requestData): ?>
 <div class="row">
@@ -86,7 +83,7 @@
 
             <!-- Reply Form -->
             <div class="card-footer">
-                <form method="post" action="<?php echo url_for("research/request/{$requestData->id}/correspond/{$requestType}") ?>">
+                <form method="post" action="<?php echo url_for('@research_request_correspond?id=' . $requestData->id . '&type=' . $requestType) ?>">
                     <div class="mb-2">
                         <label for="msgSubject" class="form-label visually-hidden"><?php echo __('Subject') ?></label>
                         <input type="text" name="subject" id="msgSubject" class="form-control form-control-sm" placeholder="<?php echo __('Subject (optional)') ?>">
@@ -114,10 +111,10 @@
             <div class="card-header"><h5 class="mb-0"><?php echo __('Actions') ?></h5></div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="<?php echo url_for("research/request/{$requestData->id}/triage/{$requestType}") ?>" class="btn btn-outline-primary btn-sm">
+                    <a href="<?php echo url_for('@research_request_triage?id=' . $requestData->id . '&type=' . $requestType) ?>" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-clipboard-check me-1" aria-hidden="true"></i><?php echo __('Triage') ?>
                     </a>
-                    <form method="post" action="<?php echo url_for("research/request/{$requestData->id}/close/{$requestType}") ?>" class="d-inline">
+                    <form method="post" action="<?php echo url_for('@research_request_close?id=' . $requestData->id . '&type=' . $requestType) ?>" class="d-inline">
                         <input type="hidden" name="closure_reason" value="fulfilled">
                         <button type="submit" class="btn btn-outline-success btn-sm w-100" data-ahg-confirm="<?php echo __('Close this request as fulfilled?') ?>">
                             <i class="fas fa-check-circle me-1" aria-hidden="true"></i><?php echo __('Close as Fulfilled') ?>
@@ -135,7 +132,7 @@
                     <p class="text-muted p-3"><?php echo __('No events yet.') ?></p>
                 <?php else: ?>
                     <ul class="list-group list-group-flush" aria-label="<?php echo __('Request timeline') ?>">
-                        <?php foreach (array_slice($timeline, 0, 25) as $event): ?>
+                        <?php foreach (array_slice((array) $sf_data->getRaw('timeline'), 0, 25) as $event): ?>
                         <li class="list-group-item py-2">
                             <div class="d-flex justify-content-between">
                                 <small class="fw-bold"><?php echo htmlspecialchars($event->action) ?></small>

@@ -889,7 +889,7 @@ class WorkflowSlaService
         foreach ($paths as $path) {
             if (file_exists($path)) {
                 $content = file_get_contents($path);
-                $parsed = \sfYaml::parse($content);
+                $parsed = \sfYaml::load($content); // Symfony 1.4 sfYaml has load(), not parse()
                 if (is_array($parsed)) {
                     $this->yamlConfig = $parsed;
                     return $this->yamlConfig;

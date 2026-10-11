@@ -87,6 +87,10 @@
                                 <a href="/admin/authorityResolution/<?php echo (int) $task->object_id ?>/review" target="_blank" class="btn btn-outline-primary">
                                     <i class="fas fa-balance-scale me-1" aria-hidden="true"></i>Open mention review
                                 </a>
+                            <?php elseif ($task->object_type === 'researcher_submission'): ?>
+                                <a href="<?php echo url_for('@researcher_view_submission?id=' . (int) $task->object_id) ?>" target="_blank" class="btn btn-outline-primary">
+                                    <i class="fas fa-folder-open me-1" aria-hidden="true"></i><?php echo __('Open submission') ?>
+                                </a>
                             <?php else: ?>
                                 <a href="<?php echo url_for(['slug' => $task->object->slug, 'module' => 'informationobject']) ?>" target="_blank" class="btn btn-outline-primary">
                                     <i class="fas fa-external-link-alt me-1" aria-hidden="true"></i>View Record

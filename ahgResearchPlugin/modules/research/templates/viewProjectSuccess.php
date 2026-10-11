@@ -637,6 +637,26 @@
             <?php endif; ?>
         </div>
 
+        <?php $extNotes = $sf_data->getRaw('externalNotes') ?: []; ?>
+        <?php if ($extNotes): ?>
+        <!-- Notes from external collaborators (share links) -->
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0"><i class="fas fa-comment-dots me-2"></i><?php echo __('Notes from collaborators'); ?></h6></div>
+            <ul class="list-group list-group-flush">
+                <?php foreach ($extNotes as $note): ?>
+                    <li class="list-group-item">
+                        <strong><?php echo htmlspecialchars($note->title ?? __('Note')); ?></strong>
+                        <div class="small"><?php echo nl2br(htmlspecialchars($note->content ?? '')); ?></div>
+                        <div class="small text-muted mt-1">
+                            <?php echo htmlspecialchars(trim(($note->name ?? '') . (empty($note->institution) ? '' : ', ' . $note->institution))); ?>
+                            &middot; <?php echo date('M j, Y H:i', strtotime($note->created_at)); ?>
+                        </div>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php endif; ?>
+
         <!-- Activity Log -->
         <div class="card">
             <div class="card-header"><h6 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h6></div>

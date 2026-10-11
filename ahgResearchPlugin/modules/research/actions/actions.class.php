@@ -2516,6 +2516,12 @@ class researchActions extends AhgController
         $this->documentMaxLabel = $this->formatBytes($this->documentMaxBytes);
 
         $this->collaborators = $projectService->getCollaborators($projectId);
+        // Notes left through a share link by people outside the portal (see executeExternalAccess).
+        $this->externalNotes = DB::table('research_activity_log')
+            ->where('project_id', $projectId)->where('activity_type', 'external_note')
+            ->orderBy('created_at', 'desc')->get()
+            ->map(fn ($r) => (object) ((json_decode($r->details ?? '', true) ?: []) + ['created_at' => $r->created_at]))
+            ->all();
         $this->resources = DB::table('research_project_resource')
             ->where('project_id', $projectId)
             ->orderBy('added_at', 'desc')
@@ -3199,6 +3205,122 @@ class researchActions extends AhgController
     /**
      * View reproduction request details.
      */
+    /** Staff steps on a reproduction request: quote, payment, delivery, completion. */
+    protected function processReproduction($request, string $action, int $requestId, $svc): void
+    {
+        $req = DB::table('research_reproduction_request')->where('id', $requestId)->first();
+        $userId = $this->getCurrentUserId();
+
+        if ('send_quote' === $action) {
+            $amount = round((float) $request->getParameter('amount'), 2);
+            DB::table('research_reproduction_request')->where('id', $requestId)->update([
+                'final_cost'     => $amount,
+                'currency'       => $req->currency ?: 'ZAR',
+                'invoice_number' => $req->invoice_number ?: $svc->generateInvoiceNumber($requestId),
+                'invoice_date'   => date('Y-m-d'),
+                'admin_notes'    => trim((string) $request->getParameter('admin_notes')) ?: $req->admin_notes,
+                'updated_at'     => date('Y-m-d H:i:s'),
+            ]);
+            // Nothing to pay: straight to production.
+            $svc->updateStatus($requestId, $amount > 0 ? 'awaiting_payment' : 'in_production', $userId, $amount > 0 ? 'Quote sent: R' . number_format($amount, 2) : 'No charge');
+            $sent = $this->emailReproduction($requestId, $amount > 0
+                ? 'Your reproduction request {reference} has been quoted at R' . number_format($amount, 2) . ". Please pay quoting the reference; we will start once payment is received.\n\n" . trim((string) $request->getParameter('admin_notes'))
+                : 'Your reproduction request {reference} has been approved at no charge and is now in production.');
+            $this->getUser()->setFlash('success', $amount > 0 ? 'Quote sent' . ($sent ? ' and emailed.' : '.') : 'No charge: the request is in production.');
+        } elseif ('record_payment' === $action) {
+            $svc->recordPayment($requestId, [
+                'reference' => trim((string) $request->getParameter('payment_reference')),
+                'method'    => (string) $request->getParameter('payment_method'),
+                'date'      => $request->getParameter('payment_date') ?: date('Y-m-d'),
+                'amount'    => $req->final_cost,
+            ]);
+            $this->getUser()->setFlash('success', 'Payment recorded; the request is in production.');
+        } elseif ('deliver_file' === $action) {
+            $itemId = (int) $request->getParameter('item_id');
+            $file = $_FILES['delivery_file'] ?? null;
+            if (!DB::table('research_reproduction_item')->where('id', $itemId)->where('request_id', $requestId)->exists()) {
+                $this->forward404('Item not found');
+            }
+            if (!$file || UPLOAD_ERR_OK !== ($file['error'] ?? UPLOAD_ERR_NO_FILE)) {
+                $this->getUser()->setFlash('error', 'Choose the file to deliver.');
+
+                return;
+            }
+            // Outside the web root: files are only served through the token download.
+            $dir = $this->config('sf_root_dir') . '/downloads/reproductions/' . $requestId;
+            if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
+                $this->getUser()->setFlash('error', 'The delivery folder could not be created.');
+
+                return;
+            }
+            $name = basename($file['name']);
+            $path = $dir . '/' . uniqid('rf_') . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $name);
+            if (!move_uploaded_file($file['tmp_name'], $path)) {
+                $this->getUser()->setFlash('error', 'The file could not be stored.');
+
+                return;
+            }
+            $svc->uploadFile($itemId, [
+                'file_name' => $name, 'file_path' => $path, 'file_size' => filesize($path),
+                'mime_type' => mime_content_type($path) ?: 'application/octet-stream', 'checksum' => hash_file('sha256', $path),
+            ]);
+            $svc->completeItem($itemId);
+            $this->getUser()->setFlash('success', 'File delivered for this item.');
+        } elseif ('complete_request' === $action) {
+            $svc->updateStatus($requestId, 'completed', $userId, 'Delivered');
+            $sent = $this->emailReproduction($requestId, "Your reproduction request {reference} is ready. Sign in and open the request to download your files; the links stay valid for 30 days.\n\n{link}");
+            $this->getUser()->setFlash('success', 'Request completed' . ($sent ? ' and the researcher emailed.' : '.'));
+        }
+    }
+
+    /** Email the researcher who made a reproduction request. */
+    protected function emailReproduction(int $requestId, string $message): bool
+    {
+        $r = DB::table('research_reproduction_request as q')->join('research_researcher as r', 'r.id', '=', 'q.researcher_id')
+            ->where('q.id', $requestId)->select('r.first_name', 'r.last_name', 'r.email', 'q.reference_number')->first();
+        if (!$r || empty($r->email)) {
+            return false;
+        }
+        $base = rtrim((string) \sfConfig::get('app_siteBaseUrl', ''), '/');
+
+        return (bool) $this->sendTemplatedEmail($r->email, 'reproduction_update', [
+            'name' => trim($r->first_name . ' ' . $r->last_name),
+            'reference' => $r->reference_number,
+            'link' => $base . '/index.php/research/reproduction/' . $requestId,
+        ], 'Your reproduction request ' . $r->reference_number, "Dear {name},\n\n" . $message . "\n\nBest regards,\nThe Archive Team");
+    }
+
+    /** Download a delivered reproduction file: its researcher or staff, with an unexpired token. */
+    public function executeReproductionDownload($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReproductionService.php';
+        $svc = new ReproductionService();
+        $file = $svc->getFileByToken((string) $request->getParameter('token'));
+        if (!$file || !is_file($file->file_path)) {
+            $this->forward404('File not found or the link has expired');
+        }
+        $owner = DB::table('research_reproduction_item as i')->join('research_reproduction_request as q', 'q.id', '=', 'i.request_id')
+            ->where('i.id', $file->item_id)->value('q.researcher_id');
+        $me = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$this->isReadingRoomStaff() && (!$me || (int) $me->id !== (int) $owner)) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+        $svc->recordDownload((int) $file->id);
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType($file->mime_type ?: 'application/octet-stream');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . str_replace('"', '', $file->file_name) . '"');
+        $response->setHttpHeader('Content-Length', (string) filesize($file->file_path));
+        $response->sendHttpHeaders();
+        readfile($file->file_path);
+
+        return sfView::NONE;
+    }
+
     public function executeViewReproduction($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
@@ -3207,8 +3329,10 @@ class researchActions extends AhgController
 
         $userId = $this->getUser()->getAttribute('user_id');
         $this->researcher = $this->service->getResearcherByUserId($userId);
+        $isStaff = $this->isReadingRoomStaff();
 
-        if (!$this->researcher) {
+        // Staff review requests (the notification email links here) without a researcher record.
+        if (!$this->researcher && !$isStaff) {
             $this->redirect('research/register');
         }
 
@@ -3216,16 +3340,37 @@ class researchActions extends AhgController
         $reproductionService = new ReproductionService();
 
         $requestId = (int) $request->getParameter('id');
-        $this->reproductionRequest = $reproductionService->getRequest($requestId, $this->researcher->id);
+        // getRequest() takes no owner, so ownership is checked here: a researcher sees only their own.
+        $this->reproductionRequest = $reproductionService->getRequest($requestId);
+        $isOwner = $this->reproductionRequest && $this->researcher
+            && (int) $this->reproductionRequest->researcher_id === (int) $this->researcher->id;
 
-        if (!$this->reproductionRequest) {
+        if (!$this->reproductionRequest || (!$isOwner && !$isStaff)) {
             $this->forward404('Request not found');
         }
 
         $this->items = $reproductionService->getItems($requestId);
+        // Staff messages about this request (internal notes stay with staff).
+        $this->messages = $this->loadLifecycleService()->getCorrespondence($requestId, 'reproduction', $isStaff);
 
-        // Handle item actions
+        $this->isStaff = $isStaff;
+        $this->deliveredFiles = [];
+        foreach ($this->items as $it) {
+            $this->deliveredFiles[$it->id] = $reproductionService->getFiles((int) $it->id);
+        }
+
+        // Staff processing: quote, payment, delivery, completion.
+        $staffAction = $request->isMethod('post') ? (string) $request->getParameter('form_action') : '';
+        if ($isStaff && in_array($staffAction, ['send_quote', 'record_payment', 'deliver_file', 'complete_request'], true)) {
+            $this->processReproduction($request, $staffAction, $requestId, $reproductionService);
+            $this->redirect('/research/reproduction/' . $requestId);
+        }
+
+        // Handle item actions: the owner's to make
         if ($request->isMethod('post')) {
+            if (!$isOwner) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
+            }
             $action = $request->getParameter('form_action');
 
             if ($action === 'add_item') {
@@ -3250,6 +3395,9 @@ class researchActions extends AhgController
 
             if ($action === 'remove_item') {
                 $itemId = (int) $request->getParameter('item_id');
+                if (!DB::table('research_reproduction_item')->where('id', $itemId)->where('request_id', $requestId)->exists()) {
+                    $this->forward404('Item not found');
+                }
                 $reproductionService->removeItem($requestId, $itemId, $this->researcher->id);
                 $this->getUser()->setFlash('success', 'Item removed');
                 $this->redirect('/research/reproduction/' . $requestId);
@@ -5365,6 +5513,36 @@ class researchActions extends AhgController
             $collab = DB::table('research_external_collaborator')->where('id', $collabId)->first();
             $this->getUser()->setFlash('success', 'Access granted');
             $this->redirect('/research/share/' . $token . '?access_token=' . $collab->access_token);
+        }
+
+        // A note from an external collaborator: only on a contribute/full share, and
+        // only by a collaborator whose token belongs to this share.
+        if ($request->isMethod('post') && 'add_note' === $request->getParameter('form_action')) {
+            $collab = $shareService->authenticateExternal((string) $request->getParameter('access_token'));
+            $content = trim((string) $request->getParameter('content'));
+            if (!$collab || (int) $collab->share_id !== (int) $this->share->id
+                || !in_array($this->share->share_type, ['contribute', 'full'], true)) {
+                \AtomExtensions\Services\AclService::forwardUnauthorized();
+            }
+            if ('' === $content) {
+                $this->getUser()->setFlash('error', 'Write the note before adding it.');
+            } else {
+                $title = trim((string) $request->getParameter('title')) ?: 'Note';
+                // External collaborators have no researcher record, so the note is filed under
+                // the project owner with the collaborator named in its details.
+                DB::table('research_activity_log')->insert([
+                    'researcher_id' => (int) DB::table('research_project')->where('id', $this->share->project_id)->value('owner_id'),
+                    'project_id'    => $this->share->project_id,
+                    'activity_type' => 'external_note',
+                    'entity_type'   => 'external_collaborator',
+                    'entity_id'     => $collab->id,
+                    'entity_title'  => mb_substr($title, 0, 255),
+                    'details'       => json_encode(['name' => $collab->name, 'email' => $collab->email, 'institution' => $collab->institution, 'title' => $title, 'content' => $content]),
+                    'created_at'    => date('Y-m-d H:i:s'),
+                ]);
+                $this->getUser()->setFlash('success', 'Note added. The project owner will see it on the project page.');
+            }
+            $this->redirect('/research/share/' . $token . '?access_token=' . urlencode($collab->access_token));
         }
 
         // If already has access token, load project data
@@ -8423,13 +8601,13 @@ class researchActions extends AhgController
 
             if (empty($name)) {
                 $this->getUser()->setFlash('error', 'Room name is required.');
-                $this->redirect("research/project/{$projectId}/rooms");
+                $this->redirect('@research_view_project?id=' . $projectId);
             }
 
             $roomId = $roomService->createRoom($projectId, $name, $userId, $description ?: null, $maxParticipants);
 
             $this->getUser()->setFlash('notice', 'Research room created successfully.');
-            $this->redirect("research/room/{$roomId}");
+            $this->redirect('@research_view_room?id=' . $roomId);
         }
 
         $this->projectId = $projectId;
@@ -8465,7 +8643,7 @@ class researchActions extends AhgController
         $roomService->updateRoom($roomId, $data);
 
         $this->getUser()->setFlash('notice', 'Room updated.');
-        $this->redirect("research/room/{$roomId}");
+        $this->redirect('@research_view_room?id=' . $roomId);
     }
 
     /**
@@ -8536,7 +8714,7 @@ class researchActions extends AhgController
      */
     public function executeRequestsDashboard($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // every researcher's requests: staff only
         $lifecycle = $this->loadLifecycleService();
 
         $filters = [
@@ -8562,7 +8740,7 @@ class researchActions extends AhgController
      */
     public function executeRequestTriage($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // every researcher's requests: staff only
         $requestId = (int) $request->getParameter('id');
         $requestType = $request->getParameter('type', 'material');
         $lifecycle = $this->loadLifecycleService();
@@ -8596,7 +8774,7 @@ class researchActions extends AhgController
      */
     public function executeRequestAssign($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // every researcher's requests: staff only
         $requestId = (int) $request->getParameter('id');
         $requestType = $request->getParameter('type', 'material');
         $staffId = (int) $request->getParameter('staff_id');
@@ -8622,9 +8800,31 @@ class researchActions extends AhgController
      * Correspondence thread + reply form.
      * GET+POST /research/request/:id/correspond/:type
      */
+    /** Email a staff message about a request to the researcher who made it. */
+    protected function emailRequestMessage(int $requestId, string $requestType, string $subject, string $body): bool
+    {
+        $researcher = 'reproduction' === $requestType
+            ? DB::table('research_reproduction_request as q')->join('research_researcher as r', 'r.id', '=', 'q.researcher_id')
+                ->where('q.id', $requestId)->select('r.first_name', 'r.last_name', 'r.email', 'q.reference_number as ref')->first()
+            : DB::table('research_material_request as q')->join('research_booking as b', 'b.id', '=', 'q.booking_id')
+                ->join('research_researcher as r', 'r.id', '=', 'b.researcher_id')
+                ->where('q.id', $requestId)->select('r.first_name', 'r.last_name', 'r.email', DB::raw("CONCAT('#', q.id) as ref"))->first();
+        if (!$researcher || empty($researcher->email)) {
+            return false;
+        }
+
+        return (bool) $this->sendTemplatedEmail(
+            $researcher->email,
+            'request_message',
+            ['name' => trim($researcher->first_name . ' ' . $researcher->last_name), 'reference' => $researcher->ref, 'message' => $body],
+            $subject ?: 'About your request ' . $researcher->ref,
+            "Dear {name},\n\n{message}\n\nReference: {reference}\n\nBest regards,\nThe Archive Team"
+        );
+    }
+
     public function executeRequestCorrespond($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // every researcher's requests: staff only
         $requestId = (int) $request->getParameter('id');
         $requestType = $request->getParameter('type', 'material');
         $lifecycle = $this->loadLifecycleService();
@@ -8637,10 +8837,11 @@ class researchActions extends AhgController
 
             if ($body !== '') {
                 $lifecycle->addCorrespondence($requestId, $requestType, $userId, 'staff', $body, $isInternal, $subject);
-                $this->getUser()->setFlash('notice', 'Message sent.');
+                $sent = $isInternal ? false : $this->emailRequestMessage($requestId, $requestType, (string) $subject, $body);
+                $this->getUser()->setFlash('notice', $isInternal ? 'Internal note saved.' : ($sent ? 'Message sent and emailed to the researcher.' : 'Message saved; it could not be emailed (research email is off or the researcher has no address).'));
             }
 
-            $this->redirect("research/request/{$requestId}/correspond/{$requestType}");
+            $this->redirect('@research_request_correspond?id=' . $requestId . '&type=' . $requestType);
         }
 
         $this->requestData = $lifecycle->getRequestWithSla($requestId, $requestType);
@@ -8657,7 +8858,7 @@ class researchActions extends AhgController
      */
     public function executeRequestClose($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // every researcher's requests: staff only
         $requestId = (int) $request->getParameter('id');
         $requestType = $request->getParameter('type', 'material');
         $reason = $request->getParameter('closure_reason', 'fulfilled');
@@ -8765,7 +8966,7 @@ class researchActions extends AhgController
      */
     public function executeCustodyCheckout($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // custody moves are staff work
         $requestId = (int) $request->getParameter('id');
         $custody = $this->loadCustodyService();
 
@@ -8831,7 +9032,7 @@ class researchActions extends AhgController
      */
     public function executeCustodyCheckin($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // custody moves are staff work
         $requestId = (int) $request->getParameter('id');
         $custody = $this->loadCustodyService();
 
@@ -8904,7 +9105,7 @@ class researchActions extends AhgController
      */
     public function executeCustodyReturnVerify($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // custody moves are staff work
         $requestId = (int) $request->getParameter('id');
         $custody = $this->loadCustodyService();
 
@@ -8933,7 +9134,7 @@ class researchActions extends AhgController
      */
     public function executeCustodyChain($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // custody moves are staff work
         $objectId = (int) $request->getParameter('object_id');
         $custody = $this->loadCustodyService();
 
@@ -8955,7 +9156,7 @@ class researchActions extends AhgController
      */
     public function executeBatchCheckout($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // custody moves are staff work
 
         if ($request->isMethod('post')) {
             $requestIds = $request->getParameter('request_ids', []);
@@ -9013,7 +9214,7 @@ class researchActions extends AhgController
      */
     public function executeBatchReturn($request)
     {
-        $this->requireAuth();
+        $this->requireReadingRoomStaff(); // custody moves are staff work
 
         if ($request->isMethod('post')) {
             $items = [];

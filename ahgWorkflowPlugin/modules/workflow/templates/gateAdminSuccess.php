@@ -11,7 +11,7 @@
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0"><i class="fas fa-shield-alt me-2"></i>Publish Gate Rules</h1>
-    <a href="<?php echo url_for('workflow/admin/gates/0/edit'); ?>" class="btn btn-primary">
+    <a href="<?php echo url_for('@workflow_gate_rule_edit?id=0'); ?>" class="btn btn-primary">
       <i class="fas fa-plus me-1"></i>Add Rule
     </a>
   </div>
@@ -73,10 +73,10 @@
                 </td>
                 <td><?php echo $rule->sort_order; ?></td>
                 <td>
-                  <a href="<?php echo url_for("workflow/admin/gates/{$rule->id}/edit"); ?>" class="btn btn-sm btn-outline-primary" title="Edit">
+                  <a href="<?php echo url_for('@workflow_gate_rule_edit?id=' . $rule->id); ?>" class="btn btn-sm btn-outline-primary" title="Edit">
                     <i class="fas fa-edit"></i>
                   </a>
-                  <a href="<?php echo url_for("workflow/admin/gates/{$rule->id}/delete"); ?>" class="btn btn-sm btn-outline-danger" title="Delete"
+                  <a href="<?php echo url_for('@workflow_gate_rule_delete?id=' . $rule->id); ?>" class="btn btn-sm btn-outline-danger" title="Delete"
                      data-ahg-confirm="Delete this rule?">
                     <i class="fas fa-trash"></i>
                   </a>

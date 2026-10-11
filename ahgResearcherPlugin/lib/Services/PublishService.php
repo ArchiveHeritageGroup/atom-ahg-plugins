@@ -12,6 +12,12 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class PublishService
 {
+    /** Information objects created by this publish, indexed at the end. */
+    private array $createdIoIds = [];
+
+    /** Digital objects created by this publish; their derivatives are made after commit. */
+    private array $createdDoIds = [];
+
     private SubmissionService $submissionService;
 
     public function __construct()
@@ -101,6 +107,7 @@ class PublishService
 
         foreach ($rootDescriptions as $item) {
             try {
+                DB::beginTransaction(); // one item: all of it, or none of it
                 $objectId = $this->createInformationObject($item, $parentObjectId, $repositoryId, $userId);
                 $itemToObjectId[$item->id] = $objectId;
 
@@ -122,7 +129,9 @@ class PublishService
                 DB::table('researcher_submission_item')
                     ->where('id', $item->id)
                     ->update(['published_object_id' => $objectId]);
-            } catch (\Exception $e) {
+                DB::commit();
+            } catch (\Throwable $e) {
+                DB::rollBack();
                 $results['errors'][] = "Item '{$item->title}': " . $e->getMessage();
             }
         }
@@ -146,6 +155,8 @@ class PublishService
                 }
 
                 try {
+
+                    DB::beginTransaction(); // one item: all of it, or none of it
                     $objectId = $this->createInformationObject($item, $parentId, $repositoryId, $userId);
                     $itemToObjectId[$item->id] = $objectId;
 
@@ -164,7 +175,9 @@ class PublishService
                     DB::table('researcher_submission_item')
                         ->where('id', $item->id)
                         ->update(['published_object_id' => $objectId]);
-                } catch (\Exception $e) {
+                    DB::commit();
+                } catch (\Throwable $e) {
+                    DB::rollBack();
                     $results['errors'][] = "Item '{$item->title}': " . $e->getMessage();
                 }
             }
@@ -204,7 +217,38 @@ class PublishService
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $this->submissionService->markPublished($submissionId);
+        // Nothing created means nothing published: leave it approved so it can be retried.
+        if (!empty($results['created_objects'])) {
+            $this->submissionService->markPublished($submissionId);
+        }
+
+        // Derivatives, after the item transactions have committed: AtoM's model reads
+        // through its own connection. Without media_type_id createRepresentations()
+        // matches nothing and silently makes no reference image or thumbnail.
+        foreach ($this->createdDoIds as $doId) {
+            try {
+                $do = \QubitDigitalObject::getById($doId);
+                if (null !== $do) {
+                    $do->setMimeAndMediaType($do->mimeType);
+                    $do->save();
+                    $do->createRepresentations(\QubitTerm::MASTER_ID);
+                }
+            } catch (\Throwable $e) {
+                $results['errors'][] = "File {$doId} was published but its derivatives were not made: " . $e->getMessage();
+            }
+        }
+
+        // Rows written with SQL are invisible to browse and search until indexed.
+        foreach ($this->createdIoIds as $ioId) {
+            try {
+                $io = \QubitInformationObject::getById($ioId);
+                if (null !== $io) {
+                    \QubitSearch::getInstance()->update($io);
+                }
+            } catch (\Throwable $e) {
+                $results['errors'][] = "Record {$ioId} was published but not indexed: " . $e->getMessage();
+            }
+        }
 
         return $results;
     }
@@ -261,6 +305,17 @@ class PublishService
             'object_id' => $objectId,
             'slug'      => $slug,
         ]);
+
+        // Publication status: the submission has passed publication approval, so
+        // the record is published (type 158 publication status, 160 published).
+        // Without a row AtoM has no status for it at all.
+        DB::table('status')->insert([
+            'object_id'     => $objectId,
+            'type_id'       => 158,
+            'status_id'     => 160,
+            'serial_number' => 0,
+        ]);
+        $this->createdIoIds[] = $objectId;
 
         // Create date event if date info provided
         if ($item->date_display || $item->date_start) {
@@ -398,7 +453,8 @@ class PublishService
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $relativePath = '/uploads/r/' . $subDir . '/' . $destName;
+        // AtoM keeps the directory in path and the file in name (path . name is the file).
+        $relativePath = '/uploads/r/' . $subDir . '/';
 
         DB::table('digital_object')->insert([
             'id'                 => $doObjectId,
@@ -412,6 +468,8 @@ class PublishService
             'usage_id'           => \QubitTerm::MASTER_ID,
             'sequence'           => $file->sort_order ?? 0,
         ]);
+
+        $this->createdDoIds[] = $doObjectId;
 
         // Update file record with published DO ID
         DB::table('researcher_submission_file')
@@ -472,6 +530,7 @@ class PublishService
                 $relId = (int) DB::table('object')->insertGetId([
                     'class_name' => 'QubitObjectTermRelation',
                     'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
                 ]);
 
                 DB::table('object_term_relation')->insert([
@@ -506,6 +565,7 @@ class PublishService
         $objectId = (int) DB::table('object')->insertGetId([
             'class_name' => 'QubitTerm',
             'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
         $parent = DB::table('term')
@@ -568,11 +628,12 @@ class PublishService
             $eventObjectId = (int) DB::table('object')->insertGetId([
                 'class_name' => 'QubitEvent',
                 'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
             DB::table('event')->insert([
                 'id'                    => $eventObjectId,
-                'information_object_id' => $objectId,
+                'object_id' => $objectId,
                 'actor_id'              => $actorId,
                 'type_id'               => \QubitTerm::CREATION_ID,
                 'source_culture'        => 'en',
@@ -599,6 +660,7 @@ class PublishService
         $noteObjectId = (int) DB::table('object')->insertGetId([
             'class_name' => 'QubitNote',
             'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
         DB::table('note')->insert([
@@ -623,11 +685,12 @@ class PublishService
         $eventId = (int) DB::table('object')->insertGetId([
             'class_name' => 'QubitEvent',
             'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
         DB::table('event')->insert([
             'id'                    => $eventId,
-            'information_object_id' => $objectId,
+            'object_id' => $objectId,
             'type_id'               => \QubitTerm::CREATION_ID,
             'start_date'            => $item->date_start ?: null,
             'end_date'              => $item->date_end ?: null,

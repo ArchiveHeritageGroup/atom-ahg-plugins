@@ -163,7 +163,8 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
       </a>
     </li>
 
-    <?php if ($hasSpectrum): ?>
+    <?php // Spectrum tasks are collection-management work: staff only. ?>
+    <?php if ($hasSpectrum && $sf_user->hasCredential(['administrator', 'editor', 'contributor', 'translator'], false)): ?>
     <!-- Spectrum Tasks Section -->
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><i class="fas fa-tasks me-1"></i><?php echo __('Tasks'); ?></h6></li>

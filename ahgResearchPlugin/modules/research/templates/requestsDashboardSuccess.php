@@ -132,10 +132,10 @@
                         <td><?php echo htmlspecialchars($req->assigned_to_name ?? '—') ?></td>
                         <td>
                             <div class="btn-group btn-group-sm" role="group" aria-label="<?php echo __('Actions for request %1%', ['%1%' => $req->id]) ?>">
-                                <a href="<?php echo url_for("research/request/{$req->id}/triage/material") ?>" class="btn btn-outline-primary" title="<?php echo __('Triage') ?>">
+                                <a href="<?php echo url_for('@research_request_triage?id=' . $req->id . '&type=' . 'material') ?>" class="btn btn-outline-primary" title="<?php echo __('Triage') ?>">
                                     <i class="fas fa-clipboard-check" aria-hidden="true"></i>
                                 </a>
-                                <a href="<?php echo url_for("research/request/{$req->id}/correspond/material") ?>" class="btn btn-outline-info" title="<?php echo __('Correspondence') ?>">
+                                <a href="<?php echo url_for('@research_request_correspond?id=' . $req->id . '&type=' . 'material') ?>" class="btn btn-outline-info" title="<?php echo __('Correspondence') ?>">
                                     <i class="fas fa-envelope" aria-hidden="true"></i>
                                 </a>
                             </div>
@@ -210,10 +210,10 @@
                         <td><?php echo $req->estimated_cost ? 'R' . number_format($req->estimated_cost, 2) : '—' ?></td>
                         <td>
                             <div class="btn-group btn-group-sm" role="group" aria-label="<?php echo __('Actions for request %1%', ['%1%' => $req->reference_number ?? $req->id]) ?>">
-                                <a href="<?php echo url_for("research/request/{$req->id}/triage/reproduction") ?>" class="btn btn-outline-primary" title="<?php echo __('Triage') ?>">
+                                <a href="<?php echo url_for('@research_request_triage?id=' . $req->id . '&type=' . 'reproduction') ?>" class="btn btn-outline-primary" title="<?php echo __('Triage') ?>">
                                     <i class="fas fa-clipboard-check" aria-hidden="true"></i>
                                 </a>
-                                <a href="<?php echo url_for("research/request/{$req->id}/correspond/reproduction") ?>" class="btn btn-outline-info" title="<?php echo __('Correspondence') ?>">
+                                <a href="<?php echo url_for('@research_request_correspond?id=' . $req->id . '&type=' . 'reproduction') ?>" class="btn btn-outline-info" title="<?php echo __('Correspondence') ?>">
                                     <i class="fas fa-envelope" aria-hidden="true"></i>
                                 </a>
                                 <a href="<?php echo url_for(['module' => 'research', 'action' => 'viewReproduction', 'id' => $req->id]) ?>" class="btn btn-outline-secondary" title="<?php echo __('View') ?>">
