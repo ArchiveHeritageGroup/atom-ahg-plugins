@@ -1,0 +1,5 @@
+# Staff pages: digitisation provenance records, signing, and the coverage
+# dashboard. Double brackets OR the credentials.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

@@ -133,7 +133,7 @@ class TranslateCommand extends BaseCommand
 
     private function checkLanguagePackage(string $pythonPath, string $from, string $to): bool
     {
-        $script = $this->getAtomRoot() . '/atom-ahg-python/src/atom_ahg/resources/translation.py';
+        $script = dirname(__DIR__, 2) . '/lib/python/translation.py';
         if (!file_exists($script)) {
             return false;
         }
@@ -167,7 +167,7 @@ class TranslateCommand extends BaseCommand
 
     private function installLanguagePackage(string $pythonPath, string $from, string $to): void
     {
-        $script = $this->getAtomRoot() . '/atom-ahg-python/src/atom_ahg/resources/translation.py';
+        $script = dirname(__DIR__, 2) . '/lib/python/translation.py';
 
         $cmd = sprintf(
             '%s %s install --from=%s --to=%s 2>&1',
@@ -220,7 +220,7 @@ class TranslateCommand extends BaseCommand
             throw new \Exception("No source text in culture: $fromCulture");
         }
 
-        $script = $this->getAtomRoot() . '/atom-ahg-python/src/atom_ahg/resources/translation.py';
+        $script = dirname(__DIR__, 2) . '/lib/python/translation.py';
         require_once dirname(__DIR__) . '/Services/TranslationMemoryService.php';
 
         foreach ($fields as $field) {

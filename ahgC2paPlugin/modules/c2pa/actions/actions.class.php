@@ -45,23 +45,28 @@ class c2paActions extends AhgController
             return $this->renderJson(['information_object_id' => $ioId, 'manifests' => []]);
         }
 
-        // #187: align with the actual ahg_c2pa_manifest schema — the prior select
+        // #187: align with the actual ahg_c2pa_manifest schema - the prior select
         // referenced columns (action/model_id/model_version/sidecar_path/
         // claim_signature) that don't exist, 500-ing on every call.
+        // The table is shared with ahgMetadataExportPlugin; select only the
+        // columns this install actually has (see C2paService::persist()).
+        $columns = C2paService::manifestColumns();
         $rows = DB::table('ahg_c2pa_manifest')
             ->where('information_object_id', $ioId)
             ->orderByDesc('created_at')
-            ->get(['id', 'digital_object_id', 'manifest_label', 'asset_hash', 'kid', 'signature_hex', 'created_at']);
+            ->get(array_values(array_intersect(['id', 'digital_object_id', 'manifest_label', 'asset_hash', 'action', 'model_id', 'kid', 'signature_hex', 'claim_signature', 'created_at'], $columns)));
 
         $manifests = [];
         foreach ($rows as $row) {
             $manifests[] = [
                 'id'                => (int) $row->id,
                 'digital_object_id' => isset($row->digital_object_id) ? (int) $row->digital_object_id : null,
-                'label'             => (string) $row->manifest_label,
-                'asset_hash'        => (string) $row->asset_hash,
+                'label'             => (string) ($row->manifest_label ?? ''),
+                'asset_hash'        => (string) ($row->asset_hash ?? ''),
+                'action'            => isset($row->action) ? (string) $row->action : null,
+                'model_id'          => isset($row->model_id) ? (string) $row->model_id : null,
                 'kid'               => (string) $row->kid,
-                'signature'         => (string) $row->signature_hex,
+                'signature'         => (string) ($row->signature_hex ?? $row->claim_signature ?? ''),
                 'created_at'        => (string) $row->created_at,
             ];
         }
@@ -95,8 +100,8 @@ class c2paActions extends AhgController
 
         return $this->renderJson([
             'id'                    => (int) $row->id,
-            'information_object_id' => (int) $row->information_object_id,
-            'action'                => (string) $row->action,
+            'information_object_id' => $row->information_object_id === null ? null : (int) $row->information_object_id,
+            'action'                => isset($row->action) ? (string) $row->action : null,
             'kid'                   => (string) $row->kid,
             'created_at'            => (string) $row->created_at,
             'manifest'              => is_array($manifest) ? $manifest : null,

@@ -1,0 +1,7 @@
+# Public content-credentials pages: the record / file verification pages, the
+# embeddable badge, the drop-in check tool and download-with-credentials. They
+# are public on purpose (anyone must be able to check authenticity), and each
+# action applies the AtoM ACL itself: record pages need read on the record, the
+# download and sidecar need readMaster on the file.
+all:
+  is_secure: false

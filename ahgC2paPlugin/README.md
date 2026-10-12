@@ -85,7 +85,8 @@ php bin/atom c2pa:verify manifest.json --public-key=<64-hex>
 # 1. Symlink + enable (standard AHG plugin flow)
 php bin/atom extension:enable ahgC2paPlugin
 
-# 2. Create the manifest store
+# 2. Create the manifest + provenance stores (an existing ahg_c2pa_manifest
+#    created by ahgMetadataExportPlugin also needs upgrade_heratio_parity.sql once)
 mysql -u root archive < atom-ahg-plugins/ahgC2paPlugin/database/install.sql
 
 # 3. Ensure a signing key exists (shared with ahgAiCompliancePlugin)
@@ -98,3 +99,26 @@ rm -rf cache/* && sudo systemctl restart php8.3-fpm
 Signing degrades gracefully: with no key installed, manifests are still built and
 sidecar'd (unsigned); verification of unsigned manifests reports the missing
 signature.
+
+## Provenance, AI outputs and public verification (Heratio parity)
+
+- **Auto-provenance.** When a request creates digital objects (any POST, or a CLI
+  task such as `ingest:commit`), every new master gets a signed digitisation
+  provenance record at the end of that request: sidecar next to the master, plus
+  an embedded `<stem>.c2pa.<ext>` copy for JPEG/PNG/TIFF/MP4 (c2patool) or PDF.
+  Encrypted-at-rest masters are signed as plaintext and keep the sidecar only.
+  Nothing is written when no signing key is readable, so the backfill can sign later.
+- **`sudo -u www-data php symfony c2pa:provenance-backfill [--id=] [--limit=] [--dry-run]`**
+  records the masters that have none. Idempotent.
+- **`sudo -u www-data php symfony c2pa:embed [--id=] [--limit=] [--dry-run]`** (re)embeds
+  signed provenance manifests into master copies.
+- **AI outputs.** ahgAIPlugin signs an `ai-generated` manifest for NER, summaries,
+  translations, HTR, LLM descriptions and suggestions, and `ai-assisted` when a
+  human edits a suggestion before approving it. Best effort; never breaks the AI call.
+- **Staff pages:** `/admin/c2pa/coverage`, `/admin/c2pa/object/:id` (records + manifests),
+  `/admin/c2pa/object/:id/record` (record a digitisation).
+- **Public pages:** `/c2pa/record/:id` (the target of the Content Credentials badge on
+  record pages), `/c2pa/object/:id`, `/c2pa/object/:id/download`,
+  `/c2pa/object/:id/credentials`, `/c2pa/object/:id/badge`, `/c2pa/object/:id/badge-json`
+  and the drop-in checker `/c2pa/check`. Record pages respect the read ACL; the download
+  and sidecar require readMaster.

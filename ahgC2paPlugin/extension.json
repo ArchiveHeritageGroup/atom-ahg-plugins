@@ -1,8 +1,8 @@
 {
     "name": "C2PA Content Credentials",
     "machine_name": "ahgC2paPlugin",
-    "version": "0.1.1",
-    "description": "C2PA 2.1 content credentials: generate, sign (Ed25519) and embed provenance manifests on digital-object derivatives (JUMBF via c2patool, or .c2pa.json sidecars), carry embedded EXIF/IPTC/XMP as C2PA metadata assertions, declare an AI training and data-mining stance, and verify manifests. Shares its signing key chain with the AI Compliance plugin.",
+    "version": "0.2.0",
+    "description": "C2PA 2.1 content credentials: generate, sign (Ed25519) and embed provenance manifests on digital objects (JUMBF via c2patool, PDF associated files, or .c2pa.json sidecars), record signed digitisation provenance automatically when a digital object is created, sign manifests for AI outputs, carry embedded EXIF/IPTC/XMP as C2PA metadata assertions, declare an AI training and data-mining stance, and verify manifests on public pages. Shares its signing key chain with the AI Compliance plugin.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "category": "provenance",
@@ -16,7 +16,8 @@
     ],
     "suggests": {
         "ahgAiCompliancePlugin": "Provides the shared Ed25519 signing key (ai_inference_key + data/ai-keys) used to sign and verify C2PA manifests",
-        "ahgDAMPlugin": "Provides dam_iptc_metadata used for stds.iptc / stds.xmp Standard Metadata Assertions"
+        "ahgDAMPlugin": "Provides dam_iptc_metadata used for stds.iptc / stds.xmp Standard Metadata Assertions",
+        "ahgAIPlugin": "Signs a C2PA manifest for each AI output (NER, summary, translation, HTR, description suggestion)"
     },
     "composer": {
         "require": {
@@ -31,21 +32,41 @@
             "C2paService",
             "ManifestBuilder",
             "C2paSigner",
-            "StandardMetadataLoader"
+            "StandardMetadataLoader",
+            "ProvenanceRecordService",
+            "DigitalObjectProvenanceService",
+            "AiOutputRecorder",
+            "CoverageReportService",
+            "ManifestPresenter"
         ],
         "commands": [
             "c2pa:verify",
-            "c2pa:smoke"
+            "c2pa:smoke",
+            "c2pa:provenance-backfill",
+            "c2pa:embed"
         ],
         "endpoints": [
             "/.well-known/c2pa-info",
             "/c2pa/verify",
             "/c2pa/manifest/:id",
-            "/c2pa/manifests/:id"
+            "/c2pa/manifests/:id",
+            "/c2pa/check",
+            "/c2pa/record/:id",
+            "/c2pa/object/:id",
+            "/c2pa/object/:id/download",
+            "/c2pa/object/:id/credentials",
+            "/c2pa/object/:id/badge",
+            "/c2pa/object/:id/badge-json",
+            "/admin/c2pa/coverage",
+            "/admin/c2pa/object/:id",
+            "/admin/c2pa/object/:id/record",
+            "/admin/c2pa/object/:id/record/:pid",
+            "/admin/c2pa/object/:id/record/:pid/manifest"
         ]
     },
     "install_sql": "database/install.sql",
     "tables": [
-        "ahg_c2pa_manifest"
+        "ahg_c2pa_manifest",
+        "ahg_c2pa_provenance"
     ]
 }

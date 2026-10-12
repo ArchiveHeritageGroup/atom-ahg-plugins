@@ -1,56 +1,76 @@
 -- PSIS / AtoM-AHG - C2PA (Coalition for Content Provenance and Authenticity) manifests.
 --
--- PSIS twin of Heratio packages/ahg-c2pa/database/install.sql. Schema is
--- byte-compatible so manifests written on PSIS and Heratio cross-verify.
+-- The durable log of every signed C2PA manifest issued for a record: digitisation
+-- provenance (ahg_c2pa_provenance.manifest_id points here), AI outputs (NER,
+-- summaries, translations, description suggestions) and metadata-export
+-- issuances. Answers "what provenance / AI activity ever touched this IO?"
+-- without crawling sidecars, and lets a lost on-disk copy be re-issued.
 --
--- Every AI-touched / DAM-signed artefact gets a C2PA 2.1 manifest. Manifests are
--- signed Ed25519 (shared key with ahgAiCompliancePlugin / ahg/inference-receipts)
--- and either embedded into the host media (JPEG/JUMBF via c2patool) or written as
--- a sidecar JSON next to the file.
---
--- This table is the durable log of every manifest emitted. It answers "what AI/
--- provenance activity ever touched this IO?" without crawling sidecar files, and
--- lets us re-issue a manifest if the on-disk copy is lost.
+-- The table is SHARED with ahgMetadataExportPlugin, whose migration
+-- (2026_05_29_c2pa_manifest.sql) created it on PSIS first. This definition is
+-- the union of that schema (manifest_label, asset_hash, signature_hex) and the
+-- Heratio ahg-c2pa one (action, model_id, model_version, manifest_cbor,
+-- sidecar_path); C2paService::persist() writes whichever columns exist. An
+-- install that already has the older table gets the Heratio columns from
+-- upgrade_heratio_parity.sql.
 --
 -- Conventions: CREATE TABLE IF NOT EXISTS, no ENUM, no FOREIGN KEY to core AtoM
 -- tables (information_object_id is a plain indexed column).
 
 CREATE TABLE IF NOT EXISTS `ahg_c2pa_manifest` (
-    `id`                       BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id`                    BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `digital_object_id`     INT UNSIGNED DEFAULT NULL,
+    `information_object_id` INT UNSIGNED DEFAULT NULL,
+    `action`                VARCHAR(32) DEFAULT NULL COMMENT 'ai-generated, ai-assisted, c2pa.created, placed, edited',
+    `model_id`              VARCHAR(128) DEFAULT NULL,
+    `model_version`         VARCHAR(64) DEFAULT NULL,
+    `manifest_label`        VARCHAR(160) NOT NULL,
+    `asset_hash`            CHAR(64) NOT NULL COMMENT 'SHA-256 of the host asset',
+    `kid`                   VARCHAR(64) NOT NULL COMMENT 'Ed25519 key id; resolves through ai_inference_key',
+    `signature_hex`         VARCHAR(160) NOT NULL COMMENT 'Ed25519 signature over SHA-256(JCS(claim)), hex',
+    `manifest_json`         LONGTEXT NOT NULL COMMENT 'Canonical (JCS) signed manifest',
+    `manifest_cbor`         LONGBLOB DEFAULT NULL COMMENT 'CBOR form of the same manifest (JUMBF on-wire form)',
+    `sidecar_path`          VARCHAR(512) DEFAULT NULL COMMENT 'Sidecar (.c2pa.json) or embedded copy written, when any',
+    `created_at`            DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`            DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_c2pa_label` (`manifest_label`),
+    KEY `idx_c2pa_do` (`digital_object_id`),
+    KEY `idx_c2pa_io` (`information_object_id`),
+    KEY `idx_c2pa_action` (`action`),
+    KEY `idx_c2pa_kid` (`kid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-    `information_object_id`    INT UNSIGNED NOT NULL,
+-- PSIS / AtoM-AHG - C2PA digitisation provenance / content-credentials records.
+--
+-- PSIS twin of Heratio packages/ahg-c2pa/database/install_provenance.sql (same
+-- columns, so records cross-read). The record-of-capture for a digitised asset:
+-- who digitised it, when, on what device and software, plus any AI-inference
+-- steps that touched it. Each record can be bound to a signed C2PA manifest in
+-- ahg_c2pa_manifest. Written by the auto-provenance watcher, the
+-- c2pa:provenance-backfill task and the /admin/c2pa staff pages.
+--
+-- Conventions: CREATE TABLE IF NOT EXISTS, no ENUM, no FOREIGN KEY to core AtoM.
 
-    -- C2PA action label (c2pa.actions.v2). Typical values:
-    --   'ai-generated' - output wholly produced by an AI model
-    --   'ai-assisted'  - a human revised the AI output
-    --   'placed'       - asset placed/signed with no AI involvement
-    `action`                   VARCHAR(32) NOT NULL COMMENT 'ai-generated, ai-assisted, placed, edited',
-
-    `model_id`                 VARCHAR(128) NOT NULL,
-    `model_version`            VARCHAR(64) DEFAULT NULL,
-
-    -- Authoritative JSON form (RFC 8785 JCS-canonical) - what the claim
-    -- signature is computed over.
-    `manifest_json`            LONGTEXT NOT NULL,
-
-    -- Optional CBOR encoding of the same manifest (JUMBF on-wire form).
-    `manifest_cbor`            LONGBLOB DEFAULT NULL,
-
-    -- Absolute path of the sidecar (.c2pa.json) written, when applicable.
-    `sidecar_path`             VARCHAR(512) DEFAULT NULL,
-
-    -- Ed25519 signature over SHA-256(JCS(claim)), hex-encoded.
-    `claim_signature`          VARCHAR(128) NOT NULL,
-
-    -- Key id (first 16 hex of SHA-256(public_key)); resolves through
-    -- ai_inference_key (ahgAiCompliancePlugin) to the public key for verification.
-    `kid`                      VARCHAR(32) NOT NULL,
-
-    `created_at`               DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-
+CREATE TABLE IF NOT EXISTS `ahg_c2pa_provenance` (
+    `id`                    BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `information_object_id` INT UNSIGNED NOT NULL,
+    `digital_object_id`     INT UNSIGNED DEFAULT NULL COMMENT 'NULL = applies to the record as a whole',
+    `captured_by`           VARCHAR(255) DEFAULT NULL,
+    `captured_at`           DATETIME DEFAULT NULL,
+    `capture_device`        VARCHAR(255) DEFAULT NULL,
+    `capture_software`      VARCHAR(255) DEFAULT NULL,
+    `notes`                 TEXT DEFAULT NULL,
+    `asset_sha256`          CHAR(64) DEFAULT NULL COMMENT 'SHA-256 of the asset file when the record was made',
+    `inference_steps`       LONGTEXT DEFAULT NULL COMMENT 'JSON array: step, model_id, model_version, output_sha256',
+    `manifest_id`           BIGINT UNSIGNED DEFAULT NULL COMMENT 'ahg_c2pa_manifest.id when signed',
+    `sign_status`           VARCHAR(16) NOT NULL DEFAULT 'unsigned' COMMENT 'signed, unsigned',
+    `created_at`            DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at`            DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (`id`),
     KEY `idx_io` (`information_object_id`),
-    KEY `idx_action` (`action`),
-    KEY `idx_kid` (`kid`),
+    KEY `idx_do` (`digital_object_id`),
+    KEY `idx_manifest` (`manifest_id`),
+    KEY `idx_status` (`sign_status`),
     KEY `idx_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

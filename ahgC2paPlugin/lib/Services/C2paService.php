@@ -308,38 +308,65 @@ final class C2paService
     }
 
     /**
-     * Embed a manifest in a JPEG via the c2patool CLI. Falls back to a sidecar
-     * when the CLI is not installed or the embed fails.
-     *
-     * @param array<string,mixed> $signedManifest
-     * @return string absolute path of the produced artefact (.c2pa.jpg or .c2pa.json)
+     * c2patool can write a C2PA manifest into these container formats. PDFs are
+     * embedded separately via embedInPdf(); everything else stays sidecar-only.
      */
-    public function embedInJpeg(string $imagePath, array $signedManifest): string
+    private const EMBEDDABLE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'tif', 'tiff', 'mp4'];
+
+    /**
+     * Whether c2patool can embed a manifest into this file's container (by extension).
+     */
+    public static function isEmbeddableFormat(string $path): bool
     {
-        if (!is_readable($imagePath)) {
-            throw new RuntimeException("C2paService: input image not readable: {$imagePath}");
-        }
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
+        return in_array($ext, self::EMBEDDABLE_EXTENSIONS, true);
+    }
+
+    /**
+     * Embed a signed manifest into a media file via c2patool (JPEG/PNG/TIFF/MP4).
+     * The source is never modified: c2patool writes a sibling <stem>.c2pa.<ext>
+     * (or $destPath). Returns null - never throws - when the tool is absent, the
+     * source is unreadable or not embeddable, or c2patool fails.
+     *
+     * @param array<string,mixed> $manifest signManifest() output
+     */
+    public function embed(string $srcPath, array $manifest, ?string $destPath = null): ?string
+    {
         if ($this->c2paToolBinary === null) {
-            error_log('[c2pa] c2patool not installed, falling back to sidecar for ' . $imagePath);
+            error_log('[c2pa] c2patool not installed; embed skipped for ' . $srcPath);
 
-            return $this->sidecar($signedManifest, $imagePath);
+            return null;
+        }
+        if (!is_readable($srcPath) || !self::isEmbeddableFormat($srcPath)) {
+            return null;
         }
 
-        $outputPath = preg_replace('/\.jpe?g$/i', '.c2pa.jpg', $imagePath) ?: ($imagePath . '.c2pa.jpg');
-        if ($outputPath === $imagePath) {
-            $outputPath = $imagePath . '.c2pa.jpg';
+        if ($destPath === null) {
+            $ext = strtolower(pathinfo($srcPath, PATHINFO_EXTENSION));
+            $destPath = preg_replace('/\.[^.\/]+$/', '.c2pa.' . $ext, $srcPath) ?: ($srcPath . '.c2pa.' . $ext);
+            if ($destPath === $srcPath) {
+                $destPath = $srcPath . '.c2pa.' . $ext;
+            }
         }
 
-        $manifestPath = tempnam(sys_get_temp_dir(), 'c2pa-manifest-') ?: ('/tmp/c2pa-manifest-' . bin2hex(random_bytes(4)));
-        file_put_contents($manifestPath, ManifestBuilder::toCanonicalJson($signedManifest));
+        $manifestPath = tempnam(sys_get_temp_dir(), 'c2pa-manifest-') ?: (sys_get_temp_dir() . '/c2pa-manifest-' . bin2hex(random_bytes(4)));
+        if (@file_put_contents($manifestPath, ManifestBuilder::toCanonicalJson($manifest)) === false) {
+            error_log('[c2pa] could not stage manifest for embed of ' . $srcPath);
+
+            return null;
+        }
+
+        if (is_file($destPath)) {
+            @unlink($destPath);
+        }
 
         $cmd = sprintf(
-            '%s %s --manifest %s --output %s 2>&1',
+            '%s %s --manifest %s --output %s --force 2>&1',
             escapeshellcmd($this->c2paToolBinary),
-            escapeshellarg($imagePath),
+            escapeshellarg($srcPath),
             escapeshellarg($manifestPath),
-            escapeshellarg($outputPath),
+            escapeshellarg($destPath),
         );
 
         $output = [];
@@ -347,21 +374,171 @@ final class C2paService
         exec($cmd, $output, $exit);
         @unlink($manifestPath);
 
-        if ($exit !== 0 || !is_readable($outputPath)) {
-            error_log('[c2pa] c2patool embed failed (exit ' . $exit . '); falling back to sidecar for ' . $imagePath . ': ' . implode(' | ', $output));
+        if ($exit !== 0 || !is_readable($destPath)) {
+            error_log('[c2pa] c2patool embed failed (exit ' . $exit . ') for ' . $srcPath . ': ' . implode(' | ', $output));
 
-            return $this->sidecar($signedManifest, $imagePath);
+            return null;
         }
 
-        return $outputPath;
+        return $destPath;
     }
 
     /**
-     * Persist a signed manifest to ahg_c2pa_manifest. Best-effort - skips
-     * silently if the table does not exist yet.
+     * Embed a manifest in a JPEG via c2patool, falling back to a sidecar on any
+     * degrade. Always returns a path (embedded .c2pa.jpg or .c2pa.json sidecar).
      *
      * @param array<string,mixed> $signedManifest
-     * @return int|null inserted row id, or null if persistence skipped/failed
+     */
+    public function embedInJpeg(string $imagePath, array $signedManifest): string
+    {
+        if (!is_readable($imagePath)) {
+            throw new RuntimeException("C2paService: input image not readable: {$imagePath}");
+        }
+
+        return $this->embed($imagePath, $signedManifest) ?? $this->sidecar($signedManifest, $imagePath);
+    }
+
+    /**
+     * Embed the signed manifest INSIDE a PDF as a C2PA associated file
+     * (/AFRelationship /C2PA_Manifest) via an append-only incremental update.
+     * Original bytes are untouched. Returns null (caller falls back to a
+     * sidecar) for anything it cannot modify safely: xref streams, encrypted,
+     * already-signed or non-trivial catalogs. The output is round-tripped.
+     *
+     * @param array<string,mixed> $signedManifest
+     */
+    public function embedInPdf(string $srcPath, array $signedManifest, ?string $destPath = null): ?string
+    {
+        if (!is_readable($srcPath)) {
+            return null;
+        }
+        $pdf = @file_get_contents($srcPath);
+        if ($pdf === false || strncmp($pdf, '%PDF-', 5) !== 0) {
+            return null;
+        }
+
+        if (!preg_match_all('/startxref\s+(\d+)\s+%%EOF/s', $pdf, $sx) || empty($sx[1])) {
+            return null;
+        }
+        $prevStart = (int) end($sx[1]);
+        if (substr($pdf, $prevStart, 4) !== 'xref') {
+            return null;
+        }
+        if (!preg_match('/trailer\s*<<(.*?)>>\s*startxref/s', $pdf, $tm)) {
+            return null;
+        }
+        $trailer = $tm[1];
+        if (stripos($trailer, '/Encrypt') !== false) {
+            return null;
+        }
+        if (stripos($pdf, '/Type /Sig') !== false || stripos($pdf, '/Type/Sig') !== false
+            || stripos($pdf, '/SigFlags') !== false) {
+            return null;
+        }
+        if (!preg_match('/\/Root\s+(\d+)\s+\d+\s+R/', $trailer, $rm)
+            || !preg_match('/\/Size\s+(\d+)/', $trailer, $szm)) {
+            return null;
+        }
+        $rootNum = (int) $rm[1];
+        $size = (int) $szm[1];
+
+        if (!preg_match('/(?<!\d)' . $rootNum . '\s+0\s+obj\s*<<(.*?)>>\s*endobj/s', $pdf, $cm)) {
+            return null;
+        }
+        $catInner = trim($cm[1]);
+        if ($catInner === '' || preg_match('/\/(Names|AF|Encrypt)\b/', $catInner)
+            || stripos($catInner, '/Pages') === false || strpos($catInner, '<<') !== false) {
+            return null;
+        }
+
+        $bytes = ManifestBuilder::toCanonicalJson($signedManifest);
+        $len = strlen($bytes);
+        $efNum = $size;
+        $fsNum = $size + 1;
+        $newSize = $size + 2;
+
+        $dest = $destPath ?? (preg_replace('/\.pdf$/i', '.c2pa.pdf', $srcPath) ?: $srcPath . '.c2pa.pdf');
+        if ($dest === $srcPath) {
+            $dest = $srcPath . '.c2pa.pdf';
+        }
+
+        $out = rtrim($pdf, "\r\n") . "\n";
+        $off = [];
+
+        $off[$efNum] = strlen($out);
+        $out .= "{$efNum} 0 obj\n<< /Type /EmbeddedFile /Subtype /application#2Fjson /Length {$len} >>\nstream\n"
+              . $bytes . "\nendstream\nendobj\n";
+
+        $off[$fsNum] = strlen($out);
+        $out .= "{$fsNum} 0 obj\n<< /Type /Filespec /F (c2pa.json) /UF (c2pa.json) /AFRelationship /C2PA_Manifest"
+              . " /Desc (C2PA Content Credential) /EF << /F {$efNum} 0 R /UF {$efNum} 0 R >> >>\nendobj\n";
+
+        $off[$rootNum] = strlen($out);
+        $out .= "{$rootNum} 0 obj\n<< {$catInner} /AF [ {$fsNum} 0 R ]"
+              . " /Names << /EmbeddedFiles << /Names [ (c2pa.json) {$fsNum} 0 R ] >> >> >>\nendobj\n";
+
+        ksort($off);
+        $xrefStart = strlen($out);
+        $xref = "xref\n";
+        $nums = array_keys($off);
+        $count = count($nums);
+        for ($i = 0; $i < $count;) {
+            $start = $nums[$i];
+            $group = [$start];
+            while ($i + 1 < $count && $nums[$i + 1] === $nums[$i] + 1) {
+                $group[] = $nums[++$i];
+            }
+            $i++;
+            $xref .= $start . ' ' . count($group) . "\n";
+            foreach ($group as $n) {
+                $xref .= sprintf("%010d %05d n \n", $off[$n], 0);
+            }
+        }
+        $out .= $xref
+              . "trailer\n<< /Size {$newSize} /Root {$rootNum} 0 R /Prev {$prevStart} >>\nstartxref\n{$xrefStart}\n%%EOF\n";
+
+        if (@file_put_contents($dest, $out) === false) {
+            return null;
+        }
+
+        if ($this->extractC2paFromPdf($dest) !== $bytes) {
+            @unlink($dest);
+            error_log('[c2pa] PDF embed self-check failed, falling back to sidecar for ' . $srcPath);
+
+            return null;
+        }
+
+        return $dest;
+    }
+
+    /**
+     * Read the C2PA manifest back out of a PDF's embedded file (counterpart to
+     * embedInPdf). Returns the raw manifest bytes or null.
+     */
+    public function extractC2paFromPdf(string $pdfPath): ?string
+    {
+        $pdf = @file_get_contents($pdfPath);
+        if ($pdf === false) {
+            return null;
+        }
+        if (!preg_match_all('/\/Type\s*\/EmbeddedFile.*?stream\r?\n(.*?)\r?\nendstream/s', $pdf, $m) || empty($m[1])) {
+            return null;
+        }
+
+        return end($m[1]);
+    }
+
+    /**
+     * Persist a signed manifest to ahg_c2pa_manifest. Best-effort - returns null
+     * when the table is absent or the insert fails.
+     *
+     * The PSIS table is shared with ahgMetadataExportPlugin and was created from
+     * that plugin's schema (manifest_label, asset_hash, signature_hex), not the
+     * Heratio one (action, model_id, sidecar_path, claim_signature, ...). Write
+     * every column of both shapes that actually exists, so this works before and
+     * after database/upgrade_heratio_parity.sql is applied.
+     *
+     * @param array<string,mixed> $signedManifest
      */
     public function persist(
         array $signedManifest,
@@ -370,35 +547,113 @@ final class C2paService
         string $modelId,
         ?string $modelVersion,
         ?string $sidecarPath,
+        ?int $digitalObjectId = null,
     ): ?int {
         try {
-            if (!DB::schema()->hasTable('ahg_c2pa_manifest')) {
+            $columns = self::manifestColumns();
+            if ($columns === []) {
                 return null;
             }
 
-            $canonical = ManifestBuilder::toCanonicalJson($signedManifest);
-            $cbor = ManifestBuilder::toCbor($signedManifest);
+            $sig = (string) ($signedManifest['claim_signature']['sig'] ?? '');
+            $kid = (string) ($signedManifest['claim_signature']['kid'] ?? '');
+            $now = date('Y-m-d H:i:s');
 
-            $sig = $signedManifest['claim_signature']['sig'] ?? '';
-            $kid = $signedManifest['claim_signature']['kid'] ?? '';
-
-            return (int) DB::table('ahg_c2pa_manifest')->insertGetId([
-                'information_object_id' => $informationObjectId,
+            $row = [
+                'information_object_id' => $informationObjectId > 0 ? $informationObjectId : null,
+                'digital_object_id'     => $digitalObjectId,
+                'manifest_label'        => (string) ($signedManifest['manifest_label'] ?? ('ahg.atom:' . bin2hex(random_bytes(16)))),
+                'asset_hash'            => (string) ($signedManifest['claim']['asset_hash']['hash'] ?? str_repeat('0', 64)),
                 'action'                => $action,
                 'model_id'              => $modelId,
                 'model_version'         => $modelVersion,
-                'manifest_json'         => $canonical,
-                'manifest_cbor'         => $cbor,
+                'manifest_json'         => ManifestBuilder::toCanonicalJson($signedManifest),
+                'manifest_cbor'         => ManifestBuilder::toCbor($signedManifest),
                 'sidecar_path'          => $sidecarPath,
                 'claim_signature'       => $sig,
+                'signature_hex'         => $sig,
                 'kid'                   => $kid,
-                'created_at'            => date('Y-m-d H:i:s.v'),
-            ]);
+                'created_at'            => $now,
+                'updated_at'            => $now,
+            ];
+
+            return (int) DB::table('ahg_c2pa_manifest')->insertGetId(array_intersect_key($row, array_flip($columns)));
         } catch (Throwable $e) {
             error_log('[c2pa] persist failed: ' . $e->getMessage());
 
             return null;
         }
+    }
+
+    /**
+     * Whether a file is encrypted at rest by the framework EncryptionService
+     * (AHG-ENC-V1/V2 header). Such masters must be hashed and signed as their
+     * plaintext, and never get an embedded copy written beside them.
+     */
+    public static function isEncryptedAtRest(string $path): bool
+    {
+        try {
+            return class_exists(\AtomFramework\Core\Security\EncryptionService::class)
+                && \AtomFramework\Core\Security\EncryptionService::isEncryptedFile($path);
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * Decrypt an encrypted-at-rest file to a private temp copy that keeps the
+     * original basename (so the extension, and with it the MIME type, survives).
+     * The CALLER must unlink the returned path. Throws when decryption fails.
+     */
+    public static function decryptToTemp(string $path): string
+    {
+        $dir = rtrim(sys_get_temp_dir(), '/') . '/c2pa-plain-' . bin2hex(random_bytes(8));
+        if (!@mkdir($dir, 0700) && !is_dir($dir)) {
+            throw new RuntimeException('C2paService: cannot create temp dir for decryption');
+        }
+        $out = $dir . '/' . basename($path);
+        \AtomFramework\Core\Security\EncryptionService::decryptFile($path, $out);
+
+        return $out;
+    }
+
+    /**
+     * Remove a decryptToTemp() copy and its private directory.
+     */
+    public static function removeTemp(?string $path): void
+    {
+        if ($path === null || $path === '') {
+            return;
+        }
+        if (is_file($path)) {
+            @unlink($path);
+        }
+        $dir = dirname($path);
+        if (str_contains(basename($dir), 'c2pa-plain-')) {
+            @rmdir($dir);
+        }
+    }
+
+    /**
+     * Column names of ahg_c2pa_manifest ([] when the table is missing), cached
+     * per process.
+     *
+     * @return list<string>
+     */
+    public static function manifestColumns(): array
+    {
+        static $columns = null;
+        if ($columns === null) {
+            try {
+                $columns = DB::schema()->hasTable('ahg_c2pa_manifest')
+                    ? DB::schema()->getColumnListing('ahg_c2pa_manifest')
+                    : [];
+            } catch (Throwable) {
+                $columns = [];
+            }
+        }
+
+        return $columns;
     }
 
     /**

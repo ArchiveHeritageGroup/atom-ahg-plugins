@@ -59,6 +59,12 @@ final class C2paBootstrap
         require_once $dir . '/C2paSigner.php';
         require_once $dir . '/ManifestBuilder.php';
         require_once __DIR__ . '/Services/C2paService.php';
+        require_once __DIR__ . '/Services/ProvenanceRecordService.php';
+        require_once __DIR__ . '/Services/DigitalObjectProvenanceService.php';
+        require_once __DIR__ . '/Services/ManifestPresenter.php';
+        require_once __DIR__ . '/Services/CoverageReportService.php';
+        require_once __DIR__ . '/Services/AiOutputRecorder.php';
+        require_once __DIR__ . '/Services/RecordAccess.php';
 
         self::$loaded = true;
 
@@ -115,6 +121,31 @@ final class C2paBootstrap
         }
 
         return null;
+    }
+
+    /**
+     * Shared per-process C2paService wired with the signing key when one is
+     * readable (null signer otherwise: build/verify still work).
+     */
+    public static function c2paService(): \AhgC2pa\Services\C2paService
+    {
+        static $service = null;
+        if ($service === null) {
+            self::load();
+            $service = new \AhgC2pa\Services\C2paService(self::loadSigner());
+        }
+
+        return $service;
+    }
+
+    public static function provenanceService(): \AhgC2pa\Services\ProvenanceRecordService
+    {
+        return new \AhgC2pa\Services\ProvenanceRecordService(self::c2paService());
+    }
+
+    public static function digitalObjectService(): \AhgC2pa\Services\DigitalObjectProvenanceService
+    {
+        return new \AhgC2pa\Services\DigitalObjectProvenanceService(self::provenanceService());
     }
 
     /**

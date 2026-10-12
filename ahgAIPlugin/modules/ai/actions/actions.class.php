@@ -74,6 +74,31 @@ class aiActions extends AhgController
         return [hash('sha256', $text), $excerpt];
     }
 
+    /**
+     * Sign a C2PA content-credentials manifest for an AI output on a record
+     * (ahgC2paPlugin; Heratio AiOutputProduced parity). Best effort: a C2PA
+     * fault is logged and never breaks the AI action.
+     *
+     * @param string $action 'ai-generated', or 'ai-assisted' once a human revised it
+     */
+    private function signAiOutputC2pa(int $objectId, string $action, $modelId, $modelVersion, string $output): void
+    {
+        try {
+            if ($objectId <= 0 || '' === $output || !$this->context->getConfiguration()->isPluginEnabled('ahgC2paPlugin')) {
+                return;
+            }
+            // Model fields come from service responses; keep only scalars.
+            $modelId = is_scalar($modelId) && '' !== (string) $modelId ? (string) $modelId : 'unknown';
+            $modelVersion = is_scalar($modelVersion) && '' !== (string) $modelVersion ? (string) $modelVersion : null;
+
+            require_once \sfConfig::get('sf_plugins_dir').'/ahgC2paPlugin/lib/c2pa_bootstrap.php';
+            \C2paBootstrap::load();
+            \AhgC2pa\Services\AiOutputRecorder::record($objectId, $action, $modelId, $modelVersion, $output);
+        } catch (\Throwable $e) {
+            error_log('[ahgAIPlugin] C2PA manifest for AI output failed: '.$e->getMessage());
+        }
+    }
+
     public function executeExtract($request)
     {
         $this->getResponse()->setContentType('application/json');
@@ -144,6 +169,7 @@ class aiActions extends AhgController
             'elapsedMs'      => $result['processing_time_ms'] ?? null,
             'userId'         => $this->userId(),
         ]);
+        $this->signAiOutputC2pa((int) $objectId, 'ai-generated', $result['model'] ?? 'ner', $result['model_version'] ?? null, $entitiesJson);
 
         return $this->renderText(json_encode([
             'success' => true,
@@ -1342,6 +1368,7 @@ class aiActions extends AhgController
             'elapsedMs'      => $result['processing_time_ms'] ?? null,
             'userId'         => $this->userId(),
         ]);
+        $this->signAiOutputC2pa((int) $objectId, 'ai-generated', $result['model'] ?? 'summarizer', $result['model_version'] ?? null, (string) $summary);
 
         return $this->renderText(json_encode([
             'success' => true,
@@ -1507,6 +1534,10 @@ class aiActions extends AhgController
                 'success' => false,
                 'error' => implode('; ', $errors)
             ]));
+        }
+
+        if (!empty($translations)) {
+            $this->signAiOutputC2pa((int) $objectId, 'ai-generated', 'ahg-ai-gateway/translate', $sourceLang.'-'.$targetLang, (string) json_encode($translations, JSON_UNESCAPED_UNICODE));
         }
 
         return $this->renderText(json_encode([
@@ -1711,6 +1742,7 @@ class aiActions extends AhgController
             'elapsedMs'      => $processingTime,
             'userId'         => $this->userId(),
         ]);
+        $this->signAiOutputC2pa((int) $objectId, 'ai-generated', $result['model'] ?? 'trocr-base-handwritten', $result['model_version'] ?? null, (string) json_encode($result, JSON_UNESCAPED_UNICODE));
 
         return $this->renderText(json_encode($response));
     }
@@ -1742,6 +1774,10 @@ class aiActions extends AhgController
 
         $service = new DescriptionService();
         $result = $service->generateSuggestion($objectId, $templateId, $llmConfigId, $userId);
+
+        if (!empty($result['success']) && !empty($result['suggested_text'])) {
+            $this->signAiOutputC2pa((int) $objectId, 'ai-generated', $result['model_used'] ?? null, null, (string) $result['suggested_text']);
+        }
 
         return $this->renderText(json_encode($result));
     }
@@ -1834,6 +1870,10 @@ class aiActions extends AhgController
 
         if ($decision === 'approve') {
             $result = $service->approveSuggestion($suggestionId, $userId, $editedText, $notes);
+            // A human revised the AI text before saving it: sign it as ai-assisted.
+            if (!empty($result['success']) && ($result['status'] ?? '') === 'edited') {
+                $this->signAiOutputC2pa((int) ($result['object_id'] ?? 0), 'ai-assisted', 'llm-description-suggestion', null, (string) ($result['text_saved'] ?? ''));
+            }
         } elseif ($decision === 'reject') {
             $result = $service->rejectSuggestion($suggestionId, $userId, $notes);
         } else {
@@ -1895,6 +1935,7 @@ class aiActions extends AhgController
             }
 
             $description = trim($result['text'] ?? $result['content'] ?? '');
+            $this->signAiOutputC2pa($objectId, 'ai-generated', $result['model'] ?? 'llm', null, $description);
 
             return $this->renderText(json_encode([
                 'success' => true,

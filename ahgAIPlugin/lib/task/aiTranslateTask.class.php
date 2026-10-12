@@ -128,7 +128,7 @@ EOD;
 
     protected function checkLanguagePackage(string $pythonPath, string $from, string $to): bool
     {
-        $script = sfConfig::get('sf_root_dir') . '/atom-ahg-python/src/atom_ahg/resources/translation.py';
+        $script = dirname(__DIR__, 2) . '/lib/python/translation.py';
         if (!file_exists($script)) {
             return false;
         }
@@ -160,7 +160,7 @@ EOD;
 
     protected function installLanguagePackage(string $pythonPath, string $from, string $to): void
     {
-        $script = sfConfig::get('sf_root_dir') . '/atom-ahg-python/src/atom_ahg/resources/translation.py';
+        $script = dirname(__DIR__, 2) . '/lib/python/translation.py';
 
         $cmd = sprintf(
             '%s %s install --from=%s --to=%s 2>&1',
@@ -215,7 +215,7 @@ EOD;
             throw new Exception("No source text in culture: $fromCulture");
         }
 
-        $script = sfConfig::get('sf_root_dir') . '/atom-ahg-python/src/atom_ahg/resources/translation.py';
+        $script = dirname(__DIR__, 2) . '/lib/python/translation.py';
 
         foreach ($fields as $field) {
             $field = trim($field);
