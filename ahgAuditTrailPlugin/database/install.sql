@@ -140,8 +140,10 @@ CREATE TABLE IF NOT EXISTS `ahg_audit_log` (
   KEY `idx_ahg_audit_ip` (`ip_address`),
   KEY `idx_ahg_audit_security` (`security_classification`),
   KEY `idx_ahg_audit_entity` (`entity_type`,`entity_id`),
-  KEY `idx_audit_entry_hash` (`entry_hash`),
-  CONSTRAINT `fk_ahg_audit_log_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+  KEY `idx_audit_entry_hash` (`entry_hash`)
+  -- No foreign key to user: ON DELETE SET NULL blanked user_id on a deleted user's
+  -- entries, rewriting hashed content and breaking the integrity chain (and the
+  -- append-only triggers do not fire on cascades). username keeps the name.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

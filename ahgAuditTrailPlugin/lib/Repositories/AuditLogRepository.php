@@ -52,8 +52,19 @@ class AuditLogRepository
 
     public function getEntityHistory(string $entityType, int $entityId, int $limit = 100): Collection
     {
-        return AuditLog::where('entity_type', $entityType)
-            ->where('entity_id', $entityId)
+        // Actions taken from a record's own pages (extended rights, ICIP labels and
+        // notices...) are logged under their module as entity_type, with the record's
+        // slug. Matching on type alone left a record's history showing only views.
+        $slug = Capsule::table('slug')->where('object_id', $entityId)->value('slug');
+
+        // Those rows carry the record's id too, so filter on the indexed entity_id first.
+        return AuditLog::where('entity_id', $entityId)
+            ->where(function ($q) use ($entityType, $slug) {
+                $q->where('entity_type', $entityType);
+                if ($slug) {
+                    $q->orWhere('entity_slug', $slug);
+                }
+            })
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();

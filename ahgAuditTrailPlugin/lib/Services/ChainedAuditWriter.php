@@ -125,7 +125,7 @@ class ChainedAuditWriter
      *
      * @return array{sealed:bool,intact:bool,broken_id:?int,reason:?string,checked:int,total:int}
      */
-    public static function verifyChain(): array
+    public static function verifyChain(?int $window = null): array
     {
         $state = DB::table('ahg_audit_chain_state')->where('id', 1)->first();
         if (!$state) {
@@ -133,9 +133,29 @@ class ChainedAuditWriter
                 'reason' => 'chain not sealed yet', 'checked' => 0, 'total' => 0];
         }
 
-        $rows = AuditLog::whereNotNull('entry_hash')->orderBy('id')->get();
-        $total = count($rows);
+        // Streamed in id order, a batch at a time. This was ->get() of every chained
+        // row, which on a real log (PSIS: 6 million rows) exhausted a 4 GB memory limit
+        // and returned 500 from both the web page and audit:chain.
+        //
+        // $window: verify only the most recent N entries, linked from the entry just
+        // before them, plus the chain tip. Tampering inside the window or a deleted tip
+        // is caught in seconds; the full chain is the CLI's job (audit:chain).
+        // Stop at the tip recorded in the state row read above. Entries keep arriving
+        // while this runs (PSIS writes about one a second), and checking past that tip
+        // compared the newest hash against an older last_hash: a false "tip mismatch".
+        $tipId = (int) $state->last_audit_id;
+        $total = AuditLog::whereNotNull('entry_hash')->where('id', '<=', $tipId)->count();
         $expectedPrev = $state->genesis_hash;
+        $fromId = 0;
+        if ($window && $total > $window) {
+            $boundary = DB::table('ahg_audit_log')->whereNotNull('entry_hash')->where('id', '<=', $tipId)
+                ->orderByDesc('id')->skip($window)->first(['id', 'entry_hash']);
+            if ($boundary) {
+                $fromId = (int) $boundary->id;
+                $expectedPrev = $boundary->entry_hash;
+            }
+        }
+        $rows = AuditLog::whereNotNull('entry_hash')->where('id', '>', $fromId)->where('id', '<=', $tipId)->lazyById(2000);
         $checked = 0;
 
         // Cryptographic seal verification (#5): verify each row's Ed25519
@@ -186,7 +206,7 @@ class ChainedAuditWriter
         }
 
         return ['sealed' => true, 'intact' => true, 'broken_id' => null, 'reason' => null,
-            'checked' => $checked, 'total' => $total,
+            'checked' => $checked, 'total' => $total, 'partial' => $fromId > 0,
             'signed' => $signed, 'sig_verified' => $sigVerified, 'sig_failed' => $sigFailed,
             'first_sig_fail_id' => $firstSigFailId];
     }

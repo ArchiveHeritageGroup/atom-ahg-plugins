@@ -12,7 +12,12 @@
     <div class="card border-success"><div class="card-body text-center py-5">
         <div class="display-1 text-success mb-3"><i class="fas fa-shield-halved"></i></div>
         <h3 class="text-success"><?php echo __('Chain intact'); ?></h3>
-        <p class="mb-0"><?php echo __('%1% chained entries verified — no tampering detected.', ['%1%' => (int) $r['checked']]); ?></p>
+        <?php if (!empty($r['partial'])): ?>
+          <p class="mb-0"><?php echo __('The most recent %1% of %2% chained entries verified, and the chain tip - no tampering detected.', ['%1%' => number_format((int) $r['checked']), '%2%' => number_format((int) $r['total'])]); ?></p>
+          <p class="small text-muted mb-0"><?php echo __('The full chain is verified from the command line with php symfony audit:chain.'); ?></p>
+        <?php else: ?>
+          <p class="mb-0"><?php echo __('%1% chained entries verified - no tampering detected.', ['%1%' => number_format((int) $r['checked'])]); ?></p>
+        <?php endif; ?>
     </div></div>
     <?php else: ?>
     <div class="card border-danger"><div class="card-body text-center py-5">

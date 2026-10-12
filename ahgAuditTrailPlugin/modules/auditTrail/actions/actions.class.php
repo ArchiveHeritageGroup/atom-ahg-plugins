@@ -299,7 +299,9 @@ class auditTrailActions extends AhgController
         $this->checkAdmin();
         $this->initFramework();
 
-        $days = (int) $request->getParameter('days', 30);
+        // 7 by default: each period scans every row in it, and on PSIS 30 days is ~2.5M
+        // rows and over 40 seconds. 30 and 90 stay available from the page.
+        $days = (int) $request->getParameter('days', 7);
         $fromDate = \Carbon\Carbon::now()->subDays($days);
         $toDate = \Carbon\Carbon::now();
 
@@ -446,6 +448,13 @@ class auditTrailActions extends AhgController
         if ($request->getParameter('entity_type')) {
             $filters['entity_type'] = $request->getParameter('entity_type');
         }
+        // The rest of the browse filters. Export ignored them (username above all), so
+        // "export what this user did" exported everyone's most recent 10,000 entries.
+        foreach (['user_id', 'username', 'status', 'ip_address', 'security_classification'] as $k) {
+            if ($request->getParameter($k)) {
+                $filters[$k] = $request->getParameter($k);
+            }
+        }
 
         $auditRepo = new \AtoM\Framework\Plugins\AuditTrail\Repositories\AuditLogRepository();
         $this->logs = $auditRepo->getFiltered($filters, 10000, 1);
@@ -512,6 +521,8 @@ class auditTrailActions extends AhgController
         $this->checkAdmin();
         require_once $this->config('sf_plugins_dir') . '/ahgAuditTrailPlugin/lib/Services/ChainedAuditWriter.php';
 
-        $this->result = \AtoM\Framework\Plugins\AuditTrail\Services\ChainedAuditWriter::verifyChain();
+        // The full chain takes minutes on a large log; the page checks the most recent
+        // entries and the tip, and `php symfony audit:chain` verifies everything.
+        $this->result = \AtoM\Framework\Plugins\AuditTrail\Services\ChainedAuditWriter::verifyChain(50000);
     }
 }

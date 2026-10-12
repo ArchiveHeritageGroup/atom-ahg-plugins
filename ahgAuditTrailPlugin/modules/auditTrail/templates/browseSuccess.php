@@ -98,11 +98,20 @@
   </div>
 <?php endif; ?>
 
+<?php
+// Export what is on screen: carry the active filters into the export links.
+$exportFilters = [];
+foreach (['filter_action', 'entity_type', 'user_id', 'username', 'status', 'ip_address', 'security_classification', 'from_date', 'to_date'] as $k) {
+    if ('' !== (string) $sf_request->getParameter($k, '')) {
+        $exportFilters[$k] = (string) $sf_request->getParameter($k);
+    }
+}
+?>
 <div class="d-flex justify-content-between align-items-center mb-3">
   <span class="text-muted"><?php echo __('Showing %1% to %2% of %3% results', ['%1%' => $pagerRaw['from'], '%2%' => $pagerRaw['to'], '%3%' => $pagerRaw['total']]) ?></span>
   <div class="btn-group btn-group-sm">
-    <a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'export', 'format' => 'csv']) ?>" class="btn btn-outline-secondary"><?php echo __('Export CSV') ?></a>
-    <a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'export', 'format' => 'json']) ?>" class="btn btn-outline-secondary"><?php echo __('Export JSON') ?></a>
+    <a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'export', 'format' => 'csv'] + $exportFilters) ?>" class="btn btn-outline-secondary"><?php echo __('Export CSV') ?></a>
+    <a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'export', 'format' => 'json'] + $exportFilters) ?>" class="btn btn-outline-secondary"><?php echo __('Export JSON') ?></a>
   </div>
 </div>
 
