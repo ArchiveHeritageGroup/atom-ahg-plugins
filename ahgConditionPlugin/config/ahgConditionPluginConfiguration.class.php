@@ -31,6 +31,7 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
 
         // Condition photo routes - require numeric ID
         $router->any('condition_check_view', '/condition/check/:id/view', 'view', ['id' => '\d+']);
+        $router->any('condition_check_edit', '/condition/check/:id/edit', 'edit', ['id' => '\d+|new']);
         $router->any('condition_photos', '/condition/check/:id/photos', 'photos', ['id' => '\d+|new']);
         $router->any('condition_annotate', '/condition/photo/:id/annotate', 'annotate', ['id' => '\d+']);
         $router->any('condition_annotation_get', '/condition/annotation/get', 'getAnnotation');

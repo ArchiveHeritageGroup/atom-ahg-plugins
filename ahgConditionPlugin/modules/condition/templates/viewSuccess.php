@@ -7,6 +7,7 @@ $ratingColors = [
     'good' => 'info', 
     'fair' => 'warning',
     'poor' => 'danger',
+    'critical' => 'danger',
     'unacceptable' => 'dark'
 ];
 $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
@@ -45,7 +46,7 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
             </span>
             <br>
             <?php if ($check->slug): ?>
-            <a href="/<?php echo $check->slug ?>/condition" class="btn btn-outline-primary btn-sm">
+            <a href="/condition/check/<?php echo (int) $check->id ?>/edit" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-edit me-1"></i> Edit
             </a>
             <?php endif ?>
@@ -213,7 +214,9 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
             <?php endif ?>
 
             <!-- Notes Section -->
-            <?php if ($check->condition_description || $check->hazards_noted || $check->recommendations || $check->condition_note): ?>
+            <?php if ($check->condition_description || $check->hazards_noted || $check->recommendations || $check->condition_note
+                || $check->technical_assessment || $check->environment_recommendation || $check->handling_recommendation
+                || $check->display_recommendation || $check->storage_recommendation || $check->packing_recommendation): ?>
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Notes & Recommendations</h5>
@@ -240,6 +243,22 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
                     </div>
                     <?php endif ?>
                     
+                    <?php if ($check->technical_assessment): ?>
+                    <div class="mb-3">
+                        <strong>Technical Assessment:</strong>
+                        <p class="mb-0"><?php echo nl2br(esc_entities($check->technical_assessment)) ?></p>
+                    </div>
+                    <?php endif ?>
+
+                    <?php foreach (['environment_recommendation' => 'Environment', 'handling_recommendation' => 'Handling', 'display_recommendation' => 'Display', 'storage_recommendation' => 'Storage', 'packing_recommendation' => 'Packing and Transport'] as $k => $label): ?>
+                    <?php if ($check->$k): ?>
+                    <div class="mb-3">
+                        <strong><?php echo __($label) ?>:</strong>
+                        <p class="mb-0"><?php echo nl2br(esc_entities($check->$k)) ?></p>
+                    </div>
+                    <?php endif ?>
+                    <?php endforeach ?>
+
                     <?php if ($check->condition_note): ?>
                     <div class="mb-0">
                         <strong>Additional Notes:</strong>
@@ -297,7 +316,7 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
                 </div>
                 <div class="card-body d-grid gap-2">
                     <?php if ($check->slug): ?>
-                    <a href="/<?php echo $check->slug ?>/condition" class="btn btn-primary">
+                    <a href="/condition/check/<?php echo (int) $check->id ?>/edit" class="btn btn-primary">
                         <i class="fas fa-edit me-1"></i> Edit Condition Check
                     </a>
                     <?php endif ?>

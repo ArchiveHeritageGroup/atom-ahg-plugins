@@ -72,19 +72,10 @@ class conditionActions extends AhgController
         $checkIdParam = $request->getParameter('id');
         $objectId = (int) $request->getParameter('object_id');
         
-        // Handle "new" condition check
+        // A new check starts on the form; it is created when the form is saved
+        // (this used to insert an empty check on a plain GET).
         if ($checkIdParam === 'new' && $objectId) {
-            // Create a new condition check
-            $newId = DB::table('spectrum_condition_check')->insertGetId([
-                'object_id' => $objectId,
-                'condition_check_reference' => 'CC-' . date('Ymd') . '-' . $objectId,
-                'check_date' => date('Y-m-d'),
-                'overall_condition' => 'pending', 'checked_by' => 'System',
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-            
-            // Redirect to the new check
-            $this->redirect('/condition/check/' . $newId . '/photos');
+            $this->redirect('/condition/check/new/edit?object_id=' . $objectId);
         }
         
         $this->checkId = (int) $checkIdParam;
@@ -504,6 +495,125 @@ class conditionActions extends AhgController
         }
 
         $this->latestCondition = !empty($this->conditions) ? $this->conditions[0] : null;
+    }
+
+    /**
+     * Record or edit a condition check.
+     *
+     * There was no way to fill in a condition check: "Edit Condition Check" went back
+     * to the object's list, and "New Condition Check" created an empty check
+     * ("checked by System", rating pending) the moment the link was opened. A check
+     * is now created only when this form is saved, and every assessment field the
+     * table holds can be entered and corrected here.
+     */
+    public function executeEdit($request)
+    {
+        $idParam = $request->getParameter('id');
+        $isNew = 'new' === $idParam;
+
+        if ($isNew) {
+            $objectId = (int) $request->getParameter('object_id');
+            $this->check = null;
+        } else {
+            $this->check = DB::table('spectrum_condition_check')->where('id', (int) $idParam)->first();
+            if (!$this->check) {
+                $this->forward404('Condition check not found');
+            }
+            $objectId = (int) $this->check->object_id;
+        }
+
+        $this->object = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i', function ($j) {
+                $j->on('i.id', '=', 'io.id')->where('i.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->leftJoin('slug as s', 's.object_id', '=', 'io.id')
+            ->where('io.id', $objectId)
+            ->select('io.id', 'io.identifier', 'i.title', 's.slug')
+            ->first();
+        if (!$this->object) {
+            $this->forward404('Object not found');
+        }
+
+        $this->isNew = $isNew;
+        $this->ratings = DB::table('condition_vocabulary')->where('vocabulary_type', 'condition')->where('is_active', 1)->orderBy('sort_order')->pluck('display_name', 'code')->all();
+        $this->priorities = DB::table('condition_vocabulary')->where('vocabulary_type', 'priority')->where('is_active', 1)->orderBy('sort_order')->pluck('display_name', 'code')->all();
+        $this->errors = [];
+
+        $fields = ['check_date', 'check_reason', 'checked_by', 'overall_condition', 'completeness', 'condition_description',
+            'hazards_noted', 'technical_assessment', 'recommendations', 'treatment_priority', 'next_check_date',
+            'environment_recommendation', 'handling_recommendation', 'display_recommendation', 'storage_recommendation',
+            'packing_recommendation', 'condition_note'];
+
+        if ($request->isMethod('post')) {
+            $data = [];
+            foreach ($fields as $k) {
+                $v = trim((string) $request->getParameter($k, ''));
+                $data[$k] = '' === $v ? null : $v;
+            }
+
+            if (empty($data['check_date'])) {
+                $this->errors['check_date'] = 'Enter the date of the check.';
+            }
+            if (empty($data['checked_by'])) {
+                $this->errors['checked_by'] = 'Enter who carried out the check.';
+            }
+            if (empty($data['overall_condition']) || !isset($this->ratings[$data['overall_condition']])) {
+                $this->errors['overall_condition'] = 'Choose the overall condition.';
+            }
+            if (!empty($data['treatment_priority']) && !isset($this->priorities[$data['treatment_priority']])) {
+                $this->errors['treatment_priority'] = 'Choose a treatment priority from the list.';
+            }
+            if (!empty($data['next_check_date']) && !empty($data['check_date']) && $data['next_check_date'] < $data['check_date']) {
+                $this->errors['next_check_date'] = 'The next check is before this check.';
+            }
+
+            if ($this->errors) {
+                $this->values = $data;
+
+                return sfView::SUCCESS;
+            }
+
+            // Mirrors kept in step: other screens and the exported report read
+            // condition_rating and recommended_treatment rather than these fields.
+            $data['condition_rating'] = $data['overall_condition'];
+            $data['recommended_treatment'] = $data['recommendations'];
+            $data['updated_at'] = date('Y-m-d H:i:s');
+
+            if ($isNew) {
+                $base = 'CC-' . date('Ymd', strtotime($data['check_date'])) . '-' . $objectId;
+                $ref = $base;
+                for ($n = 2; DB::table('spectrum_condition_check')->where('condition_check_reference', $ref)->exists(); ++$n) {
+                    $ref = $base . '-' . $n;
+                }
+                $id = DB::table('spectrum_condition_check')->insertGetId($data + [
+                    'object_id' => $objectId,
+                    'condition_check_reference' => $ref,
+                    'condition_reference' => $ref,
+                    'photo_count' => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'created_by' => $this->getUser()->getAttribute('user_id'),
+                ]);
+                $this->getUser()->setFlash('notice', 'Condition check ' . $ref . ' recorded.');
+            } else {
+                $id = (int) $this->check->id;
+                DB::table('spectrum_condition_check')->where('id', $id)->update($data);
+                $this->getUser()->setFlash('notice', 'Condition check updated.');
+            }
+
+            $this->redirect('/condition/check/' . $id . '/view');
+        }
+
+        if ($isNew) {
+            $userId = (int) $this->getUser()->getAttribute('user_id');
+            $user = DB::table('user')->where('id', $userId)->value('username');
+            $this->values = ['check_date' => date('Y-m-d'), 'checked_by' => $user];
+        } else {
+            $this->values = [];
+            foreach ($fields as $k) {
+                $this->values[$k] = $this->check->{$k} ?? null;
+            }
+            $this->values['check_date'] = $this->check->check_date ? substr($this->check->check_date, 0, 10) : null;
+        }
     }
 
     /**

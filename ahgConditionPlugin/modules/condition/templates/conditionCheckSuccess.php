@@ -25,7 +25,7 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
         <i class="fas fa-arrow-left me-2"></i><?php echo __('Back') ?>
       </a>
       <?php if ($sf_user->isAuthenticated()): ?>
-      <a href="<?php echo url_for('@condition_photos?id=new') ?>?object_id=<?php echo $resource->id ?>" class="btn btn-primary">
+      <a href="/condition/check/new/edit?object_id=<?php echo (int) $resource->id ?>" class="btn btn-primary">
         <i class="fas fa-plus me-2"></i><?php echo __('New Condition Check') ?>
       </a>
       <?php endif; ?>
@@ -47,7 +47,7 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
         <div class="row">
           <div class="col-md-3">
             <strong><?php echo __('Date') ?>:</strong><br>
-            <?php echo esc_entities($latestCondition->check_date ?? 'N/A') ?>
+            <?php echo $latestCondition->check_date ? date('j M Y', strtotime($latestCondition->check_date)) : 'N/A' ?>
           </div>
           <div class="col-md-3">
             <strong><?php echo __('Status') ?>:</strong><br>
@@ -64,7 +64,7 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
           </div>
           <div class="col-md-3">
             <strong><?php echo __('Assessor') ?>:</strong><br>
-            <?php echo esc_entities($latestCondition->assessor ?? 'N/A') ?>
+            <?php echo esc_entities($latestCondition->checked_by ?: 'N/A') ?>
           </div>
           <div class="col-md-3">
             <a href="<?php echo url_for('@condition_photos?id=' . $latestCondition->id) ?>" class="btn btn-outline-primary btn-sm">
@@ -131,7 +131,8 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
                       <span class="badge <?php echo $wfBadge ?>"><?php echo esc_entities(ucfirst(str_replace('_', ' ', $wfState))) ?></span>
                     </td>
                     <td><?php echo esc_entities($condition->checked_by ?? '-') ?></td>
-                    <td><?php echo esc_entities(mb_substr($condition->condition_note ?? '', 0, 50)) ?><?php echo mb_strlen($condition->condition_note ?? '') > 50 ? '...' : '' ?></td>
+                    <?php $note = $condition->condition_description ?: ($condition->condition_note ?? ''); ?>
+                    <td><?php echo esc_entities(mb_substr($note, 0, 50)) ?><?php echo mb_strlen($note) > 50 ? '...' : '' ?></td>
                     <td>
                       <div class="btn-group btn-group-sm">
                         <a href="/condition/check/<?php echo $condition->id ?>/view"

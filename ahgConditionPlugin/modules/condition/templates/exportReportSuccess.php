@@ -64,7 +64,7 @@ $photoTypes = [
     <table class="meta-table">
         <tr>
             <td>Reference</td>
-            <td><?php echo esc_entities($conditionCheck->condition_reference ?: 'CC-' . $conditionCheck->id) ?></td>
+            <td><?php echo esc_entities($conditionCheck->condition_check_reference ?: $conditionCheck->condition_reference ?: 'CC-' . $conditionCheck->id) ?></td>
             <td>Date</td>
             <td><?php echo date('j F Y', strtotime($conditionCheck->check_date)) ?></td>
         </tr>
@@ -80,6 +80,31 @@ $photoTypes = [
         </tr>
     </table>
     
+    <?php if ($conditionCheck->completeness || $conditionCheck->treatment_priority || $conditionCheck->next_check_date): ?>
+    <table class="meta-table">
+        <tr>
+            <td>Completeness</td>
+            <td><?php echo esc_entities(ucfirst($conditionCheck->completeness ?: '-')) ?></td>
+            <td>Treatment Priority</td>
+            <td><?php echo esc_entities(ucfirst($conditionCheck->treatment_priority ?: '-')) ?></td>
+        </tr>
+        <tr>
+            <td>Next Check</td>
+            <td colspan="3"><?php echo $conditionCheck->next_check_date ? date('j F Y', strtotime($conditionCheck->next_check_date)) : '-' ?></td>
+        </tr>
+    </table>
+    <?php endif ?>
+
+    <?php // The assessment itself: the report carried only the notes and treatment before. ?>
+    <?php foreach (['condition_description' => 'Condition Description', 'hazards_noted' => 'Hazards Noted', 'technical_assessment' => 'Technical Assessment'] as $k => $label): ?>
+    <?php if (!empty($conditionCheck->$k)): ?>
+    <div class="section">
+        <h2><?php echo $label ?></h2>
+        <p><?php echo nl2br(esc_entities($conditionCheck->$k)) ?></p>
+    </div>
+    <?php endif ?>
+    <?php endforeach ?>
+
     <?php if ($conditionCheck->condition_note): ?>
     <div class="section">
         <h2>Condition Notes</h2>
@@ -87,10 +112,23 @@ $photoTypes = [
     </div>
     <?php endif ?>
     
-    <?php if ($conditionCheck->recommended_treatment): ?>
+    <?php $treatment = $conditionCheck->recommended_treatment ?: $conditionCheck->recommendations; ?>
+    <?php if ($treatment): ?>
     <div class="section">
         <h2>Recommended Treatment</h2>
-        <p><?php echo nl2br(esc_entities($conditionCheck->recommended_treatment)) ?></p>
+        <p><?php echo nl2br(esc_entities($treatment)) ?></p>
+    </div>
+    <?php endif ?>
+
+    <?php $care = array_filter(['Environment' => $conditionCheck->environment_recommendation, 'Handling' => $conditionCheck->handling_recommendation, 'Display' => $conditionCheck->display_recommendation, 'Storage' => $conditionCheck->storage_recommendation, 'Packing and Transport' => $conditionCheck->packing_recommendation]); ?>
+    <?php if ($care): ?>
+    <div class="section">
+        <h2>Care Recommendations</h2>
+        <table class="meta-table">
+            <?php foreach ($care as $label => $text): ?>
+            <tr><td><?php echo $label ?></td><td colspan="3"><?php echo nl2br(esc_entities($text)) ?></td></tr>
+            <?php endforeach ?>
+        </table>
     </div>
     <?php endif ?>
     
