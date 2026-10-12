@@ -31,11 +31,14 @@ class ResearchJournalService
 
     // ── Journals ──────────────────────────────────────────────────────────
 
-    public function listJournals(?string $kind = null): array
+    public function listJournals(?string $kind = null, ?int $researcherId = null): array
     {
         $q = DB::table('research_journal')->orderByDesc('updated_at');
         if ($kind !== null) {
             $q->where('kind', $kind);
+        }
+        if ($researcherId !== null) {
+            $q->where('researcher_id', $researcherId);
         }
 
         return array_map(fn ($j) => (array) $j, $q->get()->all());

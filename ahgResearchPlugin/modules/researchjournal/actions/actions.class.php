@@ -35,6 +35,14 @@ class researchjournalActions extends AhgController
         $this->unreadNotifications = 0;
     }
 
+    /** A journal (and its articles) is its owner's; administrators may open any. Others get a 404. */
+    protected function requireOwn(?array $journal, $researcher): void
+    {
+        if (!$journal || ((int) $journal['researcher_id'] !== (int) $researcher->id && !$this->getUser()->isAdministrator())) {
+            $this->forward404('Journal not found');
+        }
+    }
+
     /** Resolve the current researcher row, or redirect to register / login. */
     protected function requireResearcher()
     {
@@ -54,9 +62,11 @@ class researchjournalActions extends AhgController
 
     public function executeIndex($request)
     {
-        $this->requireResearcher();
-        $this->publications = $this->journal->listJournals(ResearchJournalService::KIND_PUBLICATION);
-        $this->manuscripts  = $this->journal->listJournals(ResearchJournalService::KIND_MANUSCRIPT);
+        $researcher = $this->requireResearcher();
+        // A researcher's journals and manuscripts are their own; administrators see all.
+        $owner = $this->getUser()->isAdministrator() ? null : (int) $researcher->id;
+        $this->publications = $this->journal->listJournals(ResearchJournalService::KIND_PUBLICATION, $owner);
+        $this->manuscripts  = $this->journal->listJournals(ResearchJournalService::KIND_MANUSCRIPT, $owner);
         $this->setTemplate('index');
     }
 
@@ -67,9 +77,7 @@ class researchjournalActions extends AhgController
 
         if ($id) {
             $journal = $this->journal->getJournal($id);
-            if (!$journal) {
-                $this->forward404('Journal not found');
-            }
+            $this->requireOwn($journal, $researcher);
             $kind = $journal['kind'];
         } else {
             $journal = null;
@@ -99,12 +107,10 @@ class researchjournalActions extends AhgController
 
     public function executeShow($request)
     {
-        $this->requireResearcher();
+        $researcher = $this->requireResearcher();
         $id = (int) $request->getParameter('id');
         $journal = $this->journal->getJournal($id);
-        if (!$journal) {
-            $this->forward404('Journal not found');
-        }
+        $this->requireOwn($journal, $researcher);
 
         if ($request->isMethod('post')) {
             $this->handleShowPost($request, $id);
@@ -162,9 +168,41 @@ class researchjournalActions extends AhgController
 
     // ── Articles / manuscript builder ───────────────────────────────────────
 
+    /** Download an article as Word, ready to submit to its target journal. Owner (or administrator) only. */
+    public function executeExportArticle($request)
+    {
+        $researcher = $this->requireResearcher();
+        $article = $this->journal->getArticle((int) $request->getParameter('id'));
+        if (!$article) {
+            $this->forward404('Article not found');
+        }
+        $journal = $this->journal->getJournal((int) $article['journal_id']);
+        $this->requireOwn($journal, $researcher);
+
+        $target = null;
+        $targetId = (int) ($article['target_journal_id'] ?: ($journal['target_journal_id'] ?? 0));
+        if ($targetId) {
+            $target = DB::table('research_target_journal')->where('id', $targetId)->value('title');
+        }
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReportExportService.php';
+        $file = (new \ReportExportService())->exportManuscriptDocx($article, $target);
+
+        $name = trim(preg_replace('/[^A-Za-z0-9]+/', '-', (string) $article['title']), '-') ?: 'manuscript';
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . substr($name, 0, 80) . '.docx"');
+        $response->setHttpHeader('Content-Length', (string) filesize($file));
+        $response->sendHttpHeaders();
+        readfile($file);
+        @unlink($file);
+
+        return sfView::NONE;
+    }
+
     public function executeArticle($request)
     {
-        $this->requireResearcher();
+        $researcher = $this->requireResearcher();
 
         $articleId = (int) $request->getParameter('id');
         $journalId = (int) $request->getParameter('journal_id');
@@ -180,9 +218,7 @@ class researchjournalActions extends AhgController
         }
 
         $journal = $this->journal->getJournal($journalId);
-        if (!$journal) {
-            $this->forward404('Journal not found');
-        }
+        $this->requireOwn($journal, $researcher);
 
         if ($request->isMethod('post')) {
             $action = $request->getParameter('form_action');
@@ -208,8 +244,9 @@ class researchjournalActions extends AhgController
         $this->issues = $this->journal->listIssues($journalId);
         $this->styles = ResearchJournalService::REFERENCE_STYLES;
         $this->targetJournals = $this->journal->targetJournalOptions();
+        // An article with no target of its own is checked against its manuscript's target.
         $this->validation = ($article && $journal['kind'] === ResearchJournalService::KIND_MANUSCRIPT)
-            ? $this->journal->validateManuscript($article)
+            ? $this->journal->validateManuscript(['target_journal_id' => $article['target_journal_id'] ?: ($journal['target_journal_id'] ?? null)] + $article)
             : [];
         $this->setTemplate('article');
     }

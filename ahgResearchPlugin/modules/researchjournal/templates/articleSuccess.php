@@ -3,12 +3,13 @@
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive ?? 'journal', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
 <?php
-$j = is_array($journal_record) ? $journal_record : [];
-$a = is_array($article) ? $article : [];
-$issues = is_array($issues) ? $issues : [];
-$styles = is_array($styles) ? $styles : [];
-$targetJournals = is_array($targetJournals) ? $targetJournals : [];
-$validation = is_array($validation) ? $validation : [];
+// Raw values: is_array() is false for the escaping wrapper, so every list and field came out empty.
+$j = (array) ($sf_data->getRaw('journal_record') ?? []);
+$a = (array) ($sf_data->getRaw('article') ?? []);
+$issues = (array) ($sf_data->getRaw('issues') ?? []);
+$styles = (array) ($sf_data->getRaw('styles') ?? []);
+$targetJournals = (array) ($sf_data->getRaw('targetJournals') ?? []);
+$validation = (array) ($sf_data->getRaw('validation') ?? []);
 $isManuscript = (($j['kind'] ?? '') === 'manuscript');
 $jid = (int) ($j['id'] ?? 0);
 $isNew = empty($a);
@@ -142,6 +143,9 @@ $val = function ($k) use ($a) { return htmlspecialchars((string) ($a[$k] ?? ''))
   <div class="d-flex gap-2">
     <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i><?php echo __('Save article'); ?></button>
     <a href="<?php echo url_for(['module' => 'researchjournal', 'action' => 'show', 'id' => $jid]); ?>" class="btn btn-secondary"><?php echo __('Cancel'); ?></a>
+    <?php if (!$isNew): ?>
+    <a href="<?php echo url_for('@research_journal_article_export?id=' . (int) $a['id']); ?>" class="btn btn-outline-primary"><i class="fas fa-file-word me-1"></i><?php echo $isManuscript ? __('Download for submission (Word)') : __('Download (Word)'); ?></a>
+    <?php endif; ?>
     <?php if (!$isNew): ?>
       <span class="ms-auto"></span>
     <?php endif; ?>

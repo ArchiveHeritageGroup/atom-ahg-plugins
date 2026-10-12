@@ -31,14 +31,15 @@ class ReportExportService
      */
     protected static function ensureVendorClass(string $class): void
     {
-        if (class_exists($class)) {
-            return;
-        }
-
         $autoload = sfConfig::get('sf_root_dir').'/atom-framework/vendor/autoload.php';
 
-        if (is_readable($autoload)) {
+        if (!class_exists($class) && is_readable($autoload)) {
             require_once $autoload;
+        }
+        // PhpWord writes text into XML verbatim unless told to escape it, so one "&"
+        // in a title made the whole .docx unreadable. Escape once, here, for every export.
+        if (class_exists('\\PhpOffice\\PhpWord\\Settings')) {
+            \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
         }
     }
 
@@ -427,6 +428,61 @@ class ReportExportService
     // DOCX GENERATION (PhpWord)
     // =========================================================================
 
+    /**
+     * A manuscript (Journal Builder article) as a Word file for submission:
+     * title, authors, target journal, abstract, keywords, then the body.
+     */
+    public function exportManuscriptDocx(array $article, ?string $targetJournal = null): string
+    {
+        self::ensureVendorClass('\\PhpOffice\\PhpWord\\PhpWord');
+
+        $w = new \PhpOffice\PhpWord\PhpWord();
+        $w->getDocInfo()->setTitle((string) $article['title']);
+        $w->getDocInfo()->setCreator((string) ($article['authors'] ?? ''));
+        $w->setDefaultFontName('Times New Roman');
+        $w->setDefaultFontSize(12);
+        $w->addTitleStyle(1, ['size' => 16, 'bold' => true], ['spaceAfter' => 160]);
+        $w->addTitleStyle(2, ['size' => 13, 'bold' => true], ['spaceBefore' => 200, 'spaceAfter' => 100]);
+        $w->addTitleStyle(3, ['size' => 12, 'bold' => true], ['spaceBefore' => 160, 'spaceAfter' => 80]);
+        $para = ['lineHeight' => 1.5, 'spaceAfter' => 120];
+
+        $sec = $w->addSection();
+        $sec->addTitle((string) $article['title'], 1);
+        if (!empty($article['authors'])) {
+            $sec->addText((string) $article['authors'], ['italic' => true], $para);
+        }
+        if ($targetJournal) {
+            $sec->addText('Submitted to: ' . $targetJournal, ['size' => 10, 'color' => '555555'], $para);
+        }
+        if (!empty($article['abstract'])) {
+            $sec->addTitle('Abstract', 2);
+            $sec->addText((string) $article['abstract'], [], $para);
+        }
+        if (!empty($article['keywords'])) {
+            $kw = $sec->addTextRun($para);
+            $kw->addText('Keywords: ', ['bold' => true]);
+            $kw->addText((string) $article['keywords']);
+        }
+
+        $body = (string) ($article['body_html'] ?? '');
+        try {
+            // Markdown output is plain HTML; PhpWord's parser wants it well-formed.
+            \PhpOffice\PhpWord\Shared\Html::addHtml($sec, '<div>' . $body . '</div>', false, false);
+        } catch (\Throwable $e) {
+            foreach (preg_split('/\n{2,}/', trim(html_entity_decode(strip_tags(str_replace(['</p>', '<br>', '<br/>', '<br />'], ["\n\n", "\n", "\n", "\n"], $body))))) as $p) {
+                $sec->addText(trim($p), [], $para);
+            }
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'manuscript_') . '.docx';
+        \PhpOffice\PhpWord\IOFactory::createWriter($w, 'Word2007')->save($tmp);
+
+        return $tmp;
+    }
+
+    // =========================================================================
+    // =========================================================================
+
     protected function buildDocxFromSections(object $report): string
     {
         self::ensureVendorClass('\\PhpOffice\\PhpWord\\PhpWord');
@@ -628,7 +684,8 @@ class ReportExportService
         // Add remaining text content (stripped of tags)
         $paragraphs = preg_split('/<\/?(?:p|br|div|h[1-6])[^>]*>/i', $html);
         foreach ($paragraphs as $para) {
-            $text = trim(strip_tags($para));
+            // Decode entities: with escaping on, "&amp;" would otherwise print literally.
+            $text = trim(html_entity_decode(strip_tags($para), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
             if ($text) {
                 $docSection->addText($text, [], ['spaceAfter' => 100]);
             }

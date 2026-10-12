@@ -3,10 +3,11 @@
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive ?? 'journal', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
 <?php
-$j = is_array($journal_record) ? $journal_record : [];
+// Raw values: is_array() is false for the escaping wrapper, so every list and field came out empty.
+$j = (array) ($sf_data->getRaw('journal_record') ?? []);
 $isManuscript = ($kind === 'manuscript');
 $isNew = empty($j);
-$targetJournals = is_array($targetJournals) ? $targetJournals : [];
+$targetJournals = (array) ($sf_data->getRaw('targetJournals') ?? []);
 $val = function ($k) use ($j) { return htmlspecialchars((string) ($j[$k] ?? '')); };
 ?>
 <?php slot('title') ?>

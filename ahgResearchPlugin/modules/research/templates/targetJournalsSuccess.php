@@ -7,6 +7,7 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
   <h1 class="mb-0"><i class="fas fa-bullseye text-primary me-2"></i><?php echo __('Where to Publish'); ?>
     <small class="text-muted"><?php echo __('(target-journal directory)'); ?></small></h1>
+  <?php if ($sf_user->isAdministrator()): ?>
   <div class="d-flex gap-2">
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'targetJournalBuilder']); ?>" class="btn btn-primary">
       <i class="fas fa-plus me-1"></i><?php echo __('Add Journal'); ?>
@@ -16,6 +17,7 @@
       <button class="btn btn-outline-secondary"><i class="fas fa-seedling me-1"></i><?php echo __('Seed DHET starter'); ?></button>
     </form>
   </div>
+  <?php endif; ?>
 </div>
 <?php end_slot() ?>
 
@@ -55,7 +57,8 @@ $journals = isset($journals) && is_array($journals) ? $journals
         <th class="text-end"><?php echo __('Actions'); ?></th>
       </tr></thead>
       <tbody>
-        <?php foreach ($journals as $j): ?>
+        <?php // Raw rows: casting the escaping wrapper to an array gave its internals, so every field was blank. ?>
+        <?php foreach ($sf_data->getRaw('journals') as $j): ?>
           <?php $j = (array) $j; ?>
           <tr>
             <td>
@@ -67,11 +70,13 @@ $journals = isset($journals) && is_array($journals) ? $journals
             <td class="small"><?php echo htmlspecialchars((string) ($j['accreditation'] ?? '')); ?></td>
             <td class="small"><?php echo htmlspecialchars($j['reference_style'] ?: '—'); ?></td>
             <td class="text-end">
+              <?php if ($sf_user->isAdministrator()): ?>
               <a href="<?php echo url_for(['module' => 'research', 'action' => 'targetJournalBuilder', 'id' => $j['id']]); ?>" class="btn btn-sm btn-outline-secondary"><?php echo __('Edit'); ?></a>
               <form action="<?php echo url_for(['module' => 'research', 'action' => 'targetJournalDelete', 'id' => $j['id']]); ?>" method="post" class="d-inline"
                     data-ahg-confirm="<?php echo __('Remove from directory?'); ?>">
                 <button class="btn btn-sm btn-outline-danger"><?php echo __('Delete'); ?></button>
               </form>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>

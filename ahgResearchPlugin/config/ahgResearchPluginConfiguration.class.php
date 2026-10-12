@@ -529,6 +529,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
 
         // #115 Journal builder + manuscript workspace (own module)
         $journal = new \AtomFramework\Routing\RouteLoader('researchjournal');
+        $journal->any('research_journal_article_export', '/research/journal-builder/article/export', 'exportArticle');
         $journal->any('research_journal_article', '/research/journal-builder/article', 'article');
         $journal->any('research_journal_show', '/research/journal-builder/view', 'show');
         $journal->any('research_journal_builder', '/research/journal-builder/edit', 'builder');

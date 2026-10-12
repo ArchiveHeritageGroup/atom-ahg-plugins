@@ -19,6 +19,12 @@ class researchTargetJournalBuilderAction extends AhgController
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
+        // The directory is shared and centrally curated: changing it is an administrator's
+        // job, as targetJournalDelete already required. Researchers browse and get suggestions.
+        if (!$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('research/targetJournals');
+        }
 
         require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/TargetJournalService.php';
         $service = new TargetJournalService();

@@ -3,7 +3,7 @@
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive ?? 'targetJournals', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
 
-<?php $journal = isset($journal) && $journal ? (array) $journal : null; ?>
+<?php $journal = isset($journal) && $journal ? (array) $sf_data->getRaw('journal') : null; // the raw row, escaped on output ?>
 
 <?php slot('title') ?>
 <h1 class="mb-0"><i class="fas fa-bullseye text-primary me-2"></i><?php echo $journal ? __('Edit') : __('Add'); ?> <?php echo __('Target Journal'); ?></h1>

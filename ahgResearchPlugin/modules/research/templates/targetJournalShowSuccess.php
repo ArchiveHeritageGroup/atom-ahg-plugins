@@ -3,7 +3,7 @@
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive ?? 'targetJournals', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
 
-<?php $journal = (array) $journal; ?>
+<?php $journal = (array) $sf_data->getRaw('journal'); // the raw row; every value below is escaped on output ?>
 
 <?php slot('title') ?>
 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
@@ -17,7 +17,9 @@
       <?php if (($journal['status'] ?? 'active') !== 'active'): ?> · <span class="badge bg-secondary"><?php echo htmlspecialchars(ucfirst($journal['status'])); ?></span><?php endif; ?>
     </small>
   </div>
+  <?php if ($sf_user->isAdministrator()): ?>
   <a href="<?php echo url_for(['module' => 'research', 'action' => 'targetJournalBuilder', 'id' => $journal['id']]); ?>" class="btn btn-outline-secondary"><?php echo __('Edit'); ?></a>
+  <?php endif; ?>
 </div>
 <?php end_slot() ?>
 

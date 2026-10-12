@@ -8,8 +8,8 @@
 
 <?php slot('content') ?>
 <?php
-$publications = is_array($publications) ? $publications : [];
-$manuscripts  = is_array($manuscripts) ? $manuscripts : [];
+$publications = (array) ($sf_data->getRaw('publications') ?? []);
+$manuscripts  = (array) ($sf_data->getRaw('manuscripts') ?? []);
 $badge = function ($status) {
     $map = ['draft' => 'secondary', 'published' => 'success', 'archived' => 'dark'];
     $cls = $map[$status] ?? 'secondary';
