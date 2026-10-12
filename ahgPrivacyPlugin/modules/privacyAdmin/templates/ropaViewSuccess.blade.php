@@ -42,12 +42,6 @@ $statusClasses = [
         </div>
     </div>
 
-    @if($sf_user->hasFlash('success'))
-    <div class="alert alert-success">{{ $sf_user->getFlash('success') }}</div>
-    @endif
-    @if($sf_user->hasFlash('error'))
-    <div class="alert alert-danger">{{ $sf_user->getFlash('error') }}</div>
-    @endif
 
     @if($activity->rejection_reason)
     <div class="alert alert-warning">

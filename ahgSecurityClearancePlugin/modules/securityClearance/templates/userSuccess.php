@@ -3,7 +3,7 @@
 <div class="row">
   <div class="col-md-12">
 
-    <?php echo link_to_if($sf_user->isAdministrator(), '<h1 class="multiline">'.__('User security clearance').'<span class="sub">'.$user->username.'</span></h1>', url_for(['module' => 'user', 'action' => 'edit', 'slug' => $user->slug]), ['title' => __('Edit user')]); ?>
+    <?php echo link_to_if($sf_user->isAdministrator(), '<h1 class="multiline">'.__('User security clearance').' <span class="sub">'.$user->username.'</span></h1>', url_for(['module' => 'user', 'action' => 'edit', 'slug' => $user->slug]), ['title' => __('Edit user')]); ?>
 
     <?php if ($sf_request->getParameter('success')): ?>
       <div class="alert alert-success alert-dismissible fade show">
@@ -140,16 +140,16 @@
                 <h6 class="mb-0"><i class="fas fa-history me-2"></i><?php echo __('Change History'); ?></h6>
               </div>
               <ul class="list-group list-group-flush">
-                <?php foreach (array_slice($history, 0, 5) as $record): ?>
+                <?php foreach (array_slice((array) $sf_data->getRaw('history'), 0, 5) as $record): ?>
                   <li class="list-group-item small">
                     <div class="d-flex justify-content-between">
                       <span class="badge <?php echo 'revoked' === $record['action'] ? 'bg-danger' : ('granted' === $record['action'] ? 'bg-success' : 'bg-info'); ?>">
-                        <?php echo ucfirst($record['action']); ?>
+                        <?php echo htmlspecialchars(ucfirst($record['action'])); ?>
                       </span>
                       <small class="text-muted"><?php echo date('Y-m-d', strtotime($record['created_at'])); ?></small>
                     </div>
                     <?php if ($record['new_name']): ?>
-                      <small><?php echo ($record['previous_name'] ?? __('None')).' → '.$record['new_name']; ?></small>
+                      <small><?php echo htmlspecialchars(($record['previous_name'] ?? __('None')).' → '.$record['new_name']); ?></small>
                     <?php endif; ?>
                   </li>
                 <?php endforeach; ?>

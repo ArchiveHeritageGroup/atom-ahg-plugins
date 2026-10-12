@@ -18,9 +18,6 @@
             <a href="{{ url_for(['module' => 'privacyAdmin', 'action' => 'consentEdit', 'id' => $consent->id]) }}" class="btn btn-primary ms-3"><i class="fas fa-edit me-1"></i>{{ __('Edit') }}</a>
         </div>
     </div>
-    @if($sf_user->hasFlash('success'))
-    <div class="alert alert-success">{{ $sf_user->getFlash('success') }}</div>
-    @endif
     <div class="row">
         <div class="col-lg-8">
             <div class="card mb-4">

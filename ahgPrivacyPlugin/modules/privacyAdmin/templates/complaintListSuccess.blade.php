@@ -11,9 +11,6 @@
         </div>
     </div>
 
-    @if($sf_user->hasFlash('success'))
-    <div class="alert alert-success">{{ $sf_user->getFlash('success') }}</div>
-    @endif
 
     <!-- Filter -->
     <div class="card mb-4">

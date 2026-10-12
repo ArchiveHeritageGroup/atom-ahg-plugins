@@ -63,7 +63,7 @@ $access = json_decode(json_encode(sfOutputEscaper::unescape($access ?? [])), tru
                                 <i class="fas fa-sign-in-alt me-1"></i> Log In
                             </a>
                         <?php else: ?>
-                            <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'create', 'object_id' => $objectId]); ?>" class="btn btn-primary">
+                            <a href="<?php echo url_for('@access_request_object?type=information_object&id='.(int) $objectId); ?>" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-1"></i> Request Access
                             </a>
                         <?php endif; ?>

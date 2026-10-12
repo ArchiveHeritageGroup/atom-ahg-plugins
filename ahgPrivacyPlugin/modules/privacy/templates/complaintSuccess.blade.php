@@ -11,9 +11,6 @@
 
     <h1 class="h2 mb-4"><i class="fas fa-exclamation-circle me-2 text-warning"></i>{{ __('Lodge a Privacy Complaint') }}</h1>
 
-    @if($sf_user->hasFlash('error'))
-    <div class="alert alert-danger">{{ $sf_user->getFlash('error') }}</div>
-    @endif
 
     <div class="row">
         <div class="col-lg-8">

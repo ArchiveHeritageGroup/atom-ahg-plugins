@@ -14,9 +14,6 @@
         </a>
     </div>
 
-    <?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-    <?php endif; ?>
 
     <!-- PAIA Section Reference -->
     <div class="row mb-4">

@@ -10,19 +10,7 @@
         </ol>
       </nav>
 
-      <?php if ($sf_user->hasFlash('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-          <?php echo $sf_user->getFlash('success'); ?>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      <?php endif; ?>
 
-      <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-          <?php echo $sf_user->getFlash('error'); ?>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      <?php endif; ?>
 
       <!-- Stats Cards -->
       <div class="row mb-4">
@@ -87,14 +75,14 @@
                   <?php foreach ($requests as $req): ?>
                     <tr class="<?php echo $req->urgency === 'critical' ? 'table-danger' : ($req->urgency === 'high' ? 'table-warning' : ''); ?>">
                       <td>
-                        <strong><?php echo htmlspecialchars($req->username); ?></strong>
-                        <br><small class="text-muted"><?php echo htmlspecialchars($req->email); ?></small>
+                        <strong><?php echo $req->username; ?></strong>
+                        <br><small class="text-muted"><?php echo $req->email; ?></small>
                       </td>
                       <td>
                         <?php if ($req->request_type === 'clearance'): ?>
                           <span class="badge bg-secondary"><?php echo $req->current_classification ?? 'None'; ?></span>
                           <i class="fas fa-arrow-right mx-1"></i>
-                          <span class="badge bg-primary"><?php echo htmlspecialchars((string) $req->requested_classification); ?></span>
+                          <span class="badge bg-primary"><?php echo (string) $req->requested_classification; ?></span>
                         <?php else: ?>
                           <?php
                               $scopeLabels = [
@@ -108,7 +96,7 @@
                           ?>
                           <span class="badge bg-info text-dark"><?php echo htmlspecialchars($scopeLabel); ?></span>
                           <?php if ($req->scope_type !== 'all' && $scopeObj && !empty($scopeObj->object_title)): ?>
-                            <div class="small mt-1"><i class="fas fa-file-alt me-1 text-muted"></i><?php echo htmlspecialchars($scopeObj->object_title); ?></div>
+                            <div class="small mt-1"><i class="fas fa-file-alt me-1 text-muted"></i><?php echo $scopeObj->object_title; ?></div>
                           <?php endif; ?>
                         <?php endif; ?>
                       </td>
@@ -122,8 +110,8 @@
                         </span>
                       </td>
                       <td>
-                        <span title="<?php echo htmlspecialchars($req->reason); ?>">
-                          <?php echo htmlspecialchars(substr($req->reason, 0, 50)); ?>
+                        <span title="<?php echo $req->reason; ?>">
+                          <?php echo substr($req->reason, 0, 50); ?>
                           <?php if (strlen($req->reason) > 50): ?>...<?php endif; ?>
                         </span>
                       </td>

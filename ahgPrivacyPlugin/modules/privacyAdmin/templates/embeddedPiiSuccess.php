@@ -6,12 +6,6 @@
         </a>
     </div>
 
-    <?php if ($sf_user->hasFlash('notice')): ?>
-        <div class="alert alert-success"><?php echo $sf_user->getFlash('notice'); ?></div>
-    <?php endif; ?>
-    <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-    <?php endif; ?>
 
     <p class="text-muted">
         <?php echo __('GPS coordinates, people and contact details found in embedded EXIF/IPTC metadata. GPS findings left pending are withheld from public surfaces (IIIF, exports, AI, OCFL) by the redaction gate.'); ?>

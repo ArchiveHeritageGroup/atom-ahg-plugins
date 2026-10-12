@@ -106,13 +106,9 @@ class securityActions extends AhgController
                     ]);
                 
                 // Log the action
-                DB::table('security_access_log')->insert([
-                    'user_id' => $accessRequest->user_id,
-                    'object_id' => $accessRequest->object_id,
-                    'action' => 'access_granted',
-                    'details' => json_encode(['request_id' => $requestId, 'approved_by' => $userId]),
-                    'created_at' => date('Y-m-d H:i:s')
-                ]);
+                // Through logAccess: the direct insert named details, which the table
+                // does not have, and would have broken the audit hash chain anyway.
+                \SecurityClearanceService::logAccess((int) $accessRequest->user_id, $accessRequest->object_id ? (int) $accessRequest->object_id : null, null, null, 'access_granted', true, 'Request #'.$requestId.' approved by user '.$userId.($note ? ': '.$note : ''));
             }
         } catch (\Exception $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
@@ -153,13 +149,9 @@ class securityActions extends AhgController
                     ]);
                 
                 // Log the action
-                DB::table('security_access_log')->insert([
-                    'user_id' => $accessRequest->user_id,
-                    'object_id' => $accessRequest->object_id,
-                    'action' => 'access_denied',
-                    'details' => json_encode(['request_id' => $requestId, 'denied_by' => $userId]),
-                    'created_at' => date('Y-m-d H:i:s')
-                ]);
+                // Through logAccess: the direct insert named details, which the table
+                // does not have, and would have broken the audit hash chain anyway.
+                \SecurityClearanceService::logAccess((int) $accessRequest->user_id, $accessRequest->object_id ? (int) $accessRequest->object_id : null, null, null, 'access_denied', false, 'Request #'.$requestId.' denied by user '.$userId.($note ? ': '.$note : ''));
             }
         } catch (\Exception $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);

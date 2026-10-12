@@ -14,9 +14,6 @@
         </a>
     </div>
 
-    @if($sf_user->hasFlash('success'))
-    <div class="alert alert-success">{{ $sf_user->getFlash('success') }}</div>
-    @endif
 
     <div class="card">
         <div class="table-responsive">

@@ -16,9 +16,6 @@
             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'consentEdit', 'id' => $consent->id]); ?>" class="btn btn-primary ms-3"><i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?></a>
         </div>
     </div>
-    <?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-    <?php endif; ?>
     <div class="row">
         <div class="col-lg-8">
             <div class="card mb-4">

@@ -1065,7 +1065,9 @@ class privacyAdminActions extends AhgController
                 'i18n.title as object_title',
                 'slug.slug as object_slug'
             ])
-            ->orderByDesc('e.status') // flagged first
+            // Flagged (high-risk) first. orderByDesc('e.status') sorted "pending" above
+            // "flagged", so past 100 pending findings the high-risk ones never showed.
+            ->orderByRaw("e.status = 'flagged' DESC")
             ->orderByDesc('e.created_at')
             ->limit(100)
             ->get();
@@ -1753,6 +1755,50 @@ class privacyAdminActions extends AhgController
      * so the viewer automatically shows redacted content (like PII Review workflow)
      * POST /privacyAdmin/applyVisualRedactions
      */
+    /**
+     * Re-render a PDF's reference image and thumbnail from its redacted version,
+     * at their current sizes. ponytail: page 1 only (what AtoM derives from), and a
+     * later regen-derivatives from the master would bring the originals back.
+     */
+    protected function refreshRedactedDerivatives(int $objectId, $pdfService): void
+    {
+        try {
+            $master = DB::table('digital_object')->where('object_id', $objectId)
+                ->where('usage_id', \QubitTerm::MASTER_ID)->where('mime_type', 'application/pdf')->first();
+            if (!$master) {
+                return;
+            }
+            $web = rtrim($this->config('sf_web_dir'), '/');
+            $redacted = $pdfService->getRedactedPdf($objectId, $web . $master->path . $master->name);
+            if (empty($redacted['success']) || empty($redacted['redacted']) || !is_file($redacted['path'])) {
+                return;
+            }
+            $base = tempnam(sys_get_temp_dir(), 'redact_');
+            exec('pdftoppm -jpeg -r 110 -f 1 -l 1 -singlefile ' . escapeshellarg($redacted['path']) . ' ' . escapeshellarg($base), $out, $rc);
+            $page = $base . '.jpg';
+            $src = (0 === $rc && is_file($page)) ? @imagecreatefromjpeg($page) : false;
+            if (!$src) {
+                return;
+            }
+            foreach (DB::table('digital_object')->where('parent_id', $master->id)
+                ->whereIn('usage_id', [\QubitTerm::REFERENCE_ID, \QubitTerm::THUMBNAIL_ID])->get() as $d) {
+                $dest = $web . $d->path . $d->name;
+                $size = is_file($dest) ? @getimagesize($dest) : false;
+                if (!$size) {
+                    continue;
+                }
+                $out = imagescale($src, $size[0], $size[1]);
+                imagejpeg($out, $dest, 85);
+                imagedestroy($out);
+            }
+            imagedestroy($src);
+            @unlink($page);
+            @unlink($base);
+        } catch (\Throwable $e) {
+            error_log('Redacted derivatives not refreshed for ' . $objectId . ': ' . $e->getMessage());
+        }
+    }
+
     public function executeApplyVisualRedactions($request)
     {
         $this->getResponse()->setContentType('application/json');
@@ -1815,6 +1861,10 @@ class privacyAdminActions extends AhgController
             // Also clear VisualRedactionService cache if it exists
             $visualService = $this->getVisualRedactionService();
             $visualService->clearCache($objectId);
+
+            // The reference image and thumbnail are public files rendered from the
+            // unredacted master, so they showed exactly what was just redacted.
+            $this->refreshRedactedDerivatives($objectId, $pdfService);
 
             // Get the slug for view URL
             $slug = DB::table('slug')->where('object_id', $objectId)->value('slug');

@@ -23,7 +23,7 @@
               <p class="mb-1"><strong>Current Clearance Level:</strong></p>
               <?php if ($currentClearance): ?>
                 <span class="badge bg-<?php echo $currentClearance->level >= 4 ? 'danger' : ($currentClearance->level >= 2 ? 'warning' : 'success'); ?> fs-6">
-                  <?php echo htmlspecialchars($currentClearance->classification_name); ?>
+                  <?php echo $currentClearance->classification_name; ?>
                 </span>
                 <small class="text-muted d-block mt-1">
                   Granted: <?php echo date('M j, Y', strtotime($currentClearance->granted_at)); ?>
@@ -64,7 +64,7 @@
                   <?php foreach ($accessGrants as $grant): ?>
                     <tr>
                       <td>
-                        <strong><?php echo htmlspecialchars($grant->object_title ?? 'Unknown'); ?></strong>
+                        <strong><?php echo $grant->object_title ?? 'Unknown'; ?></strong>
                       </td>
                       <td>
                         <span class="badge bg-secondary"><?php echo ucfirst(str_replace('_', ' ', $grant->object_type)); ?></span>
@@ -83,7 +83,7 @@
                       </td>
                       <td>
                         <?php echo date('M j, Y', strtotime($grant->granted_at)); ?>
-                        <br><small class="text-muted">by <?php echo htmlspecialchars($grant->granted_by_name ?? 'System'); ?></small>
+                        <br><small class="text-muted">by <?php echo $grant->granted_by_name ?? 'System'; ?></small>
                       </td>
                       <td>
                         <?php if ($grant->expires_at): ?>
@@ -149,11 +149,11 @@
                       </td>
                       <td>
                         <?php if ($req->request_type === 'clearance'): ?>
-                          <strong><?php echo htmlspecialchars($req->requested_classification ?? 'N/A'); ?></strong>
+                          <strong><?php echo $req->requested_classification ?? 'N/A'; ?></strong>
                           <br><small class="text-muted">From: <?php echo esc_entities($req->current_classification ?? 'None'); ?></small>
                         <?php elseif (!empty($req->scopes)): ?>
                           <?php foreach ($req->scopes as $scope): ?>
-                            <strong><?php echo htmlspecialchars($scope->object_title ?? 'Unknown'); ?></strong>
+                            <strong><?php echo $scope->object_title ?? 'Unknown'; ?></strong>
                             <?php if ($scope->include_descendants): ?>
                               <span class="badge bg-info ms-1">+ children</span>
                             <?php endif; ?>
@@ -188,11 +188,11 @@
                         <?php echo date('M j, Y H:i', strtotime($req->created_at)); ?>
                       </td>
                       <td>
-                        <a href="<?php echo url_for('security/request/' . $req->id); ?>" class="btn btn-sm btn-outline-primary">
+                        <a href="<?php echo url_for('@access_request_view?id=' . $req->id); ?>" class="btn btn-sm btn-outline-primary">
                           <i class="fas fa-eye"></i>
                         </a>
                         <?php if ($req->status === 'pending'): ?>
-                          <a href="<?php echo url_for('security/request/' . $req->id . '/cancel'); ?>" 
+                          <a href="<?php echo url_for('@access_request_cancel?id=' . $req->id); ?>" 
                              class="btn btn-sm btn-outline-danger"
                              data-ahg-confirm="Cancel this request?">
                             <i class="fas fa-times"></i>

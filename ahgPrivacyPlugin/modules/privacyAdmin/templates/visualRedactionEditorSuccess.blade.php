@@ -16,7 +16,7 @@ $regions = $regions ?? [];
 // IIIF Configuration
 $baseUrl = ahg_config('iiif_base_url', 'https://psis.theahg.co.za');
 $cantaloupeUrl = ahg_config('iiif_cantaloupe_url', 'https://psis.theahg.co.za/iiif/2');
-$frameworkPath = ahg_config('iiif_framework_path', '/atom-framework/src/Extensions/IiifViewer');
+$frameworkPath = ahg_config('iiif_framework_path', '/plugins/ahgIiifPlugin/web'); // the viewer assets live in ahgIiifPlugin
 $viewerId = 'redaction-viewer-' . $objectId;
 @endphp
 
@@ -45,19 +45,7 @@ $viewerId = 'redaction-viewer-' . $objectId;
         </div>
     </div>
 
-    @if($sf_user->hasFlash('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ $sf_user->getFlash('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
-    @if($sf_user->hasFlash('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
-            {{ $sf_user->getFlash('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     <!-- Document Info Card -->
     <div class="card bg-dark text-white mb-3">
@@ -242,7 +230,6 @@ $viewerId = 'redaction-viewer-' . $objectId;
 
 @if($docInfo)
 <!-- Load required libraries -->
-<link rel="stylesheet" href="{{ $frameworkPath }}/public/css/iiif-viewer.css" @cspNonce>
 <link rel="stylesheet" href="{{ $frameworkPath }}/public/viewers/annotorious/annotorious.min.css" @cspNonce>
 <link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" @cspNonce>
 

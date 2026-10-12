@@ -152,20 +152,29 @@ class RedactionContentFilter
 
             $svc = new PrivacyRedactionService();
             $fields = $svc->getFields($candidateId);
-            if (empty($fields)) {
+            // Findings a reviewer marked "redacted" in the PII review queue.
+            $entityValues = self::loadRedactedEntityValues($candidateId);
+            if (empty($fields) && empty($entityValues)) {
                 return $content;
             }
 
-            $values = self::loadI18nValues($candidateId, $fields);
-            $values += self::loadExtraValues($candidateId, $fields);
-            if (empty($values)) {
+            $values = [];
+            if (!empty($fields)) {
+                $values = self::loadI18nValues($candidateId, $fields);
+                $values += self::loadExtraValues($candidateId, $fields);
+            }
+            if (empty($values) && empty($entityValues)) {
                 return $content;
             }
 
             // Past this line the record is protected: fail closed on any error.
             $ioId = $candidateId;
 
-            $redacted = $svc->applyRedaction($ioId, $values, $user->getAttribute('user_id'), true);
+            $redacted = $values ? $svc->applyRedaction($ioId, $values, $user->getAttribute('user_id'), true) : [];
+            foreach ($entityValues as $i => $v) {
+                $values['entity_' . $i] = $v;
+                $redacted['entity_' . $i] = self::ENTITY_PLACEHOLDER;
+            }
 
             foreach ($values as $field => $orig) {
                 if (null === $orig || '' === $orig || !isset($redacted[$field])) {
@@ -359,6 +368,20 @@ class RedactionContentFilter
     }
 
     /** @param array<int,object> $fields */
+    /** Placeholder for a single redacted finding inside otherwise visible text. */
+    private const ENTITY_PLACEHOLDER = '[REDACTED]';
+
+    /** Originals of the findings reviewers marked "redacted" (see PiiDetectionService). */
+    private static function loadRedactedEntityValues(int $ioId): array
+    {
+        if (!DB::table('ahg_ner_entity')->where('object_id', $ioId)->where('status', 'redacted')->exists()) {
+            return [];
+        }
+        require_once __DIR__ . '/PiiDetectionService.php';
+
+        return (new PiiDetectionService())->resolveRedactedValues($ioId, false);
+    }
+
     private static function loadI18nValues(int $ioId, array $fields): array
     {
         $cols = [];

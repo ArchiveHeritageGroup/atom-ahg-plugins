@@ -9,12 +9,6 @@
         </a>
     </div>
 
-    @if($sf_user->hasFlash('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ $sf_user->getFlash('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     <!-- Statistics Cards -->
     <div class="row mb-4">

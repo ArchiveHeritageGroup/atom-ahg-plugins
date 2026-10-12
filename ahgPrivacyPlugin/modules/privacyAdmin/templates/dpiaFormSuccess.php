@@ -18,8 +18,6 @@ $badge = ['draft' => 'secondary', 'review' => 'warning', 'completed' => 'success
         <?php endif; ?>
     </div>
 
-    <?php if ($sf_user->hasFlash('success')): ?><div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div><?php endif; ?>
-    <?php if ($sf_user->hasFlash('error')): ?><div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div><?php endif; ?>
 
     <form method="post" action="<?php echo url_for($isEdit ? ['module' => 'privacyAdmin', 'action' => 'dpiaForm', 'id' => $d->id] : ['module' => 'privacyAdmin', 'action' => 'dpiaForm']); ?>">
         <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">

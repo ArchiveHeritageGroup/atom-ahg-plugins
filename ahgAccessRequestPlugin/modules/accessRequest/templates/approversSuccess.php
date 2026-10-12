@@ -10,19 +10,7 @@
         </ol>
       </nav>
 
-      <?php if ($sf_user->hasFlash('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-          <?php echo $sf_user->getFlash('success'); ?>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      <?php endif; ?>
 
-      <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-          <?php echo $sf_user->getFlash('error'); ?>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      <?php endif; ?>
 
       <div class="row">
         <div class="col-lg-8">

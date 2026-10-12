@@ -959,13 +959,17 @@ class IoFormHelper
         $userId = (int) $action->getUser()->getUserId();
 
         if ($classificationId > 0) {
-            $svc::classifyObject($objectId, $classificationId, [
+            $result = $svc::classifyObject($objectId, $classificationId, [
                 'reason' => $request->getParameter('security_reason') ?: null,
                 'review_date' => $request->getParameter('security_review_date') ?: null,
                 'declassify_date' => $request->getParameter('security_declassify_date') ?: null,
                 'handling_instructions' => $request->getParameter('security_handling_instructions') ?: null,
                 'inherit_to_children' => $request->getParameter('security_inherit_to_children') ? 1 : 0,
             ], $userId);
+            // The description has saved; say so plainly if the classification did not.
+            if (empty($result['success'])) {
+                $action->getUser()->setFlash('error', 'The description was saved, but its security classification was not: '.($result['error'] ?? 'unknown error'));
+            }
         } elseif (null !== $svc::getObjectClassification($objectId)) {
             // "- none -" chosen on a currently-classified record: declassify.
             $svc::declassifyObject($objectId, null, $userId, 'Cleared via edit form');

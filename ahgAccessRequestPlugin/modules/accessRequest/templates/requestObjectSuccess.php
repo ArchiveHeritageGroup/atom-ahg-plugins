@@ -64,7 +64,7 @@
               </div>
             </div>
 
-            <form method="post" action="<?php echo url_for('security/request-object/create'); ?>">
+            <form method="post" action="<?php echo url_for('@access_request_object_create'); ?>">
               <input type="hidden" name="object_type" value="<?php echo htmlspecialchars($objectType); ?>">
               <input type="hidden" name="object_id" value="<?php echo $objectId; ?>">
 

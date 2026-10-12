@@ -11,9 +11,6 @@
 
     <h1 class="h2 mb-4"><i class="fas fa-file-alt me-2"></i>{{ __('Data Subject Access Request') }}</h1>
 
-    @if($sf_user->hasFlash('error'))
-    <div class="alert alert-danger">{{ $sf_user->getFlash('error') }}</div>
-    @endif
 
     <div class="card">
         <div class="card-body">

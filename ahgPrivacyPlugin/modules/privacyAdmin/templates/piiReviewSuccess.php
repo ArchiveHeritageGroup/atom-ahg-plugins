@@ -6,12 +6,6 @@
         </a>
     </div>
 
-    <?php if ($sf_user->hasFlash('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <?php echo $sf_user->getFlash('success'); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
 
     <div class="card">
         <div class="card-header">

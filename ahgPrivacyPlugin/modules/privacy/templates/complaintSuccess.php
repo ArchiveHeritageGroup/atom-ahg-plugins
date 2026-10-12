@@ -10,9 +10,6 @@
 
     <h1 class="h2 mb-4"><i class="fas fa-exclamation-circle me-2 text-warning"></i><?php echo __('Lodge a Privacy Complaint'); ?></h1>
 
-    <?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-    <?php endif; ?>
 
     <div class="row">
         <div class="col-lg-8">

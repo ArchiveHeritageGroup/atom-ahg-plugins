@@ -10,9 +10,6 @@
 
     <h1 class="h2 mb-4"><i class="fas fa-search me-2"></i><?php echo __('Check Request Status'); ?></h1>
 
-    <?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-    <?php endif; ?>
 
     <?php if (isset($dsar)): ?>
     <div class="card mb-4">

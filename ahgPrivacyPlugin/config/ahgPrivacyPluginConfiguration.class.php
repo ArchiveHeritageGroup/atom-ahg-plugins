@@ -68,7 +68,10 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
         $module = $request->getParameter('module');
         $action = $request->getParameter('action');
 
-        if ($module === 'privacyAdmin' && $action === 'visualRedactionEditor') {
+        // The editor template loads its own assets (with the CSP nonce). This filter
+        // injected a second set from paths without /web/ - 404s, CSP refusals, and a
+        // second PDF.js/Fabric that could clobber the first. Kept as a no-op.
+        if (false && $module === 'privacyAdmin' && $action === 'visualRedactionEditor') {
             $pluginPath = '/plugins/ahgPrivacyPlugin';
 
             // Add CSS before </head>

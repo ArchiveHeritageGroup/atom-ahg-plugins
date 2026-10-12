@@ -340,7 +340,8 @@ class PrivacyService
         $config = $this->getConfig($jurisdiction);
         $jurisdictionInfo = self::getJurisdictionConfig($jurisdiction);
         $responseDays = $config->dsar_response_days ?? $jurisdictionInfo['dsar_days'] ?? 30;
-        $receivedDate = $data['received_date'] ?? date('Y-m-d');
+        // Empty form fields arrive as '': fall back like missing ones.
+        $receivedDate = ($data['received_date'] ?? '') ?: date('Y-m-d');
 
         $dsarData = [
             'reference_number' => $this->generateReference('DSAR', $jurisdiction),
@@ -356,7 +357,7 @@ class PrivacyService
             'priority' => $data['priority'] ?? 'normal',
             'received_date' => $receivedDate,
             'due_date' => date('Y-m-d', strtotime($receivedDate . " + {$responseDays} days")),
-            'assigned_to' => $data['assigned_to'] ?? null,
+            'assigned_to' => !empty($data['assigned_to']) ? (int) $data['assigned_to'] : null,
             'created_by' => $userId,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')

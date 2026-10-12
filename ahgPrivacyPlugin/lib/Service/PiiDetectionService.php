@@ -821,6 +821,56 @@ class PiiDetectionService
     /**
      * Scan an information object for PII
      */
+    /**
+     * The original text of every finding a reviewer marked "redacted".
+     *
+     * Findings are stored masked ("082 ***147") on purpose, so they cannot be used
+     * as search terms. The record's text is re-scanned here and any detection whose
+     * masked form matches a redacted finding gives back its original. Unmasked
+     * findings (names from NER) are their own original. Nothing is persisted.
+     */
+    public function resolveRedactedValues(int $objectId, bool $includePdf = false): array
+    {
+        $redacted = DB::table('ahg_ner_entity')->where('object_id', $objectId)->where('status', 'redacted')
+            ->get(['entity_type', 'entity_value']);
+        if ($redacted->isEmpty()) {
+            return [];
+        }
+
+        $texts = array_values(array_filter((array) DB::table('information_object_i18n')->where('id', $objectId)
+            ->select(['title', 'scope_and_content', 'arrangement', 'appraisal', 'archival_history', 'physical_characteristics'])
+            ->first()));
+        if ($includePdf) {
+            $do = DB::table('digital_object')->where('object_id', $objectId)->where('mime_type', 'application/pdf')->first();
+            $path = $do ? $this->getDigitalObjectPath($do) : null;
+            if ($path) {
+                exec('pdftotext -q ' . escapeshellarg($path) . ' -', $lines);
+                $texts[] = implode("\n", $lines);
+            }
+        }
+
+        $byMask = [];
+        foreach ($texts as $text) {
+            foreach ($this->detectPii((string) $text)['entities'] ?? [] as $e) {
+                if (!empty($e['raw_value'])) {
+                    $byMask[$e['type'] . '|' . $e['value']][] = $e['raw_value'];
+                }
+            }
+        }
+
+        $values = [];
+        foreach ($redacted as $r) {
+            $key = $r->entity_type . '|' . $r->entity_value;
+            if (isset($byMask[$key])) {
+                array_push($values, ...$byMask[$key]);
+            } elseif (false === strpos((string) $r->entity_value, '*')) {
+                $values[] = (string) $r->entity_value;
+            }
+        }
+
+        return array_values(array_unique(array_filter($values)));
+    }
+
     public function scanObject(int $objectId, bool $includeDigitalObjects = true): array
     {
         $results = [
@@ -1581,8 +1631,10 @@ class PiiDetectionService
             return null;
         }
 
-        $webDir = \sfConfig::get('sf_web_dir');
-        $fullPath = $webDir . '/uploads/' . trim($path, '/') . '/' . $name;
+        // AtoM stores path as "/uploads/r/.../" (directory, already under uploads):
+        // prefixing another "/uploads/" pointed every scan at a file that does not exist.
+        $webDir = rtrim((string) \sfConfig::get('sf_web_dir'), '/');
+        $fullPath = $webDir . '/' . trim($path, '/') . '/' . $name;
 
         return file_exists($fullPath) ? $fullPath : null;
     }

@@ -73,7 +73,7 @@
     <!-- Compliance Score -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-gradient" data-ahg-style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card bg-primary">
                 <div class="card-body text-white text-center py-4">
                     <h5 class="mb-3">
                         <?php if ($currentJurisdiction !== 'all' && isset($jurisdictions[$currentJurisdiction])): ?>

@@ -4,9 +4,6 @@
         <h1 class="h3 mb-0"><i class="bi bi-check2-circle me-2"></i><?php echo __('Consent Records'); ?></h1>
         <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'consentAdd']); ?>" class="btn btn-primary"><i class="fas fa-plus me-1"></i><?php echo __('Record Consent'); ?></a>
     </div>
-    <?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-    <?php endif; ?>
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><?php echo __('Consent Records'); ?></span>

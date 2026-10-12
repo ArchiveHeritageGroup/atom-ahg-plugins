@@ -13,7 +13,7 @@ $regions = $sf_data->getRaw('regions') ?? [];
 // IIIF Configuration
 $baseUrl = sfConfig::get('app_iiif_base_url', 'https://psis.theahg.co.za');
 $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', 'https://psis.theahg.co.za/iiif/2');
-$frameworkPath = sfConfig::get('app_iiif_framework_path', '/atom-framework/src/Extensions/IiifViewer');
+$frameworkPath = sfConfig::get('app_iiif_framework_path', '/plugins/ahgIiifPlugin/web'); // the viewer assets live in ahgIiifPlugin
 $viewerId = 'redaction-viewer-' . $objectId;
 ?>
 
@@ -42,19 +42,7 @@ $viewerId = 'redaction-viewer-' . $objectId;
         </div>
     </div>
 
-    <?php if ($sf_user->hasFlash('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <?php echo $sf_user->getFlash('success'); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
 
-    <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <?php echo $sf_user->getFlash('error'); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
 
     <!-- Document Info Card -->
     <div class="card bg-dark text-white mb-3">
@@ -239,7 +227,6 @@ $viewerId = 'redaction-viewer-' . $objectId;
 
 <?php if ($docInfo): ?>
 <!-- Load required libraries -->
-<link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/css/iiif-viewer.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 <link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/viewers/annotorious/annotorious.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 <link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 

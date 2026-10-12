@@ -65,7 +65,7 @@
             <?php foreach ($statistics['clearances_by_level'] ?? [] as $level): ?>
             <tr>
               <td>
-                <span class="badge" data-ahg-style="background-color: <?php echo $level->color ?>">
+                <span class="badge <?php echo $level->color ? '' : 'bg-secondary' ?>" data-ahg-style="background-color: <?php echo $level->color ?>">
                   <?php echo esc_entities($level->name) ?>
                 </span>
               </td>
@@ -99,7 +99,7 @@
             <?php foreach ($statistics['objects_by_level'] ?? [] as $level): ?>
             <tr>
               <td>
-                <span class="badge" data-ahg-style="background-color: <?php echo $level->color ?>">
+                <span class="badge <?php echo $level->color ? '' : 'bg-secondary' ?>" data-ahg-style="background-color: <?php echo $level->color ?>">
                   <?php echo esc_entities($level->name) ?>
                 </span>
               </td>
@@ -144,7 +144,7 @@
           </td>
           <td><?php echo date('Y-m-d H:i', strtotime($req->created_at)) ?></td>
           <td>
-            <a href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'reviewRequest', 'id' => $req->request_id]) ?>" class="btn btn-sm btn-primary">
+            <a href="<?php echo $req->review_url ?? url_for(['module' => 'securityClearance', 'action' => 'reviewRequest', 'id' => $req->request_id]) ?>" class="btn btn-sm btn-primary">
               <?php echo __('Review') ?>
             </a>
           </td>

@@ -13,9 +13,6 @@
         </a>
     </div>
 
-    <?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-    <?php endif; ?>
 
     <div class="card">
         <div class="table-responsive">

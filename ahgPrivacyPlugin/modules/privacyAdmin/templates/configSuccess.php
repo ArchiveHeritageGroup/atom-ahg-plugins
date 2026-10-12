@@ -13,9 +13,6 @@
         </div>
     </div>
 
-    <?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-    <?php endif; ?>
 
     <!-- Jurisdiction Tabs -->
     <ul class="nav nav-tabs mb-4">

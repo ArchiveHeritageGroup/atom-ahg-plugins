@@ -11,9 +11,6 @@
 
     <h1 class="h2 mb-4"><i class="fas fa-search me-2"></i>{{ __('Check Request Status') }}</h1>
 
-    @if($sf_user->hasFlash('error'))
-    <div class="alert alert-danger">{{ $sf_user->getFlash('error') }}</div>
-    @endif
 
     @if(isset($dsar))
     <div class="card mb-4">

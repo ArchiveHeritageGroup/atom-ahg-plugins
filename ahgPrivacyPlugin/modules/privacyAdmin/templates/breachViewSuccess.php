@@ -43,9 +43,6 @@ $severityClasses = [
         </div>
     </div>
 
-    <?php if ($sf_user->hasFlash('success')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
-    <?php endif; ?>
 
     <div class="row">
         <div class="col-lg-8">

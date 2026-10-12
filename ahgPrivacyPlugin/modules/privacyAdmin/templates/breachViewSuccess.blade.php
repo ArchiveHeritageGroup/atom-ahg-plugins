@@ -44,9 +44,6 @@ $severityClasses = [
         </div>
     </div>
 
-    @if($sf_user->hasFlash('success'))
-    <div class="alert alert-success">{{ $sf_user->getFlash('success') }}</div>
-    @endif
 
     <div class="row">
         <div class="col-lg-8">

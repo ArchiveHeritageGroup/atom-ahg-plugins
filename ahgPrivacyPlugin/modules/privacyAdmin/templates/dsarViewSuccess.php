@@ -40,7 +40,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between">
                     <h5 class="mb-0"><?php echo __('Request Details'); ?></h5>
-                    <span class="badge bg-<?php echo $dsar->priority === 'urgent' ? 'danger' : ($dsar->priority === 'high' ? 'warning' : 'secondary'); ?>">
+                    <span class="badge <?php echo $dsar->priority === 'urgent' ? 'bg-danger' : 'bg-transparent border'; ?>">
                         <?php echo ucfirst($dsar->priority); ?> <?php echo __('Priority'); ?>
                     </span>
                 </div>
@@ -51,7 +51,7 @@
                             <p><strong><?php echo __('Received:'); ?></strong><br><?php echo $dsar->received_date; ?></p>
                             <p><strong><?php echo __('Due Date:'); ?></strong><br>
                                 <span class="<?php echo $isOverdue ? 'text-danger fw-bold' : ''; ?>"><?php echo $dsar->due_date; ?></span>
-                                <?php if (!$isOverdue && strtotime($dsar->due_date) > time()): ?>
+                                <?php if (!$isOverdue && strtotime($dsar->due_date) > time() && !in_array($dsar->status, ['completed', 'rejected', 'withdrawn'], true)): ?>
                                 <br><small class="text-muted"><?php echo ceil((strtotime($dsar->due_date) - time()) / 86400); ?> <?php echo __('days remaining'); ?></small>
                                 <?php endif; ?>
                             </p>

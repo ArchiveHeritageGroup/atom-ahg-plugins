@@ -41,7 +41,8 @@ $statusClasses = [
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between">
                     <h5 class="mb-0">{{ __('Request Details') }}</h5>
-                    <span class="badge bg-{{ $dsar->priority === 'urgent' ? 'danger' : ($dsar->priority === 'high' ? 'warning' : 'secondary') }}">
+                    {{-- Card headers force white text: an outline badge, red only when urgent. --}}
+                    <span class="badge {{ $dsar->priority === 'urgent' ? 'bg-danger' : 'bg-transparent border' }}">
                         {{ ucfirst($dsar->priority) }} {{ __('Priority') }}
                     </span>
                 </div>
@@ -52,7 +53,7 @@ $statusClasses = [
                             <p><strong>{{ __('Received:') }}</strong><br>{{ $dsar->received_date }}</p>
                             <p><strong>{{ __('Due Date:') }}</strong><br>
                                 <span class="{{ $isOverdue ? 'text-danger fw-bold' : '' }}">{{ $dsar->due_date }}</span>
-                                @if(!$isOverdue && strtotime($dsar->due_date) > time())
+                                @if(!$isOverdue && strtotime($dsar->due_date) > time() && !in_array($dsar->status, ['completed', 'rejected', 'withdrawn'], true))
                                 <br><small class="text-muted">{{ ceil((strtotime($dsar->due_date) - time()) / 86400) }} {{ __('days remaining') }}</small>
                                 @endif
                             </p>

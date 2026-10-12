@@ -73,8 +73,11 @@ class securityClearanceUserAction extends AhgController
             ->get();
 
         // Get clearance history
-        $this->history = DB::table('user_security_clearance_log as log')
-            ->leftJoin('security_classification as sc', 'sc.id', '=', 'log.classification_id')
+        // security_clearance_history holds previous and new levels; this read
+        // user_security_clearance_log.previous_classification_id, which does not
+        // exist, and the page was a 500 for every user.
+        $this->history = DB::table('security_clearance_history as log')
+            ->leftJoin('security_classification as sc', 'sc.id', '=', 'log.new_classification_id')
             ->leftJoin('security_classification as prev_sc', 'prev_sc.id', '=', 'log.previous_classification_id')
             ->where('log.user_id', $this->user->id)
             ->orderBy('log.created_at', 'desc')
@@ -111,43 +114,15 @@ class securityClearanceUserAction extends AhgController
                     ->where('user_id', $this->user->id)
                     ->first();
 
-                $data = [
+                \SecurityClearanceService::grantClearance((int) $this->user->id, (int) $classificationId, ['expires_at' => $expiresAt, 'notes' => $notes], (int) $currentUserId);
+                DB::table('user_security_clearance_log')->insert([
                     'user_id' => $this->user->id,
+                    'action' => $existing ? 'updated' : 'granted',
                     'classification_id' => $classificationId,
-                    'granted_by' => $currentUserId,
-                    'granted_at' => date('Y-m-d H:i:s'),
-                    'expires_at' => $expiresAt,
+                    'changed_by' => $currentUserId,
                     'notes' => $notes,
-                ];
-
-                if ($existing) {
-                    // Log the change
-                    DB::table('user_security_clearance_log')->insert([
-                        'user_id' => $this->user->id,
-                        'action' => 'updated',
-                        'previous_classification_id' => $existing->classification_id,
-                        'classification_id' => $classificationId,
-                        'changed_by' => $currentUserId,
-                        'notes' => $notes,
-                        'created_at' => date('Y-m-d H:i:s'),
-                    ]);
-
-                    DB::table('user_security_clearance')
-                        ->where('user_id', $this->user->id)
-                        ->update($data);
-                } else {
-                    // Log the grant
-                    DB::table('user_security_clearance_log')->insert([
-                        'user_id' => $this->user->id,
-                        'action' => 'granted',
-                        'classification_id' => $classificationId,
-                        'changed_by' => $currentUserId,
-                        'notes' => $notes,
-                        'created_at' => date('Y-m-d H:i:s'),
-                    ]);
-
-                    DB::table('user_security_clearance')->insert($data);
-                }
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
 
                 $this->redirect('@security_clearance_user?slug=' . $this->user->slug . '&success=updated');
             }
@@ -158,19 +133,15 @@ class securityClearanceUserAction extends AhgController
                 ->first();
 
             if ($existing) {
-                // Log the revocation
+                \SecurityClearanceService::revokeClearance((int) $this->user->id, (int) $currentUserId, $reason);
                 DB::table('user_security_clearance_log')->insert([
                     'user_id' => $this->user->id,
                     'action' => 'revoked',
-                    'previous_classification_id' => $existing->classification_id,
+                    'classification_id' => $existing->classification_id,
                     'changed_by' => $currentUserId,
                     'notes' => $reason,
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
-
-                DB::table('user_security_clearance')
-                    ->where('user_id', $this->user->id)
-                    ->delete();
             }
 
             $this->redirect('@security_clearance_user?slug=' . $this->user->slug . '&success=revoked');

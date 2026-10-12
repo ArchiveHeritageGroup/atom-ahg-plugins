@@ -15,9 +15,6 @@
         </ol>
       </nav>
 
-      <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-      <?php endif; ?>
 
       <?php
       $statusColors = [
@@ -53,8 +50,8 @@
             <div class="col-md-6">
               <h6 class="text-muted">Requester</h6>
               <p class="mb-0">
-                <strong><?php echo htmlspecialchars($accessRequest->username); ?></strong><br>
-                <small class="text-muted"><?php echo htmlspecialchars($accessRequest->email); ?></small>
+                <strong><?php echo $accessRequest->username; ?></strong><br>
+                <small class="text-muted"><?php echo $accessRequest->email; ?></small>
               </p>
             </div>
             <div class="col-md-6">
@@ -72,7 +69,7 @@
               </div>
               <div class="col-md-6">
                 <h6 class="text-muted">Requested Clearance</h6>
-                <span class="badge bg-primary fs-6"><?php echo htmlspecialchars($accessRequest->requested_classification); ?></span>
+                <span class="badge bg-primary fs-6"><?php echo $accessRequest->requested_classification; ?></span>
               </div>
             </div>
           <?php elseif (!empty($accessRequest->scopes)): ?>
@@ -98,7 +95,7 @@
                     <div class="list-group-item">
                       <div class="d-flex justify-content-between align-items-center">
                         <div>
-                          <strong><?php echo htmlspecialchars($scope->object_title ?? 'Unknown'); ?></strong>
+                          <strong><?php echo $scope->object_title ?? 'Unknown'; ?></strong>
                           <span class="badge bg-secondary ms-2"><?php echo ucfirst(str_replace('_', ' ', $scope->object_type)); ?></span>
                         </div>
                         <?php if ($scope->include_descendants): ?>
@@ -125,13 +122,13 @@
 
           <div class="mb-3">
             <h6 class="text-muted">Reason</h6>
-            <p class="mb-0"><?php echo nl2br(htmlspecialchars($accessRequest->reason)); ?></p>
+            <p class="mb-0"><?php echo nl2br($accessRequest->reason); ?></p>
           </div>
 
           <?php if ($accessRequest->justification): ?>
             <div class="mb-3">
               <h6 class="text-muted">Business Justification</h6>
-              <p class="mb-0"><?php echo nl2br(htmlspecialchars($accessRequest->justification)); ?></p>
+              <p class="mb-0"><?php echo nl2br($accessRequest->justification); ?></p>
             </div>
           <?php endif; ?>
 
@@ -140,7 +137,7 @@
             <div class="row">
               <div class="col-md-6">
                 <h6 class="text-muted">Reviewed By</h6>
-                <p class="mb-0"><?php echo htmlspecialchars($accessRequest->reviewer_name ?? 'Unknown'); ?></p>
+                <p class="mb-0"><?php echo $accessRequest->reviewer_name ?? 'Unknown'; ?></p>
               </div>
               <div class="col-md-6">
                 <h6 class="text-muted">Reviewed At</h6>
@@ -151,7 +148,7 @@
               <div class="mt-3">
                 <h6 class="text-muted">Review Notes</h6>
                 <div class="alert alert-<?php echo $accessRequest->status === 'approved' ? 'success' : 'danger'; ?>">
-                  <?php echo nl2br(htmlspecialchars($accessRequest->review_notes)); ?>
+                  <?php echo nl2br($accessRequest->review_notes); ?>
                 </div>
               </div>
             <?php endif; ?>
@@ -205,7 +202,7 @@
                              ($entry->action === 'created' ? 'primary' : 'secondary')); 
                       ?> me-2"><?php echo ucfirst($entry->action); ?></span>
                       <?php if ($entry->details): ?>
-                        <span class="text-muted"><?php echo htmlspecialchars($entry->details); ?></span>
+                        <span class="text-muted"><?php echo $entry->details; ?></span>
                       <?php endif; ?>
                     </div>
                     <small class="text-muted">

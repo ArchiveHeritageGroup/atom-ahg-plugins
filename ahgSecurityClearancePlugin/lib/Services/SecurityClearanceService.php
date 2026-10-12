@@ -129,28 +129,18 @@ class SecurityClearanceService
             // Get previous clearance for history
             $previous = DB::table('user_security_clearance')
                 ->where('user_id', $userId)
-                ->where('active', 1)
                 ->first();
 
-            // Deactivate existing clearance
-            DB::table('user_security_clearance')
-                ->where('user_id', $userId)
-                ->update(['active' => 0]);
-
-            // Create new clearance
-            DB::table('user_security_clearance')->insert([
-                'user_id' => $userId,
+            // One clearance row per user (user_id is UNIQUE): replace it. This wrote
+            // granted_date, expiry_date, active and vetting_* - none of which exist in
+            // user_security_clearance - so every grant through this service failed.
+            // ponytail: vetting_* has no column; it is dropped until the table grows one.
+            DB::table('user_security_clearance')->updateOrInsert(['user_id' => $userId], [
                 'classification_id' => $classificationId,
                 'granted_by' => $grantedBy,
-                'granted_date' => $data['granted_date'] ?? date('Y-m-d'),
-                'expiry_date' => $data['expiry_date'] ?? null,
-                'vetting_reference' => $data['vetting_reference'] ?? null,
-                'vetting_date' => $data['vetting_date'] ?? null,
-                'vetting_authority' => $data['vetting_authority'] ?? null,
+                'granted_at' => date('Y-m-d H:i:s'),
+                'expires_at' => ($data['expires_at'] ?? $data['expiry_date'] ?? null) ?: null,
                 'notes' => $data['notes'] ?? null,
-                'active' => 1,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
             // Determine action type
@@ -194,12 +184,11 @@ class SecurityClearanceService
 
             $previous = DB::table('user_security_clearance')
                 ->where('user_id', $userId)
-                ->where('active', 1)
                 ->first();
 
             DB::table('user_security_clearance')
                 ->where('user_id', $userId)
-                ->update(['active' => 0, 'updated_at' => date('Y-m-d H:i:s')]);
+                ->delete();
 
             if ($previous) {
                 self::recordClearanceHistory(
@@ -227,15 +216,15 @@ class SecurityClearanceService
      */
     public static function requestRenewal(int $userId, string $notes = ''): bool
     {
-        return DB::table('user_security_clearance')
-            ->where('user_id', $userId)
-            ->where('active', 1)
-            ->update([
-                'renewal_requested_date' => date('Y-m-d'),
-                'renewal_status' => 'pending',
-                'renewal_notes' => $notes,
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]) > 0;
+        // ponytail: user_security_clearance has no renewal_* columns, so the request
+        // is kept in the clearance history rather than on the clearance itself.
+        $clearance = DB::table('user_security_clearance')->where('user_id', $userId)->first();
+        if (!$clearance) {
+            return false;
+        }
+        self::recordClearanceHistory($userId, $clearance->classification_id, $clearance->classification_id, 'renewal_requested', $userId, $notes);
+
+        return true;
     }
 
     /**
@@ -248,7 +237,6 @@ class SecurityClearanceService
 
             $clearance = DB::table('user_security_clearance')
                 ->where('user_id', $userId)
-                ->where('active', 1)
                 ->first();
 
             if (!$clearance) {
@@ -262,11 +250,7 @@ class SecurityClearanceService
 
             DB::table('user_security_clearance')
                 ->where('id', $clearance->id)
-                ->update([
-                    'expiry_date' => $expiry,
-                    'renewal_status' => 'approved',
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
+                ->update(['expires_at' => $expiry.' 23:59:59']);
 
             self::recordClearanceHistory(
                 $userId,
@@ -295,21 +279,20 @@ class SecurityClearanceService
         return DB::table('user_security_clearance as usc')
             ->join('user as u', 'usc.user_id', '=', 'u.id')
             ->join('security_classification as sc', 'usc.classification_id', '=', 'sc.id')
-            ->where('usc.active', 1)
-            ->whereNotNull('usc.expiry_date')
-            ->where('usc.expiry_date', '<=', date('Y-m-d', strtotime("+$days days")))
-            ->where('usc.expiry_date', '>=', date('Y-m-d'))
+            ->whereNotNull('usc.expires_at')
+            ->where('usc.expires_at', '<=', date('Y-m-d 23:59:59', strtotime("+$days days")))
+            ->where('usc.expires_at', '>=', date('Y-m-d'))
             ->select([
                 'u.id as user_id',
                 'u.username',
                 'u.email',
                 'sc.code',
                 'sc.name as clearance_name',
-                'usc.expiry_date',
-                'usc.renewal_status',
-                DB::raw('DATEDIFF(usc.expiry_date, CURDATE()) as days_remaining'),
+                DB::raw('DATE(usc.expires_at) as expiry_date'),
+                DB::raw('NULL as renewal_status'),
+                DB::raw('DATEDIFF(usc.expires_at, CURDATE()) as days_remaining'),
             ])
-            ->orderBy('usc.expiry_date')
+            ->orderBy('usc.expires_at')
             ->get()
             ->toArray();
     }
@@ -381,14 +364,8 @@ class SecurityClearanceService
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        // Update clearance record
-        DB::table('user_security_clearance')
-            ->where('user_id', $userId)
-            ->where('active', 1)
-            ->update([
-                'two_factor_verified' => 1,
-                'two_factor_verified_at' => date('Y-m-d H:i:s'),
-            ]);
+        // The verification lives in security_2fa_session above; user_security_clearance
+        // has no two_factor_verified columns (the update here failed on every verify).
 
         self::logAccess($userId, null, null, null, '2fa_verified', true);
 
@@ -568,28 +545,32 @@ class SecurityClearanceService
                 }
             }
 
-            // Remove existing classification
-            DB::table('object_security_classification')
-                ->where('object_id', $objectId)
-                ->delete();
+            // Replace the existing classification in one transaction. The insert named
+            // classified_date, caveats, auto_declassify and retention_years, which the
+            // table does not have, so it always threw - after the delete had already
+            // removed the old classification. Nothing could be classified, and
+            // re-saving a classified record declassified it.
+            DB::transaction(function () use ($objectId, $classificationId, $classifiedBy, $data) {
+                DB::table('object_security_classification')
+                    ->where('object_id', $objectId)
+                    ->delete();
 
-            DB::table('object_security_classification')->insert([
-                'object_id' => $objectId,
-                'classification_id' => $classificationId,
-                'classified_by' => $classifiedBy,
-                'classified_date' => date('Y-m-d'),
-                'review_date' => $data['review_date'] ?? null,
-                'declassify_date' => $data['declassify_date'] ?? null,
-                'declassify_to_id' => $data['declassify_to_id'] ?? null,
-                'reason' => $data['reason'] ?? null,
-                'handling_instructions' => $data['handling_instructions'] ?? null,
-                'caveats' => $data['caveats'] ?? null,
-                'inherit_to_children' => $data['inherit_to_children'] ?? 1,
-                'auto_declassify' => $data['auto_declassify'] ?? 0,
-                'retention_years' => $data['retention_years'] ?? null,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
+                DB::table('object_security_classification')->insert([
+                    'object_id' => $objectId,
+                    'classification_id' => $classificationId,
+                    'classified_by' => $classifiedBy,
+                    'classified_at' => date('Y-m-d H:i:s'),
+                    'review_date' => $data['review_date'] ?? null,
+                    'declassify_date' => $data['declassify_date'] ?? null,
+                    'declassify_to_id' => $data['declassify_to_id'] ?? null,
+                    'reason' => $data['reason'] ?? null,
+                    'handling_instructions' => $data['handling_instructions'] ?? null,
+                    'inherit_to_children' => $data['inherit_to_children'] ?? 1,
+                    'active' => 1,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+            });
 
             // Schedule declassification if set
             if (!empty($data['declassify_date']) && !empty($data['auto_declassify'])) {
@@ -644,7 +625,6 @@ class SecurityClearanceService
                     ->update([
                         'classification_id' => $newClassificationId,
                         'declassify_date' => null,
-                        'auto_declassify' => 0,
                         'updated_at' => date('Y-m-d H:i:s'),
                     ]);
             } else {
@@ -1367,10 +1347,9 @@ class SecurityClearanceService
 
         // Expiring clearances (30 days)
         $stats['expiring_clearances'] = DB::table('user_security_clearance')
-            ->where('active', 1)
-            ->whereNotNull('expiry_date')
-            ->where('expiry_date', '<=', date('Y-m-d', strtotime('+30 days')))
-            ->where('expiry_date', '>=', date('Y-m-d'))
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<=', date('Y-m-d 23:59:59', strtotime('+30 days')))
+            ->where('expires_at', '>=', date('Y-m-d'))
             ->count();
 
         // Recent denials (7 days)

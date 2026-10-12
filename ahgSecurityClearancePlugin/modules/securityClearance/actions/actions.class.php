@@ -375,6 +375,26 @@ class securityClearanceActions extends AhgController
             ->get()
             ->toArray();
 
+        // Requests made through ahgAccessRequestPlugin (the researcher-facing
+        // Request Access form) live in access_request, which this dashboard never
+        // read - a pending request showed here as 0 pending.
+        if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('access_request')) {
+            $ar = $db::table('access_request as ar')
+                ->join('user as u', 'ar.user_id', '=', 'u.id')
+                ->leftJoin('access_request_scope as ars', 'ars.request_id', '=', 'ar.id')
+                ->where('ar.status', 'pending')
+                ->select('ar.id as request_id', 'ar.request_type', 'ar.urgency as priority', 'ar.created_at', 'u.username', 'ars.object_title')
+                ->groupBy('ar.id', 'ar.request_type', 'ar.urgency', 'ar.created_at', 'u.username', 'ars.object_title')
+                ->orderByDesc('ar.created_at')
+                ->limit(10)
+                ->get();
+            foreach ($ar as $row) {
+                $row->review_url = $this->getController()->genUrl('@access_request_view?id='.$row->request_id);
+                $this->pendingRequests[] = $row;
+            }
+            $this->statistics['pending_requests'] += $ar->count();
+        }
+
         // Expiring clearances
         $this->expiringClearances = $db::table('user_security_clearance as usc')
             ->join('user as u', 'usc.user_id', '=', 'u.id')

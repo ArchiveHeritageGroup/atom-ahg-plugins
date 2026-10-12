@@ -179,16 +179,11 @@ class PdfRedactionService
      */
     public function getRedactedTerms(int $objectId): array
     {
-        // Get redacted entities from ahg_ner_entity (NER + regex + ISAD access points)
-        $entities = DB::table('ahg_ner_entity as e')
-            ->join('ahg_ner_extraction as ex', 'ex.id', '=', 'e.extraction_id')
-            ->where('e.object_id', $objectId)
-            ->where('e.status', 'redacted')
-            ->pluck('e.entity_value')
-            ->toArray();
+        // Stored findings are masked, so they never matched the PDF's text; resolve
+        // them back to the originals in this object's own text and PDF.
+        require_once __DIR__ . '/PiiDetectionService.php';
 
-        // Remove duplicates and empty values
-        return array_values(array_unique(array_filter($entities)));
+        return (new PiiDetectionService())->resolveRedactedValues($objectId, true);
     }
 
     /**
