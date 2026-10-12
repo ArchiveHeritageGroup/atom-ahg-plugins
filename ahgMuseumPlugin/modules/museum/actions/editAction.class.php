@@ -153,6 +153,22 @@ class museumEditAction extends AhgController
                 $this->processForm();
             } elseif ($this->form->isValid()) {
                 $this->processForm();
+
+                // The template's required fields were badged "Required" and the page
+                // carried a "Save anyway" button, but nothing checked them: any record
+                // saved, however incomplete. Check now; "Save anyway" still overrides.
+                // The object number counts as present when it will be auto-generated.
+                $check = ahgCCOTemplates::validateRecord($templateId, $this->ccoData + ['object_number' => empty($this->resource->id) ? 'auto' : null]);
+                if (!$check['valid'] && !$request->getParameter('saveAnyway')) {
+                    $this->validationErrors = $check['errors'];
+                    $this->validationWarnings = $check['warnings'];
+                    $this->resourceId = $this->resource->id ?? null;
+                    $this->resourceSlug = $this->resource->slug ?? null;
+                    $this->completeness = ahgCCOTemplates::calculateCompleteness($templateId, $this->ccoData);
+
+                    return sfView::SUCCESS;
+                }
+
                 $this->saveRecord();
 
                 // Redirect to the view page using slug

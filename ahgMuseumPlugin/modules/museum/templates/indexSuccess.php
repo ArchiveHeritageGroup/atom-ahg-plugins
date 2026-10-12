@@ -28,14 +28,15 @@ if ($museumRecord) {
         // Object Identification
         'object_number' => $rawResource->identifier,
         'work_type' => $data['work_type'] ?? null,
-        'title_type' => $data['object_type'] ?? null,
+        'title_type' => $data['title_type'] ?? $data['object_type'] ?? null,
         'classification' => $data['classification'] ?? null,
         'object_class' => $data['object_class'] ?? null,
         'object_category' => $data['object_category'] ?? null,
         'object_sub_category' => $data['object_sub_category'] ?? null,
 
         // Creator Information
-        'creator_display' => $data['creator_identity'] ?? null,
+        // creator_identity holds the authority record's id; the display text is its own column.
+        'creator_display' => $data['creator_display'] ?? null,
         'creator_role' => $data['creator_role'] ?? null,
         'creator_extent' => $data['creator_extent'] ?? null,
         'creator_qualifier' => $data['creator_qualifier'] ?? null,
@@ -62,7 +63,7 @@ if ($museumRecord) {
         // Physical Description
         'dimensions_display' => $data['dimensions'] ?? null,
         'measurements' => $data['measurements'] ?? null,
-        'materials' => $data['materials'] ?? null,
+        'materials' => $data['materials'] ?? $data['materials_display'] ?? null,
         'techniques' => $data['techniques'] ?? null,
         'technique_cco' => $data['technique_cco'] ?? null,
         'technique_qualifier' => $data['technique_qualifier'] ?? null,
@@ -116,7 +117,10 @@ if ($museumRecord) {
         'provenance_text' => $data['provenance_text'] ?? null,
         'ownership_history' => $data['ownership_history'] ?? null,
         'current_location' => $data['current_location'] ?? null,
-        'current_location_repository' => $data['current_location_repository'] ?? null,
+        // Stored as the repository's id; show its name.
+        'current_location_repository' => !empty($data['current_location_repository']) && ctype_digit((string) $data['current_location_repository'])
+            ? (DB::table('actor_i18n')->where('id', (int) $data['current_location_repository'])->value('authorized_form_of_name') ?? $data['current_location_repository'])
+            : ($data['current_location_repository'] ?? null),
         'current_location_geography' => $data['current_location_geography'] ?? null,
         'current_location_coordinates' => $data['current_location_coordinates'] ?? null,
         'current_location_ref_number' => $data['current_location_ref_number'] ?? null,

@@ -129,7 +129,7 @@ class museumIndexAction extends AhgController
                 'object_sub_category' => $data['object_sub_category'] ?? null,
 
                 // Creator Information
-                'creator_display' => $data['creator_identity'] ?? null,
+                'creator_display' => $data['creator_display'] ?? null,
                 'creator_identity' => $data['creator_identity'] ?? null,
                 'creator_role' => $data['creator_role'] ?? null,
                 'creator_extent' => $data['creator_extent'] ?? null,

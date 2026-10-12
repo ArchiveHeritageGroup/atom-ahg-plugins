@@ -140,6 +140,14 @@ document.addEventListener("DOMContentLoaded", function() {
   border-color: var(--ahg-primary, #005837);
 }
 
+/* The theme's link colour won over the white above, leaving the active
+   template's label green on green. */
+.template-option.active,
+.template-option.active span,
+.template-option.active i {
+  color: #fff !important;
+}
+
 .template-option i {
   margin-right: 5px;
   font-size: 11px;
@@ -451,6 +459,8 @@ document.addEventListener("DOMContentLoaded", function() {
   background: #f8f9fa;
 }
 </style>
+<?php // Only when a save was refused: this rendered on every visit, empty, with "Save anyway". ?>
+<?php if (!empty($validationErrors)): ?>
 <div class="alert alert-danger">
   <h5><i class="fa fa-exclamation-triangle"></i> <?php echo __('Validation Errors'); ?></h5>
   <ul>
@@ -464,6 +474,7 @@ document.addEventListener("DOMContentLoaded", function() {
     </button>
   </p>
 </div>
+<?php endif; ?>
 
 <?php if (isset($validationWarnings) && !empty($validationWarnings)): ?>
 <div class="alert alert-warning">

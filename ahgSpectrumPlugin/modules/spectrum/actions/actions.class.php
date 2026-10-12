@@ -126,7 +126,8 @@ class spectrumActions extends AhgController
 
         // Get procedure label
         $procedures = ahgSpectrumWorkflowService::getProcedures();
-        $procedureLabel = $procedures[$procedureType] ?? ucwords(str_replace('_', ' ', $procedureType));
+        // Each procedure is an array (label, description, ...); this printed "Array".
+        $procedureLabel = $procedures[$procedureType]['label'] ?? ucwords(str_replace('_', ' ', $procedureType));
 
         // Get state label from config
         $config = DB::table('spectrum_workflow_config')
@@ -252,7 +253,7 @@ class spectrumActions extends AhgController
     protected function getProcedureLabel($procedureType)
     {
         $procedures = ahgSpectrumWorkflowService::getProcedures();
-        return $procedures[$procedureType] ?? ucwords(str_replace('_', ' ', $procedureType));
+        return $procedures[$procedureType]['label'] ?? ucwords(str_replace('_', ' ', $procedureType));
     }
 
     public function executeIndex($request)

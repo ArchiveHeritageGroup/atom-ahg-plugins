@@ -261,7 +261,7 @@ class ahgSpectrumNotificationService
     protected static function getProcedureLabel($procedureType)
     {
         $procedures = ahgSpectrumWorkflowService::getProcedures();
-        return $procedures[$procedureType] ?? ucwords(str_replace('_', ' ', $procedureType));
+        return $procedures[$procedureType]['label'] ?? ucwords(str_replace('_', ' ', $procedureType));
     }
 
     /**
