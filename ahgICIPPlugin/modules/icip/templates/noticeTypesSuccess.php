@@ -42,7 +42,7 @@
                             <tbody>
                                 <?php foreach ($noticeTypes as $type): ?>
                                     <tr class="<?php echo !$type->is_active ? 'table-secondary' : '' ?>">
-                                        <td><code><?php echo htmlspecialchars($type->code) ?></code></td>
+                                        <td><code><?php echo htmlspecialchars((string) ($type->code), ENT_QUOTES, 'UTF-8', false) ?></code></td>
                                         <td>
                                             <?php
                                             $severityIcon = match ($type->severity) {
@@ -52,7 +52,7 @@
                                             };
                                             ?>
                                             <i class="bi <?php echo $severityIcon ?> me-1"></i>
-                                            <?php echo htmlspecialchars($type->name) ?>
+                                            <?php echo htmlspecialchars((string) ($type->name), ENT_QUOTES, 'UTF-8', false) ?>
                                         </td>
                                         <td>
                                             <?php

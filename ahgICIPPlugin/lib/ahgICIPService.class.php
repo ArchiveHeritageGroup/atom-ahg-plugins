@@ -78,6 +78,8 @@ class ahgICIPService
             'NT' => 'Northern Territory',
             'ACT' => 'Australian Capital Territory',
             'External' => 'External Territories',
+            // The list is Australian; communities elsewhere use Other and the Region field.
+            'Other' => 'Other / outside Australia',
         ];
     }
 

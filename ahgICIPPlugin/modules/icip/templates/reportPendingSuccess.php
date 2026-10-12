@@ -41,14 +41,14 @@
                                     <td>
                                         <?php if ($record->slug): ?>
                                             <a href="<?php echo url_for('@icip_object?slug=' . $record->slug) ?>">
-                                                <?php echo htmlspecialchars($record->object_title ?? 'Untitled') ?>
+                                                <?php echo htmlspecialchars((string) ($record->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                             </a>
                                         <?php else: ?>
-                                            <?php echo htmlspecialchars($record->object_title ?? 'Untitled') ?>
+                                            <?php echo htmlspecialchars((string) ($record->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                         <?php endif ?>
                                     </td>
-                                    <td><?php echo htmlspecialchars($record->identifier ?? '-') ?></td>
-                                    <td><?php echo htmlspecialchars($record->community_name ?? 'Not specified') ?></td>
+                                    <td><?php echo htmlspecialchars((string) ($record->identifier ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></td>
+                                    <td><?php echo htmlspecialchars((string) ($record->community_name ?? 'Not specified'), ENT_QUOTES, 'UTF-8', false) ?></td>
                                     <td>
                                         <?php
                                         $statusClass = match ($record->consent_status) {

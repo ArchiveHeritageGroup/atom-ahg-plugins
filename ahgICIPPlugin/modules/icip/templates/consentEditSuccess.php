@@ -16,7 +16,7 @@
         <div class="alert alert-info">
             <i class="bi bi-archive me-2"></i>
             <strong>Record:</strong>
-            <a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? $object->identifier ?? 'Untitled') ?></a>
+            <a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars((string) ($object->title ?? $object->identifier ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?></a>
         </div>
     <?php endif ?>
 
@@ -32,7 +32,7 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label class="form-label">Object ID <span class="text-danger">*</span></label>
-                                <input type="number" name="information_object_id" class="form-control" required value="<?php echo htmlspecialchars($consent->information_object_id ?? $objectId ?? '') ?>">
+                                <input type="number" name="information_object_id" class="form-control" required value="<?php echo htmlspecialchars((string) ($consent->information_object_id ?? $objectId ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                                 <div class="form-text">Enter the information object ID this consent applies to</div>
                             </div>
                         </div>
@@ -54,7 +54,7 @@
                                     <option value="">Not specified / Multiple</option>
                                     <?php foreach ($communities as $community): ?>
                                         <option value="<?php echo $community->id ?>" <?php echo ($consent->community_id ?? '') == $community->id ? 'selected' : '' ?>>
-                                            <?php echo htmlspecialchars($community->name) ?>
+                                            <?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?>
                                         </option>
                                     <?php endforeach ?>
                                 </select>
@@ -106,13 +106,13 @@
 
                         <div class="mb-3">
                             <label class="form-label">Consent Granted By</label>
-                            <input type="text" name="consent_granted_by" class="form-control" value="<?php echo htmlspecialchars($consent->consent_granted_by ?? '') ?>">
+                            <input type="text" name="consent_granted_by" class="form-control" value="<?php echo htmlspecialchars((string) ($consent->consent_granted_by ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             <div class="form-text">Person or authority who granted consent</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Consent Document Path</label>
-                            <input type="text" name="consent_document_path" class="form-control" value="<?php echo htmlspecialchars($consent->consent_document_path ?? '') ?>">
+                            <input type="text" name="consent_document_path" class="form-control" value="<?php echo htmlspecialchars((string) ($consent->consent_document_path ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             <div class="form-text">Path to uploaded consent document (if applicable)</div>
                         </div>
                     </div>
@@ -126,19 +126,19 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Conditions</label>
-                            <textarea name="conditions" class="form-control" rows="4"><?php echo htmlspecialchars($consent->conditions ?? '') ?></textarea>
+                            <textarea name="conditions" class="form-control" rows="4"><?php echo htmlspecialchars((string) ($consent->conditions ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                             <div class="form-text">Any conditions attached to this consent</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Restrictions</label>
-                            <textarea name="restrictions" class="form-control" rows="4"><?php echo htmlspecialchars($consent->restrictions ?? '') ?></textarea>
+                            <textarea name="restrictions" class="form-control" rows="4"><?php echo htmlspecialchars((string) ($consent->restrictions ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                             <div class="form-text">Specific usage restrictions that apply</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Notes</label>
-                            <textarea name="notes" class="form-control" rows="3"><?php echo htmlspecialchars($consent->notes ?? '') ?></textarea>
+                            <textarea name="notes" class="form-control" rows="3"><?php echo htmlspecialchars((string) ($consent->notes ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         </div>
                     </div>
                 </div>

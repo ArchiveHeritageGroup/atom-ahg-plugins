@@ -245,15 +245,23 @@ class ExtendedRightsService
      */
     public function getActiveEmbargoes(): Collection
     {
-        return DB::table('embargo as e')
+        // Embargoes are written to rights_embargo (EmbargoService, the record's Add
+        // embargo). This read the older `embargo` table, which nothing writes any more,
+        // and required an end date - so the list showed none, and never a perpetual one.
+        $today = date('Y-m-d');
+
+        return DB::table('rights_embargo as e')
             ->join('information_object as io', 'io.id', '=', 'e.object_id')
             ->leftJoin('information_object_i18n as ioi', function($j) {
                 $j->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', $this->culture);
             })
-            ->where('e.end_date', '>=', date('Y-m-d'))
-            ->where('e.is_active', 1)
-            ->select(['e.*', 'ioi.title as object_title'])
-            ->orderBy('e.end_date')
+            ->leftJoin('slug', 'slug.object_id', '=', 'e.object_id')
+            ->where('e.status', 'active')
+            ->where(function ($q) use ($today) {
+                $q->whereNull('e.end_date')->orWhere('e.end_date', '>=', $today);
+            })
+            ->select(['e.*', 'ioi.title as object_title', 'ioi.title', 'slug.slug'])
+            ->orderByRaw('e.end_date IS NULL, e.end_date')
             ->limit(20)
             ->get();
     }

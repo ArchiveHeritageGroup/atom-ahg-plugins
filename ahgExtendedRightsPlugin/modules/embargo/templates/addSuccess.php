@@ -5,6 +5,10 @@
   <p class="lead"><?php echo $resource->title ?? $resource->slug; ?></p>
 <?php end_slot(); ?>
 
+<?php $old = isset($old) ? $sf_data->getRaw('old') : []; $v = fn ($k, $d = '') => htmlspecialchars((string) ($old[$k] ?? $d)); ?>
+<?php if (isset($dateError)): ?>
+  <div class="alert alert-danger"><?php echo __($dateError); ?></div>
+<?php endif; ?>
 <form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'add', 'objectId' => $objectId]); ?>">
 
   <div class="card mb-4">
@@ -16,10 +20,10 @@
         <div class="col-md-6 mb-3">
           <label for="embargo_type" class="form-label"><?php echo __('Embargo Type'); ?> <span class="text-danger">*</span></label>
           <select name="embargo_type" id="embargo_type" class="form-select" required>
-            <option value="full"><?php echo __('Full - Hide completely'); ?></option>
-            <option value="metadata_only"><?php echo __('Metadata Only - Hide digital objects'); ?></option>
-            <option value="digital_object"><?php echo __('Digital Object - Restrict downloads'); ?></option>
-            <option value="custom"><?php echo __('Custom'); ?></option>
+            <option value="full"<?php echo ($old['embargo_type'] ?? '') === 'full' ? ' selected' : ''; ?>><?php echo __('Full - Hide completely'); ?></option>
+            <option value="metadata_only"<?php echo ($old['embargo_type'] ?? '') === 'metadata_only' ? ' selected' : ''; ?>><?php echo __('Metadata Only - Hide digital objects'); ?></option>
+            <option value="digital_object"<?php echo ($old['embargo_type'] ?? '') === 'digital_object' ? ' selected' : ''; ?>><?php echo __('Digital Object - Restrict downloads'); ?></option>
+            <option value="custom"<?php echo ($old['embargo_type'] ?? '') === 'custom' ? ' selected' : ''; ?>><?php echo __('Custom'); ?></option>
           </select>
         </div>
       </div>
@@ -27,16 +31,16 @@
       <div class="row">
         <div class="col-md-4 mb-3">
           <label for="start_date" class="form-label"><?php echo __('Start Date'); ?> <span class="text-danger">*</span></label>
-          <input type="date" name="start_date" id="start_date" class="form-control" required value="<?php echo date('Y-m-d'); ?>">
+          <input type="date" name="start_date" id="start_date" class="form-control" required value="<?php echo $v('start_date', date('Y-m-d')); ?>">
         </div>
         <div class="col-md-4 mb-3">
           <label for="end_date" class="form-label"><?php echo __('End Date'); ?></label>
-          <input type="date" name="end_date" id="end_date" class="form-control">
+          <input type="date" name="end_date" id="end_date" class="form-control<?php echo isset($dateError) ? ' is-invalid' : ''; ?>" value="<?php echo $v('end_date'); ?>">
           <small class="text-muted"><?php echo __('Leave blank for perpetual embargo'); ?></small>
         </div>
         <div class="col-md-4 mb-3 d-flex align-items-end">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="is_perpetual" value="1" id="is_perpetual">
+            <input class="form-check-input" type="checkbox" name="is_perpetual" value="1" id="is_perpetual"<?php echo !empty($old['is_perpetual']) ? ' checked' : ''; ?>>
             <label class="form-check-label" for="is_perpetual">
               <?php echo __('Perpetual (no end date)'); ?>
             </label>
@@ -45,18 +49,13 @@
       </div>
 
       <div class="mb-3">
-        <label for="reason" class="form-label"><?php echo __('Reason'); ?></label>
-        <input type="text" name="reason" id="reason" class="form-control" placeholder="<?php echo __('e.g., Donor restriction, Privacy concerns, Legal hold'); ?>">
-      </div>
-
-      <div class="mb-3">
-        <label for="public_message" class="form-label"><?php echo __('Public Message'); ?></label>
-        <textarea name="public_message" id="public_message" class="form-control" rows="2" placeholder="<?php echo __('Message displayed to users when they encounter this embargo'); ?>"></textarea>
+        <label for="reason" class="form-label"><?php echo __('Reason (shown to visitors)'); ?></label>
+        <input type="text" name="reason" id="reason" class="form-control" value="<?php echo $v('reason'); ?>" placeholder="<?php echo __('e.g., Donor restriction, Privacy concerns, Legal hold'); ?>">
       </div>
 
       <div class="mb-3">
         <label for="notes" class="form-label"><?php echo __('Internal Notes'); ?></label>
-        <textarea name="notes" id="notes" class="form-control" rows="3"></textarea>
+        <textarea name="notes" id="notes" class="form-control" rows="3"><?php echo $v('notes'); ?></textarea>
       </div>
     </div>
   </div>

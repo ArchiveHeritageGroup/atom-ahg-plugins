@@ -1,7 +1,7 @@
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? 'Record') ?></a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars((string) ($object->title ?? 'Record'), ENT_QUOTES, 'UTF-8', false) ?></a></li>
             <li class="breadcrumb-item"><a href="<?php echo url_for('@icip_object?slug=' . $object->slug) ?>">ICIP</a></li>
             <li class="breadcrumb-item active">Cultural Notices</li>
         </ol>
@@ -42,16 +42,16 @@
                                     ?>
                                     <i class="bi <?php echo $severityIcon ?> fs-4 me-3"></i>
                                     <div>
-                                        <strong><?php echo htmlspecialchars($notice->notice_name) ?></strong>
+                                        <strong><?php echo htmlspecialchars((string) ($notice->notice_name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                         <?php if ($notice->requires_acknowledgement): ?>
                                             <span class="badge bg-warning text-dark ms-2">Requires Acknowledgement</span>
                                         <?php endif ?>
                                         <?php if ($notice->blocks_access): ?>
                                             <span class="badge bg-danger ms-2">Blocks Access</span>
                                         <?php endif ?>
-                                        <p class="mb-1 mt-1"><?php echo htmlspecialchars($notice->custom_text ?? $notice->default_text ?? '') ?></p>
+                                        <p class="mb-1 mt-1"><?php echo htmlspecialchars((string) ($notice->custom_text ?? $notice->default_text ?? ''), ENT_QUOTES, 'UTF-8', false) ?></p>
                                         <?php if ($notice->community_name): ?>
-                                            <small class="text-muted">Community: <?php echo htmlspecialchars($notice->community_name) ?></small>
+                                            <small class="text-muted">Community: <?php echo htmlspecialchars((string) ($notice->community_name), ENT_QUOTES, 'UTF-8', false) ?></small>
                                         <?php endif ?>
                                     </div>
                                 </div>
@@ -84,7 +84,7 @@
                                     <option value="">Select notice type</option>
                                     <?php foreach ($noticeTypes as $type): ?>
                                         <option value="<?php echo $type->id ?>">
-                                            <?php echo htmlspecialchars($type->name) ?>
+                                            <?php echo htmlspecialchars((string) ($type->name), ENT_QUOTES, 'UTF-8', false) ?>
                                             (<?php echo ucfirst($type->severity) ?>)
                                         </option>
                                     <?php endforeach ?>
@@ -95,7 +95,7 @@
                                 <select name="community_id" class="form-select">
                                     <option value="">Not specified</option>
                                     <?php foreach ($communities as $community): ?>
-                                        <option value="<?php echo $community->id ?>"><?php echo htmlspecialchars($community->name) ?></option>
+                                        <option value="<?php echo $community->id ?>"><?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?></option>
                                     <?php endforeach ?>
                                 </select>
                             </div>
@@ -155,9 +155,9 @@
                             };
                             ?>
                             <i class="bi <?php echo $severityIcon ?> me-1"></i>
-                            <strong><?php echo htmlspecialchars($type->name) ?></strong>
+                            <strong><?php echo htmlspecialchars((string) ($type->name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                             <br>
-                            <small class="text-muted"><?php echo htmlspecialchars($type->description ?? '') ?></small>
+                            <small class="text-muted"><?php echo htmlspecialchars((string) ($type->description ?? ''), ENT_QUOTES, 'UTF-8', false) ?></small>
                         </div>
                     <?php endforeach ?>
                 </div>

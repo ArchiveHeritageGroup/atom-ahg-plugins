@@ -45,9 +45,16 @@ $access = json_decode(json_encode(sfOutputEscaper::unescape($access ?? [])), tru
                         <div class="alert alert-secondary">
                             <h5><i class="fas fa-clock me-2"></i>Under Embargo</h5>
                             <p class="mb-0">
-                                This material is embargoed until 
-                                <strong><?php echo date('F j, Y', strtotime($access['embargo']['end_date'])); ?></strong>.
+                                <?php if (!empty($access['embargo']['end_date'])): ?>
+                                    This material is embargoed until
+                                    <strong><?php echo date('j F Y', strtotime($access['embargo']['end_date'])); ?></strong>.
+                                <?php else: ?>
+                                    This material is embargoed until further notice.
+                                <?php endif; ?>
                             </p>
+                            <?php if (!empty($access['embargo']['reason'])): ?>
+                                <p class="mb-0 mt-2"><?php echo esc_entities($access['embargo']['reason']); ?></p>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 

@@ -3,7 +3,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="<?php echo url_for('@icip_dashboard') ?>">ICIP</a></li>
             <li class="breadcrumb-item"><a href="<?php echo url_for('@icip_communities') ?>">Communities</a></li>
-            <li class="breadcrumb-item active"><?php echo htmlspecialchars($community->name) ?></li>
+            <li class="breadcrumb-item active"><?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?></li>
         </ol>
     </nav>
 
@@ -11,7 +11,7 @@
         <div>
             <h1>
                 <i class="bi bi-people me-2"></i>
-                <?php echo htmlspecialchars($community->name) ?>
+                <?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?>
             </h1>
             <?php if (!$community->is_active): ?>
                 <span class="badge bg-secondary">Inactive</span>
@@ -39,10 +39,10 @@
                         <div class="col-md-6">
                             <dl>
                                 <dt>Language Group</dt>
-                                <dd><?php echo htmlspecialchars($community->language_group ?? '-') ?></dd>
+                                <dd><?php echo htmlspecialchars((string) ($community->language_group ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></dd>
 
                                 <dt>Region</dt>
-                                <dd><?php echo htmlspecialchars($community->region ?? '-') ?></dd>
+                                <dd><?php echo htmlspecialchars((string) ($community->region ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></dd>
 
                                 <dt>State/Territory</dt>
                                 <dd>
@@ -67,7 +67,7 @@
                             <?php if ($community->native_title_reference): ?>
                                 <dl>
                                     <dt>Native Title Reference</dt>
-                                    <dd><?php echo htmlspecialchars($community->native_title_reference) ?></dd>
+                                    <dd><?php echo htmlspecialchars((string) ($community->native_title_reference), ENT_QUOTES, 'UTF-8', false) ?></dd>
                                 </dl>
                             <?php endif ?>
                         </div>
@@ -76,7 +76,7 @@
                     <?php if ($community->notes): ?>
                         <hr>
                         <h6>Notes</h6>
-                        <p class="mb-0"><?php echo nl2br(htmlspecialchars($community->notes)) ?></p>
+                        <p class="mb-0"><?php echo nl2br(htmlspecialchars((string) ($community->notes), ENT_QUOTES, 'UTF-8', false)) ?></p>
                     <?php endif ?>
                 </div>
             </div>
@@ -105,7 +105,7 @@
                                 <tbody>
                                     <?php foreach ($consents as $consent): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($consent->object_title ?? 'Untitled') ?></td>
+                                            <td><?php echo htmlspecialchars((string) ($consent->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?></td>
                                             <td>
                                                 <?php
                                                 $statusClass = match ($consent->consent_status) {
@@ -191,15 +191,15 @@
                     <?php if ($community->contact_name): ?>
                         <p class="mb-2">
                             <i class="bi bi-person me-2 text-muted"></i>
-                            <strong><?php echo htmlspecialchars($community->contact_name) ?></strong>
+                            <strong><?php echo htmlspecialchars((string) ($community->contact_name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                         </p>
                     <?php endif ?>
 
                     <?php if ($community->contact_email): ?>
                         <p class="mb-2">
                             <i class="bi bi-envelope me-2 text-muted"></i>
-                            <a href="mailto:<?php echo htmlspecialchars($community->contact_email) ?>">
-                                <?php echo htmlspecialchars($community->contact_email) ?>
+                            <a href="mailto:<?php echo htmlspecialchars((string) ($community->contact_email), ENT_QUOTES, 'UTF-8', false) ?>">
+                                <?php echo htmlspecialchars((string) ($community->contact_email), ENT_QUOTES, 'UTF-8', false) ?>
                             </a>
                         </p>
                     <?php endif ?>
@@ -207,8 +207,8 @@
                     <?php if ($community->contact_phone): ?>
                         <p class="mb-2">
                             <i class="bi bi-telephone me-2 text-muted"></i>
-                            <a href="tel:<?php echo htmlspecialchars($community->contact_phone) ?>">
-                                <?php echo htmlspecialchars($community->contact_phone) ?>
+                            <a href="tel:<?php echo htmlspecialchars((string) ($community->contact_phone), ENT_QUOTES, 'UTF-8', false) ?>">
+                                <?php echo htmlspecialchars((string) ($community->contact_phone), ENT_QUOTES, 'UTF-8', false) ?>
                             </a>
                         </p>
                     <?php endif ?>
@@ -216,7 +216,7 @@
                     <?php if ($community->contact_address): ?>
                         <p class="mb-0">
                             <i class="bi bi-geo-alt me-2 text-muted"></i>
-                            <?php echo nl2br(htmlspecialchars($community->contact_address)) ?>
+                            <?php echo nl2br(htmlspecialchars((string) ($community->contact_address), ENT_QUOTES, 'UTF-8', false)) ?>
                         </p>
                     <?php endif ?>
 
@@ -234,13 +234,13 @@
                     </div>
                     <div class="card-body">
                         <p class="mb-2">
-                            <strong><?php echo htmlspecialchars($community->prescribed_body_corporate) ?></strong>
+                            <strong><?php echo htmlspecialchars((string) ($community->prescribed_body_corporate), ENT_QUOTES, 'UTF-8', false) ?></strong>
                         </p>
                         <?php if ($community->pbc_contact_email): ?>
                             <p class="mb-0">
                                 <i class="bi bi-envelope me-2 text-muted"></i>
-                                <a href="mailto:<?php echo htmlspecialchars($community->pbc_contact_email) ?>">
-                                    <?php echo htmlspecialchars($community->pbc_contact_email) ?>
+                                <a href="mailto:<?php echo htmlspecialchars((string) ($community->pbc_contact_email), ENT_QUOTES, 'UTF-8', false) ?>">
+                                    <?php echo htmlspecialchars((string) ($community->pbc_contact_email), ENT_QUOTES, 'UTF-8', false) ?>
                                 </a>
                             </p>
                         <?php endif ?>

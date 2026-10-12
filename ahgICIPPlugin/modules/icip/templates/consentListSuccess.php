@@ -38,7 +38,7 @@
                         <option value="">All Communities</option>
                         <?php foreach ($communities as $community): ?>
                             <option value="<?php echo $community->id ?>" <?php echo ($filters['community_id'] ?? '') == $community->id ? 'selected' : '' ?>>
-                                <?php echo htmlspecialchars($community->name) ?>
+                                <?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?>
                             </option>
                         <?php endforeach ?>
                     </select>
@@ -83,13 +83,13 @@
                                     <td>
                                         <?php if ($consent->slug): ?>
                                             <a href="<?php echo url_for('@icip_object?slug=' . $consent->slug) ?>">
-                                                <?php echo htmlspecialchars($consent->object_title ?? 'Untitled') ?>
+                                                <?php echo htmlspecialchars((string) ($consent->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                             </a>
                                         <?php else: ?>
-                                            <?php echo htmlspecialchars($consent->object_title ?? 'Untitled') ?>
+                                            <?php echo htmlspecialchars((string) ($consent->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                         <?php endif ?>
                                     </td>
-                                    <td><?php echo htmlspecialchars($consent->community_name ?? '-') ?></td>
+                                    <td><?php echo htmlspecialchars((string) ($consent->community_name ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></td>
                                     <td>
                                         <?php
                                         $statusClass = match ($consent->consent_status) {

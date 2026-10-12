@@ -15,6 +15,9 @@ $embargoReasons = $taxonomyService->getEmbargoReasons(true);
 $embargoStatuses = $taxonomyService->getEmbargoStatuses(false);
 ?>
 
+<?php if (isset($dateError)): ?>
+  <div class="alert alert-danger"><?php echo __($dateError); ?></div>
+<?php endif; ?>
 <form method="post" action="<?php echo url_for(['module' => 'embargo', 'action' => 'edit', 'id' => $embargo->id]); ?>">
   <div class="card mb-4">
     <div class="card-header">
@@ -31,7 +34,7 @@ $embargoStatuses = $taxonomyService->getEmbargoStatuses(false);
           </select>
         </div>
         <div class="col-md-6 mb-3">
-          <label for="reason" class="form-label"><?php echo __('Reason'); ?></label>
+          <label for="reason" class="form-label"><?php echo __('Reason (shown to visitors)'); ?></label>
           <select name="reason" id="reason" class="form-select">
             <?php foreach ($embargoReasons as $code => $label): ?>
               <option value="<?php echo $code; ?>" <?php echo ($embargo->reason ?? '') === $code ? 'selected' : ''; ?>><?php echo __($label); ?></option>

@@ -44,19 +44,19 @@
                                                 <i class="bi bi-lock-fill text-danger me-1"></i>
                                                 <?php echo $restrictionTypes[$restriction->restriction_type] ?? ucwords(str_replace('_', ' ', $restriction->restriction_type)) ?>
                                                 <?php if ($restriction->restriction_type === 'custom' && $restriction->custom_restriction_text): ?>
-                                                    <br><small class="text-muted"><?php echo htmlspecialchars($restriction->custom_restriction_text) ?></small>
+                                                    <br><small class="text-muted"><?php echo htmlspecialchars((string) ($restriction->custom_restriction_text), ENT_QUOTES, 'UTF-8', false) ?></small>
                                                 <?php endif ?>
                                             </td>
                                             <td>
                                                 <?php if ($restriction->slug): ?>
                                                     <a href="<?php echo url_for('@icip_object?slug=' . $restriction->slug) ?>">
-                                                        <?php echo htmlspecialchars($restriction->object_title ?? 'Untitled') ?>
+                                                        <?php echo htmlspecialchars((string) ($restriction->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                                     </a>
                                                 <?php else: ?>
-                                                    <?php echo htmlspecialchars($restriction->object_title ?? 'Untitled') ?>
+                                                    <?php echo htmlspecialchars((string) ($restriction->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                                 <?php endif ?>
                                             </td>
-                                            <td><?php echo htmlspecialchars($restriction->community_name ?? '-') ?></td>
+                                            <td><?php echo htmlspecialchars((string) ($restriction->community_name ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></td>
                                             <td>
                                                 <?php if ($restriction->start_date || $restriction->end_date): ?>
                                                     <?php echo $restriction->start_date ? date('j M Y', strtotime($restriction->start_date)) : 'Start' ?>

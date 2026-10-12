@@ -34,7 +34,7 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Name, language group, region..." value="<?php echo htmlspecialchars($filters['search'] ?? '') ?>">
+                    <input type="text" name="search" class="form-control" placeholder="Name, language group, region..." value="<?php echo htmlspecialchars((string) ($filters['search'] ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                 </div>
                 <div class="col-md-2">
                     <div class="form-check">
@@ -83,22 +83,22 @@
                                 <tr>
                                     <td>
                                         <a href="<?php echo url_for('@icip_community_view?id=' . $community->id) ?>">
-                                            <strong><?php echo htmlspecialchars($community->name) ?></strong>
+                                            <strong><?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                         </a>
                                         <?php if ($community->prescribed_body_corporate): ?>
-                                            <br><small class="text-muted">PBC: <?php echo htmlspecialchars($community->prescribed_body_corporate) ?></small>
+                                            <br><small class="text-muted">PBC: <?php echo htmlspecialchars((string) ($community->prescribed_body_corporate), ENT_QUOTES, 'UTF-8', false) ?></small>
                                         <?php endif ?>
                                     </td>
-                                    <td><?php echo htmlspecialchars($community->language_group ?? '-') ?></td>
-                                    <td><?php echo htmlspecialchars($community->region ?? '-') ?></td>
+                                    <td><?php echo htmlspecialchars((string) ($community->language_group ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></td>
+                                    <td><?php echo htmlspecialchars((string) ($community->region ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></td>
                                     <td>
                                         <span class="badge bg-secondary"><?php echo $community->state_territory ?></span>
                                     </td>
                                     <td>
                                         <?php if ($community->contact_name): ?>
-                                            <?php echo htmlspecialchars($community->contact_name) ?>
+                                            <?php echo htmlspecialchars((string) ($community->contact_name), ENT_QUOTES, 'UTF-8', false) ?>
                                             <?php if ($community->contact_email): ?>
-                                                <br><small><a href="mailto:<?php echo htmlspecialchars($community->contact_email) ?>"><?php echo htmlspecialchars($community->contact_email) ?></a></small>
+                                                <br><small><a href="mailto:<?php echo htmlspecialchars((string) ($community->contact_email), ENT_QUOTES, 'UTF-8', false) ?>"><?php echo htmlspecialchars((string) ($community->contact_email), ENT_QUOTES, 'UTF-8', false) ?></a></small>
                                             <?php endif ?>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>

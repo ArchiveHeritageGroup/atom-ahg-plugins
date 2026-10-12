@@ -11,7 +11,7 @@
         <div>
             <h1>
                 <i class="bi bi-chat-dots me-2"></i>
-                Consultation with <?php echo htmlspecialchars($consultation->community_name) ?>
+                Consultation with <?php echo htmlspecialchars((string) ($consultation->community_name), ENT_QUOTES, 'UTF-8', false) ?>
             </h1>
             <p class="text-muted mb-0">
                 <?php echo date('j F Y', strtotime($consultation->consultation_date)) ?>
@@ -32,7 +32,7 @@
                     <h5 class="mb-0">Summary</h5>
                 </div>
                 <div class="card-body">
-                    <?php echo nl2br(htmlspecialchars($consultation->summary)) ?>
+                    <?php echo nl2br(htmlspecialchars((string) ($consultation->summary), ENT_QUOTES, 'UTF-8', false)) ?>
                 </div>
             </div>
 
@@ -42,7 +42,7 @@
                         <h5 class="mb-0">Outcomes</h5>
                     </div>
                     <div class="card-body">
-                        <?php echo nl2br(htmlspecialchars($consultation->outcomes)) ?>
+                        <?php echo nl2br(htmlspecialchars((string) ($consultation->outcomes), ENT_QUOTES, 'UTF-8', false)) ?>
                     </div>
                 </div>
             <?php endif ?>
@@ -57,21 +57,21 @@
                         <?php if ($consultation->community_representatives): ?>
                             <div class="col-md-6 mb-3">
                                 <h6>Community Representatives</h6>
-                                <p class="mb-0"><?php echo nl2br(htmlspecialchars($consultation->community_representatives)) ?></p>
+                                <p class="mb-0"><?php echo nl2br(htmlspecialchars((string) ($consultation->community_representatives), ENT_QUOTES, 'UTF-8', false)) ?></p>
                             </div>
                         <?php endif ?>
 
                         <?php if ($consultation->institution_representatives): ?>
                             <div class="col-md-6 mb-3">
                                 <h6>Institution Representatives</h6>
-                                <p class="mb-0"><?php echo nl2br(htmlspecialchars($consultation->institution_representatives)) ?></p>
+                                <p class="mb-0"><?php echo nl2br(htmlspecialchars((string) ($consultation->institution_representatives), ENT_QUOTES, 'UTF-8', false)) ?></p>
                             </div>
                         <?php endif ?>
 
                         <?php if ($consultation->attendees): ?>
                             <div class="col-md-6 mb-3">
                                 <h6>Other Attendees</h6>
-                                <p class="mb-0"><?php echo nl2br(htmlspecialchars($consultation->attendees)) ?></p>
+                                <p class="mb-0"><?php echo nl2br(htmlspecialchars((string) ($consultation->attendees), ENT_QUOTES, 'UTF-8', false)) ?></p>
                             </div>
                         <?php endif ?>
                     </div>
@@ -111,7 +111,7 @@
 
                         <?php if ($consultation->follow_up_notes): ?>
                             <h6>Notes</h6>
-                            <?php echo nl2br(htmlspecialchars($consultation->follow_up_notes)) ?>
+                            <?php echo nl2br(htmlspecialchars((string) ($consultation->follow_up_notes), ENT_QUOTES, 'UTF-8', false)) ?>
                         <?php endif ?>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                         <dt>Community</dt>
                         <dd>
                             <a href="<?php echo url_for('@icip_community_view?id=' . $consultation->community_id) ?>">
-                                <?php echo htmlspecialchars($consultation->community_name) ?>
+                                <?php echo htmlspecialchars((string) ($consultation->community_name), ENT_QUOTES, 'UTF-8', false) ?>
                             </a>
                         </dd>
 
@@ -154,7 +154,7 @@
 
                         <?php if ($consultation->location): ?>
                             <dt>Location</dt>
-                            <dd><?php echo htmlspecialchars($consultation->location) ?></dd>
+                            <dd><?php echo htmlspecialchars((string) ($consultation->location), ENT_QUOTES, 'UTF-8', false) ?></dd>
                         <?php endif ?>
 
                         <dt>Status</dt>
@@ -190,7 +190,7 @@
                     <div class="card-body">
                         <a href="<?php echo url_for('@icip_object?slug=' . $consultation->slug) ?>">
                             <i class="bi bi-archive me-2"></i>
-                            <?php echo htmlspecialchars($consultation->object_title) ?>
+                            <?php echo htmlspecialchars((string) ($consultation->object_title), ENT_QUOTES, 'UTF-8', false) ?>
                         </a>
                     </div>
                 </div>

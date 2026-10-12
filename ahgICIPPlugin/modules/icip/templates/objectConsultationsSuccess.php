@@ -1,7 +1,7 @@
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? 'Record') ?></a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars((string) ($object->title ?? 'Record'), ENT_QUOTES, 'UTF-8', false) ?></a></li>
             <li class="breadcrumb-item"><a href="<?php echo url_for('@icip_object?slug=' . $object->slug) ?>">ICIP</a></li>
             <li class="breadcrumb-item active">Consultations</li>
         </ol>
@@ -37,7 +37,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <h5 class="mb-1">
-                                        <?php echo htmlspecialchars($consultation->community_name) ?>
+                                        <?php echo htmlspecialchars((string) ($consultation->community_name), ENT_QUOTES, 'UTF-8', false) ?>
                                     </h5>
                                     <p class="text-muted mb-2">
                                         <i class="bi bi-calendar me-1"></i>
@@ -76,13 +76,13 @@
 
                             <div class="mt-2">
                                 <h6>Summary</h6>
-                                <p><?php echo nl2br(htmlspecialchars($consultation->summary)) ?></p>
+                                <p><?php echo nl2br(htmlspecialchars((string) ($consultation->summary), ENT_QUOTES, 'UTF-8', false)) ?></p>
                             </div>
 
                             <?php if ($consultation->outcomes): ?>
                                 <div class="mt-2">
                                     <h6>Outcomes</h6>
-                                    <p class="mb-0"><?php echo nl2br(htmlspecialchars($consultation->outcomes)) ?></p>
+                                    <p class="mb-0"><?php echo nl2br(htmlspecialchars((string) ($consultation->outcomes), ENT_QUOTES, 'UTF-8', false)) ?></p>
                                 </div>
                             <?php endif ?>
 

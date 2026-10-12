@@ -1,2 +1,10 @@
+# SECURITY: embargoes are a staff function. This was `is_secure: false`, and the
+# actions check nothing themselves, so a visitor with no session could open
+# /ahg/rights/embargo/add and /ahg/rights/embargo/lift/:id and submit them -
+# placing or lifting an embargo on any record. Same rule as extendedRights.
+#
+# Credentials use the double-bracket (OR) form; a single-item list such as
+# `credentials: [editor]` requires literally that group and 403s administrators.
 all:
-  is_secure: false
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

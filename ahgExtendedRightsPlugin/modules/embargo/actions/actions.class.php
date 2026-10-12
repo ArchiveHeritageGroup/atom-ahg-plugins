@@ -59,9 +59,18 @@ class embargoActions extends AhgController
         $this->objectId = $objectId;
 
         if ($request->isMethod('post')) {
-            $this->processAddForm($request, (int)$objectId);
-            return sfView::NONE;
+            // false: the dates were refused and the form is shown again with what was typed
+            if (false !== $this->processAddForm($request, (int)$objectId)) {
+                return sfView::NONE;
+            }
         }
+    }
+
+    /** An end date before the start date was saved as-is, giving an embargo that never applies. */
+    protected function datesOutOfOrder(array $data): bool
+    {
+        return empty($data['is_perpetual']) && !empty($data['end_date']) && !empty($data['start_date'])
+            && $data['end_date'] < $data['start_date'];
     }
 
     protected function processAddForm(sfWebRequest $request, int $objectId)
@@ -80,6 +89,13 @@ class embargoActions extends AhgController
             'notes' => $request->getParameter('notes'),
             'public_message' => $request->getParameter('public_message'),
         ];
+
+        if ($this->datesOutOfOrder($data)) {
+            $this->dateError = 'The end date is before the start date.';
+            $this->old = $data;
+
+            return false;
+        }
 
         // Check if propagation to children is requested
         $applyToChildren = (bool)$request->getParameter('apply_to_children', false);
@@ -124,8 +140,9 @@ class embargoActions extends AhgController
         }
 
         if ($request->isMethod('post')) {
-            $this->processEditForm($request, (int)$embargoId);
-            return sfView::NONE;
+            if (false !== $this->processEditForm($request, (int)$embargoId)) {
+                return sfView::NONE;
+            }
         }
     }
 
@@ -145,6 +162,13 @@ class embargoActions extends AhgController
             'notes' => $request->getParameter('notes'),
             'public_message' => $request->getParameter('public_message'),
         ];
+
+        if ($this->datesOutOfOrder($data)) {
+            $this->dateError = 'The end date is before the start date.';
+            $this->embargo = (object) array_merge((array) $this->embargo, $data);
+
+            return false;
+        }
 
         $service->updateEmbargo($embargoId, $data, $userId);
 

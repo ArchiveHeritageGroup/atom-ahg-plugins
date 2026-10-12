@@ -43,7 +43,7 @@
                         <option value="">All Communities</option>
                         <?php foreach ($communities as $community): ?>
                             <option value="<?php echo $community->id ?>" <?php echo ($filters['community_id'] ?? '') == $community->id ? 'selected' : '' ?>>
-                                <?php echo htmlspecialchars($community->name) ?>
+                                <?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?>
                             </option>
                         <?php endforeach ?>
                     </select>
@@ -98,7 +98,7 @@
                             <?php foreach ($consultations as $consultation): ?>
                                 <tr>
                                     <td><?php echo date('j M Y', strtotime($consultation->consultation_date)) ?></td>
-                                    <td><?php echo htmlspecialchars($consultation->community_name) ?></td>
+                                    <td><?php echo htmlspecialchars((string) ($consultation->community_name), ENT_QUOTES, 'UTF-8', false) ?></td>
                                     <td>
                                         <span class="badge bg-light text-dark">
                                             <?php echo ucwords(str_replace('_', ' ', $consultation->consultation_type)) ?>
@@ -121,7 +121,7 @@
                                     <td>
                                         <?php echo mb_substr($consultation->summary, 0, 60) . (strlen($consultation->summary) > 60 ? '...' : '') ?>
                                         <?php if ($consultation->object_title): ?>
-                                            <br><small class="text-muted">Re: <?php echo htmlspecialchars($consultation->object_title) ?></small>
+                                            <br><small class="text-muted">Re: <?php echo htmlspecialchars((string) ($consultation->object_title), ENT_QUOTES, 'UTF-8', false) ?></small>
                                         <?php endif ?>
                                     </td>
                                     <td>

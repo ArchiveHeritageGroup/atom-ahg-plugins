@@ -14,7 +14,7 @@
                 Consent Record
             </h1>
             <p class="text-muted mb-0">
-                <?php echo htmlspecialchars($consent->object_title ?? 'Untitled') ?>
+                <?php echo htmlspecialchars((string) ($consent->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
             </p>
         </div>
         <a href="<?php echo url_for('@icip_consent_edit?id=' . $id) ?>" class="btn btn-primary">
@@ -105,7 +105,7 @@
                         <h5 class="mb-0">Conditions</h5>
                     </div>
                     <div class="card-body">
-                        <?php echo nl2br(htmlspecialchars($consent->conditions)) ?>
+                        <?php echo nl2br(htmlspecialchars((string) ($consent->conditions), ENT_QUOTES, 'UTF-8', false)) ?>
                     </div>
                 </div>
             <?php endif ?>
@@ -117,7 +117,7 @@
                         <h5 class="mb-0">Restrictions</h5>
                     </div>
                     <div class="card-body">
-                        <?php echo nl2br(htmlspecialchars($consent->restrictions)) ?>
+                        <?php echo nl2br(htmlspecialchars((string) ($consent->restrictions), ENT_QUOTES, 'UTF-8', false)) ?>
                     </div>
                 </div>
             <?php endif ?>
@@ -129,7 +129,7 @@
                         <h5 class="mb-0">Notes</h5>
                     </div>
                     <div class="card-body">
-                        <?php echo nl2br(htmlspecialchars($consent->notes)) ?>
+                        <?php echo nl2br(htmlspecialchars((string) ($consent->notes), ENT_QUOTES, 'UTF-8', false)) ?>
                     </div>
                 </div>
             <?php endif ?>
@@ -147,7 +147,7 @@
                         <dd>
                             <?php if ($consent->slug): ?>
                                 <a href="<?php echo url_for('@icip_object?slug=' . $consent->slug) ?>">
-                                    <?php echo htmlspecialchars($consent->object_title ?? 'Untitled') ?>
+                                    <?php echo htmlspecialchars((string) ($consent->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                 </a>
                             <?php else: ?>
                                 ID: <?php echo $consent->information_object_id ?>
@@ -158,7 +158,7 @@
                         <dd>
                             <?php if ($consent->community_id): ?>
                                 <a href="<?php echo url_for('@icip_community_view?id=' . $consent->community_id) ?>">
-                                    <?php echo htmlspecialchars($consent->community_name) ?>
+                                    <?php echo htmlspecialchars((string) ($consent->community_name), ENT_QUOTES, 'UTF-8', false) ?>
                                 </a>
                             <?php else: ?>
                                 <span class="text-muted">Not specified</span>
@@ -167,13 +167,13 @@
 
                         <?php if ($consent->consent_granted_by): ?>
                             <dt>Granted By</dt>
-                            <dd><?php echo htmlspecialchars($consent->consent_granted_by) ?></dd>
+                            <dd><?php echo htmlspecialchars((string) ($consent->consent_granted_by), ENT_QUOTES, 'UTF-8', false) ?></dd>
                         <?php endif ?>
 
                         <?php if ($consent->consent_document_path): ?>
                             <dt>Document</dt>
                             <dd>
-                                <a href="<?php echo htmlspecialchars($consent->consent_document_path) ?>" target="_blank">
+                                <a href="<?php echo htmlspecialchars((string) ($consent->consent_document_path), ENT_QUOTES, 'UTF-8', false) ?>" target="_blank">
                                     <i class="bi bi-file-earmark-pdf me-1"></i>
                                     View Document
                                 </a>

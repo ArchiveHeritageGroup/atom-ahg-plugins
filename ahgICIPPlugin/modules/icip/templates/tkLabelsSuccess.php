@@ -35,11 +35,11 @@
                                             <?php echo strtoupper($type->code) ?>
                                         </div>
                                         <div>
-                                            <strong><?php echo htmlspecialchars($type->name) ?></strong>
+                                            <strong><?php echo htmlspecialchars((string) ($type->name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                             <br>
-                                            <small class="text-muted"><?php echo htmlspecialchars($type->description) ?></small>
+                                            <small class="text-muted"><?php echo htmlspecialchars((string) ($type->description), ENT_QUOTES, 'UTF-8', false) ?></small>
                                             <?php if ($type->local_contexts_url): ?>
-                                                <br><a href="<?php echo htmlspecialchars($type->local_contexts_url) ?>" target="_blank" class="small">Learn more</a>
+                                                <br><a href="<?php echo htmlspecialchars((string) ($type->local_contexts_url), ENT_QUOTES, 'UTF-8', false) ?>" target="_blank" class="small">Learn more</a>
                                             <?php endif ?>
                                         </div>
                                     </div>
@@ -60,11 +60,11 @@
                                             <?php echo strtoupper($type->code) ?>
                                         </div>
                                         <div>
-                                            <strong><?php echo htmlspecialchars($type->name) ?></strong>
+                                            <strong><?php echo htmlspecialchars((string) ($type->name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                             <br>
-                                            <small class="text-muted"><?php echo htmlspecialchars($type->description) ?></small>
+                                            <small class="text-muted"><?php echo htmlspecialchars((string) ($type->description), ENT_QUOTES, 'UTF-8', false) ?></small>
                                             <?php if ($type->local_contexts_url): ?>
-                                                <br><a href="<?php echo htmlspecialchars($type->local_contexts_url) ?>" target="_blank" class="small">Learn more</a>
+                                                <br><a href="<?php echo htmlspecialchars((string) ($type->local_contexts_url), ENT_QUOTES, 'UTF-8', false) ?>" target="_blank" class="small">Learn more</a>
                                             <?php endif ?>
                                         </div>
                                     </div>
@@ -106,18 +106,18 @@
                                                 <span class="badge <?php echo $label->category === 'TK' ? 'icip-tk-label' : 'icip-bc-label' ?>">
                                                     <?php echo strtoupper($label->label_code) ?>
                                                 </span>
-                                                <?php echo htmlspecialchars($label->label_name) ?>
+                                                <?php echo htmlspecialchars((string) ($label->label_name), ENT_QUOTES, 'UTF-8', false) ?>
                                             </td>
                                             <td>
                                                 <?php if ($label->slug): ?>
                                                     <a href="<?php echo url_for('@icip_object?slug=' . $label->slug) ?>">
-                                                        <?php echo htmlspecialchars($label->object_title ?? 'Untitled') ?>
+                                                        <?php echo htmlspecialchars((string) ($label->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                                     </a>
                                                 <?php else: ?>
-                                                    <?php echo htmlspecialchars($label->object_title ?? 'Untitled') ?>
+                                                    <?php echo htmlspecialchars((string) ($label->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                                 <?php endif ?>
                                             </td>
-                                            <td><?php echo htmlspecialchars($label->community_name ?? '-') ?></td>
+                                            <td><?php echo htmlspecialchars((string) ($label->community_name ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></td>
                                             <td>
                                                 <span class="badge <?php echo $label->applied_by === 'community' ? 'bg-success' : 'bg-secondary' ?>">
                                                     <?php echo ucfirst($label->applied_by) ?>
@@ -151,7 +151,7 @@
                                         <span class="badge <?php echo $stat->category === 'TK' ? 'icip-tk-label' : 'icip-bc-label' ?> me-1">
                                             <?php echo strtoupper($stat->code) ?>
                                         </span>
-                                        <?php echo htmlspecialchars($stat->name) ?>
+                                        <?php echo htmlspecialchars((string) ($stat->name), ENT_QUOTES, 'UTF-8', false) ?>
                                     </span>
                                     <span class="badge bg-primary"><?php echo $stat->usage_count ?></span>
                                 </li>

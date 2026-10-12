@@ -23,7 +23,7 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Community Name <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control" required value="<?php echo htmlspecialchars($community->name ?? '') ?>">
+                            <input type="text" name="name" class="form-control" required value="<?php echo htmlspecialchars((string) ($community->name ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             <div class="form-text">Official name of the Aboriginal or Torres Strait Islander community</div>
                         </div>
 
@@ -36,18 +36,18 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Language Group</label>
-                                <input type="text" name="language_group" class="form-control" value="<?php echo htmlspecialchars($community->language_group ?? '') ?>">
+                                <input type="text" name="language_group" class="form-control" value="<?php echo htmlspecialchars((string) ($community->language_group ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Region</label>
-                                <input type="text" name="region" class="form-control" value="<?php echo htmlspecialchars($community->region ?? '') ?>">
+                                <input type="text" name="region" class="form-control" value="<?php echo htmlspecialchars((string) ($community->region ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">State/Territory <span class="text-danger">*</span></label>
-                            <select name="state_territory" class="form-select" required>
-                                <option value="">Select state/territory</option>
+                            <label class="form-label">State/Territory (Australia)</label>
+                            <select name="state_territory" class="form-select">
+                                <option value="">Not specified</option>
                                 <?php foreach ($states as $code => $name): ?>
                                     <option value="<?php echo $code ?>" <?php echo ($community->state_territory ?? '') === $code ? 'selected' : '' ?>>
                                         <?php echo $name ?>
@@ -66,23 +66,23 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Primary Contact Name</label>
-                            <input type="text" name="contact_name" class="form-control" value="<?php echo htmlspecialchars($community->contact_name ?? '') ?>">
+                            <input type="text" name="contact_name" class="form-control" value="<?php echo htmlspecialchars((string) ($community->contact_name ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Contact Email</label>
-                                <input type="email" name="contact_email" class="form-control" value="<?php echo htmlspecialchars($community->contact_email ?? '') ?>">
+                                <input type="email" name="contact_email" class="form-control" value="<?php echo htmlspecialchars((string) ($community->contact_email ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Contact Phone</label>
-                                <input type="tel" name="contact_phone" class="form-control" value="<?php echo htmlspecialchars($community->contact_phone ?? '') ?>">
+                                <input type="tel" name="contact_phone" class="form-control" value="<?php echo htmlspecialchars((string) ($community->contact_phone ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Contact Address</label>
-                            <textarea name="contact_address" class="form-control" rows="2"><?php echo htmlspecialchars($community->contact_address ?? '') ?></textarea>
+                            <textarea name="contact_address" class="form-control" rows="2"><?php echo htmlspecialchars((string) ($community->contact_address ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -95,19 +95,19 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Native Title Reference</label>
-                            <input type="text" name="native_title_reference" class="form-control" value="<?php echo htmlspecialchars($community->native_title_reference ?? '') ?>">
+                            <input type="text" name="native_title_reference" class="form-control" value="<?php echo htmlspecialchars((string) ($community->native_title_reference ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             <div class="form-text">Reference number for Native Title determination (if applicable)</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Prescribed Body Corporate (PBC)</label>
-                            <input type="text" name="prescribed_body_corporate" class="form-control" value="<?php echo htmlspecialchars($community->prescribed_body_corporate ?? '') ?>">
+                            <input type="text" name="prescribed_body_corporate" class="form-control" value="<?php echo htmlspecialchars((string) ($community->prescribed_body_corporate ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             <div class="form-text">Name of the PBC holding Native Title rights</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">PBC Contact Email</label>
-                            <input type="email" name="pbc_contact_email" class="form-control" value="<?php echo htmlspecialchars($community->pbc_contact_email ?? '') ?>">
+                            <input type="email" name="pbc_contact_email" class="form-control" value="<?php echo htmlspecialchars((string) ($community->pbc_contact_email ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                         </div>
                     </div>
                 </div>
@@ -118,7 +118,7 @@
                         <h5 class="mb-0">Notes</h5>
                     </div>
                     <div class="card-body">
-                        <textarea name="notes" class="form-control" rows="4"><?php echo htmlspecialchars($community->notes ?? '') ?></textarea>
+                        <textarea name="notes" class="form-control" rows="4"><?php echo htmlspecialchars((string) ($community->notes ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         <div class="form-text">Internal notes about this community (not displayed publicly)</div>
                     </div>
                 </div>

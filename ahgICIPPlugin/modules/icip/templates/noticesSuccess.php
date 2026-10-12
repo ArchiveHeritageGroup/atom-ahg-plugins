@@ -55,18 +55,18 @@
                                                 };
                                                 ?>
                                                 <i class="bi <?php echo $severityIcon ?> me-1"></i>
-                                                <?php echo htmlspecialchars($notice->notice_name) ?>
+                                                <?php echo htmlspecialchars((string) ($notice->notice_name), ENT_QUOTES, 'UTF-8', false) ?>
                                             </td>
                                             <td>
                                                 <?php if ($notice->slug): ?>
                                                     <a href="<?php echo url_for('@icip_object?slug=' . $notice->slug) ?>">
-                                                        <?php echo htmlspecialchars($notice->object_title ?? 'Untitled') ?>
+                                                        <?php echo htmlspecialchars((string) ($notice->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                                     </a>
                                                 <?php else: ?>
-                                                    <?php echo htmlspecialchars($notice->object_title ?? 'Untitled') ?>
+                                                    <?php echo htmlspecialchars((string) ($notice->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                                 <?php endif ?>
                                             </td>
-                                            <td><?php echo htmlspecialchars($notice->community_name ?? '-') ?></td>
+                                            <td><?php echo htmlspecialchars((string) ($notice->community_name ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></td>
                                             <td>
                                                 <?php
                                                 $severityClass = match ($notice->severity) {
@@ -109,12 +109,12 @@
                                 ?>
                                 <i class="bi <?php echo $severityIcon ?> fs-5 me-2 mt-1"></i>
                                 <div>
-                                    <strong><?php echo htmlspecialchars($type->name) ?></strong>
+                                    <strong><?php echo htmlspecialchars((string) ($type->name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                     <?php if (!$type->is_active): ?>
                                         <span class="badge bg-secondary ms-1">Inactive</span>
                                     <?php endif ?>
                                     <br>
-                                    <small class="text-muted"><?php echo htmlspecialchars($type->description ?? '') ?></small>
+                                    <small class="text-muted"><?php echo htmlspecialchars((string) ($type->description ?? ''), ENT_QUOTES, 'UTF-8', false) ?></small>
                                     <div class="mt-1">
                                         <?php if ($type->requires_acknowledgement): ?>
                                             <span class="badge bg-warning text-dark">Requires Acknowledgement</span>

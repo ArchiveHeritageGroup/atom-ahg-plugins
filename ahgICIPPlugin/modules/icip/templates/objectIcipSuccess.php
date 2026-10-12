@@ -2,7 +2,7 @@
 // AtoM escaping wraps action variables in sfOutputEscaper decorators. Object
 // property reads survive that, but native array functions (array_slice below)
 // reject the decorator. Unwrap the action variables to plain values, and let
-// the template htmlspecialchars() as it already does.
+// the template htmlspecialchars((string) (), ENT_QUOTES, 'UTF-8', false) as it already does.
 $object = $sf_data->getRaw('object');
 $summary = $sf_data->getRaw('summary');
 $consents = $sf_data->getRaw('consents');
@@ -23,13 +23,13 @@ $restrictionTypes = $sf_data->getRaw('restrictionTypes');
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? $object->identifier ?? 'Record') ?></a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars((string) ($object->title ?? $object->identifier ?? 'Record'), ENT_QUOTES, 'UTF-8', false) ?></a></li>
             <li class="breadcrumb-item active"><?php echo __('Indigenous cultural & IP'); ?></li>
         </ol>
     </nav>
 
     <div class="d-flex justify-content-between align-items-start mb-4">
-        <p class="text-muted mb-0"><?php echo htmlspecialchars($object->title ?? 'Untitled') ?></p>
+        <p class="text-muted mb-0"><?php echo htmlspecialchars((string) ($object->title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?></p>
         <a href="<?php echo url_for('/' . $object->slug) ?>" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> <?php echo __('Back to record'); ?>
         </a>
@@ -151,7 +151,7 @@ $restrictionTypes = $sf_data->getRaw('restrictionTypes');
                                 <?php echo $statusOptions[$latest->consent_status] ?? ucwords(str_replace('_', ' ', $latest->consent_status)) ?>
                             </span>
                             <?php if ($latest->community_name): ?>
-                                <span class="text-muted">Community: <?php echo htmlspecialchars($latest->community_name) ?></span>
+                                <span class="text-muted">Community: <?php echo htmlspecialchars((string) ($latest->community_name), ENT_QUOTES, 'UTF-8', false) ?></span>
                             <?php endif ?>
                         </div>
                         <?php if ($latest->consent_date): ?>
@@ -201,15 +201,15 @@ $restrictionTypes = $sf_data->getRaw('restrictionTypes');
                                 <div class="d-flex">
                                     <i class="bi <?php echo $severityIcon ?> fs-4 me-3"></i>
                                     <div>
-                                        <strong><?php echo htmlspecialchars($notice->notice_name) ?></strong>
+                                        <strong><?php echo htmlspecialchars((string) ($notice->notice_name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                         <?php if ($notice->requires_acknowledgement): ?>
                                             <span class="badge bg-warning text-dark ms-2">Requires Acknowledgement</span>
                                         <?php endif ?>
                                         <p class="mb-0 mt-1">
-                                            <?php echo htmlspecialchars($notice->custom_text ?? $notice->default_text ?? '') ?>
+                                            <?php echo htmlspecialchars((string) ($notice->custom_text ?? $notice->default_text ?? ''), ENT_QUOTES, 'UTF-8', false) ?>
                                         </p>
                                         <?php if ($notice->community_name): ?>
-                                            <small class="text-muted">Requested by: <?php echo htmlspecialchars($notice->community_name) ?></small>
+                                            <small class="text-muted">Requested by: <?php echo htmlspecialchars((string) ($notice->community_name), ENT_QUOTES, 'UTF-8', false) ?></small>
                                         <?php endif ?>
                                     </div>
                                 </div>
@@ -239,7 +239,7 @@ $restrictionTypes = $sf_data->getRaw('restrictionTypes');
                                             <?php echo strtoupper($label->label_code) ?>
                                         </span>
                                         <div>
-                                            <strong><?php echo htmlspecialchars($label->label_name) ?></strong>
+                                            <strong><?php echo htmlspecialchars((string) ($label->label_name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                             <br>
                                             <small class="text-muted">
                                                 Applied by: <?php echo ucfirst($label->applied_by) ?>
@@ -298,7 +298,7 @@ $restrictionTypes = $sf_data->getRaw('restrictionTypes');
                             <?php foreach (array_slice($consultations, 0, 3) as $consultation): ?>
                                 <li class="mb-2 pb-2 border-bottom">
                                     <div class="d-flex justify-content-between">
-                                        <strong><?php echo htmlspecialchars($consultation->community_name) ?></strong>
+                                        <strong><?php echo htmlspecialchars((string) ($consultation->community_name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                         <small class="text-muted"><?php echo date('j M Y', strtotime($consultation->consultation_date)) ?></small>
                                     </div>
                                     <small><?php echo ucwords(str_replace('_', ' ', $consultation->consultation_type)) ?></small>

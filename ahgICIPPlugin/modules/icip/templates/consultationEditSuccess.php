@@ -16,7 +16,7 @@
         <div class="alert alert-info">
             <i class="bi bi-archive me-2"></i>
             <strong>Record:</strong>
-            <a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? $object->identifier ?? 'Untitled') ?></a>
+            <a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars((string) ($object->title ?? $object->identifier ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?></a>
         </div>
     <?php endif ?>
 
@@ -36,7 +36,7 @@
                                     <option value="">Select community</option>
                                     <?php foreach ($communities as $community): ?>
                                         <option value="<?php echo $community->id ?>" <?php echo ($consultation->community_id ?? '') == $community->id ? 'selected' : '' ?>>
-                                            <?php echo htmlspecialchars($community->name) ?>
+                                            <?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?>
                                         </option>
                                     <?php endforeach ?>
                                 </select>
@@ -70,7 +70,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Location</label>
-                                <input type="text" name="location" class="form-control" value="<?php echo htmlspecialchars($consultation->location ?? '') ?>">
+                                <input type="text" name="location" class="form-control" value="<?php echo htmlspecialchars((string) ($consultation->location ?? ''), ENT_QUOTES, 'UTF-8', false) ?>">
                             </div>
                         </div>
 
@@ -94,17 +94,17 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Community Representatives</label>
-                            <textarea name="community_representatives" class="form-control" rows="2" placeholder="Names of community members present"><?php echo htmlspecialchars($consultation->community_representatives ?? '') ?></textarea>
+                            <textarea name="community_representatives" class="form-control" rows="2" placeholder="Names of community members present"><?php echo htmlspecialchars((string) ($consultation->community_representatives ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Institution Representatives</label>
-                            <textarea name="institution_representatives" class="form-control" rows="2" placeholder="Names of institution staff present"><?php echo htmlspecialchars($consultation->institution_representatives ?? '') ?></textarea>
+                            <textarea name="institution_representatives" class="form-control" rows="2" placeholder="Names of institution staff present"><?php echo htmlspecialchars((string) ($consultation->institution_representatives ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Other Attendees</label>
-                            <textarea name="attendees" class="form-control" rows="2" placeholder="Any other attendees"><?php echo htmlspecialchars($consultation->attendees ?? '') ?></textarea>
+                            <textarea name="attendees" class="form-control" rows="2" placeholder="Any other attendees"><?php echo htmlspecialchars((string) ($consultation->attendees ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -117,12 +117,12 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Summary <span class="text-danger">*</span></label>
-                            <textarea name="summary" class="form-control" rows="5" required placeholder="Describe what was discussed..."><?php echo htmlspecialchars($consultation->summary ?? '') ?></textarea>
+                            <textarea name="summary" class="form-control" rows="5" required placeholder="Describe what was discussed..."><?php echo htmlspecialchars((string) ($consultation->summary ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Outcomes</label>
-                            <textarea name="outcomes" class="form-control" rows="4" placeholder="What was decided or agreed upon..."><?php echo htmlspecialchars($consultation->outcomes ?? '') ?></textarea>
+                            <textarea name="outcomes" class="form-control" rows="4" placeholder="What was decided or agreed upon..."><?php echo htmlspecialchars((string) ($consultation->outcomes ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -152,7 +152,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Follow-up Notes</label>
-                            <textarea name="follow_up_notes" class="form-control" rows="3" placeholder="What needs to happen next..."><?php echo htmlspecialchars($consultation->follow_up_notes ?? '') ?></textarea>
+                            <textarea name="follow_up_notes" class="form-control" rows="3" placeholder="What needs to happen next..."><?php echo htmlspecialchars((string) ($consultation->follow_up_notes ?? ''), ENT_QUOTES, 'UTF-8', false) ?></textarea>
                         </div>
                     </div>
                 </div>

@@ -109,7 +109,7 @@
                                         <tr>
                                             <td>
                                                 <a href="<?php echo url_for('@icip_community_view?id=' . $community->id) ?>">
-                                                    <?php echo htmlspecialchars($community->name) ?>
+                                                    <?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?>
                                                 </a>
                                             </td>
                                             <td><span class="badge bg-secondary"><?php echo $community->state_territory ?></span></td>

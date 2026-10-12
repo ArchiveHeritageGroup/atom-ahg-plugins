@@ -1,7 +1,7 @@
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? 'Record') ?></a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars((string) ($object->title ?? 'Record'), ENT_QUOTES, 'UTF-8', false) ?></a></li>
             <li class="breadcrumb-item"><a href="<?php echo url_for('@icip_object?slug=' . $object->slug) ?>">ICIP</a></li>
             <li class="breadcrumb-item active">Consent</li>
         </ol>
@@ -58,7 +58,7 @@
                                                     <?php echo $statusOptions[$consent->consent_status] ?? ucwords(str_replace('_', ' ', $consent->consent_status)) ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo htmlspecialchars($consent->community_name ?? '-') ?></td>
+                                            <td><?php echo htmlspecialchars((string) ($consent->community_name ?? '-'), ENT_QUOTES, 'UTF-8', false) ?></td>
                                             <td><?php echo $consent->consent_date ? date('j M Y', strtotime($consent->consent_date)) : '-' ?></td>
                                             <td><?php echo $consent->consent_expiry_date ? date('j M Y', strtotime($consent->consent_expiry_date)) : '-' ?></td>
                                             <td>
@@ -88,7 +88,7 @@
                                 <select name="community_id" class="form-select">
                                     <option value="">Not specified / Multiple</option>
                                     <?php foreach ($communities as $community): ?>
-                                        <option value="<?php echo $community->id ?>"><?php echo htmlspecialchars($community->name) ?></option>
+                                        <option value="<?php echo $community->id ?>"><?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?></option>
                                     <?php endforeach ?>
                                 </select>
                             </div>

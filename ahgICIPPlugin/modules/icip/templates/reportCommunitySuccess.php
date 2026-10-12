@@ -3,7 +3,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="<?php echo url_for('@icip_dashboard') ?>">ICIP</a></li>
             <li class="breadcrumb-item"><a href="<?php echo url_for('@icip_reports') ?>">Reports</a></li>
-            <li class="breadcrumb-item active"><?php echo htmlspecialchars($community->name) ?></li>
+            <li class="breadcrumb-item active"><?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?></li>
         </ol>
     </nav>
 
@@ -11,12 +11,12 @@
         <div>
             <h1>
                 <i class="bi bi-people me-2"></i>
-                <?php echo htmlspecialchars($community->name) ?>
+                <?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?>
             </h1>
             <p class="text-muted mb-0">
                 <?php echo $states[$community->state_territory] ?? $community->state_territory ?>
                 <?php if ($community->language_group): ?>
-                    &bull; <?php echo htmlspecialchars($community->language_group) ?>
+                    &bull; <?php echo htmlspecialchars((string) ($community->language_group), ENT_QUOTES, 'UTF-8', false) ?>
                 <?php endif ?>
             </p>
         </div>
@@ -88,10 +88,10 @@
                                     <td>
                                         <?php if ($consent->slug): ?>
                                             <a href="<?php echo url_for('@icip_object?slug=' . $consent->slug) ?>">
-                                                <?php echo htmlspecialchars($consent->object_title ?? 'Untitled') ?>
+                                                <?php echo htmlspecialchars((string) ($consent->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                             </a>
                                         <?php else: ?>
-                                            <?php echo htmlspecialchars($consent->object_title ?? 'Untitled') ?>
+                                            <?php echo htmlspecialchars((string) ($consent->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?>
                                         <?php endif ?>
                                     </td>
                                     <td>
@@ -182,9 +182,9 @@
                         <ul class="list-group list-group-flush">
                             <?php foreach ($notices as $notice): ?>
                                 <li class="list-group-item">
-                                    <strong><?php echo htmlspecialchars($notice->notice_name) ?></strong>
+                                    <strong><?php echo htmlspecialchars((string) ($notice->notice_name), ENT_QUOTES, 'UTF-8', false) ?></strong>
                                     <br>
-                                    <small class="text-muted"><?php echo htmlspecialchars($notice->object_title ?? 'Untitled') ?></small>
+                                    <small class="text-muted"><?php echo htmlspecialchars((string) ($notice->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?></small>
                                 </li>
                             <?php endforeach ?>
                         </ul>
@@ -207,9 +207,9 @@
                             <?php foreach ($labels as $label): ?>
                                 <li class="list-group-item">
                                     <span class="badge bg-secondary me-2"><?php echo strtoupper($label->code) ?></span>
-                                    <?php echo htmlspecialchars($label->label_name) ?>
+                                    <?php echo htmlspecialchars((string) ($label->label_name), ENT_QUOTES, 'UTF-8', false) ?>
                                     <br>
-                                    <small class="text-muted"><?php echo htmlspecialchars($label->object_title ?? 'Untitled') ?></small>
+                                    <small class="text-muted"><?php echo htmlspecialchars((string) ($label->object_title ?? 'Untitled'), ENT_QUOTES, 'UTF-8', false) ?></small>
                                 </li>
                             <?php endforeach ?>
                         </ul>

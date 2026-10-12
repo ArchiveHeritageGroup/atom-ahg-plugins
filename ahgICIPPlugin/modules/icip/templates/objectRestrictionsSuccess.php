@@ -1,7 +1,7 @@
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? 'Record') ?></a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars((string) ($object->title ?? 'Record'), ENT_QUOTES, 'UTF-8', false) ?></a></li>
             <li class="breadcrumb-item"><a href="<?php echo url_for('@icip_object?slug=' . $object->slug) ?>">ICIP</a></li>
             <li class="breadcrumb-item active">Restrictions</li>
         </ol>
@@ -40,12 +40,12 @@
                                     <?php endif ?>
 
                                     <?php if ($restriction->restriction_type === 'custom' && $restriction->custom_restriction_text): ?>
-                                        <p class="mb-1 mt-1"><?php echo htmlspecialchars($restriction->custom_restriction_text) ?></p>
+                                        <p class="mb-1 mt-1"><?php echo htmlspecialchars((string) ($restriction->custom_restriction_text), ENT_QUOTES, 'UTF-8', false) ?></p>
                                     <?php endif ?>
 
                                     <div class="mt-1">
                                         <?php if ($restriction->community_name): ?>
-                                            <small class="text-muted">Community: <?php echo htmlspecialchars($restriction->community_name) ?></small>
+                                            <small class="text-muted">Community: <?php echo htmlspecialchars((string) ($restriction->community_name), ENT_QUOTES, 'UTF-8', false) ?></small>
                                         <?php endif ?>
                                         <?php if ($restriction->start_date || $restriction->end_date): ?>
                                             <br>
@@ -93,7 +93,7 @@
                                 <select name="community_id" class="form-select">
                                     <option value="">Not specified</option>
                                     <?php foreach ($communities as $community): ?>
-                                        <option value="<?php echo $community->id ?>"><?php echo htmlspecialchars($community->name) ?></option>
+                                        <option value="<?php echo $community->id ?>"><?php echo htmlspecialchars((string) ($community->name), ENT_QUOTES, 'UTF-8', false) ?></option>
                                     <?php endforeach ?>
                                 </select>
                             </div>
