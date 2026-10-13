@@ -424,6 +424,11 @@ class provenanceActions extends AhgController
 
         foreach ($timeline as $event) {
             $startDate = $event['date'] ?? null;
+            // Only an approximate date ("circa 1952"): place it by its year rather
+            // than as undated at the front of the timeline.
+            if (empty($startDate) && preg_match('/(\d{4})/', (string) ($event['date_display'] ?? ''), $m)) {
+                $startDate = $m[1];
+            }
             $timelineItems[] = [
                 'type' => $event['type_label'] ?? $event['event_type'] ?? 'Event',
                 'label' => $event['from'] ?? $event['to'] ?? $event['type_label'] ?? 'Unknown',

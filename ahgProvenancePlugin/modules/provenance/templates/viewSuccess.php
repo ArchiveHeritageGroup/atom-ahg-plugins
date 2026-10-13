@@ -11,8 +11,11 @@
 $resourceLabel = '';
 
 try {
-    if (method_exists($resource, 'getTitle')) {
-        $resourceLabel = (string) $resource->getTitle(['cultureFallback' => true]);
+    // The template gets an escaping decorator, and getTitle() is a magic (__call)
+    // method, so method_exists() was always false: ask the raw object, via is_callable.
+    $rawResource = $sf_data->getRaw('resource');
+    if (is_callable([$rawResource, 'getTitle'])) {
+        $resourceLabel = htmlspecialchars((string) $rawResource->getTitle(['cultureFallback' => true]), ENT_QUOTES, 'UTF-8');
     }
 } catch (Throwable $e) {
     $resourceLabel = '';
@@ -67,8 +70,10 @@ if ('' === trim($resourceLabel)) {
       <?php foreach ($gaps as $g): ?>
       <li>
         <?php echo htmlspecialchars($g['from_owner']) ?> &rarr; <?php echo htmlspecialchars($g['to_owner']) ?>:
-        <strong><?php echo (int) $g['gap_years'] ?></strong> <?php echo __('year gap') ?>
-        (<?php echo (int) $g['gap_start'] ?>&ndash;<?php echo (int) $g['gap_end'] ?>)
+        <?php if (($g['reason'] ?? '') === 'unknown'): ?><?php echo __('the previous owner is not recorded') ?>
+        <?php elseif (($g['reason'] ?? '') === 'broken'): ?><?php echo __('the chain is broken here') ?>
+        <?php endif ?>
+        <?php if (!empty($g['gap_years'])): ?>(<strong><?php echo (int) $g['gap_years'] ?></strong> <?php echo __('years') ?>, <?php echo (int) $g['gap_start'] ?> - <?php echo (int) $g['gap_end'] ?>)<?php endif ?>
       </li>
       <?php endforeach ?>
     </ul>

@@ -169,7 +169,10 @@ class ProvenanceService
         
         foreach ($events as $event) {
             $date = $event->event_date ?? $event->event_date_start ?? null;
-            $dateDisplay = $event->event_date_text ?? ($date ? date('Y', strtotime($date)) : 'Unknown date');
+            // An empty date text ('' rather than NULL) hid the exact date: the
+            // events table showed nothing for a dated donation.
+            $dateText = trim((string) ($event->event_date_text ?? ''));
+            $dateDisplay = '' !== $dateText ? $dateText : ($date ? date('Y', strtotime($date)) : 'Unknown date');
             
             $timeline[] = [
                 'id' => $event->id,
@@ -670,28 +673,53 @@ class ProvenanceService
     {
         $data = $this->getProvenanceForObject($objectId, $culture);
 
-        $chain = [];
+        $gaps = [];
+
+        // Events are transfers of custody: whoever receives the object in one event
+        // holds it until the next. So a gap is a broken link - the next event's
+        // "from" is missing, or is not the previous event's "to" - not a long
+        // interval. Comparing dates alone flagged decades of continuous ownership
+        // as gaps and missed links with only an approximate date ("circa 1952").
         if (!empty($data['events'])) {
+            $chain = [];
             foreach ($data['events'] as $e) {
                 $chain[] = [
-                    'name' => $e->to_agent_name ?? ($e->from_agent_name ?? 'Unknown'),
-                    'start' => $this->extractYear($e->event_date_start ?? ($e->event_date ?? null)),
-                    'end' => $this->extractYear($e->event_date_end ?? null),
+                    'from' => trim((string) ($e->from_agent_name ?? '')),
+                    'to' => trim((string) ($e->to_agent_name ?? '')),
+                    'year' => $this->extractYear($e->event_date_start ?? ($e->event_date ?? null))
+                        ?? $this->extractYear($e->event_date_text ?? null),
                 ];
             }
-        } else {
-            foreach (($data['timeline'] ?? []) as $t) {
-                $chain[] = [
-                    'name' => $t['to'] ?? 'Unknown',
-                    'start' => $this->extractYear($t['date'] ?? null),
-                    'end' => null,
+            for ($i = 0, $n = count($chain); $i < $n - 1; ++$i) {
+                $cur = $chain[$i];
+                $next = $chain[$i + 1];
+                if ('' !== $next['from'] && '' !== $cur['to'] && 0 === strcasecmp($next['from'], $cur['to'])) {
+                    continue;
+                }
+                $gaps[] = [
+                    'from_owner' => '' !== $cur['to'] ? $cur['to'] : 'Unknown',
+                    'to_owner' => '' !== $next['to'] ? $next['to'] : 'Unknown',
+                    'gap_start' => $cur['year'],
+                    'gap_end' => $next['year'],
+                    'gap_years' => ($cur['year'] && $next['year']) ? $next['year'] - $cur['year'] : null,
+                    'reason' => '' === $next['from'] ? 'unknown' : 'broken',
                 ];
             }
+
+            return $gaps;
         }
 
-        $gaps = [];
+        // Older records without events: only owners and dates are known, so fall
+        // back to comparing dates.
+        $chain = [];
+        foreach (($data['timeline'] ?? []) as $t) {
+            $chain[] = [
+                'name' => $t['to'] ?? 'Unknown',
+                'start' => $this->extractYear($t['date'] ?? null),
+            ];
+        }
         for ($i = 0, $n = count($chain); $i < $n - 1; ++$i) {
-            $curEnd = $chain[$i]['end'] ?: $chain[$i]['start'];
+            $curEnd = $chain[$i]['start'];
             $nextStart = $chain[$i + 1]['start'];
             if ($curEnd && $nextStart && ($nextStart - $curEnd) > 1) {
                 $gaps[] = [
@@ -700,6 +728,7 @@ class ProvenanceService
                     'gap_start' => $curEnd,
                     'gap_end' => $nextStart,
                     'gap_years' => $nextStart - $curEnd,
+                    'reason' => 'interval',
                 ];
             }
         }

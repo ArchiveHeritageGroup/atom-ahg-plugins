@@ -8,8 +8,11 @@
 $resourceLabel = '';
 
 try {
-    if (method_exists($resource, 'getTitle')) {
-        $resourceLabel = (string) $resource->getTitle(['cultureFallback' => true]);
+    // The template gets an escaping decorator, and getTitle() is a magic (__call)
+    // method, so method_exists() was always false: ask the raw object, via is_callable.
+    $rawResource = $sf_data->getRaw('resource');
+    if (is_callable([$rawResource, 'getTitle'])) {
+        $resourceLabel = htmlspecialchars((string) $rawResource->getTitle(['cultureFallback' => true]), ENT_QUOTES, 'UTF-8');
     }
 } catch (Throwable $e) {
     $resourceLabel = '';
