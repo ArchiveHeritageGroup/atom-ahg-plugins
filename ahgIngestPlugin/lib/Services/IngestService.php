@@ -925,7 +925,33 @@ class IngestService
             ]);
         } elseif ($fileType === 'zip') {
             $extractDir = dirname($fileInfo['stored_path']) . '/extracted_' . $sessionId;
-            $this->extractZip($fileId, $extractDir);
+            $extracted = $this->extractZip($fileId, $extractDir);
+
+            // A ZIP that carries its metadata CSV with the files (a common
+            // bundle): register that CSV as the session's CSV, as a CSV upload
+            // would be, and the files match its rows by filename. Without this
+            // the Map step found no rows and the ingest could not go on.
+            $csvs = array_values(array_filter($extracted, fn ($f) => preg_match('/\.csv$/i', $f['name'] ?? '')
+                && !str_starts_with($f['name'], '._') && false === strpos($f['path'], '/__MACOSX/')));
+            $hasCsv = DB::table('ingest_file')->where('session_id', $sessionId)->where('file_type', 'csv')->exists();
+            if (1 === count($csvs) && !$hasCsv) {
+                $csvId = DB::table('ingest_file')->insertGetId([
+                    'session_id' => $sessionId,
+                    'file_type' => 'csv',
+                    'original_name' => $fileInfo['original_name'] . ' [' . $csvs[0]['name'] . ']',
+                    'stored_path' => $csvs[0]['path'],
+                    'file_size' => (int) @filesize($csvs[0]['path']),
+                    'mime_type' => 'text/csv',
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+                $detection = $this->detectCsvFormat($csvs[0]['path']);
+                DB::table('ingest_file')->where('id', $csvId)->update([
+                    'row_count' => $detection['row_count'],
+                    'delimiter' => $detection['delimiter'],
+                    'encoding' => $detection['encoding'],
+                    'headers' => json_encode($detection['headers']),
+                ]);
+            }
         } elseif ($fileType === 'directory') {
             // Count files in directory
             $fileCount = 0;
@@ -2025,8 +2051,16 @@ class IngestService
             $rowWarnings = 0;
 
             // Required field checks (warnings — do not block ingestion)
+            // creationDatesStart is the pre-2.6 column name; AtoM's current CSV
+            // carries the same date as eventStartDates (or eventDates /
+            // creationDates text), and mapping to those still warned on every row.
+            $aliases = ['creationDatesStart' => ['eventStartDates', 'eventDates', 'creationDates']];
             foreach ($required as $field) {
-                if (empty($enriched[$field])) {
+                $present = !empty($enriched[$field]);
+                foreach ($aliases[$field] ?? [] as $alt) {
+                    $present = $present || !empty($enriched[$alt]);
+                }
+                if (!$present) {
                     $this->addValidation($sessionId, $row->row_number, 'warning', $field,
                         "Required field '{$field}' is empty");
                     $rowWarnings++;

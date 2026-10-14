@@ -1141,6 +1141,10 @@ class ingestActions extends sfActions
         if ($job) {
             $count = $commitSvc->rollback($job->id);
             $this->getUser()->setFlash('notice', "Rollback complete: {$count} records deleted");
+            if ($commitSvc->rollbackErrors) {
+                $this->getUser()->setFlash('error', 'Some records could not be deleted: '.implode('; ', array_map(
+                    fn ($e) => "row {$e['row']}: {$e['error']}", array_slice($commitSvc->rollbackErrors, 0, 5))));
+            }
         }
 
         $this->redirect(['module' => 'ingest', 'action' => 'index']);

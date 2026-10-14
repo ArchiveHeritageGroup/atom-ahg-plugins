@@ -3,6 +3,19 @@ $session = $sf_data->getRaw('session');
 $tree = $sf_data->getRaw('tree') ?? [];
 $rowCount = $sf_data->getRaw('rowCount') ?? 0;
 $doCount = $sf_data->getRaw('doCount') ?? 0;
+$standardLabels = ['isadg' => 'ISAD(G)', 'dc' => 'Dublin Core', 'rad' => 'RAD', 'dacs' => 'DACS', 'mods' => 'MODS', 'spectrum' => 'Collections procedures', 'cco' => 'CCO'];
+
+// Show where the batch lands: the parent the commit will create, or the
+// existing record it goes under. Not a row, so it is not clickable.
+$placeUnder = null;
+if ('new' === $session->parent_placement) {
+    $placeUnder = ['title' => ($session->new_parent_title ?: $session->title).' ('.__('new').')', 'level' => $session->new_parent_level ?: 'Fonds'];
+} elseif ('existing' === $session->parent_placement && $session->parent_id) {
+    $placeUnder = ['title' => (string) \Illuminate\Database\Capsule\Manager::table('information_object_i18n')->where('id', $session->parent_id)->value('title'), 'level' => ''];
+}
+if ($placeUnder && $tree) {
+    $tree = [$placeUnder + ['row_number' => '', 'legacy_id' => '', 'is_valid' => 1, 'is_excluded' => 0, 'has_do' => false, 'is_parent' => true, 'children' => $tree]];
+}
 ?>
 
 <h1><?php echo __('Preview & Approve') ?></h1>
@@ -53,7 +66,7 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
         <div class="card text-center">
             <div class="card-body">
                 <h3 class="mb-0"><?php echo ucfirst($session->sector) ?></h3>
-                <small class="text-muted"><?php echo strtoupper($session->standard) ?></small>
+                <small class="text-muted"><?php echo $standardLabels[$session->standard] ?? strtoupper($session->standard) ?></small>
             </div>
         </div>
     </div>
@@ -90,7 +103,7 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
             </div>
         </div>
 
-        <?php if ($session->output_generate_sip || $session->output_generate_dip): ?>
+        <?php if ($session->output_generate_sip || $session->output_generate_aip || $session->output_generate_dip): ?>
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-box me-2"></i><?php echo __('Package Estimates') ?></h5>
@@ -99,6 +112,12 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
                 <?php if ($session->output_generate_sip): ?>
                     <div class="d-flex justify-content-between mb-2">
                         <span><?php echo __('SIP Package') ?></span>
+                        <span class="badge bg-secondary"><?php echo $rowCount ?> objects</span>
+                    </div>
+                <?php endif ?>
+                <?php if ($session->output_generate_aip): ?>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span><?php echo __('AIP Package') ?></span>
                         <span class="badge bg-secondary"><?php echo $rowCount ?> objects</span>
                     </div>
                 <?php endif ?>
@@ -163,7 +182,9 @@ function renderTree(array $nodes, int $depth = 0): string
         $hasChildren = !empty($node['children']);
 
         $html .= '<li class="mb-1">';
-        $html .= '<div class="d-flex align-items-center tree-node" data-row="' . $node['row_number'] . '" data-ahg-style="cursor:pointer;">';
+        $html .= empty($node['is_parent'])
+            ? '<div class="d-flex align-items-center tree-node" data-row="' . $node['row_number'] . '" data-ahg-style="cursor:pointer;">'
+            : '<div class="d-flex align-items-center">';
 
         if ($hasChildren) {
             $html .= '<i class="fas fa-caret-down me-1 tree-toggle"></i>';

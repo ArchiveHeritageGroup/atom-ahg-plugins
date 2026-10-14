@@ -142,7 +142,9 @@ $job = $sf_data->getRaw('job');
                     <?php endif ?>
 
                     <?php if ($job->created_records > 0): ?>
-                        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) ?>"
+                        <?php // Open the record the batch went under; browse everything only for top-level imports.
+                        $parentSlug = $session->parent_id ? \Illuminate\Database\Capsule\Manager::table('slug')->where('object_id', $session->parent_id)->value('slug') : null; ?>
+                        <a href="<?php echo $parentSlug ? url_for(['module' => 'informationobject', 'slug' => $parentSlug]) : url_for(['module' => 'informationobject', 'action' => 'browse']) ?>"
                            class="btn btn-outline-success">
                             <i class="fas fa-list me-1"></i><?php echo __('Browse Records') ?>
                         </a>

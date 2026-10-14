@@ -1213,15 +1213,16 @@ class IngestCommitService
                     'software',
                     'ahgIngestPlugin'
                 );
-
-                return count($objectIds);
+                // No early return: the checksums and event are not the package.
+                // Returning here meant no SIP manifest was written and the job
+                // never recorded a SIP whenever the preservation plugin was on.
             } catch (\Throwable $e) {
                 \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                 // PreservationService not available or error — fall through to manifest
             }
         }
 
-        // Fallback: create a simple SIP manifest
+        // The SIP manifest (with or without the preservation plugin)
         $sipPath = $session->output_sip_path ?: (\sfConfig::get('sf_upload_dir') . '/sip');
         if (!is_dir($sipPath)) {
             @mkdir($sipPath, 0755, true);
@@ -1464,6 +1465,9 @@ class IngestCommitService
 
     // ─── Rollback ───────────────────────────────────────────────────────
 
+    /** Failures from the last rollback(), for the caller to show. */
+    public array $rollbackErrors = [];
+
     public function rollback(int $jobId): int
     {
         $job = DB::table('ingest_job')->where('id', $jobId)->first();
@@ -1481,6 +1485,7 @@ class IngestCommitService
 
         $deleted = 0;
         $errors = [];
+        $deletedIds = [];
 
         foreach ($rows as $row) {
             try {
@@ -1497,6 +1502,7 @@ class IngestCommitService
                 if ($io) {
                     $this->deleteWithoutIndexHook($io);
                     $deleted++;
+                    $deletedIds[] = (int) $row->created_atom_id;
                 }
 
                 // Clear created IDs
@@ -1511,6 +1517,28 @@ class IngestCommitService
                 $errors[] = ['row' => $row->row_number ?? null, 'error' => $e->getMessage()];
             }
         }
+
+        // The parent this ingest created ("new" placement) goes too, but only
+        // when nothing else has been filed under it since. Rollback used to
+        // leave it behind as an empty fonds.
+        if ($session && 'new' === ($session->parent_placement ?? '') && !empty($session->parent_id)) {
+            try {
+                $parentId = (int) $session->parent_id;
+                // The deletes above run in the request's Propel transaction, which
+                // this connection cannot see yet, so leave those ids out.
+                $hasChildren = DB::table('information_object')->where('parent_id', $parentId)
+                    ->when($deletedIds, fn ($q) => $q->whereNotIn('id', $deletedIds))->exists();
+                $parent = $hasChildren ? null : \QubitInformationObject::getById($parentId);
+                if ($parent) {
+                    $this->deleteWithoutIndexHook($parent);
+                    ++$deleted;
+                }
+            } catch (\Throwable $e) {
+                $errors[] = ['row' => 'parent', 'error' => $e->getMessage()];
+            }
+        }
+
+        $this->rollbackErrors = $errors;
 
         // Update job status
         DB::table('ingest_job')->where('id', $jobId)->update([
@@ -1542,8 +1570,17 @@ class IngestCommitService
      */
     private function deleteWithoutIndexHook($object): void
     {
+        // Create the search instance initialised before disable() runs: when
+        // disable() is the first search call in a request it builds one with
+        // no index names, and the queued deletes then flush with a null index.
+        \QubitSearch::getInstance();
+
         try {
-            \QubitSearch::getInstance()->delete($object);
+            // Only descriptions are indexed. Asking search to remove a digital
+            // object gave it no index name and logged an error on every rollback.
+            if ($object instanceof \QubitInformationObject) {
+                \QubitSearch::getInstance()->delete($object);
+            }
         } catch (\Throwable $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Index removal is best-effort (a later search:populate reconciles).
