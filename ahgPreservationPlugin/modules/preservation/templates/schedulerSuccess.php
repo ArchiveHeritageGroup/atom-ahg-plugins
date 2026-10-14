@@ -285,7 +285,7 @@
             <div class="card-body">
                 <p class="small text-muted">Run the scheduler via cron to execute due workflows:</p>
                 <pre class="bg-dark text-light p-3 rounded small"><code># Run every minute (recommended)
-* * * * * cd ' . sfConfig::get('sf_root_dir') . ' && \
+* * * * * cd <?php echo htmlspecialchars(sfConfig::get('sf_root_dir')); ?> && \
   php symfony preservation:scheduler >> \
   /var/log/atom/scheduler.log 2>&1</code></pre>
                 <p class="small text-muted mb-0">Or run individual workflows:</p>

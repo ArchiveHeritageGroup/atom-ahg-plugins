@@ -36,7 +36,7 @@
                         <?php endif; ?>
                     </td>
                     <td><code><?php echo htmlspecialchars($format->mime_type); ?></code></td>
-                    <td>.<?php echo htmlspecialchars($format->extension ?? '-'); ?></td>
+                    <td><?php $ext = ltrim(trim((string) ($format->extension ?? '')), '.'); echo ('' === $ext || '-' === $ext) ? '-' : '.'.htmlspecialchars($ext); ?></td>
                     <td><small><?php echo htmlspecialchars($format->puid ?? '-'); ?></small></td>
                     <td>
                         <?php

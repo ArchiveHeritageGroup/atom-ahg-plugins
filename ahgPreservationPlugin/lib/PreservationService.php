@@ -97,7 +97,9 @@ class PreservationService
         $this->logEvent(
             $digitalObjectId,
             null,
-            'fixity_check',
+            // PREMIS: making a checksum is a message digest calculation; a fixity
+            // check is comparing a file against one (verifyFixity()).
+            'message_digest_calculation',
             'Checksums generated: ' . implode(', ', $algorithms),
             'success'
         );
@@ -579,14 +581,28 @@ class PreservationService
         preg_match('/ClamAV\s+([\d.]+)/', $output, $matches);
         $engineVersion = $matches[1] ?? 'unknown';
 
-        // Get signature database info
-        $sigOutput = shell_exec('sigtool --info /var/lib/clamav/daily.cvd 2>/dev/null') ?? '';
-        preg_match('/Version:\s+(\d+)/', $sigOutput, $sigMatches);
-        $sigVersion = $sigMatches[1] ?? 'unknown';
+        // Signature database: freshclam keeps updates in daily.cld once it has
+        // patched the shipped daily.cvd, so read whichever is there.
+        $sigVersion = 'unknown';
+        $sigDate = '';
+        foreach (['/var/lib/clamav/daily.cld', '/var/lib/clamav/daily.cvd'] as $db) {
+            if (is_readable($db)) {
+                $sigOutput = shell_exec('sigtool --info '.escapeshellarg($db).' 2>/dev/null') ?? '';
+                if (preg_match('/Version:\s+(\d+)/', $sigOutput, $sigMatches)) {
+                    $sigVersion = $sigMatches[1];
+                    preg_match('/Build time:\s+(.+)/', $sigOutput, $timeMatches);
+                    $sigDate = trim($timeMatches[1] ?? '');
+                    break;
+                }
+            }
+        }
+        $daemon = !empty(trim(shell_exec('pgrep clamd 2>/dev/null') ?? ''));
 
         return [
             'engine_version' => $engineVersion,
             'signature_version' => $sigVersion,
+            'signature_date' => $sigDate,
+            'scanner' => $daemon ? 'clamdscan (daemon)' : 'clamscan',
             'available' => true,
         ];
     }
@@ -1542,6 +1558,7 @@ class PreservationService
 
         // Siegfried uses 'id' for PUID (PRONOM identifier)
         $puid = $match['id'] ?? null;
+        $unknown = (null === $puid || 'UNKNOWN' === strtoupper((string) $puid));
         $formatName = $match['format'] ?? 'Unknown';
         $formatVersion = $match['version'] ?? null;
         $mimeType = $match['mime'] ?? $digitalObject->mime_type;
@@ -1560,7 +1577,7 @@ class PreservationService
 
         // Find or create format in registry
         $formatId = null;
-        if ($puid && $updateRegistry) {
+        if ($puid && !$unknown && $updateRegistry) {
             $formatId = $this->findOrCreateFormat($puid, $mimeType, $formatName, $formatVersion);
         }
 
@@ -1598,8 +1615,10 @@ class PreservationService
             $digitalObjectId,
             null,
             'format_identification',
-            "Format identified as {$formatName}" . ($puid ? " ({$puid})" : ''),
-            'success',
+            // Siegfried answers UNKNOWN with an empty name when nothing in PRONOM matches;
+            // that is a result to follow up, not a success.
+            $unknown ? 'Format not identified: no PRONOM match' : "Format identified as {$formatName}" . ($puid ? " ({$puid})" : ''),
+            $unknown ? 'warning' : 'success',
             json_encode([
                 'tool' => $toolVersion,
                 'puid' => $puid,
@@ -2209,9 +2228,9 @@ class PreservationService
 
                 case 'fixity_check':
                     $batchResult = $this->runBatchFixityCheck($limit);
-                    $results['processed'] = $batchResult['total_checked'];
+                    $results['processed'] = $batchResult['total'];
                     $results['succeeded'] = $batchResult['passed'];
-                    $results['failed'] = $batchResult['failed'];
+                    $results['failed'] = $batchResult['failed'] + $batchResult['errors'];
                     $results['summary'] = $batchResult;
                     break;
 
@@ -2234,7 +2253,7 @@ class PreservationService
                     $batchResult = $this->verifyAllBackups();
                     $results['processed'] = $batchResult['total'];
                     $results['succeeded'] = $batchResult['valid'];
-                    $results['failed'] = $batchResult['invalid'] + $batchResult['corrupted'];
+                    $results['failed'] = $batchResult['invalid'] + $batchResult['missing'] + $batchResult['errors'];
                     $results['summary'] = $batchResult;
                     break;
 

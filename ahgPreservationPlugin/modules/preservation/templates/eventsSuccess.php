@@ -47,7 +47,7 @@
                             -
                         <?php endif; ?>
                     </td>
-                    <td><?php echo htmlspecialchars(substr($event->event_detail ?? '', 0, 50)); ?></td>
+                    <td><?php echo htmlspecialchars($event->event_detail ?? ''); ?></td>
                     <td>
                         <?php if ($event->event_outcome === 'success'): ?>
                             <span class="badge bg-success">Success</span>

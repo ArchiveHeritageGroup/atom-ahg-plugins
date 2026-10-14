@@ -638,14 +638,19 @@ CREATE TABLE IF NOT EXISTS preservation_workflow_run (
 -- =============================================
 -- DEFAULT WORKFLOW SCHEDULES
 -- =============================================
-INSERT IGNORE INTO preservation_workflow_schedule
-(name, description, workflow_type, is_enabled, schedule_type, cron_expression, batch_limit, options, created_by) VALUES
-('Daily Format Identification', 'Identify formats for new digital objects', 'format_identification', 1, 'cron', '0 1 * * *', 500, '{"unidentified_only": true, "update_registry": true}', 'system'),
-('Daily Fixity Check', 'Verify checksums for digital objects', 'fixity_check', 1, 'cron', '0 2 * * *', 500, '{"min_age_days": 7, "algorithm": "sha256"}', 'system'),
-('Daily Virus Scan', 'Scan digital objects for malware', 'virus_scan', 1, 'cron', '0 3 * * *', 200, '{"new_only": true, "quarantine": true}', 'system'),
-('Weekly Format Conversion', 'Convert at-risk formats to preservation formats', 'format_conversion', 0, 'cron', '0 4 * * 0', 50, '{"target_formats": {"image": "tiff", "document": "pdf"}}', 'system'),
-('Weekly Backup Verification', 'Verify backup file integrity', 'backup_verification', 1, 'cron', '0 6 * * 6', 100, '{"verify_checksums": true}', 'system'),
-('Daily Replication', 'Replicate files to backup targets', 'replication', 0, 'cron', '0 5 * * *', 500, '{"targets": "all", "verify_after_sync": true}', 'system');
+-- Seeded only where the name is not there yet: INSERT IGNORE had no unique key
+-- to ignore on, so every re-install added the six schedules again.
+INSERT INTO preservation_workflow_schedule
+(name, description, workflow_type, is_enabled, schedule_type, cron_expression, batch_limit, options, created_by)
+SELECT s.* FROM (
+    SELECT 'Daily Format Identification' AS name, 'Identify formats for new digital objects' AS description, 'format_identification' AS workflow_type, 1 AS is_enabled, 'cron' AS schedule_type, '0 1 * * *' AS cron_expression, 500 AS batch_limit, '{"unidentified_only": true, "update_registry": true}' AS options, 'system' AS created_by
+    UNION ALL SELECT 'Daily Fixity Check', 'Verify checksums for digital objects', 'fixity_check', 1, 'cron', '0 2 * * *', 500, '{"min_age_days": 7, "algorithm": "sha256"}', 'system'
+    UNION ALL SELECT 'Daily Virus Scan', 'Scan digital objects for malware', 'virus_scan', 1, 'cron', '0 3 * * *', 200, '{"new_only": true, "quarantine": true}', 'system'
+    UNION ALL SELECT 'Weekly Format Conversion', 'Convert at-risk formats to preservation formats', 'format_conversion', 0, 'cron', '0 4 * * 0', 50, '{"target_formats": {"image": "tiff", "document": "pdf"}}', 'system'
+    UNION ALL SELECT 'Weekly Backup Verification', 'Verify backup file integrity', 'backup_verification', 1, 'cron', '0 6 * * 6', 100, '{"verify_checksums": true}', 'system'
+    UNION ALL SELECT 'Daily Replication', 'Replicate files to backup targets', 'replication', 0, 'cron', '0 5 * * *', 500, '{"targets": "all", "verify_after_sync": true}', 'system'
+) s
+WHERE NOT EXISTS (SELECT 1 FROM preservation_workflow_schedule w WHERE w.name = s.name);
 
 -- =============================================
 -- OAIS PACKAGES (SIP/AIP/DIP)

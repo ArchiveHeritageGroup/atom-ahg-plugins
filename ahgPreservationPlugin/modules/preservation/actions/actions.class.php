@@ -180,7 +180,8 @@ class preservationActions extends AhgController
         $this->checkAdminAccess();
 
         $this->formats = DB::table('preservation_format')
-            ->orderBy('risk_level', 'desc')
+            // Most at risk first (a plain sort on the word put Medium before Critical).
+            ->orderByRaw("FIELD(risk_level, 'critical', 'high', 'medium', 'low') = 0, FIELD(risk_level, 'critical', 'high', 'medium', 'low')")
             ->orderBy('format_name')
             ->get()
             ->toArray();
@@ -359,7 +360,7 @@ class preservationActions extends AhgController
             ->toArray();
 
         // Objects never scanned
-        $this->unscannedobjects = DB::table('digital_object as do')
+        $this->unscannedObjects = DB::table('digital_object as do')
             ->leftJoin('preservation_virus_scan as pvs', 'do.id', '=', 'pvs.digital_object_id')
             ->where('do.usage_id', 140)
             ->whereNull('pvs.id')

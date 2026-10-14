@@ -14,9 +14,9 @@
                 <strong>ClamAV is installed and available</strong>
                 <?php if ($clamAvVersion): ?>
                 <br><small class="text-muted">
-                    Scanner: <?php echo htmlspecialchars($clamAvVersion['scanner']); ?> |
-                    Version: <?php echo htmlspecialchars($clamAvVersion['version']); ?> |
-                    Database: <?php echo htmlspecialchars($clamAvVersion['database']); ?>
+                    Scanner: <?php echo htmlspecialchars($clamAvVersion['scanner'] ?? ''); ?> |
+                    Version: <?php echo htmlspecialchars($clamAvVersion['engine_version'] ?? ''); ?> |
+                    Signatures: <?php echo htmlspecialchars(($clamAvVersion['signature_version'] ?? '').(empty($clamAvVersion['signature_date']) ? '' : ', '.$clamAvVersion['signature_date'])); ?>
                 </small>
                 <?php endif; ?>
             <?php else: ?>
@@ -154,7 +154,7 @@ php symfony preservation:virus-scan --limit=500</code></pre>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>
                         </td>
-                        <td><small><?php echo htmlspecialchars($scan->scanner_name ?? 'unknown'); ?></small></td>
+                        <td><small><?php echo htmlspecialchars(trim(($scan->scan_engine ?? '').' '.($scan->engine_version ?? '')) ?: 'unknown'); ?></small></td>
                         <td><small class="text-muted"><?php echo date('Y-m-d H:i', strtotime($scan->scanned_at)); ?></small></td>
                         <td><small><?php echo htmlspecialchars($scan->scanned_by ?? 'system'); ?></small></td>
                     </tr>

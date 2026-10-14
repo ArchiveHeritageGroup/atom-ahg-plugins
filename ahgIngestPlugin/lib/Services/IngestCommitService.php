@@ -1198,15 +1198,18 @@ class IngestCommitService
                         continue;
                     }
                     $objectIds[] = $doId;
-                    // Ensure a fixity checksum exists for the packaged object
-                    $preservationService->generateChecksums($doId, ['sha256']);
+                    // Ensure a fixity checksum exists for the packaged object (post-processing
+                    // has usually made one; regenerating logged a second event).
+                    if (!DB::table('preservation_checksum')->where('digital_object_id', $doId)->where('algorithm', 'sha256')->exists()) {
+                        $preservationService->generateChecksums($doId, ['sha256']);
+                    }
                 }
 
                 // PREMIS event: SIP package generated
                 $preservationService->logEvent(
                     null,
                     null,
-                    'replication',
+                    'information_package_creation', // PREMIS 3; making a SIP is not replication
                     'SIP package generated for ' . count($objectIds) . ' object(s) via Data Ingest session #' . $session->id,
                     'success',
                     null,

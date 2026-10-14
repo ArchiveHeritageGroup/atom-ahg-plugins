@@ -205,7 +205,7 @@
                     <?php foreach ($events as $event): ?>
                     <tr>
                         <td><span class="badge bg-secondary"><?php echo str_replace('_', ' ', $event->event_type); ?></span></td>
-                        <td><?php echo htmlspecialchars(substr($event->event_detail ?? '', 0, 50)); ?></td>
+                        <td><?php echo htmlspecialchars($event->event_detail ?? ''); ?></td>
                         <td>
                             <?php if ($event->event_outcome === 'success'): ?>
                                 <span class="text-success"><i class="fas fa-circle-check"></i> Success</span>
