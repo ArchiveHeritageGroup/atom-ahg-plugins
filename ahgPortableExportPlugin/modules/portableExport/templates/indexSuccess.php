@@ -124,7 +124,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
                   <br><small class="fw-normal"><?php echo __('Viewer with notes + file import'); ?></small>
                 </label>
                 <input type="radio" class="btn-check" name="mode" id="mode-archive" value="archive">
-                <label class="btn btn-outline-success" for="mode-archive">
+                <label class="btn btn-outline-primary" for="mode-archive">
                   <i class="bi bi-archive me-1"></i><?php echo __('Archive Export'); ?>
                   <br><small class="fw-normal"><?php echo __('Re-importable JSON + digital objects'); ?></small>
                 </label>
@@ -515,6 +515,13 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
   .wizard-step.active { border-bottom-color: #0d6efd; color: #0d6efd; font-weight: 600; }
   .wizard-step.completed { border-bottom-color: #198754; color: #198754; }
   .wizard-step.completed .badge { background-color: #198754 !important; }
+  /* The theme paints outline buttons solid, so every option looked selected.
+     Unselected: outlined. Selected: solid with a gold ring. */
+  .wizard-panel .btn-check + .btn { background-color: #fff !important; color: var(--ahg-primary, #005837) !important; border-color: currentColor !important; }
+  .wizard-panel .btn-check + .btn small, .wizard-panel .btn-check + .btn .small { color: inherit; }
+  .wizard-panel .btn-check:checked + .btn { background-color: var(--ahg-primary, #005837) !important; color: #fff !important; box-shadow: 0 0 0 3px #E1B34F; }
+  /* Pending step numbers were white on a near-white badge. */
+  .wizard-step .badge.bg-secondary { background-color: #6c757d !important; color: #fff !important; }
 </style>
 
 <script <?php echo $nonceAttr; ?>>
@@ -815,12 +822,16 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
           }
 
           document.getElementById('progress-result').style.display = '';
+          statusEl.textContent = 'Finished.';
+          refreshExportList();
           resetStartButton();
         } else if (data.status === 'failed') {
           clearInterval(pollInterval);
           bar.classList.remove('progress-bar-animated');
           bar.classList.add('bg-danger');
           document.getElementById('error-message').textContent = data.error_message || 'Export failed';
+          statusEl.textContent = 'Stopped.';
+          refreshExportList();
           document.getElementById('progress-error').style.display = '';
           resetStartButton();
         }
@@ -915,8 +926,11 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
     }
   }
 
+  // Row buttons are bound per row, so they are bound again when the list is
+  // reloaded after an export finishes (refreshExportList).
+  function bindExportRows(root) {
   // Save-to-folder from a historical export row (destination = local).
-  document.querySelectorAll('.btn-save-local').forEach(function(btn) {
+  root.querySelectorAll('.btn-save-local').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var id = this.getAttribute('data-id');
       var cell = this.closest('td');
@@ -932,7 +946,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
 
   // ─── Delete Export ────────────────────────────────────────────
 
-  document.querySelectorAll('.btn-delete-export').forEach(function(btn) {
+  root.querySelectorAll('.btn-delete-export').forEach(function(btn) {
     btn.addEventListener('click', function() {
       if (!confirm('Delete this export and its files?')) return;
       var id = this.getAttribute('data-id');
@@ -950,7 +964,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
 
   // ─── Share Token ──────────────────────────────────────────────
 
-  document.querySelectorAll('.btn-share-token').forEach(function(btn) {
+  root.querySelectorAll('.btn-share-token').forEach(function(btn) {
     btn.addEventListener('click', function() {
       shareExportId = this.getAttribute('data-id');
       document.getElementById('share-result').style.display = 'none';
@@ -958,6 +972,24 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
       modal.show();
     });
   });
+
+  }
+  bindExportRows(document);
+
+  // The list is rendered by the server; after an export ends, swap in a fresh
+  // copy so the new export shows without losing the result panel.
+  function refreshExportList() {
+    fetch(window.location.href, { credentials: 'same-origin' })
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        var fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('exports-table');
+        var current = document.getElementById('exports-table');
+        if (fresh && current) {
+          current.replaceWith(fresh);
+          bindExportRows(fresh);
+        }
+      });
+  }
 
   document.getElementById('btn-generate-token').addEventListener('click', function() {
     var maxDl = document.getElementById('share-max-downloads').value;

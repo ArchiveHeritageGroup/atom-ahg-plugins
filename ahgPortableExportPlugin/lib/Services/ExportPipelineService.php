@@ -81,6 +81,20 @@ class ExportPipelineService
         }
     }
 
+    /** Why an export came out empty, from the disclosure gate's counts. */
+    protected static function nothingToExportMessage(array $excluded): string
+    {
+        $why = [];
+        foreach (['unpublished' => 'not published (draft)', 'acl' => 'restricted for your account', 'icip' => 'under cultural protocols', 'odrl' => 'under access policies'] as $k => $label) {
+            if (!empty($excluded[$k])) {
+                $why[] = $excluded[$k].' '.$label;
+            }
+        }
+
+        return 'Nothing to export: no description in this scope can go into the package'
+            .($why ? ' ('.implode(', ', $why).'). Publish the records, or choose another scope.' : '. Check the scope.');
+    }
+
     /**
      * Execute all export steps sequentially.
      */
@@ -123,6 +137,11 @@ class ExportPipelineService
         // stamped column) can see what was NOT exported.
         $excluded = $extractor->getDisclosureExcluded();
         $withheldTotal = $excluded['unpublished'] + $excluded['icip'] + $excluded['odrl'] + $excluded['acl'] + $excluded['redacted_objects'];
+        // An empty package used to be marked completed (e.g. a fonds still in
+        // draft gave "completed, 0 descriptions"). Say why instead.
+        if (0 === $totalDescriptions) {
+            throw new \RuntimeException(self::nothingToExportMessage($excluded));
+        }
         $disclosure = [
             'generated_at' => date('c'),
             'records_included' => $totalDescriptions,
@@ -302,6 +321,9 @@ class ExportPipelineService
         // disclosure summary into the package + stamp the column at completion.
         $excluded = $archiveExtractor->getDisclosureExcluded();
         $withheldTotal = $excluded['unpublished'] + $excluded['icip'] + $excluded['odrl'] + $excluded['acl'] + $excluded['redacted_objects'];
+        if (0 === $totalDescriptions) {
+            throw new \RuntimeException(self::nothingToExportMessage($excluded));
+        }
         $disclosure = [
             'generated_at' => date('c'),
             'records_included' => $totalDescriptions,

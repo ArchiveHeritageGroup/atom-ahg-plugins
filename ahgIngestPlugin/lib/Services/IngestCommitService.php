@@ -611,7 +611,7 @@ class IngestCommitService
                     : (\QubitTerm::PUBLICATION_STATUS_DRAFT_ID ?? 159)]);
         }
 
-        if (!empty($data['creators']) || !empty($data['creationDates']) || !empty($data['creationDatesStart'])) {
+        if (!empty($data['creators']) || !empty($data['creationDates']) || !empty($data['creationDatesStart']) || array_filter(array_intersect_key($data, array_flip(self::ATOM_EVENT_COLUMNS)))) {
             $eventIds = DB::table('event')->where('object_id', $id)->where('type_id', \QubitTerm::CREATION_ID ?? 111)->pluck('id');
             foreach ($eventIds as $eventId) {
                 if (null !== $event = \QubitEvent::getById((int) $eventId)) {
@@ -900,8 +900,22 @@ class IngestCommitService
         }
     }
 
+    /** AtoM's own CSV event columns, as its CSV import names them. */
+    private const ATOM_EVENT_COLUMNS = ['eventActors', 'eventTypes', 'eventDates', 'eventStartDates', 'eventEndDates'];
+
     protected function createEvents(int $ioId, array $data): void
     {
+        // AtoM's CSV columns (eventActors, eventTypes, eventDates, eventStartDates,
+        // eventEndDates) map to fields of the same names, which this method never
+        // read: an ingest of a standard AtoM CSV kept no dates and no creators.
+        foreach (self::ATOM_EVENT_COLUMNS as $col) {
+            if (!empty($data[$col])) {
+                $this->createAtomCsvEvents($ioId, $data);
+
+                return;
+            }
+        }
+
         // Creators
         if (!empty($data['creators'])) {
             $creators = array_map('trim', explode('|', $data['creators']));
@@ -980,6 +994,75 @@ class IngestCommitService
                     \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
                     // skip
                 }
+            }
+        }
+    }
+
+    /**
+     * Events from AtoM's CSV columns: pipe-separated lists aligned by position,
+     * so eventTypes[i], eventActors[i], eventDates[i], eventStartDates[i] and
+     * eventEndDates[i] describe one event. A missing type is Creation, as in
+     * AtoM's own import.
+     */
+    private function createAtomCsvEvents(int $ioId, array $data): void
+    {
+        $split = fn ($col) => isset($data[$col]) && '' !== trim((string) $data[$col]) ? array_map('trim', explode('|', (string) $data[$col])) : [];
+        $cols = array_combine(self::ATOM_EVENT_COLUMNS, array_map($split, self::ATOM_EVENT_COLUMNS));
+        $count = max(array_map('count', $cols));
+
+        for ($i = 0; $i < $count; ++$i) {
+            $actorName = $cols['eventActors'][$i] ?? '';
+            $date = $cols['eventDates'][$i] ?? '';
+            $start = $cols['eventStartDates'][$i] ?? '';
+            $end = $cols['eventEndDates'][$i] ?? '';
+            if ('' === $actorName && '' === $date && '' === $start && '' === $end) {
+                continue;
+            }
+
+            $typeId = \QubitTerm::CREATION_ID;
+            if ('' !== ($typeName = $cols['eventTypes'][$i] ?? '')) {
+                $typeId = (int) (DB::table('term')->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+                    ->where('term.taxonomy_id', \QubitTaxonomy::EVENT_TYPE_ID)
+                    ->where('term_i18n.name', $typeName)->value('term.id') ?: \QubitTerm::CREATION_ID);
+            }
+
+            $actorId = null;
+            if ('' !== $actorName) {
+                $actorId = DB::table('actor_i18n')->where('authorized_form_of_name', $actorName)->value('id');
+                if (!$actorId) {
+                    try {
+                        $actor = new \QubitActor();
+                        $actor->parentId = \QubitActor::ROOT_ID;
+                        $actor->authorizedFormOfName = $actorName;
+                        $actor->sourceCulture = 'en';
+                        $actor->save();
+                        $actorId = $actor->id;
+                    } catch (\Throwable $e) {
+                        \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+                    }
+                }
+            }
+
+            try {
+                $event = new \QubitEvent();
+                $event->objectId = $ioId;
+                $event->typeId = $typeId;
+                if ($actorId) {
+                    $event->actorId = (int) $actorId;
+                }
+                if ('' !== $date) {
+                    $event->date = $date;
+                }
+                if ('' !== $start) {
+                    $event->startDate = self::fullDate($start, false);
+                }
+                if ('' !== $end) {
+                    $event->endDate = self::fullDate($end, true);
+                }
+                $event->sourceCulture = 'en';
+                $event->save();
+            } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             }
         }
     }
