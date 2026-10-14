@@ -204,7 +204,7 @@
       <?php
         $totalBalance = 0;
         foreach ($rawFines as $fine) {
-            $remaining = ($fine->amount ?? 0) - ($fine->amount_paid ?? 0);
+            $remaining = ($fine->amount ?? 0) - ($fine->paid_amount ?? 0);
             $totalBalance += $remaining;
         }
       ?>
@@ -227,11 +227,11 @@
             </thead>
             <tbody>
               <?php foreach ($rawFines as $fine): ?>
-                <?php $remaining = ($fine->amount ?? 0) - ($fine->amount_paid ?? 0); ?>
+                <?php $remaining = ($fine->amount ?? 0) - ($fine->paid_amount ?? 0); ?>
                 <tr>
                   <td><span class="badge bg-secondary"><?php echo esc_entities(ucfirst(str_replace('_', ' ', $fine->fine_type ?? ''))); ?></span></td>
                   <td class="text-end"><?php echo number_format($fine->amount ?? 0, 2); ?></td>
-                  <td class="text-end"><?php echo number_format($fine->amount_paid ?? 0, 2); ?></td>
+                  <td class="text-end"><?php echo number_format($fine->paid_amount ?? 0, 2); ?></td>
                   <td class="text-end"><strong><?php echo number_format($remaining, 2); ?></strong></td>
                   <td><?php echo esc_entities($fine->created_at ?? ''); ?></td>
                   <td><?php echo esc_entities($fine->description ?? ''); ?></td>

@@ -86,6 +86,18 @@ class loanActions extends AhgController
         $this->sectorName = $this->getSectorName($this->sector);
         $this->purposes = $this->getPurposes($this->sector);
         $this->insuranceTypes = $this->getInsuranceTypes();
+
+        // The template reads these; nothing set them, so every loan showed
+        // "Pending" and no workflow buttons.
+        $workflow = $service->getWorkflow($this->loan);
+        $state = $service->getWorkflowState($this->loan);
+        $this->currentState = $workflow->getStateLabel($state);
+        $color = $workflow->getStateColor($state);
+        $this->stateColor = 'default' === $color ? 'secondary' : $color;
+        $this->availableTransitions = array_values($workflow->getAvailableTransitions($state));
+        $this->isOverdue = !empty($this->loan['end_date'])
+            && $this->loan['end_date'] < date('Y-m-d')
+            && !in_array($state, ['returned', 'return_condition_verified', 'closed', 'cancelled'], true);
     }
 
     /**
@@ -154,6 +166,8 @@ class loanActions extends AhgController
 
                 $this->getUser()->setFlash('notice', 'Loan created successfully');
                 $this->redirect(['module' => 'loan', 'action' => 'show', 'id' => $loanId]);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -203,6 +217,8 @@ class loanActions extends AhgController
                 $service->update($id, $data);
                 $this->getUser()->setFlash('notice', 'Loan updated successfully');
                 $this->redirect(['module' => 'loan', 'action' => 'show', 'id' => $id]);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -228,8 +244,19 @@ class loanActions extends AhgController
         $generator = new \AhgLoan\Services\Loan\LoanAgreementGenerator($service);
 
         // Set institution details from settings if available
+        // The lending institution is the repository holding the loan's objects when
+        // they all share one; the site title is only the fallback (on PSIS it is
+        // "AtoM/Heratio", which is no institution's name).
+        $repoNames = $this->getDatabase()->table('ahg_loan_object as lo')
+            ->join('information_object as io', 'io.id', '=', 'lo.information_object_id')
+            ->join('actor_i18n as ai', function ($j) {
+                $j->on('ai.id', '=', 'io.repository_id')->where('ai.culture', '=', 'en');
+            })
+            ->where('lo.loan_id', (int) $request->getParameter('id'))
+            ->distinct()->pluck('ai.authorized_form_of_name')->all();
+
         $generator->setInstitution([
-            'name' => $this->config('app_siteTitle', 'The Archive and Heritage Group'),
+            'name' => 1 === count($repoNames) ? $repoNames[0] : $this->config('app_siteTitle', 'The Archive and Heritage Group'),
             'address' => $this->config('app_siteAddress', ''),
             'phone' => $this->config('app_sitePhone', ''),
             'email' => $this->config('app_siteEmail', ''),
@@ -251,6 +278,8 @@ class loanActions extends AhgController
             echo $content;
 
             return sfView::NONE;
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error generating agreement: '.$e->getMessage());
             $this->redirect(['module' => 'loan', 'action' => 'show', 'id' => $id]);
@@ -297,6 +326,8 @@ class loanActions extends AhgController
                 ]);
 
                 $this->getUser()->setFlash('notice', 'Loan period extended successfully');
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -323,10 +354,8 @@ class loanActions extends AhgController
             $notes = $request->getParameter('notes');
 
             try {
-                $service->update($id, [
-                    'return_date' => $returnDate,
-                    'status' => 'returned',
-                ]);
+                // Through the service, so the return lands in the status history too.
+                $service->recordReturn($id, $returnDate, $notes ?: null, (int) $this->getUser()->getAttribute('user_id', 1));
 
                 // Log the return
                 $db = $this->getDatabase();
@@ -342,6 +371,8 @@ class loanActions extends AhgController
                 ]);
 
                 $this->getUser()->setFlash('notice', 'Return recorded successfully');
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -381,6 +412,8 @@ class loanActions extends AhgController
                 ]);
 
                 $this->getUser()->setFlash('notice', 'Object added to loan');
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -407,6 +440,8 @@ class loanActions extends AhgController
             try {
                 $service->removeObject($loanId, $objectId);
                 $this->getUser()->setFlash('notice', 'Object removed from loan');
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -460,6 +495,8 @@ class loanActions extends AhgController
                     } else {
                         $this->getUser()->setFlash('error', 'Failed to move uploaded file');
                     }
+                } catch (\sfStopException $e) {
+                    throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
                 } catch (\Exception $e) {
                     $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
                 }
@@ -537,6 +574,8 @@ class loanActions extends AhgController
             // Perform the transition
             $service->transition($id, $transition, $this->getUser()->getAttribute('user_id', 1), $comment);
             $result['success'] = true;
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $result['error'] = $e->getMessage();
         }

@@ -10,8 +10,10 @@
 
 <?php
   $isLoanOut = $loan['loan_type'] === 'out';
-  $isOverdue = !empty($loan['is_overdue']);
-  $currentState = $loan['workflow']['current_state'] ?? 'pending';
+  // $currentState, $stateColor, $availableTransitions and $isOverdue come from the
+  // show action; the loan array carries no workflow or is_overdue keys.
+  $currentState = $currentState ?? 'pending';
+  $isOverdue = !empty($isOverdue);
 ?>
 
 <div class="row">
@@ -42,9 +44,9 @@
               'returned' => 'dark',
               'cancelled' => 'danger',
             ];
-            $statusColor = $statusColors[$currentState] ?? 'secondary';
+            $statusColor = $stateColor ?? ($statusColors[$currentState] ?? 'secondary');
           ?>
-          <span class="badge bg-<?php echo $statusColor; ?> fs-6"><?php echo ucfirst($currentState); ?></span>
+          <span class="badge text-bg-<?php echo $statusColor; ?> fs-6"><?php echo htmlspecialchars($currentState); ?></span>
           <?php if ($isOverdue): ?>
             <span class="badge bg-danger fs-6">Overdue</span>
           <?php endif; ?>
@@ -283,7 +285,7 @@
           <h5 class="mb-0">Workflow</h5>
         </div>
         <div class="card-body">
-          <p class="text-muted small">Current state: <strong><?php echo ucfirst($currentState); ?></strong></p>
+          <p class="text-muted small">Current state: <strong><?php echo htmlspecialchars($currentState); ?></strong></p>
           <div class="d-grid gap-2">
             <?php foreach ($availableTransitions as $transition): ?>
               <button type="button" class="btn btn-outline-primary btn-sm transition-btn"

@@ -319,6 +319,54 @@ class LoanService
     }
 
     /**
+     * The workflow for a loan: out-going loans follow LoanOutWorkflow, the rest LoanInWorkflow.
+     */
+    public function getWorkflow(array $loan): \AhgLoan\Services\Workflow\AbstractWorkflow
+    {
+        $dir = dirname(__DIR__);
+        require_once dirname($dir) . '/Contracts/WorkflowInterface.php';
+        require_once $dir . '/Workflow/AbstractWorkflow.php';
+        require_once $dir . '/Workflow/LoanOutWorkflow.php';
+        require_once $dir . '/Workflow/LoanInWorkflow.php';
+
+        return 'out' === ($loan['loan_type'] ?? 'out')
+            ? new \AhgLoan\Services\Workflow\LoanOutWorkflow()
+            : new \AhgLoan\Services\Workflow\LoanInWorkflow();
+    }
+
+    /**
+     * The loan's place in its workflow. A status the workflow does not know
+     * (new loans are saved as 'draft') counts as the workflow's first state.
+     */
+    public function getWorkflowState(array $loan): string
+    {
+        $workflow = $this->getWorkflow($loan);
+        $status = (string) ($loan['status'] ?? '');
+
+        return null !== $workflow->getState($status) ? $status : $workflow->getInitialState();
+    }
+
+    /**
+     * Move a loan along its workflow and record it like any other status change.
+     *
+     * The loan page and its transition endpoint called this, but it did not
+     * exist, so no loan could move past its first status.
+     */
+    public function transition(int $loanId, string $transition, int $userId, ?string $comment = null): string
+    {
+        $loan = $this->get($loanId);
+        if (!$loan) {
+            throw new \InvalidArgumentException('Loan not found');
+        }
+
+        $workflow = $this->getWorkflow($loan);
+        $newState = $workflow->apply($this->getWorkflowState($loan), $transition);
+        $this->updateStatus($loanId, $newState, $userId, $comment);
+
+        return $newState;
+    }
+
+    /**
      * Add object to loan.
      */
     public function addObject(int $loanId, array $object): int

@@ -153,7 +153,7 @@ class LoanAgreementGenerator
             $html .= '<td style="border:1px solid #ccc; padding:8px;">'.($i + 1).'</td>';
             $html .= '<td style="border:1px solid #ccc; padding:8px;">'.htmlspecialchars($obj['object_identifier'] ?? $obj['identifier'] ?? '').'</td>';
             $html .= '<td style="border:1px solid #ccc; padding:8px;">'.htmlspecialchars($obj['object_title'] ?? $obj['io_title'] ?? '').'</td>';
-            $html .= '<td style="border:1px solid #ccc; padding:8px; text-align:right;">'.($obj['insurance_value'] ? number_format($obj['insurance_value'], 2) : '-').'</td>';
+            $html .= '<td style="border:1px solid #ccc; padding:8px; text-align:right;">'.($obj['insurance_value'] ? number_format((float) $obj['insurance_value'], 2) : '-').'</td>';
             $html .= '</tr>';
         }
 
@@ -327,16 +327,17 @@ HTML;
     /**
      * Format currency value.
      */
-    private function formatCurrency(?float $amount, ?string $currency): string
+    // Decimal columns arrive as strings, which a ?float parameter rejects under strict_types.
+    private function formatCurrency(float|string|null $amount, ?string $currency): string
     {
-        if (null === $amount) {
+        if (null === $amount || '' === $amount) {
             return '-';
         }
 
         $symbols = ['ZAR' => 'R', 'USD' => '$', 'EUR' => '€', 'GBP' => '£'];
         $symbol = $symbols[$currency ?? 'ZAR'] ?? $currency.' ';
 
-        return $symbol.number_format($amount, 2);
+        return $symbol.number_format((float) $amount, 2);
     }
 
     /**

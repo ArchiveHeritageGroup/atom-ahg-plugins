@@ -162,7 +162,7 @@
                   <td><?php echo (int) ($hold->queue_position ?? 0); ?></td>
                   <td>
                     <?php
-                      $hStatus = $hold->hold_status ?? 'pending';
+                      $hStatus = $hold->status ?? 'pending';
                       $hClass = 'bg-secondary';
                       if ($hStatus === 'ready') {
                           $hClass = 'bg-success';

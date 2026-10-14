@@ -443,10 +443,15 @@ class CirculationService
             return $rule;
         }
 
-        // Material type default (patron_type = 'default')
+        // Wildcards: the loan-rules editor saves 'default', the installed rules
+        // use '*'. Matching only 'default' left every installed rule unreachable,
+        // so no checkout could find one.
+        $any = ['default', '*'];
+
+        // Material type, any patron type
         $rule = DB::table('library_loan_rule')
             ->where('material_type', $materialType)
-            ->where('patron_type', 'default')
+            ->whereIn('patron_type', $any)
             ->first();
 
         if ($rule) {
@@ -455,8 +460,8 @@ class CirculationService
 
         // Global default
         return DB::table('library_loan_rule')
-            ->where('material_type', 'default')
-            ->where('patron_type', 'default')
+            ->whereIn('material_type', $any)
+            ->whereIn('patron_type', $any)
             ->first();
     }
 

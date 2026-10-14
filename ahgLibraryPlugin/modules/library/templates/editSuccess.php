@@ -633,8 +633,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Extract all data
                     var title = d.title || '';
                     var authors = d.authors ? d.authors.map(function(a) { return {name: a.name, url: a.url}; }) : [];
-                    var publisher = d.publishers && d.publishers[0] ? d.publishers[0].name : '';
-                    var publishPlace = d.publish_places && d.publish_places[0] ? d.publish_places[0].name : '';
+                    // Providers send these as plain strings or as {name}; reading only
+                    // .name left publisher and place blank for Open Library results.
+                    var nameOf = function (v) { return v ? (typeof v === 'string' ? v : (v.name || '')) : ''; };
+                    var publisher = d.publishers ? nameOf(d.publishers[0]) : '';
+                    var publishPlace = d.publish_places ? nameOf(d.publish_places[0]) : '';
                     var date = d.publish_date || '';
                     var pages = d.number_of_pages || '';
                     var pagination = d.pagination || (pages ? pages + ' p.' : '');

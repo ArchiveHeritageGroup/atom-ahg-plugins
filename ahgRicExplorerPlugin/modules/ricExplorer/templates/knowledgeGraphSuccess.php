@@ -1,5 +1,5 @@
 <?php
-/* Unified cross-domain knowledge graph (#150) — record ↔ creators / repository /
+/* Unified cross-domain knowledge graph (#150) - record ↔ creators / repository /
    subjects / related records / donor. */
 $n = sfConfig::get('csp_nonce', '');
 $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
@@ -11,7 +11,7 @@ $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
   </div>
 
   <?php if (empty($objectId)): ?>
-    <p class="text-muted"><?php echo __('Pick a record to see its cross-domain graph — creators, repository, subjects and related records.') ?></p>
+    <p class="text-muted"><?php echo __('Pick a record to see its cross-domain graph - creators, repository, subjects and related records.') ?></p>
     <div class="card"><div class="card-body p-0">
       <?php if (empty($records)): ?>
         <div class="p-3 text-muted small"><?php echo __('No records found.') ?></div>
@@ -19,7 +19,7 @@ $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
         <div class="table-responsive"><table class="table table-hover table-sm mb-0 align-middle">
           <thead class="table-light"><tr><th><?php echo __('Record') ?></th><th></th></tr></thead>
           <tbody>
-          <?php foreach ($records as $r): ?>
+          <?php foreach ($sf_data->getRaw('records') as $r): ?>
             <tr>
               <td><?php echo esc_entities($r->title) ?> <small class="text-muted">#<?php echo (int) $r->io_id ?></small></td>
               <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="<?php echo url_for(['module' => 'ricExplorer', 'action' => 'knowledgeGraph', 'id' => $r->io_id]) ?>"><i class="fas fa-share-nodes me-1"></i><?php echo __('Graph') ?></a></td>
@@ -31,8 +31,8 @@ $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
     </div></div>
   <?php else: $s = $graph['summary'] ?? []; ?>
     <div class="d-flex flex-wrap align-items-baseline mb-2 gap-2">
-      <strong class="flex-grow-1"><?php echo esc_entities($recordTitle) ?></strong>
-      <?php if (!empty($recordSlug)): ?><a href="/<?php echo esc_entities($recordSlug) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Open record') ?></a><?php endif ?>
+      <strong class="flex-grow-1"><?php echo esc_entities($sf_data->getRaw('recordTitle')) ?></strong>
+      <?php if (!empty($recordSlug)): ?><a href="/<?php echo esc_entities($sf_data->getRaw('recordSlug')) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Open record') ?></a><?php endif ?>
       <a href="<?php echo url_for(['module' => 'ricExplorer', 'action' => 'knowledgeGraph']) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('All') ?></a>
     </div>
     <div class="mb-2 small text-muted">
@@ -43,7 +43,7 @@ $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
     <div id="kg-cy" data-ahg-style="height: 560px;" class="border rounded bg-light"></div>
     <div class="form-text"><?php echo __('Drag nodes to rearrange. Colours: record (dark), repository (blue), creator (orange), subject (teal), related record (green).') ?></div>
 
-    <script type="application/json" id="kg-graph-data"<?php echo $nonce ?>><?php echo json_encode($graph, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+    <script type="application/json" id="kg-graph-data"<?php echo $nonce ?>><?php /* The raw array: json_encode() of the escaping decorator gave {}, so the graph drew nothing. */ echo json_encode($sf_data->getRaw('graph'), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
     <script src="/plugins/ahgRicExplorerPlugin/web/js/cytoscape.min.js"></script>
     <script<?php echo $nonce ?>>
     (function () {
@@ -67,7 +67,11 @@ $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
           { selector: 'node[type="donor"]', style: { 'background-color': tone.donor } },
           { selector: 'edge', style: { 'label': 'data(label)', 'font-size': '8px', 'color': '#666', 'width': 1, 'line-color': '#ced4da', 'curve-style': 'bezier', 'target-arrow-shape': 'triangle', 'target-arrow-color': '#ced4da', 'text-rotation': 'autorotate' } }
         ],
-        layout: { name: 'cose', animate: false, padding: 20, nodeRepulsion: 6000, idealEdgeLength: 90 }
+        // Record in the centre, its neighbours on a ring: cose piled the nodes on
+        // top of each other, and with few nodes the fit zoomed labels to poster size.
+        maxZoom: 1.6,
+        layout: { name: 'concentric', animate: false, padding: 40, minNodeSpacing: 70,
+          concentric: function (n) { return n.data('type') === 'record' ? 2 : 1; }, levelWidth: function () { return 1; } }
       });
     })();
     </script>

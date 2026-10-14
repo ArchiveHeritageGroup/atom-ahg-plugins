@@ -64,7 +64,7 @@ class HoldService
         // Check max holds
         $currentHolds = DB::table('library_hold')
             ->where('patron_id', $patronId)
-            ->whereIn('hold_status', ['pending', 'ready'])
+            ->whereIn('status', ['pending', 'ready'])
             ->count();
 
         if ($currentHolds >= $patron->max_holds) {
@@ -81,7 +81,7 @@ class HoldService
         $existing = DB::table('library_hold')
             ->where('patron_id', $patronId)
             ->where('library_item_id', $libraryItemId)
-            ->whereIn('hold_status', ['pending', 'ready'])
+            ->whereIn('status', ['pending', 'ready'])
             ->first();
 
         if ($existing) {
@@ -93,7 +93,7 @@ class HoldService
             ->join('library_copy as cp', 'c.copy_id', '=', 'cp.id')
             ->where('cp.library_item_id', $libraryItemId)
             ->where('c.patron_id', $patronId)
-            ->where('c.checkout_status', 'checked_out')
+            ->where('c.status', 'checked_out')
             ->exists();
 
         if ($hasCheckout) {
@@ -105,7 +105,7 @@ class HoldService
         // Determine position in queue
         $position = DB::table('library_hold')
             ->where('library_item_id', $libraryItemId)
-            ->whereIn('hold_status', ['pending', 'ready'])
+            ->whereIn('status', ['pending', 'ready'])
             ->count() + 1;
 
         // If a copy is available, mark hold as ready immediately
@@ -127,10 +127,10 @@ class HoldService
             'library_item_id' => $libraryItemId,
             'patron_id'       => $patronId,
             'hold_date'       => $now,
-            'hold_status'     => $status,
+            'status'     => $status,
             'queue_position'  => $position,
             'expiry_date'     => $expiryDate,
-            'pickup_location' => $notes, // re-use notes for pickup if needed
+            'notes'           => $notes,
             'created_at'      => $now,
             'updated_at'      => $now,
         ]);
@@ -170,14 +170,14 @@ class HoldService
             return ['success' => false, 'error' => 'Hold does not belong to this patron'];
         }
 
-        if (!in_array($hold->hold_status, ['pending', 'ready'])) {
-            return ['success' => false, 'error' => 'Hold cannot be cancelled (status: ' . $hold->hold_status . ')'];
+        if (!in_array($hold->status, ['pending', 'ready'])) {
+            return ['success' => false, 'error' => 'Hold cannot be cancelled (status: ' . $hold->status . ')'];
         }
 
         DB::table('library_hold')
             ->where('id', $holdId)
             ->update([
-                'hold_status' => 'cancelled',
+                'status' => 'cancelled',
                 'updated_at'  => date('Y-m-d H:i:s'),
             ]);
 
@@ -201,7 +201,7 @@ class HoldService
         return DB::table('library_hold as h')
             ->join('library_patron as p', 'h.patron_id', '=', 'p.id')
             ->where('h.library_item_id', $libraryItemId)
-            ->whereIn('h.hold_status', ['pending', 'ready'])
+            ->whereIn('h.status', ['pending', 'ready'])
             ->select([
                 'h.*',
                 'p.first_name', 'p.last_name', 'p.card_number as patron_barcode', 'p.email',
@@ -218,7 +218,7 @@ class HoldService
     {
         $holds = DB::table('library_hold')
             ->where('library_item_id', $libraryItemId)
-            ->whereIn('hold_status', ['pending', 'ready'])
+            ->whereIn('status', ['pending', 'ready'])
             ->orderBy('hold_date')
             ->get();
 
@@ -239,7 +239,7 @@ class HoldService
         $now = date('Y-m-d H:i:s');
 
         $expired = DB::table('library_hold')
-            ->where('hold_status', 'ready')
+            ->where('status', 'ready')
             ->where('expiry_date', '<', $today)
             ->get();
 
@@ -248,7 +248,7 @@ class HoldService
             DB::table('library_hold')
                 ->where('id', $hold->id)
                 ->update([
-                    'hold_status' => 'expired',
+                    'status' => 'expired',
                     'updated_at'  => $now,
                 ]);
 
@@ -278,7 +278,7 @@ class HoldService
 
         $nextHold = DB::table('library_hold')
             ->where('library_item_id', $libraryItemId)
-            ->where('hold_status', 'pending')
+            ->where('status', 'pending')
             ->orderBy('queue_position')
             ->first();
 
@@ -286,7 +286,7 @@ class HoldService
             DB::table('library_hold')
                 ->where('id', $nextHold->id)
                 ->update([
-                    'hold_status' => 'ready',
+                    'status' => 'ready',
                     'expiry_date' => date('Y-m-d', strtotime('+' . (int) $this->getLibrarySetting('hold_expiry_days', '7') . ' days')),
                     'updated_at'  => date('Y-m-d H:i:s'),
                 ]);
@@ -308,11 +308,11 @@ class HoldService
     public function getStatistics(): array
     {
         return [
-            'pending'   => DB::table('library_hold')->where('hold_status', 'pending')->count(),
-            'ready'     => DB::table('library_hold')->where('hold_status', 'ready')->count(),
-            'fulfilled' => DB::table('library_hold')->where('hold_status', 'fulfilled')->count(),
-            'expired'   => DB::table('library_hold')->where('hold_status', 'expired')->count(),
-            'cancelled' => DB::table('library_hold')->where('hold_status', 'cancelled')->count(),
+            'pending'   => DB::table('library_hold')->where('status', 'pending')->count(),
+            'ready'     => DB::table('library_hold')->where('status', 'ready')->count(),
+            'fulfilled' => DB::table('library_hold')->where('status', 'fulfilled')->count(),
+            'expired'   => DB::table('library_hold')->where('status', 'expired')->count(),
+            'cancelled' => DB::table('library_hold')->where('status', 'cancelled')->count(),
         ];
     }
 

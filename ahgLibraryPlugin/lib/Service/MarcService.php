@@ -320,8 +320,10 @@ class MarcService
                     DB::table('library_copy')->insert([
                         'library_item_id'    => $itemId,
                         'barcode'            => $copyBarcode,
-                        'copy_status'        => 'available',
-                        'home_location'      => $location,
+                        'copy_number'        => $c + 1,
+                        // library_copy's columns are status and shelf_location.
+                        'status'             => 'available',
+                        'shelf_location'     => $location,
                         'created_at'         => date('Y-m-d H:i:s'),
                         'updated_at'         => date('Y-m-d H:i:s'),
                     ]);
@@ -862,10 +864,10 @@ class MarcService
             foreach ($parsed['subjects'] as $sortOrder => $subject) {
                 DB::table('library_item_subject')->insert([
                     'library_item_id' => $itemId,
+                    // library_item_subject has subject_type and no sort_order; rows keep insert order by id.
                     'heading' => $subject['heading'],
-                    'heading_type' => $subject['heading_type'],
+                    'subject_type' => $subject['heading_type'],
                     'source' => $subject['source'],
-                    'sort_order' => $sortOrder,
                 ]);
             }
         }
@@ -992,9 +994,9 @@ class MarcService
         $df('504', ' ', ' ', ['a' => $item->bibliography_note ?? '']);
         $df('520', ' ', ' ', ['a' => $item->summary ?? '']);
 
-        $subjects = DB::table('library_item_subject')->where('library_item_id', $item->id)->orderBy('sort_order')->get();
+        $subjects = DB::table('library_item_subject')->where('library_item_id', $item->id)->orderBy('id')->get(); // no sort_order column on this table
         foreach ($subjects as $subject) {
-            $df($this->getSubjectTag($subject->heading_type), ' ', $this->getSubjectSourceIndicator($subject->source), ['a' => $subject->heading]);
+            $df($this->getSubjectTag($subject->subject_type), ' ', $this->getSubjectSourceIndicator($subject->source), ['a' => $subject->heading]);
         }
 
         return ['leader' => $leader, 'control' => $control, 'data' => $data];
@@ -1180,11 +1182,11 @@ class MarcService
         // Subjects
         $subjects = DB::table('library_item_subject')
             ->where('library_item_id', $item->id)
-            ->orderBy('sort_order')
+            ->orderBy('id')
             ->get();
 
         foreach ($subjects as $subject) {
-            $tag = $this->getSubjectTag($subject->heading_type);
+            $tag = $this->getSubjectTag($subject->subject_type);
             $ind2 = $this->getSubjectSourceIndicator($subject->source);
             $this->writeDataField($xml, $tag, ' ', $ind2, ['a' => $subject->heading]);
         }

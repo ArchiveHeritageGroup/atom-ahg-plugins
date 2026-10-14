@@ -144,6 +144,8 @@ class exhibitionActions extends AhgController
 
                 $this->getUser()->setFlash('notice', 'Exhibition created successfully');
                 $this->redirect(['module' => 'exhibition', 'action' => 'show', 'id' => $exhibitionId]);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error creating exhibition: '.$e->getMessage());
                 $this->formData = $data;
@@ -196,6 +198,8 @@ class exhibitionActions extends AhgController
 
                 $this->getUser()->setFlash('notice', 'Exhibition updated successfully');
                 $this->redirect(['module' => 'exhibition', 'action' => 'show', 'id' => $this->exhibition['id']]);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error updating exhibition: '.$e->getMessage());
             }
@@ -222,6 +226,8 @@ class exhibitionActions extends AhgController
                 'success' => true,
                 'message' => 'Status changed to '.$newStatus,
             ]));
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             return $this->renderText(json_encode([
                 'success' => false,
@@ -271,6 +277,8 @@ class exhibitionActions extends AhgController
         try {
             $id = $service->addObject($exhibitionId, $objectId, $data);
             $this->getUser()->setFlash('notice', 'Object added to exhibition');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -300,6 +308,8 @@ class exhibitionActions extends AhgController
         try {
             $service->updateObject($exhibitionObjectId, $data);
             $this->getUser()->setFlash('notice', 'Object updated');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -320,6 +330,8 @@ class exhibitionActions extends AhgController
         try {
             $service->removeObject($exhibitionObjectId);
             $this->getUser()->setFlash('notice', 'Object removed from exhibition');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -348,6 +360,8 @@ class exhibitionActions extends AhgController
             $service->reorderObjects($data['order']);
 
             return $this->renderText(json_encode(['success' => true]));
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
@@ -385,6 +399,8 @@ class exhibitionActions extends AhgController
                 $service->addSection($this->exhibition['id'], $data);
                 $this->getUser()->setFlash('notice', 'Section added');
                 $this->redirect(['module' => 'exhibition', 'action' => 'sections', 'id' => $this->exhibition['id']]);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -418,6 +434,8 @@ class exhibitionActions extends AhgController
         try {
             $service->updateSection($sectionId, $data);
             $this->getUser()->setFlash('notice', 'Section updated');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -444,6 +462,8 @@ class exhibitionActions extends AhgController
         try {
             $service->deleteSection($sectionId);
             $this->getUser()->setFlash('notice', 'Section deleted');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -481,6 +501,8 @@ class exhibitionActions extends AhgController
                 $service->createStoryline($this->exhibition['id'], $data, $userId);
                 $this->getUser()->setFlash('notice', 'Storyline created');
                 $this->redirect(['module' => 'exhibition', 'action' => 'storylines', 'id' => $this->exhibition['id']]);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -514,6 +536,8 @@ class exhibitionActions extends AhgController
             $userId = $this->getUser()->getAttribute('user_id', 1);
             $service->createStoryline($exhibitionId, $data, $userId);
             $this->getUser()->setFlash('notice', 'Storyline created');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -547,6 +571,8 @@ class exhibitionActions extends AhgController
         try {
             $service->updateStoryline($storylineId, $data);
             $this->getUser()->setFlash('notice', 'Storyline updated');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -573,6 +599,8 @@ class exhibitionActions extends AhgController
         try {
             $service->deleteStoryline($storylineId);
             $this->getUser()->setFlash('notice', 'Storyline deleted');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -620,6 +648,8 @@ class exhibitionActions extends AhgController
         try {
             $service->addStorylineStop($storylineId, $exhibitionObjectId, $data);
             $this->getUser()->setFlash('notice', 'Stop added to storyline');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -650,6 +680,8 @@ class exhibitionActions extends AhgController
         try {
             $service->updateStorylineStop($stopId, $data);
             $this->getUser()->setFlash('notice', 'Stop updated');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -672,6 +704,8 @@ class exhibitionActions extends AhgController
         try {
             $service->deleteStorylineStop($stopId);
             $this->getUser()->setFlash('notice', 'Stop deleted');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -713,6 +747,8 @@ class exhibitionActions extends AhgController
                 $service->createEvent($this->exhibition['id'], $data, $userId);
                 $this->getUser()->setFlash('notice', 'Event created');
                 $this->redirect(['module' => 'exhibition', 'action' => 'events', 'id' => $this->exhibition['id']]);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -753,6 +789,8 @@ class exhibitionActions extends AhgController
             $userId = $this->getUser()->getAttribute('user_id', 1);
             $service->createEvent($exhibitionId, $data, $userId);
             $this->getUser()->setFlash('notice', 'Event created');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -794,6 +832,8 @@ class exhibitionActions extends AhgController
         try {
             $service->updateEvent($eventId, $data);
             $this->getUser()->setFlash('notice', 'Event updated');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -820,6 +860,8 @@ class exhibitionActions extends AhgController
         try {
             $service->deleteEvent($eventId);
             $this->getUser()->setFlash('notice', 'Event deleted');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -854,6 +896,8 @@ class exhibitionActions extends AhgController
                 );
                 $this->getUser()->setFlash('notice', 'Checklist created');
                 $this->redirect(['module' => 'exhibition', 'action' => 'checklists', 'id' => $this->exhibition['id']]);
+            } catch (\sfStopException $e) {
+                throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
@@ -881,6 +925,8 @@ class exhibitionActions extends AhgController
         try {
             $service->createChecklistFromTemplate($exhibitionId, $templateId, $assignedTo);
             $this->getUser()->setFlash('notice', 'Checklist created');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }
@@ -912,6 +958,8 @@ class exhibitionActions extends AhgController
         try {
             $service->addChecklistItem($checklistId, $data);
             $this->getUser()->setFlash('notice', 'Item added to checklist');
+        } catch (\sfStopException $e) {
+            throw $e; // redirect() throws this; catching it flashed an empty error after a successful save
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
         }

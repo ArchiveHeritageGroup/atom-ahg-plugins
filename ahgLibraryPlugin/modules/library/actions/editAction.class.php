@@ -136,6 +136,7 @@ class libraryEditAction extends AhgController
 
         // Save library_item
         $libraryItemId = $this->saveLibraryItem($request, $isNew);
+        $this->ensureBarcodedCopy($libraryItemId, trim((string) $request->getParameter('barcode')));
 
         // Save creators
         $creators = $request->getParameter('creators', []);
@@ -263,6 +264,29 @@ class libraryEditAction extends AhgController
         } else {
             $data['created_at'] = date('Y-m-d H:i:s');
             return (int) $db->table('library_item')->insertGetId($data);
+        }
+    }
+
+    /**
+     * Circulation checks copies out by barcode, but the barcode on this form
+     * only reached library_item, and batch capture makes copies without one,
+     * so nothing catalogued here could ever be lent. The barcode now goes on
+     * the item's first unbarcoded copy, or on a new copy if it has none.
+     * ponytail: one copy per form; further copies come from acquisitions.
+     */
+    protected function ensureBarcodedCopy(int $libraryItemId, string $barcode): void
+    {
+        $db = \Illuminate\Database\Capsule\Manager::connection();
+        if ('' === $barcode || $db->table('library_copy')->where('barcode', $barcode)->exists()) {
+            return;
+        }
+        $bare = $db->table('library_copy')->where('library_item_id', $libraryItemId)
+            ->whereNull('barcode')->orderBy('copy_number')->first();
+        if ($bare) {
+            $db->table('library_copy')->where('id', $bare->id)
+                ->update(['barcode' => $barcode, 'updated_at' => date('Y-m-d H:i:s')]);
+        } elseif (!$db->table('library_copy')->where('library_item_id', $libraryItemId)->exists()) {
+            \CirculationService::getInstance()->addCopy($libraryItemId, ['barcode' => $barcode, 'copy_number' => 1]);
         }
     }
 

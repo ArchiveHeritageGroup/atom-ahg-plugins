@@ -33,6 +33,9 @@ $rawResource = sfOutputEscaper::unescape($resource);
 <?php end_slot(); ?>
 
 <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/tts.css">
+<?php /* The theme forces every section to z-index:10 !important, so the cards after
+   Actions painted over its open More menu and its items could not be clicked. */ ?>
+<style <?php echo __(sfConfig::get('csp_nonce', '')); ?>>#right-column section.card:has(.dropdown-menu.show) { z-index: 1036 !important; }</style>
 <script src="/plugins/ahgCorePlugin/web/js/tts.js"></script>
 
 <div id="tts-content-area" data-tts-content>
@@ -299,10 +302,16 @@ $rawResource = sfOutputEscaper::unescape($resource);
     <?php endif; ?>
 
     <!-- Content -->
-    <?php 
-      $summary = $libraryData['summary'] ?? '';
+    <?php
+      // Raw and decoded: lookup providers store text already HTML-encoded, and
+      // the escaping decorator plus esc_entities() then showed "&amp;#039;".
+      $rawLib = $sf_data->getRaw('libraryData');
+      $plain = fn ($v) => html_entity_decode((string) $v, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $summary = $plain($rawLib['summary'] ?? '');
       $scopeAndContent = $resource->getScopeAndContent(['cultureFallback' => true]);
-      $contentsNote = $libraryData['contents_note'] ?? '';
+      $contentsNote = $plain($rawLib['contents_note'] ?? '');
+      $generalNote = $plain($rawLib['general_note'] ?? '');
+      $bibliographyNote = $plain($rawLib['bibliography_note'] ?? '');
     ?>
     <?php if (!empty($summary) || !empty($scopeAndContent) || !empty($contentsNote)): ?>
     <section class="card mb-4">
@@ -329,18 +338,18 @@ $rawResource = sfOutputEscaper::unescape($resource);
     <?php endif; ?>
 
     <!-- Notes -->
-    <?php if (!empty($libraryData['general_note']) || !empty($libraryData['bibliography_note'])): ?>
+    <?php if (!empty($generalNote) || !empty($bibliographyNote)): ?>
     <section class="card mb-4">
       <div class="card-header">
         <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i><?php echo __('Notes'); ?></h5>
       </div>
       <div class="card-body">
-        <?php if (!empty($libraryData['general_note'])): ?>
-          <p><?php echo nl2br(esc_entities($libraryData['general_note'])); ?></p>
+        <?php if (!empty($generalNote)): ?>
+          <p><?php echo nl2br(esc_entities($generalNote)); ?></p>
         <?php endif; ?>
 
-        <?php if (!empty($libraryData['bibliography_note'])): ?>
-          <p class="text-muted"><em><?php echo nl2br(esc_entities($libraryData['bibliography_note'])); ?></em></p>
+        <?php if (!empty($bibliographyNote)): ?>
+          <p class="text-muted"><em><?php echo nl2br(esc_entities($bibliographyNote)); ?></em></p>
         <?php endif; ?>
       </div>
     </section>

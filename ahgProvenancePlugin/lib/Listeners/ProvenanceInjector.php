@@ -143,7 +143,12 @@ class ProvenanceInjector
 
         // Where a left block already exists - the treeview on a description page -
         // add to it rather than building a second one beside it.
+        // layout_3col names it left-column; missing that wrapped main-column in a
+        // second row on library pages and pushed the record under the sidebar.
         $existing = stripos($content, '<div id="sidebar"');
+        if (false === $existing) {
+            $existing = stripos($content, '<div id="left-column"');
+        }
         if (false !== $existing) {
             $openEnd = strpos($content, '>', $existing);
             if (false === $openEnd) {

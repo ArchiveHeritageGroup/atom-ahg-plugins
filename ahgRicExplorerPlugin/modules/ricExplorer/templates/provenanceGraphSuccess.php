@@ -1,5 +1,5 @@
 <?php
-/* Provenance graph (#149 strand 3) — chain of custody + authenticity. */
+/* Provenance graph (#149 strand 3) - chain of custody + authenticity. */
 $n = sfConfig::get('csp_nonce', '');
 $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
 ?>
@@ -18,11 +18,11 @@ $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
         <div class="table-responsive"><table class="table table-hover table-sm mb-0 align-middle">
           <thead class="table-light"><tr><th><?php echo __('Record') ?></th><th><?php echo __('Custody events') ?></th><th><?php echo __('Certainty') ?></th><th><?php echo __('Gaps') ?></th><th></th></tr></thead>
           <tbody>
-          <?php foreach ($records as $r): ?>
+          <?php foreach ($sf_data->getRaw('records') as $r): ?>
             <tr>
               <td><?php echo esc_entities($r->title) ?> <small class="text-muted">#<?php echo (int) $r->io_id ?></small></td>
               <td><?php echo (int) $r->events ?></td>
-              <td><?php echo esc_entities($r->certainty_level) ?: '—' ?></td>
+              <td><?php echo esc_entities($r->certainty_level) ?: '-' ?></td>
               <td><?php echo ((int) $r->has_gaps) ? '<span class="badge bg-warning text-dark">gaps</span>' : '<span class="badge bg-success">none</span>' ?></td>
               <td><a class="btn btn-sm btn-outline-primary" href="<?php echo url_for(['module' => 'ricExplorer', 'action' => 'provenanceGraph', 'id' => $r->io_id]) ?>"><i class="fas fa-diagram-project me-1"></i><?php echo __('Graph') ?></a></td>
             </tr>
@@ -31,10 +31,10 @@ $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
         </table></div>
       <?php endif ?>
     </div></div>
-  <?php else: $s = $graph['summary'] ?? []; ?>
+  <?php else: $s = $sf_data->getRaw('graph')['summary'] ?? []; /* raw: esc_entities() below escapes once */  ?>
     <div class="d-flex flex-wrap align-items-baseline mb-2 gap-2">
-      <strong class="flex-grow-1"><?php echo esc_entities($recordTitle) ?></strong>
-      <?php if (!empty($recordSlug)): ?><a href="/<?php echo esc_entities($recordSlug) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Open record') ?></a><?php endif ?>
+      <strong class="flex-grow-1"><?php echo esc_entities($sf_data->getRaw('recordTitle')) ?></strong>
+      <?php if (!empty($recordSlug)): ?><a href="/<?php echo esc_entities($sf_data->getRaw('recordSlug')) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Open record') ?></a><?php endif ?>
       <a href="<?php echo url_for(['module' => 'ricExplorer', 'action' => 'provenanceGraph']) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('All') ?></a>
     </div>
 
@@ -76,7 +76,7 @@ $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
             <div class="mb-1">
               <span class="text-muted"><?php echo __('Nazi-era provenance') ?>:</span>
               <?php if (!empty($s['nazi_era_checked'])): ?>
-                <span class="badge bg-<?php echo !empty($s['nazi_era_clear']) ? 'success' : 'danger' ?>"><?php echo !empty($s['nazi_era_clear']) ? __('checked — clear') : __('checked — flagged') ?></span>
+                <span class="badge bg-<?php echo !empty($s['nazi_era_clear']) ? 'success' : 'danger' ?>"><?php echo !empty($s['nazi_era_clear']) ? __('checked - clear') : __('checked - flagged') ?></span>
               <?php else: ?><span class="badge bg-secondary"><?php echo __('not checked') ?></span><?php endif ?>
             </div>
             <?php if (!empty($s['cultural_property_status'])): ?>
@@ -88,7 +88,7 @@ $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
       </div>
     </div>
 
-    <script type="application/json" id="prov-graph-data"<?php echo $nonce ?>><?php echo json_encode($graph, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+    <script type="application/json" id="prov-graph-data"<?php echo $nonce ?>><?php /* The raw array: json_encode() of the escaping decorator gave {}, so the graph drew nothing. */ echo json_encode($sf_data->getRaw('graph'), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
     <script src="/plugins/ahgRicExplorerPlugin/web/js/cytoscape.min.js"></script>
     <script src="/plugins/ahgRicExplorerPlugin/web/js/provenance-graph.js"></script>
     <script<?php echo $nonce ?>>window.AhgProvenanceGraph && window.AhgProvenanceGraph.init('prov-cy', 'prov-graph-data');</script>

@@ -182,7 +182,8 @@ class OpacService
         }
 
         if (!empty($params['publication_year'])) {
-            $query->where('li.publication_date', 'LIKE', $params['publication_year'] . '%');
+            // Dates are free text ("September 29, 2003"), so match the year anywhere in them.
+            $query->whereRaw("REGEXP_SUBSTR(li.publication_date, '[0-9]{4}') = ?", [(string) $params['publication_year']]);
         }
 
         if (!empty($params['language'])) {
@@ -411,17 +412,20 @@ class OpacService
             ->all();
 
         // Subjects
+        // library_item_subject has no sort_order column; ordering by it made
+        // every catalogue record page a 500. Keep the order they were added in.
         $subjects = DB::table('library_item_subject')
             ->where('library_item_id', $libraryItemId)
-            ->orderBy('sort_order')
+            ->orderBy('id')
             ->get()
             ->all();
 
         // Copies with availability
         $copies = DB::table('library_copy')
             ->where('library_item_id', $libraryItemId)
-            ->whereNotIn('copy_status', ['withdrawn'])
-            ->select(['id', 'barcode', 'copy_number', 'copy_status', 'location', 'condition_note'])
+            // Real column names, aliased to what viewSuccess reads.
+            ->whereNotIn('status', ['withdrawn'])
+            ->select(['id', 'barcode', 'copy_number', 'status as copy_status', 'shelf_location as location', 'condition_notes as condition_note'])
             ->orderBy('copy_number')
             ->get()
             ->all();
@@ -429,7 +433,7 @@ class OpacService
         // Pending holds count
         $holdCount = DB::table('library_hold')
             ->where('library_item_id', $libraryItemId)
-            ->whereIn('hold_status', ['pending', 'ready'])
+            ->whereIn('status', ['pending', 'ready']) // library_hold names it status
             ->count();
 
         return [
@@ -471,7 +475,9 @@ class OpacService
             })
             ->where('pub_st.status_id', 160)
             ->whereNotNull('li.publication_date')
-            ->select(DB::raw('LEFT(li.publication_date, 4) as year'), DB::raw('COUNT(*) as cnt'))
+            // First four-digit run, not the first four characters: "September 29, 2003" gave "Sept".
+            ->whereRaw("REGEXP_SUBSTR(li.publication_date, '[0-9]{4}') IS NOT NULL")
+            ->select(DB::raw("REGEXP_SUBSTR(li.publication_date, '[0-9]{4}') as year"), DB::raw('COUNT(*) as cnt'))
             ->groupBy('year')
             ->orderBy('year', 'desc')
             ->limit(20)

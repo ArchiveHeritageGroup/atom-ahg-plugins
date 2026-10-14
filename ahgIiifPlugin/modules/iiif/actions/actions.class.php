@@ -66,6 +66,22 @@ class iiifActions extends AhgController
     }
 
     /**
+     * Published records are public; a draft only for users AtoM would show it to.
+     */
+    private function canSeePublicationState(int $objectId): bool
+    {
+        $published = \Illuminate\Database\Capsule\Manager::table('status')
+            ->where('object_id', $objectId)->where('type_id', \QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+            ->value('status_id');
+        if ((int) $published === \QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID) {
+            return true;
+        }
+        $resource = \QubitInformationObject::getById($objectId);
+
+        return null !== $resource && \QubitAcl::check($resource, 'viewDraft');
+    }
+
+    /**
      * Detect if client explicitly requests v2.1 manifest via ?format=2, ?version=2, or Accept header.
      * Default is now v3 (Presentation API 3.0).
      */
@@ -210,6 +226,13 @@ class iiifActions extends AhgController
         }
 
         if (!$object) {
+            $this->getResponse()->setStatusCode(404);
+            return $this->renderText(json_encode(['error' => 'Object not found']));
+        }
+
+        // Drafts: the record page refuses them to anyone without viewDraft, but the
+        // manifest was served to everyone. Answer as if it did not exist.
+        if (!$this->canSeePublicationState((int) $object['id'])) {
             $this->getResponse()->setStatusCode(404);
             return $this->renderText(json_encode(['error' => 'Object not found']));
         }
@@ -521,6 +544,13 @@ class iiifActions extends AhgController
         }
 
         if (!$object) {
+            $this->getResponse()->setStatusCode(404);
+            return $this->renderText(json_encode(['error' => 'Object not found']));
+        }
+
+        // Drafts: the record page refuses them to anyone without viewDraft, but the
+        // manifest was served to everyone. Answer as if it did not exist.
+        if (!$this->canSeePublicationState((int) $object['id'])) {
             $this->getResponse()->setStatusCode(404);
             return $this->renderText(json_encode(['error' => 'Object not found']));
         }

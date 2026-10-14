@@ -152,7 +152,10 @@ def format_es_results(es_result, search_terms=None):
         seen.add(slug)
         
         i18n = src.get('i18n', {})
-        title = i18n.get('en', {}).get('title') or i18n.get('af', {}).get('title') or 'Untitled'
+        # Actors carry a name, not a title.
+        title = (i18n.get('en', {}).get('title') or i18n.get('af', {}).get('title')
+                 or i18n.get('en', {}).get('authorizedFormOfName')
+                 or i18n.get('af', {}).get('authorizedFormOfName') or 'Untitled')
         
         # Get creator names
         creators = []
@@ -164,7 +167,9 @@ def format_es_results(es_result, search_terms=None):
         
         # Get dates
         dates = src.get('dates', [])
-        date_str = dates[0].get('date') if dates else None
+        d0 = dates[0] if dates else {}
+        date_str = (d0.get('i18n', {}).get('en', {}).get('date') or d0.get('date')
+                    or '-'.join(filter(None, [d0.get('startDateString'), d0.get('endDateString')])) or None)
         
         # Get highlight
         highlights = hit.get('highlight', {})
@@ -230,12 +235,27 @@ def api_search():
     
     # Build and execute ES query
     if query_type == 'level':
-        es_query_body = {"size": 100, "query": {"match_all": {}},
-            "_source": ["slug", "identifier", "i18n.en.title", "i18n.af.title", "creators", "dates"]}
+        # Filter on the level asked for; match_all returned every record and actor.
+        # ponytail: AtoM's fixture term ids (Fonds 236, Collection 238, Series 239);
+        # look them up by name if an instance ever renumbers its levels.
+        level_ids = {'fond': [236], 'seri': [239], 'coll': [238]}[params['level'].split()[-1][:4]]
+        es_query_body = {"size": 100, "query": {"terms": {"levelOfDescriptionId": level_ids}},
+            "_source": ["slug", "identifier", "referenceCode", "levelOfDescriptionId",
+                        "i18n.en.title", "i18n.af.title", "creators", "dates"]}
+        indices = [ES_INDEX_IO]
+    elif query_type == 'date':
+        # Records whose date range overlaps the years asked for; the fuzzy query
+        # this fell through to ignored the years and matched any record.
+        es_query_body = build_es_query(query)
+        es_query_body['query'] = {"nested": {"path": "dates", "query": {"bool": {"must": [
+            {"range": {"dates.startDate": {"lte": f"{params['end']}-12-31"}}},
+            {"range": {"dates.endDate": {"gte": f"{params['start']}-01-01"}}}]}}}}
+        indices = [ES_INDEX_IO]
     else:
         es_query_body = build_es_query(query)
-    
-    es_result = es_search([ES_INDEX_IO, ES_INDEX_ACTOR], es_query_body)
+        indices = [ES_INDEX_IO, ES_INDEX_ACTOR]
+
+    es_result = es_search(indices, es_query_body)
     
     if es_result and es_result.get('hits', {}).get('hits'):
         formatted = format_es_results(es_result, search_terms)

@@ -33,6 +33,7 @@
         { selector: 'node[ntype = "record"]', style: { 'background-color': '#0d6efd', 'text-outline-color': '#0d6efd', 'shape': 'round-rectangle', 'width': '64px', 'height': '52px' } },
         { selector: 'node[ntype = "donor"]', style: { 'background-color': '#fd7e14', 'text-outline-color': '#fd7e14', 'shape': 'diamond' } },
         { selector: 'node[ntype = "agent"]', style: { 'background-color': '#198754', 'text-outline-color': '#198754' } },
+        { selector: 'node[ntype = "unknown"]', style: { 'background-color': '#fff', 'color': '#6c757d', 'text-outline-width': 0, 'border-width': 2, 'border-style': 'dashed', 'border-color': '#6c757d' } },
         { selector: 'node[verified = 1]', style: { 'border-width': 3, 'border-color': '#ffc107' } },
         { selector: 'edge', style: {
           'label': 'data(label)', 'font-size': '9px', 'color': '#333',
@@ -40,10 +41,14 @@
           'target-arrow-shape': 'triangle', 'curve-style': 'bezier',
           'text-background-color': '#fff', 'text-background-opacity': 0.85, 'text-background-padding': '2px'
         } },
-        { selector: 'edge[kind = "current"]', style: { 'line-style': 'dashed', 'line-color': '#0d6efd', 'target-arrow-color': '#0d6efd' } },
+        { selector: 'edge[kind = "current"]', style: { 'line-style': 'dashed', 'line-color': '#0d6efd', 'target-arrow-color': '#0d6efd',
+          // Swung out to the side: straight, it ran back up the chain and hid it.
+          'curve-style': 'unbundled-bezier', 'control-point-distances': [-220], 'control-point-weights': [0.5] } },
+        { selector: 'edge[kind = "gap"]', style: { 'line-style': 'dashed', 'line-color': '#adb5bd', 'target-arrow-color': '#adb5bd', 'color': '#6c757d' } },
         { selector: 'edge[kind = "event"]', style: { 'line-color': '#495057', 'target-arrow-color': '#495057' } }
       ],
-      layout: { name: 'breadthfirst', directed: true, padding: 20, spacingFactor: 1.2 },
+      // Rooted at the record, so the chain reads top to bottom in date order.
+      layout: { name: 'breadthfirst', directed: true, roots: 'node[ntype = "record"]', padding: 20, spacingFactor: 1.2 },
       wheelSensitivity: 0.2
     });
 

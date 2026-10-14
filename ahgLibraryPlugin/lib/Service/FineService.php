@@ -59,8 +59,8 @@ class FineService
             'checkout_id' => $checkoutId,
             'fine_type'   => $fineType,
             'amount'      => $amount,
-            'amount_paid' => 0,
-            'fine_status' => 'outstanding',
+            'paid_amount' => 0,
+            'status' => 'outstanding',
             'description' => $description,
             'created_at'  => $now,
             'updated_at'  => $now,
@@ -100,21 +100,21 @@ class FineService
         // Mark copy as lost
         DB::table('library_copy')
             ->where('id', $checkout->copy_id)
-            ->update(['copy_status' => 'lost', 'updated_at' => $now]);
+            ->update(['status' => 'lost', 'updated_at' => $now]);
 
         // Mark checkout as lost
         DB::table('library_checkout')
             ->where('id', $checkoutId)
-            ->update(['checkout_status' => 'lost', 'updated_at' => $now]);
+            ->update(['status' => 'lost', 'updated_at' => $now]);
 
         // Update copy counts
         $total = DB::table('library_copy')
             ->where('library_item_id', $copy->library_item_id)
-            ->whereNotIn('copy_status', ['withdrawn', 'lost'])
+            ->whereNotIn('status', ['withdrawn', 'lost'])
             ->count();
         $available = DB::table('library_copy')
             ->where('library_item_id', $copy->library_item_id)
-            ->where('copy_status', 'available')
+            ->where('status', 'available')
             ->count();
         DB::table('library_item')
             ->where('id', $copy->library_item_id)
@@ -150,14 +150,14 @@ class FineService
             return ['success' => false, 'error' => 'Fine not found'];
         }
 
-        if ($fine->fine_status === 'paid') {
+        if ($fine->status === 'paid') {
             return ['success' => false, 'error' => 'Fine is already fully paid'];
         }
 
-        $remaining = (float) $fine->amount - (float) $fine->amount_paid;
+        $remaining = (float) $fine->amount - (float) $fine->paid_amount;
         $payment = min($amount, $remaining);
 
-        $newPaid = (float) $fine->amount_paid + $payment;
+        $newPaid = (float) $fine->paid_amount + $payment;
         $newStatus = ($newPaid >= (float) $fine->amount) ? 'paid' : 'partial';
 
         $now = date('Y-m-d H:i:s');
@@ -165,8 +165,8 @@ class FineService
         DB::table('library_fine')
             ->where('id', $fineId)
             ->update([
-                'amount_paid'    => $newPaid,
-                'fine_status'    => $newStatus,
+                'paid_amount'    => $newPaid,
+                'status'    => $newStatus,
                 'payment_method' => $paymentMethod,
                 'payment_date'   => $now,
                 'updated_at'     => $now,
@@ -193,7 +193,7 @@ class FineService
     public function waiveFine(int $fineId, ?string $reason = null): bool
     {
         $fine = DB::table('library_fine')->where('id', $fineId)->first();
-        if (!$fine || $fine->fine_status === 'paid') {
+        if (!$fine || $fine->status === 'paid') {
             return false;
         }
 
@@ -202,7 +202,7 @@ class FineService
         DB::table('library_fine')
             ->where('id', $fineId)
             ->update([
-                'fine_status'  => 'waived',
+                'status'  => 'waived',
                 'description'  => trim(($fine->description ?? '') . "\n[Waived " . date('Y-m-d') . '] ' . ($reason ?? '')),
                 'updated_at'   => $now,
             ]);
@@ -232,7 +232,7 @@ class FineService
             ->where('f.patron_id', $patronId);
 
         if ($outstandingOnly) {
-            $query->whereIn('f.fine_status', ['outstanding', 'partial']);
+            $query->whereIn('f.status', ['outstanding', 'partial']);
         }
 
         return $query->select([
@@ -253,8 +253,8 @@ class FineService
     {
         $total = DB::table('library_fine')
             ->where('patron_id', $patronId)
-            ->whereIn('fine_status', ['outstanding', 'partial'])
-            ->selectRaw('SUM(amount - amount_paid) as balance')
+            ->whereIn('status', ['outstanding', 'partial'])
+            ->selectRaw('SUM(amount - paid_amount) as balance')
             ->value('balance');
 
         return (float) ($total ?? 0);
@@ -268,8 +268,8 @@ class FineService
         $query = DB::table('library_fine as f')
             ->join('library_patron as p', 'f.patron_id', '=', 'p.id');
 
-        if (!empty($params['fine_status'])) {
-            $query->where('f.fine_status', $params['fine_status']);
+        if (!empty($params['status'])) {
+            $query->where('f.status', $params['status']);
         }
 
         if (!empty($params['fine_type'])) {
@@ -321,7 +321,7 @@ class FineService
             ->join('library_copy as cp', 'c.copy_id', '=', 'cp.id')
             ->join('library_item as li', 'cp.library_item_id', '=', 'li.id')
             ->join('library_patron as p', 'c.patron_id', '=', 'p.id')
-            ->where('c.checkout_status', 'checked_out')
+            ->where('c.status', 'checked_out')
             ->where('c.due_date', '<', $today)
             ->select([
                 'c.id as checkout_id',
@@ -341,27 +341,11 @@ class FineService
 
             if ($existingFine) {
                 // Update amount if fine is accumulating
-                $loanRule = DB::table('library_loan_rule')
-                    ->where('material_type', $co->material_type)
-                    ->where('patron_type', $co->patron_type)
-                    ->first();
-
-                if (!$loanRule) {
-                    $loanRule = DB::table('library_loan_rule')
-                        ->where('material_type', $co->material_type)
-                        ->where('patron_type', 'default')
-                        ->first();
-                }
-
-                if (!$loanRule) {
-                    $loanRule = DB::table('library_loan_rule')
-                        ->where('material_type', 'default')
-                        ->where('patron_type', 'default')
-                        ->first();
-                }
+                // Same rule lookup as checkout, wildcards included.
+                $loanRule = \CirculationService::getInstance()->getLoanRule((string) $co->material_type, (string) $co->patron_type);
 
                 $finePerDay = $loanRule ? (float) $loanRule->fine_per_day : (float) $this->getLibrarySetting('fine_per_day_default', '1.00');
-                $maxFine = $loanRule ? (float) $loanRule->max_fine : (float) $this->getLibrarySetting('max_fine_cap', '50.00');
+                $maxFine = $loanRule ? (float) $loanRule->fine_cap : (float) $this->getLibrarySetting('max_fine_cap', '50.00');
 
                 $daysOverdue = max(0, (int) ((strtotime($today) - strtotime($co->due_date)) / 86400));
                 $newAmount = min($daysOverdue * $finePerDay, $maxFine);
@@ -397,17 +381,17 @@ class FineService
     {
         return [
             'total_outstanding'  => (float) DB::table('library_fine')
-                ->whereIn('fine_status', ['outstanding', 'partial'])
-                ->sum(DB::raw('amount - amount_paid')),
-            'total_collected'    => (float) DB::table('library_fine')->sum('amount_paid'),
+                ->whereIn('status', ['outstanding', 'partial'])
+                ->sum(DB::raw('amount - paid_amount')),
+            'total_collected'    => (float) DB::table('library_fine')->sum('paid_amount'),
             'total_waived'       => (float) DB::table('library_fine')
-                ->where('fine_status', 'waived')
-                ->sum(DB::raw('amount - amount_paid')),
+                ->where('status', 'waived')
+                ->sum(DB::raw('amount - paid_amount')),
             'outstanding_count'  => DB::table('library_fine')
-                ->whereIn('fine_status', ['outstanding', 'partial'])
+                ->whereIn('status', ['outstanding', 'partial'])
                 ->count(),
             'patrons_with_fines' => DB::table('library_fine')
-                ->whereIn('fine_status', ['outstanding', 'partial'])
+                ->whereIn('status', ['outstanding', 'partial'])
                 ->distinct('patron_id')
                 ->count('patron_id'),
         ];

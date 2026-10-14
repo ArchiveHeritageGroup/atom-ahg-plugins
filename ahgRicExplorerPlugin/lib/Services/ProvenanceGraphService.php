@@ -89,9 +89,22 @@ class ProvenanceGraphService
             }
         }
 
-        // Custody transfers as directed edges.
-        foreach ($events as $e) {
-            $src = $e->from_agent_id ? 'agent-'.$e->from_agent_id : 'io-'.$ioId;
+        // Custody transfers as directed edges. Only the first event may start at
+        // the record itself (it comes into someone's hands); a later event with
+        // no seller is a gap, drawn as an unknown holder instead of hidden.
+        foreach ($events as $i => $e) {
+            if ($e->from_agent_id) {
+                $src = 'agent-'.$e->from_agent_id;
+            } elseif (0 === $i) {
+                $src = 'io-'.$ioId;
+            } else {
+                $src = 'unknown-'.$e->id;
+                $nodes[] = ['id' => $src, 'label' => 'Unknown holder', 'type' => 'unknown'];
+                $prev = $events[$i - 1]->to_agent_id ?? null;
+                if ($prev) {
+                    $edges[] = ['source' => 'agent-'.$prev, 'target' => $src, 'label' => 'not recorded', 'kind' => 'gap'];
+                }
+            }
             $tgt = $e->to_agent_id ? 'agent-'.$e->to_agent_id : 'io-'.$ioId;
             $date = $e->event_date_text ?: ($e->event_date ?: ($e->event_date_start ?: ''));
             $label = trim(($e->event_type ?: 'transfer').($date ? ' ('.$date.')' : ''));
