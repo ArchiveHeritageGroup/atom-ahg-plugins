@@ -33,14 +33,14 @@
                     <?php foreach ($standards as $s): ?>
                     <tr class="<?php echo $s->is_active ? '' : 'table-secondary'; ?>">
                         <td><?php echo $s->sort_order; ?></td>
-                        <td><code><?php echo esc_entities($s->code); ?></code></td>
+                        <td><code><?php echo esc_entities(sfOutputEscaper::unescape($s)->code); ?></code></td>
                         <td>
-                            <strong><?php echo esc_entities($s->name); ?></strong>
+                            <strong><?php echo esc_entities(sfOutputEscaper::unescape($s)->name); ?></strong>
                             <?php if ($s->description): ?>
                             <br><small class="text-muted"><?php echo truncate_text($s->description, 80); ?></small>
                             <?php endif; ?>
                         </td>
-                        <td><?php echo esc_entities($s->country); ?></td>
+                        <td><?php echo esc_entities(sfOutputEscaper::unescape($s)->country); ?></td>
                         <td class="text-center">
                             <?php if ($s->capitalisation_required): ?>
                             <span class="badge bg-warning text-dark"><?php echo __('Required'); ?></span>

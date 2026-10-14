@@ -107,8 +107,8 @@
                         <?php foreach ($standards as $standard): ?>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
-                                    <strong><?php echo esc_entities($standard->code) ?></strong><br>
-                                    <small class="text-muted"><?php echo esc_entities($standard->country) ?></small>
+                                    <strong><?php echo esc_entities(sfOutputEscaper::unescape($standard)->code) ?></strong><br>
+                                    <small class="text-muted"><?php echo esc_entities(sfOutputEscaper::unescape($standard)->country) ?></small>
                                 </div>
                                 <?php if ($standard->capitalisation_required): ?>
                                     <span class="badge bg-success">Required</span>
@@ -153,12 +153,12 @@
                                         <tr>
                                             <td>
                                                 <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]) ?>">
-                                                    <?php echo esc_entities($asset->object_identifier ?: 'N/A') ?>
+                                                    <?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?: 'N/A') ?>
                                                 </a>
                                             </td>
-                                            <td><?php echo esc_entities($asset->object_title ?: '-') ?></td>
+                                            <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?: '-') ?></td>
                                             <td><?php echo $asset->class_name ?: '-' ?></td>
-                                            <td><?php echo esc_entities($asset->standard_code ?: '-') ?></td>
+                                            <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->standard_code ?: '-') ?></td>
                                             <td>
                                                 <?php
                                                 $statusColors = [

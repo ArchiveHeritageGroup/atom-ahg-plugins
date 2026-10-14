@@ -1,6 +1,6 @@
 <?php use_helper('Date'); ?>
 <?php $rawAsset = $sf_data->getRaw('asset'); ?>
-<?php slot('title') ?><?php echo esc_entities($asset->object_identifier ?: 'N/A') ?> - <?php echo esc_entities($asset->object_title ?: 'Untitled') ?><?php end_slot() ?>
+<?php slot('title') ?><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?: 'N/A') ?> - <?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?: 'Untitled') ?><?php end_slot() ?>
 
 <div class="container-fluid">
     <div class="row">
@@ -9,7 +9,7 @@
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="h3 mb-1"><?php echo esc_entities($asset->object_identifier ?: 'N/A') ?> - <?php echo esc_entities($asset->object_title ?: 'Untitled') ?></h1>
+                <h1 class="h3 mb-1"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?: 'N/A') ?> - <?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?: 'Untitled') ?></h1>
                 <p class="text-muted mb-0"><?php echo $rawAsset->standard_name ?? 'No Standard' ?></p>
             </div>
             <div class="btn-group">
@@ -84,9 +84,9 @@
                         <dt class="col-sm-5"><?php echo __('Recognition Date') ?></dt>
                         <dd class="col-sm-7"><?php echo $asset->recognition_date ? format_date($asset->recognition_date, 'D') : '-' ?></dd>
                         <dt class="col-sm-5"><?php echo __('Measurement Basis') ?></dt>
-                        <dd class="col-sm-7"><?php echo ucfirst($asset->measurement_basis ?: '-') ?></dd>
+                        <dd class="col-sm-7"><?php echo ucfirst(str_replace('_', ' ', $asset->measurement_basis ?: '-')) ?></dd>
                         <dt class="col-sm-5"><?php echo __('Acquisition Method') ?></dt>
-                        <dd class="col-sm-7"><?php echo ucfirst($asset->acquisition_method ?: '-') ?></dd>
+                        <dd class="col-sm-7"><?php echo ucfirst(str_replace('_', ' ', $asset->acquisition_method ?: '-')) ?></dd>
                         <dt class="col-sm-5"><?php echo __('Acquisition Date') ?></dt>
                         <dd class="col-sm-7"><?php echo $asset->acquisition_date ? format_date($asset->acquisition_date, 'D') : '-' ?></dd>
                         <dt class="col-sm-5"><?php echo __('Acquisition Cost') ?></dt>
@@ -116,11 +116,11 @@
                         <dt class="col-sm-5"><?php echo __('Significance') ?></dt>
                         <dd class="col-sm-7"><?php echo ucfirst($asset->heritage_significance ?: '-') ?></dd>
                         <dt class="col-sm-5"><?php echo __('Location') ?></dt>
-                        <dd class="col-sm-7"><?php echo esc_entities($asset->current_location ?: '-') ?></dd>
+                        <dd class="col-sm-7"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->current_location ?: '-') ?></dd>
                         <dt class="col-sm-5"><?php echo __('Condition') ?></dt>
                         <dd class="col-sm-7"><?php echo ucfirst($asset->condition_rating ?: '-') ?></dd>
                         <dt class="col-sm-5"><?php echo __('Donor') ?></dt>
-                        <dd class="col-sm-7"><?php echo esc_entities($asset->donor_name ?: '-') ?></dd>
+                        <dd class="col-sm-7"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->donor_name ?: '-') ?></dd>
                     </dl>
 
                     <h5 class="border-bottom pb-2 mb-3 mt-4"><?php echo __('Insurance') ?></h5>
@@ -130,9 +130,9 @@
                         <dt class="col-sm-5"><?php echo __('Insurance Value') ?></dt>
                         <dd class="col-sm-7"><?php echo $asset->insurance_value ? number_format($asset->insurance_value, 2) : '-' ?></dd>
                         <dt class="col-sm-5"><?php echo __('Policy Number') ?></dt>
-                        <dd class="col-sm-7"><?php echo esc_entities($asset->insurance_policy_number ?: '-') ?></dd>
+                        <dd class="col-sm-7"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->insurance_policy_number ?: '-') ?></dd>
                         <dt class="col-sm-5"><?php echo __('Provider') ?></dt>
-                        <dd class="col-sm-7"><?php echo esc_entities($asset->insurance_provider ?: '-') ?></dd>
+                        <dd class="col-sm-7"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->insurance_provider ?: '-') ?></dd>
                         <dt class="col-sm-5"><?php echo __('Expiry Date') ?></dt>
                         <dd class="col-sm-7"><?php echo $asset->insurance_expiry_date ? format_date($asset->insurance_expiry_date, 'D') : '-' ?></dd>
                     </dl>
@@ -159,7 +159,7 @@
                                 <td class="text-end"><?php echo number_format($v->previous_value, 2) ?></td>
                                 <td class="text-end fw-bold"><?php echo number_format($v->new_value, 2) ?></td>
                                 <td class="text-end <?php echo $v->valuation_change >= 0 ? 'text-success' : 'text-danger' ?>"><?php echo ($v->valuation_change >= 0 ? '+' : '') . number_format($v->valuation_change, 2) ?></td>
-                                <td><?php echo esc_entities($v->valuer_name ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($v)->valuer_name ?: '-') ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -188,7 +188,7 @@
                                 <td class="text-end"><?php echo number_format($imp->carrying_amount_before, 2) ?></td>
                                 <td class="text-end text-danger"><?php echo $imp->impairment_loss ? number_format($imp->impairment_loss, 2) : '-' ?></td>
                                 <td class="text-end"><?php echo $imp->carrying_amount_after ? number_format($imp->carrying_amount_after, 2) : '-' ?></td>
-                                <td><?php echo esc_entities($imp->assessor_name ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($imp)->assessor_name ?: '-') ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -214,10 +214,10 @@
                             <tr>
                                 <td><?php echo format_date($m->movement_date, 'D') ?></td>
                                 <td><span class="badge bg-info"><?php echo ucfirst(str_replace('_', ' ', $m->movement_type)) ?></span></td>
-                                <td><?php echo esc_entities($m->from_location ?: '-') ?></td>
-                                <td><?php echo esc_entities($m->to_location ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($m)->from_location ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($m)->to_location ?: '-') ?></td>
                                 <td><?php echo ucfirst($m->condition_on_departure ?: '-') ?></td>
-                                <td><?php echo esc_entities($m->authorized_by ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($m)->authorized_by ?: '-') ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -242,10 +242,10 @@
                         <?php foreach ($journals as $j): ?>
                             <tr>
                                 <td><?php echo format_date($j->journal_date, 'D') ?></td>
-                                <td><?php echo esc_entities($j->journal_number ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($j)->journal_number ?: '-') ?></td>
                                 <td><span class="badge bg-secondary"><?php echo ucfirst($j->journal_type) ?></span></td>
-                                <td><?php echo esc_entities($j->debit_account) ?></td>
-                                <td><?php echo esc_entities($j->credit_account) ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($j)->debit_account) ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($j)->credit_account) ?></td>
                                 <td class="text-end fw-bold"><?php echo number_format($j->debit_amount, 2) ?></td>
                                 <td><?php echo $j->posted ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-warning">No</span>' ?></td>
                             </tr>

@@ -41,12 +41,12 @@
                                                <?php echo $std->is_active ? 'checked' : '' ?>
                                                >
                                         <label class="form-check-label" for="std_<?php echo $std->id ?>">
-                                            <strong><?php echo esc_entities($std->code) ?></strong>
+                                            <strong><?php echo esc_entities(sfOutputEscaper::unescape($std)->code) ?></strong>
                                         </label>
                                     </div>
-                                    <p class="mb-1 mt-2"><?php echo esc_entities($std->name) ?></p>
+                                    <p class="mb-1 mt-2"><?php echo esc_entities(sfOutputEscaper::unescape($std)->name) ?></p>
                                     <small class="text-muted">
-                                        <i class="fas fa-globe me-1"></i><?php echo esc_entities($std->country) ?>
+                                        <i class="fas fa-globe me-1"></i><?php echo esc_entities(sfOutputEscaper::unescape($std)->country) ?>
                                     </small>
                                     <div class="mt-2">
                                         <?php if ($std->capitalisation_required): ?>

@@ -58,7 +58,7 @@
                     <select name="standard_id" class="form-select">
                         <option value=""><?php echo __('All Standards') ?></option>
                         <?php foreach ($rawStandards as $s): ?>
-                            <option value="<?php echo $s->id ?>" <?php echo ($filters['standard_id'] ?? '') == $s->id ? 'selected' : '' ?>><?php echo esc_entities($s->code) ?></option>
+                            <option value="<?php echo $s->id ?>" <?php echo ($filters['standard_id'] ?? '') == $s->id ? 'selected' : '' ?>><?php echo esc_entities(sfOutputEscaper::unescape($s)->code) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -117,14 +117,14 @@
                         <tbody>
                             <?php foreach ($assets as $asset): ?>
                                 <tr>
-                                    <td><?php echo esc_entities($asset->object_identifier ?: 'N/A') ?></td>
+                                    <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?: 'N/A') ?></td>
                                     <td>
                                         <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]) ?>">
-                                            <?php echo esc_entities($asset->object_title ?: '-') ?>
+                                            <?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?: '-') ?>
                                         </a>
                                     </td>
-                                    <td><span class="badge bg-secondary"><?php echo esc_entities($asset->class_name ?: '-') ?></span></td>
-                                    <td><?php echo esc_entities($asset->standard_code ?: '-') ?></td>
+                                    <td><span class="badge bg-secondary"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->class_name ?: '-') ?></span></td>
+                                    <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->standard_code ?: '-') ?></td>
                                     <td>
                                         <?php
                                         $statusColors = ['recognised' => 'success', 'not_recognised' => 'secondary', 'pending' => 'warning', 'derecognised' => 'danger'];

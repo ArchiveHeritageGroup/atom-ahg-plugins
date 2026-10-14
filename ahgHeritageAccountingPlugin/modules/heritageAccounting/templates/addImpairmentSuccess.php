@@ -5,7 +5,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-1"><i class="fas fa-exclamation-triangle me-2"></i><?php echo __('Add Impairment') ?></h1>
-            <p class="text-muted"><?php echo esc_entities($asset->object_identifier ?? '') ?> - <?php echo esc_entities($asset->object_title ?? 'Untitled') ?></p>
+            <p class="text-muted"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?? '') ?> - <?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?? 'Untitled') ?></p>
         </div>
     </div>
 
@@ -20,40 +20,54 @@
                 <h5 class="mb-0"><?php echo __('Impairment Details') ?></h5>
             </div>
             <div class="card-body">
+                <?php // Fields match the action (#impairment): the form used to send impairment_amount,
+                      // impairment_type, reason, reviewed_by and is_reversed, none of which it read,
+                      // so every assessment was saved empty and the carrying amount never changed. ?>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label"><?php echo __('Assessment Date') ?> <span class="text-danger">*</span></label>
-                        <input type="date" name="assessment_date" class="form-control" value="<?php echo date('Y-m-d') ?>" required>
+                        <label class="form-label" for="assessmentDate"><?php echo __('Assessment Date') ?> <span class="text-danger">*</span></label>
+                        <input type="date" id="assessmentDate" name="assessment_date" class="form-control" value="<?php echo date('Y-m-d') ?>" required>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label" for="assessorName"><?php echo __('Assessed By') ?></label>
+                        <input type="text" id="assessorName" name="assessor_name" class="form-control">
+                    </div>
+                </div>
+
+                <h6 class="mt-4"><?php echo __('Indicators of impairment') ?></h6>
+                <div class="row g-3">
+                    <?php foreach (['physical_damage' => __('Physical damage'), 'obsolescence' => __('Obsolescence'), 'change_in_use' => __('Change in use'), 'external_factors' => __('External factors')] as $key => $label): ?>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" name="<?php echo $key ?>" class="form-check-input" id="ind_<?php echo $key ?>" value="1">
+                            <label class="form-check-label" for="ind_<?php echo $key ?>"><?php echo $label ?></label>
+                        </div>
+                        <input type="text" name="<?php echo $key ?>_details" class="form-control form-control-sm mt-1" placeholder="<?php echo __('Details') ?>" aria-label="<?php echo $label ?>: <?php echo __('Details') ?>">
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <h6 class="mt-4"><?php echo __('Outcome') ?></h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-check mt-2">
+                            <input type="checkbox" name="impairment_identified" class="form-check-input" id="impairmentIdentified" value="1">
+                            <label class="form-check-label" for="impairmentIdentified"><?php echo __('Impairment identified') ?></label>
+                        </div>
+                        <div class="form-text"><?php echo __('Carrying amount now: %1%', ['%1%' => number_format((float) $asset->current_carrying_amount, 2)]) ?></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label"><?php echo __('Impairment Amount') ?> <span class="text-danger">*</span></label>
-                        <input type="number" step="0.01" name="impairment_amount" class="form-control" required>
+                        <label class="form-label" for="recoverableAmount"><?php echo __('Recoverable service amount') ?></label>
+                        <input type="number" step="0.01" id="recoverableAmount" name="recoverable_amount" class="form-control">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label"><?php echo __('Impairment Type') ?></label>
-                        <select name="impairment_type" class="form-select">
-                            <option value=""><?php echo __('-- Select --') ?></option>
-                            <option value="physical"><?php echo __('Physical Damage') ?></option>
-                            <option value="obsolescence"><?php echo __('Obsolescence') ?></option>
-                            <option value="market"><?php echo __('Market Decline') ?></option>
-                            <option value="legal"><?php echo __('Legal/Regulatory') ?></option>
-                            <option value="environmental"><?php echo __('Environmental') ?></option>
-                            <option value="other"><?php echo __('Other') ?></option>
-                        </select>
+                        <label class="form-label" for="impairmentLoss"><?php echo __('Impairment loss') ?></label>
+                        <input type="number" step="0.01" id="impairmentLoss" name="impairment_loss" class="form-control">
+                        <div class="form-text"><?php echo __('Left blank, it is the carrying amount less the recoverable amount.') ?></div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label"><?php echo __('Reason') ?></label>
-                        <textarea name="reason" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label"><?php echo __('Reviewed By') ?></label>
-                        <input type="text" name="reviewed_by" class="form-control">
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-check mt-4">
-                            <input type="checkbox" name="is_reversed" class="form-check-input" id="isReversed" value="1">
-                            <label class="form-check-label" for="isReversed"><?php echo __('Reversal of Previous Impairment') ?></label>
-                        </div>
+                        <label class="form-label" for="impairmentNotes"><?php echo __('Notes') ?></label>
+                        <textarea id="impairmentNotes" name="notes" class="form-control" rows="3"></textarea>
                     </div>
                 </div>
             </div>

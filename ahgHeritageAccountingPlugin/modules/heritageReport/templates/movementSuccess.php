@@ -50,12 +50,12 @@
                         <?php foreach ($movements as $m): ?>
                             <tr>
                                 <td><?php echo $m->movement_date ?></td>
-                                <td><?php echo esc_entities($m->identifier ?: '-') ?></td>
-                                <td><?php echo esc_entities($m->title ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($m)->identifier ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($m)->title ?: '-') ?></td>
                                 <td><span class="badge bg-info"><?php echo ucfirst(str_replace('_', ' ', $m->movement_type)) ?></span></td>
-                                <td><?php echo esc_entities($m->from_location ?: '-') ?></td>
-                                <td><?php echo esc_entities($m->to_location ?: '-') ?></td>
-                                <td><?php echo esc_entities($m->authorized_by ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($m)->from_location ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($m)->to_location ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($m)->authorized_by ?: '-') ?></td>
                             </tr>
                         <?php endforeach; ?>
                         <?php if (empty($movements)): ?>

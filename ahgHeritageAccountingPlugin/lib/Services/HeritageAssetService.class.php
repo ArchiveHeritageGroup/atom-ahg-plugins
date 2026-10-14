@@ -218,7 +218,13 @@ class HeritageAssetService
         $id = DB::table('heritage_valuation_history')->insertGetId($data);
 
         // Update asset
+        // Revaluation model (GRAP 103.40-44, IPSAS 45): an increase is credited to
+        // the revaluation surplus; a decrease is charged against the surplus first,
+        // and only what exceeds it falls to surplus or deficit. The surplus was
+        // never touched, so every revaluation vanished from equity.
+        $surplus = (float) ($asset->revaluation_surplus ?? 0) + (float) $data['valuation_change'];
         $this->update($assetId, [
+            'revaluation_surplus' => max(0.0, $surplus),
             'last_valuation_date' => $data['valuation_date'],
             'last_valuation_amount' => $data['new_value'],
             'current_carrying_amount' => $data['new_value'],
@@ -247,6 +253,11 @@ class HeritageAssetService
         $data['created_at'] = date('Y-m-d H:i:s');
 
         if ($data['impairment_identified'] ?? false) {
+            // Without an entered loss, it is the carrying amount less the recoverable
+            // service amount (GRAP 103.61-67), never below zero.
+            if (empty($data['impairment_loss']) && null !== ($data['recoverable_amount'] ?? null)) {
+                $data['impairment_loss'] = max(0.0, (float) $data['carrying_amount_before'] - (float) $data['recoverable_amount']);
+            }
             $data['carrying_amount_after'] = $data['carrying_amount_before'] - ($data['impairment_loss'] ?? 0);
         }
 

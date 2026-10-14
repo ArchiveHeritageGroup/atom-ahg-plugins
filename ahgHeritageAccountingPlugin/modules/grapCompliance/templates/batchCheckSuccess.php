@@ -37,11 +37,11 @@
                             <tr>
                                 <td>
                                     <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]) ?>">
-                                        <?php echo esc_entities($asset->object_identifier ?: 'N/A') ?>
+                                        <?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?: 'N/A') ?>
                                     </a>
                                 </td>
-                                <td><?php echo esc_entities($asset->object_title ?: '-') ?></td>
-                                <td><?php echo esc_entities($asset->class_name ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->class_name ?: '-') ?></td>
                                 <td class="text-center">
                                     <strong class="<?php echo $compliance['summary']['score'] >= 80 ? 'text-success' : ($compliance['summary']['score'] >= 50 ? 'text-warning' : 'text-danger') ?>">
                                         <?php echo $compliance['summary']['score'] ?>%

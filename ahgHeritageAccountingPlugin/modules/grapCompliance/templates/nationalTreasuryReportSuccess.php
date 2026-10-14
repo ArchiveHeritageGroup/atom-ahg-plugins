@@ -40,7 +40,7 @@
                         $grandCount += $class->count;
                         ?>
                         <tr>
-                            <td><?php echo esc_entities($class->class_name ?: 'Unclassified') ?></td>
+                            <td><?php echo esc_entities(sfOutputEscaper::unescape($class)->class_name ?: 'Unclassified') ?></td>
                             <td class="text-end"><?php echo number_format($class->count) ?></td>
                             <td class="text-end"><?php echo number_format($class->total_value, 2) ?></td>
                             <td class="text-end text-danger"><?php echo number_format($class->total_impairment, 2) ?></td>
@@ -84,11 +84,11 @@
                     <tbody>
                         <?php foreach ($assets as $asset): ?>
                             <tr>
-                                <td><?php echo esc_entities($asset->object_identifier ?: '-') ?></td>
-                                <td><?php echo esc_entities($asset->object_title ?: '-') ?></td>
-                                <td><?php echo esc_entities($asset->class_name ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->class_name ?: '-') ?></td>
                                 <td><?php echo ucfirst(str_replace('_', ' ', $asset->recognition_status)) ?></td>
-                                <td><?php echo ucfirst($asset->measurement_basis ?: '-') ?></td>
+                                <td><?php echo ucfirst(str_replace('_', ' ', $asset->measurement_basis ?: '-')) ?></td>
                                 <td class="text-end"><?php echo number_format($asset->acquisition_cost, 2) ?></td>
                                 <td class="text-end"><?php echo number_format($asset->current_carrying_amount, 2) ?></td>
                                 <td><?php echo $asset->acquisition_date ?: '-' ?></td>

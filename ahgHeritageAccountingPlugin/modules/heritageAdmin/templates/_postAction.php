@@ -21,9 +21,11 @@
  *   title    string  tooltip / accessible name
  *   confirm  string  confirmation prompt; omit for no confirmation
  */
+// $params arrives wrapped by output escaping, which array_merge() rejects; that
+// crashed the standards page after its first row.
 $url = url_for(array_merge(
     ['module' => 'heritageAdmin', 'action' => $action],
-    $params ?? []
+    isset($params) ? (array) sfOutputEscaper::unescape($params) : []
 ));
 
 $token = class_exists('\AtomFramework\Services\CsrfService')

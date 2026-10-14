@@ -29,7 +29,7 @@
                         <option value=""><?php echo __('All Standards'); ?></option>
                         <?php foreach ($standards as $s): ?>
                         <option value="<?php echo $s->id; ?>" <?php echo $standardId == $s->id ? 'selected' : ''; ?>>
-                            <?php echo esc_entities($s->code); ?> - <?php echo esc_entities($s->name); ?>
+                            <?php echo esc_entities(sfOutputEscaper::unescape($s)->code); ?> - <?php echo esc_entities(sfOutputEscaper::unescape($s)->name); ?>
                         </option>
                         <?php endforeach; ?>
                     </select>
@@ -63,20 +63,20 @@
                     ?>
                     <?php foreach ($rules as $r): ?>
                     <tr class="<?php echo $r->is_active ? '' : 'table-secondary'; ?>">
-                        <td><code><?php echo esc_entities($r->standard_code); ?></code></td>
+                        <td><code><?php echo esc_entities(sfOutputEscaper::unescape($r)->standard_code); ?></code></td>
                         <td>
                             <span class="badge bg-<?php echo $categoryColors[$r->category] ?? 'secondary'; ?>">
                                 <?php echo ucfirst($r->category); ?>
                             </span>
                         </td>
-                        <td><code><?php echo esc_entities($r->code); ?></code></td>
+                        <td><code><?php echo esc_entities(sfOutputEscaper::unescape($r)->code); ?></code></td>
                         <td>
-                            <strong><?php echo esc_entities($r->name); ?></strong>
+                            <strong><?php echo esc_entities(sfOutputEscaper::unescape($r)->name); ?></strong>
                             <?php if ($r->reference): ?>
-                            <br><small class="text-muted"><?php echo esc_entities($r->reference); ?></small>
+                            <br><small class="text-muted"><?php echo esc_entities(sfOutputEscaper::unescape($r)->reference); ?></small>
                             <?php endif; ?>
                         </td>
-                        <td><code class="text-muted"><?php echo esc_entities($r->field_name); ?></code></td>
+                        <td><code class="text-muted"><?php echo esc_entities(sfOutputEscaper::unescape($r)->field_name); ?></code></td>
                         <td>
                             <span class="badge bg-<?php echo $severityColors[$r->severity] ?? 'secondary'; ?>">
                                 <?php echo ucfirst($r->severity); ?>

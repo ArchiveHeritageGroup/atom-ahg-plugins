@@ -6,7 +6,7 @@
         <div class="col-12 d-flex justify-content-between align-items-center">
             <div>
                 <h1 class="h3 mb-1"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Compliance Check') ?></h1>
-                <p class="text-muted mb-0"><?php echo esc_entities($asset->object_identifier) ?></p>
+                <p class="text-muted mb-0"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier) ?></p>
             </div>
             <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]) ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Asset') ?>

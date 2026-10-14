@@ -65,7 +65,7 @@
                                 <select name="accounting_standard_id" class="form-select">
                                     <option value=""><?php echo __('-- Select Standard --') ?></option>
                                     <?php foreach ($rawStandards as $s): ?>
-                                        <option value="<?php echo $s->id ?>" <?php echo $asset->accounting_standard_id == $s->id ? 'selected' : '' ?>><?php echo esc_entities($s->code . ' - ' . $s->name) ?></option>
+                                        <option value="<?php echo $s->id ?>" <?php echo $asset->accounting_standard_id == $s->id ? 'selected' : '' ?>><?php echo esc_entities(sfOutputEscaper::unescape($s)->code . ' - ' . sfOutputEscaper::unescape($s)->name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -74,13 +74,13 @@
                                 <select name="asset_class_id" class="form-select">
                                     <option value=""><?php echo __('-- Select Class --') ?></option>
                                     <?php foreach ($rawClasses as $c): ?>
-                                        <option value="<?php echo $c->id ?>" <?php echo $asset->asset_class_id == $c->id ? 'selected' : '' ?>><?php echo esc_entities($c->name) ?></option>
+                                        <option value="<?php echo $c->id ?>" <?php echo $asset->asset_class_id == $c->id ? 'selected' : '' ?>><?php echo esc_entities(sfOutputEscaper::unescape($c)->name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo __('Sub-class') ?></label>
-                                <input type="text" name="asset_sub_class" class="form-control" value="<?php echo esc_entities($asset->asset_sub_class ?? '') ?>">
+                                <input type="text" name="asset_sub_class" class="form-control" value="<?php echo esc_entities(sfOutputEscaper::unescape($asset)->asset_sub_class ?? '') ?>">
                             </div>
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label"><?php echo __('Recognition Status Reason') ?></label>
-                                <textarea name="recognition_status_reason" class="form-control" rows="2"><?php echo esc_entities($asset->recognition_status_reason ?? '') ?></textarea>
+                                <textarea name="recognition_status_reason" class="form-control" rows="2"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->recognition_status_reason ?? '') ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -154,13 +154,13 @@
                             <div class="col-md-4">
                                 <label class="form-label"><?php echo __('Donor Name') ?></label>
                                 <div class="position-relative">
-                                    <input type="text" name="donor_name" id="donorSearch" class="form-control" value="<?php echo esc_entities($asset->donor_name ?? '') ?>" autocomplete="off">
+                                    <input type="text" name="donor_name" id="donorSearch" class="form-control" value="<?php echo esc_entities(sfOutputEscaper::unescape($asset)->donor_name ?? '') ?>" autocomplete="off">
                                     <div id="donorResults" class="autocomplete-dropdown"></div>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label"><?php echo __('Donor Restrictions') ?></label>
-                                <textarea name="donor_restrictions" class="form-control" rows="2"><?php echo esc_entities($asset->donor_restrictions ?? '') ?></textarea>
+                                <textarea name="donor_restrictions" class="form-control" rows="2"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->donor_restrictions ?? '') ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -200,11 +200,11 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Significance Statement') ?></label>
-                            <textarea name="significance_statement" class="form-control" rows="3"><?php echo esc_entities($asset->significance_statement ?? '') ?></textarea>
+                            <textarea name="significance_statement" class="form-control" rows="3"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->significance_statement ?? '') ?></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Current Location') ?></label>
-                            <input type="text" name="current_location" class="form-control" value="<?php echo esc_entities($asset->current_location ?? '') ?>">
+                            <input type="text" name="current_location" class="form-control" value="<?php echo esc_entities(sfOutputEscaper::unescape($asset)->current_location ?? '') ?>">
                         </div>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Condition') ?></label>
@@ -232,11 +232,11 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Policy Number') ?></label>
-                            <input type="text" name="insurance_policy_number" class="form-control" value="<?php echo esc_entities($asset->insurance_policy_number ?? '') ?>">
+                            <input type="text" name="insurance_policy_number" class="form-control" value="<?php echo esc_entities(sfOutputEscaper::unescape($asset)->insurance_policy_number ?? '') ?>">
                         </div>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Provider') ?></label>
-                            <input type="text" name="insurance_provider" class="form-control" value="<?php echo esc_entities($asset->insurance_provider ?? '') ?>">
+                            <input type="text" name="insurance_provider" class="form-control" value="<?php echo esc_entities(sfOutputEscaper::unescape($asset)->insurance_provider ?? '') ?>">
                         </div>
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Expiry Date') ?></label>
@@ -249,7 +249,7 @@
                 <div class="card mb-4">
                     <div class="card-header bg-dark text-white"><h5 class="mb-0"><?php echo __('Notes') ?></h5></div>
                     <div class="card-body">
-                        <textarea name="notes" class="form-control" rows="4"><?php echo esc_entities($asset->notes ?? '') ?></textarea>
+                        <textarea name="notes" class="form-control" rows="4"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->notes ?? '') ?></textarea>
                     </div>
                 </div>
 

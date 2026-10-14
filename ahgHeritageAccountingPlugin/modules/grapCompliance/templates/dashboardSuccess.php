@@ -166,11 +166,11 @@
                                         <tr>
                                             <td>
                                                 <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]) ?>">
-                                                    <?php echo esc_entities($asset->object_identifier ?: 'N/A') ?>
+                                                    <?php echo ($asset->object_identifier ?: 'N/A') ?>
                                                 </a>
                                             </td>
-                                            <td><?php echo esc_entities($asset->object_title ?: '-') ?></td>
-                                            <td><?php echo esc_entities($asset->class_name ?: '-') ?></td>
+                                            <td><?php echo ($asset->object_title ?: '-') ?></td>
+                                            <td><?php echo ($asset->class_name ?: '-') ?></td>
                                             <td>
                                                 <?php
                                                 $statusColors = ['recognised' => 'success', 'not_recognised' => 'secondary', 'pending' => 'warning', 'derecognised' => 'danger'];

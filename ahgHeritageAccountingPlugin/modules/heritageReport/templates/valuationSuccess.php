@@ -31,9 +31,9 @@
                     <tbody>
                         <?php foreach ($assets as $asset): ?>
                             <tr>
-                                <td><?php echo esc_entities($asset->identifier ?: '-') ?></td>
-                                <td><?php echo esc_entities($asset->title ?: '-') ?></td>
-                                <td><?php echo esc_entities($asset->class_name ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->identifier ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->title ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->class_name ?: '-') ?></td>
                                 <td><?php echo $asset->last_valuation_date ?></td>
                                 <td class="text-end"><?php echo number_format($asset->last_valuation_amount, 2) ?></td>
                                 <td class="text-end"><?php echo number_format($asset->current_carrying_amount, 2) ?></td>

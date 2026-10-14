@@ -54,7 +54,7 @@
                             <div class="col-md-6">
                                 <?php if (isset($io) && $io): ?>
                                     <label class="form-label"><?php echo __('Linked Record') ?></label>
-                                    <div class="form-control bg-light"><?php echo esc_entities($io->title ?: 'Untitled') ?></div>
+                                    <div class="form-control bg-light"><?php echo esc_entities(sfOutputEscaper::unescape($io)->title ?: 'Untitled') ?></div>
                                     <input type="hidden" name="information_object_id" value="<?php echo $io->id ?>">
                                 <?php else: ?>
                                     <label class="form-label"><?php echo __('Link to Archival Record') ?></label>
@@ -71,7 +71,7 @@
                                 <select name="accounting_standard_id" class="form-select">
                                     <option value=""><?php echo __('-- Select Standard --') ?></option>
                                     <?php foreach ($standards as $s): ?>
-                                        <option value="<?php echo $s->id ?>" <?php echo ($formData['accounting_standard_id'] ?? '') == $s->id ? 'selected' : '' ?>><?php echo esc_entities($s->code . ' - ' . $s->name) ?></option>
+                                        <option value="<?php echo $s->id ?>" <?php echo ($formData['accounting_standard_id'] ?? '') == $s->id ? 'selected' : '' ?>><?php echo esc_entities(sfOutputEscaper::unescape($s)->code . ' - ' . sfOutputEscaper::unescape($s)->name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -80,7 +80,7 @@
                                 <select name="asset_class_id" class="form-select">
                                     <option value=""><?php echo __('-- Select Class --') ?></option>
                                     <?php foreach ($classes as $c): ?>
-                                        <option value="<?php echo $c->id ?>" <?php echo ($formData['asset_class_id'] ?? '') == $c->id ? 'selected' : '' ?>><?php echo esc_entities($c->name) ?></option>
+                                        <option value="<?php echo $c->id ?>" <?php echo ($formData['asset_class_id'] ?? '') == $c->id ? 'selected' : '' ?>><?php echo esc_entities(sfOutputEscaper::unescape($c)->name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>

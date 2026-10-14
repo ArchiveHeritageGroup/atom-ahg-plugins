@@ -29,7 +29,7 @@
                                     <?php foreach ($standards as $s): ?>
                                     <option value="<?php echo $s->id; ?>" 
                                         <?php echo ($isEdit && $rule->standard_id == $s->id) || (!$isEdit && $preselectedStandard == $s->id) ? 'selected' : ''; ?>>
-                                        <?php echo esc_entities($s->code); ?> - <?php echo esc_entities($s->name); ?>
+                                        <?php echo esc_entities(sfOutputEscaper::unescape($s)->code); ?> - <?php echo esc_entities(sfOutputEscaper::unescape($s)->name); ?>
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -47,7 +47,7 @@
                             <div class="col-md-3">
                                 <label class="form-label"><?php echo __('Rule Code'); ?> <span class="text-danger">*</span></label>
                                 <input type="text" name="code" class="form-control" required
-                                       value="<?php echo $isEdit ? esc_entities($rule->code) : ''; ?>"
+                                       value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($rule)->code) : ''; ?>"
                                        placeholder="e.g. REC001" maxlength="50" data-ahg-style="text-transform: uppercase;">
                             </div>
                         </div>
@@ -55,19 +55,19 @@
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Rule Name'); ?> <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control" required
-                                   value="<?php echo $isEdit ? esc_entities($rule->name) : ''; ?>"
+                                   value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($rule)->name) : ''; ?>"
                                    placeholder="e.g. Asset Class Required">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Description'); ?></label>
-                            <textarea name="description" class="form-control" rows="2"><?php echo $isEdit ? esc_entities($rule->description) : ''; ?></textarea>
+                            <textarea name="description" class="form-control" rows="2"><?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($rule)->description) : ''; ?></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Error Message'); ?> <span class="text-danger">*</span></label>
                             <input type="text" name="error_message" class="form-control" required
-                                   value="<?php echo $isEdit ? esc_entities($rule->error_message) : ''; ?>"
+                                   value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($rule)->error_message) : ''; ?>"
                                    placeholder="Message shown when rule fails">
                         </div>
 
@@ -75,7 +75,7 @@
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo __('Standard Reference'); ?></label>
                                 <input type="text" name="reference" class="form-control"
-                                       value="<?php echo $isEdit ? esc_entities($rule->reference) : ''; ?>"
+                                       value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($rule)->reference) : ''; ?>"
                                        placeholder="e.g. GRAP 103.14">
                             </div>
                             <div class="col-md-3">
@@ -106,14 +106,14 @@
                             <div class="col-md-4">
                                 <label class="form-label"><?php echo __('Field Name'); ?></label>
                                 <input type="text" name="field_name" class="form-control"
-                                       value="<?php echo $isEdit ? esc_entities($rule->field_name) : ''; ?>"
+                                       value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($rule)->field_name) : ''; ?>"
                                        placeholder="e.g. asset_class_id">
                                 <small class="text-muted"><?php echo __('Database field to check'); ?></small>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label"><?php echo __('Condition'); ?></label>
                                 <input type="text" name="condition" class="form-control"
-                                       value="<?php echo $isEdit ? esc_entities($rule->condition) : ''; ?>"
+                                       value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($rule)->condition) : ''; ?>"
                                        placeholder="e.g. >0, >=1, !=0">
                                 <small class="text-muted"><?php echo __('For value_check type'); ?></small>
                             </div>

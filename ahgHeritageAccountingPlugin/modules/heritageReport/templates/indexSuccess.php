@@ -66,8 +66,8 @@
             <div class="col-md-3 mb-3">
                 <div class="card">
                     <div class="card-body text-center">
-                        <h5><?php echo esc_entities($std->code) ?></h5>
-                        <small class="text-muted"><?php echo esc_entities($std->country) ?></small>
+                        <h5><?php echo esc_entities(sfOutputEscaper::unescape($std)->code) ?></h5>
+                        <small class="text-muted"><?php echo esc_entities(sfOutputEscaper::unescape($std)->country) ?></small>
                         <div class="mt-3">
                             <a href="<?php echo url_for(['module' => 'heritageReport', 'action' => 'assetRegister', 'standard_id' => $std->id]) ?>" class="btn btn-sm btn-outline-primary">
                                 <?php echo __('View') ?>

@@ -25,7 +25,7 @@
                             <div class="col-md-4">
                                 <label class="form-label"><?php echo __('Code'); ?> <span class="text-danger">*</span></label>
                                 <input type="text" name="code" class="form-control" required 
-                                       value="<?php echo $isEdit ? esc_entities($standard->code) : ''; ?>"
+                                       value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($standard)->code) : ''; ?>"
                                        placeholder="e.g. GRAP103, IPSAS45" maxlength="20"
                                        data-ahg-style="text-transform: uppercase;">
                                 <small class="text-muted"><?php echo __('Unique identifier, uppercase'); ?></small>
@@ -33,7 +33,7 @@
                             <div class="col-md-8">
                                 <label class="form-label"><?php echo __('Name'); ?> <span class="text-danger">*</span></label>
                                 <input type="text" name="name" class="form-control" required 
-                                       value="<?php echo $isEdit ? esc_entities($standard->name) : ''; ?>"
+                                       value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($standard)->name) : ''; ?>"
                                        placeholder="e.g. GRAP 103 Heritage Assets">
                             </div>
                         </div>
@@ -42,7 +42,7 @@
                             <div class="col-md-6">
                                 <label class="form-label"><?php echo __('Country / Region'); ?> <span class="text-danger">*</span></label>
                                 <input type="text" name="country" class="form-control" required
-                                       value="<?php echo $isEdit ? esc_entities($standard->country) : ''; ?>"
+                                       value="<?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($standard)->country) : ''; ?>"
                                        placeholder="e.g. South Africa, International">
                             </div>
                             <div class="col-md-6">
@@ -55,7 +55,7 @@
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Description'); ?></label>
                             <textarea name="description" class="form-control" rows="3"
-                                      placeholder="<?php echo __('Brief description of the standard and its applicability...'); ?>"><?php echo $isEdit ? esc_entities($standard->description) : ''; ?></textarea>
+                                      placeholder="<?php echo __('Brief description of the standard and its applicability...'); ?>"><?php echo $isEdit ? esc_entities(sfOutputEscaper::unescape($standard)->description) : ''; ?></textarea>
                         </div>
                     </div>
                 </div>

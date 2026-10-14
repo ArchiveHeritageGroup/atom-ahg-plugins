@@ -5,7 +5,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-1"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Add Movement') ?></h1>
-            <p class="text-muted"><?php echo esc_entities($asset->object_identifier ?? '') ?> - <?php echo esc_entities($asset->object_title ?? 'Untitled') ?></p>
+            <p class="text-muted"><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?? '') ?> - <?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?? 'Untitled') ?></p>
         </div>
     </div>
 
@@ -44,7 +44,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label"><?php echo __('From Location') ?></label>
-                        <input type="text" name="from_location" class="form-control" value="<?php echo esc_entities($asset->current_location ?? '') ?>">
+                        <input type="text" name="from_location" class="form-control" value="<?php echo esc_entities(sfOutputEscaper::unescape($asset)->current_location ?? '') ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label"><?php echo __('To Location') ?></label>

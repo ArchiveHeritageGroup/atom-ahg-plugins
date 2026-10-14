@@ -20,7 +20,7 @@
                     <select name="standard_id" class="form-select">
                         <option value=""><?php echo __('All Standards') ?></option>
                         <?php foreach ($standards as $s): ?>
-                            <option value="<?php echo $s->id ?>" <?php echo ($filters['standard_id'] ?? '') == $s->id ? 'selected' : '' ?>><?php echo esc_entities($s->code) ?></option>
+                            <option value="<?php echo $s->id ?>" <?php echo ($filters['standard_id'] ?? '') == $s->id ? 'selected' : '' ?>><?php echo esc_entities(sfOutputEscaper::unescape($s)->code) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -29,7 +29,7 @@
                     <select name="class_id" class="form-select">
                         <option value=""><?php echo __('All Classes') ?></option>
                         <?php foreach ($classes as $c): ?>
-                            <option value="<?php echo $c->id ?>" <?php echo ($filters['class_id'] ?? '') == $c->id ? 'selected' : '' ?>><?php echo esc_entities($c->name) ?></option>
+                            <option value="<?php echo $c->id ?>" <?php echo ($filters['class_id'] ?? '') == $c->id ? 'selected' : '' ?>><?php echo esc_entities(sfOutputEscaper::unescape($c)->name) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -74,11 +74,11 @@
                         <?php foreach ($assets as $asset): ?>
                             <?php $totalCarrying += $asset->current_carrying_amount; $totalAcquisition += $asset->acquisition_cost; ?>
                             <tr>
-                                <td><?php echo esc_entities($asset->object_identifier ?: '-') ?></td>
-                                <td><?php echo esc_entities($asset->object_title ?: '-') ?></td>
-                                <td><?php echo esc_entities($asset->class_name ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_identifier ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->object_title ?: '-') ?></td>
+                                <td><?php echo esc_entities(sfOutputEscaper::unescape($asset)->class_name ?: '-') ?></td>
                                 <td><?php echo ucfirst(str_replace('_', ' ', $asset->recognition_status)) ?></td>
-                                <td><?php echo ucfirst($asset->measurement_basis ?: '-') ?></td>
+                                <td><?php echo ucfirst(str_replace('_', ' ', $asset->measurement_basis ?: '-')) ?></td>
                                 <td class="text-end"><?php echo number_format($asset->acquisition_cost, 2) ?></td>
                                 <td class="text-end"><?php echo number_format($asset->current_carrying_amount, 2) ?></td>
                                 <td><?php echo $asset->acquisition_date ?: '-' ?></td>
