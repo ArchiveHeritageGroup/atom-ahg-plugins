@@ -13,7 +13,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0"><?php echo __('Verified'); ?></h6>
-                        <h2 class="mb-0"><?php echo number_format($verificationStats['passed'] ?? 0); ?></h2>
+                        <h2 class="mb-0"><?php echo number_format($verificationStats['valid'] ?? 0); ?></h2>
                     </div>
                     <i class="fas fa-certificate fs-1 opacity-50"></i>
                 </div>
@@ -26,7 +26,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0"><?php echo __('Failed'); ?></h6>
-                        <h2 class="mb-0"><?php echo number_format($verificationStats['failed'] ?? 0); ?></h2>
+                        <h2 class="mb-0"><?php echo number_format(($verificationStats['invalid'] ?? 0) + ($verificationStats['corrupted'] ?? 0) + ($verificationStats['error'] ?? 0) + ($verificationStats['missing'] ?? 0)); ?></h2>
                     </div>
                     <i class="fas fa-circle-xmark fs-1 opacity-50"></i>
                 </div>
@@ -225,17 +225,17 @@ php symfony preservation:replicate --dry-run</code></pre>
                         </td>
                         <td><span class="badge bg-secondary"><?php echo htmlspecialchars($v->backup_type ?? 'full'); ?></span></td>
                         <td>
-                            <?php if ($v->status === 'passed'): ?>
-                                <span class="badge bg-success">Passed</span>
-                            <?php elseif ($v->status === 'failed'): ?>
-                                <span class="badge bg-danger">Failed</span>
+                            <?php if ($v->status === 'valid'): ?>
+                                <span class="badge bg-success">Valid</span>
+                            <?php elseif (in_array($v->status, ['invalid', 'corrupted', 'error', 'missing'], true)): ?>
+                                <span class="badge bg-danger"><?php echo ucfirst($v->status); ?></span>
                             <?php elseif ($v->status === 'warning'): ?>
                                 <span class="badge bg-warning">Warning</span>
                             <?php else: ?>
                                 <span class="badge bg-secondary"><?php echo ucfirst($v->status); ?></span>
                             <?php endif; ?>
                         </td>
-                        <td><small><?php echo number_format($v->file_size ?? 0); ?> bytes</small></td>
+                        <td><small><?php $n = (float) ($v->backup_size ?? 0); $u = 0; while ($n >= 1024 && $u < 4) { $n /= 1024; ++$u; } echo round($n, $u ? 1 : 0).' '.['bytes', 'KB', 'MB', 'GB', 'TB'][$u]; ?></small></td>
                         <td><small class="text-muted"><?php echo date('Y-m-d H:i', strtotime($v->verified_at)); ?></small></td>
                         <td><small><?php echo htmlspecialchars($v->verified_by ?? 'system'); ?></small></td>
                     </tr>

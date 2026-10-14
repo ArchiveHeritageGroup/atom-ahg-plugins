@@ -57,7 +57,6 @@ foreach ($backups as $backup) {
                 <ul class="list-unstyled mb-0">
                     <li><strong><?php echo __('Host') ?>:</strong> <?php echo esc_entities($dbConfig['db_host'] ?? 'localhost') ?></li>
                     <li><strong><?php echo __('Database') ?>:</strong> <?php echo esc_entities($dbConfig['db_name'] ?? 'archive') ?></li>
-                    <li><strong><?php echo __('User') ?>:</strong> <?php echo esc_entities($dbConfig['db_user'] ?? 'root') ?></li>
                     <li><strong><?php echo __('Port') ?>:</strong> <?php echo esc_entities($dbConfig['db_port'] ?? 3306) ?></li>
                 </ul>
                 <hr>
@@ -162,6 +161,10 @@ foreach ($backups as $backup) {
 
     <!-- Right Column: Backups List -->
     <div class="col-md-8">
+        <div id="backup-running" class="alert alert-info d-flex align-items-center d-none">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            <div><strong><?php echo __('Backup running in the background') ?></strong><br><small class="backup-running-id"><?php echo __('Starting...') ?></small><br><small class="text-muted"><?php echo __('You can leave this page; the backup carries on. The list updates when it finishes.') ?></small></div>
+        </div>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-history me-2"></i><?php echo __('Backups') ?></h5>
@@ -542,16 +545,44 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.error) {
                 alert('Error: ' + data.error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             } else {
-                location.reload();
+                // Runs in the background (backup:create); follow it until it ends.
+                document.querySelectorAll('.modal.show').forEach(m => bootstrap.Modal.getInstance(m)?.hide());
+                followBackup(true);
             }
         })
-        .catch(e => alert('Error: ' + e.message))
-        .finally(() => {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
+        .catch(e => { alert('Error: ' + e.message); btn.innerHTML = originalText; btn.disabled = false; });
     }
+
+    function followBackup(justStarted) {
+        const banner = document.getElementById('backup-running');
+        let seen = false, waits = 0;
+        const poll = () => fetch('<?php echo url_for(['module' => 'backup', 'action' => 'status']) ?>', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.json())
+            .then(data => {
+                if (data.running && data.running.length) {
+                    seen = true;
+                    banner.classList.remove('d-none');
+                    banner.querySelector('.backup-running-id').textContent = data.running[0].backup_id + ', started ' + data.running[0].started_at;
+                    setTimeout(poll, 3000);
+                } else if (seen) {
+                    location.reload();
+                } else if (justStarted && ++waits < 30) {
+                    setTimeout(poll, 2000); // the job may not have written its row yet
+                } else if (justStarted) {
+                    location.reload();
+                }
+            });
+        if (justStarted) {
+            banner.classList.remove('d-none');
+            setTimeout(poll, 2000);
+        } else {
+            poll();
+        }
+    }
+    followBackup(false);
 
     // Incremental backup
     var incrBtn = document.getElementById('btn-incremental-backup');

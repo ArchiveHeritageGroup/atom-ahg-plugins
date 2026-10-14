@@ -1291,16 +1291,23 @@ class PreservationService
      */
     public function verifyAllBackups(string $backupDir = null, string $verifiedBy = 'cron'): array
     {
+        // Where Backup & Restore writes (Admin > Backup > Settings); uploads/backups
+        // was never written to, so verification always found nothing.
+        if (null === $backupDir && class_exists('\\AtomExtensions\\Services\\BackupSettingsService')) {
+            $backupDir = (new \AtomExtensions\Services\BackupSettingsService())->get('backup_path') ?: null;
+        }
         $backupDir = $backupDir ?? sfConfig::get('sf_upload_dir') . '/backups';
 
         if (!is_dir($backupDir)) {
-            return ['error' => 'Backup directory not found'];
+            return ['error' => 'Backup directory not found: '.$backupDir, 'total' => 0, 'valid' => 0, 'invalid' => 0, 'missing' => 0, 'errors' => 1];
         }
 
         $summary = [
             'total' => 0,
             'valid' => 0,
             'invalid' => 0,
+            'corrupted' => 0,
+            'warning' => 0,
             'missing' => 0,
             'errors' => 0,
             'details' => [],
@@ -1314,7 +1321,9 @@ class PreservationService
             $backupType = str_contains($backup, '.sql') ? 'database' : 'files';
 
             $result = $this->verifyBackup($backup, $backupType, null, $verifiedBy);
-            $summary[$result['status']]++;
+            // verifyBackup() also answers corrupted, warning and error; count those too.
+            $key = 'error' === $result['status'] ? 'errors' : $result['status'];
+            $summary[$key] = ($summary[$key] ?? 0) + 1;
             $summary['details'][basename($backup)] = $result['status'];
         }
 
@@ -2253,7 +2262,7 @@ class PreservationService
                     $batchResult = $this->verifyAllBackups();
                     $results['processed'] = $batchResult['total'];
                     $results['succeeded'] = $batchResult['valid'];
-                    $results['failed'] = $batchResult['invalid'] + $batchResult['missing'] + $batchResult['errors'];
+                    $results['failed'] = $batchResult['invalid'] + $batchResult['corrupted'] + $batchResult['missing'] + $batchResult['errors'];
                     $results['summary'] = $batchResult;
                     break;
 

@@ -1541,6 +1541,15 @@ class IngestCommitService
             }
         }
 
+        // The packages describe records that no longer exist, so they go too.
+        if ($session) {
+            try {
+                $this->deletePackages($session);
+            } catch (\Throwable $e) {
+                $errors[] = ['row' => 'packages', 'error' => $e->getMessage()];
+            }
+        }
+
         $this->rollbackErrors = $errors;
 
         // Update job status
@@ -1571,6 +1580,31 @@ class IngestCommitService
      * the document from the index while search is enabled, then disable indexing
      * for the actual model delete so it cannot throw, and re-enable afterwards.
      */
+    /**
+     * Remove the SIP, AIP and DIP this session wrote. Names are
+     * {sip,dip}_<session>_<timestamp>.json and aip_<session>_<timestamp>/; the
+     * underscore after the id keeps session 7 from matching session 71.
+     */
+    private function deletePackages(object $session): void
+    {
+        $uploads = \sfConfig::get('sf_upload_dir');
+        $sid = (int) $session->id;
+        foreach ([
+            ($session->output_sip_path ?: $uploads.'/sip')."/sip_{$sid}_*.json",
+            ($session->output_dip_path ?: $uploads.'/dip')."/dip_{$sid}_*.json",
+        ] as $pattern) {
+            foreach (glob($pattern) ?: [] as $file) {
+                @unlink($file);
+            }
+        }
+        foreach (glob(($session->output_aip_path ?: $uploads.'/aip')."/aip_{$sid}_*", GLOB_ONLYDIR) ?: [] as $dir) {
+            foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST) as $f) {
+                $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
+            }
+            @rmdir($dir);
+        }
+    }
+
     private function deleteWithoutIndexHook($object): void
     {
         // Create the search instance initialised before disable() runs: when

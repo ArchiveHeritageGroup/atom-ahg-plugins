@@ -36,7 +36,7 @@ $components = $backup['components'] ?? [];
                     <div class="row">
                         <div class="col-sm-4"><strong><?php echo __('ID') ?>:</strong> <?php echo esc_entities($backupId) ?></div>
                         <div class="col-sm-4"><strong><?php echo __('Type') ?>:</strong> <?php echo esc_entities(ucfirst($backup['type'] ?? 'manual')) ?></div>
-                        <div class="col-sm-4"><strong><?php echo __('Created') ?>:</strong> <?php echo esc_entities($backup['created_at'] ?? 'Unknown') ?></div>
+                        <div class="col-sm-4"><strong><?php echo __('Created') ?>:</strong> <?php echo esc_entities($backup['created_at'] ?? $backup['completed_at'] ?? $backup['started_at'] ?? 'Unknown') ?></div>
                     </div>
                 </div>
 
@@ -131,6 +131,23 @@ document.addEventListener('DOMContentLoaded', function() {
             body: new URLSearchParams(formData)
         })
         .then(r => r.json())
+        .then(data => !data.started ? data : new Promise(resolve => {
+            // The restore runs in the background (backup:restore); wait for its result.
+            restoreStatus.textContent = '<?php echo __('Restoring in the background. This can take several minutes; keep this page open to see the result.') ?>';
+            const poll = () => fetch('<?php echo url_for(['module' => 'backup', 'action' => 'restoreStatus']) ?>', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.json())
+                .then(st => {
+                    if (st.at && st.at >= data.since && st.state === 'completed') {
+                        resolve({ status: 'success', message: '<?php echo __('Restore completed') ?>' });
+                    } else if (st.at && st.at >= data.since && st.state === 'failed') {
+                        resolve({ error: st.message || 'Restore failed' });
+                    } else {
+                        setTimeout(poll, 4000);
+                    }
+                })
+                .catch(() => setTimeout(poll, 4000));
+            setTimeout(poll, 3000);
+        }))
         .then(data => {
             if (data.status === 'success') {
                 progressBar.classList.remove('progress-bar-animated', 'bg-warning');

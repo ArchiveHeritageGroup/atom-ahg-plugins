@@ -123,21 +123,40 @@ if (!$this->getUser()->isAdministrator()) {
             $this->forward404();
         }
 
-        $options = [
-            'database' => (bool)$request->getParameter('database', true),
-            'uploads' => (bool)$request->getParameter('uploads', true),
-            'plugins' => (bool)$request->getParameter('plugins', true),
-            'framework' => (bool)$request->getParameter('framework', true),
-            'type' => 'manual',
-        ];
-
-        try {
-            $service = new \AtomExtensions\Services\BackupService();
-            $result = $service->createBackup($options);
-            return $this->renderJson($result);
-        } catch (\Throwable $e) {
-            return $this->renderJson(['error' => $e->getMessage()], 500);
+        // A real dump outlasts the request (php-fpm stops it after a few minutes,
+        // and the backup was cut off), so start backup:create in the background
+        // and let the page follow backup_history (executeStatus).
+        $flags = [];
+        foreach (['database', 'uploads', 'plugins', 'framework', 'fuseki'] as $c) {
+            if ((bool) $request->getParameter($c, 'database' === $c)) {
+                $flags[] = '--'.$c;
+            }
         }
+        if (!$flags) {
+            return $this->renderJson(['error' => 'Choose at least one component to back up.'], 400);
+        }
+        if (\Illuminate\Database\Capsule\Manager::table('backup_history')->where('status', 'in_progress')->where('created_at', '>', date('Y-m-d H:i:s', time() - 6 * 3600))->exists()) {
+            return $this->renderJson(['error' => 'A backup is already running.'], 409);
+        }
+
+        $root = sfConfig::get('sf_root_dir');
+        $log = sfConfig::get('sf_log_dir').'/backup-create.log';
+        exec(sprintf('cd %s && nohup php symfony backup:create %s >> %s 2>&1 &', escapeshellarg($root), implode(' ', $flags), escapeshellarg($log)));
+
+        return $this->renderJson(['started' => true]);
+    }
+
+    /** Running and recent backups, for the page to follow a background backup. */
+    public function executeStatus($request)
+    {
+        $rows = \Illuminate\Database\Capsule\Manager::table('backup_history')
+            ->orderByDesc('id')->limit(5)
+            ->get(['backup_id', 'status', 'created_at as started_at', 'completed_at', 'size_bytes', 'error_message']);
+
+        return $this->renderJson([
+            'running' => $rows->where('status', 'in_progress')->values(),
+            'recent' => $rows->values(),
+        ]);
     }
 
     // ==========================================
@@ -549,38 +568,7 @@ if (!$this->getUser()->isAdministrator()) {
             return $this->renderJson(['error' => 'Upload not found'], 404);
         }
 
-        $options = [
-            'restore_database' => (bool)$request->getParameter('restore_database', true),
-            'restore_uploads' => (bool)$request->getParameter('restore_uploads', false),
-            'restore_plugins' => (bool)$request->getParameter('restore_plugins', false),
-            'restore_framework' => (bool)$request->getParameter('restore_framework', false),
-        ];
-
-        try {
-            $service = new \AtomExtensions\Services\BackupService();
-            
-            // Restore from staging directory instead of regular backup path
-            $result = $service->restoreFromPath($uploadDir, $options);
-
-            // Update manifest status
-            $manifestFile = $uploadDir . '/upload_manifest.json';
-            if (file_exists($manifestFile)) {
-                $manifest = json_decode(file_get_contents($manifestFile), true);
-                $manifest['status'] = 'restored';
-                $manifest['restored_at'] = date('Y-m-d H:i:s');
-                $manifest['restore_options'] = $options;
-                file_put_contents($manifestFile, json_encode($manifest, JSON_PRETTY_PRINT));
-            }
-
-            return $this->renderJson([
-                'status' => 'success',
-                'message' => 'Restore completed successfully',
-                'details' => $result
-            ]);
-
-        } catch (\Throwable $e) {
-            return $this->renderJson(['error' => $e->getMessage()], 500);
-        }
+        return $this->launchRestore('--upload='.escapeshellarg($uploadId), $request);
     }
 
     /**
@@ -639,25 +627,56 @@ if (!$this->getUser()->isAdministrator()) {
             $this->forward404();
         }
 
-        $backupId = $request->getParameter('id');
-        if (!$backupId) {
+        $backupId = (string) $request->getParameter('id');
+        if ('' === $backupId || str_contains($backupId, '/') || str_contains($backupId, '..')) {
             return $this->renderJson(['error' => 'Backup ID required'], 400);
         }
 
-        $options = [
-            'restore_database' => (bool)$request->getParameter('restore_database', true),
-            'restore_uploads' => (bool)$request->getParameter('restore_uploads', false),
-            'restore_plugins' => (bool)$request->getParameter('restore_plugins', false),
-            'restore_framework' => (bool)$request->getParameter('restore_framework', false),
-        ];
+        return $this->launchRestore('--id='.escapeshellarg($backupId), $request);
+    }
 
-        try {
-            $service = new \AtomExtensions\Services\BackupService();
-            $service->restoreBackup($backupId, $options);
-            return $this->renderJson(['status' => 'success', 'message' => 'Restore completed']);
-        } catch (\Throwable $e) {
-            return $this->renderJson(['error' => $e->getMessage()], 500);
+    /**
+     * Start backup:restore in the background. A restore of a real database
+     * outlasts the request (php-fpm stops it after a few minutes, which could
+     * leave the database half-restored); the page follows restoreStatus.
+     */
+    private function launchRestore(string $sourceFlag, $request)
+    {
+        $flags = [];
+        foreach (['database' => true, 'uploads' => false, 'plugins' => false, 'framework' => false] as $c => $default) {
+            if ((bool) $request->getParameter('restore_'.$c, $default)) {
+                $flags[] = '--'.$c;
+            }
         }
+        if (!$flags) {
+            return $this->renderJson(['error' => 'Choose at least one component to restore.'], 400);
+        }
+        $current = $this->readRestoreStatus();
+        if ('running' === ($current['state'] ?? '') && strtotime($current['at'] ?? '') > time() - 6 * 3600) {
+            return $this->renderJson(['error' => 'A restore is already running.'], 409);
+        }
+        if (\Illuminate\Database\Capsule\Manager::table('backup_history')->where('status', 'in_progress')->where('created_at', '>', date('Y-m-d H:i:s', time() - 6 * 3600))->exists()) {
+            return $this->renderJson(['error' => 'A backup is running; restore when it has finished.'], 409);
+        }
+
+        $root = sfConfig::get('sf_root_dir');
+        $log = sfConfig::get('sf_log_dir').'/backup-restore.log';
+        exec(sprintf('cd %s && nohup php symfony backup:restore %s %s >> %s 2>&1 &', escapeshellarg($root), $sourceFlag, implode(' ', $flags), escapeshellarg($log)));
+
+        return $this->renderJson(['started' => true, 'since' => date('Y-m-d H:i:s')]);
+    }
+
+    private function readRestoreStatus(): array
+    {
+        $path = (new \AtomExtensions\Services\BackupSettingsService())->get('backup_path', '/var/backups/atom').'/restore-status.json';
+
+        return is_file($path) ? (json_decode((string) file_get_contents($path), true) ?: []) : [];
+    }
+
+    /** The current or last restore, for the restore pages to follow. */
+    public function executeRestoreStatus($request)
+    {
+        return $this->renderJson($this->readRestoreStatus());
     }
 
     public function executeDelete($request)
