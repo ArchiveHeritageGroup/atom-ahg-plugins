@@ -4,6 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php
+    // Canonical address for search engines: the clean path, without /index.php
+    // or a query string, so every filtered, sorted or session variant of a page
+    // counts as that one page.
+    $canonicalPath = preg_replace('#^/index\.php(?=/|$)#', '', (string) parse_url($sf_request->getUri(), PHP_URL_PATH)) ?: '/';
+    ?>
+    <link rel="canonical" href="<?php echo htmlspecialchars(($sf_request->isSecure() ? 'https://' : 'http://').$sf_request->getHost().$canonicalPath, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php
     // SECURITY (M12): publish the CSRF token and auto-attach it as the
     // X-CSRF-TOKEN header to every same-origin, unsafe-method AJAX request
     // (fetch / XMLHttpRequest / jQuery). This covers all AhgController AJAX
