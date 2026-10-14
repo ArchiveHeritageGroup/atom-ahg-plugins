@@ -19,6 +19,7 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
         $this->dispatcher->connect('response.filter_content', [$this, 'addAssets']);
         // #130: field-level redaction of the IO view for unauthorised viewers.
         $this->dispatcher->connect('response.filter_content', [$this, 'applyFieldRedaction']);
+        $this->dispatcher->connect('response.filter_content', [$this, 'applyPiiMasking']);
     }
 
     /**
@@ -51,6 +52,29 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
             // But it must never be silent again: swallowing this is what hid a
             // total redaction failure.
             error_log('[ahgPrivacy] field redaction did not run: ' . $e->getMessage());
+
+            return $content;
+        }
+    }
+
+    /**
+     * Mask redacted personal information in every response a non-administrator
+     * receives: exports (EAD and other XML), browse and search snippets, JSON.
+     * Record pages already masked; nothing else did.
+     */
+    public function applyPiiMasking(sfEvent $event, $content)
+    {
+        try {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PiiMaskingService.php';
+            $type = (string) $event->getSubject()->getContentType();
+            if (!is_string($content) || '' === $content || !preg_match('#html|xml|json|text#i', $type)
+                || \ahgPrivacyPlugin\Service\PiiMaskingService::canBypassMasking()) {
+                return $content;
+            }
+
+            return \ahgPrivacyPlugin\Service\PiiMaskingService::maskAll($content);
+        } catch (\Throwable $e) {
+            error_log('[ahgPrivacy] PII masking did not run: ' . $e->getMessage());
 
             return $content;
         }

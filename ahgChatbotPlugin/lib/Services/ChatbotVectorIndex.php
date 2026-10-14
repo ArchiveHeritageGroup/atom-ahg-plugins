@@ -120,7 +120,8 @@ class ChatbotVectorIndex
         $gw = AiGatewayClient::fromSettings();
         $points = [];
         foreach ($rows as $r) {
-            $text = trim(trim((string) $r->title)."\n".mb_substr(trim(strip_tags((string) $r->scope_and_content)), 0, 4000));
+            // Stored masked: the index must not hold personal information that record pages hide.
+            $text = (string) ChatbotRetriever::maskPii((int) $r->id, trim(trim((string) $r->title)."\n".mb_substr(trim(strip_tags((string) $r->scope_and_content)), 0, 4000)));
             if ('' === $text) {
                 ++$stats['skipped'];
 
@@ -356,6 +357,7 @@ class ChatbotVectorIndex
 
             $points = [];
             foreach ($passages as $n => $text) {
+                $text = (string) ChatbotRetriever::maskPii((int) $r->object_id, $text);
                 $vec = $gw->embed($text);
                 if (!is_array($vec) || [] === $vec) {
                     $points = null;

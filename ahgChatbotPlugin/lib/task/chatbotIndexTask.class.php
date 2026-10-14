@@ -38,6 +38,7 @@ EOD;
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();
         require_once __DIR__.'/../Services/ChatbotVectorIndex.php';
+        require_once __DIR__.'/../Services/ChatbotRetriever.php'; // maskPii, used while indexing
 
         $index = new \AhgChatbotPlugin\Services\ChatbotVectorIndex();
         $culture = $options['culture'] ?: 'en';

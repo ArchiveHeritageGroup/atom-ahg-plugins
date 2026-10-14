@@ -56,6 +56,90 @@ class PiiMaskingService
     }
 
     /**
+     * Mask every redacted identifier (ID, passport, email, phone, account, tax
+     * and card numbers), whichever record it belongs to.
+     *
+     * mask() works per record and only record pages called it, so the same ID
+     * number came back in full from the EAD export and in search snippets.
+     * This runs over a whole response instead. Values shorter than six
+     * characters are left alone, so a short value cannot blank out unrelated
+     * text. The list is cached for a minute.
+     */
+    public static function maskAll(string $content): string
+    {
+        static $rules = null;
+        if (null === $rules) {
+            $key = 'ahg_privacy_redacted_patterns';
+            $rules = function_exists('apcu_fetch') ? apcu_fetch($key) : false;
+            if (!is_array($rules)) {
+                // Identifiers only. Names, places, dates and subjects are redacted
+                // per record and may appear legitimately elsewhere ("Cape Town").
+                $rows = DB::table('ahg_ner_entity')
+                    ->where('status', 'redacted')
+                    ->whereIn('entity_type', ['SA_ID', 'NG_NIN', 'PASSPORT', 'EMAIL', 'PHONE_SA', 'PHONE_INTL', 'BANK_ACCOUNT', 'TAX_NUMBER', 'CREDIT_CARD'])
+                    ->distinct()->get(['entity_type', 'entity_value']);
+                $rules = [];
+                foreach ($rows as $e) {
+                    $re = self::previewToPattern((string) $e->entity_type, (string) $e->entity_value);
+                    if (null !== $re) {
+                        $rules[] = [$re, self::$maskPatterns[$e->entity_type] ?? '[REDACTED]'];
+                    }
+                }
+                if (function_exists('apcu_store')) {
+                    apcu_store($key, $rules, 60);
+                }
+            }
+        }
+        foreach ($rules as [$re, $mask]) {
+            $content = preg_replace($re, $mask, $content) ?? $content;
+        }
+
+        return $content;
+    }
+
+    /**
+     * The detector stores a starred preview, not the identifier (see
+     * PiiDetectionService::maskPii), so a plain replace never matched. Rebuild a
+     * pattern from the preview's fixed shape: kept prefix and suffix, and the
+     * starred length where the preview preserves it.
+     */
+    private static function previewToPattern(string $type, string $preview): ?string
+    {
+        $q = fn ($t) => preg_quote($t, '/');
+        switch ($type) {
+            case 'SA_ID':
+            case 'NG_NIN':
+            case 'PASSPORT':
+                if (!preg_match('/^(.{4})(\*+)(.{2})$/u', $preview, $m)) {
+                    return null;
+                }
+
+                return '/(?<![0-9A-Za-z])'.$q($m[1]).'[0-9A-Za-z]{'.strlen($m[2]).'}'.$q($m[3]).'(?![0-9A-Za-z])/';
+            case 'EMAIL':
+                if (!preg_match('/^(.{1,2})\*\*\*@(.+)$/u', $preview, $m)) {
+                    return null;
+                }
+
+                return '/(?<![\w.+-])'.$q($m[1]).'[\w.+-]{0,64}@'.$q($m[2]).'/i';
+            case 'PHONE_SA':
+            case 'PHONE_INTL':
+                if (!preg_match('/^(.{4})\*\*\*(.{3})$/u', $preview, $m)) {
+                    return null;
+                }
+
+                return '/(?<!\d)'.$q($m[1]).'[\d \-]{1,12}'.$q($m[2]).'(?!\d)/';
+            case 'CREDIT_CARD':
+                return preg_match('/(\d{4})$/', $preview, $m) ? '/(?<!\d)(?:\d[ -]?){12}'.$m[1].'(?!\d)/' : null;
+            default:
+                if (!preg_match('/^(.{3})(\*+)(.{2})$/u', $preview, $m)) {
+                    return null;
+                }
+
+                return '/(?<![0-9A-Za-z])'.$q($m[1]).'[0-9A-Za-z]{'.strlen($m[2]).'}'.$q($m[3]).'(?![0-9A-Za-z])/';
+        }
+    }
+
+    /**
      * Check if user can bypass PII masking (administrators)
      *
      * @return bool

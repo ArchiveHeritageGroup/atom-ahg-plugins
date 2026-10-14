@@ -80,10 +80,37 @@ class ChatbotRetriever
         // hidden record never reaches the context.
         $rows = self::hydrate($visible, $culture);
         foreach ($rows as $r) {
-            $r->passages = $passages[(int) $r->id] ?? [];
+            $id = (int) $r->id;
+            $r->title = self::maskPii($id, $r->title);
+            $r->scope_and_content = self::maskPii($id, $r->scope_and_content);
+            $r->passages = array_map(static fn ($t) => self::maskPii($id, $t), $passages[$id] ?? []);
         }
 
         return $rows;
+    }
+
+    /**
+     * Mask personal information flagged by the privacy plugin, when it is
+     * installed. Record pages masked it but the chatbot did not, so an ID
+     * number could be quoted back. Optional: without ahgPrivacyPlugin the
+     * text is returned unchanged.
+     */
+    public static function maskPii(int $objectId, ?string $text): ?string
+    {
+        static $loaded = null;
+        if (null === $loaded) {
+            $file = dirname(__DIR__, 3).'/ahgPrivacyPlugin/lib/Service/PiiMaskingService.php';
+            $loaded = class_exists('ahgPrivacyPlugin\\Service\\PiiMaskingService', false) || (is_file($file) && (require_once $file) && class_exists('ahgPrivacyPlugin\\Service\\PiiMaskingService', false));
+        }
+        if (!$loaded || null === $text || '' === $text) {
+            return $text;
+        }
+        try {
+            // forceShow=true skips the administrator bypass: the chatbot is public.
+            return \ahgPrivacyPlugin\Service\PiiMaskingService::mask($objectId, $text, true);
+        } catch (\Throwable $e) {
+            return $text;
+        }
     }
 
     /**

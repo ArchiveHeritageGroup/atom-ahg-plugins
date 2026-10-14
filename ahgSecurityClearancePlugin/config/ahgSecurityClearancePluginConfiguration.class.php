@@ -263,6 +263,18 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
             $userId = $context->getUser()->getAttribute('user_id');
             $hidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
                 ->isRestricted($objectId, $userId ? (int) $userId : null);
+
+            // Drafts: the record page refuses them without viewDraft, but their
+            // reference images and thumbnails were still served.
+            if (!$hidden) {
+                $published = (int) \Illuminate\Database\Capsule\Manager::table('status')
+                    ->where('object_id', $objectId)->where('type_id', \QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+                    ->value('status_id');
+                if (\QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID !== $published) {
+                    $resource = \QubitInformationObject::getById($objectId);
+                    $hidden = null === $resource || !\QubitAcl::check($resource, 'viewDraft');
+                }
+            }
         } catch (\Throwable $e) {
             error_log('file.access.check_failed: ' . $e->getMessage());
             $hidden = true;

@@ -125,6 +125,7 @@ class discoveryActions extends AhgController
         // Step 3: Merge & Rank
         $merger = new \AhgDiscovery\Services\ResultMerger();
         $merged = $merger->merge($keywordResults, $entityResults, $hierarchicalResults, $vectorResults);
+        $merged['flat_results'] = $this->visibleOnly($merged['flat_results'] ?? []);
 
         // Step 4: Enrich with metadata (paginated slice)
         $enricher = new \AhgDiscovery\Services\ResultEnricher($culture);
@@ -183,7 +184,7 @@ class discoveryActions extends AhgController
         $limit = min(20, max(1, (int) $request->getParameter('limit', 8)));
 
         $entitySearch = new \AhgDiscovery\Services\EntitySearchStrategy();
-        $related = $entitySearch->findRelated($objectId, $limit);
+        $related = $this->visibleOnly($entitySearch->findRelated($objectId, $limit));
 
         if (empty($related)) {
             return $this->renderJson([
@@ -683,5 +684,30 @@ class discoveryActions extends AhgController
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Ignore log errors
         }
+    }
+
+    /**
+     * Drop results this user may not see. None of the strategies (keyword,
+     * entity, hierarchy, vector) filtered anything, so drafts, classified,
+     * embargoed and ICIP-restricted records all came back in public search.
+     * Administrators see everything; everyone else sees published records the
+     * shared access filter does not restrict.
+     */
+    private function visibleOnly(array $results): array
+    {
+        if (empty($results) || $this->getUser()->isAdministrator()) {
+            return $results;
+        }
+        $ids = array_values(array_unique(array_map('intval', array_column($results, 'object_id'))));
+        $published = \Illuminate\Database\Capsule\Manager::table('status')
+            ->where('type_id', \QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+            ->where('status_id', \QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID)
+            ->whereIn('object_id', $ids)->pluck('object_id')->map('intval')->all();
+        $userId = $this->getUser()->getAttribute('user_id');
+        $restricted = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+            ->getRestrictedObjectIds($userId ? (int) $userId : null);
+        $allowed = array_flip(array_diff($published, array_map('intval', $restricted)));
+
+        return array_values(array_filter($results, fn ($r) => isset($allowed[(int) ($r['object_id'] ?? 0)])));
     }
 }
