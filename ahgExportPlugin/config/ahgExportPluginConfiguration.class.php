@@ -9,6 +9,7 @@ class ahgExportPluginConfiguration extends sfPluginConfiguration
     {
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'export';
+        $enabledModules[] = 'clipboardExport';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
@@ -64,5 +65,12 @@ class ahgExportPluginConfiguration extends sfPluginConfiguration
         $router->any('object_export', '/object/export', 'index');
 
         $router->register($event->getSubject());
+
+        // Clipboard export (CallHub CH-000215): base AtoM's export job crashes
+        // (IndexWrapper::createSearch), so the form's POST comes here. GET still
+        // reaches base, which renders the form.
+        $clipboard = new \AtomFramework\Routing\RouteLoader('clipboardExport');
+        $clipboard->post('clipboard_export_ahg', '/clipboard/export', 'export');
+        $clipboard->register($event->getSubject());
     }
 }

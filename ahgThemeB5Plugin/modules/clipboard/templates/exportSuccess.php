@@ -163,4 +163,30 @@
 </script>
 <?php endif; ?>
 
+<?php // The export is handled by ahgExportPlugin (CallHub CH-000215), which reads the
+      // records from the request: send the clipboard's slugs for the chosen type. ?>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+(function () {
+  var form = document.getElementById('clipboard-export-form');
+  if (!form) return;
+  form.addEventListener('submit', function (event) {
+    // Base AtoM's script would send this in the background and expect a job
+    // reply; the export now answers with the zip itself, so let the browser
+    // submit the form normally and download it.
+    event.stopImmediatePropagation();
+    form.querySelectorAll('input[name="slugs[]"]').forEach(function (el) { el.remove(); });
+    var type = (form.querySelector('[name="exportType"]') || {}).value || 'informationObject';
+    // The clipboard is one "clipboard" entry keyed by type; older builds used atom-clipboard-<type>.
+    var slugs = [];
+    try { slugs = (JSON.parse(localStorage.getItem('clipboard') || '{}') || {})[type] || []; } catch (e) {}
+    if (!slugs.length) { try { slugs = JSON.parse(localStorage.getItem('atom-clipboard-' + type) || '[]'); } catch (e) {} }
+    (Array.isArray(slugs) ? slugs : []).forEach(function (slug) {
+      var input = document.createElement('input');
+      input.type = 'hidden'; input.name = 'slugs[]'; input.value = slug;
+      form.appendChild(input);
+    });
+  }, true);
+})();
+</script>
+
 <?php end_slot(); ?>

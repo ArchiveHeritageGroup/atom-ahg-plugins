@@ -10,10 +10,41 @@ class ahgTermTaxonomyPluginConfiguration extends sfPluginConfiguration
         $this->registerAutoloader();
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
+        $this->dispatcher->connect('controller.change_action', [$this, 'guardTermAddTaxonomy']);
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'termTaxonomy';
         sfConfig::set('sf_enabled_modules', $enabledModules);
+    }
+
+    /**
+     * term/add takes the taxonomy as a URL ("/index.php/subjects"). Base AtoM
+     * resolves it through routing and, when that finds nothing - a bare slug, a
+     * /taxonomy/index/id/35 path, a typo - crashes: a 500 ("route does not
+     * exist") or get_class(null) in QubitAcl (CallHub CH-000214). Base is locked,
+     * so an unresolvable taxonomy is answered here with a 404 instead.
+     */
+    public function guardTermAddTaxonomy(sfEvent $event)
+    {
+        $params = $event->getParameters();
+        // term/add may be served by the edit action; only the add form carries ?taxonomy.
+        if ('term' !== ($params['module'] ?? '') || !in_array($params['action'] ?? '', ['add', 'edit'], true)) {
+            return;
+        }
+        $taxonomy = (string) sfContext::getInstance()->getRequest()->getParameter('taxonomy', '');
+        if ('' === $taxonomy) {
+            return;
+        }
+
+        $path = (string) parse_url($taxonomy, PHP_URL_PATH);
+        $slug = basename($path);
+        $known = '' !== $slug && '/' === substr($path, 0, 1)
+            && \Illuminate\Database\Capsule\Manager::table('slug as s')
+                ->join('taxonomy as t', 't.id', '=', 's.object_id')
+                ->where('s.slug', $slug)->exists();
+        if (!$known) {
+            throw new sfError404Exception('Unknown taxonomy');
+        }
     }
 
     protected function registerAutoloader()
