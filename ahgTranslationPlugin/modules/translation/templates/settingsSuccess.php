@@ -6,11 +6,7 @@
 <?php endif; ?>
 
 <form method="post">
-  <div class="form-group">
-    <label><?php echo __('MT endpoint') ?></label>
-    <input class="form-control" name="endpoint" value="<?php echo htmlspecialchars($endpoint, ENT_QUOTES, 'UTF-8') ?>" />
-    <small class="form-text text-muted"><?php echo __('Example: http://127.0.0.1:5100/translate') ?></small>
-  </div>
+  <p class="text-muted"><?php echo __('Translations go through the AHG AI gateway. Its address and key are set under Admin > AHG Settings > AI Services.') ?></p>
 
   <div class="form-group">
     <label><?php echo __('Timeout (seconds)') ?></label>

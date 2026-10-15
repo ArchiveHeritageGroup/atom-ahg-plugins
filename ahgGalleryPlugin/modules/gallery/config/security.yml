@@ -12,3 +12,47 @@ add:
 edit:
   is_secure:   true
   credentials: [[ editor, administrator ]]
+
+# Loans, facility reports, valuations and venues are collection-management
+# records, not public display: insurance values, lenders' contacts and building
+# security. Until 15 Oct 2026 they were open, and viewLoan / facilityReport
+# accepted anonymous POSTs that changed a loan or filed a report.
+loans:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+createLoan:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+viewLoan:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+facilityReport:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+valuations:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+createValuation:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+venues:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+createVenue:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+viewVenue:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+createArtist:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

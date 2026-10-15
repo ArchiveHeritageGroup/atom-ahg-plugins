@@ -1,0 +1,15 @@
+# Translation writes into archival descriptions, so only staff may use it.
+# Until 15 Oct 2026 the module had no security.yml: translate and apply relied
+# on the CSRF token alone (which any visitor's session can obtain), and health
+# was public and showed an internal node address.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+settings:
+  is_secure:   true
+  credentials: administrator
+
+health:
+  is_secure:   true
+  credentials: administrator

@@ -11,51 +11,52 @@ class translationActions extends AhgController
         $this->svc = new AhgTranslationService();
     }
 
+    /**
+     * Translation writes into descriptions: editors and administrators only;
+     * settings and health: administrators only. Checked here as well as in
+     * config/security.yml so the rule does not depend on the config cache.
+     */
+    private function requireStaff(bool $adminOnly = false): void
+    {
+        $user = $this->getUser();
+        $allowed = $adminOnly ? ['administrator'] : ['editor', 'administrator'];
+        if (!$user->isAuthenticated() || !$user->hasCredential($allowed, false)) {
+            $this->forward404();
+        }
+    }
+
     public function executeHealth($request)
     {
-        $endpoint = $this->svc->getSetting('mt.endpoint', 'http://127.0.0.1:5100/translate');
+        $this->requireStaff(true);
+        // Translation goes through the AHG AI gateway (AhgTranslationService),
+        // so that is what is checked. The node behind it is the gateway's
+        // business and is never shown here.
+        $gateway = \AtomFramework\Services\AI\AiGatewayClient::fromSettings();
+        $configured = $gateway->isConfigured();
+        $available = $configured && $gateway->isAvailable();
 
-        // Lightweight check; do not assume MT supports en->en. We just verify endpoint is reachable.
-        $ch = curl_init($endpoint);
-        curl_setopt_array($ch, array(
-            CURLOPT_POST => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
-            CURLOPT_POSTFIELDS => json_encode(array('source' => 'af', 'target' => 'en', 'text' => 'toets')),
-            CURLOPT_TIMEOUT => 5,
-        ));
-        $raw = curl_exec($ch);
-        $errno = curl_errno($ch);
-        $err = curl_error($ch);
-        $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        $ok = ($errno === 0) && ($status >= 200 && $status < 500); // 4xx still means reachable
+        $this->getResponse()->setContentType('application/json');
 
         return $this->renderText(json_encode(array(
-            'ok' => $ok,
-            'endpoint' => $endpoint,
-            'http_status' => $status,
-            'curl_error' => $errno ? ($errno . ': ' . $err) : null,
+            'ok' => $available,
+            'endpoint' => 'AHG AI gateway',
+            'api_key_configured' => $configured,
+            'error' => $available ? null : ($configured ? 'Gateway not reachable' : 'No AI gateway key configured (Admin > AHG Settings > AI Services)'),
         )));
     }
 
     public function executeSettings($request)
     {
+        $this->requireStaff(true);
         // Require authenticated user (tighten to admin later if you want)
-        if (!$this->getUser()->isAuthenticated()) $this->forward404();
-
         if ($request->isMethod(sfRequest::POST)) {
-            $endpoint = trim((string)$request->getParameter('endpoint'));
             $timeout = trim((string)$request->getParameter('timeout'));
-            if ($endpoint !== '') $this->svc->setSetting('mt.endpoint', $endpoint);
             if ($timeout !== '' && ctype_digit($timeout)) $this->svc->setSetting('mt.timeout_seconds', $timeout);
 
             $this->getUser()->setFlash('notice', 'Settings updated');
             $this->redirect('@ahg_translation_settings');
         }
 
-        $this->endpoint = $this->svc->getSetting('mt.endpoint', 'http://127.0.0.1:5100/translate');
         $this->timeout = $this->svc->getSetting('mt.timeout_seconds', '30');
     }
 
@@ -72,6 +73,7 @@ class translationActions extends AhgController
      */
     public function executeTranslate($request)
     {
+        $this->requireStaff();
         $this->forward404Unless($request->isMethod(sfRequest::POST));
 
         $id = (int)$request->getParameter('id');
@@ -153,6 +155,7 @@ class translationActions extends AhgController
 
     public function executeApply($request)
     {
+        $this->requireStaff();
         $this->forward404Unless($request->isMethod(sfRequest::POST));
 
         $draftId = (int)$request->getParameter('draftId');

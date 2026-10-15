@@ -2171,25 +2171,35 @@ class heritageActions extends AhgController
      */
     public function executeCollections($request)
     {
-
-
-        $institutionId = $request->getParameter('institution_id');
-        $culture = $this->culture();
-        $collectionId = $request->getParameter('id');
-
-        $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
-
-        if ($collectionId) {
-            // Single collection view
-            $this->collection = $service->getFeaturedCollection((int) $collectionId);
-            if (!$this->collection) {
-                $this->forward404();
-            }
-            $this->setTemplate('collectionDetail');
-        } else {
-            // Collection listing
-            $this->collections = $service->getFeaturedCollections($institutionId ? (int) $institutionId : null, 20);
+        // The featured list is the one curated under Admin > Heritage > Featured
+        // collections (heritage_featured_collection: source_type + source_id),
+        // the same list the landing page shows. DiscoveryService's featured
+        // methods expect another shape of that table and failed here with
+        // "Unknown column show_on_landing". There is no single-collection view;
+        // each card links to the collection itself.
+        if ($request->getParameter('id')) {
+            $this->forward404();
         }
+
+        $this->collections = array_map(function (array $c) {
+            $url = 'archival' === $c['type']
+                ? $this->getController()->genUrl(['module' => 'informationobject', 'action' => 'browse', 'collection' => $c['id']])
+                : $this->getController()->genUrl(['module' => 'iiifCollection', 'action' => 'view', 'id' => $c['id']]);
+
+            return [
+                'title' => $c['name'],
+                'subtitle' => null,
+                'description' => $c['description'] ? strip_tags((string) $c['description']) : null,
+                'curator_note' => null,
+                'cover_image' => $c['thumbnail'] ?: null,
+                'background_color' => null,
+                'is_featured' => false,
+                'item_count' => (int) $c['item_count'],
+                'image_count' => 0,
+                'link_type' => 'collection',
+                'link_reference' => $url,
+            ];
+        }, $this->getCuratedCollections($this->culture(), 20));
 
         return sfView::SUCCESS;
     }
