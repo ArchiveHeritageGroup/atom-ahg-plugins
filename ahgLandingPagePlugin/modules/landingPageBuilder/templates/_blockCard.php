@@ -103,8 +103,7 @@ $isColumnLayout = in_array($block->machine_name, ['row_1_col', 'row_2_col', 'row
           echo '📚 ' . esc_entities($config['title'] ?? 'Holdings') . ' (' . ($config['limit'] ?? 10) . ')';
           break;
         case 'image_carousel':
-          $imgCount = count($config['images'] ?? []);
-          echo '🖼 ' . $imgCount . ' images';
+          echo '🖼 ' . (!empty($config['collection_id']) ? 'Collection: ' . esc_entities($config['collection_id']) : 'No collection chosen');
           break;
         case 'quick_links':
           $linkCount = count($config['links'] ?? []);

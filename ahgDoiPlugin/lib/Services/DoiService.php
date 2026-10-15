@@ -108,31 +108,62 @@ class DoiService
             return ['success' => false, 'message' => 'No configuration found'];
         }
 
+        // DataCite's DOI list is public, so a GET succeeds with any password.
+        // Check the repository exists, then send an empty create request:
+        // DataCite rejects it as invalid when the credentials are accepted,
+        // and as not found (404) or unauthorised when they are not. Nothing
+        // is created either way.
         try {
-            $url = rtrim($config->datacite_url, '/') . '/dois?page[size]=1';
+            $base = rtrim($config->datacite_url, '/');
+            $repoId = (string) $config->datacite_repo_id;
 
-            $ch = curl_init($url);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/vnd.api+json',
-                ],
-                CURLOPT_USERPWD => $config->datacite_repo_id . ':' . $config->datacite_password,
-                CURLOPT_TIMEOUT => 10,
-            ]);
-
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-
-            if ($httpCode === 200) {
-                return ['success' => true, 'message' => 'Connection successful'];
+            [$code] = $this->dataciteRequest('GET', $base . '/clients/' . rawurlencode(strtolower($repoId)));
+            if (404 === $code) {
+                return ['success' => false, 'message' => "Repository ID {$repoId} does not exist on {$base}"];
             }
 
-            return ['success' => false, 'message' => "HTTP {$httpCode}: " . substr($response, 0, 200)];
+            [$code, $body] = $this->dataciteRequest('POST', $base . '/dois', '{"data":{"type":"dois","attributes":{}}}',
+                $repoId . ':' . $config->datacite_password);
+            if (in_array($code, [401, 403, 404], true)) {
+                return ['success' => false, 'message' => 'DataCite rejected the repository ID or password'];
+            }
+            // ponytail: 400/422 taken as "credentials accepted"; confirm the exact
+            // code against a real test account and narrow this if it differs.
+            if ($code >= 400 && $code < 500) {
+                return ['success' => true, 'message' => 'Connection successful: DataCite accepted the credentials'];
+            }
+
+            return ['success' => false, 'message' => "Unexpected reply from DataCite (HTTP {$code}): " . substr((string) $body, 0, 200)];
         } catch (\Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    /** @return array{0:int,1:string} HTTP status and body */
+    private function dataciteRequest(string $method, string $url, ?string $body = null, ?string $auth = null): array
+    {
+        $ch = curl_init($url);
+        $opts = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/vnd.api+json'],
+            CURLOPT_TIMEOUT => 10,
+        ];
+        if (null !== $body) {
+            $opts[CURLOPT_POSTFIELDS] = $body;
+        }
+        if (null !== $auth) {
+            $opts[CURLOPT_USERPWD] = $auth;
+        }
+        curl_setopt_array($ch, $opts);
+        $response = curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if (false === $response) {
+            throw new \RuntimeException('Could not reach DataCite at ' . $url);
+        }
+
+        return [$code, (string) $response];
     }
 
     // =========================================
