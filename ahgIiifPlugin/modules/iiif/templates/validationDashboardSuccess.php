@@ -67,7 +67,7 @@
           <?php foreach ($stats['recent_failures'] as $f): ?>
           <tr>
             <td>
-              <a href="<?php echo url_for("admin/iiif-validation/run/{$f->object_id}"); ?>">
+              <a href="<?php echo url_for('@iiif_validation_run?object_id='.(int) $f->object_id); ?>">
                 <?php echo htmlspecialchars($f->title ?? "ID: {$f->object_id}"); ?>
               </a>
             </td>
@@ -102,7 +102,7 @@
           <tr id="row-<?php echo $obj->object_id; ?>">
             <td>
               <?php if ($obj->slug): ?>
-                <a href="<?php echo url_for("{$obj->slug}"); ?>" target="_blank">
+                <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $obj->slug]); ?>" target="_blank">
                   <?php echo htmlspecialchars($obj->title ?? 'Untitled'); ?>
                 </a>
               <?php else: ?>

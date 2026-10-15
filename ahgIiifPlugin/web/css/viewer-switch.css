@@ -121,3 +121,9 @@
     bottom: 16px;
     right: 16px;
 }
+
+/* The theme paints every div[class*="action"] green, which turned Mirador's
+   (normally invisible) mosaic actions bar into a stripe across the window. */
+.mirador-mosaic .mosaic-window-additional-actions-bar {
+    background: transparent !important;
+}

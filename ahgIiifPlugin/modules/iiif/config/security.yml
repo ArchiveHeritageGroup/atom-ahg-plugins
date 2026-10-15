@@ -12,7 +12,7 @@
 # serve a reference derivative to anonymous callers and never a master.
 manifest:          { is_secure: false }
 manifestById:      { is_secure: false }
-manifestV:         { is_secure: false }
+manifestV3:        { is_secure: false }
 viewer:            { is_secure: false }
 compare:           { is_secure: false }
 search:            { is_secure: false }

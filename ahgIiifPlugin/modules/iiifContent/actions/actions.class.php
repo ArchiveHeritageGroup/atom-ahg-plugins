@@ -193,10 +193,10 @@ class iiifContentActions extends sfActions
         $stmt = $pdo->query("
             SELECT v.id, v.token, v.click_count, v.expires_at, v.created_at,
                    v.object_id,
-                   io.slug, ioi.title
+                   sl.slug, ioi.title
             FROM `iiif_saved_view` v
-            LEFT JOIN `information_object` io ON io.id = v.object_id
-            LEFT JOIN `information_object_i18n` ioi ON ioi.id = io.id AND ioi.culture = 'en'
+            LEFT JOIN `slug` sl ON sl.object_id = v.object_id
+            LEFT JOIN `information_object_i18n` ioi ON ioi.id = v.object_id AND ioi.culture = 'en'
             ORDER BY v.created_at DESC
             LIMIT 100
         ");
@@ -228,19 +228,19 @@ class iiifContentActions extends sfActions
 
         $manifestId = $source['id'];
 
-        // Try to find object by manifest URL
-        // Manifest URL looks like: /iiif/manifest/:slug
-        if (preg_match('#/iiif/manifest/([^/]+)#', $manifestId, $m)) {
-            return '/iiif/viewer/' . $m[1];
+        // The viewer route takes the numeric object id. Manifest URLs come as
+        // /iiif/manifest/id/<id>, or /iiif/manifest/<slug> and /iiif/v3/manifest/<slug>;
+        // slugs live in the slug table (information_object has no slug column,
+        // so the old lookup could never match).
+        if (preg_match('#/iiif/manifest/id/(\d+)#', $manifestId, $m)) {
+            return '/iiif/viewer/' . (int) $m[1];
         }
+        $slug = preg_match('#/iiif/(?:v3/)?manifest/([^/?\#]+)#', $manifestId, $m) ? $m[1] : basename($manifestId);
+        $stmt = $this->getContentStateService()->getPdo()->prepare('SELECT object_id FROM `slug` WHERE slug = :slug LIMIT 1');
+        $stmt->execute([':slug' => $slug]);
+        $id = $stmt->fetchColumn();
 
-        // Fall back to object slug lookup
-        $pdo = $this->getContentStateService()->getPdo();
-        $stmt = $pdo->prepare("SELECT id FROM `information_object` WHERE slug = :slug LIMIT 1");
-        $stmt->execute([':slug' => basename($manifestId)]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $row ? '/iiif/viewer/' . $row['id'] : null;
+        return $id ? '/iiif/viewer/' . (int) $id : null;
     }
 
     /**

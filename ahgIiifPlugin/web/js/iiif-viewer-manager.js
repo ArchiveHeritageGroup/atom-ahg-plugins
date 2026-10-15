@@ -100,8 +100,15 @@ export class IiifViewerManager {
                 if (decodeRes.ok) {
                     const { contentState } = await decodeRes.json();
                     this.pendingContentState = contentState;
-                    // Apply after viewer is ready
+                    // Apply after viewer is ready. A shared view is a region of the
+                    // image, which the image viewer can show; Mirador cannot be
+                    // driven to it, so open the image viewer for it.
                     this.applyContentStateWhenReady = true;
+                    if (this.loaded.osd && this.currentViewer === 'openseadragon') {
+                        this.applyContentState(contentState);
+                    } else {
+                        await this.showViewer('openseadragon');
+                    }
                 }
             } catch (e) {
                 console.warn('Failed to load content state:', e);
@@ -141,6 +148,7 @@ export class IiifViewerManager {
         this.on(`btn-download-${vid}`, 'click', () => this.downloadImage());
         this.on(`btn-annotations-${vid}`, 'click', () => this.toggleAnnotations());
         this.on(`btn-manifest-${vid}`, 'click', () => this.copyManifestUrl());
+        this.addShareButton();
 
         // PDF controls
         this.on(`pdf-prev-${vid}`, 'click', () => this.pdfPrevPage());
@@ -887,6 +895,130 @@ export class IiifViewerManager {
                     window.open(downloadUrl.replace('/info.json', '/full/full/0/default.jpg'), '_blank');
                 }
             }
+        }
+    }
+
+    // ========================================================================
+    // IIIF Content State: share the current view, apply a shared one
+    // ========================================================================
+
+    /** "Share this view" beside the manifest button (called on bind and on OSD init). */
+    addShareButton() {
+        const vid = this.viewerId;
+        const ref = document.getElementById(`btn-manifest-${vid}`);
+        if (!ref || document.getElementById(`btn-share-${vid}`)) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = `btn-share-${vid}`;
+        btn.className = ref.className;
+        btn.title = 'Share this view';
+        btn.setAttribute('aria-label', 'Share this view');
+        btn.innerHTML = '<i class="fas fa-share-alt"></i>';
+        ref.insertAdjacentElement('afterend', btn);
+        btn.addEventListener('click', () => this.shareCurrentView(btn));
+    }
+
+    canvasesOf(manifest) {
+        if (!manifest) return [];
+        if (Array.isArray(manifest.items)) return manifest.items;
+        return (manifest.sequences && manifest.sequences[0] && manifest.sequences[0].canvases) || [];
+    }
+
+    /** Encode the image viewer's current page and region as a short link and copy it. */
+    async shareCurrentView(btn) {
+        if (this.currentViewer !== 'openseadragon' || !this.osdViewer) {
+            await this.showViewer('openseadragon');
+            this.showShareMessage('Zoom to the detail you want to share, then press Share again.', null);
+            return;
+        }
+        const viewer = this.osdViewer;
+        const item = viewer.world.getItemAt(0);
+        if (!item) return;
+
+        const manifest = await this.fetchManifest();
+        const manifestId = (manifest && (manifest.id || manifest['@id'])) || this.options.manifestUrl;
+        const page = typeof viewer.currentPage === 'function' ? viewer.currentPage() : 0;
+        const canvas = this.canvasesOf(manifest)[page] || {};
+        const canvasId = canvas.id || canvas['@id'] || `${manifestId}/canvas/${page + 1}`;
+
+        const size = item.getContentSize();
+        const r = item.viewportToImageRectangle(viewer.viewport.getBounds(true));
+        const x = Math.max(0, Math.round(r.x));
+        const y = Math.max(0, Math.round(r.y));
+        const w = Math.max(1, Math.min(Math.round(size.x) - x, Math.round(r.width)));
+        const h = Math.max(1, Math.min(Math.round(size.y) - y, Math.round(r.height)));
+
+        try {
+            const res = await fetch(`${this.options.baseUrl}/iiif/content-state/encode`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    manifestId, canvasId, region: `xywh=${x},${y},${w},${h}`,
+                    shortToken: true, ttlDays: 90, objectId: this.options.objectId,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.token) throw new Error(data.error || `HTTP ${res.status}`);
+            const url = `${window.location.origin}${window.location.pathname}?cs=${encodeURIComponent(data.token)}`;
+            let copied = false;
+            try { await navigator.clipboard.writeText(url); copied = true; } catch (e) { /* show it instead */ }
+            this.showShareMessage(copied ? 'Link to this view copied:' : 'Link to this view:', url);
+            if (btn) {
+                const html = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => { btn.innerHTML = html; }, 2000);
+            }
+        } catch (e) {
+            this.showShareMessage('Could not share this view: ' + e.message, null, true);
+        }
+    }
+
+    showShareMessage(text, url, isError = false) {
+        const vid = this.viewerId;
+        const anchor = document.getElementById(`btn-share-${vid}`) || document.getElementById(`btn-manifest-${vid}`);
+        const host = anchor ? (anchor.closest('.d-flex, .btn-toolbar, .btn-group')?.parentElement || anchor.parentElement) : null;
+        if (!host) return;
+        let box = document.getElementById(`share-msg-${vid}`);
+        if (!box) {
+            box = document.createElement('div');
+            box.id = `share-msg-${vid}`;
+            host.insertAdjacentElement('afterend', box);
+        }
+        box.className = `alert ${isError ? 'alert-danger' : 'alert-success'} small py-2 px-3 my-2`;
+        box.textContent = text + ' ';
+        if (url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.textContent = url;
+            a.className = 'text-break';
+            box.appendChild(a);
+        }
+        clearTimeout(this._shareMsgTimer);
+        this._shareMsgTimer = setTimeout(() => box.remove(), 12000);
+    }
+
+    /** Show the page and region a shared link points at. */
+    async applyContentState(state) {
+        const viewer = this.osdViewer;
+        if (!viewer || !state) return;
+        this.applyContentStateWhenReady = false;
+        const cs = state.canonical || state;
+        const json = JSON.stringify(cs);
+
+        const target = typeof cs.target === 'string' ? cs.target : (cs.target && (cs.target.id || cs.target['@id']));
+        if (target && typeof viewer.goToPage === 'function') {
+            const manifest = await this.fetchManifest();
+            const index = this.canvasesOf(manifest).findIndex(c => (c.id || c['@id']) === target.split('#')[0]);
+            if (index > 0 && index !== viewer.currentPage()) {
+                await new Promise(resolve => { viewer.addOnceHandler('open', resolve); viewer.goToPage(index); });
+            }
+        }
+
+        const m = json.match(/xywh=(?:pixel:)?(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?)/);
+        const item = viewer.world.getItemAt(0);
+        if (m && item) {
+            const [x, y, w, h] = m.slice(1).map(Number);
+            viewer.viewport.fitBounds(item.imageToViewportRectangle(x, y, w, h), false);
         }
     }
 
