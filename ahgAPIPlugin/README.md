@@ -35,7 +35,7 @@ php bin/atom extension:enable ahgAPIPlugin
 
 2. Run the database migrations:
 ```bash
-   mysql -u root your_database < plugins/ahgAPIPlugin/data/install.sql
+   php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgAPIPlugin   # from the AtoM root; never a plain mysql < install.sql
 ```
 
 3. Enable the plugin in `apps/qubit/config/settings.yml`:

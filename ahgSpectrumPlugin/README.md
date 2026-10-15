@@ -38,9 +38,7 @@ cat plugins/ahgSpectrumPlugin/config/routing.yml >> apps/qubit/config/routing.ym
 
 ### 3. Install Database Schema
 ```bash
-mysql -u root -p atom < plugins/ahgSpectrumPlugin/schema/ahg_settings_schema.sql
-mysql -u root -p atom < plugins/ahgSpectrumPlugin/schema/condition_photos_schema.sql
-mysql -u root -p atom < plugins/ahgSpectrumPlugin/schema/metadata_extraction_schema.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgSpectrumPlugin
 ```
 
 Or use the web installer:

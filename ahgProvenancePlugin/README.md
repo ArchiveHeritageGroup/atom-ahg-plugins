@@ -59,8 +59,12 @@ git clone --depth 1 --filter=blob:none --sparse \
 cd tmp-fetch && git sparse-checkout set ahgProvenancePlugin && cd ..
 mv tmp-fetch/ahgProvenancePlugin ./ahgProvenancePlugin && rm -rf tmp-fetch
 
-# 2. Apply the schema.
-mysql -u <user> -p <database> < ahgProvenancePlugin/database/install.sql
+# 2. Apply the schema with the framework's installer. It stops on the first
+#    error, reports it, and checks every declared table exists. Never use a
+#    plain `mysql < install.sql`: it can stop half way without saying so.
+cd <atom-root>
+php atom-framework/bin/install-plugin-schema.php \
+    --database=<database> --user=<user> --password=<password> --plugin=ahgProvenancePlugin
 
 # 3. Enable it, then clear the cache and reload PHP-FPM.
 cd <atom-root>

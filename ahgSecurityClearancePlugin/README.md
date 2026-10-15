@@ -60,7 +60,7 @@ cp -r ahgSecurityClearancePlugin /usr/share/nginx/atom/plugins/
 
 ### 2. Install Database Schema
 ```bash
-mysql -u atom -p atom < /usr/share/nginx/atom/plugins/ahgSecurityClearancePlugin/lib/install.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgSecurityClearancePlugin
 ```
 
 ### 3. Enable the Plugin

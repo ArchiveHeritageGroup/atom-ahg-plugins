@@ -32,7 +32,7 @@ Composer library. This plugin is the AtoM integration layer.
 
    ```bash
    mysqldump archive > /var/backups/archive-before-ai-compliance.sql
-   mysql archive < ahgAiCompliancePlugin/database/install.sql
+   php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgAiCompliancePlugin   # from the AtoM root; never a plain mysql < install.sql
    ```
 
    Two new tables are created: `ai_inference_log` (the chain) and

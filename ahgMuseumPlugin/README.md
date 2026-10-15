@@ -289,7 +289,7 @@ php bin/atom extension:enable ahgMuseumPlugin
 ### 2. Run database migrations
 
 ```bash
-mysql -u root archive < plugins/ahgMuseumPlugin/data/install.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgMuseumPlugin   # from the AtoM root; never a plain mysql < install.sql
 ```
 
 ### 3. Clear cache

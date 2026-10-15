@@ -201,7 +201,7 @@ php bin/atom extension:enable ahgMultiTenantPlugin
 
 2. Run database migrations:
 ```bash
-mysql -u root archive < plugins/ahgMultiTenantPlugin/database/install.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgMultiTenantPlugin   # from the AtoM root; never a plain mysql < install.sql
 ```
 
 3. Clear cache:

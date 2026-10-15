@@ -21,7 +21,7 @@ Comprehensive Rights Management for AtoM 2.10 Laravel Rebuild
 tar -xzf ahgRightsPlugin.tar.gz -C /usr/share/nginx/archive/plugins/
 
 # 2. Install database tables
-mysql -u root archive < /usr/share/nginx/archive/plugins/ahgRightsPlugin/data/migrations/install.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgRightsPlugin   # from the AtoM root; never a plain mysql < install.sql
 
 # 3. Enable plugin in ProjectConfiguration.class.php
 # Add 'ahgRightsPlugin' to the enabled plugins array

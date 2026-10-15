@@ -40,7 +40,7 @@ cp ahg3DModelPlugin/services/Model3DService.php \
 ### 3. Install Database Schema
 
 ```bash
-mysql -u root -p archive < ahg3DModelPlugin/schema/install.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahg3DModelPlugin   # from the AtoM root; never a plain mysql < install.sql
 ```
 
 ### 4. Create Upload Directory

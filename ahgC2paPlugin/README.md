@@ -87,7 +87,7 @@ php bin/atom extension:enable ahgC2paPlugin
 
 # 2. Create the manifest + provenance stores (an existing ahg_c2pa_manifest
 #    created by ahgMetadataExportPlugin also needs upgrade_heratio_parity.sql once)
-mysql -u root archive < atom-ahg-plugins/ahgC2paPlugin/database/install.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgC2paPlugin   # from the AtoM root; never a plain mysql < install.sql
 
 # 3. Ensure a signing key exists (shared with ahgAiCompliancePlugin)
 sudo -u www-data php symfony ai-compliance:install-key

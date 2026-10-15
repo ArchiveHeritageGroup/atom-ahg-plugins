@@ -67,7 +67,7 @@ one records each file once and does not double-count bytes.
 ## Install
 
 ```bash
-mysql -u root <dbname> < database/install.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgSubtreeExportPlugin
 ```
 
 Creates `subtree_export` and `subtree_export_file`. Touches nothing else.

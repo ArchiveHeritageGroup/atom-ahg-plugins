@@ -16,7 +16,7 @@ Run:
 
 Example:
 ```bash
-mysql -u <user> -p <atom_db> < plugins/ahgTranslationPlugin/data/install.sql
+php atom-framework/bin/install-plugin-schema.php --database=<database> --user=<user> --password=<password> --plugin=ahgTranslationPlugin
 ```
 
 ## Install in AtoM instance
