@@ -1,6 +1,6 @@
 # Packaged AHG plugins for AtoM
 
-The AHG extensions packaged as installable bundles for [Access to Memory](https://accesstomemory.org) 2.9 and 2.10, grouped by the capability they deliver. Each installs on its own, and nothing in base AtoM is modified - no file under `apps/`, `lib/`, `vendor/` or `config/` is touched, and `ProjectConfiguration.class.php` stays as upstream ships it.
+The AHG extensions packaged as installable bundles for [Access to Memory](https://accesstomemory.org) 2.9 and 2.10, grouped by the capability they deliver. Each installs on its own, and nothing in base AtoM is modified - no file under `apps/`, `lib/`, `vendor/` or `config/` is touched, and `ProjectConfiguration.class.php` stays as upstream ships it. The one exception is the framework installer's optional `--with-base-patches` flag, which is off by default.
 
 This page lists the **current version of each**. For older versions see the [full release history](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases). The wider catalogue - Records in Contexts, AI and semantic discovery, museum, library, DAM, rights, privacy and security - installs from the [repository](../../README.md#plugin-catalogue) rather than from bundles.
 
@@ -106,14 +106,33 @@ Reader feedback and corrections against archival records, with a queue for staff
 
 Each bundle carries its own dependencies and an `INSTALL.md` with the enable order. In short, from the AtoM root:
 
+Back up the database first, and try it on a staging copy before production.
+
 ```bash
 unzip ahgRuntimePlugin-2.15.0.zip -d plugins/     # first, shared by all
 unzip <plugin>.zip                -d plugins/
 chown -R www-data:www-data plugins/
-mysql -u <user> -p <database> < plugins/<plugin>/database/install.sql
+php plugins/<plugin>/bin/install-plugin-schema.php \
+    --database=<database> --user=<user> --password=<password>
 ```
 
+The installer loads every plugin in the bundle in the order their tables depend on each other, then confirms that each declared table exists. It is safe to run more than once, `--dry-run` shows what it would do, and a non-zero exit status means the schema is incomplete and names the statement that failed.
+
 Then enable in **Admin > Plugins**, clear the cache and reload PHP.
+
+### Without the installer
+
+If you cannot run PHP from the command line, load each `install.sql` by hand so that errors are not lost:
+
+```bash
+mysql --force -u <user> -p <database> < plugins/<plugin>/database/install.sql 2> install-errors.log
+```
+
+`install-errors.log` must be empty, and every table listed in the bundle's `INSTALL.md` must exist. Do not use a plain `mysql < install.sql`: the client stops at the first error and leaves the schema half built without saying so.
+
+### Removing a plugin
+
+Disable it in **Admin > Plugins**, clear the cache and reload PHP. Its tables stay in the database, so re-enabling it later keeps its data; drop them only after a backup, if you are sure.
 
 ## Infrastructure, if you want it
 

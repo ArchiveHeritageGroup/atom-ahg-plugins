@@ -44,6 +44,10 @@ class ResultEnricher
         $thumbnails  = $this->fetchThumbnails($ids);
         $slugs       = $this->fetchSlugs($ids);
 
+        // Drop hits for records that no longer exist (a stale vector index
+        // still returns ids of deleted records): they have no title and no slug.
+        $results = array_values(array_filter($results, fn ($r) => isset($titles[$r['object_id']]) || isset($slugs[$r['object_id']])));
+
         // Attach metadata to each result
         foreach ($results as &$result) {
             $id = $result['object_id'];

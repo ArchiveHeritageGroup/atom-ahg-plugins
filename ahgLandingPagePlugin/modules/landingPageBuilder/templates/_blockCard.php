@@ -3,7 +3,8 @@
  * Block card partial for the editor canvas
  */
 $hiddenClass = $block->is_visible ? '' : 'block-hidden';
-$config = is_array($block->config) ? $block->config : [];
+$rawConfig = sfOutputEscaper::unescape($block->config);
+$config = is_array($rawConfig) ? $rawConfig : [];
 
 // Check if this is a column layout block
 $isColumnLayout = in_array($block->machine_name, ['row_1_col', 'row_2_col', 'row_3_col']);

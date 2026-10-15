@@ -93,13 +93,36 @@ def _read_mycnf_password():
         return ""
 
 
+def _read_atom_config():
+    """User and password from AtoM's config/config.php in the current directory.
+
+    Lets cron run the indexer from the AtoM root as www-data with no credentials
+    on the command line or in the crontab - the same file the web app uses.
+    """
+    path = os.path.join(os.getcwd(), "config", "config.php")
+    if not os.path.isfile(path):
+        return {}
+    import re
+    text = open(path, encoding="utf-8").read()
+    out = {}
+    for key in ("username", "password"):
+        m = re.search(r"'%s'\s*=>\s*'((?:[^'\\]|\\.)*)'" % key, text)
+        if m:
+            out[key] = m.group(1).replace("\\'", "'").replace("\\\\", "\\")
+    return out
+
+
 def get_db_connection(args):
     """Create MySQL connection via PyMySQL."""
     import pymysql
+    atom = {}
     password = os.environ.get("MYSQL_PASSWORD", "") or args.db_password or _read_mycnf_password()
+    if not password:
+        atom = _read_atom_config()
+        password = atom.get("password", "")
     return pymysql.connect(
         host=os.environ.get("MYSQL_HOST", "localhost"),
-        user=args.db_user,
+        user=atom.get("username") or args.db_user,
         password=password,
         database=args.db_name,
         charset="utf8mb4",

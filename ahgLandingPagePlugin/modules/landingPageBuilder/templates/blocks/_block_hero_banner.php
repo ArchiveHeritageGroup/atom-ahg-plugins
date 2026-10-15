@@ -14,7 +14,7 @@ if (is_string($showButton)) {
   <div class="position-absolute top-0 start-0 w-100 h-100" data-ahg-style="background: rgba(0,0,0,<?php echo $overlay ?>);"></div>
   <div class="container position-relative text-white text-<?php echo $textAlign ?>">
     <?php if (!empty($config['title'])): ?>
-      <h1 class="fw-bold mb-3" data-ahg-style="<?php echo $titleSize ? 'font-size: ' . esc_entities($titleSize) . ';' : '' ?>"><?php echo esc_entities($config['title']) ?></h1>
+      <h1 class="fw-bold mb-3 text-white" data-ahg-style="<?php echo $titleSize ? 'font-size: ' . esc_entities($titleSize) . ';' : '' ?>"><?php echo esc_entities($config['title']) ?></h1>
     <?php endif ?>
     <?php if (!empty($config['subtitle'])): ?>
       <p class="mb-4" data-ahg-style="<?php echo $subtitleSize ? 'font-size: ' . esc_entities($subtitleSize) . ';' : '' ?>"><?php echo esc_entities($config['subtitle']) ?></p>

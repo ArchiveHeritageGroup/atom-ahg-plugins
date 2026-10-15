@@ -11,8 +11,10 @@ namespace AhgDiscovery\Services;
  * This enables Discovery to find records that are semantically related
  * to the query even when no exact keyword overlap exists.
  *
- * NO AI CALLS at index time (pre-built). One Python call at query time
- * for embedding (~200ms), one Qdrant REST call for search (~50ms).
+ * NO AI CALLS at index time (pre-built). The query is embedded through the
+ * AHG AI gateway (Ollama all-minilm, the same all-MiniLM-L6-v2 model the
+ * index was built with); the local Python script is only a fallback when no
+ * gateway key is configured. One Qdrant REST call for search (~50ms).
  */
 class VectorSearchStrategy
 {
@@ -93,9 +95,9 @@ class VectorSearchStrategy
      */
     public function search(array $expanded, int $limit = 50): array
     {
-        // Check if Qdrant is enabled in settings
+        // Check if Qdrant is enabled in settings (default on, as on the AI Services page)
         $settings = self::loadSettings();
-        if (($settings['qdrant_enabled'] ?? '0') !== '1') {
+        if (($settings['qdrant_enabled'] ?? '1') !== '1') {
             return [];
         }
 
@@ -146,6 +148,15 @@ class VectorSearchStrategy
      */
     private function embedQuery(string $text): ?array
     {
+        $gateway = \AtomFramework\Services\AI\AiGatewayClient::fromSettings();
+        if ($gateway->isConfigured()) {
+            $vector = $gateway->embed($text, self::gatewayModel($this->model));
+            if (!empty($vector)) {
+                return $vector;
+            }
+            error_log('[ahgDiscovery] gateway embedding failed, trying local script');
+        }
+
         if (!file_exists($this->embedScript)) {
             error_log('[ahgDiscovery] embed_query.py not found: ' . $this->embedScript);
             return null;
@@ -168,6 +179,18 @@ class VectorSearchStrategy
         }
 
         return $result['vector'];
+    }
+
+    /**
+     * Map the sentence-transformers model name stored in settings to the
+     * gateway's Ollama name. The vectors must come from the same model the
+     * Qdrant collection was built with.
+     */
+    private static function gatewayModel(string $model): string
+    {
+        $map = ['all-MiniLM-L6-v2' => 'all-minilm', 'sentence-transformers/all-MiniLM-L6-v2' => 'all-minilm'];
+
+        return $map[$model] ?? $model;
     }
 
     /**
@@ -234,7 +257,7 @@ class VectorSearchStrategy
         $settings = self::loadSettings();
 
         // Respect enabled toggle
-        if (($settings['qdrant_enabled'] ?? '0') !== '1') {
+        if (($settings['qdrant_enabled'] ?? '1') !== '1') {
             return false;
         }
 

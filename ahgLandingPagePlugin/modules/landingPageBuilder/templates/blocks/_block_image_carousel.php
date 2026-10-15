@@ -6,7 +6,7 @@
 $collectionSlug = $config['collection_id'] ?? null;
 $maxItems = (int)($config['limit'] ?? 12) ?: 12;
 $height = $config['height'] ?? '450px';
-$autoplay = $config['auto_play'] ?? true;
+$autoplay = $config['autoplay'] ?? $config['auto_play'] ?? true;
 $interval = (int)($config['interval'] ?? 5000) ?: 5000;
 $showTitle = !empty($config['title']);
 $showCaptions = $config['show_captions'] ?? true;
@@ -20,4 +20,10 @@ if (!$collectionSlug) {
 }
 
 // The partial expects collectionSlug variable
-include sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/modules/staticpage/templates/_featuredCollection.php';
+// The carousel partial lives in ahgIiifPlugin (it moved out of the theme).
+$partial = sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/modules/iiif/templates/_featuredCollection.php';
+if (!file_exists($partial)) {
+    echo '<p class="text-muted">This block needs the IIIF plugin (ahgIiifPlugin) to be enabled.</p>';
+    return;
+}
+include $partial;

@@ -146,8 +146,8 @@ VALUES
  '{"content":"","format":"html"}', 0, 21),
 
 ('image_carousel', 'Image Carousel', 'Slideshow of images', 'bi-images', 'content',
- '{"type":"object","properties":{"images":{"type":"array","items":{"type":"object","properties":{"url":{"type":"string"},"caption":{"type":"string"},"link":{"type":"string"}}}},"autoplay":{"type":"boolean","default":true},"interval":{"type":"integer","default":5000}}}',
- '{"images":[],"autoplay":true,"interval":5000}', 0, 22),
+ '{"type":"object","properties":{"collection_id":{"type":"string","title":"IIIF collection","description":"Slug of the IIIF collection to show, for example featured-collection-1"},"title":{"type":"string","title":"Heading"},"subtitle":{"type":"string","title":"Subheading"},"limit":{"type":"integer","title":"Maximum images","default":12,"minimum":1,"maximum":50},"height":{"type":"string","title":"Height","default":"450px"},"autoplay":{"type":"boolean","title":"Play automatically","default":true},"interval":{"type":"integer","title":"Time between slides (ms)","default":5000},"show_captions":{"type":"boolean","title":"Show captions","default":true}}}',
+ '{"collection_id":"","title":"","subtitle":"","limit":12,"height":"450px","autoplay":true,"interval":5000,"show_captions":true}', 0, 22),
 
 -- Archive Blocks
 ('search_box', 'Search Box', 'Global search input', 'bi-search', 'archive',

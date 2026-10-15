@@ -269,6 +269,7 @@ Install top to bottom: nothing in a section depends on anything below it.
 | [`ahgC2paPlugin`](ahgC2paPlugin/) | 1 | [`ahgCorePlugin`](ahgCorePlugin/) | C2PA (Coalition for Content Provenance and Authenticity) 2.1 content credentials. Generate, Ed25519-sign and embed signed provenance manifests on digital-object derivatives (JUMBF via c2patool, or .c2pa.json sidecars), surface embedded EXIF/IPTC/XMP as C2PA Standard Metadata Assertions, declare AI training-mining stance, and verify manifests. PSIS port of Heratio's ahg/c2pa, sharing the ahg/inference-receipts Ed25519 key chain with ahgAiCompliancePlugin |
 | [`ahgCDPAPlugin`](ahgCDPAPlugin/) | 9 | [`ahgCorePlugin`](ahgCorePlugin/) | Zimbabwe Cyber and Data Protection Act [Chapter 12:07] compliance - DPO registration, breach management, DPIA, consent tracking, data subject requests, and POTRAZ reporting |
 | [`ahgCartPlugin`](ahgCartPlugin/) | 8 | [`ahgCorePlugin`](ahgCorePlugin/) | Shopping cart with dual-mode support: Standard (Request to Publish) and E-Commerce with PayFast payment integration |
+| [`ahgChatbotPlugin`](ahgChatbotPlugin/) | 1 | [`ahgCorePlugin`](ahgCorePlugin/) | Public assistant that answers questions from the published catalogue, citing the records it used. Retrieval is filtered to what the visitor may see; generation goes through the AHG AI gateway only |
 | [`ahgConditionPlugin`](ahgConditionPlugin/) | 16 | [`ahgCorePlugin`](ahgCorePlugin/) | Condition assessment and reporting for museum objects |
 | [`ahgContactPlugin`](ahgContactPlugin/) | 1 | [`ahgCorePlugin`](ahgCorePlugin/) | Contact information management for actors and repositories |
 | [`ahgCustomFieldsPlugin`](ahgCustomFieldsPlugin/) | 2 | [`ahgCorePlugin`](ahgCorePlugin/) | Admin-configurable custom metadata fields for any entity type. Define fields via UI - no code changes needed ([video](https://youtu.be/A07MF2HrzN4)) |
@@ -396,9 +397,10 @@ listed last because nothing else waits on them.
 | [`ahgRedactionPlugin`](ahgRedactionPlugin/) | 2 | Manual visual redaction of digital objects: draw regions over a PDF or image, save them, and generate a redacted copy. The original file is never modified |
 | [`ahgResourceSyncPlugin`](ahgResourceSyncPlugin/) | 1 | ResourceSync 1.1 (NISO Z39.99-2017) Source endpoints: Source Description, Capability List, Resource List and Change List as sitemap-formatted XML. Mirrors the OAI-PMH publication filter so aggregators see the same record + tombstone set across both federation surfaces |
 | [`ahgSearchPlugin`](ahgSearchPlugin/) | 6 | Global search, autocomplete, description updates, and search/replace for AtoM Heratio |
+| [`ahgSubtreeExportPlugin`](ahgSubtreeExportPlugin/) | 0 | Export a record and the next N descriptions in tree order, with their digital objects, to external storage. CLI only |
 | [`ahgTranslationPlugin`](ahgTranslationPlugin/) | 3 | On-prem translation integration for AtoM via local MT endpoint (supports Afrikaans/Dutch and SA languages -> English depending on MT service) |
 
-Totals: 120 plugins - 1 generated prerequisite, 1 core, 107 dependent, 11 independent.
+Totals: 122 plugins - 1 generated prerequisite, 1 core, 108 dependent, 12 independent.
 
 ---
 
@@ -412,7 +414,7 @@ Nothing here is written from intention.
 
 No file under `apps/`, `lib/`, `vendor/` or `config/` is touched, and
 `config/ProjectConfiguration.class.php` stays exactly as upstream ships it. The plugins
-load through AtoM's own `plugins` setting - the same list Admin > Plugins writes.
+load through AtoM's own `plugins` setting - the same list Admin > Plugins writes. The one exception is the installer's optional `--with-base-patches` flag, which is off by default.
 
 ### Prerequisites
 
@@ -689,7 +691,7 @@ Ubuntu 24.04 ships. On a host running 8.1 or 8.2, use those package names instea
 
 ## License
 
-GPL-3.0 - See [LICENSE](LICENSE) file.
+AGPL-3.0-or-later - see the [LICENSE](LICENSE) file. Every plugin's `extension.json` carries the same licence.
 
 ## Author
 

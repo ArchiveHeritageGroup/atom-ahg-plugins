@@ -41,7 +41,12 @@ class LandingPageService
 
         // Enrich blocks with dynamic data
         $enrichedBlocks = $blocks->map(function ($block) {
-            return $this->enrichBlockData($block);
+            $block = $this->enrichBlockData($block);
+            if (isset($block->child_blocks)) {
+                $block->child_blocks = $block->child_blocks->filter(fn ($child) => (bool) $child->is_visible)->values();
+            }
+
+            return $block;
         });
 
         return [
@@ -62,7 +67,8 @@ class LandingPageService
 
         return [
             'page' => $page,
-            'blocks' => $this->repository->getPageBlocks($pageId),
+            'blocks' => $this->repository->getPageBlocks($pageId, false)
+                ->map(fn ($block) => $this->loadChildBlocks($block)),
             'blockTypes' => $this->repository->getAllBlockTypes(),
             'versions' => $this->repository->getPageVersions($pageId, 5),
         ];
@@ -448,7 +454,7 @@ class LandingPageService
         switch ($entity) {
             case 'informationobject':
                 return DB::table('information_object')
-                    ->whereNull('parent_id')
+                    ->where('parent_id', \QubitInformationObject::ROOT_ID)
                     ->count();
 
             case 'repository':
@@ -504,6 +510,7 @@ class LandingPageService
                     })
                     ->leftJoin('digital_object as do', 'io.id', '=', 'do.object_id')
                     ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+                    ->whereExists($this->publishedSubquery('io.id'))
                     ->select([
                         'io.id',
                         'i18n.title',
@@ -608,7 +615,8 @@ class LandingPageService
                 $join->on('io.level_of_description_id', '=', 'level.id')
                     ->where('level.culture', '=', $culture);
             })
-            ->whereNull('io.parent_id')
+            ->where('io.parent_id', \QubitInformationObject::ROOT_ID)
+            ->whereExists($this->publishedSubquery('io.id'))
             ->select([
                 'io.id',
                 'i18n.title',
@@ -751,7 +759,7 @@ class LandingPageService
         // Get holdings count
         $holdingsCount = DB::table('information_object')
             ->where('repository_id', $config['repository_id'])
-            ->whereNull('parent_id')
+            ->where('parent_id', \QubitInformationObject::ROOT_ID)
             ->count();
 
         $repository->holdings_count = $holdingsCount;
@@ -765,7 +773,8 @@ class LandingPageService
                 })
                 ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
                 ->where('io.repository_id', $config['repository_id'])
-                ->whereNull('io.parent_id')
+                ->where('io.parent_id', \QubitInformationObject::ROOT_ID)
+                ->whereExists($this->publishedSubquery('io.id'))
                 ->select(['io.id', 'i18n.title', 'slug.slug'])
                 ->limit($config['max_holdings'])
                 ->get()
@@ -864,7 +873,12 @@ class LandingPageService
 
         // Enrich blocks with dynamic data
         $enrichedBlocks = $blocks->map(function ($block) {
-            return $this->enrichBlockData($block);
+            $block = $this->enrichBlockData($block);
+            if (isset($block->child_blocks)) {
+                $block->child_blocks = $block->child_blocks->filter(fn ($child) => (bool) $child->is_visible)->values();
+            }
+
+            return $block;
         });
 
         return [
@@ -958,11 +972,26 @@ class LandingPageService
     }
 
     /**
+     * Subquery for whereExists(): the description is published. Landing pages
+     * are public, so draft records must not be listed on them.
+     */
+    protected function publishedSubquery(string $idColumn): \Closure
+    {
+        return function ($q) use ($idColumn) {
+            $q->select(DB::raw(1))
+                ->from('status')
+                ->whereColumn('status.object_id', $idColumn)
+                ->where('status.type_id', \QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+                ->where('status.status_id', \QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID);
+        };
+    }
+
+    /**
      * Load child blocks for column layouts
      */
     protected function loadChildBlocks(object $block): object
     {
-        if (in_array($block->machine_name, ['row_2_col', 'row_3_col'])) {
+        if (in_array($block->machine_name, ['row_1_col', 'row_2_col', 'row_3_col'])) {
             $block->child_blocks = $this->repository->getChildBlocks($block->id);
 
             // Enrich child blocks with data
