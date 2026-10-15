@@ -142,6 +142,15 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
 <?php slot('after-content'); ?>
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>>
+/* Readable match reasons and a visible active mode (the theme draws outline
+   buttons solid, so every mode looked selected). */
+.discovery-result-reasons .badge { background: #F2EDE6 !important; color: #262626 !important; border-left: 4px solid #8a9a9c; font-weight: 600; }
+.discovery-result-reasons .badge.reason-keyword { border-left-color: #10373E; }
+.discovery-result-reasons .badge.reason-semantic { border-left-color: #653332; }
+.discovery-result-reasons .badge.reason-entity { border-left-color: #2e7d32; }
+.discovery-result-reasons .badge.reason-context { border-left-color: #E1B34F; }
+#discovery-mode-group .btn { background: #fff !important; color: var(--ahg-primary, #005837) !important; border-color: currentColor !important; }
+#discovery-mode-group .btn.active { background: var(--ahg-primary, #005837) !important; color: #fff !important; box-shadow: 0 0 0 3px #E1B34F; }
 /* Discovery Page Styles */
 .discovery-container { max-width: 960px; margin: 0 auto; }
 
@@ -537,11 +546,13 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
     if (reasons.length) {
       html += '<div class="discovery-result-reasons">';
       reasons.forEach(function(reason) {
-        var badgeClass = 'bg-light text-muted';
-        if (reason === 'KEYWORD') badgeClass = 'bg-info bg-opacity-10 text-info';
-        else if (reason === 'SEMANTIC') badgeClass = 'bg-primary bg-opacity-10 text-primary';
-        else if (reason.startsWith('ENTITY:')) badgeClass = 'bg-success bg-opacity-10 text-success';
-        else if (reason === 'SIBLING' || reason === 'CHILD') badgeClass = 'bg-warning bg-opacity-10 text-warning';
+        // Own classes: the theme paints Bootstrap's 10%-opacity backgrounds solid,
+        // which put teal text on teal and pale yellow on pale yellow.
+        var badgeClass = 'reason-other';
+        if (reason === 'KEYWORD') badgeClass = 'reason-keyword';
+        else if (reason === 'SEMANTIC') badgeClass = 'reason-semantic';
+        else if (reason.startsWith('ENTITY:')) badgeClass = 'reason-entity';
+        else if (reason === 'SIBLING' || reason === 'CHILD') badgeClass = 'reason-context';
         var label = reason.startsWith('ENTITY:') ? reason.substring(7) : reason.toLowerCase();
         html += '<span class="badge ' + badgeClass + ' me-1">' + escHtml(label) + '</span>';
       });

@@ -46,7 +46,7 @@ class EntitySearchStrategy
                         $q->orWhere('entity_value', 'LIKE', '%' . $term . '%');
                     }
                 })
-                ->whereIn('status', ['approved', 'pending'])
+                ->whereIn('status', ['approved', 'linked', 'pending']) // linked = confirmed and tied to an authority record
                 ->groupBy('object_id')
                 ->orderByDesc('match_count')
                 ->limit($limit)
@@ -85,7 +85,7 @@ class EntitySearchStrategy
             // Get entities for this record
             $entities = DB::table('ahg_ner_entity')
                 ->where('object_id', $objectId)
-                ->whereIn('status', ['approved', 'pending'])
+                ->whereIn('status', ['approved', 'linked', 'pending']) // linked = confirmed and tied to an authority record
                 ->pluck('entity_value')
                 ->toArray();
 
@@ -106,7 +106,7 @@ class EntitySearchStrategy
                         $q->orWhere('entity_value', $entity);
                     }
                 })
-                ->whereIn('status', ['approved', 'pending'])
+                ->whereIn('status', ['approved', 'linked', 'pending']) // linked = confirmed and tied to an authority record
                 ->groupBy('object_id')
                 ->orderByDesc('match_count')
                 ->limit($limit)
@@ -146,6 +146,14 @@ class EntitySearchStrategy
                     $terms[] = $phrase;
                 }
             }
+        }
+
+        // When the query names someone or something, match on those names. Generic
+        // words (any keyword over four letters, synonyms) are only a fallback for
+        // queries with no names: "photographs of the Engelbrecht family" otherwise
+        // matched "family" in "Binneman Family" and ranked that record first.
+        if (!empty($terms)) {
+            return $terms;
         }
 
         // Keywords (single words, useful for matching person/org names)

@@ -8,7 +8,7 @@
 <tbody>
 <?php foreach ($templates as $t): ?>
 <tr>
-<td><i class="fa <?php echo $t->icon; ?> text-<?php echo $t->color; ?>"></i> <?php echo esc_entities($t->name); ?></td>
+<td><i class="fa <?php echo $t->icon; ?> text-<?php echo $t->color; ?>"></i> <?php echo $t->name; // already escaped by the output escaper ?></td>
 <td><?php echo $t->entity_type; ?></td>
 <td><?php echo $t->is_featured ? 'Yes' : '-'; ?></td>
 <td><?php echo $t->is_active ? 'Yes' : 'No'; ?></td>

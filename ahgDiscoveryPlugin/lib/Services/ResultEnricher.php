@@ -123,7 +123,7 @@ class ResultEnricher
             $rows = DB::table('ahg_ner_entity')
                 ->select('object_id', 'entity_type', 'entity_value')
                 ->whereIn('object_id', $ids)
-                ->whereIn('status', ['approved', 'pending'])
+                ->whereIn('status', ['approved', 'linked', 'pending'])
                 ->orderBy('object_id')
                 ->get();
 
