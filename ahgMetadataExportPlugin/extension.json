@@ -3,6 +3,7 @@
     "machine_name": "ahgMetadataExportPlugin",
     "description": "Unified export framework supporting 10 metadata standards across GLAM sectors (Galleries, Libraries, Archives, Museums) and digital preservation.",
     "version": "1.0.0",
+    "status": "source",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "authorEmail": "johan@theahg.co.za",
     "license": "AGPL-3.0-or-later",

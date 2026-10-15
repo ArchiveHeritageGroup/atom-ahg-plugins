@@ -2,6 +2,8 @@
     "name": "Access Request",
     "machine_name": "ahgAccessRequestPlugin",
     "version": "1.1.6",
+    "tested_at": "2026-08-18",
+    "status": "tested",
     "description": "Researcher access request management for restricted materials",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

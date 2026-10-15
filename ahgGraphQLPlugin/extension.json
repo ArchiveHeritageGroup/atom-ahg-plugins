@@ -2,6 +2,7 @@
     "name": "GraphQL",
     "machine_name": "ahgGraphQLPlugin",
     "version": "1.0.0",
+    "status": "source",
     "description": "GraphQL API endpoint providing flexible querying with security safeguards including depth limiting and complexity analysis",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

@@ -2,6 +2,7 @@
     "name": "Usage Statistics",
     "machine_name": "ahgStatisticsPlugin",
     "version": "1.0.0",
+    "status": "source",
     "description": "Usage statistics tracking with page views, downloads, GeoIP lookup, bot filtering, and reporting dashboards",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

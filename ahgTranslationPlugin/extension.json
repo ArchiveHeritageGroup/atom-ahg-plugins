@@ -2,6 +2,7 @@
     "name": "Translation",
     "machine_name": "ahgTranslationPlugin",
     "version": "1.0.1",
+    "status": "source",
     "description": "On-prem translation integration for AtoM via local MT endpoint (supports Afrikaans/Dutch and SA languages -> English depending on MT service).",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

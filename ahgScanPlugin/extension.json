@@ -2,6 +2,7 @@
     "name": "Watched Folder Scanner",
     "machine_name": "ahgScanPlugin",
     "version": "1.0.0",
+    "status": "source",
     "description": "Watched-folder streaming ingest: configurable watched folders, a scan/watch CLI that detects new files and feeds the ingest pipeline, processed/failed disposition dirs, and dedupe by SHA-256 checksum.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0-or-later",

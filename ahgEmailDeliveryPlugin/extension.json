@@ -2,6 +2,7 @@
     "name": "Email Delivery",
     "machine_name": "ahgEmailDeliveryPlugin",
     "version": "1.0.0",
+    "status": "source",
     "description": "Email deliverability: bounce capture, a suppression list, and a send-time check that holds mail to suppressed addresses.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

@@ -2,6 +2,8 @@
     "name": "UI Overrides",
     "machine_name": "ahgUiOverridesPlugin",
     "version": "1.0.0",
+    "tested_at": "2026-08-18",
+    "status": "tested",
     "description": "UI action overrides for AtoM modules - centralized location for action customizations",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

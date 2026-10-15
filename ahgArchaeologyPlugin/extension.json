@@ -2,6 +2,7 @@
     "name": "Archaeology",
     "machine_name": "ahgArchaeologyPlugin",
     "version": "0.1.0",
+    "status": "source",
     "description": "Archaeological site, find and stratigraphic context recording - single-context recording with Harris Matrix, for excavation archives",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

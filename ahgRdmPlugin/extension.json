@@ -2,6 +2,7 @@
     "name": "RDM Manager",
     "machine_name": "ahgRdmPlugin",
     "version": "0.1.0",
+    "status": "source",
     "description": "Research data management with data kept in South Africa (POPIA): dataset deposit, an AI-assisted, human-approved POPIA sensitivity scan, access and embargo control, DOI minting and a compliance dashboard.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0-or-later",

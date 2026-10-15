@@ -2,6 +2,7 @@
     "name": "C2PA Content Credentials",
     "machine_name": "ahgC2paPlugin",
     "version": "0.2.0",
+    "status": "source",
     "description": "C2PA 2.1 content credentials: generate, sign (Ed25519) and embed provenance manifests on digital objects (JUMBF via c2patool, PDF associated files, or .c2pa.json sidecars), record signed digitisation provenance automatically when a digital object is created, sign manifests for AI outputs, carry embedded EXIF/IPTC/XMP as C2PA metadata assertions, declare an AI training and data-mining stance, and verify manifests on public pages. Shares its signing key chain with the AI Compliance plugin.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

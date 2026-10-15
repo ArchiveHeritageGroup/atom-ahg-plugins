@@ -2,6 +2,7 @@
     "name": "Custom Fields",
     "machine_name": "ahgCustomFieldsPlugin",
     "version": "1.0.0",
+    "status": "source",
     "description": "Admin-configurable custom metadata fields for any entity type. Define fields via UI - no code changes needed.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

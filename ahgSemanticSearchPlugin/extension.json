@@ -2,6 +2,7 @@
     "name": "Semantic Search",
     "machine_name": "ahgSemanticSearchPlugin",
     "version": "1.0.0",
+    "status": "source",
     "description": "Semantic search and thesaurus management with WordNet/Datamuse API sync, Wikidata SPARQL integration, and vector embeddings via Ollama",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

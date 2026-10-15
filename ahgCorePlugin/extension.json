@@ -2,6 +2,8 @@
     "name": "Core",
     "machine_name": "ahgCorePlugin",
     "version": "1.0.0",
+    "tested_at": "2026-08-18",
+    "status": "tested",
     "description": "Core utilities and shared services for AHG plugins. Provides centralized database access, configuration, taxonomy resolution, file storage, and cross-plugin contracts.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

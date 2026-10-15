@@ -2,6 +2,8 @@
     "name": "Condition Assessment",
     "machine_name": "ahgConditionPlugin",
     "version": "1.2.7",
+    "tested_at": "2026-08-18",
+    "status": "tested",
     "description": "Condition assessment and reporting for museum objects",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

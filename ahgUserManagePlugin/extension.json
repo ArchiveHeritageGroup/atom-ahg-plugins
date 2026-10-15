@@ -2,6 +2,7 @@
     "name": "User Manage",
     "machine_name": "ahgUserManagePlugin",
     "version": "1.0.0",
+    "status": "source",
     "description": "User browse and management using Laravel Query Builder",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

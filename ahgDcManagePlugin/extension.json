@@ -2,6 +2,7 @@
     "name": "Dublin Core Descriptive Standard",
     "machine_name": "ahgDcManagePlugin",
     "version": "1.0.0",
+    "status": "source",
     "description": "Dublin Core descriptive standard edit form for information objects",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

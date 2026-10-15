@@ -2,6 +2,7 @@
     "name": "Records Management (File Plan)",
     "machine_name": "ahgRecordsManagePlugin",
     "version": "0.1.0",
+    "status": "source",
     "description": "Records-management file plan: a classification scheme of functions, series and files with retention and disposal-action metadata.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "email": "johan@theahg.co.za",

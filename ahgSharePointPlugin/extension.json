@@ -2,6 +2,7 @@
     "name": "SharePoint Integration",
     "machine_name": "ahgSharePointPlugin",
     "version": "0.1.0",
+    "status": "source",
     "description": "Microsoft 365 SharePoint integration: tenant config, drive registration, manual delta sync (Phase 1); webhook records handoff (Phase 2); federated search + M365 connector feed (Phase 3). One-way: SharePoint -> AtoM ingest.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0-or-later",

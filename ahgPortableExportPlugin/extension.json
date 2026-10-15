@@ -2,6 +2,7 @@
     "name": "Portable Export & Import",
     "machine_name": "ahgPortableExportPlugin",
     "version": "3.0.0",
+    "status": "source",
     "description": "Full-system portable export and import for AtoM Heratio. Export complete instances with 15 entity types, SHA-256 checksummed manifests, and self-documenting packages. Import archives into fresh instances with ID remapping, merge/replace/dry-run modes. Also supports offline HTML viewer export for CD/USB/ZIP distribution.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0-or-later",
