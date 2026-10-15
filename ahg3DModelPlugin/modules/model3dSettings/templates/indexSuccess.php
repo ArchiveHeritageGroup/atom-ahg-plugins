@@ -10,8 +10,17 @@ function getSetting($settings, $key, $default = '') {
     return isset($settings[$key]) ? $settings[$key]->setting_value : $default;
 }
 
+// An unset key shows the behaviour the code falls back to (Model3DService's
+// defaults: AR and auto-rotate on; hotspots and fullscreen are always shown).
+// Treating unset as off showed these as disabled while they were working,
+// and saving the page unchanged would then have switched them off.
 function isSettingEnabled($settings, $key) {
-    return isset($settings[$key]) && $settings[$key]->setting_value === '1';
+    $defaults = ['enable_ar' => true, 'enable_auto_rotate' => true, 'enable_annotations' => true, 'enable_fullscreen' => true];
+    if (!isset($settings[$key])) {
+        return $defaults[$key] ?? false;
+    }
+
+    return in_array((string) $settings[$key]->setting_value, ['1', 'true'], true);
 }
 ?>
 

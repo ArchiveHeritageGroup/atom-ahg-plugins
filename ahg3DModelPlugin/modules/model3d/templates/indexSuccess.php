@@ -3,8 +3,10 @@
  * 3D Model Index Template - List all models
  */
 $models = $sf_data->getRaw('models');
-$total = $sf_data->getRaw('total');
-$page = $sf_data->getRaw('page');
+// The action sets totalCount and currentPage; reading total and page gave
+// "0 models in the archive" and broke the pager.
+$total = (int) $sf_data->getRaw('totalCount');
+$page = (int) $sf_data->getRaw('currentPage');
 $totalPages = $sf_data->getRaw('totalPages');
 ?>
 

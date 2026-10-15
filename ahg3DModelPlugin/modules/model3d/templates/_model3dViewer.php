@@ -42,7 +42,7 @@ $modelCount = count($models);
 
         // Check if this is a Gaussian Splat format
         if (is_splat_format($model->format ?? '')):
-            $splatUrl = $baseUrl . '/uploads/' . $model->file_path;
+            $splatUrl = \AtomFramework\Services\Model3DService::modelUrl(sfOutputEscaper::unescape($model), $baseUrl);
             echo render_splat_viewer($splatUrl, [
                 'height' => '500px',
                 'title' => $model->title ?? $model->original_filename ?? 'Gaussian Splat'

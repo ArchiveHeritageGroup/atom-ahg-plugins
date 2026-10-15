@@ -12,7 +12,7 @@
  * where the suggest endpoint includes them.
  *
  * For richer fields (mandates, birth/death dates, places) the prefill engine
- * is welcome to follow-up with a SRU call to https://viaf.org/viaf/<id>/viaf.json
+ * is welcome to follow up with https://viaf.org/viaf/<id> (Accept: application/json); the SRU search and /viaf.json were retired in 2024
  * - that fetch is intentionally deferred until a user reports the autosuggest
  * fields are insufficient.
  *

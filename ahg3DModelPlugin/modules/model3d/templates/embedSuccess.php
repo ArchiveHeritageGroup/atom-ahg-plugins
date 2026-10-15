@@ -114,7 +114,7 @@ if (!$model): ?>
 </div>
 <?php else:
     $baseUrl = sfContext::getInstance()->getRequest()->getUriPrefix();
-    $modelUrl = "{$baseUrl}/uploads/{$model->file_path}";
+    $modelUrl = \AtomFramework\Services\Model3DService::modelUrl(sfOutputEscaper::unescape($model), $baseUrl);
     $posterUrl = $model->poster_image ? "{$baseUrl}/uploads/{$model->poster_image}" : '';
     $arAttrs = $model->ar_enabled ? 'ar ar-modes="webxr scene-viewer quick-look"' : '';
     $autoRotate = $model->auto_rotate ? 'auto-rotate' : '';

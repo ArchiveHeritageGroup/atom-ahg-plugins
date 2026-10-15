@@ -30,7 +30,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                 <div class="card-body p-0">
                     <model-viewer
                         id="preview-viewer"
-                        src="/uploads/<?php echo $model->file_path ?>"
+                        src="<?php echo htmlspecialchars(\AtomFramework\Services\Model3DService::modelUrl(sfOutputEscaper::unescape($model))) ?>"
                         alt="Preview"
                         camera-controls
                         touch-action="pan-y"
@@ -244,7 +244,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                 </div>
                 <div class="card-body">
                     <?php if (empty($hotspots)): ?>
-                    <p class="text-muted mb-0 small">No hotspots defined.</p>
+                    <p class="text-muted mb-0 small">No hotspots defined. Click a point on the model in the preview to add one there.</p>
                     <?php else: ?>
                     <ul class="list-group list-group-flush">
                         <?php foreach ($hotspots as $hotspot): ?>
@@ -369,7 +369,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="small text-muted">Click on the 3D model to set the hotspot position, then fill in the details below.</p>
+                <p class="small text-muted">The position comes from the point you clicked on the model. Without one, enter X, Y and Z yourself.</p>
                 
                 <div class="mb-3">
                     <label class="form-label">Type</label>
@@ -421,18 +421,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const viewer = document.getElementById('preview-viewer');
     const modelId = <?php echo $model->id ?>;
     
-    // Get position on click for hotspots
+    // Click a point on the model to add a hotspot there. The form is a modal,
+    // whose backdrop blocks the model, so the click opens the form (with the
+    // position filled in) rather than the form asking for a click. A pointer
+    // that moved is a rotation, not a click.
+    let downAt = null;
+    let lastNormal = null;
+    viewer.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
     viewer.addEventListener('click', function(event) {
-        const rect = viewer.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        
-        // Get 3D position from model-viewer
-        const hit = viewer.surfaceFromPoint(x, y);
+        if (downAt && Math.hypot(event.clientX - downAt[0], event.clientY - downAt[1]) > 5) return;
+        // positionAndNormalFromPoint gives the 3D point (surfaceFromPoint returns
+        // only a surface name, so the coordinates were never filled in).
+        const hit = viewer.positionAndNormalFromPoint(event.clientX, event.clientY);
         if (hit) {
-            document.getElementById('hotspot_x').value = hit.x.toFixed(4);
-            document.getElementById('hotspot_y').value = hit.y.toFixed(4);
-            document.getElementById('hotspot_z').value = hit.z.toFixed(4);
+            document.getElementById('hotspot_x').value = hit.position.x.toFixed(4);
+            document.getElementById('hotspot_y').value = hit.position.y.toFixed(4);
+            document.getElementById('hotspot_z').value = hit.position.z.toFixed(4);
+            lastNormal = hit.normal;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('addHotspotModal')).show();
         }
     });
     
@@ -445,6 +451,9 @@ document.addEventListener('DOMContentLoaded', function() {
             position_x: parseFloat(document.getElementById('hotspot_x').value) || 0,
             position_y: parseFloat(document.getElementById('hotspot_y').value) || 0,
             position_z: parseFloat(document.getElementById('hotspot_z').value) || 0,
+            normal_x: lastNormal ? lastNormal.x : 0,
+            normal_y: lastNormal ? lastNormal.y : 1,
+            normal_z: lastNormal ? lastNormal.z : 0,
         };
         
         fetch('/index.php/ahg3DModel/addHotspot/' + modelId, {

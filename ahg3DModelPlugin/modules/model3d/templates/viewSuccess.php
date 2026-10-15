@@ -9,7 +9,7 @@ $hotspots = $sf_data->getRaw('hotspots');
 $object = $sf_data->getRaw('object');
 
 $baseUrl = sfContext::getInstance()->getRequest()->getUriPrefix();
-$modelUrl = "{$baseUrl}/uploads/{$model->file_path}";
+$modelUrl = \AtomFramework\Services\Model3DService::modelUrl(sfOutputEscaper::unescape($model), $baseUrl);
 $posterUrl = $model->poster_image ? "{$baseUrl}/uploads/{$model->poster_image}" : '';
 ?>
 

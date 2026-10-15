@@ -43,8 +43,10 @@ class ahgAuthorityLinkageService
     const ULAN_SPARQL = 'http://vocab.getty.edu/sparql';
     const WIKIDATA_API = 'https://www.wikidata.org/w/api.php';
     const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
-    const VIAF_API = 'https://www.viaf.org/viaf/search';
-    const VIAF_DATA = 'https://www.viaf.org/viaf/';
+    // OCLC's 2024 VIAF platform: the SRU search and /viaf.json are retired;
+    // AutoSuggest and /viaf/<id> (Accept: application/json) answer.
+    const VIAF_API = 'https://viaf.org/viaf/AutoSuggest';
+    const VIAF_DATA = 'https://viaf.org/viaf/';
     const ISNI_API = 'https://isni.org/isni/';
     const LCNAF_API = 'https://id.loc.gov/authorities/names/suggest2';
 
@@ -353,61 +355,29 @@ class ahgAuthorityLinkageService
      */
     public function searchVIAF($query, $type = null, $limit = 20): array
     {
-        $cqlType = '';
-        if ($type === 'person') {
-            $cqlType = ' and local.mainHeadingEl = "personalNames"';
-        } elseif ($type === 'corporate_body') {
-            $cqlType = ' and local.mainHeadingEl = "corporateNames"';
-        }
-
-        $params = [
-            'query' => sprintf('local.mainHeadingEl any "%s"%s', $query, $cqlType),
-            'maximumRecords' => $limit,
-            'httpAccept' => 'application/json',
-            'sortKeys' => 'holdingscount',
-        ];
-
-        $url = self::VIAF_API . '?' . http_build_query($params);
-        $response = $this->httpGet($url);
-
+        $response = $this->httpGet(self::VIAF_API . '?' . http_build_query(['query' => $query]));
         if (!$response) {
             return [];
         }
 
         $data = json_decode($response, true);
+        $wanted = ['person' => 'personal', 'corporate_body' => 'corporate'][$type] ?? null;
         $results = [];
-
-        foreach ($data['searchRetrieveResponse']['records'] ?? [] as $record) {
-            $recordData = $record['record']['recordData'] ?? [];
-
-            $viafId = $recordData['viafID'] ?? null;
-            if (!$viafId) {
+        foreach ($data['result'] ?? [] as $item) {
+            $viafId = $item['viafid'] ?? null;
+            if (!$viafId || ($wanted && ($item['nametype'] ?? '') !== $wanted)) {
                 continue;
             }
-
-            $mainHeading = $recordData['mainHeadings']['data'] ?? [];
-            if (!is_array($mainHeading)) {
-                $mainHeading = [$mainHeading];
-            }
-
-            $label = '';
-            foreach ($mainHeading as $heading) {
-                if (is_array($heading) && isset($heading['text'])) {
-                    $label = $heading['text'];
-                    break;
-                } elseif (is_string($heading)) {
-                    $label = $heading;
-                    break;
-                }
-            }
-
             $results[] = [
                 'id' => $viafId,
                 'uri' => 'https://viaf.org/viaf/' . $viafId,
                 'source' => self::SOURCE_VIAF,
-                'label' => $label,
-                'type' => $this->detectVIAFType($recordData),
+                'label' => $item['displayForm'] ?? $item['term'] ?? '',
+                'type' => ['personal' => 'person', 'corporate' => 'corporate_body'][$item['nametype'] ?? ''] ?? 'unknown',
             ];
+            if (count($results) >= $limit) {
+                break;
+            }
         }
 
         return $results;
@@ -418,14 +388,27 @@ class ahgAuthorityLinkageService
      */
     public function getVIAFRecord($viafId): ?array
     {
-        $url = self::VIAF_DATA . $viafId . '/viaf.json';
-        $response = $this->httpGet($url);
+        $response = $this->httpGet(self::VIAF_DATA . rawurlencode((string) $viafId));
 
         if (!$response) {
             return null;
         }
 
-        $data = json_decode($response, true);
+        // The cluster arrives as {"ns1:VIAFCluster": {"ns1:mainHeadings": ...}}; drop
+        // the namespace prefixes so the fields read as they did in viaf.json.
+        $strip = function ($v) use (&$strip) {
+            if (!is_array($v)) {
+                return $v;
+            }
+            $out = [];
+            foreach ($v as $k => $x) {
+                $out[is_string($k) && false !== ($c = strpos($k, ':')) ? substr($k, $c + 1) : $k] = $strip($x);
+            }
+
+            return $out;
+        };
+        $data = $strip(json_decode($response, true) ?: []);
+        $data = $data['VIAFCluster'] ?? $data;
 
         // Extract main heading
         $mainHeading = '';
@@ -447,10 +430,10 @@ class ahgAuthorityLinkageService
         // Extract linked authorities
         $linkedIds = [];
         foreach ($data['sources']['source'] ?? [] as $source) {
-            if (isset($source['@nsid'])) {
-                $nsid = $source['@nsid'];
+            $nsid = (string) ($source['content'] ?? $source['@nsid'] ?? '');
+            if ('' !== $nsid) {
                 if (strpos($nsid, 'LC|') === 0) {
-                    $linkedIds['lcnaf'] = str_replace('LC|', '', $nsid);
+                    $linkedIds['lcnaf'] = str_replace([' ', 'LC|'], '', $nsid); // VIAF pads LC ids ("n  85153068")
                 } elseif (strpos($nsid, 'DNB|') === 0) {
                     $linkedIds['gnd'] = str_replace('DNB|', '', $nsid);
                 } elseif (strpos($nsid, 'WKP|') === 0) {

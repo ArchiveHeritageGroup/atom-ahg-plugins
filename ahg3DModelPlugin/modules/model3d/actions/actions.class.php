@@ -506,9 +506,12 @@ class model3dActions extends AhgController
 
         $objectId = $model->object_id;
 
-        // Delete file
-        $filePath = $this->config('sf_upload_dir') . '/' . $model->file_path;
-        if (file_exists($filePath)) {
+        // Delete the file only if this plugin stored it (uploads/3d/...). A model
+        // registered from an existing digital object points at that object's
+        // master file, which must survive the removal of its 3D settings.
+        $relative = \AtomFramework\Services\Model3DService::relativeUploadPath((string) $model->file_path);
+        $filePath = $this->config('sf_upload_dir') . '/' . $relative;
+        if (str_starts_with($relative, '3d/') && is_file($filePath)) {
             unlink($filePath);
         }
 
@@ -623,7 +626,7 @@ class model3dActions extends AhgController
 
         // Build IIIF 3D manifest
         $baseUrl = $request->getUriPrefix();
-        $modelUrl = $baseUrl . '/uploads/' . $model->file_path;
+        $modelUrl = \AtomFramework\Services\Model3DService::modelUrl($model, $baseUrl);
         $manifestId = $baseUrl . '/iiif/3d/' . $modelId . '/manifest.json';
 
         $manifest = [
