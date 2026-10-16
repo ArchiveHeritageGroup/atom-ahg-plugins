@@ -383,21 +383,7 @@ class InformationObjectCrudService
 
             // 11. Save creators as Creation events
             if (!empty($data['creators'])) {
-                foreach ($data['creators'] as $creator) {
-                    $actorId = !empty($creator['actorId']) ? (int) $creator['actorId'] : null;
-                    if ($actorId) {
-                        EventService::save(
-                            [
-                                'type_id' => self::EVENT_TYPE_CREATION,
-                                'object_id' => $id,
-                                'actor_id' => $actorId,
-                                'source_culture' => $culture,
-                            ],
-                            $culture,
-                            []
-                        );
-                    }
-                }
+                self::saveCreators($id, array_column($data['creators'], 'actorId'), $culture);
             }
 
             // 12. Save properties: language, script, languageOfDescription, scriptOfDescription
@@ -535,40 +521,15 @@ class InformationObjectCrudService
                     self::saveEvents($id, $data['events'], $culture);
                 }
 
-                // Re-save creators
+                // Re-save creators. The events above may already hold a
+                // creation event naming the same person (the form lists it in
+                // both places), so saveCreators skips anyone already there.
                 if (array_key_exists('creators', $data)) {
-                    // Explicitly provided by form — save what was submitted
-                    foreach ($data['creators'] as $creator) {
-                        $actorId = !empty($creator['actorId']) ? (int) $creator['actorId'] : null;
-                        if ($actorId) {
-                            EventService::save(
-                                [
-                                    'type_id' => self::EVENT_TYPE_CREATION,
-                                    'object_id' => $id,
-                                    'actor_id' => $actorId,
-                                    'source_culture' => $culture,
-                                ],
-                                $culture,
-                                []
-                            );
-                        }
-                    }
+                    // Explicitly provided by form - save what was submitted
+                    self::saveCreators($id, array_column($data['creators'], 'actorId'), $culture);
                 } else {
-                    // Not provided (RAD/MODS) — preserve existing creators
-                    foreach ($preservedCreators as $cr) {
-                        if ($cr->actor_id) {
-                            EventService::save(
-                                [
-                                    'type_id' => self::EVENT_TYPE_CREATION,
-                                    'object_id' => $id,
-                                    'actor_id' => (int) $cr->actor_id,
-                                    'source_culture' => $culture,
-                                ],
-                                $culture,
-                                []
-                            );
-                        }
-                    }
+                    // Not provided (RAD/MODS) - preserve existing creators
+                    self::saveCreators($id, array_map(static fn ($cr) => $cr->actor_id, $preservedCreators), $culture);
                 }
             }
 
@@ -1068,6 +1029,40 @@ class InformationObjectCrudService
     /**
      * Save events for an information object.
      */
+    /**
+     * Save creators as Creation events, once each. A person who already has a
+     * creation event on this record (for example one saved from the dates
+     * table a moment earlier) is not added again. Before 16 Oct 2026 every
+     * save of a record with an undated creator added a duplicate event.
+     */
+    protected static function saveCreators(int $objectId, array $actorIds, string $culture): void
+    {
+        $existing = DB::table('event')
+            ->where('object_id', $objectId)
+            ->where('type_id', self::EVENT_TYPE_CREATION)
+            ->whereNotNull('actor_id')
+            ->pluck('actor_id')
+            ->map(fn ($a) => (int) $a)
+            ->all();
+
+        foreach (array_unique(array_map('intval', array_filter($actorIds))) as $actorId) {
+            if (in_array($actorId, $existing, true)) {
+                continue;
+            }
+            EventService::save(
+                [
+                    'type_id' => self::EVENT_TYPE_CREATION,
+                    'object_id' => $objectId,
+                    'actor_id' => $actorId,
+                    'source_culture' => $culture,
+                ],
+                $culture,
+                []
+            );
+            $existing[] = $actorId;
+        }
+    }
+
     protected static function saveEvents(int $objectId, array $events, string $culture): void
     {
         foreach ($events as $eventData) {
