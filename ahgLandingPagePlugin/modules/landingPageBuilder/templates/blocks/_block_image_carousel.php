@@ -19,6 +19,15 @@ if (!$collectionSlug) {
     return;
 }
 
+// Resolve the slug to an id here: the IIIF partial uses $collectionId first and
+// otherwise falls back to the homepage collection setting, so passing only a
+// slug showed the homepage collection instead of this block's one.
+$collectionId = \Illuminate\Database\Capsule\Manager::table('iiif_collection')->where('slug', $collectionSlug)->value('id');
+if (!$collectionId) {
+    echo '<p class="text-muted">The IIIF collection "' . esc_entities($collectionSlug) . '" does not exist. Edit this block to choose another.</p>';
+    return;
+}
+
 // The partial expects collectionSlug variable
 // The carousel partial lives in ahgIiifPlugin (it moved out of the theme).
 $partial = sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/modules/iiif/templates/_featuredCollection.php';

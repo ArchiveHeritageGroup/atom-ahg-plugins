@@ -2,7 +2,6 @@
     "name": "Digital Preservation",
     "machine_name": "ahgPreservationPlugin",
     "version": "1.0.6",
-    "tested_at": "2026-08-18",
     "status": "packaged",
     "description": "Digital preservation: checksums, fixity verification, PREMIS events, format registry",
     "author": "The Archive and Heritage Group (Pty) Ltd",

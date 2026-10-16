@@ -6,6 +6,10 @@
 
 // Map block config to partial variables
 $collectionId = $config['collection_id'] ?? null;
+if ($collectionId && !ctype_digit((string) $collectionId)) {
+    // A slug was entered: look up its id, so the partial cannot fall back to the homepage collection.
+    $collectionId = \Illuminate\Database\Capsule\Manager::table('iiif_collection')->where('slug', $collectionId)->value('id');
+}
 $maxItems = $config['limit'] ?? 12;
 $height = $config['height'] ?? '450px';
 $autoplay = $config['auto_rotate'] ?? true;

@@ -2,7 +2,6 @@
     "machine_name": "ahgIiifPlugin",
     "name": "IIIF",
     "version": "1.2.3",
-    "tested_at": "2026-08-18",
     "status": "packaged",
     "license": "AGPL-3.0-or-later",
     "description": "IIIF viewer integration with Mirador and OpenSeadragon support",

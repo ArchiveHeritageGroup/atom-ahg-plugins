@@ -655,9 +655,14 @@ ahgSettings, ahgUiOverrides, ahgAuditTrail, ahgBackup, ahgThemeB5, ahgProvenance
 ahgCondition, ahgCart, ahgRequestToPublish, ahgResearch, ahgUserRegistration,
 ahgAccessRequest, ahgMetadataExtraction, ahgSiteRecord, ahgHeritage.
 
-Proven by dropping all 253 tables and reinstalling from zero, then running the end-to-end
-suites: 74 checks passed, 4 failed, every failure traced to a plugin deliberately outside
-this set.
+Proven on 18 August 2026, at v3.103.12, by dropping all 253 tables and reinstalling from
+zero, then running the end-to-end suites: 74 checks passed, 4 failed, every failure traced
+to a plugin deliberately outside this set. The run's log was not kept, and it has not yet
+been repeated on later releases; the suites in `testing/` run against an existing instance,
+not an empty database.
+
+Being in this set is about clean installation, not packaging: of the eight packaged
+downloads, only Backup and Provenance (with the runtime) are in it.
 
 Plugins outside it may still carry schema that the installer does not create. They are not
 yet certified for standalone installation.
@@ -670,10 +675,13 @@ yet certified for standalone installation.
 
 ## Version Compatibility
 
-| Version | AtoM | PHP |
-|---------|------|-----|
+| atom-framework | AtoM | PHP |
+|----------------|------|-----|
 | 2.x (current) | 2.9, 2.10 | 8.1+ |
 | 1.x | 2.8-2.9 | 7.4+ |
+
+The plugins are released together as one repository (v3.x tags); each plugin also carries
+its own version in `extension.json`.
 
 The package names in the install commands above say `php8.3` because that is what
 Ubuntu 24.04 ships. On a host running 8.1 or 8.2, use those package names instead.
