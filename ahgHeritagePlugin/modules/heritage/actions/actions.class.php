@@ -2249,14 +2249,11 @@ class heritageActions extends AhgController
     {
 
 
-        $institutionId = $request->getParameter('institution_id');
+        // The curated list from Admin > Heritage, as on the landing page and
+        // /heritage/collections (DiscoveryService's version returned 500).
         $limit = min(20, max(1, (int) $request->getParameter('limit', 6)));
-        $culture = $this->culture();
 
-        $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($culture);
-        $collections = $service->getFeaturedCollections($institutionId ? (int) $institutionId : null, $limit);
-
-        return $this->renderJson(['success' => true, 'data' => $collections]);
+        return $this->renderJson(['success' => true, 'data' => $this->getCuratedCollections($this->culture(), $limit)]);
     }
 
     /**

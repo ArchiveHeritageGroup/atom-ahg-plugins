@@ -1047,13 +1047,18 @@ CREATE TABLE IF NOT EXISTS heritage_featured_collection (
     id INT AUTO_INCREMENT PRIMARY KEY,
     institution_id INT DEFAULT NULL,
 
-    -- Content
-    title VARCHAR(255) NOT NULL,
+    -- Curated source (Admin > Heritage > Featured collections, the landing page)
+    source_type VARCHAR(23) DEFAULT NULL COMMENT 'iiif, archival',
+    source_id INT DEFAULT NULL COMMENT 'iiif_collection.id or information_object.id',
+
+    -- Content (title, description and thumbnail_path override the source's own)
+    title VARCHAR(255) DEFAULT NULL,
     subtitle VARCHAR(500) DEFAULT NULL,
     description TEXT DEFAULT NULL,
     curator_note TEXT DEFAULT NULL,
 
     -- Visual
+    thumbnail_path VARCHAR(500) DEFAULT NULL,
     cover_image VARCHAR(500) DEFAULT NULL,
     thumbnail_image VARCHAR(500) DEFAULT NULL,
     background_color VARCHAR(7) DEFAULT NULL,
@@ -1085,6 +1090,7 @@ CREATE TABLE IF NOT EXISTS heritage_featured_collection (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+    UNIQUE KEY uk_source (source_type, source_id, institution_id),
     INDEX idx_institution (institution_id),
     INDEX idx_featured (is_featured),
     INDEX idx_enabled (is_enabled),
@@ -1092,6 +1098,41 @@ CREATE TABLE IF NOT EXISTS heritage_featured_collection (
     INDEX idx_dates (start_date, end_date),
     INDEX idx_link_type (link_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Two layouts of heritage_featured_collection existed: the curated one
+-- (source_type + source_id) that the plugin's admin and landing page use, and
+-- the richer one above. Tables created from the curated layout gain the other
+-- columns here; the installer counts "already present" as done, so re-running
+-- is safe. Nothing is removed and no row changes.
+ALTER TABLE heritage_featured_collection ADD COLUMN source_type VARCHAR(23) DEFAULT NULL COMMENT 'iiif, archival';
+ALTER TABLE heritage_featured_collection ADD COLUMN source_id INT DEFAULT NULL COMMENT 'iiif_collection.id or information_object.id';
+ALTER TABLE heritage_featured_collection MODIFY source_type VARCHAR(23) DEFAULT NULL COMMENT 'iiif, archival';
+ALTER TABLE heritage_featured_collection MODIFY source_id INT DEFAULT NULL COMMENT 'iiif_collection.id or information_object.id';
+ALTER TABLE heritage_featured_collection ADD COLUMN thumbnail_path VARCHAR(500) DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN subtitle VARCHAR(500) DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN curator_note TEXT DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN cover_image VARCHAR(500) DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN thumbnail_image VARCHAR(500) DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN background_color VARCHAR(7) DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN text_color VARCHAR(7) DEFAULT '#ffffff';
+ALTER TABLE heritage_featured_collection ADD COLUMN link_type VARCHAR(52) COMMENT 'collection, search, repository, external' DEFAULT 'search';
+ALTER TABLE heritage_featured_collection ADD COLUMN link_reference VARCHAR(500) DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN collection_id INT DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN repository_id INT DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN search_query JSON DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN item_count INT DEFAULT 0;
+ALTER TABLE heritage_featured_collection ADD COLUMN image_count INT DEFAULT 0;
+ALTER TABLE heritage_featured_collection ADD COLUMN display_size VARCHAR(42) COMMENT 'small, medium, large, featured' DEFAULT 'medium';
+ALTER TABLE heritage_featured_collection ADD COLUMN show_on_landing TINYINT(1) DEFAULT 1;
+ALTER TABLE heritage_featured_collection ADD COLUMN is_featured TINYINT(1) DEFAULT 0;
+ALTER TABLE heritage_featured_collection ADD COLUMN start_date DATE DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN end_date DATE DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD COLUMN created_by INT DEFAULT NULL;
+ALTER TABLE heritage_featured_collection ADD UNIQUE KEY uk_source (source_type, source_id, institution_id);
+ALTER TABLE heritage_featured_collection ADD INDEX idx_institution (institution_id);
+ALTER TABLE heritage_featured_collection ADD INDEX idx_featured (is_featured);
+ALTER TABLE heritage_featured_collection ADD INDEX idx_dates (start_date, end_date);
+ALTER TABLE heritage_featured_collection ADD INDEX idx_link_type (link_type);
+
 
 -- Table: heritage_hero_slide
 -- Full-bleed hero carousel slides
