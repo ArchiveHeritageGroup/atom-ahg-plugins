@@ -1,6 +1,8 @@
-# SUSHI harvesting of COUNTER usage statistics, using configured provider
-# credentials. Not currently routed, but declared so it cannot become public by
-# being wired up.
+# SUSHI (COUNTER 5) server for library usage reports. Open to outside COUNTER
+# harvesters, which do not sign in to AtoM: each request must present the API key
+# configured at Admin > Library > SUSHI (SushiService::validateRequest), and with
+# no key configured every request is refused. Decided by Dr Johan Pieterse,
+# 19 Oct 2026.
 
 all:
-  is_secure: true
+  is_secure: false

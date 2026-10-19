@@ -17,6 +17,10 @@ declare(strict_types=1);
 
 namespace AtomExtensions\Services;
 
+// Declared in the AtomExtensions\Services namespace but kept in this plugin,
+// where that namespace is not autoloaded.
+require_once __DIR__.'/LibraryCounterService.php';
+
 use Exception;
 use sfConfig;
 
@@ -139,9 +143,18 @@ class SushiService
 
         $apiKey = $headers['X-API-Key'] ?? $headers['api_key'] ?? null;
 
-        // Compare against configured key (null means not yet set - allow for initial setup)
-        $storedKey = LibraryCounterService::getSetting('sushi_api_key');
-        if ($storedKey !== null && $storedKey !== '' && $apiKey !== $storedKey) {
+        // The endpoint is open to outside COUNTER harvesters, so the key is the
+        // only gate: with no key configured nobody gets in (it used to let
+        // everyone in "for initial setup").
+        $storedKey = (string) LibraryCounterService::getSetting('sushi_api_key');
+        if ($storedKey === '') {
+            return [
+                'valid'  => false,
+                'code'   => self::E_AUTH_FAILED,
+                'message' => 'SUSHI is not configured on this server',
+            ];
+        }
+        if (!is_string($apiKey) || !hash_equals($storedKey, $apiKey)) {
             return [
                 'valid'  => false,
                 'code'   => self::E_AUTH_FAILED,

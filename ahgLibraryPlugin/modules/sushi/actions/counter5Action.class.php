@@ -32,10 +32,11 @@ class sushiCounter5Action extends AhgController
     {
         $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
         $this->response->setHttpHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requestor-Id, X-Customer-Id, X-API-Key');
-        $this->response->setHttpHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        $this->response->setHttpHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 
         // Handle preflight
-        if ($request->getMethod() === 'OPTIONS') {
+        // sfWebRequest::getMethod() reports OPTIONS as GET, so read the raw method.
+        if ('OPTIONS' === strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? ''))) {
             $this->response->setStatusCode(204);
             return \sfView::NONE;
         }
