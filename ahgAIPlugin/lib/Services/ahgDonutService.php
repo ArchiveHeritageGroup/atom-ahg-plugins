@@ -28,6 +28,14 @@ class ahgDonutService
     /** @var string Optional API key forwarded as X-API-Key. */
     private $apiKey;
 
+    /** @var int HTTP status of the last call (0 when the gateway was unreachable). */
+    private $lastStatus = 0;
+
+    public function lastStatus(): int
+    {
+        return $this->lastStatus;
+    }
+
     public function __construct()
     {
         // The gateway's Donut route (a shim on qwen2.5vl since workhorse-115 retired).
@@ -403,6 +411,7 @@ class ahgDonutService
         $error = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        $this->lastStatus = (int) $httpCode;
 
         if ($error !== '' || $response === false) {
             error_log('ahgDonutService: gateway unreachable (' . $url . '): ' . $error);

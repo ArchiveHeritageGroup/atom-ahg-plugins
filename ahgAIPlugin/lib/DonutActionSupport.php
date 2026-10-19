@@ -92,7 +92,13 @@ class DonutActionSupport
     public static function positions($request): array
     {
         $docType = (string) $request->getParameter('doc_type', 'type_a');
-        $result = self::service()->positions($docType);
+        $service = self::service();
+        $result = $service->positions($docType);
+        if ($result === null && 404 === $service->lastStatus()) {
+            // The gateway answers 404 for a document type with no training
+            // annotations (type_c today): no positions, not a service failure.
+            return ['success' => true, 'doc_type' => $docType, 'annotations_used' => 0, 'fields' => [], 'message' => 'No field positions for this document type'];
+        }
         if ($result === null) {
             return ['success' => false, 'error' => 'DONUT service unavailable'];
         }
