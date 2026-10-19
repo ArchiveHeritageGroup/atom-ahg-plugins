@@ -561,6 +561,7 @@ class ahgAuthorityLinkageService
         $propertyId = DB::table('property')->insertGetId([
             'object_id' => $actorId,
             'name' => $propertyName,
+            'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
         ]);
 
         // Create i18n entry

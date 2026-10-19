@@ -53,29 +53,19 @@ class FederationProvenance
     {
         \AhgCore\Core\AhgDb::init();
 
-        // Find property with matching source identifier
-        $property = \Illuminate\Database\Capsule\Manager::table('property')
-            ->where('scope', self::SCOPE)
-            ->where('name', self::PROP_SOURCE_OAI_IDENTIFIER)
-            ->where('value', $sourceIdentifier)
-            ->first();
+        // The same OAI identifier can come from more than one peer: check each.
+        $objectIds = $this->props()
+            ->where('p.name', self::PROP_SOURCE_OAI_IDENTIFIER)
+            ->where('pi.value', $sourceIdentifier)
+            ->pluck('p.object_id');
 
-        if (!$property) {
-            return null;
+        foreach ($objectIds as $objectId) {
+            if ((int) $this->getProperty((int) $objectId, self::PROP_SOURCE_PEER_ID) === $peerId) {
+                return \QubitInformationObject::getById($objectId);
+            }
         }
 
-        // Verify peer ID matches
-        $peerProperty = \Illuminate\Database\Capsule\Manager::table('property')
-            ->where('object_id', $property->object_id)
-            ->where('scope', self::SCOPE)
-            ->where('name', self::PROP_SOURCE_PEER_ID)
-            ->first();
-
-        if (!$peerProperty || (int)$peerProperty->value !== $peerId) {
-            return null;
-        }
-
-        return \QubitInformationObject::getById($property->object_id);
+        return null;
     }
 
     /**
@@ -141,13 +131,13 @@ class FederationProvenance
     {
         \AhgCore\Core\AhgDb::init();
 
-        $objectIds = \Illuminate\Database\Capsule\Manager::table('property')
-            ->where('scope', self::SCOPE)
-            ->where('name', self::PROP_SOURCE_PEER_ID)
-            ->where('value', (string)$peerId)
+        $objectIds = $this->props()
+            ->where('p.name', self::PROP_SOURCE_PEER_ID)
+            ->where('pi.value', (string) $peerId)
+            ->orderBy('p.object_id')
             ->limit($limit)
             ->offset($offset)
-            ->pluck('object_id');
+            ->pluck('p.object_id');
 
         $records = [];
         foreach ($objectIds as $objectId) {
@@ -170,10 +160,9 @@ class FederationProvenance
     {
         \AhgCore\Core\AhgDb::init();
 
-        return \Illuminate\Database\Capsule\Manager::table('property')
-            ->where('scope', self::SCOPE)
-            ->where('name', self::PROP_SOURCE_PEER_ID)
-            ->where('value', (string)$peerId)
+        return $this->props()
+            ->where('p.name', self::PROP_SOURCE_PEER_ID)
+            ->where('pi.value', (string) $peerId)
             ->count();
     }
 
@@ -184,10 +173,14 @@ class FederationProvenance
     {
         \AhgCore\Core\AhgDb::init();
 
-        \Illuminate\Database\Capsule\Manager::table('property')
+        $ids = \Illuminate\Database\Capsule\Manager::table('property')
             ->where('object_id', $objectId)
             ->where('scope', self::SCOPE)
-            ->delete();
+            ->pluck('id');
+        if ($ids->isNotEmpty()) {
+            \Illuminate\Database\Capsule\Manager::table('property_i18n')->whereIn('id', $ids)->delete();
+            \Illuminate\Database\Capsule\Manager::table('property')->whereIn('id', $ids)->delete();
+        }
     }
 
     /**
@@ -198,22 +191,20 @@ class FederationProvenance
         \AhgCore\Core\AhgDb::init();
 
         // Total federated records
-        $totalRecords = \Illuminate\Database\Capsule\Manager::table('property')
-            ->where('scope', self::SCOPE)
-            ->where('name', self::PROP_SOURCE_PEER_ID)
+        $totalRecords = $this->props()
+            ->where('p.name', self::PROP_SOURCE_PEER_ID)
             ->count();
 
         // Records by peer
-        $recordsByPeer = \Illuminate\Database\Capsule\Manager::table('property as p')
-            ->leftJoin('federation_peer as fp', 'p.value', '=', \Illuminate\Database\Capsule\Manager::raw('CAST(fp.id AS CHAR)'))
-            ->where('p.scope', self::SCOPE)
+        $recordsByPeer = $this->props()
+            ->leftJoin('federation_peer as fp', 'pi.value', '=', \Illuminate\Database\Capsule\Manager::raw('CAST(fp.id AS CHAR)'))
             ->where('p.name', self::PROP_SOURCE_PEER_ID)
             ->select([
-                'p.value as peer_id',
+                'pi.value as peer_id',
                 'fp.name as peer_name',
                 \Illuminate\Database\Capsule\Manager::raw('COUNT(*) as record_count'),
             ])
-            ->groupBy('p.value', 'fp.name')
+            ->groupBy('pi.value', 'fp.name')
             ->get()
             ->toArray();
 
@@ -240,29 +231,47 @@ class FederationProvenance
     }
 
     /**
+     * Federation properties: `property` (scope 'federation', name) with the value
+     * in `property_i18n`. `property` has no value column; the old code wrote and
+     * read one, so every harvest failed. The values are technical, so they are
+     * kept in one fixed culture whatever the visitor's language.
+     */
+    private const CULTURE = 'en';
+
+    private function props(): \Illuminate\Database\Query\Builder
+    {
+        return \Illuminate\Database\Capsule\Manager::table('property as p')
+            ->join('property_i18n as pi', function ($join) {
+                $join->on('p.id', '=', 'pi.id')->where('pi.culture', '=', self::CULTURE);
+            })
+            ->where('p.scope', self::SCOPE);
+    }
+
+    /**
      * Set a property on an information object
      */
     protected function setProperty(int $objectId, string $name, string $value): void
     {
-        // Check if property exists
-        $existing = \Illuminate\Database\Capsule\Manager::table('property')
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $id = $db::table('property')
             ->where('object_id', $objectId)
             ->where('scope', self::SCOPE)
             ->where('name', $name)
-            ->first();
+            ->value('id');
 
-        if ($existing) {
-            \Illuminate\Database\Capsule\Manager::table('property')
-                ->where('id', $existing->id)
-                ->update(['value' => $value]);
-        } else {
-            \Illuminate\Database\Capsule\Manager::table('property')->insert([
+        if (!$id) {
+            $id = $db::table('property')->insertGetId([
                 'object_id' => $objectId,
                 'scope' => self::SCOPE,
                 'name' => $name,
-                'value' => $value,
+                'source_culture' => self::CULTURE,
             ]);
         }
+
+        $db::table('property_i18n')->updateOrInsert(
+            ['id' => $id, 'culture' => self::CULTURE],
+            ['value' => $value]
+        );
     }
 
     /**
@@ -270,12 +279,11 @@ class FederationProvenance
      */
     protected function getProperty(int $objectId, string $name): ?string
     {
-        $property = \Illuminate\Database\Capsule\Manager::table('property')
-            ->where('object_id', $objectId)
-            ->where('scope', self::SCOPE)
-            ->where('name', $name)
-            ->first();
+        $value = $this->props()
+            ->where('p.object_id', $objectId)
+            ->where('p.name', $name)
+            ->value('pi.value');
 
-        return $property ? $property->value : null;
+        return null === $value ? null : (string) $value;
     }
 }
