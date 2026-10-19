@@ -227,7 +227,10 @@ class damReportsActions extends AhgController
         $this->getResponse()->setContentType('text/csv');
         $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
         
-        $output = fopen('php://output', 'w');
+        // Built in memory and handed to the response: writing to php://output
+        // flushed PHP's default text/html headers before Symfony's once the file
+        // outgrew the output buffer, so larger exports opened as a page.
+        $output = fopen('php://temp', 'w+');
         
         switch ($report) {
             case 'assets':
@@ -251,7 +254,10 @@ class damReportsActions extends AhgController
             }
         }
         
+        rewind($output);
+        $csv = stream_get_contents($output);
         fclose($output);
-        return sfView::NONE;
+
+        return $this->renderText($csv);
     }
 }
