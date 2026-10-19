@@ -13,10 +13,16 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
 
     public function addAssets(sfEvent $event, $content)
     {
-        $response = $event->getSubject();
+        // Only full HTML pages: exports, JSON and XML can carry "</head>" in their data.
+        // The listener can fire twice per request, so add the link once.
+        $type = (string) $event->getSubject()->getContentType();
         $css = '<link rel="stylesheet" href="/plugins/ahgConditionPlugin/web/css/condition-annotator.css">';
-        $content = str_replace('</head>', $css . "\n</head>", $content);
-        return $content;
+        if (!is_string($content) || false === stripos($type, 'text/html')
+            || false === ($pos = stripos($content, '</head>')) || false !== strpos($content, $css)) {
+            return $content;
+        }
+
+        return substr_replace($content, $css . "\n", $pos, 0);
     }
 
     public function addRoutes(sfEvent $event)
