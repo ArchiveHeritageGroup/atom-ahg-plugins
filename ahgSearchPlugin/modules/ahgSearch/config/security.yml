@@ -1,0 +1,7 @@
+# The top-bar search suggestions must work for visitors, as in base AtoM's own
+# search module (apps/qubit/modules/search/config/security.yml). Without this,
+# the app-wide rule that secures every "autocomplete" action applied, and a
+# visitor typing in the search box got the whole log-in page dropped into the
+# suggestions list. Drafts are filtered for visitors in SearchService.
+autocomplete:
+  is_secure: false
