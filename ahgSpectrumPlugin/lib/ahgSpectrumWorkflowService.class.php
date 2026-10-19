@@ -907,15 +907,18 @@ class ahgSpectrumWorkflowService
                     ['value' => $value]
                 );
         } else {
-            // Create new property
+            // Create new property. source_culture is required (no default), so the
+            // first status on a record used to fail with SQL error 1364.
+            $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
             $propertyId = DB::table('property')->insertGetId([
                 'object_id' => $objectId,
                 'name' => $name,
+                'source_culture' => $culture,
             ]);
 
             DB::table('property_i18n')->insert([
                 'id' => $propertyId,
-                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
+                'culture' => $culture,
                 'value' => $value,
             ]);
         }

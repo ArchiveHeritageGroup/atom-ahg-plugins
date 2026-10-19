@@ -41,6 +41,16 @@ class museumApiSpectrumUpdateProcedureAction extends AhgController
             return sfView::NONE;
         }
 
+        // The workflow service belongs to the collections-procedures plugin and
+        // is not autoloaded here; without it the call died as a bare HTML 500.
+        $service = sfConfig::get('sf_plugins_dir').'/ahgSpectrumPlugin/lib/ahgSpectrumWorkflowService.class.php';
+        if (!is_file($service)) {
+            $this->getResponse()->setStatusCode(501);
+            echo json_encode(['error' => 'Collections procedures plugin is not installed']);
+            return sfView::NONE;
+        }
+        require_once $service;
+
         try {
             $result = ahgSpectrumWorkflowService::updateProcedureStatus(
                 $objectId,
@@ -57,7 +67,7 @@ class museumApiSpectrumUpdateProcedureAction extends AhgController
                 'updated' => $result
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setStatusCode(500);
             echo json_encode([
                 'error' => 'Update failed',
