@@ -1872,7 +1872,8 @@ class displayActions extends AhgController
             ->orderByDesc('count')
             ->limit(10)
             ->get()
-            ->map(fn($r) => (object) ['id' => $r->object_type, 'name' => ucfirst($r->object_type), 'count' => (int) $r->count])
+            // Same shape as the cached and live paths: the template reads object_type.
+            ->map(fn($r) => (object) ['object_type' => $r->object_type, 'id' => $r->object_type, 'name' => ucfirst($r->object_type), 'count' => (int) $r->count])
             ->toArray();
 
         // Level counts
@@ -1972,7 +1973,8 @@ class displayActions extends AhgController
             ->orderByDesc('count')
             ->limit(10)
             ->get()
-            ->map(fn($r) => (object) ['id' => $r->media_type, 'name' => ucfirst($r->media_type), 'count' => (int) $r->count])
+            // The template reads media_type, as on the other two paths.
+            ->map(fn($r) => (object) ['media_type' => $r->media_type, 'id' => $r->media_type, 'name' => ucfirst($r->media_type), 'count' => (int) $r->count])
             ->toArray();
     }
 

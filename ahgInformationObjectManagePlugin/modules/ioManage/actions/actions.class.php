@@ -660,20 +660,14 @@ class ioManageActions extends AhgController
                 $movedFile = \Qubit::moveUploadFile($file);
                 $tmpFilePath = $movedFile['tmp_name'];
 
-                // Create QubitDigitalObject via Propel (handles derivatives + filesystem)
-                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
-                    $do = new \QubitDigitalObject();
-                    $do->objectId = $ioId;
-                    $do->usageId = \QubitTerm::MASTER_ID;
-                    $do->assets[] = new \QubitAsset($tmpFilePath);
-                    $do->save(); // PropelBridge; Phase 4 replaces
-                } else {
-                    $do = new \QubitDigitalObject();
-                    $do->objectId = $ioId;
-                    $do->usageId = \QubitTerm::MASTER_ID;
-                    $do->assets[] = new \QubitAsset($tmpFilePath);
-                    $do->save();
-                }
+                // Create QubitDigitalObject via Propel (handles derivatives + filesystem).
+                // Name the asset after the uploaded file, as base AtoM's uploader does;
+                // QubitAsset($path) would take the temporary name (TMPxxxx.jpg).
+                $do = new \QubitDigitalObject();
+                $do->objectId = $ioId;
+                $do->usageId = \QubitTerm::MASTER_ID;
+                $do->assets[] = new \QubitAsset(basename((string) $file['name']), file_get_contents($tmpFilePath));
+                $do->save();
 
                 // Update search index
                 $ioObject = \QubitInformationObject::getById($ioId);

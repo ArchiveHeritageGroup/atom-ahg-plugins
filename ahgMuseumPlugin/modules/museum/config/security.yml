@@ -9,5 +9,12 @@
 # `credentials: [editor]` refuses administrators, who hold the administrator
 # credential rather than editor. Actions needing more than "logged in" enforce
 # it themselves. Same pattern as ahgSpectrumPlugin/modules/spectrum.
+# The record view is public: museum (CCO) records are published descriptions,
+# and indexAction checks read access itself (QubitAcl 'read', which honours
+# publication status, plus the embargo gate). Without this line every museum
+# record sent visitors to the log-in page (found 19 Oct 2026, issue #210).
+index:
+  is_secure: false
+
 all:
   is_secure: true
