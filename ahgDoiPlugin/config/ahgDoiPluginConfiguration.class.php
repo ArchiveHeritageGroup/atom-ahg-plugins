@@ -76,9 +76,6 @@ class ahgDoiPluginConfiguration extends sfPluginConfiguration
         $router->any('ahg_doi_queue', '/admin/doi/queue', 'queue');
         $router->any('ahg_doi_queue_retry', '/admin/doi/queue/:id/retry', 'queueRetry', ['id' => '\d+']);
 
-        // Mapping configuration
-        $router->any('ahg_doi_mapping', '/admin/doi/mapping', 'mapping');
-
         // Reports
         $router->any('ahg_doi_report', '/admin/doi/report', 'report');
 

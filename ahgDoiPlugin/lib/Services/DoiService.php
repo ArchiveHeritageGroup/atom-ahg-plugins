@@ -16,6 +16,9 @@ use Illuminate\Support\Collection;
  */
 class DoiService
 {
+    /** DataCite asks scripted clients to name themselves and give a contact address. */
+    public const USER_AGENT = 'AHG-Extensions-for-AtoM-DOI/1.0 (https://www.atom-extensions.com; mailto:support@theahg.co.za)';
+
     private ?object $config = null;
 
     // =========================================
@@ -145,6 +148,7 @@ class DoiService
         $ch = curl_init($url);
         $opts = [
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => self::USER_AGENT,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => ['Content-Type: application/vnd.api+json'],
             CURLOPT_TIMEOUT => 10,
@@ -310,6 +314,7 @@ class DoiService
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => self::USER_AGENT,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_NOBODY => true,
             CURLOPT_TIMEOUT => 10,
@@ -541,6 +546,7 @@ class DoiService
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => self::USER_AGENT,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POSTFIELDS => json_encode($payload),
             CURLOPT_HTTPHEADER => [
@@ -1268,6 +1274,7 @@ class DoiService
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => self::USER_AGENT,
             CURLOPT_CUSTOMREQUEST => 'PATCH',
             CURLOPT_POSTFIELDS => json_encode($payload),
             CURLOPT_HTTPHEADER => [

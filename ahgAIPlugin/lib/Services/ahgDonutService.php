@@ -30,7 +30,8 @@ class ahgDonutService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim($this->loadSetting('donut_service_url', 'http://192.168.0.115:5008'), '/');
+        // The gateway's Donut route (a shim on qwen2.5vl since workhorse-115 retired).
+        $this->baseUrl = rtrim($this->loadSetting('donut_service_url', 'https://ai.theahg.co.za/ai/v1/donut'), '/');
         $this->timeout = (int) $this->loadSetting('donut_timeout', '60');
         if ($this->timeout <= 0) {
             $this->timeout = 60;

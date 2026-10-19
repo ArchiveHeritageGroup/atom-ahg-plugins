@@ -345,21 +345,20 @@ class IiifAiService
         // Get translation settings from ahg_ner_settings
         $sourceLang = $this->getTranslationSetting('translation_source_lang', 'en');
         $targetLang = $this->getTranslationSetting('translation_target_lang', 'af');
-        $mtEndpoint = $this->getTranslationSetting('mt_endpoint', 'http://127.0.0.1:5100/translate');
         $overwrite = $this->getTranslationSetting('translation_overwrite', '0') === '1';
         $saveCulture = $this->getTranslationSetting('translation_save_culture', '1') === '1';
         $mode = $this->getTranslationSetting('translation_mode', 'review');
-        $apiKey = $this->getAiApiKey();
 
-        $response = $this->apiRequest('POST', $mtEndpoint, [
-            'text' => $text,
-            'source' => $sourceLang,
-            'target' => $targetLang,
-        ], $apiKey);
+        // Through the AHG AI gateway, as AhgTranslationService does - never the
+        // old mt_endpoint setting, which pointed straight at a GPU node.
+        $response = \AtomFramework\Services\AI\AiGatewayClient::fromSettings()->translate($text, $sourceLang, $targetLang);
+        if (is_array($response) && !isset($response['translatedText'])) {
+            $response['translatedText'] = $response['translated'] ?? $response['translation'] ?? null;
+        }
 
         $elapsed = (int) ((microtime(true) - $startTime) * 1000);
 
-        if (!$response || !isset($response['translatedText'])) {
+        if (!$response || empty($response['translatedText'])) {
             return $this->logExtraction(
                 $objectId, null, 'translate', 'failed',
                 null, $response['error'] ?? 'Translation failed', $elapsed
