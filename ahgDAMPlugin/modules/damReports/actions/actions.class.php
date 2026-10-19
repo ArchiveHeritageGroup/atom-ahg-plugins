@@ -12,7 +12,9 @@ class damReportsActions extends AhgController
 {
     protected function checkAccess()
     {
-        if (!$this->getUser()->isAuthenticated()) {
+        // Staff only: a signed-in researcher must not list every asset and its
+        // storage. Same test as the DAM dashboard (base AtoM's create permission).
+        if (!$this->getUser()->isAuthenticated() || !\QubitAcl::check(\QubitInformationObject::getRoot(), 'create')) {
             $this->forward('admin', 'secure');
         }
     }

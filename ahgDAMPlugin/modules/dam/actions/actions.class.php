@@ -7,11 +7,25 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 class damActions extends AhgController
 {
+    /**
+     * Base AtoM's own permission check on the record, or on the root for new
+     * records. Signing in is not enough: a self-registered researcher is signed
+     * in too, and could otherwise retype any record, write its IPTC or read the
+     * embedded metadata of a restricted master.
+     */
+    private function requireAcl(?int $objectId, string $action): void
+    {
+        $resource = $objectId ? \QubitInformationObject::getById($objectId) : \QubitInformationObject::getRoot();
+        if (!$resource || !\QubitAcl::check($resource, $action)) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+    }
     public function executeDashboard($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
+        $this->requireAcl(null, 'create');
 
         // Get DAM statistics
         $this->totalAssets = DB::table('display_object_config')
@@ -73,6 +87,7 @@ class damActions extends AhgController
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
+        $this->requireAcl(null, 'create');
 
         // Get repositories for dropdown
         $this->repositories = DB::table('repository as r')
@@ -279,6 +294,7 @@ class damActions extends AhgController
         if (!$this->resource) {
             $this->forward404('Resource not found');
         }
+        $this->requireAcl((int) $this->resource->id, 'update');
 
         // Get or create IPTC metadata
         $this->iptc = DB::table('dam_iptc_metadata')
@@ -486,6 +502,7 @@ class damActions extends AhgController
         }
 
         $objectId = (int) $request->getParameter('id');
+        $this->requireAcl($objectId, 'readMaster');
 
         // Get digital object path
         $digitalObject = DB::table('digital_object')
@@ -645,6 +662,7 @@ class damActions extends AhgController
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
         }
+        $this->requireAcl(null, 'create');
 
         // Get repositories
         $this->repositories = DB::table('repository as r')
@@ -678,6 +696,7 @@ class damActions extends AhgController
         }
 
         $objectId = (int) $request->getParameter('id');
+        $this->requireAcl($objectId, 'update');
 
         DB::table('display_object_config')->updateOrInsert(
             ['object_id' => $objectId],

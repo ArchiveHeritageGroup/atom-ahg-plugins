@@ -1,0 +1,18 @@
+# Symfony's default is `is_secure: false`, so without this file every DAM screen
+# answered anonymous visitors and relied on its own check. Staff screens now need
+# a sign-in here, and each action also runs base AtoM's permission check on the
+# record (create, update or readMaster), because signing in is not enough on
+# PSIS, where researchers can register themselves.
+#
+# `is_secure` only, no `credentials` key: a module-wide `credentials: [editor]`
+# refuses administrators. Same pattern as ahgMuseumPlugin/modules/museum.
+# The record view checks read access and the embargo gate itself, and browse
+# only redirects to the public GLAM browse, so both stay public.
+index:
+  is_secure: false
+
+browse:
+  is_secure: false
+
+all:
+  is_secure: true
