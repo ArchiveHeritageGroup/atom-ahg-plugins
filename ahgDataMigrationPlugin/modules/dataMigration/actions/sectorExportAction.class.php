@@ -7,7 +7,7 @@ use AtomFramework\Http\Controllers\AhgController;
  *
  * Exports records from the database using sector-specific exporter.
  */
-class sectorExportAction extends AhgController
+class dataMigrationSectorExportAction extends AhgController
 {
     public function execute($request)
     {
@@ -153,12 +153,12 @@ class sectorExportAction extends AhgController
      */
     protected function getRepositories(): array
     {
-        return \Illuminate\Database\Capsule\Manager::table('actor as a')
-            ->join('actor_i18n as ai', 'a.id', '=', 'ai.id')
-            ->where('a.class_name', 'QubitRepository')
+        // Repositories have their own table; class_name is on `object`, not `actor`.
+        return \Illuminate\Database\Capsule\Manager::table('repository as r')
+            ->join('actor_i18n as ai', 'r.id', '=', 'ai.id')
             ->where('ai.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
             ->orderBy('ai.authorized_form_of_name')
-            ->select('a.id', 'ai.authorized_form_of_name as name')
+            ->select('r.id', 'ai.authorized_form_of_name as name')
             ->get()
             ->toArray()
         ;

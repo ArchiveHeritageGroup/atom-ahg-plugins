@@ -9,7 +9,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * Admin interface for reviewing, confirming, and managing Getty vocabulary links.
  */
-class gettyLinksAction extends AhgController
+class museumApiGettyLinksAction extends AhgController
 {
     public $links = [];
     public $statistics = [];
@@ -30,6 +30,9 @@ class gettyLinksAction extends AhgController
     
     public function execute($request)
     {
+        // This module has no templates of its own; the page lives in museum/.
+        $this->setTemplate('gettyLinks', 'museum');
+
         // Check authentication
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
@@ -99,7 +102,7 @@ class gettyLinksAction extends AhgController
                         'confirmed_at' => date('Y-m-d H:i:s'),
                     ]);
 
-                $this->redirect('api/gettyLinks');
+                $this->redirect('museumApi/gettyLinks');
             }
         }
     }

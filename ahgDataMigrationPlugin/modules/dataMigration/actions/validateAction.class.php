@@ -8,7 +8,7 @@ use AtomFramework\Http\Controllers\AhgController;
  * Validates a CSV file against sector-specific rules without importing any data.
  * Returns a detailed validation report with row/column error tracking.
  */
-class validateAction extends AhgController
+class dataMigrationValidateAction extends AhgController
 {
     public function execute($request)
     {

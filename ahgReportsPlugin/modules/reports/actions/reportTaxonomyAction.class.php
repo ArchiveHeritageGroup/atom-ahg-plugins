@@ -26,7 +26,7 @@ use AtomFramework\Services\Pagination\PaginationService;
  */
 class reportsReportTaxonomyAction extends BaseReportAction
 {
-    public static $NAMES = ['dateStart', 'dateEnd', 'dateOf', 'limit'];
+    public static $NAMES = ['className', 'dateStart', 'dateEnd', 'dateOf', 'limit'];
 
     public function execute($request)
     {
@@ -152,8 +152,8 @@ class reportsReportTaxonomyAction extends BaseReportAction
             // Page results
             $this->pager = new QubitPager('QubitTaxonomy');
             $this->pager->setCriteria($criteria);
-            $this->pager->setMaxPerPage($request->limit);
-            $this->pager->setPage($request->page);
+            $this->pager->setMaxPerPage((int) ($this->form->getValue('limit') ?: 10));
+            $this->pager->setPage((int) $this->request->getParameter('page', 1));
 
             $this->taxonomies = $this->pager->getResults();
         } else {

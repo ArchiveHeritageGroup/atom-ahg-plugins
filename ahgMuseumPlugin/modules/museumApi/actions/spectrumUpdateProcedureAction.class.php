@@ -9,7 +9,7 @@ use AtomFramework\Http\Controllers\AhgController;
  * @package ahgMuseumPlugin
  */
 
-class apiSpectrumUpdateProcedureAction extends AhgController
+class museumApiSpectrumUpdateProcedureAction extends AhgController
 {
     public function execute($request)
     {

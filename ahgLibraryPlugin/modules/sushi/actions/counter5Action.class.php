@@ -12,15 +12,19 @@ declare(strict_types=1);
  * @subpackage sushi
  */
 
-namespace AtomExtensions\Modules\Sushi;
+use AtomFramework\Http\Controllers\AhgController;
 
-class counter5Action extends \AhgController
+// The service is declared AtomExtensions\Services\SushiService but lives in this
+// plugin, where nothing autoloads that namespace.
+require_once __DIR__.'/../../../lib/Service/SushiService.php';
+
+// Symfony looks for <module><Action>Action in the global namespace.
+class sushiCounter5Action extends AhgController
 {
-    protected SushiService $svc;
+    protected \AtomExtensions\Services\SushiService $svc;
 
-    public function initialize(): void
+    public function boot(): void
     {
-        parent::initialize();
         $this->svc = new \AtomExtensions\Services\SushiService();
     }
 

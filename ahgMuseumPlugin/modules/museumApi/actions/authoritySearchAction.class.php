@@ -11,7 +11,7 @@ use AtomFramework\Http\Controllers\AhgController;
  * @package ahgMuseumPlugin
  */
 
-class apiAuthoritySearchAction extends AhgController
+class museumApiAuthoritySearchAction extends AhgController
 {
     public function execute($request)
     {

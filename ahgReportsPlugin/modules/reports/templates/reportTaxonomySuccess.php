@@ -60,58 +60,22 @@
 
 <?php slot('content'); ?>
 
-  <table class="table table-bordered" border="1" cellpadding="0" cellspacing="0" bordercolor="#999999">
+  <table class="table table-bordered">
     <thead>
       <tr>
-		<th><?php echo __('Unique Identifier'); ?></th>
-		<th><?php echo __('Description/Title'); ?></th>
-		<th><?php echo __('Method of Storage'); ?></th>
-		<th><?php echo __('Location'); ?></th>
-		<th><?php echo __('Period Covered'); ?></th>
-		<th><?php echo __('Extent'); ?></th>
-		<th><?php echo __('Accrual Space'); ?></th>
-		<th><?php echo __('Forms'); ?></th>
-  
-        <?php if ('CREATED_AT' != $form->getValue('dateOf')) { ?>
-          <th data-ahg-style="width: 110px"><?php echo __('Updated'); ?></th>
-        <?php } else { ?>
-          <th data-ahg-style="width: 110px"><?php echo __('Created'); ?></th>
-        <?php } ?>
+        <th><?php echo __('Taxonomy'); ?></th>
+        <th><?php echo __('Usage'); ?></th>
+        <th data-ahg-style="width: 110px"><?php echo 'CREATED_AT' != $form->getValue('dateOf') ? __('Updated') : __('Created'); ?></th>
       </tr>
-    </thead><tbody>
-     <?php foreach ($pager->getResults() as $result) { ?>
-        <tr class="<?php echo 0 == @++$row % 2 ? 'even' : 'odd'; ?>">
-			<?php if (isset($result->id)) { ?> 
-				<td><?php echo link_to($result->getUniqueIdentifier(['cultureFallback' => true]) ?? $result->getName(['cultureFallback' => true]) ?? '-', ['module' => 'physicalobject', 'slug' => $result->slug]); ?></td>
-			<?php } else { ?> 
-				<td>-</td> 
-			<?php }	?>
-			<?php if (isset($result->id)) { ?> <td><?php echo $result->getDescriptionTitle(['cultureFallback' => true]); ?></td> <?php } else { ?> <td>-</td> <?php }	?>
-			<?php if (isset($result->type)) { ?> <td><?php echo $result->type; ?></td> <?php } else { ?> <td>-</td> <?php }	?>
-			<?php if (isset($result->id)) { ?> 
-				<td><?php echo $result->getLocation(['cultureFallback' => true]); ?></td> 
-			<?php } else { ?> 
-				<td>-</td> 
-			<?php }	?>
-			
-			<?php if (isset($result->id)) { ?> <td><?php echo $result->getPeriodCovered(['cultureFallback' => true]); ?></td> <?php } else { ?> <td>-</td> <?php }	?>
-			<?php if (isset($result->id)) { ?> <td><?php echo $result->getExtent(['cultureFallback' => true]); ?></td> <?php } else { ?> <td>-</td> <?php }	?>
-			<?php if (isset($result->id)) { ?> <td><?php echo $result->getAccrualSpace(['cultureFallback' => true]); ?></td> <?php } else { ?> <td>-</td> <?php }	?>
-			<?php if (isset($result->id)) { ?> <td><?php echo $result->getForms(['cultureFallback' => true]); ?></td> <?php } else { ?> <td>-</td> <?php }	?>
-
-          </td>
-		<td>
-			<?php if ('CREATED_AT' != $form->getValue('dateOf')) { ?>
-			<?php echo $result->updatedAt; ?>
-			<?php } else { ?>
-			<?php echo $result->createdAt; ?>
-			<?php } ?>
-		</td>
-
+    </thead>
+    <tbody>
+      <?php foreach ($pager->getResults() as $result) { ?>
+        <tr>
+          <td><?php echo link_to(esc_entities($result->getName(['cultureFallback' => true]) ?: '-'), ['module' => 'taxonomy', 'slug' => $result->slug]); ?></td>
+          <td><?php echo esc_entities((string) $result->usage); ?></td>
+          <td><?php echo 'CREATED_AT' != $form->getValue('dateOf') ? $result->updatedAt : $result->createdAt; ?></td>
         </tr>
-
       <?php } ?>
-
     </tbody>
   </table>
 

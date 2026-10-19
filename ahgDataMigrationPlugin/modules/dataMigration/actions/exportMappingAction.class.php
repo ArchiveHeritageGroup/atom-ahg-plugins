@@ -4,7 +4,7 @@ use AtomFramework\Http\Controllers\AhgController;
 /**
  * Export a mapping profile to JSON file.
  */
-class exportMappingAction extends AhgController
+class dataMigrationExportMappingAction extends AhgController
 {
     public function execute($request)
     {

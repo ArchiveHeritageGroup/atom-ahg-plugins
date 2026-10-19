@@ -7,7 +7,7 @@ use AtomFramework\Http\Controllers\AhgController;
  * Validates a sample of rows for live preview during mapping configuration.
  * Returns validation results for display in the UI.
  */
-class previewValidationAction extends AhgController
+class dataMigrationPreviewValidationAction extends AhgController
 {
     public function execute($request)
     {

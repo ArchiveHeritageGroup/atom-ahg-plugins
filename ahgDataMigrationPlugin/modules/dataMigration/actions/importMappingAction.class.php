@@ -4,7 +4,7 @@ use AtomFramework\Http\Controllers\AhgController;
 /**
  * Import a mapping profile from JSON file.
  */
-class importMappingAction extends AhgController
+class dataMigrationImportMappingAction extends AhgController
 {
     public function execute($request)
     {

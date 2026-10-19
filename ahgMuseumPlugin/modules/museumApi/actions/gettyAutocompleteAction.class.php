@@ -8,7 +8,7 @@ use AtomFramework\Http\Controllers\AhgController;
  * AJAX endpoint for searching Getty vocabularies (AAT, TGN, ULAN).
  * Returns JSON results for use in form autocomplete fields.
  */
-class gettyAutocompleteAction extends AhgController
+class museumApiGettyAutocompleteAction extends AhgController
 {
     public function execute($request)
     {
