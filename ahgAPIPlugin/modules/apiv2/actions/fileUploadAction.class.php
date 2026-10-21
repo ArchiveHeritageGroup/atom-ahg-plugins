@@ -10,6 +10,12 @@ class apiv2FileUploadAction extends AhgApiController
         if (!$this->hasScope('write')) {
             return $this->error(403, 'Forbidden', 'Write scope required');
         }
+        // Any signed-in user can issue themselves a write key at /api/keys, so
+        // the scope alone let researchers write into the upload store.
+        require_once sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/ApiVisibility.php';
+        if (!ApiVisibility::isStaff($this->getUser())) {
+            return $this->error(403, 'Forbidden', 'Uploading files needs a staff account');
+        }
 
         // Sanitize type parameter to prevent path traversal
         $type = basename($request->getParameter('type', 'general'));

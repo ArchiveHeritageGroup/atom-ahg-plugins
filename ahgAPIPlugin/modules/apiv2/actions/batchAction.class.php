@@ -51,9 +51,24 @@ class apiv2BatchAction extends AhgApiController
         ];
 
         try {
+            // SECURITY: the key's scope is not authorisation. Any signed-in user
+            // can issue themselves a write key at /api/keys, so without AtoM's
+            // own check a self-registered researcher could retitle or delete any
+            // description through batch. Same check as the single endpoints.
+            if (in_array($op['operation'] ?? '', ['update', 'delete'], true)) {
+                $slug = DB::table('slug')->where('slug', (string) ($op['slug'] ?? ''))->value('object_id');
+                $resource = $slug ? \QubitInformationObject::getById((int) $slug) : null;
+                if (!$resource || !\AtomExtensions\Services\AclService::check($resource, $op['operation'])) {
+                    return $result + ['error' => 'Not authorised for this description'];
+                }
+            }
+
             switch ($op['operation']) {
                 case 'create':
-                    $result = array_merge($result, $this->handleCreate($op));
+                    // Batch create wrote lft/rgt as 0, breaking the description
+                    // tree, and skipped the permission check. The single endpoint
+                    // does both properly.
+                    $result['error'] = 'Batch create is not supported; use POST /api/v2/descriptions';
                     break;
                 case 'update':
                     $result = array_merge($result, $this->handleUpdate($op));
@@ -69,40 +84,6 @@ class apiv2BatchAction extends AhgApiController
         }
 
         return $result;
-    }
-
-    protected function handleCreate(array $op): array
-    {
-        // Simplified create for batch - delegates to repository
-        if ($op['entity'] === 'description' && !empty($op['data']['title'])) {
-            $objectId = DB::table('object')->insertGetId([
-                'class_name' => 'QubitInformationObject',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ]);
-
-            DB::table('information_object')->insert([
-                'id' => $objectId,
-                'parent_id' => $op['data']['parent_id'] ?? 1,
-                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
-                'lft' => 0, 'rgt' => 0, // Simplified - needs proper nested set
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ]);
-
-            DB::table('information_object_i18n')->insert([
-                'id' => $objectId,
-                'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
-                'title' => $op['data']['title']
-            ]);
-
-            $slug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $op['data']['title']));
-            DB::table('slug')->insert(['object_id' => $objectId, 'slug' => $slug . '-' . $objectId]);
-
-            return ['success' => true, 'id' => $objectId];
-        }
-
-        return ['success' => false, 'error' => 'Invalid create operation'];
     }
 
     protected function handleUpdate(array $op): array

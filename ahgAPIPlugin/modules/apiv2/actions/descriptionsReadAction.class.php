@@ -33,6 +33,10 @@ class apiv2DescriptionsReadAction extends AhgApiController
             return $this->error(404, 'Not Found', "Description '{$slug}' not found");
         }
 
+        if ($full) {
+            $result = $this->limitFullToCaller($result);
+        }
+
         // Custom fields (#202): staff keys see every field, other keys only the
         // fields marked visible to the public. Added before redaction, so the
         // privacy rules below apply to them too.
@@ -57,5 +61,55 @@ class apiv2DescriptionsReadAction extends AhgApiController
         }
 
         return $this->success($result);
+    }
+
+    /**
+     * The full read listed every ancestor and counted every child, hidden or
+     * not, so a published record under a draft or embargoed parent gave away the
+     * parent's title. Its file links were unusable ("/uploads/" doubled, no file
+     * name) and offered the master to any key. Now: only ancestors and children
+     * the caller may see, and each file only where AtoM's own readMaster,
+     * readReference or readThumbnail check allows it (#218, GLAM MCP).
+     */
+    private function limitFullToCaller(array $result): array
+    {
+        $user = $this->getUser();
+
+        $result['hierarchy'] = array_values(array_filter(
+            (array) ($result['hierarchy'] ?? []),
+            fn ($a) => !empty($a['slug']) && ApiVisibility::canSeeSlug((string) $a['slug'], $user)
+        ));
+
+        $children = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->where('io.parent_id', (int) $result['id']);
+        ApiVisibility::applyToQuery($children, $user);
+        $result['children_count'] = $children->count();
+
+        $resource = \QubitInformationObject::getById((int) $result['id']);
+        $files = [];
+        foreach ((array) ($result['digital_objects'] ?? []) as $do) {
+            $rows = \Illuminate\Database\Capsule\Manager::table('digital_object')
+                ->where('id', (int) $do['id'])->orWhere('parent_id', (int) $do['id'])
+                ->get(['usage_id', 'path', 'name'])->keyBy('usage_id');
+            $url = function (int $usage, string $action) use ($rows, $resource) {
+                $row = $rows[$usage] ?? null;
+
+                return $row && $row->path && $resource && \QubitAcl::check($resource, $action) ? $row->path.$row->name : null;
+            };
+            $master = $url(\QubitTerm::MASTER_ID, 'readMaster');
+            $files[] = [
+                'id' => $do['id'],
+                'name' => $master ? $do['name'] : null,
+                'mime_type' => $do['mime_type'],
+                'byte_size' => $master ? $do['byte_size'] : null,
+                'checksum' => $master ? $do['checksum'] : null,
+                'thumbnail_url' => $url(\QubitTerm::THUMBNAIL_ID, 'readThumbnail'),
+                'reference_url' => $url(\QubitTerm::REFERENCE_ID, 'readReference'),
+                'master_url' => $master,
+            ];
+        }
+        $result['digital_objects'] = $files;
+
+        return $result;
     }
 }

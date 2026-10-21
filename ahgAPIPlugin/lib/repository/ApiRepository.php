@@ -121,13 +121,21 @@ class ApiRepository
             $query->where('dss.sector', $params['sector']);
         }
 
+        // Children of one description (id or slug), in archival order. The
+        // parameter was accepted but ignored, so "children" listed everything.
+        $parentId = null;
+        if (!empty($params['parent'])) {
+            $parentId = ctype_digit((string) $params['parent']) ? (int) $params['parent'] : (int) $this->getObjectIdBySlug((string) $params['parent']);
+            $query->where('io.parent_id', $parentId ?: -1);
+        }
+
         // Caller-specific visibility (drafts, restricted records) - see ApiVisibility.
         if (isset($params['visibility']) && is_callable($params['visibility'])) {
             ($params['visibility'])($query);
         }
 
         $total = $query->count();
-        $results = $query->orderBy('io.id', 'desc')->skip($skip)->take($limit)->get();
+        $results = ($parentId ? $query->orderBy('io.lft', 'asc') : $query->orderBy('io.id', 'desc'))->skip($skip)->take($limit)->get();
 
         return [
             'total' => $total,
@@ -1193,12 +1201,14 @@ public function getAuthorities(array $params = []): array
             ->select([
                 'b.id',
                 'b.reference_number',
-                'b.breach_date',
-                'b.discovery_date',
+                // The table names these occurred_date, detected_date and
+                // data_subjects_affected; the old names made every call a 500.
+                'b.occurred_date as breach_date',
+                'b.detected_date as discovery_date',
                 'b.severity',
                 'b.status',
                 'b.breach_type',
-                'b.affected_count',
+                'b.data_subjects_affected as affected_count',
                 'bi.description',
                 'bi.impact_assessment'
             ]);
@@ -1212,7 +1222,7 @@ public function getAuthorities(array $params = []): array
         }
 
         $total = $query->count();
-        $results = $query->orderBy('b.breach_date', 'desc')
+        $results = $query->orderBy('b.occurred_date', 'desc')
                          ->skip($skip)
                          ->take($limit)
                          ->get();
@@ -1229,26 +1239,35 @@ public function getAuthorities(array $params = []): array
 
     public function createBreach(array $data): int
     {
+        // Column names follow privacy_breach; the API's older field names
+        // (breach_date, discovery_date, affected_count, containment_actions,
+        // remediation_steps) are still accepted. Every insert used to fail on
+        // columns the table does not have.
+        $now = date('Y-m-d H:i:s');
         $id = DB::table('privacy_breach')->insertGetId([
             'reference_number' => $data['reference_number'] ?? 'BR-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid()), 0, 4)),
-            'breach_date' => $data['breach_date'] ?? date('Y-m-d'),
-            'discovery_date' => $data['discovery_date'] ?? date('Y-m-d'),
+            'jurisdiction' => $data['jurisdiction'] ?? 'popia',
+            'breach_type' => $data['breach_type'],
             'severity' => $data['severity'] ?? 'medium',
-            'status' => 'investigating',
-            'breach_type' => $data['breach_type'] ?? null,
-            'affected_count' => $data['affected_count'] ?? null,
-            'reported_by' => $data['reported_by'] ?? null,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
+            'status' => $data['status'] ?? 'detected',
+            'detected_date' => $data['detected_date'] ?? $data['discovery_date'] ?? $now,
+            'occurred_date' => $data['occurred_date'] ?? $data['breach_date'] ?? null,
+            'data_subjects_affected' => $data['data_subjects_affected'] ?? $data['affected_count'] ?? null,
+            'data_categories_affected' => $data['data_categories_affected'] ?? null,
+            'risk_to_rights' => $data['risk_to_rights'] ?? null,
+            'created_by' => $data['created_by'] ?? null,
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
 
         DB::table('privacy_breach_i18n')->insert([
             'id' => $id,
             'culture' => $this->culture,
+            'title' => $data['title'] ?? null,
             'description' => $data['description'] ?? null,
+            'cause' => $data['cause'] ?? null,
             'impact_assessment' => $data['impact_assessment'] ?? null,
-            'containment_actions' => $data['containment_actions'] ?? null,
-            'remediation_steps' => $data['remediation_steps'] ?? null
+            'remedial_actions' => $data['remedial_actions'] ?? trim(($data['containment_actions'] ?? '') . "\n" . ($data['remediation_steps'] ?? '')) ?: null,
         ]);
 
         return $id;

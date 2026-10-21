@@ -82,6 +82,39 @@ class iiifActions extends AhgController
     }
 
     /**
+     * Whether this user may see the record at all: its publication state, and
+     * nothing the access filter hides (embargo, classification, donor
+     * restriction, ICIP, ODRL). Manifests and content search only checked
+     * publication, so embargoed and classified records were served to anyone.
+     * Fails closed.
+     */
+    private function canSeeRecord(int $objectId): bool
+    {
+        if (!$this->canSeePublicationState($objectId)) {
+            return false;
+        }
+        try {
+            $user = $this->getUser();
+            $userId = $user->isAuthenticated() ? (int) $user->getAttribute('user_id') : null;
+            $hidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()->getRestrictedObjectIds($userId ?: null);
+
+            return !in_array($objectId, array_map('intval', $hidden), true);
+        } catch (\Throwable $e) {
+            error_log('iiif.visibility_failed: '.$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /** canSeeRecord() by slug; false when the slug is unknown. */
+    private function canSeeSlug(string $slug): bool
+    {
+        $id = \Illuminate\Database\Capsule\Manager::table('slug')->where('slug', $slug)->value('object_id');
+
+        return $id && $this->canSeeRecord((int) $id);
+    }
+
+    /**
      * Detect if client explicitly requests v2.1 manifest via ?format=2, ?version=2, or Accept header.
      * Default is now v3 (Presentation API 3.0).
      */
@@ -232,7 +265,7 @@ class iiifActions extends AhgController
 
         // Drafts: the record page refuses them to anyone without viewDraft, but the
         // manifest was served to everyone. Answer as if it did not exist.
-        if (!$this->canSeePublicationState((int) $object['id'])) {
+        if (!$this->canSeeRecord((int) $object['id'])) {
             $this->getResponse()->setStatusCode(404);
             return $this->renderText(json_encode(['error' => 'Object not found']));
         }
@@ -550,7 +583,7 @@ class iiifActions extends AhgController
 
         // Drafts: the record page refuses them to anyone without viewDraft, but the
         // manifest was served to everyone. Answer as if it did not exist.
-        if (!$this->canSeePublicationState((int) $object['id'])) {
+        if (!$this->canSeeRecord((int) $object['id'])) {
             $this->getResponse()->setStatusCode(404);
             return $this->renderText(json_encode(['error' => 'Object not found']));
         }
@@ -1098,6 +1131,12 @@ class iiifActions extends AhgController
         $query = (string) $request->getParameter('q', '');
         $motivation = $request->getParameter('motivation');
 
+        if (!$this->canSeeSlug((string) $slug)) {
+            $this->getResponse()->setStatusCode(404);
+
+            return $this->renderText(json_encode(['error' => 'Object not found']));
+        }
+
         $page = $this->runContentSearch($slug, $query, $motivation);
 
         $this->getResponse()->setHttpHeader('Content-Type', 'application/ld+json;profile="http://iiif.io/api/search/2/context.json"');
@@ -1119,6 +1158,12 @@ class iiifActions extends AhgController
     {
         $slug = $request->getParameter('slug');
         $query = (string) $request->getParameter('q', '');
+
+        if (!$this->canSeeSlug((string) $slug)) {
+            $this->getResponse()->setStatusCode(404);
+
+            return $this->renderText(json_encode(['error' => 'Object not found']));
+        }
 
         $page = $this->runAutocomplete($slug, $query);
 
