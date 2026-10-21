@@ -570,7 +570,7 @@ class DescriptionService
      * Save text to scope_and_content field
      */
     /** information_object_i18n fields a suggestion may write. */
-    public const TARGET_FIELDS = ['scope_and_content', 'archival_history', 'extent_and_medium', 'arrangement', 'access_conditions', 'reproduction_conditions'];
+    public const TARGET_FIELDS = ['title', 'scope_and_content', 'archival_history', 'extent_and_medium', 'arrangement', 'access_conditions', 'reproduction_conditions'];
 
     /** The field a suggestion writes to: source_data.field when allowed, else scope_and_content. */
     public static function targetField(object $suggestion): string

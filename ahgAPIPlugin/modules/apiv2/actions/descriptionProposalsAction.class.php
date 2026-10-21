@@ -26,7 +26,7 @@ class apiv2DescriptionProposalsAction extends AhgApiController
     private const TYPES = ['PERSON', 'ORG', 'GPE', 'DATE'];
     private const MAX = 50;
     /** information_object_i18n fields a proposal may target. */
-    private const FIELDS = ['scope_and_content', 'archival_history', 'extent_and_medium', 'arrangement', 'access_conditions', 'reproduction_conditions'];
+    private const FIELDS = ['title', 'scope_and_content', 'archival_history', 'extent_and_medium', 'arrangement', 'access_conditions', 'reproduction_conditions'];
 
     private static function sources($list): array
     {
@@ -69,8 +69,8 @@ class apiv2DescriptionProposalsAction extends AhgApiController
         foreach ($fields as $i => $f) {
             $field = (string) ($f['field'] ?? '');
             $text = trim((string) ($f['text'] ?? ''));
-            if (!in_array($field, self::FIELDS, true) || '' === $text || mb_strlen($text) > 20000) {
-                return $this->error(400, 'Bad Request', "Field $i: field must be one of ".implode(', ', self::FIELDS).', text 1-20000 characters');
+            if (!in_array($field, self::FIELDS, true) || '' === $text || mb_strlen($text) > ('title' === $field ? 1024 : 20000)) {
+                return $this->error(400, 'Bad Request', "Field $i: field must be one of ".implode(', ', self::FIELDS).', text 1-20000 characters (title 1-1024)');
             }
             $fieldRows[] = ['field' => $field, 'text' => $text, 'evidence' => mb_substr(trim((string) ($f['evidence'] ?? '')), 0, 4000), 'sources' => self::sources($f['sources'] ?? [])];
         }
