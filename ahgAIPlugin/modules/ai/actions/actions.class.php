@@ -223,6 +223,14 @@ class aiActions extends AhgController
             ->get()
             ->toArray();
 
+        // Evidence and sources for proposals that arrived through the API.
+        $evidence = [];
+        try {
+            $evidence = Illuminate\Database\Capsule\Manager::table('ahg_ner_entity_evidence')
+                ->whereIn('entity_id', array_map(fn ($e) => $e->id, $entities))->get()->keyBy('entity_id')->all();
+        } catch (\Throwable $e) {
+            // Table absent on an install that predates it: show entities without evidence.
+        }
         $grouped = [];
         foreach ($entities as $entity) {
             $type = $entity->entity_type;
@@ -245,6 +253,8 @@ class aiActions extends AhgController
                 'id' => $entity->id,
                 'value' => $entity->entity_value,
                 'status' => $entity->status,
+                'evidence' => $evidence[$entity->id]->evidence ?? null,
+                'sources' => json_decode((string) ($evidence[$entity->id]->sources ?? '[]'), true) ?: [],
                 'exact_matches' => $matches['exact'],
                 'partial_matches' => $matches['partial']
             ];

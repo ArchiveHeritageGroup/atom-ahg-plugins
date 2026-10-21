@@ -185,12 +185,31 @@ function reviewSuggestion(suggestionId, objectId) {
             var s = data.suggestion;
             currentReview.suggestion = s;
 
-            var html = '<div class="row">';
+            // Proposals from the API name their field and carry evidence/sources.
+            var meta = {};
+            try { meta = s.source_data ? (typeof s.source_data === 'string' ? JSON.parse(s.source_data) : s.source_data) : {}; } catch (e) { meta = {}; }
+            var fieldLabel = (meta.field || 'scope_and_content').replace(/_/g, ' ');
+            fieldLabel = fieldLabel.charAt(0).toUpperCase() + fieldLabel.slice(1);
+
+            var html = '';
+            if (meta.evidence || (meta.sources && meta.sources.length)) {
+                html += '<div class="alert alert-light border mb-3"><strong>Why this was proposed</strong>';
+                if (meta.evidence) { html += '<div class="mt-1">' + escapeHtml(meta.evidence) + '</div>'; }
+                if (meta.sources && meta.sources.length) {
+                    html += '<div class="mt-2 small">Sources:<ul class="mb-0">';
+                    meta.sources.forEach(function (u) {
+                        if (/^https?:\/\//i.test(u)) { html += '<li><a href="' + escapeHtml(u).replace(/"/g, '&quot;').replace(/'/g, '&#039;') + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(u) + '</a></li>'; }
+                    });
+                    html += '</ul></div>';
+                }
+                html += '</div>';
+            }
+            html += '<div class="row">';
 
             // Existing text
             html += '<div class="col-md-6">';
             html += '<div class="card h-100">';
-            html += '<div class="card-header"><i class="bi bi-file-text me-1"></i>Current Description</div>';
+            html += '<div class="card-header"><i class="bi bi-file-text me-1"></i>Current: ' + escapeHtml(fieldLabel) + '</div>';
             html += '<div class="card-body" data-ahg-style="max-height: 400px; overflow-y: auto;">';
             if (s.existing_text && s.existing_text.trim()) {
                 html += '<pre class="mb-0" data-ahg-style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(s.existing_text) + '</pre>';
@@ -202,7 +221,7 @@ function reviewSuggestion(suggestionId, objectId) {
             // Suggested text (editable)
             html += '<div class="col-md-6">';
             html += '<div class="card h-100 border-primary">';
-            html += '<div class="card-header bg-primary text-white"><i class="bi bi-magic me-1"></i>AI Suggestion';
+            html += '<div class="card-header bg-primary text-white"><i class="bi bi-magic me-1"></i>Suggested: ' + escapeHtml(fieldLabel);
             html += '<span class="badge bg-light text-primary float-end">' + (s.model_used || 'AI') + '</span></div>';
             html += '<div class="card-body">';
             html += '<textarea id="editSuggestedText" class="form-control" rows="15" data-ahg-style="font-size: 0.9rem;">' + escapeHtml(s.suggested_text) + '</textarea>';

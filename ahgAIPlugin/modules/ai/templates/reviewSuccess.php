@@ -214,6 +214,14 @@ function renderEntities(entities) {
             html += '<input type="text" class="form-control entity-value" id="value-' + entity.id + '" value="' + escapeHtml(entity.value) + '" data-ahg-call="updateEntityValue" data-ahg-on="change" data-ahg-types="x" data-ahg-a0="' + entity.id + '">';
             html += '<button class="btn btn-outline-secondary" type="button" data-ahg-call="resetValue" data-ahg-types="x,s" data-ahg-a0="' + entity.id + '" data-ahg-a1="' + escapeHtml(entity.value) + '" title="Reset"><i class="fas fa-undo"></i></button>';
             html += '</div>';
+            // Why it was proposed (proposals from the API carry evidence and sources).
+            if (entity.evidence || (entity.sources && entity.sources.length)) {
+                html += '<small class="d-block text-muted mt-1"><i class="fas fa-quote-left me-1"></i>' + escapeHtml(entity.evidence || '');
+                (entity.sources || []).forEach(function (u, n) {
+                    if (/^https?:\/\//i.test(u)) { html += ' <a href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer">[source ' + (n + 1) + ']</a>'; }
+                });
+                html += '</small>';
+            }
             if (hasExact) {
                 html += '<small class="text-success"><i class="fas fa-check-circle me-1"></i>Match: ' + entity.exact_matches[0].name + '</small>';
             } else if (hasPartial) {

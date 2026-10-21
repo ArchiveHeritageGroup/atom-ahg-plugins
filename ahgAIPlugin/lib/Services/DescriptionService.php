@@ -326,11 +326,13 @@ class DescriptionService
                 'review_notes' => $notes,
             ]);
 
-        // Save to scope_and_content
-        $saved = $this->saveScopeAndContent($suggestion->object_id, $textToSave);
+        // Save to the field the proposal names (API proposals carry it in
+        // source_data); LLM suggestions have none and stay scope and content.
+        $field = self::targetField($suggestion);
+        $saved = $this->saveScopeAndContent($suggestion->object_id, $textToSave, $field);
 
         if (!$saved) {
-            return ['success' => false, 'error' => 'Failed to save scope and content'];
+            return ['success' => false, 'error' => 'Failed to save '.str_replace('_', ' ', $field)];
         }
 
         return [
@@ -567,8 +569,23 @@ class DescriptionService
     /**
      * Save text to scope_and_content field
      */
-    private function saveScopeAndContent(int $objectId, string $text): bool
+    /** information_object_i18n fields a suggestion may write. */
+    public const TARGET_FIELDS = ['scope_and_content', 'archival_history', 'extent_and_medium', 'arrangement', 'access_conditions', 'reproduction_conditions'];
+
+    /** The field a suggestion writes to: source_data.field when allowed, else scope_and_content. */
+    public static function targetField(object $suggestion): string
     {
+        $data = json_decode((string) ($suggestion->source_data ?? ''), true);
+        $field = is_array($data) ? (string) ($data['field'] ?? '') : '';
+
+        return in_array($field, self::TARGET_FIELDS, true) ? $field : 'scope_and_content';
+    }
+
+    private function saveScopeAndContent(int $objectId, string $text, string $field = 'scope_and_content'): bool
+    {
+        if (!in_array($field, self::TARGET_FIELDS, true)) {
+            return false;
+        }
         try {
             $culture = $this->getCulture();
 
@@ -581,13 +598,13 @@ class DescriptionService
                 DB::table('information_object_i18n')
                     ->where('id', $objectId)
                     ->where('culture', $culture)
-                    ->update(['scope_and_content' => $text]);
+                    ->update([$field => $text]);
             } else {
                 DB::table('information_object_i18n')
                     ->insert([
                         'id' => $objectId,
                         'culture' => $culture,
-                        'scope_and_content' => $text,
+                        $field => $text,
                     ]);
             }
 
