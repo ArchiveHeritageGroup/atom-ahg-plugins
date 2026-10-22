@@ -110,6 +110,50 @@ class apiv2DescriptionsReadAction extends AhgApiController
         }
         $result['digital_objects'] = $files;
 
+        $result['provenance'] = $this->provenanceFor((int) $result['id'], ApiVisibility::isStaff($user));
+
         return $result;
+    }
+
+    /**
+     * The record's provenance chain (ahgProvenancePlugin), when it is marked public
+     * or the caller is staff, as the record page shows it. Sale prices and auction
+     * details only for staff.
+     */
+    private function provenanceFor(int $objectId, bool $staff): ?array
+    {
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        try {
+            $rec = $db::table('provenance_record')->where('information_object_id', $objectId)->first();
+        } catch (\Throwable $e) {
+            return null; // provenance plugin not installed
+        }
+        if (!$rec || (!$rec->is_public && !$staff)) {
+            return null;
+        }
+        $summary = $db::table('provenance_record_i18n')->where('id', $rec->id)
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())->value('provenance_summary');
+        $entries = [];
+        foreach ($db::table('provenance_entry')->where('information_object_id', $objectId)->orderBy('sequence')->get() as $e) {
+            $row = [
+                'sequence' => (int) $e->sequence,
+                'owner' => $e->owner_name, 'owner_type' => $e->owner_type, 'location' => $e->owner_location,
+                'from' => trim(($e->start_date_qualifier ? $e->start_date_qualifier.' ' : '').$e->start_date) ?: null,
+                'to' => trim(($e->end_date_qualifier ? $e->end_date_qualifier.' ' : '').$e->end_date) ?: null,
+                'transfer' => $e->transfer_type, 'transfer_details' => $e->transfer_details,
+                'certainty' => $e->certainty, 'sources' => $e->sources,
+                'is_gap' => (bool) $e->is_gap, 'gap_explanation' => $e->gap_explanation,
+            ];
+            if ($staff) {
+                $row += ['sale_price' => $e->sale_price, 'sale_currency' => $e->sale_currency, 'auction_house' => $e->auction_house, 'auction_lot' => $e->auction_lot];
+            }
+            $entries[] = $row;
+        }
+
+        return [
+            'summary' => $summary, 'current_status' => $rec->current_status, 'acquisition_type' => $rec->acquisition_type,
+            'certainty' => $rec->certainty_level, 'has_gaps' => (bool) $rec->has_gaps, 'is_complete' => (bool) $rec->is_complete,
+            'entries' => $entries,
+        ];
     }
 }

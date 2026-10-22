@@ -39,6 +39,8 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $apiv2->get('apiv2_descriptionsBrowse', '/api/v2/descriptions', 'descriptionsBrowse');
         $apiv2->post('apiv2_descriptionsCreate', '/api/v2/descriptions', 'descriptionsCreate');
         $apiv2->get('apiv2_descriptionsCitation', '/api/v2/descriptions/:slug/citation', 'descriptionsCitation', ['slug' => '[a-z0-9_-]+']);
+        // Text held for the record's files: extracted text, OCR, transcriptions (GLAM MCP, #218).
+        $apiv2->get('apiv2_descriptionText', '/api/v2/descriptions/:slug/text', 'descriptionText', ['slug' => '[a-z0-9_-]+']);
         // Proposed access points and dates, queued for review (GLAM MCP, #218).
         $apiv2->post('apiv2_descriptionProposals', '/api/v2/descriptions/:slug/proposals', 'descriptionProposals', ['slug' => '[a-z0-9_-]+']);
         $apiv2->get('apiv2_descriptionsRead', '/api/v2/descriptions/:slug', 'descriptionsRead', ['slug' => '[a-z0-9_-]+']);

@@ -2,6 +2,9 @@
 
 Records in Context (RiC) visualization and exploration plugin for Access to Memory (AtoM).
 
+
+Video walkthrough: [RiC Graph Discovery - AtoM](https://youtu.be/sidRNbECBKQ)
+
 ## Features
 
 - **RiC Relations Panel**: Shows creators, accumulators, and related records on description pages
