@@ -150,10 +150,44 @@ class apiv2DescriptionsReadAction extends AhgApiController
             $entries[] = $row;
         }
 
+        // Events recorded on the provenance screen (ahgProvenancePlugin): transfers
+        // between agents, each with its own public flag. The museum (CCO) screen
+        // writes the owner chain above instead; a record may have either or both.
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $events = [];
+        $q = $db::table('provenance_event as e')
+            ->leftJoin('provenance_agent as fa', 'fa.id', '=', 'e.from_agent_id')
+            ->leftJoin('provenance_agent as ta', 'ta.id', '=', 'e.to_agent_id')
+            ->leftJoin('provenance_event_i18n as ei', function ($j) use ($culture) {
+                $j->on('ei.id', '=', 'e.id')->where('ei.culture', '=', $culture);
+            })
+            ->where('e.provenance_record_id', $rec->id)
+            ->orderBy('e.sequence_number')->orderBy('e.sort_order')->orderBy('e.event_date_start')
+            ->select('e.*', 'fa.name as from_name', 'ta.name as to_name', 'ei.event_description', 'ei.evidence_description as evidence_i18n', 'ei.source_reference as source_i18n');
+        if (!$staff) {
+            $q->where('e.is_public', 1);
+        }
+        foreach ($q->get() as $e) {
+            $date = $e->event_date_text ?: trim(($e->event_date_start ?: $e->event_date ?: '').($e->event_date_end && $e->event_date_end !== $e->event_date_start ? ' - '.$e->event_date_end : ''));
+            $row = [
+                'type' => $e->event_type, 'date' => $date ?: null, 'date_certainty' => $e->date_certainty,
+                'from' => $e->from_name, 'to' => $e->to_name,
+                'place' => implode(', ', array_filter([$e->event_location, $e->event_city, $e->event_country])) ?: null,
+                'description' => $e->event_description, 'certainty' => $e->certainty,
+                'evidence' => trim(($e->evidence_type ? $e->evidence_type.': ' : '').($e->evidence_i18n ?: $e->evidence_description)) ?: null,
+                'source' => $e->source_i18n ?: $e->source_reference,
+            ];
+            if ($staff) {
+                $row += ['price' => $e->price, 'currency' => $e->currency, 'sale_reference' => $e->sale_reference, 'notes' => $e->notes];
+            }
+            $events[] = $row;
+        }
+
         return [
             'summary' => $summary, 'current_status' => $rec->current_status, 'acquisition_type' => $rec->acquisition_type,
             'certainty' => $rec->certainty_level, 'has_gaps' => (bool) $rec->has_gaps, 'is_complete' => (bool) $rec->is_complete,
             'entries' => $entries,
+            'events' => $events,
         ];
     }
 }
