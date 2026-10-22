@@ -643,6 +643,23 @@ class aiActions extends AhgController
         } catch (Exception $e) {
             error_log("NER save error: " . $e->getMessage());
         }
+
+        // With Authority Resolution on, the NER review Review button opens its
+        // queue, which only lists promoted entities; the background pipeline
+        // promotes, this on-demand extraction did not, so its results never showed.
+        $arLib = sfConfig::get('sf_plugins_dir') . '/ahgAuthorityResolutionPlugin/lib/Services/';
+        if (in_array('authorityResolution', (array) sfConfig::get('sf_enabled_modules', []), true)
+            && is_file($arLib . 'PromoteToMentionService.php')) {
+            require_once $arLib . 'ContextDerivationService.php';
+            require_once $arLib . 'PromoteToMentionService.php';
+            try {
+                (new \AtomFramework\Services\AuthorityResolution\PromoteToMentionService(
+                    new \AtomFramework\Services\AuthorityResolution\ContextDerivationService()
+                ))->promoteAllForObject((int) $objectId);
+            } catch (\Throwable $e) {
+                error_log('NER promote error for object ' . $objectId . ': ' . $e->getMessage());
+            }
+        }
     }
 
     private function findMatchingActors($entityValue)

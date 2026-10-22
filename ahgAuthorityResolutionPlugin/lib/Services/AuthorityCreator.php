@@ -104,8 +104,17 @@ class AuthorityCreator
             ? (int) $form['parent_id']
             : self::TERM_ROOT_ID;
         $culture = (string) ($form['source_culture'] ?? $culture);
+        // AtoM 2.10's term_i18n is just id/culture/name; only some schema
+        // revisions carry the description column the coordinates go in. Without
+        // it, refuse coordinates rather than drop them silently.
+        $hasDescription = DB::schema()->hasColumn('term_i18n', 'description');
+        if ($latFilled && !$hasDescription) {
+            throw new \InvalidArgumentException(
+                'This catalogue cannot store coordinates on a place term. Leave latitude and longitude empty.'
+            );
+        }
 
-        return DB::connection()->transaction(function () use ($name, $culture, $parentId, $latFilled, $lat, $lng) {
+        return DB::connection()->transaction(function () use ($name, $culture, $parentId, $latFilled, $lat, $lng, $hasDescription) {
             $now = date('Y-m-d H:i:s');
 
             $termId = (int) DB::table('object')->insertGetId([
@@ -129,12 +138,8 @@ class AuthorityCreator
             if ($latFilled) {
                 $description = sprintf('%s,%s', (string) $lat, (string) $lng);
             }
-            DB::table('term_i18n')->insert([
-                'id' => $termId,
-                'culture' => $culture,
-                'name' => $name,
-                'description' => $description,
-            ]);
+            DB::table('term_i18n')->insert(['id' => $termId, 'culture' => $culture, 'name' => $name]
+                + ($hasDescription ? ['description' => $description] : []));
 
             DB::table('slug')->insert([
                 'object_id' => $termId,

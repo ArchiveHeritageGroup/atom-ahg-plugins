@@ -133,6 +133,29 @@ class apiv2DescriptionProposalsAction extends AhgApiController
             });
         }
 
+        // With the Authority Resolution plugin on, NER review's Review button opens
+        // the resolution queue, which lists "mentions", not NER entities; the AI
+        // pipeline promotes each entity it extracts. Do the same so proposals are
+        // reviewable. Idempotent, covers anything still unpromoted on the record;
+        // the promoter handles people, organisations and places (dates stay in
+        // the NER dialog).
+        $promoted = 0;
+        $arLib = \sfConfig::get('sf_plugins_dir').'/ahgAuthorityResolutionPlugin/lib/Services/';
+        // Same test the NER review page uses to send its Review button to the queue.
+        if (in_array('authorityResolution', (array) \sfConfig::get('sf_enabled_modules', []), true)
+            && is_file($arLib.'PromoteToMentionService.php')) {
+            // Not autoloaded; the plugin's own actions require them the same way.
+            require_once $arLib.'ContextDerivationService.php';
+            require_once $arLib.'PromoteToMentionService.php';
+            try {
+                $promoted = (new \AtomFramework\Services\AuthorityResolution\PromoteToMentionService(
+                    new \AtomFramework\Services\AuthorityResolution\ContextDerivationService()
+                ))->promoteAllForObject((int) $objectId);
+            } catch (\Throwable $e) {
+                error_log('apiv2 proposals: promotion to authority resolution failed for object '.$objectId.': '.$e->getMessage());
+            }
+        }
+
         // Field texts go to AI > Suggest review. Approval writes the field named in
         // source_data; an identical text already pending for that field is skipped.
         $fieldsQueued = [];
@@ -168,6 +191,7 @@ class apiv2DescriptionProposalsAction extends AhgApiController
             'slug' => $slug,
             'queued' => $queued,
             'skipped_existing' => count($clean) - count($new),
+            'promoted_for_resolution' => $promoted,
             'fields_queued' => $fieldsQueued,
             'fields_skipped_existing' => $fieldsSkipped,
             'review_url' => ($base ?: '').'/ai/ner/review',
