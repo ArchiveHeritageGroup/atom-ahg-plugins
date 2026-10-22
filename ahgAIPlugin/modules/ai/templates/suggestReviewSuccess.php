@@ -250,7 +250,12 @@ function reviewSuggestion(suggestionId, objectId) {
             if (s.generation_time_ms) stats.push((s.generation_time_ms / 1000).toFixed(1) + 's');
             document.getElementById('reviewStats').textContent = stats.join(' | ');
 
-            // Bind buttons
+            // Bind buttons. Reset them first: the modal is reused, and a previous
+            // approve or reject left its button disabled with a spinner, so the
+            // next suggestion could not be saved (it "just turned").
+            var ab = document.getElementById('approveBtn'), rb = document.getElementById('rejectBtn');
+            ab.disabled = false; ab.innerHTML = '<i class="bi bi-check-circle me-1"></i>Approve & Save';
+            rb.disabled = false; rb.innerHTML = '<i class="bi bi-x-circle me-1"></i>Reject';
             document.getElementById('approveBtn').onclick = function() {
                 approveFromModal(suggestionId);
             };
