@@ -2,6 +2,8 @@
 
 Enhanced REST API v2 for Access to Memory (AtoM) 2.x
 
+The AtoM MCP server (in development) works through this API: it reads records, their text and images, and sends proposals that an archivist reviews before anything changes. Video walkthrough: [AtoM MCP Server in Action](https://youtu.be/n6snV-lgH_Y)
+
 ## Features
 
 - **API Key Management** - Create and manage API keys with granular scopes (read/write/delete)

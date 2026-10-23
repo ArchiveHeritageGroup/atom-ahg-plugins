@@ -485,6 +485,23 @@ function render_iiif_viewer($resource, $options = [])
 
     // For PDF content - use simple embedded viewer without IIIF complexity
     if ($hasPdf) {
+        // The PDF is the master file. A visitor without readMaster is refused it
+        // (uploads are routed through digitalobject/view), so the frame showed
+        // AtoM's "Page Not Found" and Open/Download failed. Show them the
+        // reference image of the first page instead, with a plain note.
+        if (!\QubitAcl::check($resource, 'readMaster')) {
+            $reference = method_exists($primaryDo, 'getRepresentationByUsage')
+                ? $primaryDo->getRepresentationByUsage(\QubitTerm::REFERENCE_ID) : null;
+            $html .= '<div class="pdf-viewer-container text-center">';
+            if ($reference) {
+                $html .= '<img src="' . htmlspecialchars((string) $reference->getFullPath()) . '" alt="'
+                    . htmlspecialchars((string) ($resource->title ?? '')) . '" class="img-fluid ahg-media-capped">';
+            }
+            $html .= '<p class="text-muted small mt-2">' . htmlspecialchars(function_exists('__') ? __('The full document is available to staff. Use Request this item to ask for a copy.') : 'The full document is available to staff. Use Request this item to ask for a copy.') . '</p>';
+            $html .= '</div>';
+
+            return $html;
+        }
         $pdfUrl = get_digital_object_url($primaryDo);
         $html .= '<div class="pdf-viewer-container">';
         $html .= ahg_iiif_render_pdf_viewer_html($viewerId, $pdfUrl, $viewerHeight, true);

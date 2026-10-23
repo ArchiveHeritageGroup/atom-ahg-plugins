@@ -45,6 +45,8 @@ one capability, and the technical package names stay stable underneath.
 
 Every walkthrough is on the [AHG YouTube channel](https://www.youtube.com/@TheArchiveandHeritageGroup).
 
+In development: the AtoM MCP server lets an assistant read records and propose names, places, dates and description changes through the [API](ahgAPIPlugin/), for an archivist to approve. [Watch it in action](https://youtu.be/n6snV-lgH_Y).
+
 **Maturity differs, and the catalogue says so.** IIIF, Seadragon, Mirador,
 Preservation, Provenance, Backup, Favourites and Feedback are packaged as
 [downloadable bundles](docs/plugins/README.md) with screenshots and install notes.

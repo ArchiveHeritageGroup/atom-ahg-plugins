@@ -602,10 +602,18 @@ class aiActions extends AhgController
     private function saveExtraction($objectId, $entities)
     {
         try {
-            // Delete existing pending entities
+            // Replace earlier extractions' pending entities, but keep proposals
+            // made through the API (backend_used "<source>:u<user id>", e.g.
+            // "glam-mcp:u900148"): those carry an archivist's evidence and
+            // sources, and re-running extraction used to wipe them.
             Illuminate\Database\Capsule\Manager::table('ahg_ner_entity')
                 ->where('object_id', $objectId)
                 ->where('status', 'pending')
+                ->whereNotIn('extraction_id', function ($q) use ($objectId) {
+                    $q->select('id')->from('ahg_ner_extraction')
+                        ->where('object_id', $objectId)
+                        ->where('backend_used', 'like', '%:u%');
+                })
                 ->delete();
 
             $extractionId = Illuminate\Database\Capsule\Manager::table('ahg_ner_extraction')->insertGetId([

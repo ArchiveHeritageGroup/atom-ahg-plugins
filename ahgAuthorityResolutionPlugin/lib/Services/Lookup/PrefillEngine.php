@@ -187,6 +187,27 @@ class PrefillEngine
             }
         }
 
+        // Proposal pass: details the proposer gave with the name (dates of
+        // existence, history, places), with its evidence and sources as the
+        // provenance. External sources still win where they answered.
+        try {
+            if (DB::schema()->hasColumn('ahg_ner_entity_evidence', 'authority')) {
+                $ev = DB::table('ahg_ner_entity_evidence')->where('entity_id', (int) $mention->ner_entity_id)->first(['authority', 'sources']);
+                $given = $ev && $ev->authority ? json_decode((string) $ev->authority, true) : null;
+                $uri = $ev && $ev->sources ? (json_decode((string) $ev->sources, true)[0] ?? null) : null;
+                foreach (is_array($given) ? $given : [] as $key => $value) {
+                    if (!isset($merged[$key]) && is_string($value) && '' !== trim($value)) {
+                        $merged[$key] = [
+                            'value' => trim($value),
+                            '_provenance' => ['source' => 'proposal', 'uri' => $uri, 'license' => null, 'cached' => false, 'at' => gmdate('Y-m-d\TH:i:s\Z')],
+                        ];
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('PrefillEngine: proposal details unavailable for mention '.$mention->id.': '.$e->getMessage());
+        }
+
         // Second pass: derive a name from the mention itself if no source filled it.
         $nameKey = $this->isPlace($mention) ? 'name' : 'authorized_form_of_name';
         if (!isset($merged[$nameKey]) && !empty($mention->entity_value)) {

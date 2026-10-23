@@ -11,7 +11,8 @@ use Illuminate\Database\Capsule\Manager as DB;
  * extractor. Nothing on the description changes until a person approves.
  *
  * Body: {"entities": [{"type": "PERSON|ORG|GPE|DATE", "value": "...", "confidence": 0.8,
- *                       "evidence": "...", "sources": ["https://..."]}, ...],
+ *                       "evidence": "...", "sources": ["https://..."],
+ *                       "authority": {"dates_of_existence": "...", "history": "...", "places": "..."}}, ...],
  *        "fields":   [{"field": "scope_and_content", "text": "...", "evidence": "...", "sources": [...]}],
  *        "source": "optional label, e.g. glam-mcp"}
  *
@@ -26,6 +27,8 @@ class apiv2DescriptionProposalsAction extends AhgApiController
     private const TYPES = ['PERSON', 'ORG', 'GPE', 'DATE'];
     private const MAX = 50;
     /** information_object_i18n fields a proposal may target. */
+    /** Authority details a person or organisation proposal may carry, with their length limits. */
+    private const AUTHORITY_FIELDS = ['dates_of_existence' => 255, 'history' => 8000, 'places' => 1000];
     private const FIELDS = ['title', 'scope_and_content', 'archival_history', 'extent_and_medium', 'arrangement', 'access_conditions', 'reproduction_conditions'];
 
     private static function sources($list): array
@@ -86,8 +89,21 @@ class apiv2DescriptionProposalsAction extends AhgApiController
                 return $this->error(400, 'Bad Request', "Entity $i: type must be one of ".implode(', ', self::TYPES).', value 1-500 characters');
             }
             $confidence = isset($e['confidence']) ? max(0.0, min(1.0, (float) $e['confidence'])) : null;
+            // People and organisations may carry what a new authority record
+            // needs (ISAAR dates of existence, history, places): the Authority
+            // Resolution create form is pre-filled from it.
+            $authority = [];
+            if (in_array($type, ['PERSON', 'ORG'], true) && is_array($e['authority'] ?? null)) {
+                foreach (self::AUTHORITY_FIELDS as $k => $max) {
+                    $v = trim((string) ($e['authority'][$k] ?? ''));
+                    if ('' !== $v) {
+                        $authority[$k] = mb_substr($v, 0, $max);
+                    }
+                }
+            }
             $clean[$type."\0".mb_strtolower($value)] = ['type' => $type, 'value' => $value, 'confidence' => $confidence,
-                'evidence' => mb_substr(trim((string) ($e['evidence'] ?? '')), 0, 4000), 'sources' => self::sources($e['sources'] ?? [])];
+                'evidence' => mb_substr(trim((string) ($e['evidence'] ?? '')), 0, 4000), 'sources' => self::sources($e['sources'] ?? []),
+                'authority' => $authority];
         }
 
         // Skip what this record already has waiting for review or already linked.
@@ -101,8 +117,11 @@ class apiv2DescriptionProposalsAction extends AhgApiController
         $userId = (int) $this->getUser()->getAttribute('user_id');
         $label = preg_replace('/[^a-z0-9_-]/i', '', (string) ($data['source'] ?? 'api')) ?: 'api';
         $now = date('Y-m-d H:i:s');
+        // ponytail: the authority column is added by install.sql on new installs and
+        // by hand on existing ones; until then authority details are dropped.
+        $hasAuthority = DB::schema()->hasColumn('ahg_ner_entity_evidence', 'authority');
         if ($new) {
-            DB::transaction(function () use ($new, $objectId, $userId, $label, $now, &$queued) {
+            DB::transaction(function () use ($new, $objectId, $userId, $label, $now, $hasAuthority, &$queued) {
                 $extractionId = DB::table('ahg_ner_extraction')->insertGetId([
                     'object_id' => (int) $objectId,
                     // Who proposed it, for the audit: e.g. "glam-mcp:u900148".
@@ -121,12 +140,13 @@ class apiv2DescriptionProposalsAction extends AhgApiController
                         'status' => 'pending',
                         'created_at' => $now,
                     ]);
-                    if ('' !== $e['evidence'] || $e['sources']) {
+                    $authority = $hasAuthority && $e['authority'] ? $e['authority'] : [];
+                    if ('' !== $e['evidence'] || $e['sources'] || $authority) {
                         DB::table('ahg_ner_entity_evidence')->insert([
                             'entity_id' => $entityId, 'evidence' => $e['evidence'] ?: null,
                             'sources' => $e['sources'] ? json_encode($e['sources']) : null,
                             'created_by' => $userId, 'created_at' => $now,
-                        ]);
+                        ] + ($authority ? ['authority' => json_encode($authority, JSON_UNESCAPED_UNICODE)] : []));
                     }
                     $queued[] = ['type' => $e['type'], 'value' => $e['value']];
                 }
