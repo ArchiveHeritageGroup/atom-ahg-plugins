@@ -81,6 +81,9 @@ class ahgUserManagePluginConfiguration extends sfPluginConfiguration
         // the secure page, so it is intentionally not registered here.
         $userPassthrough->any('user_clipboard_passthrough', '/user/clipboard', 'clipboard');
         $userPassthrough->any('user_password_reset_passthrough', '/user/passwordReset', 'passwordReset');
+        // The link in the reset email. Without it /user/:slug reads "passwordResetConfirm"
+        // as a username and 404s, so no reset could ever be completed.
+        $userPassthrough->any('user_password_reset_confirm_passthrough', '/user/passwordResetConfirm', 'passwordResetConfirm');
 
         $userPassthrough->register($routing);
     }
