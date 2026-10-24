@@ -42,6 +42,10 @@ class requestToPublishDeleteAction extends AhgController
                 $repository->delete($resource->id);
                 $this->getUser()->setFlash('notice', 'Request has been deleted.');
                 $this->redirect(['module' => 'requestToPublish', 'action' => 'browse']);
+            } catch (\sfStopException $e) {
+                // redirect() works by throwing this; let it through, or the catch below
+                // reports a successful redirect as an empty "Error:".
+                throw $e;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error deleting request: ' . $e->getMessage());
             }

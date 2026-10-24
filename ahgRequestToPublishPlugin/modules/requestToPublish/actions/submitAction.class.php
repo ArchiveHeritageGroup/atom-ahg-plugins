@@ -75,6 +75,10 @@ class requestToPublishSubmitAction extends AhgController
 
                 $this->getUser()->setFlash('notice', 'Your request has been submitted. Keep this receipt code to track it: ' . $token);
                 $this->redirect(['module' => 'requestToPublish', 'action' => 'receipt', 'token' => $token]);
+            } catch (\sfStopException $e) {
+                // redirect() works by throwing this; let it through, or the catch below
+                // reports a successful redirect as an empty "Error:".
+                throw $e;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: ' . $e->getMessage());
             }

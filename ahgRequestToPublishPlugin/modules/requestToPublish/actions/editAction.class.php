@@ -62,6 +62,10 @@ class requestToPublishEditAction extends AhgController
                 }
 
                 $this->redirect(['module' => 'requestToPublish', 'action' => 'browse']);
+            } catch (\sfStopException $e) {
+                // redirect() works by throwing this; let it through, or the catch below
+                // reports a successful redirect as an empty "Error:".
+                throw $e;
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: ' . $e->getMessage());
             }
