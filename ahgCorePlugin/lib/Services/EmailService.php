@@ -161,7 +161,9 @@ class EmailService
         $mail->isSMTP();
         $mail->Host = $config['host'];
         $mail->Port = $config['port'];
-        $mail->SMTPAuth = true;
+        // Log in only when a username is set: an open relay (e.g. a campus relay on
+        // port 25 with no authentication) refuses AUTH, which failed every message.
+        $mail->SMTPAuth = '' !== trim((string) $config['username']);
         $mail->Username = $config['username'];
         $mail->Password = $config['password'];
 
@@ -169,6 +171,10 @@ class EmailService
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         } elseif ($config['encryption'] === 'ssl') {
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            // Encryption "None" means none: without this PHPMailer upgrades to
+            // STARTTLS whenever the server offers it, and fails on its certificate.
+            $mail->SMTPAutoTLS = false;
         }
 
         // UTF-8, explicitly.
@@ -352,7 +358,7 @@ class EmailService
                 $mail->isSMTP();
                 $mail->Host = self::getSetting('smtp_host');
                 $mail->Port = (int) self::getSetting('smtp_port', 587);
-                $mail->SMTPAuth = true;
+                $mail->SMTPAuth = '' !== trim((string) self::getSetting('smtp_username'));
                 $mail->Username = self::getSetting('smtp_username');
                 $mail->Password = self::decryptSetting('smtp_password');
 
@@ -361,6 +367,8 @@ class EmailService
                     $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
                 } elseif ($encryption === 'ssl') {
                     $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                } else {
+                    $mail->SMTPAutoTLS = false;
                 }
 
                 $mail->setFrom($fromEmail, $fromName);

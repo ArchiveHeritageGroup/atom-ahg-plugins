@@ -176,10 +176,15 @@ class UserPasswordResetAction extends AhgController
             // SMTP Configuration
             $mail->isSMTP();
             $mail->Host = $host;
-            $mail->SMTPAuth = true;
+            // Same rules as EmailService: log in only with a username, and with no
+            // encryption chosen do not let PHPMailer upgrade to STARTTLS on its own.
+            $mail->SMTPAuth = '' !== trim((string) $username);
             $mail->Username = $username;
             $mail->Password = $password;
             $mail->SMTPSecure = trim(strval($smtp_secure));
+            if ('' === $mail->SMTPSecure) {
+                $mail->SMTPAutoTLS = false;
+            }
             $mail->Port = intval($port);
 
             $mail->setFrom(trim($from_email), $from_name);
