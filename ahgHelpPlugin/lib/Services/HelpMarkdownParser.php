@@ -32,6 +32,20 @@ class HelpMarkdownParser
         // Render markdown to HTML
         $html = $parsedown->text($markdown);
 
+        // The guides link screenshots relative to the docs folder
+        // ("images/x/01.png", "../images/x/01.png" from technical/). Rendered under
+        // /help/article/<slug> those resolve to nothing, so point them at the
+        // help_image action, which serves files from the docs images folder.
+        $html = preg_replace_callback(
+            '/(<img\b[^>]*\bsrc=")(?!https?:|\/|data:)([^"]+)"/i',
+            static function ($m) {
+                $path = preg_replace('#^(\./|\.\./)+#', '', $m[2]);
+
+                return $m[1].'/help/image/'.$path.'"';
+            },
+            $html
+        );
+
         // Extract TOC and inject anchor IDs on headings
         $toc = [];
         $html = preg_replace_callback(

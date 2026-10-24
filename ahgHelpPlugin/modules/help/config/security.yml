@@ -19,6 +19,10 @@ index:
 article:
   is_secure: false
 
+# Screenshots shown inside public articles.
+image:
+  is_secure: false
+
 category:
   is_secure: false
 

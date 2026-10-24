@@ -52,6 +52,8 @@ class ahgHelpPluginConfiguration extends sfPluginConfiguration
         // Category and article routes
         $router->get('help_category', '/help/category/:category', 'category');
         $router->get('help_article_view', '/help/article/:slug', 'article');
+        // Screenshots referenced by the guides (see HelpMarkdownParser).
+        $router->get('help_image', '/help/image/:path', 'image', ['path' => 'images/.+']);
 
         // Search
         $router->get('help_search', '/help/search', 'search');

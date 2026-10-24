@@ -362,6 +362,32 @@ class helpActions extends AhgController
     }
 
     /**
+     * A screenshot from the guides. Serves image files from the docs images folder
+     * only: the path must resolve inside it and carry an image extension.
+     */
+    public function executeImage($request)
+    {
+        $types = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'webp' => 'image/webp'];
+        $base = realpath(sfConfig::get('sf_root_dir').'/atom-extensions-catalog/docs/images');
+        $rel = preg_replace('#^images/#', '', (string) $request->getParameter('path'));
+        $file = $base ? realpath($base.'/'.$rel) : false;
+        $ext = $file ? strtolower(pathinfo($file, PATHINFO_EXTENSION)) : '';
+
+        if (!$file || 0 !== strpos($file, $base.'/') || !isset($types[$ext]) || !is_file($file)) {
+            $this->forward404();
+        }
+
+        $response = $this->getResponse();
+        $response->setContentType($types[$ext]);
+        $response->setHttpHeader('Cache-Control', 'public, max-age=86400');
+        $response->setHttpHeader('Content-Length', (string) filesize($file));
+        $response->sendHttpHeaders();
+        readfile($file);
+
+        return sfView::NONE;
+    }
+
+    /**
      * System map - interactive Cytoscape graph of the enabled plugins, grouped
      * by category (root → category → plugin). Admin-only dev/admin navigation.
      */
