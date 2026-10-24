@@ -41,17 +41,34 @@ class HelpArticleService
             return self::$enabledPlugins;
         }
 
+        // The plugins this request actually loaded. atom_plugin is only the source of
+        // truth on AHG-configured instances; on stock AtoM (RARI) the serialised
+        // `plugins` setting governs and atom_plugin is inert, so reading it showed
+        // help for plugins that are not installed.
         try {
-            self::$enabledPlugins = DB::table('atom_plugin')
-                ->where('is_enabled', 1)
-                ->pluck('name')
-                ->all();
-        } catch (\Exception $e) {
-            // If atom_plugin table is unavailable, don't filter
-            self::$enabledPlugins = [];
+            self::$enabledPlugins = \sfProjectConfiguration::getActive()->getPlugins();
+        } catch (\Throwable $e) {
+            self::$enabledPlugins = [];   // no list: don't filter
         }
 
         return self::$enabledPlugins;
+    }
+
+    /**
+     * Whether this viewer may see the Technical and Plugin Reference categories:
+     * administrators only, and only where `help_show_technical` is on (default on;
+     * off on client sites such as RARI, where no one should see them).
+     */
+    public static function canSeeAdminCategories(): bool
+    {
+        if (!self::isAdmin()) {
+            return false;
+        }
+        try {
+            return \AtomExtensions\Services\AhgSettingsService::getBool('help_show_technical', true);
+        } catch (\Throwable $e) {
+            return true;
+        }
     }
 
     /**
@@ -59,7 +76,7 @@ class HelpArticleService
      */
     protected static function applyAdminFilter($query): void
     {
-        if (!self::isAdmin()) {
+        if (!self::canSeeAdminCategories()) {
             $query->whereNotIn('category', self::ADMIN_CATEGORIES);
         }
     }
@@ -165,7 +182,7 @@ class HelpArticleService
     {
         try {
             // Block non-admins from accessing admin-only categories
-            if (!self::isAdmin() && in_array($category, self::ADMIN_CATEGORIES)) {
+            if (!self::canSeeAdminCategories() && in_array($category, self::ADMIN_CATEGORIES)) {
                 return [];
             }
 
@@ -241,7 +258,7 @@ class HelpArticleService
                 ->where('ha.is_published', 1)
                 ->whereRaw('MATCH(hs.heading, hs.body_text) AGAINST(? IN BOOLEAN MODE)', [$query . '*']);
 
-            if (!self::isAdmin()) {
+            if (!self::canSeeAdminCategories()) {
                 $q->whereNotIn('ha.category', self::ADMIN_CATEGORIES);
             }
 
@@ -393,6 +410,8 @@ class HelpArticleService
             return DB::table('help_article')
                 ->where('related_plugin', $pluginName)
                 ->where('is_published', 1)
+                ->tap(fn ($q) => self::applyAdminFilter($q))
+                ->tap(fn ($q) => self::applyPluginFilter($q))
                 ->select('slug', 'title', 'category', 'subcategory')
                 ->orderBy('sort_order')
                 ->orderBy('title')
@@ -431,6 +450,8 @@ class HelpArticleService
         try {
             $rows = DB::table('help_article')
                 ->where('is_published', 1)
+                ->tap(fn ($q) => self::applyAdminFilter($q))
+                ->tap(fn ($q) => self::applyPluginFilter($q))
                 ->where(function ($q) use ($tokens, $pluginGuess) {
                     $q->where('related_plugin', $pluginGuess);
                     foreach ($tokens as $t) {

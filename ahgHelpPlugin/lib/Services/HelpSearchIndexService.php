@@ -24,7 +24,7 @@ class HelpSearchIndexService
                 ->where('is_published', 1);
 
             // Exclude admin-only categories for non-admins
-            if (!HelpArticleService::isAdmin()) {
+            if (!HelpArticleService::canSeeAdminCategories()) {
                 $query->whereNotIn('category', HelpArticleService::ADMIN_CATEGORIES);
             }
 
