@@ -12,29 +12,16 @@ class UserPasswordResetConfirmAction extends AhgController
 
     public function execute($request)
     {
-        $token = $request->getParameter('token');
+        // Validate token. Tokens live in ahg_password_reset (hashed), not on the base
+        // user table, which has no column for them.
+        $token = (string) $request->getParameter('token');
+        $userId = WriteServiceFactory::user()->findPasswordResetUserId($token);
+        $this->resource = $userId ? QubitUser::getById($userId) : null;
 
-        // Validate token
-        if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
-            $row = \Illuminate\Database\Capsule\Manager::table('user')
-                ->where('reset_token', $token)
-                ->first();
-            if ($row) {
-                $this->resource = QubitUser::getById($row->id);
-            } else {
-                $this->resource = null;
-            }
-        } else {
-            $criteria = new Criteria();
-            $criteria->add(QubitUser::RESET_TOKEN, $token);
-            $this->resource = QubitUser::getOne($criteria);
-        }
-
-        if (!$this->resource || 
-            !$this->resource->resetTokenExpiry || 
-            strtotime($this->resource->resetTokenExpiry) < time()) {
+        if (!$this->resource) {
             $this->getUser()->setFlash('error', $this->context->i18n->__('Invalid or expired reset token.'));
             $this->redirect(['module' => 'user', 'action' => 'login']);
+
             return;
         }
 
@@ -68,14 +55,9 @@ class UserPasswordResetConfirmAction extends AhgController
             if ($this->form->isValid()) {
                 $this->processForm();
 
-                // Clear reset token
-                $this->resource->resetToken = null;
-                $this->resource->resetTokenExpiry = null;
-                if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
-                    $this->resource->save(); // PropelBridge; Phase 4 replaces
-                } else {
-                    $this->resource->save();
-                }
+                $this->resource->save();
+                // One use only.
+                WriteServiceFactory::user()->clearPasswordResetToken((int) $this->resource->id);
 
                 $this->getUser()->setFlash('notice', $this->context->i18n->__('Your password has been reset successfully. You can now log in with your new password.'));
                 $this->redirect(['module' => 'user', 'action' => 'login']);

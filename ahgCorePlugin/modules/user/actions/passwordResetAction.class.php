@@ -79,12 +79,19 @@ class UserPasswordResetAction extends AhgController
                     $token = bin2hex(random_bytes(32));
                     $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-                    // Store token via WriteService
-                    WriteServiceFactory::user()->savePasswordResetToken(
-                        (int) $user->id,
-                        $token,
-                        $expiry
-                    );
+                    // Store token via WriteService. A token that could not be stored
+                    // must not be emailed: the link would only ever fail.
+                    try {
+                        WriteServiceFactory::user()->savePasswordResetToken(
+                            (int) $user->id,
+                            $token,
+                            $expiry
+                        );
+                        $stored = true;
+                    } catch (\Throwable $e) {
+                        error_log('passwordReset: could not store reset token: '.$e->getMessage());
+                        $stored = false;
+                    }
 
                     // Tell the user what actually happened.
                     //
@@ -94,7 +101,9 @@ class UserPasswordResetAction extends AhgController
                     // no host - the token was stored, nothing was sent, and the
                     // user was told to go and check their inbox. Nothing appeared
                     // in the log either.
-                    if ('1' !== (string) $this->getEmailSetting('smtp_enabled', '0')) {
+                    if (!$stored) {
+                        $this->getUser()->setFlash('error', $this->context->i18n->__('The reset message could not be sent. Please contact an administrator.'));
+                    } elseif ('1' !== (string) $this->getEmailSetting('smtp_enabled', '0')) {
                         $this->getUser()->setFlash('error', $this->context->i18n->__('Email is not configured on this site, so the reset message could not be sent. Please contact an administrator.'));
                     } elseif ($this->sendResetEmail($user, $token)) {
                         $this->getUser()->setFlash('notice', $this->context->i18n->__('Password reset instructions have been sent to your email.'));
