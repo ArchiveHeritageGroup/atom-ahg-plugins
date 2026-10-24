@@ -109,7 +109,9 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
         ));
 
         // Core display routes - no theme dependency (fallback)
-        $routing->prependRoute('display_browse', new \sfRoute(
+        // ExplicitRoute: a variable-free route at the front otherwise captures
+        // url_for() calls that name no module (see atom-framework ExplicitRoute).
+        $routing->prependRoute('display_browse', new \ExplicitRoute(
             '/display/browse',
             ['module' => 'display', 'action' => 'browse']
         ));

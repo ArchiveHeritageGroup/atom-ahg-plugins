@@ -273,7 +273,9 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
         //
         // Registered after the slug routes so it is CHECKED BEFORE them: this
         // loader prepends, so the last one registered is the first one matched.
-        $routing->prependRoute('accession_check_identifier_available', new \sfRoute(
+        // ExplicitRoute: a variable-free route at the front otherwise captures
+        // url_for() calls that name no module (see atom-framework ExplicitRoute).
+        $routing->prependRoute('accession_check_identifier_available', new \ExplicitRoute(
             '/accession/checkIdentifierAvailable',
             // Dispatched to accessionManage, not accession: base's qtAccessionPlugin
             // always wins the 'accession' module (core plugins are merged ahead of

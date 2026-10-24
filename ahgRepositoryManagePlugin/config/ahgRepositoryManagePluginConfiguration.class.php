@@ -61,24 +61,6 @@ class ahgRepositoryManagePluginConfiguration extends sfPluginConfiguration
             ['slug' => '[a-zA-Z0-9_.-]+']
         ));
 
-        // Institution autocomplete.
-        //
-        // Prepended AFTER the catch-all above, which puts it AHEAD of it: the
-        // '/repository/:slug' route matches "autocomplete" as a slug, finds no
-        // repository by that name, and 404s rather than declining, so the
-        // autocomplete action was unreachable even though it exists in both base
-        // AtoM and ahgCorePlugin. Nothing in base routing.yml defines this route,
-        // so there was nothing to fall through to.
-        //
-        // The visible symptom is the "Add institution" dialog on the group
-        // permissions screen (aclGroup/editInformationObjectAcl) offering no
-        // suggestions at all - its widget points at this URL. Broken on every
-        // instance, PSIS included, not only here.
-        $routing->prependRoute('repository_autocomplete_override', new \sfRoute(
-            '/repository/autocomplete',
-            ['module' => 'repository', 'action' => 'autocomplete']
-        ));
-
         // sfIsdiahPlugin add route (no requirements, sfRoute is fine)
         $sfIsdiah = new \AtomFramework\Routing\RouteLoader('sfIsdiahPlugin');
         $sfIsdiah->any('repository_add_override', '/repository/add', 'edit');
@@ -88,6 +70,30 @@ class ahgRepositoryManagePluginConfiguration extends sfPluginConfiguration
         $repoManage = new \AtomFramework\Routing\RouteLoader('repositoryManage');
         $repoManage->any('repository_browse_override', '/repository/browse', 'browse');
         $repoManage->register($routing);
+
+        // Institution autocomplete.
+        //
+        // Prepended AFTER the catch-all above, which puts it AHEAD of it: the
+        // '/repository/:slug' route matches "autocomplete" as a slug, finds no
+        // repository by that name, and 404s rather than declining, so the
+        // autocomplete action was unreachable even though it exists in both base
+        // AtoM and ahgCorePlugin. Nothing in base routing.yml defines this route,
+        // so there was nothing to fall through to.
+        //
+        // ExplicitRoute, not sfRoute: a variable-free route at the front of the
+        // collection is picked by url_for() calls that name no module, and on RARI
+        // (24 Oct 2026) the create-institution form posted here as
+        // /repository/autocomplete?0[disableNestedSetUpdating]=0. Registered after the
+        // loaders above because RouteLoader::register() is what loads ExplicitRoute.
+        //
+        // The visible symptom is the "Add institution" dialog on the group
+        // permissions screen (aclGroup/editInformationObjectAcl) offering no
+        // suggestions at all - its widget points at this URL. Broken on every
+        // instance, PSIS included, not only here.
+        $routing->prependRoute('repository_autocomplete_override', new \ExplicitRoute(
+            '/repository/autocomplete',
+            ['module' => 'repository', 'action' => 'autocomplete']
+        ));
     }
 
     /**
