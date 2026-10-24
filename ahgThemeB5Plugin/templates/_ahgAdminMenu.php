@@ -52,14 +52,8 @@ try {
 } catch (Exception $e) {
     \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 
-// heratio#143 Phase 1 - Workflow visual diagram + designer surface
-// (gated by ahg_workflow table existence).
-$hasWorkflow = false;
-$hasSpectrumCompliance = false;
 $hasExhibitionSpace = false;
 try {
-    $hasWorkflow = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_workflow');
-    $hasSpectrumCompliance = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_spectrum_object_compliance');
         // Enablement, not schema: tables outlive enablement, so asking whether
         // ahg_exhibition_space exists kept the menu entry for good and offered a
         // link into a module that is not loaded. Every other flag here asks
@@ -242,16 +236,8 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'browse']); ?>"><i class="fas fa-palette fa-fw me-1"></i><?php echo __('Exhibition spaces'); ?></a></li>
     <?php endif; ?>
 
-    <?php if ($hasWorkflow): ?>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Workflow'); ?></h6></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('Workflows & diagrams'); ?></a></li>
-    <?php if ($hasSpectrumCompliance): ?>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']); ?>"><i class="fas fa-university fa-fw me-1"></i><?php echo __('Collections Procedures compliance'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumChain']); ?>"><i class="fas fa-link fa-fw me-1"></i><?php echo __('Collections Procedures chain rules'); ?></a></li>
-    <?php endif; ?>
-    <?php endif; ?>
+    <?php // No Workflow section: removed 24 Oct 2026 at Dr Johan Pieterse's request. The
+          // pages stay reachable by URL (/workflow/dashboard, /workflow/admin). ?>
 
     <?php // Digital preservation pages (ahgPreservationPlugin), incl. the triage dashboard (#154). ?>
     <?php if (ahgIsPluginEnabled('ahgPreservationPlugin')): ?>
