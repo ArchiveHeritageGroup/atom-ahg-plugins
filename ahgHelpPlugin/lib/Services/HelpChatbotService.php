@@ -131,7 +131,7 @@ class HelpChatbotService
         $context = self::buildContext($articles, $sections);
 
         // Build system prompt
-        $systemPrompt = "You are a helpful documentation assistant for AtoM Heratio, an archival management system. "
+        $systemPrompt = "You are a helpful documentation assistant for AHG Extensions for AtoM, an archival management system. "
             . "Answer questions based ONLY on the provided documentation context. "
             . "If the documentation doesn't cover the question, say so clearly. "
             . "Be concise and direct. Use markdown formatting for readability. "

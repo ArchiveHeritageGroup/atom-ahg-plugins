@@ -390,7 +390,7 @@ class helpActions extends AhgController
             ->orderBy('name')
             ->get(['name', 'category', 'is_core', 'description']);
 
-        $nodes = [['data' => ['id' => '__root', 'label' => 'AtoM Heratio', 'type' => 'root']]];
+        $nodes = [['data' => ['id' => '__root', 'label' => 'AHG Extensions for AtoM', 'type' => 'root']]];
         $edges = [];
         $cats = [];
 
