@@ -193,6 +193,8 @@ function reviewSuggestion(suggestionId, objectId) {
             try { meta = s.source_data ? (typeof s.source_data === 'string' ? JSON.parse(s.source_data) : s.source_data) : {}; } catch (e) { meta = {}; }
             var fieldLabel = (meta.field || 'scope_and_content').replace(/_/g, ' ');
             fieldLabel = fieldLabel.charAt(0).toUpperCase() + fieldLabel.slice(1);
+            if (meta.kind === 'transcript') { fieldLabel = 'Transcription of the file'; }
+            if (meta.kind === 'translation') { fieldLabel += ' - translation (' + meta.culture + ')'; }
 
             var html = '';
             if (meta.evidence || (meta.sources && meta.sources.length)) {
@@ -208,6 +210,13 @@ function reviewSuggestion(suggestionId, objectId) {
                 html += '</div>';
             }
             html += '<div class="row">';
+
+            // A transcription is checked against the page itself.
+            if (meta.kind === 'transcript' && meta.image) {
+                var img = escapeHtml(meta.image).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+                html += '<div class="col-12 mb-3 text-center"><a href="' + img + '" target="_blank" rel="noopener">'
+                    + '<img src="' + img + '" alt="Page image" class="img-fluid border" data-ahg-style="max-height: 500px;"></a></div>';
+            }
 
             // Existing text
             html += '<div class="col-md-6">';

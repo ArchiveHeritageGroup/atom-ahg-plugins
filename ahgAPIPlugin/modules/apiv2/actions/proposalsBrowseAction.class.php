@@ -99,7 +99,8 @@ class apiv2ProposalsBrowseAction extends AhgApiController
         foreach ($fields as $f) {
             $items[] = [
                 'kind' => 'field', 'id' => (int) $f->id, 'object_id' => (int) $f->object_id,
-                'field' => json_decode((string) $f->source_data, true)['field'] ?? null,
+                'field' => ($meta = json_decode((string) $f->source_data, true) ?: [])['field'] ?? (($meta['kind'] ?? '') === 'transcript' ? 'transcript' : null),
+                'culture' => $meta['culture'] ?? null,
                 'value' => mb_substr((string) $f->suggested_text, 0, 300), 'status' => (string) $f->status,
                 'review_notes' => $f->review_notes,
                 'proposed_by' => $f->created_by ? (int) $f->created_by : null,

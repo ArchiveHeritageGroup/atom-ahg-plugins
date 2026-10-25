@@ -328,12 +328,20 @@ class DescriptionService
 
         // Save to the field the proposal names (API proposals carry it in
         // source_data); LLM suggestions have none and stay scope and content.
-        $field = self::targetField($suggestion);
-        $saved = $this->saveScopeAndContent($suggestion->object_id, $textToSave, $field);
+        // A transcript goes to the file's text, a translation to its language.
+        $meta = json_decode((string) ($suggestion->source_data ?? ''), true) ?: [];
+        if ('transcript' === ($meta['kind'] ?? '')) {
+            $field = 'transcript';
+            $saved = $this->saveTranscript((int) ($meta['digital_object_id'] ?? 0), $textToSave);
+        } else {
+            $field = self::targetField($suggestion);
+            $saved = $this->saveScopeAndContent($suggestion->object_id, $textToSave, $field, $meta['culture'] ?? null);
+        }
 
         if (!$saved) {
             return ['success' => false, 'error' => 'Failed to save '.str_replace('_', ' ', $field)];
         }
+        $this->reindex((int) $suggestion->object_id);
 
         return [
             'success' => true,
@@ -581,13 +589,13 @@ class DescriptionService
         return in_array($field, self::TARGET_FIELDS, true) ? $field : 'scope_and_content';
     }
 
-    private function saveScopeAndContent(int $objectId, string $text, string $field = 'scope_and_content'): bool
+    private function saveScopeAndContent(int $objectId, string $text, string $field = 'scope_and_content', ?string $culture = null): bool
     {
         if (!in_array($field, self::TARGET_FIELDS, true)) {
             return false;
         }
         try {
-            $culture = $this->getCulture();
+            $culture = $culture ?: $this->getCulture();
 
             $exists = DB::table('information_object_i18n')
                 ->where('id', $objectId)
@@ -613,6 +621,50 @@ class DescriptionService
             error_log('Error saving scope_and_content: ' . $e->getMessage());
 
             return false;
+        }
+    }
+
+    /**
+     * Store an approved transcription as the file's 'transcript' property, where
+     * GET /api/v2/descriptions/:slug/text and the search index read it (the same
+     * place pdftotext and HTR put theirs). It replaces an existing transcript;
+     * the reviewer saw that text beside the proposal.
+     */
+    private function saveTranscript(int $digitalObjectId, string $text): bool
+    {
+        if (!$digitalObjectId || !DB::table('digital_object')->where('id', $digitalObjectId)->exists()) {
+            return false;
+        }
+        try {
+            $existing = DB::table('property')->where('object_id', $digitalObjectId)->where('name', 'transcript')->first(['id', 'source_culture']);
+            if ($existing) {
+                DB::table('property_i18n')->updateOrInsert(['id' => $existing->id, 'culture' => $existing->source_culture], ['value' => $text]);
+            } else {
+                $culture = $this->getCulture();
+                $id = DB::table('property')->insertGetId([
+                    'object_id' => $digitalObjectId, 'name' => 'transcript', 'source_culture' => $culture,
+                    'scope' => 'Transcription proposed through the API and approved by an archivist',
+                ]);
+                DB::table('property_i18n')->insert(['id' => $id, 'culture' => $culture, 'value' => $text]);
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log('Error saving transcript: '.$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /** Update the record in the search index so approved text is found at once. */
+    private function reindex(int $objectId): void
+    {
+        try {
+            if (class_exists('QubitSearch') && $io = \QubitInformationObject::getById($objectId)) {
+                \QubitSearch::getInstance()->update($io);
+            }
+        } catch (\Throwable $e) {
+            error_log('Search update after approval failed for '.$objectId.': '.$e->getMessage());
         }
     }
 
