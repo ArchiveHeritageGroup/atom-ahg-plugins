@@ -43,6 +43,8 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $apiv2->get('apiv2_descriptionText', '/api/v2/descriptions/:slug/text', 'descriptionText', ['slug' => '[a-z0-9_-]+']);
         // Proposed access points and dates, queued for review (GLAM MCP, #218).
         $apiv2->post('apiv2_descriptionProposals', '/api/v2/descriptions/:slug/proposals', 'descriptionProposals', ['slug' => '[a-z0-9_-]+']);
+        // A caller's proposals and what became of them (GLAM MCP, #222).
+        $apiv2->get('apiv2_proposalsBrowse', '/api/v2/proposals', 'proposalsBrowse');
         $apiv2->get('apiv2_descriptionsRead', '/api/v2/descriptions/:slug', 'descriptionsRead', ['slug' => '[a-z0-9_-]+']);
         $apiv2->put('apiv2_descriptionsUpdate', '/api/v2/descriptions/:slug', 'descriptionsUpdate', ['slug' => '[a-z0-9_-]+']);
         $apiv2->delete('apiv2_descriptionsDelete', '/api/v2/descriptions/:slug', 'descriptionsDelete', ['slug' => '[a-z0-9_-]+']);
