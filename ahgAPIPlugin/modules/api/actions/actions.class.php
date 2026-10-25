@@ -19,24 +19,56 @@ class apiActions extends AhgController
         $this->newKey = null;
         $this->error = null;
 
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $this->isAdmin = $this->getUser()->isAdministrator();
+        $hasIssued = $db::schema()->hasColumn('ahg_api_key', 'issued_by');
+
         if ($request->isMethod('post')) {
             if ('revoke' === $request->getParameter('form_action')) {
-                \Illuminate\Database\Capsule\Manager::table('ahg_api_key')
-                    ->where('id', (int) $request->getParameter('key_id'))->where('user_id', $userId)->delete();
+                // Your own keys, or (administrators) keys you issued to someone else.
+                $db::table('ahg_api_key')->where('id', (int) $request->getParameter('key_id'))
+                    ->where(function ($q) use ($userId, $hasIssued) {
+                        $q->where('user_id', $userId);
+                        if ($hasIssued && $this->isAdmin) {
+                            $q->orWhere('issued_by', $userId);
+                        }
+                    })->delete();
                 $this->redirect(['module' => 'api', 'action' => 'keys']);
             }
             $name = trim((string) $request->getParameter('name'));
             $scopes = array_values(array_intersect((array) $request->getParameter('scopes', []), array_keys($this->scopes)));
+            $expires = trim((string) $request->getParameter('expires_at'));
+            $daily = (int) $request->getParameter('daily_limit') ?: null;
+            $ownerId = $userId;
+            $issuedBy = null;
+            $for = trim((string) $request->getParameter('issue_for'));
+            if ('' !== $for) {
+                // Administrators issue keys to other people (e.g. read-only keys for
+                // testing the MCP). The key acts as its owner, with the owner's groups.
+                $ownerId = $this->isAdmin ? (int) $db::table('user')->where('username', $for)->orWhere('email', $for)->value('id') : 0;
+                $issuedBy = $userId;
+            }
             if ('' === $name || !$scopes) {
                 $this->error = 'Give the key a name and at least one scope.';
+            } elseif ('' !== $for && !$ownerId) {
+                $this->error = 'No user with that username or email.';
+            } elseif ('' !== $expires && (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $expires) || $expires <= date('Y-m-d'))) {
+                $this->error = 'The expiry date must be a date after today.';
             } else {
                 // Shown once on this response only; the database keeps a hash.
-                $this->newKey = (new \AhgAPIPlugin\Service\ApiKeyService())->createApiKey($userId, mb_substr($name, 0, 100), $scopes);
+                $this->newKey = (new \AhgAPIPlugin\Service\ApiKeyService())->createApiKey($ownerId, mb_substr($name, 0, 100), $scopes, 1000,
+                    '' !== $expires ? $expires.' 23:59:59' : null, $daily, $issuedBy);
+                $this->newKey['for'] = '' !== $for ? $for : null;
             }
         }
 
-        $this->keys = \Illuminate\Database\Capsule\Manager::table('ahg_api_key')->where('user_id', $userId)
-            ->orderByDesc('created_at')->get(['id', 'name', 'api_key_prefix', 'scopes', 'last_used_at', 'is_active', 'created_at'])->all();
+        $cols = array_merge(['id', 'name', 'api_key_prefix', 'scopes', 'rate_limit', 'expires_at', 'last_used_at', 'is_active', 'created_at'],
+            $hasIssued ? ['daily_limit'] : []);
+        $this->keys = $db::table('ahg_api_key')->where('user_id', $userId)->orderByDesc('created_at')->get($cols)->all();
+        $this->issued = $hasIssued && $this->isAdmin ? $db::table('ahg_api_key as k')->leftJoin('user as u', 'u.id', '=', 'k.user_id')
+            ->where('k.issued_by', $userId)->where('k.user_id', '!=', $userId)->orderByDesc('k.created_at')
+            ->get(array_merge(array_map(fn ($c) => 'k.'.$c, $cols), ['u.username']))->all() : [];
+        $this->canIssue = $hasIssued && $this->isAdmin;
     }
 
     public function executeSearchInformationObjects($request)

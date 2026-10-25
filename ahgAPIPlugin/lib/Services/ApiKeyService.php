@@ -40,7 +40,8 @@ class ApiKeyService
             'id' => $apiKey->id,
             'user_id' => $apiKey->user_id,
             'scopes' => json_decode($apiKey->scopes ?? '[]', true),
-            'rate_limit' => $apiKey->rate_limit
+            'rate_limit' => $apiKey->rate_limit,
+            'daily_limit' => $apiKey->daily_limit ?? null,
         ];
     }
 
@@ -66,31 +67,50 @@ class ApiKeyService
 
     public function checkRateLimit(int $apiKeyId, int $limit): bool
     {
+        // One atomic statement: two first requests in the same hour no longer
+        // race to insert the window row.
         $windowStart = date('Y-m-d H:00:00');
+        DB::statement('INSERT INTO ahg_api_rate_limit (api_key_id, window_start, request_count) VALUES (?, ?, 1)
+            ON DUPLICATE KEY UPDATE request_count = request_count + 1', [$apiKeyId, $windowStart]);
+        $count = (int) DB::table('ahg_api_rate_limit')->where('api_key_id', $apiKeyId)
+            ->where('window_start', $windowStart)->value('request_count');
 
-        $current = DB::table('ahg_api_rate_limit')
-            ->where('api_key_id', $apiKeyId)
-            ->where('window_start', $windowStart)
-            ->first();
+        return $count <= $limit;
+    }
 
-        if (!$current) {
-            DB::table('ahg_api_rate_limit')->insert([
-                'api_key_id' => $apiKeyId,
-                'window_start' => $windowStart,
-                'request_count' => 1
-            ]);
-            return true;
+    /**
+     * Count this request against the key's hourly limit and daily cap. Returns
+     * why it is refused, or null when it may go ahead. rate_limit 0 means no
+     * hourly limit; a NULL daily_limit means no daily cap.
+     *
+     * @return array{message: string, retry_after: int}|null
+     */
+    public function overLimit(array $keyInfo): ?array
+    {
+        $id = (int) ($keyInfo['id'] ?? 0);
+        if (!$id) {
+            return null;
+        }
+        $daily = (int) ($keyInfo['daily_limit'] ?? 0);
+        if ($daily > 0) {
+            $today = (int) DB::table('ahg_api_rate_limit')->where('api_key_id', $id)
+                ->where('window_start', '>=', date('Y-m-d 00:00:00'))->sum('request_count');
+            if ($today >= $daily) {
+                return ['message' => "This key's daily limit of $daily requests is used up; it resets at midnight.",
+                    'retry_after' => strtotime('tomorrow') - time()];
+            }
+        }
+        $hourly = (int) ($keyInfo['rate_limit'] ?? 0);
+        if ($hourly > 0 && !$this->checkRateLimit($id, $hourly)) {
+            return ['message' => "This key's limit of $hourly requests an hour is used up.",
+                'retry_after' => 3600 - (time() % 3600)];
+        }
+        if ($hourly <= 0) {
+            // Still counted, so the daily cap and usage figures see it.
+            $this->checkRateLimit($id, PHP_INT_MAX);
         }
 
-        if ($current->request_count >= $limit) {
-            return false;
-        }
-
-        DB::table('ahg_api_rate_limit')
-            ->where('id', $current->id)
-            ->increment('request_count');
-
-        return true;
+        return null;
     }
 
     public function logRequest(array $data): void
@@ -108,7 +128,8 @@ class ApiKeyService
         ]);
     }
 
-    public function createApiKey(int $userId, string $name, array $scopes = ['read'], int $rateLimit = 1000): array
+    public function createApiKey(int $userId, string $name, array $scopes = ['read'], int $rateLimit = 1000,
+        ?string $expiresAt = null, ?int $dailyLimit = null, ?int $issuedBy = null): array
     {
         $rawKey = bin2hex(random_bytes(32));
         $hashedKey = hash('sha256', $rawKey);
@@ -121,10 +142,11 @@ class ApiKeyService
             'api_key_prefix' => substr($rawKey, 0, 8),
             'scopes' => json_encode($scopes),
             'rate_limit' => $rateLimit,
+            'expires_at' => $expiresAt,
             'is_active' => 1,
             'created_at' => $now,
             'updated_at' => $now
-        ]);
+        ] + (DB::schema()->hasColumn('ahg_api_key', 'daily_limit') ? ['daily_limit' => $dailyLimit, 'issued_by' => $issuedBy] : []));
 
         // Return the raw key - it will only be shown once
         return [
