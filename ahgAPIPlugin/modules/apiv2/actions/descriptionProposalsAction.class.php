@@ -15,10 +15,17 @@ use Illuminate\Database\Capsule\Manager as DB;
  *                       "authority": {"dates_of_existence": "...", "history": "...", "places": "..."},
  *                       "actor_id": 123, "term_id": 456, "link_reason": "..."}, ...],
  *        "fields":   [{"field": "scope_and_content", "text": "...", "evidence": "...", "sources": [...]}],
+ *        "relationships": [{"subject_name": "...", "subject_actor_id": 123, "relation": "is the spouse of",
+ *                            "object_name": "...", "object_actor_id": 456, "date": "1898",
+ *                            "start_date": "1898-05-02", "end_date": "...", "evidence": "...", "sources": [...]}],
  *        "source": "optional label, e.g. glam-mcp"}
  *
- * Entities go to AI > NER review, field texts to AI > Suggest review; the
- * evidence and sources are shown to the reviewer.
+ * Entities go to AI > NER review, field texts to AI > Suggest review,
+ * relationships to AI > Relationship review; the evidence and sources are
+ * shown to the reviewer. A relationship reads subject-relation-object, the
+ * relation being a term (name or id) of the Actor relation type taxonomy. Each
+ * side is an existing authority record (*_actor_id) or a person or
+ * organisation proposed for this record in the same or an earlier request.
  *
  * actor_id (PERSON, ORG) or term_id (GPE, a place) says which existing
  * authority record the name most likely is; Authority Resolution shows it as
@@ -32,6 +39,9 @@ class apiv2DescriptionProposalsAction extends AhgApiController
     private const TYPES = ['PERSON', 'ORG', 'GPE', 'DATE'];
     private const MAX = 50;
     private const PLACES_TAXONOMY_ID = 42;
+    private const RELATION_TYPE_TAXONOMY_ID = 55;
+    private const RELATION_TYPE_ROOT_ID = 110;
+    private const MAX_RELATIONSHIPS = 20;
     /** information_object_i18n fields a proposal may target. */
     /** Authority details a person or organisation proposal may carry, with their length limits. */
     private const AUTHORITY_FIELDS = ['dates_of_existence' => 255, 'history' => 8000, 'places' => 1000];
@@ -48,6 +58,34 @@ class apiv2DescriptionProposalsAction extends AhgApiController
         }
 
         return $out;
+    }
+
+    /** An authority record a proposal may name: exists, is a person/organisation/family and is not hidden. */
+    private static function actorOk(int $id): bool
+    {
+        return $id > 1 && DB::table('actor')->where('id', $id)->whereNotNull('entity_type_id')->exists()
+            && !(class_exists('\\AhgActorManage\\Services\\ActorVisibilityService')
+                && \AhgActorManage\Services\ActorVisibilityService::isHiddenFromPublic($id));
+    }
+
+    /** A specific Actor relation type ("is the spouse of"), by id or name; the four categories are refused. */
+    private static function relationType($relation): ?int
+    {
+        $q = DB::table('term as t')->where('t.taxonomy_id', self::RELATION_TYPE_TAXONOMY_ID)
+            ->where('t.parent_id', '!=', self::RELATION_TYPE_ROOT_ID);
+        if (is_int($relation) || ctype_digit((string) $relation)) {
+            return $q->where('t.id', (int) $relation)->value('t.id');
+        }
+
+        return $q->join('term_i18n as ti', 'ti.id', '=', 't.id')
+            ->whereRaw('LOWER(ti.name) = ?', [mb_strtolower(trim((string) $relation))])->value('t.id');
+    }
+
+    private static function isoDate($v): ?string
+    {
+        $v = trim((string) $v);
+
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) && checkdate((int) substr($v, 5, 2), (int) substr($v, 8, 2), (int) substr($v, 0, 4)) ? $v : null;
     }
 
     public function POST($request, $data = null)
@@ -68,8 +106,48 @@ class apiv2DescriptionProposalsAction extends AhgApiController
 
         $entities = is_array($data['entities'] ?? null) ? $data['entities'] : [];
         $fields = is_array($data['fields'] ?? null) ? $data['fields'] : [];
-        if (!$entities && !$fields) {
-            return $this->error(400, 'Bad Request', 'entities (a list of {type, value}) or fields (a list of {field, text}) is required');
+        $relationships = is_array($data['relationships'] ?? null) ? $data['relationships'] : [];
+        if (!$entities && !$fields && !$relationships) {
+            return $this->error(400, 'Bad Request', 'entities (a list of {type, value}), fields (a list of {field, text}) or relationships is required');
+        }
+        if (count($relationships) > self::MAX_RELATIONSHIPS) {
+            return $this->error(400, 'Bad Request', 'At most '.self::MAX_RELATIONSHIPS.' relationships per request');
+        }
+        $relRows = [];
+        foreach ($relationships as $i => $r) {
+            $row = ['type_id' => self::relationType($r['relation'] ?? '')];
+            if (!$row['type_id']) {
+                return $this->error(400, 'Bad Request', "Relationship $i: relation must be an Actor relation type such as \"is the spouse of\" or \"is the child of\" (see /api/v2/taxonomies/55/terms)");
+            }
+            foreach (['subject', 'object'] as $side) {
+                $name = trim(preg_replace('/\s+/', ' ', (string) ($r[$side.'_name'] ?? '')));
+                $actorId = (int) ($r[$side.'_actor_id'] ?? 0);
+                if ($actorId && !self::actorOk($actorId)) {
+                    return $this->error(400, 'Bad Request', "Relationship $i: {$side}_actor_id is not an authority record");
+                }
+                if ('' === $name && $actorId) {
+                    $name = (string) DB::table('actor_i18n')->where('id', $actorId)->orderByRaw("culture = 'en' DESC")->value('authorized_form_of_name');
+                }
+                if ('' === $name || mb_strlen($name) > 500) {
+                    return $this->error(400, 'Bad Request', "Relationship $i: {$side}_name (1-500 characters) or {$side}_actor_id is required");
+                }
+                $row[$side.'_name'] = $name;
+                $row[$side.'_actor_id'] = $actorId ?: null;
+            }
+            $row += [
+                'date_text' => mb_substr(trim((string) ($r['date'] ?? '')), 0, 255) ?: null,
+                'start_date' => self::isoDate($r['start_date'] ?? ''), 'end_date' => self::isoDate($r['end_date'] ?? ''),
+                'evidence' => mb_substr(trim((string) ($r['evidence'] ?? '')), 0, 4000) ?: null,
+                'sources' => ($src = self::sources($r['sources'] ?? [])) ? json_encode($src) : null,
+            ];
+            $relRows[] = $row;
+        }
+        // The review queues belong to ahgAIPlugin; without it there is nowhere to propose to.
+        if (($entities || $fields) && !DB::schema()->hasTable('ahg_ner_entity')) {
+            return $this->error(501, 'Not Implemented', 'Proposals need the AI plugin (ahgAIPlugin), whose review screens they go to');
+        }
+        if ($relRows && !DB::schema()->hasTable('ahg_relationship_proposal')) {
+            return $this->error(501, 'Not Implemented', 'Relationship proposals need the ahg_relationship_proposal table (ahgAIPlugin install.sql)');
         }
         if (count($fields) > 10) {
             return $this->error(400, 'Bad Request', 'At most 10 field proposals per request');
@@ -116,9 +194,7 @@ class apiv2DescriptionProposalsAction extends AhgApiController
                 }
                 $exists = 'GPE' === $type
                     ? DB::table('term')->where('id', $linkId)->where('taxonomy_id', self::PLACES_TAXONOMY_ID)->exists()
-                    : DB::table('actor')->where('id', $linkId)->where('id', '!=', 1)->whereNotNull('entity_type_id')->exists()
-                        && !(class_exists('\\AhgActorManage\\Services\\ActorVisibilityService')
-                            && \AhgActorManage\Services\ActorVisibilityService::isHiddenFromPublic($linkId));
+                    : self::actorOk($linkId);
                 if (!$exists) {
                     return $this->error(400, 'Bad Request', "Entity $i: ".('GPE' === $type ? 'term_id is not a place' : 'actor_id is not an authority record'));
                 }
@@ -219,6 +295,38 @@ class apiv2DescriptionProposalsAction extends AhgApiController
             }
         }
 
+        // Relationships go to AI > Relationship review. A side without an authority
+        // record must be a person or organisation proposed for this record (now or
+        // earlier): the archivist links that name first, then approves.
+        $relQueued = [];
+        $relSkipped = 0;
+        foreach ($relRows as $i => $row) {
+            foreach (['subject', 'object'] as $side) {
+                $row[$side.'_entity_id'] = $row[$side.'_actor_id'] ? null : DB::table('ahg_ner_entity')
+                    ->where('object_id', (int) $objectId)->whereIn('entity_type', ['PERSON', 'ORG'])->where('status', '!=', 'rejected')
+                    ->whereRaw('LOWER(entity_value) = ?', [mb_strtolower($row[$side.'_name'])])->orderByDesc('id')->value('id');
+                if (!$row[$side.'_actor_id'] && !$row[$side.'_entity_id']) {
+                    $relQueued[] = ['subject' => $row['subject_name'], 'object' => $row['object_name'], 'queued' => false,
+                        'error' => "\"{$row[$side.'_name']}\" is neither an authority record ({$side}_actor_id) nor a person or organisation proposed for this record: propose it as an entity too"];
+
+                    continue 2;
+                }
+            }
+            $dup = DB::table('ahg_relationship_proposal')->where('object_id', (int) $objectId)->where('status', '!=', 'rejected')
+                ->where('type_id', $row['type_id'])->whereRaw('LOWER(subject_name) = ?', [mb_strtolower($row['subject_name'])])
+                ->whereRaw('LOWER(object_name) = ?', [mb_strtolower($row['object_name'])])->exists();
+            if ($dup) {
+                ++$relSkipped;
+
+                continue;
+            }
+            DB::table('ahg_relationship_proposal')->insert($row + [
+                'object_id' => (int) $objectId, 'status' => 'pending', 'proposed_via' => $label,
+                'created_by' => $userId ?: null, 'created_at' => $now,
+            ]);
+            $relQueued[] = ['subject' => $row['subject_name'], 'object' => $row['object_name'], 'queued' => true];
+        }
+
         // Field texts go to AI > Suggest review. Approval writes the field named in
         // source_data; an identical text already pending for that field is skipped.
         $fieldsQueued = [];
@@ -257,8 +365,11 @@ class apiv2DescriptionProposalsAction extends AhgApiController
             'promoted_for_resolution' => $promoted,
             'fields_queued' => $fieldsQueued,
             'fields_skipped_existing' => $fieldsSkipped,
+            'relationships' => $relQueued,
+            'relationships_skipped_existing' => $relSkipped,
+            'relationship_review_url' => ($base ?: '').'/ai/relationship/review',
             'review_url' => ($base ?: '').'/ai/ner/review',
             'description_review_url' => ($base ?: '').'/ai/suggest/review',
-        ], ($queued || $fieldsQueued) ? 201 : 200);
+        ], ($queued || $fieldsQueued || array_filter(array_column($relQueued, 'queued'))) ? 201 : 200);
     }
 }

@@ -8,10 +8,11 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * Proposals made through POST /api/v2/descriptions/:slug/proposals and what
  * became of them: names, places and dates (AI > NER review, and the Authority
- * Resolution queue where it is on) and field texts (AI > Suggest review).
+ * Resolution queue where it is on), field texts (AI > Suggest review) and
+ * relationships (AI > Relationship review).
  * Newest first.
  *
- * Each item: kind (entity|field), type or field, value, record slug and title,
+ * Each item: kind (entity|field|relationship), type or field, value, record slug and title,
  * status (pending, approved, edited, linked, rejected, new_record_created,
  * parked), linked authority id, reviewer and dates.
  *
@@ -62,7 +63,28 @@ class apiv2ProposalsBrowseAction extends AhgApiController
         $fields = $fields->orderByDesc('id')->limit(self::MAX * 5)
             ->get(['id', 'object_id', 'source_data', 'suggested_text', 'status', 'reviewed_by', 'reviewed_at', 'review_notes', 'created_by', 'created_at']);
 
+        $relationships = [];
+        if (DB::schema()->hasTable('ahg_relationship_proposal')) {
+            $q = DB::table('ahg_relationship_proposal as r')->leftJoin('term_i18n as ti', function ($j) use ($culture) {
+                $j->on('ti.id', '=', 'r.type_id')->where('ti.culture', '=', $culture);
+            });
+            if ($mine) {
+                $q->where('r.created_by', $userId);
+            }
+            $relationships = $q->orderByDesc('r.id')->limit(self::MAX * 5)->get(['r.id', 'r.object_id', 'r.subject_name', 'ti.name as relation',
+                'r.object_name', 'r.date_text', 'r.status', 'r.relation_id', 'r.review_notes', 'r.created_by', 'r.reviewed_by', 'r.reviewed_at', 'r.created_at']);
+        }
+
         $items = [];
+        foreach ($relationships as $r) {
+            $items[] = [
+                'kind' => 'relationship', 'id' => (int) $r->id, 'object_id' => (int) $r->object_id,
+                'value' => trim($r->subject_name.' '.$r->relation.' '.$r->object_name.($r->date_text ? ' ('.$r->date_text.')' : '')),
+                'status' => (string) $r->status, 'review_notes' => $r->review_notes,
+                'proposed_by' => $r->created_by ? (int) $r->created_by : null,
+                'reviewed_by' => $r->reviewed_by, 'reviewed_at' => $r->reviewed_at, 'proposed_at' => $r->created_at,
+            ];
+        }
         foreach ($entities as $e) {
             // The resolution queue's outcome is the more precise one once a person acted on it.
             $state = $hasMention && $e->mention_state && 'pending' !== $e->mention_state ? $e->mention_state : $e->status;

@@ -43,6 +43,9 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
         $router->any('ahg_ai_suggest', '/ai/suggest/:id', 'suggest');
         $router->any('ahg_ai_suggest_preview', '/ai/suggest/:id/preview', 'suggestPreview');
         $router->any('ahg_ai_suggest_review', '/ai/suggest/review', 'suggestReview');
+        // Relationships proposed through the API (GLAM MCP, atom-ahg-plugins#220).
+        $router->any('ahg_ai_relationship_review', '/ai/relationship/review', 'relationshipReview');
+        $router->any('ahg_ai_relationship_decision', '/ai/relationship/:id/decision', 'relationshipDecision', ['id' => '\d+']);
         $router->any('ahg_ai_suggest_decision', '/ai/suggest/:id/decision', 'suggestDecision');
         $router->any('ahg_ai_llm_configs', '/ai/llm/configs', 'llmConfigs');
         $router->any('ahg_ai_llm_health', '/ai/llm/health', 'llmHealth');

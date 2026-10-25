@@ -5,8 +5,11 @@
             <a href="/ai/llm/health" class="btn btn-outline-secondary btn-sm me-2" target="_blank">
                 <i class="bi bi-heart-pulse me-1"></i>LLM Health
             </a>
-            <a href="/ai/ner/review" class="btn btn-outline-primary btn-sm">
+            <a href="/ai/ner/review" class="btn btn-outline-primary btn-sm me-2">
                 <i class="bi bi-tags me-1"></i>NER Review
+            </a>
+            <a href="/ai/relationship/review" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-diagram-3 me-1"></i>Relationship Review
             </a>
         </div>
     </div>

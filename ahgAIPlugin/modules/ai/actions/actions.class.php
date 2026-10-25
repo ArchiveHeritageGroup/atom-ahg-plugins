@@ -5,6 +5,7 @@ use AtomFramework\Services\Write\WriteServiceFactory;
 use Illuminate\Database\Capsule\Manager as DB;
 require_once dirname(__FILE__).'/../../../lib/Services/NerService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/DescriptionService.php';
+require_once dirname(__FILE__).'/../../../lib/Services/RelationshipProposalService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/LlmService.php';
 require_once dirname(__FILE__).'/../../../lib/Services/PromptService.php';
 
@@ -1916,6 +1917,43 @@ class aiActions extends AhgController
         }
 
         return $this->renderText(json_encode($result));
+    }
+
+    /**
+     * Relationships proposed through the API (GLAM MCP).
+     * GET /ai/relationship/review?status=pending|approved|rejected
+     */
+    public function executeRelationshipReview($request)
+    {
+        if (!$this->getUser()->hasCredential(['administrator', 'editor'], false)) {
+            $this->forward('admin', 'secure');
+        }
+        $service = new RelationshipProposalService();
+        $this->available = $service->available();
+        $this->status = in_array($request->getParameter('status'), ['approved', 'rejected'], true) ? $request->getParameter('status') : 'pending';
+        $this->proposals = $this->available ? $service->listProposals($this->status, $this->getUserCulture()) : [];
+        $this->counts = $this->available ? $service->counts() : [];
+    }
+
+    /**
+     * POST /ai/relationship/:id/decision  decision=approve|reject, notes
+     */
+    public function executeRelationshipDecision($request)
+    {
+        if (!$request->isMethod('post') || !$this->getUser()->hasCredential(['administrator', 'editor'], false)) {
+            $this->forward('admin', 'secure');
+        }
+        $service = new RelationshipProposalService();
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $notes = trim((string) $request->getParameter('notes', '')) ?: null;
+        $id = (int) $request->getParameter('id');
+        $result = 'approve' === $request->getParameter('decision')
+            ? $service->approve($id, $userId, $this->getUserCulture(), $notes)
+            : $service->reject($id, $userId, $notes);
+        $this->getUser()->setFlash($result['success'] ? 'notice' : 'error', $result['success']
+            ? ('approve' === $request->getParameter('decision') ? 'Relationship saved on both authority records.' : 'Relationship rejected.')
+            : $result['error']);
+        $this->redirect('/ai/relationship/review');
     }
 
     /**
