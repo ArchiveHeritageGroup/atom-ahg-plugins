@@ -28,6 +28,10 @@
  * similarity; Task 4 will overwrite it with the multi-dimensional
  * weighted aggregate.
  *
+ * A record the proposer named (POST /api/v2/descriptions/:slug/proposals
+ * with actor_id or term_id) is added on top of the top-N with source
+ * "proposed"; the review screen always lists it first.
+ *
  * Copyright (C) 2026 Johan Pieterse
  * Plain Sailing Information Systems
  * Email: johan@plainsailingisystems.co.za
@@ -71,7 +75,7 @@ class CandidateGeneratorService
         $mention = DB::table('ahg_mention as m')
             ->join('ahg_ner_entity as n', 'n.id', '=', 'm.ner_entity_id')
             ->where('m.id', $mentionId)
-            ->first(['m.id', 'm.entity_type', 'n.entity_value']);
+            ->first(['m.id', 'm.ner_entity_id', 'm.entity_type', 'n.entity_value']);
 
         if (!$mention) {
             return [];
@@ -89,7 +93,51 @@ class CandidateGeneratorService
         $scored = $this->score($entityValue, $blended);
         $top = $this->trim($scored, $topN);
 
+        $proposed = $this->proposedCandidate((int) $mention->ner_entity_id, $entityValue);
+        if ($proposed) {
+            array_unshift($top, $proposed);
+        }
+
         return $this->persist($mentionId, $top);
+    }
+
+    /**
+     * The existing authority record a proposal named for this entity, or null.
+     * Stored by the proposals API as authority.link {kind: actor|term, id, reason}
+     * on ahg_ner_entity_evidence.
+     */
+    public static function proposedLink(int $nerEntityId): ?array
+    {
+        if (!DB::schema()->hasColumn('ahg_ner_entity_evidence', 'authority')) {
+            return null;
+        }
+        $json = DB::table('ahg_ner_entity_evidence')->where('entity_id', $nerEntityId)->value('authority');
+        $link = $json ? (json_decode((string) $json, true)['link'] ?? null) : null;
+
+        return is_array($link) && !empty($link['id']) && in_array($link['kind'] ?? '', ['actor', 'term'], true) ? $link : null;
+    }
+
+    private function proposedCandidate(int $nerEntityId, string $entityValue): ?array
+    {
+        $link = self::proposedLink($nerEntityId);
+        if (!$link) {
+            return null;
+        }
+        // Prefer English, accept any culture; a deleted record yields no row.
+        $name = 'actor' === $link['kind']
+            ? DB::table('actor_i18n')->where('id', (int) $link['id'])->orderByRaw("culture = 'en' DESC")->value('authorized_form_of_name')
+            : DB::table('term_i18n')->where('id', (int) $link['id'])->orderByRaw("culture = 'en' DESC")->value('name');
+        if (null === $name || '' === trim((string) $name)) {
+            return null;
+        }
+
+        return [
+            'source' => 'proposed',
+            'authority_id' => (int) $link['id'],
+            'fuseki_uri' => null,
+            'display_name' => (string) $name,
+            'score' => $this->nameSimilarity($entityValue, (string) $name),
+        ];
     }
 
     /**

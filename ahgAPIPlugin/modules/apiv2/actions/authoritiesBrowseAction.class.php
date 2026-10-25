@@ -12,7 +12,8 @@ class apiv2AuthoritiesBrowseAction extends AhgApiController
         $params = [
             'limit' => $request->getParameter('limit', 10),
             'skip' => $request->getParameter('skip', 0),
-            'entity_type' => $request->getParameter('entity_type')
+            'entity_type' => $request->getParameter('entity_type'),
+            'search' => (string) $request->getParameter('search', ''),
         ];
 
         $result = $this->repository->getAuthorities($params);

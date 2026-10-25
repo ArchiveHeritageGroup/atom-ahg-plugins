@@ -316,6 +316,9 @@ class ParkQueueService
     {
         $rows = DB::table('ahg_mention_candidate')
             ->where('mention_id', $mentionId)
+            // A proposed candidate never comes from the adapters, so it is left
+            // out of the comparison with a fresh adapter run.
+            ->where('candidate_source', '!=', 'proposed')
             ->get(['candidate_source', 'candidate_authority_id', 'candidate_fuseki_uri', 'candidate_display_name']);
         $keys = [];
         foreach ($rows as $r) {

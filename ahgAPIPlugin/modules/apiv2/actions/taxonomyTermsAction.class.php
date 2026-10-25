@@ -10,7 +10,8 @@ class apiv2TaxonomyTermsAction extends AhgApiController
         }
 
         $taxonomyId = (int) $request->getParameter('id');
-        $result = $this->repository->getTaxonomyTerms($taxonomyId);
+        // ?search= returns at most 50 terms whose name holds every word.
+        $result = $this->repository->getTaxonomyTerms($taxonomyId, (string) $request->getParameter('search', ''));
 
         return $this->success(['terms' => $result]);
     }

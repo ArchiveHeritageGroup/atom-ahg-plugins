@@ -12,12 +12,17 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * Body: {"entities": [{"type": "PERSON|ORG|GPE|DATE", "value": "...", "confidence": 0.8,
  *                       "evidence": "...", "sources": ["https://..."],
- *                       "authority": {"dates_of_existence": "...", "history": "...", "places": "..."}}, ...],
+ *                       "authority": {"dates_of_existence": "...", "history": "...", "places": "..."},
+ *                       "actor_id": 123, "term_id": 456, "link_reason": "..."}, ...],
  *        "fields":   [{"field": "scope_and_content", "text": "...", "evidence": "...", "sources": [...]}],
  *        "source": "optional label, e.g. glam-mcp"}
  *
  * Entities go to AI > NER review, field texts to AI > Suggest review; the
  * evidence and sources are shown to the reviewer.
+ *
+ * actor_id (PERSON, ORG) or term_id (GPE, a place) says which existing
+ * authority record the name most likely is; Authority Resolution shows it as
+ * the first candidate, marked as proposed, with link_reason.
  *
  * Staff only (framework scope rule) and AtoM's own update permission on the
  * record. Values already pending or linked for this record are skipped.
@@ -26,6 +31,7 @@ class apiv2DescriptionProposalsAction extends AhgApiController
 {
     private const TYPES = ['PERSON', 'ORG', 'GPE', 'DATE'];
     private const MAX = 50;
+    private const PLACES_TAXONOMY_ID = 42;
     /** information_object_i18n fields a proposal may target. */
     /** Authority details a person or organisation proposal may carry, with their length limits. */
     private const AUTHORITY_FIELDS = ['dates_of_existence' => 255, 'history' => 8000, 'places' => 1000];
@@ -101,6 +107,24 @@ class apiv2DescriptionProposalsAction extends AhgApiController
                     }
                 }
             }
+            // A proposed link to an existing authority record, checked here so a
+            // wrong id fails the request instead of reaching the reviewer.
+            $linkId = (int) ('GPE' === $type ? ($e['term_id'] ?? 0) : ($e['actor_id'] ?? 0));
+            if ($linkId > 0) {
+                if ('DATE' === $type) {
+                    return $this->error(400, 'Bad Request', "Entity $i: a date cannot link to an authority record");
+                }
+                $exists = 'GPE' === $type
+                    ? DB::table('term')->where('id', $linkId)->where('taxonomy_id', self::PLACES_TAXONOMY_ID)->exists()
+                    : DB::table('actor')->where('id', $linkId)->where('id', '!=', 1)->whereNotNull('entity_type_id')->exists()
+                        && !(class_exists('\\AhgActorManage\\Services\\ActorVisibilityService')
+                            && \AhgActorManage\Services\ActorVisibilityService::isHiddenFromPublic($linkId));
+                if (!$exists) {
+                    return $this->error(400, 'Bad Request', "Entity $i: ".('GPE' === $type ? 'term_id is not a place' : 'actor_id is not an authority record'));
+                }
+                $authority['link'] = ['kind' => 'GPE' === $type ? 'term' : 'actor', 'id' => $linkId,
+                    'reason' => mb_substr(trim((string) ($e['link_reason'] ?? '')), 0, 1000)];
+            }
             $clean[$type."\0".mb_strtolower($value)] = ['type' => $type, 'value' => $value, 'confidence' => $confidence,
                 'evidence' => mb_substr(trim((string) ($e['evidence'] ?? '')), 0, 4000), 'sources' => self::sources($e['sources'] ?? []),
                 'authority' => $authority];
@@ -114,6 +138,7 @@ class apiv2DescriptionProposalsAction extends AhgApiController
         $new = array_diff_key($clean, $existing);
 
         $queued = [];
+        $newEntityIds = [];
         $userId = (int) $this->getUser()->getAttribute('user_id');
         $label = preg_replace('/[^a-z0-9_-]/i', '', (string) ($data['source'] ?? 'api')) ?: 'api';
         $now = date('Y-m-d H:i:s');
@@ -148,7 +173,8 @@ class apiv2DescriptionProposalsAction extends AhgApiController
                             'created_by' => $userId, 'created_at' => $now,
                         ] + ($authority ? ['authority' => json_encode($authority, JSON_UNESCAPED_UNICODE)] : []));
                     }
-                    $queued[] = ['type' => $e['type'], 'value' => $e['value']];
+                    $newEntityIds[] = $entityId;
+                    $queued[] = ['type' => $e['type'], 'value' => $e['value']] + (isset($authority['link']) ? ['linked_to' => $authority['link']['kind'].':'.$authority['link']['id']] : []);
                 }
             });
         }
@@ -167,10 +193,27 @@ class apiv2DescriptionProposalsAction extends AhgApiController
             // Not autoloaded; the plugin's own actions require them the same way.
             require_once $arLib.'ContextDerivationService.php';
             require_once $arLib.'PromoteToMentionService.php';
+            require_once $arLib.'Adapters/CandidateAdapterInterface.php';
+            require_once $arLib.'Adapters/MysqlActorAdapter.php';
+            require_once $arLib.'Adapters/MysqlTermAdapter.php';
+            require_once $arLib.'CandidateGeneratorService.php';
             try {
                 $promoted = (new \AtomFramework\Services\AuthorityResolution\PromoteToMentionService(
                     new \AtomFramework\Services\AuthorityResolution\ContextDerivationService()
                 ))->promoteAllForObject((int) $objectId);
+                // Candidates now, from the local authority records only, so the
+                // reviewer does not open a mention with "no candidates" and a
+                // proposed link is already first. The scheduled reprocess adds
+                // Fuseki candidates and evidence scores later.
+                if ($newEntityIds) {
+                    $generator = new \AtomFramework\Services\AuthorityResolution\CandidateGeneratorService([
+                        new \AtomFramework\Services\AuthorityResolution\Adapters\MysqlActorAdapter(),
+                        new \AtomFramework\Services\AuthorityResolution\Adapters\MysqlTermAdapter(),
+                    ]);
+                    foreach (DB::table('ahg_mention')->whereIn('ner_entity_id', $newEntityIds)->pluck('id') as $mentionId) {
+                        $generator->generate((int) $mentionId);
+                    }
+                }
             } catch (\Throwable $e) {
                 error_log('apiv2 proposals: promotion to authority resolution failed for object '.$objectId.': '.$e->getMessage());
             }

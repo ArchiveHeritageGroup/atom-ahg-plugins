@@ -305,7 +305,8 @@ class authorityResolutionActions extends sfActions
                 $j->on('s.object_id', '=', 'c.candidate_authority_id');
             })
             ->where('c.mention_id', $mentionId)
-            ->orderByRaw('c.composite_score DESC, c.rank_position ASC')
+            // The record a proposer named comes first, whatever its score.
+            ->orderByRaw("c.candidate_source = 'proposed' DESC, c.composite_score DESC, c.rank_position ASC")
             ->select([
                 'c.id',
                 'c.mention_id',
@@ -321,6 +322,14 @@ class authorityResolutionActions extends sfActions
                 's.slug as authority_slug',
             ])
             ->get();
+
+        // The proposer's reason, shown on the proposed candidate's card.
+        foreach ($this->candidates as $c) {
+            if ('proposed' === $c->candidate_source) {
+                require_once dirname(__FILE__) . '/../../../lib/Services/CandidateGeneratorService.php';
+                $c->proposed_reason = (string) (\AtomFramework\Services\AuthorityResolution\CandidateGeneratorService::proposedLink((int) $mention->ner_entity_id)['reason'] ?? '');
+            }
+        }
 
         // Next pending mention id (for the post-decision redirect).
         $this->next_pending_id = DB::table('ahg_mention')

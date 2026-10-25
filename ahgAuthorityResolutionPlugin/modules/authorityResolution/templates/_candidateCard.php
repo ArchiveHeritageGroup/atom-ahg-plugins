@@ -24,6 +24,7 @@ $sourceBadge = [
   'fuseki_agent'  => ['cls' => 'info',    'label' => 'Fuseki agent'],
   'mysql_term'    => ['cls' => 'success', 'label' => 'Local term'],
   'fuseki_place'  => ['cls' => 'info',    'label' => 'Fuseki place'],
+  'proposed'      => ['cls' => 'warning', 'label' => 'Proposed'],
 ];
 $srcCfg = $sourceBadge[$candidate->candidate_source] ?? ['cls' => 'secondary', 'label' => $candidate->candidate_source];
 $compositeScore = $candidate->composite_score !== null ? (float) $candidate->composite_score : null;
@@ -74,6 +75,15 @@ $compositeScore = $candidate->composite_score !== null ? (float) $candidate->com
         name sim: <?php echo number_format((float) $candidate->name_similarity_score, 3); ?>
       </span>
     </div>
+
+    <?php if ($candidate->candidate_source === 'proposed'): ?>
+      <p class="small mb-2">
+        <i class="fas fa-lightbulb text-warning me-1"></i><?php echo __('Proposed as the existing record for this name.'); ?>
+        <?php if (!empty($candidate->proposed_reason)): ?>
+          <?php echo htmlspecialchars((string) $candidate->proposed_reason); ?>
+        <?php endif; ?>
+      </p>
+    <?php endif; ?>
 
     <?php if (!empty($signals)): ?>
       <table class="table table-sm mb-2">

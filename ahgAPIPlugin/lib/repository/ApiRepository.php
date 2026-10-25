@@ -437,7 +437,19 @@ class ApiRepository
             ->count();
     }
 
-public function getAuthorities(array $params = []): array
+    /**
+     * Every word of $search must appear somewhere in $column, so "Hendrik
+     * Engelbrecht" also finds "Engelbrecht, Hendrik". At most 6 words.
+     */
+    protected function whereWords($query, string $column, $search): void
+    {
+        $words = array_slice(preg_split('/[\s,]+/u', trim((string) $search), -1, PREG_SPLIT_NO_EMPTY), 0, 6);
+        foreach ($words as $w) {
+            $query->where($column, 'like', '%'.addcslashes(mb_substr($w, 0, 100), '%_\\').'%');
+        }
+    }
+
+    public function getAuthorities(array $params = []): array
     {
         $limit = min($params['limit'] ?? 10, 100);
         $skip = $params['skip'] ?? 0;
@@ -468,6 +480,13 @@ public function getAuthorities(array $params = []): array
                 $query->whereNotIn('a.id', $hidden);
             }
         }
+
+        // ?entity_type=person|organization|family narrows to one ISAAR entity type.
+        $types = ['person' => 132, 'organization' => 131, 'corporate body' => 131, 'family' => 133];
+        if (isset($types[strtolower((string) ($params['entity_type'] ?? ''))])) {
+            $query->where('a.entity_type_id', $types[strtolower((string) $params['entity_type'])]);
+        }
+        $this->whereWords($query, 'ai.authorized_form_of_name', $params['search'] ?? '');
 
         $total = $query->count();
         $results = $query->orderBy('ai.authorized_form_of_name', 'asc')
@@ -576,9 +595,9 @@ public function getAuthorities(array $params = []): array
         })->toArray();
     }
 
-    public function getTaxonomyTerms(int $taxonomyId): array
+    public function getTaxonomyTerms(int $taxonomyId, string $search = ''): array
     {
-        $results = DB::table('term as t')
+        $query = DB::table('term as t')
             ->join('term_i18n as ti', function ($join) {
                 $join->on('t.id', '=', 'ti.id')
                      ->where('ti.culture', '=', $this->culture);
@@ -586,8 +605,12 @@ public function getAuthorities(array $params = []): array
             ->where('t.taxonomy_id', $taxonomyId)
             ->where('t.id', '!=', 1)
             ->select(['t.id', 'ti.name', 't.parent_id', 't.code'])
-            ->orderBy('t.lft', 'asc')
-            ->get();
+            ->orderBy('t.lft', 'asc');
+        if ('' !== trim($search)) {
+            $this->whereWords($query, 'ti.name', $search);
+            $query->limit(50);
+        }
+        $results = $query->get();
 
         return $results->map(function ($row) {
             return [
