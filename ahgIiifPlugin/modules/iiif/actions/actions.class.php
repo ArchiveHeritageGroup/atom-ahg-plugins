@@ -205,39 +205,63 @@ class iiifActions extends AhgController
      *
      * @return array<int,array<string,mixed>>
      */
+    /**
+     * Image formats the image server (Cantaloupe 5, Java2D) can read. A master in
+     * any other image format - WebP, SVG, HEIC - answers "501 Unsupported source
+     * format", and the viewer shows "Unable to open". ponytail: a fixed list; read
+     * it from the server's processor config if a site adds decoders.
+     */
+    private const IMAGE_SERVER_FORMATS = ['image/jpeg', 'image/png', 'image/tiff', 'image/jp2', 'image/jpx', 'image/gif', 'image/bmp'];
+
     protected function applyMasterAccess(array $digitalObjects, bool $canMaster): array
     {
-        if ($canMaster) {
-            return $digitalObjects;
-        }
-
-        $db = \Illuminate\Database\Capsule\Manager::class;
         $out = [];
         foreach ($digitalObjects as $do) {
-            $child = $db::table('digital_object')
-                ->where('parent_id', $do['id'])
-                ->whereIn('usage_id', [141, 142])
-                ->orderByRaw('FIELD(usage_id, 141, 142)')
-                ->select('id', 'name', 'path', 'mime_type', 'byte_size')
-                ->first();
-
-            if ($child) {
-                $child = (array) $child;
-                // The canvas keeps the master's size (read from its file header, never
-                // served), so a view shared by staff lands on the same spot for everyone.
-                $do['master_path'] = $do['path'];
-                $do['master_name'] = $do['name'];
-                $do['id'] = $child['id'];
-                $do['name'] = $child['name'];
-                $do['path'] = $child['path'];
-                $do['mime_type'] = $child['mime_type'];
-                $do['byte_size'] = $child['byte_size'];
+            $mime = strtolower((string) ($do['mime_type'] ?? ''));
+            // Staff see the master itself, when the image server can read it.
+            if ($canMaster && (0 !== strpos($mime, 'image/') || in_array($mime, self::IMAGE_SERVER_FORMATS, true))) {
                 $out[] = $do;
+
+                continue;
+            }
+
+            if ($ref = $this->referenceCopy($do)) {
+                $out[] = $ref;
+            } elseif ($canMaster) {
+                $out[] = $do; // no reference copy to fall back on
             }
             // No derivative + no master access -> omit; never expose the master.
         }
 
         return $out;
+    }
+
+    /**
+     * The record's reference copy (or thumbnail) in place of its master. The
+     * canvas keeps the master's size (read from its file header, never served),
+     * so a view shared by staff lands on the same spot for everyone.
+     */
+    private function referenceCopy(array $do): ?array
+    {
+        $child = \Illuminate\Database\Capsule\Manager::table('digital_object')
+            ->where('parent_id', $do['id'])
+            ->whereIn('usage_id', [141, 142])
+            ->orderByRaw('FIELD(usage_id, 141, 142)')
+            ->select('id', 'name', 'path', 'mime_type', 'byte_size')
+            ->first();
+        if (!$child) {
+            return null;
+        }
+        $child = (array) $child;
+        $do['master_path'] = $do['path'];
+        $do['master_name'] = $do['name'];
+        $do['id'] = $child['id'];
+        $do['name'] = $child['name'];
+        $do['path'] = $child['path'];
+        $do['mime_type'] = $child['mime_type'];
+        $do['byte_size'] = $child['byte_size'];
+
+        return $do;
     }
 
     protected function generateManifest(array $params)
