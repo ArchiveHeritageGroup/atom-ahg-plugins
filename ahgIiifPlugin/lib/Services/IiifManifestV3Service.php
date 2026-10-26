@@ -95,7 +95,8 @@ class IiifManifestV3Service
                 $do['name'] ?: "Image {$canvasIndex}",
                 $cantaloupeId,
                 $dims['width'],
-                $dims['height']
+                $dims['height'],
+                $this->masterSize($do)
             );
             $canvasGroups[$do['name'] ?: "Image {$canvasIndex}"][] = "{$manifestId}/canvas/{$canvasIndex}";
             $canvasIndex++;
@@ -910,7 +911,24 @@ class IiifManifestV3Service
         return $canvas;
     }
 
-    private function buildCanvas(string $manifestId, int $index, string $label, string $cantaloupeId, int $width, int $height): array
+    /**
+     * The master's pixel size when a reference copy stands in for it (visitors),
+     * read from the file's header only; null otherwise. Every viewer then gets the
+     * same canvas, so a shared view (content state, canvas coordinates) means the
+     * same area whichever copy is painted on it.
+     */
+    private function masterSize(array $do): ?array
+    {
+        if (empty($do['master_path']) || empty($do['master_name'])) {
+            return null;
+        }
+        $file = rtrim((string) \sfConfig::get('sf_web_dir'), '/').'/'.trim($do['master_path'], '/').'/'.$do['master_name'];
+        $size = is_file($file) ? @getimagesize($file) : false;
+
+        return $size && $size[0] > 0 && $size[1] > 0 ? ['width' => (int) $size[0], 'height' => (int) $size[1]] : null;
+    }
+
+    private function buildCanvas(string $manifestId, int $index, string $label, string $cantaloupeId, int $width, int $height, ?array $canvasSize = null): array
     {
         $canvasId = "{$manifestId}/canvas/{$index}";
         $imageApiBase = "{$this->baseUrl}/iiif/2/{$cantaloupeId}";
@@ -929,8 +947,8 @@ class IiifManifestV3Service
             'id' => $canvasId,
             'type' => 'Canvas',
             'label' => ['none' => [$label]],
-            'width' => $width,
-            'height' => $height,
+            'width' => $canvasSize['width'] ?? $width,
+            'height' => $canvasSize['height'] ?? $height,
             'annotations' => $this->annotationsFor($canvasId),
             'items' => [
                 [

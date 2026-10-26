@@ -88,20 +88,36 @@
         loadScript(pluginPath + '/js/vendor/openseadragon.min.js').then(function() {
             // Fetch manifest and extract tile sources
             fetch(manifestUrl).then(function(r) { return r.json(); }).then(function(manifest) {
+                // Presentation 3 (what /iiif/manifest serves) and 2. Reading only v2
+                // found nothing in a v3 manifest: "No IIIF tile sources found".
                 var tileSources = [];
-                var sequences = manifest.sequences || [];
-                if (sequences.length > 0) {
-                    var canvases = sequences[0].canvases || [];
-                    canvases.forEach(function(canvas) {
-                        var images = canvas.images || [];
-                        images.forEach(function(img) {
-                            var svc = img.resource && img.resource.service;
-                            if (svc) {
-                                tileSources.push(svc['@id'] + '/info.json');
+                (manifest.items || []).forEach(function(canvas) {
+                    (canvas.items || []).forEach(function(page) {
+                        (page.items || []).forEach(function(anno) {
+                            var body = anno.body || {};
+                            var svc = [].concat(body.service || []);
+                            var id = svc.length ? (svc[0].id || svc[0]['@id']) : null;
+                            if (id) {
+                                tileSources.push(id.replace(/\/$/, '') + '/info.json');
+                            } else if (body.id) {
+                                tileSources.push({ type: 'image', url: body.id });
                             }
                         });
                     });
-                }
+                });
+                (tileSources.length ? [] : (manifest.sequences || [])).forEach(function(seq) {
+                    (seq.canvases || []).forEach(function(canvas) {
+                        (canvas.images || []).forEach(function(img) {
+                            var res = img.resource || {};
+                            var id = (res.service || {})['@id'] || (res.service || {}).id;
+                            if (id) {
+                                tileSources.push(id.replace(/\/$/, '') + '/info.json');
+                            } else if (res['@id']) {
+                                tileSources.push({ type: 'image', url: res['@id'] });
+                            }
+                        });
+                    });
+                });
                 if (tileSources.length === 0) {
                     osdContainer.innerHTML = '<div class="alert alert-warning m-3">No IIIF tile sources found in manifest.</div>';
                     return;

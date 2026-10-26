@@ -941,12 +941,18 @@ export class IiifViewerManager {
         const canvas = this.canvasesOf(manifest)[page] || {};
         const canvasId = canvas.id || canvas['@id'] || `${manifestId}/canvas/${page + 1}`;
 
+        // Saved in canvas coordinates, as IIIF Content State specifies, not in the
+        // pixels of whichever copy this viewer has: staff see the master, visitors
+        // the reference copy, on a canvas of the same (master) size, so the same
+        // link means the same area for both.
         const size = item.getContentSize();
+        const k = (canvas.width && size.x) ? canvas.width / size.x : 1;
         const r = item.viewportToImageRectangle(viewer.viewport.getBounds(true));
-        const x = Math.max(0, Math.round(r.x));
-        const y = Math.max(0, Math.round(r.y));
-        const w = Math.max(1, Math.min(Math.round(size.x) - x, Math.round(r.width)));
-        const h = Math.max(1, Math.min(Math.round(size.y) - y, Math.round(r.height)));
+        const cw = Math.round(size.x * k), ch = Math.round(size.y * k);
+        const x = Math.max(0, Math.round(r.x * k));
+        const y = Math.max(0, Math.round(r.y * k));
+        const w = Math.max(1, Math.min(cw - x, Math.round(r.width * k)));
+        const h = Math.max(1, Math.min(ch - y, Math.round(r.height * k)));
 
         try {
             const res = await fetch(`${this.options.baseUrl}/iiif/content-state/encode`, {
@@ -1006,10 +1012,12 @@ export class IiifViewerManager {
         const json = JSON.stringify(cs);
 
         const target = typeof cs.target === 'string' ? cs.target : (cs.target && (cs.target.id || cs.target['@id']));
-        if (target && typeof viewer.goToPage === 'function') {
-            const manifest = await this.fetchManifest();
-            const index = this.canvasesOf(manifest).findIndex(c => (c.id || c['@id']) === target.split('#')[0]);
-            if (index > 0 && index !== viewer.currentPage()) {
+        const manifest = await this.fetchManifest();
+        const canvases = this.canvasesOf(manifest);
+        let index = 0;
+        if (target) {
+            index = Math.max(0, canvases.findIndex(c => (c.id || c['@id']) === target.split('#')[0]));
+            if (index > 0 && typeof viewer.goToPage === 'function' && index !== viewer.currentPage()) {
                 await new Promise(resolve => { viewer.addOnceHandler('open', resolve); viewer.goToPage(index); });
             }
         }
@@ -1017,7 +1025,11 @@ export class IiifViewerManager {
         const m = json.match(/xywh=(?:pixel:)?(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?)/);
         const item = viewer.world.getItemAt(0);
         if (m && item) {
-            const [x, y, w, h] = m.slice(1).map(Number);
+            // Canvas coordinates to the pixels of the copy this viewer has.
+            const size = item.getContentSize();
+            const cw = (canvases[index] || {}).width;
+            const k = (cw && size.x) ? size.x / cw : 1;
+            const [x, y, w, h] = m.slice(1).map(Number).map(v => v * k);
             viewer.viewport.fitBounds(item.imageToViewportRectangle(x, y, w, h), false);
         }
     }

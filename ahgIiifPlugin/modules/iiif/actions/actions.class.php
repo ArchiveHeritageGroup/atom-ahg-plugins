@@ -223,6 +223,10 @@ class iiifActions extends AhgController
 
             if ($child) {
                 $child = (array) $child;
+                // The canvas keeps the master's size (read from its file header, never
+                // served), so a view shared by staff lands on the same spot for everyone.
+                $do['master_path'] = $do['path'];
+                $do['master_name'] = $do['name'];
                 $do['id'] = $child['id'];
                 $do['name'] = $child['name'];
                 $do['path'] = $child['path'];
