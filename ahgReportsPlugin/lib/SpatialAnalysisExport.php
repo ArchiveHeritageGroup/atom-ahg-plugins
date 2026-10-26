@@ -704,23 +704,18 @@ class SpatialAnalysisExport
                 return $row;
             }
 
-            if (method_exists($service, 'canSeeExact') && $service::canSeeExact($user, (object) $row)) {
-                return $row;
+            // The site-record plugin's own rule for exports (redactRow): exact for
+            // editors and administrators, otherwise what site_locality_public allows
+            // (default none), map sheet and altitude withheld. It used to be applied
+            // by hand here, with canSeeExact's arguments swapped and coarsen()'s pair
+            // read by name, so every export - staff's too - lost its coordinates.
+            $record = (object) $row;
+            $locality = $service::present($record, $user);
+            $row = $service::redactRow($row, $record, $user);
+            if (array_key_exists('map_sheet', $row) && null === $row['map_sheet'] && !$locality['exact']) {
+                $row['map_sheet'] = '';
             }
-
-            // Not cleared: coarsen the position and withhold the map sheet, exactly as
-            // the record view does.
-            if (method_exists($service, 'coarsen')) {
-                $coarse = $service::coarsen($row['latitude'] ?? null, $row['longitude'] ?? null);
-                $row['latitude'] = $coarse['latitude'] ?? null;
-                $row['longitude'] = $coarse['longitude'] ?? null;
-            } else {
-                $row['latitude'] = null;
-                $row['longitude'] = null;
-            }
-
-            $row['map_sheet'] = '';
-            $row['coordinate_precision'] = 'coarsened';
+            $row['coordinate_precision'] = $locality['exact'] ? 'exact' : (!empty($locality['withheld']) ? 'withheld' : 'coarsened');
         } catch (\Throwable $e) {
             // Never fail open on a disclosure rule: if the decision cannot be made,
             // withhold.
@@ -789,10 +784,25 @@ class SpatialAnalysisExport
             try {
                 if (class_exists($service) && method_exists($service, 'canSeeExact')) {
                     $user = \sfContext::hasInstance() ? \sfContext::getInstance()->getUser() : null;
-                    $exact = (bool) $service::canSeeExact($user, (object) $row);
+                    $exact = (bool) $service::canSeeExact((object) $row, $user);   // record first, then user
                 }
             } catch (\Throwable $e) {
                 $exact = false;   // undecidable means coarser, never finer
+            }
+        }
+
+        // Not cleared, and the public may see no location (site_locality_public,
+        // default none): not even the one-degree square or the sheet's first digits.
+        if (!$exact) {
+            try {
+                $mode = (class_exists($service) && method_exists($service, 'publicMode')) ? $service::publicMode() : 'none';
+            } catch (\Throwable $e) {
+                $mode = 'none';
+            }
+            if ('none' === $mode) {
+                $row['map_sheet'] = '';
+
+                return $row;   // coordinate_precision stays 'withheld', all cells null
             }
         }
 

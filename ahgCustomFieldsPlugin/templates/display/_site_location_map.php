@@ -6,10 +6,16 @@ use Illuminate\Database\Capsule\Manager as DB;
  *
  * Renders a Leaflet map from the site_latitude / site_longitude custom fields.
  * Precise archaeological coordinates are sensitive (looting risk), so:
- *   - authenticated staff (or a record with the sensitivity flag turned off)
- *     see the EXACT position with a marker;
- *   - the public sees a GENERALISED position - coordinates rounded to ~0.1 deg
- *     and drawn as a coarse circle, never a precise pin - with a note.
+ *   - editors and administrators (or anyone, for a record with the sensitivity
+ *     flag turned off) see the EXACT position with a marker;
+ *   - everyone else, including signed-in researchers, sees what the setting
+ *     site_locality_public allows: by default nothing but a note that the
+ *     location is restricted, or an area of about 10, 25 or 50 km drawn as a
+ *     coarse circle, never a precise pin.
+ * The same rule, setting and clearance as ahgSiteRecordPlugin's
+ * LocalityVisibilityService, applied here so this plugin stands on its own.
+ * (Until 26 Oct 2026 any signed-in user saw the exact position, and the public
+ * a fixed ~11 km circle.)
  *
  * The flag defaults to ON (sensitive) when a record has never set it, so a new
  * site is protected by default. Leaflet JS/CSS ship with ahgThemeB5Plugin and
@@ -66,27 +72,49 @@ if (!$sensitiveSet) {
     $sensitive = true; // default-protect records that never set the flag
 }
 
-// Staff (authenticated) always see exact; guests see exact only when the site
-// is explicitly marked non-sensitive.
+// Editors and administrators see exact; everyone else only when the site is
+// explicitly marked non-sensitive. Not "any signed-in user": a self-registered
+// researcher must not get a precise position.
 $isStaff = false;
 try {
-    $isStaff = \sfContext::getInstance()->getUser()->isAuthenticated();
+    $u = \sfContext::getInstance()->getUser();
+    $isStaff = $u->isAuthenticated() && ($u->hasCredential('editor') || $u->hasCredential('administrator'));
 } catch (\Throwable $e) {
     $isStaff = false;
 }
 $showExact = $isStaff || !$sensitive;
+
+// What the public may see (site_locality_public): none, or about 10, 25 or 50 km.
+$publicMode = 'none';
+if (class_exists('\\AtomExtensions\\Services\\AhgSettingsService')) {
+    try {
+        $publicMode = (string) \AtomExtensions\Services\AhgSettingsService::get('site_locality_public', 'none');
+    } catch (\Throwable $e) {
+        $publicMode = 'none';
+    }
+}
+if (!in_array($publicMode, ['none', '10', '25', '50'], true)) {
+    $publicMode = 'none';
+}
 
 if ($showExact) {
     $dispLat = $lat;
     $dispLng = $lng;
     $zoom = 13;
     $fuzzKm = 0;
+} elseif ('none' === $publicMode) {
+    // No map and no number at all: only the note below.
+    $dispLat = $dispLng = null;
+    $zoom = 0;
+    $fuzzKm = 0;
 } else {
-    $dispLat = round($lat, 1);   // ~11 km N-S
-    $dispLng = round($lng, 1);
-    $zoom = 9;
-    $fuzzKm = 12;
+    $fuzzKm = (int) $publicMode;
+    $step = $fuzzKm / 111.0;   // degrees of latitude in that many km
+    $dispLat = round($lat / $step) * $step;
+    $dispLng = round($lng / $step) * $step;
+    $zoom = ['10' => 10, '25' => 9, '50' => 8][$publicMode];
 }
+$withheld = !$showExact && 'none' === $publicMode;
 
 $mapId = 'siteLocationMap_' . $objectId;
 $n = sfConfig::get('csp_nonce', '');
@@ -94,6 +122,14 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
 ?>
 <section id="siteLocationArea" class="border-bottom">
   <h5 class="section-title border-bottom pb-2 mb-3"><?php echo __('Site location'); ?></h5>
+
+  <?php if ($withheld): ?>
+    <p class="text-muted small mb-0">
+      <span class="badge bg-secondary me-1"><?php echo __('restricted'); ?></span>
+      <?php echo __('The location of this site is restricted to protect it.'); ?>
+    </p>
+  </section>
+  <?php return; endif; ?>
 
   <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/leaflet.min.css">
   <div id="<?php echo $mapId; ?>" class="mb-2" data-ahg-style="height: 320px; border-radius: .375rem;"></div>
@@ -109,7 +145,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
   <?php else: ?>
     <p class="text-muted small mb-0">
       <i class="fas fa-info-circle me-1"></i>
-      <?php echo __('Approximate location shown. Precise coordinates for this site are restricted; sign in as authorised staff to view them.'); ?>
+      <?php echo __('Location shown to approximately %km% km. Precise coordinates for this site are restricted to protect it.', ['%km%' => $fuzzKm]); ?>
     </p>
   <?php endif; ?>
 
@@ -126,7 +162,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
         maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
       <?php if ($fuzzKm > 0): ?>
-      L.circle([lat, lng], { radius: <?php echo (int) ($fuzzKm * 1000); ?>, color: '#1d6a52', weight: 1, fillColor: '#1d6a52', fillOpacity: 0.12 }).addTo(map);
+      L.circle([lat, lng], { radius: <?php echo (int) ($fuzzKm * 500); ?>, color: '#1d6a52', weight: 1, fillColor: '#1d6a52', fillOpacity: 0.12 }).addTo(map);
       <?php else: ?>
       L.marker([lat, lng]).addTo(map);
       <?php endif; ?>
