@@ -162,6 +162,26 @@ class iiifActions extends AhgController
     }
 
     /**
+     * Is an IIIF image server serving this site's images? It never serves a
+     * master, to anyone (config/cantaloupe/delegates.rb and cantaloupeCheck), so
+     * while it is, every viewer is given the reference copy, staff included -
+     * otherwise a staff member's viewer asked it for masters and got no tiles.
+     * Staff still download masters through /uploads/r/. Without an image server
+     * (canvases painted from the file) staff keep the master.
+     */
+    protected function imageServerInUse(): bool
+    {
+        static $inUse = null;
+        if (null === $inUse) {
+            // Not autoloaded on every path (the v2 manifest never loaded it).
+            require_once \sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifManifestV3Service.php';
+            $inUse = (new \AhgIiif\Services\IiifManifestV3Service())->imageServerAvailable();
+        }
+
+        return $inUse;
+    }
+
+    /**
      * Swap each master digital object for its reference derivative (usage 141,
      * thumbnail 142 as a fallback) when the user cannot read the master. A master
      * with no derivative is dropped rather than exposed. When $canMaster is true
@@ -273,7 +293,7 @@ class iiifActions extends AhgController
         // Access control: only 'readMaster' users get the original; everyone else
         // (anonymous or authenticated-without-readMaster) gets the reference. Cache
         // each tier separately and mark the response private.
-        $canMaster = $this->userCanReadMaster((int) $object['id']);
+        $canMaster = $this->userCanReadMaster((int) $object['id']) && !$this->imageServerInUse();
         $tier = 'v2-' . ($canMaster ? 'master' : 'ref');
         $this->getResponse()->setHttpHeader('Cache-Control', 'private, no-cache');
 
@@ -593,7 +613,7 @@ class iiifActions extends AhgController
         // anonymous or authenticated-without-readMaster - is served the reference
         // derivative. Cache each access tier separately and mark the response
         // private so a public request can never receive a staff-cached master.
-        $canMaster = $this->userCanReadMaster((int) $object['id']);
+        $canMaster = $this->userCanReadMaster((int) $object['id']) && !$this->imageServerInUse();
         $tier = 'v3-' . ($canMaster ? 'master' : 'ref');
         $this->getResponse()->setHttpHeader('Cache-Control', 'private, no-cache');
 

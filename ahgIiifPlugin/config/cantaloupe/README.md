@@ -33,6 +33,25 @@ administrators, every check got the login page back, and the delegate, which the
 failed open, served masters to anyone (RARI, 26 Oct 2026). The delegate now fails
 closed, so the same mistake costs the zoom, not the masters.
 
+**Keep the derivative cache off.** Cantaloupe serves an image it has already
+cached without asking the delegate again, so anything that once got into the
+cache stays available to anyone, including after its record is unpublished,
+embargoed or restricted. Set `cache.server.derivative.enabled = false` (the info
+cache, image sizes only, is harmless). On RARI a master cached during a test
+before the fix kept answering 200 after the fix, until the cache was emptied.
+The cost is speed; tiled pyramid TIFFs and larger reference copies make up for it.
+
+**Masters never go through the image server, so set the reference size.**
+Viewers are given the reference copy (`_141`), staff included, while an image
+server is in use. AtoM's default reference width is about 480 pixels, which
+leaves little to zoom into: raise it under Admin > Settings > Digital object
+derivatives and rebuild the copies (`php symfony digitalobject:regen-derivatives`).
+
+**Properties: the first value wins.** Cantaloupe's configuration library keeps
+the first value when a key appears twice, so settings appended to the end of
+`cantaloupe.properties` are ignored where the sample already sets them. Change
+the sample's own lines.
+
 Each of those failed silently, and any one of them left the check inert while
 appearing to be configured.
 
@@ -43,4 +62,5 @@ appearing to be configured.
 
 A master must answer `{"allowed": false}`. Then request the same master through
 `/iiif/2/<identifier>/full/max/0/default.jpg` as an anonymous caller and confirm
-403. Restart Cantaloupe first — the delegate caches verdicts.
+403. Restart Cantaloupe and empty its cache first: the delegate caches verdicts for a
+minute, and a cached image is served without any check. Ask twice; both must be 403.

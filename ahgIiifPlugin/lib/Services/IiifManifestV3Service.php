@@ -567,7 +567,7 @@ class IiifManifestV3Service
      * once per request and caches - cheap, and it means an install that later gains
      * an image server starts serving full manifests without a config change.
      */
-    private function imageServerAvailable(): bool
+    public function imageServerAvailable(): bool
     {
         static $available = null;
 
