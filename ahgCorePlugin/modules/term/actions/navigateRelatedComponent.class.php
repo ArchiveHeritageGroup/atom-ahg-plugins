@@ -17,6 +17,19 @@
  * along with Access to Memory (AtoM).  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// One class, two files: base AtoM ships the same component at
+// apps/qubit/modules/term/actions/. Symfony renders the component from base's
+// module folder, while its class map can load this copy first (term/relatedAuthorities
+// uses the class before rendering the component), and PHP then fails with
+// "Cannot declare class TermNavigateRelatedComponent" (RARI, 26 Oct 2026). So
+// while base's file is there, that is the one loaded, whoever asks first; this
+// copy only declares the class once base's module is gone. The declaration sits
+// inside the if on purpose: an unconditional one is bound when the file is
+// compiled, before any check runs.
+$baseComponent = sfConfig::get('sf_app_module_dir').'/term/actions/navigateRelatedComponent.class.php';
+if (is_file($baseComponent)):
+    require_once $baseComponent;
+else:
 class TermNavigateRelatedComponent extends sfComponent
 {
     // Arrays not allowed in class constants
@@ -74,3 +87,4 @@ class TermNavigateRelatedComponent extends sfComponent
         return $resultSet->getTotalHits();
     }
 }
+endif;
