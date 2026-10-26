@@ -96,7 +96,7 @@ class IiifManifestV3Service
                 $cantaloupeId,
                 $dims['width'],
                 $dims['height'],
-                $this->masterSize($do)
+                self::masterSize($do)
             );
             $canvasGroups[$do['name'] ?: "Image {$canvasIndex}"][] = "{$manifestId}/canvas/{$canvasIndex}";
             $canvasIndex++;
@@ -917,7 +917,7 @@ class IiifManifestV3Service
      * same canvas, so a shared view (content state, canvas coordinates) means the
      * same area whichever copy is painted on it.
      */
-    private function masterSize(array $do): ?array
+    public static function masterSize(array $do): ?array
     {
         if (empty($do['master_path']) || empty($do['master_name'])) {
             return null;

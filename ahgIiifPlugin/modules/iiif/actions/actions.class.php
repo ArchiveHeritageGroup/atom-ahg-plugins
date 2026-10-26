@@ -459,13 +459,16 @@ class iiifActions extends AhgController
                 }
 
                 $canvasId = "{$manifestId}/canvas/{$canvasIndex}";
+                // Master's size when a reference copy stands in, as in v3, so shared views match.
+                require_once \sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifManifestV3Service.php';
+                $canvasSize = \AhgIiif\Services\IiifManifestV3Service::masterSize($do);
 
                 $canvases[] = [
                     '@type' => 'sc:Canvas',
                     '@id' => $canvasId,
                     'label' => $do['name'] ?: "Image {$canvasIndex}",
-                    'width' => $width,
-                    'height' => $height,
+                    'width' => $canvasSize['width'] ?? $width,
+                    'height' => $canvasSize['height'] ?? $height,
                     'images' => [
                         [
                             '@type' => 'oa:Annotation',
