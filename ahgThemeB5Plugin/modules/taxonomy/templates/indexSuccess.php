@@ -106,7 +106,11 @@
               <td><?php echo countRelatedInformationObjects($hit->getId()); ?></td>
             <?php } ?>
             <?php if ($addActorCountColumn) { ?>
-              <td><?php echo TermNavigateRelatedComponent::getEsDocsRelatedToTermCount('QubitActor', $hit->getId()); ?></td>
+              <?php // A hit whose term row is gone (stale index entry) made base AtoM throw
+                    // "Unsupported taxonomy" and the whole page 500 (#312); count it as 0. ?>
+              <td><?php echo QubitTerm::getById($hit->getId())
+                ? TermNavigateRelatedComponent::getEsDocsRelatedToTermCount('QubitActor', $hit->getId())
+                : 0; ?></td>
             <?php } ?>
           </tr>
         <?php } ?>
