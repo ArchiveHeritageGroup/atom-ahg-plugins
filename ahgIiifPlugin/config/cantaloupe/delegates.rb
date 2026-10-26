@@ -95,7 +95,7 @@ class CustomDelegate
       #   if ($host = <site>) { return 301 https://... }
       # in the port-80 block, which runs before location matching, so a plain HTTP
       # call is redirected no matter what and never returns 200 - and this method
-      # fails open on any non-200, which meant the check never actually ran.
+      # refuses on any non-200, so the check would refuse every image.
       # Still to 127.0.0.1 so the request stays on the box; the certificate will not
       # match that address, hence VERIFY_NONE.
       uri = URI.parse("https://127.0.0.1/iiif/auth/cantaloupe-check")
@@ -137,12 +137,17 @@ class CustomDelegate
 
         return result
       end
+      STDERR.puts "[Cantaloupe] Auth check answered #{response.code} for #{identifier} (#{host}) - refusing"
     rescue => e
-      STDERR.puts "[Cantaloupe] Auth check failed: #{e.message} — allowing access (fail-open)"
+      STDERR.puts "[Cantaloupe] Auth check failed for #{identifier} (#{host}): #{e.message} - refusing"
     end
 
-    # Fail-open: if auth check fails, allow access
-    true
+    # Fail closed. Any answer that is not a readable verdict (an error, a non-200,
+    # a login page instead of JSON) refuses the image. Failing open here once
+    # served masters to anyone when the check endpoint was locked behind sign-in
+    # (found on RARI, 26 Oct 2026): a broken check must cost the zoom, never the
+    # masters. Not cached, so a fixed check takes effect at once.
+    false
   end
 
   def source(options = {}); 'FilesystemSource'; end

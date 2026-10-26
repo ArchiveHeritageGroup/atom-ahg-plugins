@@ -423,9 +423,9 @@ class iiifAuthActions extends AhgController
         $result = $authService->cantaloupeCheck($identifier, $cookie, $bearer);
 
         // Always 200, with the verdict in the body. Cantaloupe's delegate only
-        // parses the response when the status is 200 and treats anything else as
-        // 'auth check failed', whereupon it fails open and serves the image - so
-        // answering 403 to refuse a master had the exact opposite effect.
+        // reads a verdict from a 200 with JSON; anything else (a 403, an error, a
+        // login page) refuses the image. This action must stay reachable without
+        // sign-in (security.yml): the localhost check above is its protection.
         return $this->renderJson($result);
     }
 

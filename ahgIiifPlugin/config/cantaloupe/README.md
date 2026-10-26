@@ -23,11 +23,18 @@ AtoM instances. Without the header the check lands on whichever vhost answers by
 default, which knows nothing about the file and answers "allow".
 
 **The endpoint answers 200 even when refusing.** The verdict is in the body
-(`{"allowed": false}`). This method treats any non-200 as a failed check and then
-fails open — so returning 403 to refuse a request has the opposite effect.
+(`{"allowed": false}`). The delegate reads only a 200 with a JSON verdict; anything
+else (a 403, an error, a login page) now refuses the image.
 
-Each of those failed silently and independently, and any one of them leaves the
-check inert while appearing to be configured.
+**The endpoint must not need a sign-in.** Cantaloupe calls it with no AtoM session.
+`modules/iiifAuth/config/security.yml` keeps `cantaloupeCheck` public; the action
+answers only requests from the machine itself. When it was locked to
+administrators, every check got the login page back, and the delegate, which then
+failed open, served masters to anyone (RARI, 26 Oct 2026). The delegate now fails
+closed, so the same mistake costs the zoom, not the masters.
+
+Each of those failed silently, and any one of them left the check inert while
+appearing to be configured.
 
 ## Verifying it actually runs
 

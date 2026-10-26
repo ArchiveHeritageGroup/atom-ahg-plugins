@@ -18,8 +18,13 @@ confirm:        { is_secure: false }
 protect:   { is_secure: true, credentials: [[ editor, administrator ]] }
 unprotect: { is_secure: true, credentials: [[ editor, administrator ]] }
 
-# Cantaloupe reachability is an operator diagnostic.
-cantaloupeCheck: { is_secure: true, credentials: administrator }
+# The image server's permission check: Cantaloupe's delegate (config/cantaloupe/
+# delegates.rb) calls it for every image, with no AtoM session. It must stay
+# reachable without sign-in; the action itself answers only requests from the
+# machine it runs on (127.0.0.1, ::1). Securing it made every check return the
+# login page, the delegate failed open, and masters were served to anyone
+# (found on RARI, 26 Oct 2026).
+cantaloupeCheck: { is_secure: false }
 
 all:
   is_secure:   true
