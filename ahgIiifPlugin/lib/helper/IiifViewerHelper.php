@@ -489,7 +489,13 @@ function render_iiif_viewer($resource, $options = [])
         // (uploads are routed through digitalobject/view), so the frame showed
         // AtoM's "Page Not Found" and Open/Download failed. Show them the
         // reference image of the first page instead, with a plain note.
-        if (!\QubitAcl::check($resource, 'readMaster')) {
+        // Some pages (the library page) pass a LightweightResource, which AtoM's
+        // ACL cannot place in the hierarchy ("Resource 'Test AI' not found",
+        // a 500). Check the real record; without one, refuse the master.
+        $aclResource = $resource instanceof \QubitInformationObject
+            ? $resource
+            : \QubitInformationObject::getById((int) $objectId);
+        if (!$aclResource || !\QubitAcl::check($aclResource, 'readMaster')) {
             $reference = method_exists($primaryDo, 'getRepresentationByUsage')
                 ? $primaryDo->getRepresentationByUsage(\QubitTerm::REFERENCE_ID) : null;
             $html .= '<div class="pdf-viewer-container text-center">';
