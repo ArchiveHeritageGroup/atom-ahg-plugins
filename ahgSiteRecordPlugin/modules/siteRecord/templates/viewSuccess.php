@@ -57,6 +57,9 @@ $taxonomyLabels = [
         <td>
           <?php if (!$locality['has_coordinates']) { ?>
             <span class="text-muted">Not recorded</span>
+          <?php } elseif (!empty($locality['withheld'])) { ?>
+            <span class="badge bg-secondary">restricted</span>
+            <div class="small text-muted"><?php echo esc_specialchars($locality['note']); ?></div>
           <?php } else { ?>
             <?php echo esc_specialchars(sprintf('%.6F, %.6F', $locality['latitude'], $locality['longitude'])); ?>
             <?php if ($locality['exact']) { ?>

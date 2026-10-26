@@ -29,9 +29,13 @@ namespace AhgSiteRecordPlugin\Services;
  * BEHAVIOUR
  *
  *   - Someone with clearance gets the exact position.
- *   - Everyone else gets a coarsened position - rounded to ~0.1 degrees, which is
- *     an area roughly 11 km across - plus a note saying it is deliberately
- *     imprecise. Never a precise pin, and never the raw text fields.
+ *   - Everyone else gets what the setting site_locality_public allows: by default
+ *     nothing (only a note that the location is restricted), or a coarsened
+ *     position - an area of about 10, 25 or 50 km - with a note saying it is
+ *     deliberately imprecise. Never a precise pin, and never the raw text fields.
+ *     The default is "none" because RARI has not yet decided whether the public
+ *     should see any location (Prof Challis, 26 Oct 2026); the former fixed
+ *     rounding to 0.1 degree (about 11 km) was a starting default, not a choice.
  *   - A record that has never had its sensitivity set is treated as SENSITIVE.
  *     Protection is the default; exposure has to be a decision.
  *
@@ -41,13 +45,14 @@ namespace AhgSiteRecordPlugin\Services;
 class LocalityVisibilityService
 {
     /**
-     * Degrees to round to for anyone without clearance. 0.1 deg is ~11 km of
-     * latitude - coarse enough that it identifies a district, not a site.
+     * What the public sees (setting site_locality_public): "none", or the
+     * approximate width in km of the area a position is rounded to. One degree of
+     * latitude is about 111 km, so the rounding step is km / 111 degrees.
      */
-    public const COARSE_DEGREES = 0.1;
-
-    /** Approximate width of that area, for the note shown to the reader. */
-    public const COARSE_KM = 11;
+    public const PUBLIC_SETTING = 'site_locality_public';
+    public const PUBLIC_MODES = ['none', '10', '25', '50'];
+    public const PUBLIC_DEFAULT = 'none';
+    private const KM_PER_DEGREE = 111.0;
 
     /**
      * Credentials that may see an exact position.
@@ -152,7 +157,7 @@ class LocalityVisibilityService
      *
      * @param mixed $user null to use the current session user
      */
-    public static function present($record, $user = null): array
+    public static function present($record, $user = null, ?string $publicMode = null): array
     {
         $exact = self::canSeeExact($record, $user);
 
@@ -169,6 +174,7 @@ class LocalityVisibilityService
             'map_sheet' => null,
             'locality_original' => null,
             'precision_km' => null,
+            'withheld' => false,
             'note' => null,
         ];
 
@@ -187,15 +193,41 @@ class LocalityVisibilityService
         // free text that may hold anything at all, so neither can be coarsened
         // the way a number can.
         if ($out['has_coordinates']) {
-            [$out['latitude'], $out['longitude']] = self::coarsen($lat, $lng);
-            $out['precision_km'] = self::COARSE_KM;
-            $out['note'] = sprintf(
-                'Location shown to approximately %d km. Precise coordinates are restricted to protect the site.',
-                self::COARSE_KM
-            );
+            $mode = $publicMode ?? self::publicMode();
+            if ('none' === $mode) {
+                // has_coordinates stays true, so a page says "restricted", never
+                // "not recorded"; no number of any kind leaves.
+                $out['withheld'] = true;
+                $out['note'] = 'The location of this site is restricted to protect it.';
+            } else {
+                $km = (int) $mode;
+                [$out['latitude'], $out['longitude']] = self::coarsen($lat, $lng, $km / self::KM_PER_DEGREE);
+                $out['precision_km'] = $km;
+                $out['note'] = sprintf(
+                    'Location shown to approximately %d km. Precise coordinates are restricted to protect the site.',
+                    $km
+                );
+            }
         }
 
         return $out;
+    }
+
+    /**
+     * The site_locality_public setting; anything unknown or unreadable is "none".
+     */
+    public static function publicMode(): string
+    {
+        $mode = self::PUBLIC_DEFAULT;
+        if (class_exists('\\AtomExtensions\\Services\\AhgSettingsService')) {
+            try {
+                $mode = (string) \AtomExtensions\Services\AhgSettingsService::get(self::PUBLIC_SETTING, self::PUBLIC_DEFAULT);
+            } catch (\Throwable $e) {
+                $mode = self::PUBLIC_DEFAULT;
+            }
+        }
+
+        return in_array($mode, self::PUBLIC_MODES, true) ? $mode : self::PUBLIC_DEFAULT;
     }
 
     /**
@@ -207,10 +239,8 @@ class LocalityVisibilityService
      *
      * @return array{0: float, 1: float}
      */
-    public static function coarsen(float $lat, float $lng): array
+    public static function coarsen(float $lat, float $lng, float $step): array
     {
-        $step = self::COARSE_DEGREES;
-
         return [
             round($lat / $step) * $step,
             round($lng / $step) * $step,

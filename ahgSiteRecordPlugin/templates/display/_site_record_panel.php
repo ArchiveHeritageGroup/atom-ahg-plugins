@@ -120,12 +120,17 @@ $taxonomyLabels = [
         <tr>
           <th scope="row">Location</th>
           <td>
+            <?php if (!empty($locality['withheld'])) { ?>
+              <span class="badge bg-secondary">restricted</span>
+              <div class="small text-muted"><?php echo esc_specialchars($locality['note']); ?></div>
+            <?php } else { ?>
             <?php echo esc_specialchars(sprintf('%.6F, %.6F', $locality['latitude'], $locality['longitude'])); ?>
             <?php if ($locality['exact']) { ?>
               <span class="text-muted">(<?php echo esc_specialchars($locality['datum']); ?>)</span>
             <?php } else { ?>
               <span class="badge bg-secondary ms-1">approximate</span>
               <div class="small text-muted"><?php echo esc_specialchars($locality['note']); ?></div>
+            <?php } ?>
             <?php } ?>
           </td>
         </tr>

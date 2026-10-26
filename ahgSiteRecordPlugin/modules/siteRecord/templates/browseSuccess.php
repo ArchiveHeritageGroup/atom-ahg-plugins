@@ -61,6 +61,8 @@ $pages = (int) ceil($total / max(1, $perPage));
             <td>
               <?php if (!$r->locality['has_coordinates']) { ?>
                 <span class="text-muted">-</span>
+              <?php } elseif (!empty($r->locality['withheld'])) { ?>
+                <span class="badge bg-secondary">restricted</span>
               <?php } elseif ($r->locality['exact']) { ?>
                 <?php echo esc_specialchars(sprintf('%.5F, %.5F', $r->locality['latitude'], $r->locality['longitude'])); ?>
               <?php } else { ?>

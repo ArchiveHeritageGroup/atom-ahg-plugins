@@ -52,16 +52,33 @@ check('missing property is sensitive',        L::isSensitive((object) []),      
 check('explicitly public is not sensitive',   L::isSensitive(site(['locality_sensitive' => 0])),    false);
 check('public record, anonymous sees exact',  L::canSeeExact(site(['locality_sensitive' => 0]), $anon), true);
 
-echo "\n--- what anonymous actually receives ---\n";
+echo "\n--- the default: the public sees no location (site_locality_public = none) ---\n";
+check('setting defaults to none', L::publicMode(), 'none');
 $a = L::present(site(), $anon);
-check('exact flag',        $a['exact'],             false);
-check('latitude coarsened', $a['latitude'],         -29.1);
-check('longitude coarsened', $a['longitude'],        28.8);
-check('map sheet withheld', $a['map_sheet'],        null);
+check('exact flag',            $a['exact'],             false);
+check('still known to exist',  $a['has_coordinates'],   true);
+check('withheld',              $a['withheld'],          true);
+check('no latitude',           $a['latitude'],          null);
+check('no longitude',          $a['longitude'],         null);
+check('no precision',          $a['precision_km'],      null);
+check('map sheet withheld',    $a['map_sheet'],         null);
 check('original text withheld', $a['locality_original'], null);
-check('altitude withheld',  $a['altitude_m'],       null);
-check('precision stated',   $a['precision_km'],     11);
-check('has a note',         is_string($a['note']),  true);
+check('altitude withheld',     $a['altitude_m'],        null);
+check('says it is restricted', is_string($a['note']) && false !== stripos($a['note'], 'restricted'), true);
+
+echo "\n--- when RARI chooses an area: 10, 25 or 50 km ---\n";
+foreach (['10', '25', '50'] as $km) {
+    $c = L::present(site(), $anon, $km);
+    $step = (int) $km / 111.0;
+    check("{$km} km: precision stated", $c['precision_km'], (int) $km);
+    check("{$km} km: not withheld", $c['withheld'], false);
+    check("{$km} km: latitude on the grid", abs(fmod(abs($c['latitude']) + 1e-9, $step)) < 1e-6 || abs($step - fmod(abs($c['latitude']), $step)) < 1e-6, true);
+    check("{$km} km: within half a cell of the site", abs($c['latitude'] - -29.1234567) <= $step / 2 + 1e-9, true);
+    check("{$km} km: map sheet still withheld", $c['map_sheet'], null);
+}
+$wide = L::present(site(), $anon, '50');
+$narrow = L::present(site(), $anon, '10');
+check('50 km is coarser than 10 km (fewer distinct cells)', abs($wide['latitude'] - -29.1234567) >= 0 && $wide['precision_km'] > $narrow['precision_km'], true);
 
 echo "\n--- what an editor receives ---\n";
 $e = L::present(site(), $editor);
@@ -71,8 +88,8 @@ check('map sheet',    $e['map_sheet'], '2328BD');
 check('no precision note', $e['precision_km'], null);
 
 echo "\n--- coarsening cannot be reversed ---\n";
-$near1 = L::present(site(['latitude' => -29.1234567, 'longitude' => 28.7654321]), $anon);
-$near2 = L::present(site(['latitude' => -29.1298765, 'longitude' => 28.7612345]), $anon);
+$near1 = L::present(site(['latitude' => -29.1234567, 'longitude' => 28.7654321]), $anon, '10');
+$near2 = L::present(site(['latitude' => -29.1298765, 'longitude' => 28.7612345]), $anon, '10');
 check('two nearby sites collapse to one cell', [$near1['latitude'], $near1['longitude']] === [$near2['latitude'], $near2['longitude']], true);
 
 echo "\n--- no coordinates at all ---\n";
@@ -85,7 +102,8 @@ $row = ['site_number' => 'FRN1', 'latitude' => -29.1234567, 'longitude' => 28.76
         'map_sheet' => '2328BD', 'locality_original' => 'x', 'altitude_m' => 1840,
         'locality_precision_km' => null];
 $r = L::redactRow($row, site(), $anon);
-check('export lat coarsened', $r['latitude'],           -29.1);
+check('export lat withheld (default none)', $r['latitude'], null);
+check('export precision withheld',     $r['locality_precision_km'], null);
 check('export map sheet gone', $r['map_sheet'],          null);
 check('export original gone',  $r['locality_original'],  null);
 check('export altitude gone',  $r['altitude_m'],         null);
