@@ -418,9 +418,12 @@ class iiifAuthActions extends AhgController
         $identifier = $request->getParameter('identifier', '');
         $cookie = $request->getParameter('cookie');
         $bearer = $request->getParameter('bearer');
+        // Master grants the browser sent with the tile request (iiif_mg_<id> cookies),
+        // forwarded by the delegate; see IiifAuthService::GRANT_COOKIE_PREFIX.
+        $grants = array_filter(explode(',', (string) $request->getParameter('grants', '')));
 
         $authService = $this->getAuthService();
-        $result = $authService->cantaloupeCheck($identifier, $cookie, $bearer);
+        $result = $authService->cantaloupeCheck($identifier, $cookie, $bearer, $grants);
 
         // Always 200, with the verdict in the body. Cantaloupe's delegate only
         // reads a verdict from a 200 with JSON; anything else (a 403, an error, a

@@ -162,13 +162,27 @@ class iiifActions extends AhgController
     }
 
     /**
-     * Is an IIIF image server serving this site's images? It never serves a
-     * master, to anyone (config/cantaloupe/delegates.rb and cantaloupeCheck), so
-     * while it is, every viewer is given the reference copy, staff included -
-     * otherwise a staff member's viewer asked it for masters and got no tiles.
-     * Staff still download masters through /uploads/r/. Without an image server
-     * (canvases painted from the file) staff keep the master.
+     * Does this viewer get the master? Only staff with readMaster for the record.
+     * While an image server is in use - which never sees an AtoM session - they
+     * also get a signed master grant for this one record (IiifAuthService::
+     * GRANT_COOKIE_PREFIX), the only thing that lets it serve them the master;
+     * when no grant can be issued (no secret) they get the reference copy like
+     * everyone else, rather than a viewer that cannot load a tile.
      */
+    protected function staffMasterView(int $objectId): bool
+    {
+        if (!$this->userCanReadMaster($objectId)) {
+            return false;
+        }
+        if (!$this->imageServerInUse()) {
+            return true;
+        }
+        require_once \sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifAuthService.php';
+
+        return (new \IiifAuthService())->issueMasterGrant($objectId, (int) $this->getUser()->getAttribute('user_id'));
+    }
+
+    /** Is an IIIF image server serving this site's images? */
     protected function imageServerInUse(): bool
     {
         static $inUse = null;
@@ -293,7 +307,7 @@ class iiifActions extends AhgController
         // Access control: only 'readMaster' users get the original; everyone else
         // (anonymous or authenticated-without-readMaster) gets the reference. Cache
         // each tier separately and mark the response private.
-        $canMaster = $this->userCanReadMaster((int) $object['id']) && !$this->imageServerInUse();
+        $canMaster = $this->staffMasterView((int) $object['id']);
         $tier = 'v2-' . ($canMaster ? 'master' : 'ref');
         $this->getResponse()->setHttpHeader('Cache-Control', 'private, no-cache');
 
@@ -613,7 +627,7 @@ class iiifActions extends AhgController
         // anonymous or authenticated-without-readMaster - is served the reference
         // derivative. Cache each access tier separately and mark the response
         // private so a public request can never receive a staff-cached master.
-        $canMaster = $this->userCanReadMaster((int) $object['id']) && !$this->imageServerInUse();
+        $canMaster = $this->staffMasterView((int) $object['id']);
         $tier = 'v3-' . ($canMaster ? 'master' : 'ref');
         $this->getResponse()->setHttpHeader('Cache-Control', 'private, no-cache');
 

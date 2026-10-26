@@ -68,6 +68,11 @@ class CustomDelegate
       auth_cookie = $1
     end
 
+    # Master grants (iiif_mg_<record id>=<user>.<expiry>.<signature>), set by
+    # AtoM when a member of staff with readMaster opens a manifest. Passed on
+    # as they are; AtoM checks the signature and the record.
+    grants = cookie_header.scan(/iiif_mg_\d+=([0-9]+\.[0-9]+\.[0-9a-f]{64})/).flatten.uniq.first(20)
+
     bearer = nil
     auth_header = (headers['Authorization'] || '').to_s
     if auth_header =~ /Bearer\s+(.+)$/i
@@ -81,7 +86,7 @@ class CustomDelegate
     host = (headers['Host'] || headers['X-Forwarded-Host'] || '').to_s.split(',').first.to_s.strip
 
     # Build cache key (identifier + credentials + instance)
-    cache_key = "#{host}:#{identifier}:#{auth_cookie}:#{bearer}"
+    cache_key = "#{host}:#{identifier}:#{auth_cookie}:#{bearer}:#{grants.join(',')}"
 
     # Check cache
     cached = self.class.auth_cache[cache_key]
@@ -102,7 +107,8 @@ class CustomDelegate
       uri.query = URI.encode_www_form(
         identifier: identifier,
         cookie: auth_cookie || '',
-        bearer: bearer || ''
+        bearer: bearer || '',
+        grants: grants.join(',')
       )
 
       http = Net::HTTP.new(uri.host, uri.port)

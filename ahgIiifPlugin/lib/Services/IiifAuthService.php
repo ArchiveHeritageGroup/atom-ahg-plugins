@@ -19,6 +19,18 @@ class IiifAuthService
     public const PROFILE_EXTERNAL = 'external';
     public const TOKEN_COOKIE = 'iiif_auth_token';
 
+    /**
+     * Master grants: how a signed-in member of staff sees masters in the zoom
+     * viewer. The image server never sees an AtoM session, so it can never ask
+     * the ACL itself. When the manifest is built - inside the staff member's own
+     * request, where readMaster is checked for real - a grant is set for that one
+     * record: a cookie sent only to /iiif/2/, signed with the site's secret, valid
+     * for GRANT_TTL seconds. cantaloupeCheck allows a master only with a valid
+     * grant for its record. No secret, no grants: staff get the reference copy.
+     */
+    public const GRANT_COOKIE_PREFIX = 'iiif_mg_';
+    public const GRANT_TTL = 900;
+
     // Auth API versions
     public const AUTH_VERSION_1 = '1.0';
     public const AUTH_VERSION_2 = '2.0';
@@ -763,7 +775,58 @@ class IiifAuthService
     /** digital_object.usage_id for a master. Derivatives are 141 (reference) and 142 (thumbnail). */
     private const MASTER_USAGE_ID = 140;
 
-    public function cantaloupeCheck(string $identifier, ?string $cookie = null, ?string $bearer = null): array
+    private static function grantKey(): string
+    {
+        $secret = (string) (\sfConfig::get('app_iiif_grant_secret') ?: \sfConfig::get('sf_csrf_secret', ''));
+
+        return strlen($secret) >= 16 ? hash('sha256', 'iiif-master-grant|'.$secret) : '';
+    }
+
+    private static function grantSignature(int $objectId, int $userId, int $expires, string $key): string
+    {
+        return hash_hmac('sha256', "{$objectId}|{$userId}|{$expires}", $key);
+    }
+
+    /** Set a master grant for one record, for the signed-in user (see GRANT_COOKIE_PREFIX). */
+    public function issueMasterGrant(int $objectId, int $userId): bool
+    {
+        $key = self::grantKey();
+        if ('' === $key || $objectId <= 0 || $userId <= 0) {
+            return false;
+        }
+        $expires = time() + self::GRANT_TTL;
+        setcookie(self::GRANT_COOKIE_PREFIX.$objectId, $userId.'.'.$expires.'.'.self::grantSignature($objectId, $userId, $expires, $key), [
+            'expires' => $expires,
+            'path' => '/iiif/2/',
+            'secure' => isset($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS'],
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+
+        return true;
+    }
+
+    /** Is one of these grant values a valid, unexpired grant for this record? */
+    public static function masterGranted(int $objectId, array $grants): bool
+    {
+        $key = self::grantKey();
+        if ('' === $key) {
+            return false;
+        }
+        foreach ($grants as $grant) {
+            if (!preg_match('/^(\d+)\.(\d+)\.([0-9a-f]{64})$/', trim((string) $grant), $m)) {
+                continue;
+            }
+            [, $userId, $expires, $sig] = $m;
+            if ((int) $expires > time() && hash_equals(self::grantSignature($objectId, (int) $userId, (int) $expires, $key), $sig)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function cantaloupeCheck(string $identifier, ?string $cookie = null, ?string $bearer = null, array $grants = []): array
     {
         // Extract object_id from identifier path
         // Identifiers look like: uploads_SL_r_SL_REPO_SL_... but the tile URLs this
@@ -788,14 +851,16 @@ class IiifAuthService
             ->first(['id', 'object_id', 'usage_id']);
 
         if (!$digitalObject) {
-            // No matching digital object — allow (unprotected)
-            return ['allowed' => true];
+            // A file the catalogue does not know as a digital object: refused.
+            // This used to answer 'allowed (unprotected)', so any file under
+            // uploads/, or a path spelt slightly differently, was served.
+            return ['allowed' => false, 'status' => 403, 'reason' => 'Not a known digital object.'];
         }
 
         $objectId = $digitalObject->object_id;
 
-        // Masters are never served through the image server. Not conditionally -
-        // never.
+        // Masters are not served through the image server on the strength of
+        // anything the image server itself can see.
         //
         // /uploads/r/ is routed through the application so readMaster applies, but
         // the tile server reads the same files off disk and knows nothing about
@@ -813,6 +878,13 @@ class IiifAuthService
         // what a viewer should request. Staff download masters through /uploads/r/,
         // where the ACL genuinely applies and a session genuinely exists.
         if (self::MASTER_USAGE_ID === (int) $digitalObject->usage_id) {
+            // The one exception: a signed master grant for this record, set when
+            // a member of staff with readMaster opened its manifest (see
+            // GRANT_COOKIE_PREFIX). It proves the ACL said yes in a real session.
+            if (self::masterGranted((int) $objectId, $grants)) {
+                return ['allowed' => true];
+            }
+
             return [
                 'allowed' => false,
                 'status' => 403,

@@ -41,11 +41,17 @@ cache, image sizes only, is harmless). On RARI a master cached during a test
 before the fix kept answering 200 after the fix, until the cache was emptied.
 The cost is speed; tiled pyramid TIFFs and larger reference copies make up for it.
 
-**Masters never go through the image server, so set the reference size.**
-Viewers are given the reference copy (`_141`), staff included, while an image
-server is in use. AtoM's default reference width is about 480 pixels, which
-leaves little to zoom into: raise it under Admin > Settings > Digital object
-derivatives and rebuild the copies (`php symfony digitalobject:regen-derivatives`).
+**Masters go through the image server only for staff, with a grant.** Visitors
+are given the reference copy (`_141`); AtoM's default reference width is about 480
+pixels. Staff with readMaster for a record get the master: when they open its
+manifest, AtoM - in their real session - sets a signed grant for that one record
+(cookie `iiif_mg_<id>`, sent only to `/iiif/2/`, valid 15 minutes), the delegate
+forwards it, and cantaloupeCheck allows the master only with a valid grant. The
+grant is signed with the site's `csrf_secret` (or `app_iiif_grant_secret`); with
+neither, no grants are issued and staff get the reference copy too. This is also
+why the derivative cache must stay off: a cached master would go to the next
+person, with or without a grant. A file the check cannot match to a digital
+object is refused.
 
 **Properties: the first value wins.** Cantaloupe's configuration library keeps
 the first value when a key appears twice, so settings appended to the end of
