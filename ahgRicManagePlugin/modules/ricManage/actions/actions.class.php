@@ -79,6 +79,10 @@ class ricManageActions extends AhgController
             return $this->json(['success' => false, 'error' => 'Missing object id']);
         }
 
+        if (!$this->canRead($objectId)) {
+            return $this->json(['success' => false, 'error' => 'Not found'], 404);
+        }
+
         $culture = $this->getUser()->getCulture() ?: 'en';
         $svc = new \AhgRicManage\Services\RicManageService();
         $meta = $svc->getRecordMeta($objectId);
@@ -215,6 +219,10 @@ class ricManageActions extends AhgController
             return $this->json(['success' => false, 'error' => 'Missing object id']);
         }
 
+        if (!$this->canRead($objectId)) {
+            return $this->json(['success' => false, 'error' => 'Not found'], 404);
+        }
+
         $culture = $this->getUser()->getCulture() ?: 'en';
         $svc = new \AhgRicManage\Services\RicManageService();
         $doc = $svc->exportRicO($objectId, $culture);
@@ -222,6 +230,24 @@ class ricManageActions extends AhgController
         $this->getResponse()->setContentType('application/ld+json; charset=utf-8');
 
         return $this->renderText(json_encode($doc, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * May the current user read this record? The same rule as the record page:
+     * AtoM's read permission (which also refuses drafts without viewDraft) and
+     * the AHG access gate (embargo, classification, ICIP). get and export are
+     * public routes, so without this any record - drafts included - could be
+     * read by trying numeric ids. Anything that is not a description is refused.
+     */
+    private function canRead(int $objectId): bool
+    {
+        $resource = \QubitInformationObject::getById($objectId);
+        if (null === $resource || \QubitInformationObject::ROOT_ID == $resource->id) {
+            return false;
+        }
+
+        return \QubitAcl::check($resource, 'read')
+            && \AhgCore\Access\AhgAccessGate::canView($objectId);
     }
 
     /**
