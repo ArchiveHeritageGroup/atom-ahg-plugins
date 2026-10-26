@@ -233,11 +233,13 @@ class ricManageActions extends AhgController
     }
 
     /**
-     * May the current user read this record? The same rule as the record page:
-     * AtoM's read permission (which also refuses drafts without viewDraft) and
-     * the AHG access gate (embargo, classification, ICIP). get and export are
-     * public routes, so without this any record - drafts included - could be
-     * read by trying numeric ids. Anything that is not a description is refused.
+     * May the current user read this record? get and export are public routes,
+     * so without this any record could be read by trying numeric ids. The rule
+     * is the REST API's: AtoM's read permission (which refuses drafts without
+     * viewDraft), and not among the ids the framework's access filter hides from
+     * this user (classification, donor restriction, embargo, ICIP, ODRL). If the
+     * filter cannot be evaluated, nothing is readable. Anything that is not a
+     * description is refused.
      */
     private function canRead(int $objectId): bool
     {
@@ -245,9 +247,23 @@ class ricManageActions extends AhgController
         if (null === $resource || \QubitInformationObject::ROOT_ID == $resource->id) {
             return false;
         }
+        if (!\QubitAcl::check($resource, 'read')) {
+            return false;
+        }
 
-        return \QubitAcl::check($resource, 'read')
-            && \AhgCore\Access\AhgAccessGate::canView($objectId);
+        $user = $this->getUser();
+        $userId = $user->isAuthenticated() ? (int) $user->getAttribute('user_id') : 0;
+
+        try {
+            $hidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ?: null);
+        } catch (\Throwable $e) {
+            error_log('ricManage.visibility_failed: '.$e->getMessage());
+
+            return false;
+        }
+
+        return !in_array($objectId, array_map('intval', $hidden), true);
     }
 
     /**
