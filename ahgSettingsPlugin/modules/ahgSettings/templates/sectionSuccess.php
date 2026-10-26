@@ -582,10 +582,10 @@ slot('title', $title);
                                     </div>
                                     
                                     <div class="form-group row">
-                                        <label class="col-sm-3 col-form-label" for="iiif_server_url"><?php echo __('IIIF Server URL'); ?></label>
+                                        <label class="col-sm-3 col-form-label"><?php echo __('IIIF Image Server'); ?></label>
                                         <div class="col-sm-9">
-                                            <input type="url" class="form-control" id="iiif_server_url" name="settings[iiif_server_url]" value="<?php echo htmlspecialchars($settings['iiif_server_url'] ?? ''); ?>" placeholder="https://iiif.example.com">
-                                            <small class="form-text text-muted"><?php echo __('External IIIF server URL (leave blank to use built-in)'); ?></small>
+                                            <p class="form-control-plaintext mb-0"><code><?php echo htmlspecialchars(sfConfig::get('app_iiif_cantaloupe_url', '/iiif/2')); ?></code></p>
+                                            <small class="form-text text-muted"><?php echo __('Found automatically: the IIIF plugin looks for Cantaloupe at %1% and uses it when it answers; otherwise records show the reference image without a tiling viewer. Nothing to set here.', ['%1%' => htmlspecialchars(sfConfig::get('app_iiif_cantaloupe_internal_url', 'http://127.0.0.1:8182'))]); ?></small>
                                         </div>
                                     </div>
                                     

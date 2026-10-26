@@ -424,7 +424,6 @@ class AhgSettingsSectionAction extends AhgController
             // Map ahg_settings keys → iiif_viewer_settings keys
             $iiifKeyMap = [
                 'iiif_viewer'            => 'viewer_type',
-                'iiif_server_url'        => 'iiif_server_url',
                 'iiif_show_navigator'    => 'show_navigator',
                 'iiif_show_rotation'     => 'show_rotation',
                 'iiif_show_fullscreen'   => 'enable_fullscreen',

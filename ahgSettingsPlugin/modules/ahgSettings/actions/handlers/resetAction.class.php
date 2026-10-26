@@ -66,7 +66,6 @@ class AhgSettingsResetAction extends AhgController
             'iiif' => [
                 'iiif_enabled' => 'true',
                 'iiif_viewer' => 'mirador',
-                'iiif_server_url' => '',
                 'iiif_default_zoom' => '1',
                 'iiif_show_navigator' => 'true',
                 'iiif_show_rotation' => 'true',
