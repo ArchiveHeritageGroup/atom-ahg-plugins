@@ -384,7 +384,7 @@ foreach ($collection->items as $item) {
                             </td>
                             <td>
                                 <?php if ($item->slug): ?>
-                                <a href="/iiif-manifest.php?slug=<?php echo $item->slug ?>" class="btn btn-sm btn-outline-info" target="_blank" title="<?php echo __('View IIIF Manifest') ?>">
+                                <a href="/iiif/manifest/<?php echo $item->slug ?>" class="btn btn-sm btn-outline-info" target="_blank" title="<?php echo __('View IIIF Manifest') ?>">
                                     <i class="fas fa-code"></i>
                                 </a>
                                 <?php endif ?>

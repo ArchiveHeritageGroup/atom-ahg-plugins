@@ -184,8 +184,10 @@ class TermTaxonomyService
     public function loadListTerms(int $taxonomyId, array $params): array
     {
         $c = $this->culture;
-        $listLimit = max(1, (int) ($params['listLimit'] ?? \sfConfig::get('app_hits_per_page', 30)));
-        $listPage = max(1, (int) ($params['listPage'] ?? 1));
+        // Both come from the URL; the search index refuses from + size above its
+        // result window (10,000), so keep the request inside it.
+        $listLimit = min(100, max(1, (int) ($params['listLimit'] ?? \sfConfig::get('app_hits_per_page', 30))));
+        $listPage = min(intdiv(10000, $listLimit), max(1, (int) ($params['listPage'] ?? 1)));
         $skip = ($listPage - 1) * $listLimit;
 
         $body = [

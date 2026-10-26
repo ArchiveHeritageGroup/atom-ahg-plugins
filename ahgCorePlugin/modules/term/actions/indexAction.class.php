@@ -312,8 +312,18 @@ EOF;
 
     protected function loadListTerms($request)
     {
-        if (!isset($request->listLimit)) {
-            $request->listLimit = sfConfig::get('app_hits_per_page');
+        // listLimit and listPage come from the URL. Unbounded, a request such as
+        // ?listLimit=973141582 asks the search index for more than its result
+        // window (10,000) and the page fails with a 500, so both are clamped.
+        $request->listLimit = min(
+            100,
+            max(1, (int) ($request->listLimit ?? sfConfig::get('app_hits_per_page', 10)))
+        );
+        if (!empty($request->listPage)) {
+            $request->listPage = min(
+                intdiv(10000, $request->listLimit),
+                max(1, (int) $request->listPage)
+            );
         }
 
         $listQuery = new \Elastica\Query();
