@@ -22,6 +22,17 @@ class sessionStatusActions extends sfActions
     }
 
     /**
+     * GET /session/signed-in - where the session guard's "Sign in (new tab)"
+     * lands after signing in. The work is in the other tab, so this tab says
+     * to go back there and save, rather than opening a fresh copy of the page.
+     */
+    public function executeSignedIn(sfWebRequest $request)
+    {
+        $this->getResponse()->setHttpHeader('Cache-Control', 'no-store');
+        $this->signedIn = $this->getUser()->isAuthenticated();
+    }
+
+    /**
      * Seconds an idle session survives: the shorter of AtoM's user timeout
      * (config/factories.yml) and php.ini's session.gc_maxlifetime. Symfony raises
      * the latter at runtime, but Ubuntu's session cleaner reads php.ini, so the

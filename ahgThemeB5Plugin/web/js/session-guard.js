@@ -3,7 +3,8 @@
  *
  * - Two minutes before an idle session ends, offers "Stay signed in".
  * - Once it has ended, says so, and says that what was typed is still on the
- *   page.
+ *   page. "Sign in (new tab)" opens the login page in another tab, which after
+ *   signing in shows /session/signed-in: go back to the first tab and save.
  * - A save after that point is held instead of being sent to a server that
  *   would bounce it to the login page and lose the edits.
  *
@@ -18,6 +19,11 @@
   var timeout = parseInt(script.getAttribute('data-timeout'), 10) * 1000;
   var statusUrl = script.getAttribute('data-status-url');
   var loginUrl = script.getAttribute('data-login-url');
+  // After signing in, the new tab lands on a page that says to come back here.
+  var signedInUrl = script.getAttribute('data-signed-in-url');
+  if (loginUrl && signedInUrl) {
+    loginUrl += (loginUrl.indexOf('?') < 0 ? '?' : '&') + 'next=' + encodeURIComponent(signedInUrl);
+  }
   var text = {
     warn: script.getAttribute('data-text-warn'),
     stay: script.getAttribute('data-text-stay'),

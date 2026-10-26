@@ -42,6 +42,7 @@ class ahgThemeB5PluginConfiguration extends sfPluginConfiguration
         sfConfig::set('sf_enabled_modules', $enabledModules);
         $this->dispatcher->connect('routing.load_configuration', function (sfEvent $event) {
             $event->getSubject()->prependRoute('ahg_session_status', new sfRoute('/session/status', ['module' => 'sessionStatus', 'action' => 'index']));
+            $event->getSubject()->prependRoute('ahg_session_signed_in', new sfRoute('/session/signed-in', ['module' => 'sessionStatus', 'action' => 'signedIn']));
         });
 
         // Check for and warn about competing themes

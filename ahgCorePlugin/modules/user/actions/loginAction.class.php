@@ -36,6 +36,12 @@ class UserLoginAction extends sfAction
             // Redirect to our referer otherwise
             $this->form->setDefault('next', $request->getReferer());
         }
+        // A local path given on the login link (the session guard's "signed in
+        // again" page) wins over the referer.
+        $askedNext = (string) $request->getParameter('next');
+        if ('' !== self::localPath($askedNext, $request)) {
+            $this->form->setDefault('next', $askedNext);
+        }
 
         $this->form->setValidator('next', new sfValidatorString());
         $this->form->setWidget('next', new sfWidgetFormInputHidden());
@@ -100,10 +106,11 @@ class UserLoginAction extends sfAction
                         // Can be read by reverse proxies to allow users to bypass caching
                         setcookie('atom_authenticated', '1', ['path' => '/', 'secure' => true, 'samesite' => 'strict']);
 
-                        // SECURITY: only redirect to a local path (open-redirect
-                        // guard) — reject absolute URLs and scheme-relative `//host`.
-                        $next = (string) $this->form->getValue('next');
-                        if ('' !== $next && preg_match('#^/(?!/)#', $next)) {
+                        // SECURITY: only redirect to a path on this site (open-redirect
+                        // guard). The referer arrives as a full URL, so one on this
+                        // host is reduced to its path; any other host is refused.
+                        $next = self::localPath((string) $this->form->getValue('next'), $request);
+                        if ('' !== $next) {
                             $this->redirect($next);
                         }
 
@@ -157,5 +164,27 @@ class UserLoginAction extends sfAction
         ]);
 
         return $this->context->i18n->__('%1% draft(s) available (visit %2%newest additions%3% page to browse them)', ['%1%' => $draftCount, '%2%' => '<a class="alert-link" href="'.$draftUrl.'">', '%3%' => '</a>']);
+    }
+
+    /**
+     * The path to return to after signing in, or '' when there is none: a local
+     * path as given, or the path of a full URL on this same host. Another host,
+     * a scheme-relative //host, and the login page itself (a loop) give ''.
+     */
+    public static function localPath(string $next, sfWebRequest $request): string
+    {
+        if (preg_match('#^https?://#i', $next)) {
+            $parts = parse_url($next);
+            $host = explode(':', (string) $request->getHost())[0];
+            if (!$parts || 0 !== strcasecmp($parts['host'] ?? '', $host)) {
+                return '';
+            }
+            $next = ($parts['path'] ?? '/').(isset($parts['query']) ? '?'.$parts['query'] : '');
+        }
+        if (!preg_match('#^/(?!/)#', $next) || preg_match('#^/(index\.php/)?user/login\b#', $next)) {
+            return '';
+        }
+
+        return $next;
     }
 }

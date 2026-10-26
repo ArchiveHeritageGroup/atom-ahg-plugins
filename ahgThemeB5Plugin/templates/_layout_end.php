@@ -75,10 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php $ahgSessionUser = sfContext::getInstance()->getUser(); ?>
 <?php if ($ahgSessionUser->isAuthenticated()) { ?>
   <?php require_once sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/sessionStatus/actions/actions.class.php'; ?>
-  <script src="/plugins/ahgThemeB5Plugin/web/js/session-guard.js?v=1.0.0"
+  <script src="/plugins/ahgThemeB5Plugin/web/js/session-guard.js?v=1.0.1"
     data-timeout="<?php echo (int) sessionStatusActions::effectiveTimeout($ahgSessionUser); ?>"
     data-status-url="<?php echo url_for('@ahg_session_status'); ?>"
     data-login-url="<?php echo url_for(['module' => 'user', 'action' => 'login']); ?>"
+    data-signed-in-url="<?php echo url_for('@ahg_session_signed_in'); ?>"
     data-text-warn="<?php echo __('You will be signed out in %1% because you have not been active.'); ?>"
     data-text-stay="<?php echo __('Stay signed in'); ?>"
     data-text-ended="<?php echo __('Your session has ended because you were not active. Anything you typed on this page is still here: sign in again in a new tab, then come back and save.'); ?>"
