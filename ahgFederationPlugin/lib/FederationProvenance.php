@@ -197,7 +197,9 @@ class FederationProvenance
 
         // Records by peer
         $recordsByPeer = $this->props()
-            ->leftJoin('federation_peer as fp', 'pi.value', '=', \Illuminate\Database\Capsule\Manager::raw('CAST(fp.id AS CHAR)'))
+            // Compared as numbers: CAST(fp.id AS CHAR) took the connection's collation,
+            // which clashed with property_i18n.value's ("Illegal mix of collations"), a 500.
+            ->leftJoin('federation_peer as fp', \Illuminate\Database\Capsule\Manager::raw('CAST(pi.value AS UNSIGNED)'), '=', 'fp.id')
             ->where('p.name', self::PROP_SOURCE_PEER_ID)
             ->select([
                 'pi.value as peer_id',
