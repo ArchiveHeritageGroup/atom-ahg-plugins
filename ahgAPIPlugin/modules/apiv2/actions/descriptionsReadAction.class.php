@@ -1,6 +1,7 @@
 <?php
 
 require_once sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/ApiVisibility.php';
+require_once sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/ApiRights.php';
 
 use AtomFramework\Http\Controllers\AhgApiController;
 class apiv2DescriptionsReadAction extends AhgApiController
@@ -46,6 +47,15 @@ class apiv2DescriptionsReadAction extends AhgApiController
                 'informationobject',
                 !ApiVisibility::isStaff($this->getUser())
             );
+        }
+
+        // Rights and Local Contexts labels in force (ApiRights). If they cannot be
+        // read, say so: a client must not take "unavailable" for "none apply".
+        try {
+            $result['rights'] = ApiRights::forObject((int) $result['id'], ApiVisibility::isStaff($this->getUser()));
+        } catch (\Throwable $e) {
+            error_log('api.rights_failed: '.$e->getMessage());
+            $result['rights'] = ['rules' => [], 'labels' => [], 'unavailable' => true];
         }
 
         // #130 refinement 2 - field-level redaction on the REST layer, using the
