@@ -157,7 +157,11 @@ class ApiRights
         if (!$l) {
             return null;
         }
-        $code = 'CC-'.strtoupper(preg_replace('/^cc[-_ ]?/i', '', $l->code)).($l->version ? '-'.$l->version : '');
+        // The stored code may already end in its version ("by-nc-nd-4.0"); add it only once.
+        $code = preg_match('/^cc[-_ ]?0/i', $l->code) ? 'CC0' : 'CC-'.strtoupper(preg_replace('/^cc[-_ ]?/i', '', $l->code));
+        if ($l->version && !preg_match('/-'.preg_quote($l->version, '/').'$/i', $code)) {
+            $code .= '-'.$l->version;
+        }
 
         return ['iri' => $l->uri, 'code' => $code, 'label' => str_replace('-', ' ', $code)];
     }
