@@ -246,8 +246,8 @@ if ('' === trim($resourceLabel)) {
                   <span class="badge bg-secondary ms-2"><?php echo ucfirst(str_replace('_', ' ', $doc->document_type)) ?></span>
                 </div>
                 <div>
-                  <?php if ($doc->file_path): ?>
-                  <a href="<?php echo $doc->file_path ?>" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-download"></i> View</a>
+                  <?php if ($doc->filename): ?>
+                  <a href="<?php echo url_for('@provenance_document?id=' . $doc->id) ?>" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-download"></i> View</a>
                   <?php endif ?>
                   <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-doc-id="<?php echo $doc->id ?>"><i class="fas fa-trash"></i> Delete</button>
                 </div>

@@ -1243,6 +1243,67 @@ class spectrumActions extends AhgController
         return true;
     }
 
+    /**
+     * Stream one condition photo to staff. Photos are collection-care records,
+     * so they are not served from uploads/ as static files.
+     */
+    public function executeConditionPhotoFile($request)
+    {
+        if (!$this->getUser()->isAuthenticated()
+            || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->forward('admin', 'secure');
+        }
+
+        $photo = DB::table('spectrum_condition_photo')->where('id', (int) $request->getParameter('id'))->first();
+        if (!$photo) {
+            $this->forward404();
+        }
+
+        // Two conventions are stored in file_path: "/uploads/condition_photos/..."
+        // (from the site root) and a path below the upload folder. Only the two
+        // photo folders are served, whatever the row says.
+        // ponytail: a custom photo_storage_path outside the plugin's photo folder is not
+        // served; add it to $roots if a site ever sets one.
+        $root = $this->config('sf_root_dir');
+        $roots = array_filter([realpath($root . '/uploads/condition_photos'), realpath($root . '/uploads/spectrum')]);
+        $stored = (string) $photo->file_path;
+        $candidates = [
+            0 === strpos($stored, '/') ? $root . $stored : $this->config('sf_upload_dir') . '/' . $stored,
+            $root . '/uploads/condition_photos/' . basename((string) $photo->filename),
+        ];
+        $path = null;
+        foreach ($candidates as $candidate) {
+            $real = realpath($candidate);
+            foreach ($roots as $base) {
+                if ($real && is_file($real) && 0 === strpos($real, $base . '/')) {
+                    $path = $real;
+                    break 2;
+                }
+            }
+        }
+        if (!$path) {
+            $this->forward404('The file is missing from storage.');
+        }
+
+        // Raster images only: an SVG shown inline can carry script.
+        $type = (string) mime_content_type($path);
+        if (!in_array($type, ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/tiff'], true)) {
+            $this->forward404('Not an image');
+        }
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType($type);
+        $response->setHttpHeader('Content-Disposition', 'inline; filename="' . str_replace('"', '', basename($path)) . '"');
+        $response->setHttpHeader('Content-Length', (string) filesize($path));
+        $response->setHttpHeader('Cache-Control', 'private, max-age=3600');
+        $response->setHttpHeader('X-Content-Type-Options', 'nosniff');
+        $response->sendHttpHeaders();
+        readfile($path);
+
+        return sfView::NONE;
+    }
+
     public function executeConditionPhotos($request)
     {
         // #185: creates a spectrum_condition_check on GET and uploads a
@@ -1331,6 +1392,7 @@ class spectrumActions extends AhgController
                 
                 foreach ($photos as $photo) {
                     $photoArray = (array) $photo;
+                    $photoArray['url'] = $this->getController()->genUrl('@procedures_condition_photo_file?id=' . $photo->id);
                     $this->photos[] = $photoArray;
                     $type = $photo->photo_type ?? 'other';
                     if (!isset($this->photosByType[$type])) {

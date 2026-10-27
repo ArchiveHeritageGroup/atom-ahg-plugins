@@ -522,6 +522,56 @@ class provenanceActions extends AhgController
     }
 
     /**
+     * Download a supporting document. Files are not served from uploads/: a
+     * document is shown to the public only when it is marked public and its
+     * provenance record is visible; staff see every document.
+     */
+    public function executeDocument($request)
+    {
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $doc = $db::table('provenance_document')->where('id', (int) $request->getParameter('id'))->first();
+        if (!$doc || !$doc->filename) {
+            $this->forward404();
+        }
+
+        if (!$this->maySeeNonPublicProvenance()) {
+            $record = $db::table('provenance_record')->where('id', $doc->provenance_record_id)->first();
+            if (!$doc->is_public || !$record || (isset($record->is_public) && !$record->is_public)) {
+                $this->forward404();
+            }
+        }
+
+        $base = realpath($this->config('sf_root_dir') . '/uploads/provenance');
+        $path = $base ? realpath($base . '/' . basename($doc->filename)) : false;
+        if (!$path || !is_file($path)) {
+            $this->forward404('The file is missing from storage.');
+        }
+
+        // Pictures and PDFs open in the browser; anything else downloads, so an
+        // uploaded HTML or SVG file never renders on this site.
+        $type = (string) mime_content_type($path);
+        $inline = in_array($type, ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf'], true);
+        $name = (string) ($doc->original_filename ?: $doc->filename);
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType($type ?: 'application/octet-stream');
+        $response->setHttpHeader('Content-Disposition', sprintf(
+            '%s; filename="%s"; filename*=UTF-8\'\'%s',
+            $inline ? 'inline' : 'attachment',
+            str_replace('"', '', $name),
+            rawurlencode($name)
+        ));
+        $response->setHttpHeader('Content-Length', (string) filesize($path));
+        $response->setHttpHeader('Cache-Control', 'private, max-age=3600');
+        $response->setHttpHeader('X-Content-Type-Options', 'nosniff');
+        $response->sendHttpHeaders();
+        readfile($path);
+
+        return sfView::NONE;
+    }
+
+    /**
      * AJAX: Search agents
      */
     public function executeSearchAgents($request)

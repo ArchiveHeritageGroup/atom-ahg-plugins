@@ -155,6 +155,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_project_upload_document', '/research/project/:id/document', 'projectUploadDocument', ['id' => '\d+']);
         $research->any('research_project_remove_resource', '/research/project/:id/resource/remove', 'projectRemoveResource', ['id' => '\d+']);
         $research->any('research_view_project', '/research/project/:id', 'viewProject', ['id' => '\d+']);
+        $research->any('research_project_document', '/research/project-document/:id', 'projectDocument', ['id' => '\d+']);
         $research->any('research_projects', '/research/projects', 'projects');
         $research->any('research_save_experience_level', '/research/experience-level', 'saveExperienceLevel');
 
@@ -269,6 +270,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_ajax_search_entities', '/research/ajax/search-entities', 'searchEntities');
         $research->any('research_ajax_add_to_bibliography', '/research/ajax/add-to-bibliography', 'addToBibliographyAjax');
         $research->any('research_ajax_upload_note_image', '/research/ajax/upload-note-image', 'uploadNoteImage');
+        $research->any('research_note_image', '/research/note-image/:file', 'noteImage', ['file' => 'note_\d+_\d+_[0-9a-f]+\.(jpg|png|gif|webp)']);
         $research->any('research_ajax_resolve_thumbnail', '/research/ajax/resolve-thumbnail', 'resolveThumbnail');
         $research->any('research_ajax_clipboard_to_project', '/research/ajax/clipboard-to-project', 'clipboardToProject');
         $research->any('research_ajax_manage_clipboard_item', '/research/ajax/manage-clipboard-item', 'manageClipboardItem');

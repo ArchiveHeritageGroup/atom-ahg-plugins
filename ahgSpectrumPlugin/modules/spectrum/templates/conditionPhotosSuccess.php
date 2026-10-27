@@ -201,7 +201,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
                         <div class="photo-item" data-type="<?php echo $photo['photo_type']; ?>" data-id="<?php echo $photo['id']; ?>">
                             <div class="photo-card">
                                 <div class="photo-image">
-                                    <img src="<?php echo $photo['file_path']; ?>" 
+                                    <img src="<?php echo $photo['url']; ?>" 
                                          alt="<?php echo htmlspecialchars($photo['caption'] ?? ''); ?>"
                                          loading="lazy"
                                          class="js-photo-lightbox" data-photo-id="<?php echo $photo['id']; ?>">
@@ -590,7 +590,7 @@ function openLightbox(photoId) {
 
 function updateLightbox() {
     var photo = photos[currentPhotoIndex];
-    document.getElementById('lightbox-image').src = photo.file_path;
+    document.getElementById('lightbox-image').src = photo.url;
     document.getElementById('lightbox-title').textContent = photo.caption || photo.original_filename;
     document.getElementById('lightbox-info').textContent = (currentPhotoIndex + 1) + ' / ' + photos.length;
 }
@@ -755,7 +755,7 @@ function initAnnotator(photo) {
         currentAnnotator.destroy();
     }
     
-    var imageUrl = photo.file_path;
+    var imageUrl = photo.url;
     
     // Check if Fabric is loaded
     if (typeof fabric === 'undefined') {
@@ -876,8 +876,8 @@ document.getElementById('annotation-modal').addEventListener('hidden.bs.modal', 
 
     bind('.js-photo-lightbox', function (id) {
         var photo = Array.isArray(photos) ? photos.find(function (p) { return p.id == id; }) : null;
-        if (photo && photo.file_path) {
-            window.open(photo.file_path, '_blank', 'noopener');
+        if (photo && photo.url) {
+            window.open(photo.url, '_blank', 'noopener');
         } else {
             openLightbox(id);
         }

@@ -287,7 +287,7 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
                         ?>
                         <div class="col-6">
                             <a href="/condition/photo/<?php echo $photo->id ?>/annotate" class="d-block position-relative">
-                                <img src="/uploads/condition_photos/<?php echo $photo->thumbnail ?: $photo->filename ?>" 
+                                <img src="<?php echo url_for('@condition_photo_file?id=' . $photo->id) . ($photo->thumbnail ? '?thumb=1' : '') ?>" 
                                      class="img-fluid rounded" alt="<?php echo esc_entities($photo->caption ?: 'Condition photo') ?>">
                                 <?php if ($annotationCount > 0): ?>
                                 <span class="position-absolute top-0 end-0 badge bg-primary m-1"><?php echo $annotationCount ?></span>

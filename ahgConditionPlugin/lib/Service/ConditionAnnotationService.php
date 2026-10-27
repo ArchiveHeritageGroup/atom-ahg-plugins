@@ -477,6 +477,44 @@ class ConditionAnnotationService
     }
 
     /**
+     * Absolute path of a photo, or its thumbnail, on disk; null when missing.
+     *
+     * Photos are served by condition/photoFile behind the module's staff gate,
+     * never as static files. Only the photo folders are searched, so a stored
+     * path cannot point the action at any other file.
+     */
+    public function photoFilePath(object $photo, bool $thumb = false): ?string
+    {
+        $roots = array_filter(array_unique([
+            realpath($this->getUploadPath()),
+            realpath(\sfConfig::get('sf_root_dir').'/uploads/condition_photos'),
+        ]));
+        $name = basename((string) ($thumb && $photo->thumbnail ? $photo->thumbnail : $photo->filename));
+        $candidates = [];
+        foreach ($roots as $root) {
+            $candidates[] = $root.'/'.$name;
+        }
+        // Photos added from an object's procedures page sit in a per-object
+        // folder, which only file_path records.
+        if (!$thumb && $photo->file_path) {
+            $candidates[] = \sfConfig::get('sf_root_dir').'/'.ltrim((string) $photo->file_path, '/');
+        }
+        foreach ($candidates as $candidate) {
+            $real = realpath($candidate);
+            if (!$real || !is_file($real)) {
+                continue;
+            }
+            foreach ($roots as $root) {
+                if (0 === strpos($real, $root.'/')) {
+                    return $real;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Get upload path from settings or default
      */
     protected function getUploadPath(): string

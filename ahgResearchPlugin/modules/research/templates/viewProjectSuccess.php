@@ -426,7 +426,7 @@
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="me-2">
                                         <?php if ('document' === $res->resource_type && !empty($res->file_path)): ?>
-                                            <a href="/<?php echo htmlspecialchars(ltrim($res->file_path, '/'), ENT_QUOTES); ?>" download="<?php echo htmlspecialchars($res->file_name ?? '', ENT_QUOTES); ?>"><i class="fas fa-file me-1"></i><?php echo htmlspecialchars($res->title ?? $res->file_name ?? ''); ?></a>
+                                            <a href="<?php echo url_for('@research_project_document?id=' . $res->id); ?>"><i class="fas fa-file me-1"></i><?php echo htmlspecialchars($res->title ?? $res->file_name ?? ''); ?></a>
                                             <span class="badge bg-secondary ms-1"><?php echo __('Document'); ?></span>
                                             <?php if (!empty($res->file_size)): ?>
                                                 <small class="text-muted ms-1"><?php echo $res->file_size >= 1048576 ? round($res->file_size / 1048576, 1) . ' MB' : round($res->file_size / 1024) . ' KB'; ?></small>

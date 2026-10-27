@@ -139,7 +139,7 @@ class conditionActions extends AhgController
                         (($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor')) ||
                          $this->getUser()->hasGroup(ConditionConstants::EDITOR_GROUP_ID));
 
-        $this->imageUrl = '/uploads/condition_photos/' . $this->photo->filename;
+        $this->imageUrl = $this->getController()->genUrl('@condition_photo_file?id=' . $this->photo->id);
     }
 
     /**
@@ -308,7 +308,42 @@ class conditionActions extends AhgController
 
         $this->conditionCheck = $service->getConditionCheckWithObject((int) $this->photo->condition_check_id);
         $this->annotations = $service->getAnnotations($this->photoId);
-        $this->imageUrl = '/uploads/condition_photos/' . $this->photo->filename;
+        $this->imageUrl = $this->getController()->genUrl('@condition_photo_file?id=' . $this->photo->id);
+    }
+
+    /**
+     * Stream one condition photo (?thumb=1 for its thumbnail). Condition photos
+     * are collection-care records: they go through this module's staff gate in
+     * preExecute, not out of uploads/ as static files.
+     */
+    public function executePhotoFile($request)
+    {
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
+        $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
+
+        $photo = $service->getPhoto((int) $request->getParameter('id'));
+        $path = $photo ? $service->photoFilePath($photo, (bool) $request->getParameter('thumb')) : null;
+        if (!$path) {
+            $this->forward404('Photo not found');
+        }
+
+        // Raster images only: an SVG shown inline can carry script.
+        $type = (string) mime_content_type($path);
+        if (!in_array($type, ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/tiff'], true)) {
+            $this->forward404('Not an image');
+        }
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType($type);
+        $response->setHttpHeader('Content-Disposition', 'inline; filename="'.str_replace('"', '', basename($path)).'"');
+        $response->setHttpHeader('Content-Length', (string) filesize($path));
+        $response->setHttpHeader('Cache-Control', 'private, max-age=3600');
+        $response->setHttpHeader('X-Content-Type-Options', 'nosniff');
+        $response->sendHttpHeaders();
+        readfile($path);
+
+        return sfView::NONE;
     }
 
     /**
@@ -370,8 +405,8 @@ class conditionActions extends AhgController
                 'caption' => $photo->caption,
                 'photo_type' => $photo->photo_type,
                 'annotation_count' => is_array($annotations) ? count($annotations) : 0,
-                'url' => '/uploads/condition_photos/' . $photo->filename,
-                'thumbnail_url' => '/uploads/condition_photos/' . ($photo->thumbnail ?: $photo->filename),
+                'url' => $this->getController()->genUrl('@condition_photo_file?id=' . $photo->id),
+                'thumbnail_url' => $this->getController()->genUrl('@condition_photo_file?id=' . $photo->id) . ($photo->thumbnail ? '?thumb=1' : ''),
             ];
         }
 

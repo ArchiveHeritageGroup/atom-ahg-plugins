@@ -118,6 +118,7 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
 
         // Condition routes
         $spectrum->any('spectrum_condition_photos', '/:slug/spectrum/condition-photos', 'conditionPhotos');
+        $spectrum->any('procedures_condition_photo_file', '/procedures/condition-photo/:id/file', 'conditionPhotoFile', ['id' => '\d+']);
         $spectrum->any('spectrum_condition_report', '/:slug/spectrum/condition-report', 'conditionReport');
 
         // Compliance routes

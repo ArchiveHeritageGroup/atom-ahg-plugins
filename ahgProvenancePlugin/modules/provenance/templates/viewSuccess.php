@@ -169,8 +169,8 @@ if ('' === trim($resourceLabel)) {
               <strong><?php echo htmlspecialchars($doc->title ?: $doc->original_filename) ?></strong>
               <span class="badge bg-secondary ms-2"><?php echo ucfirst(str_replace('_', ' ', $doc->document_type)) ?></span>
             </div>
-            <?php if ($doc->file_path): ?>
-            <a href="<?php echo $doc->file_path ?>" class="btn btn-sm btn-outline-primary" target="_blank">
+            <?php if ($doc->filename && ($doc->is_public || $sf_user->hasCredential(['editor', 'administrator'], false))): ?>
+            <a href="<?php echo url_for('@provenance_document?id=' . $doc->id) ?>" class="btn btn-sm btn-outline-primary" target="_blank">
               <i class="fas fa-download"></i>
             </a>
             <?php endif ?>

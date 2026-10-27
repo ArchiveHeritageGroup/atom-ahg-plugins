@@ -62,6 +62,7 @@ class ahgProvenancePluginConfiguration extends sfPluginConfiguration
         // NB: nginx owns "location ^~ /api/provenance/" (proxied elsewhere), so
         // these API routes live under /provenance/ to reach Symfony.
         $r->any('provenance_coverage', '/provenance/coverage', 'coverage');
+        $r->any('provenance_document', '/provenance/document/:id', 'document', ['id' => '\d+']);
         $r->any('provenance_coverage_data', '/provenance/coverage-data', 'apiCoverage');
         $r->any('provenance_api_trace', '/provenance/trace/:id', 'apiTrace', ['id' => '\d+']);
         $r->any('provenance_authenticity', '/provenance/authenticity/:id', 'authenticity', ['id' => '\d+']);

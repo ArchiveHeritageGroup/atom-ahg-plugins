@@ -117,12 +117,12 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                             <div class="card h-100 photo-card">
                                 <div class="photo-image position-relative">
                                     <img
-                                        src="/uploads/condition_photos/<?php echo $photo->filename; ?>"
+                                        src="<?php echo url_for('@condition_photo_file?id=' . $photo->id); ?>"
                                         class="card-img-top condition-photo-thumb"
                                         alt="<?php echo esc_entities($photo->caption ?? ''); ?>"
                                         data-action="annotate"
                                         data-photo-id="<?php echo $photo->id; ?>"
-                                        data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>"
+                                        data-image-src="<?php echo url_for('@condition_photo_file?id=' . $photo->id); ?>"
                                     >
 
                                     <span class="badge bg-info position-absolute top-0 end-0 m-2">
@@ -154,7 +154,7 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                                         <button class="btn btn-outline-info"
                                                 data-action="annotate"
                                                 data-photo-id="<?php echo $photo->id; ?>"
-                                                data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>"
+                                                data-image-src="<?php echo url_for('@condition_photo_file?id=' . $photo->id); ?>"
                                                 title="<?php echo __('Annotate'); ?>">
                                             <i class="fas fa-draw-polygon"></i>
                                         </button>
@@ -162,7 +162,7 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                                         <button class="btn btn-outline-success"
                                                 data-action="ai-scan"
                                                 data-photo-id="<?php echo $photo->id; ?>"
-                                                data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>"
+                                                data-image-src="<?php echo url_for('@condition_photo_file?id=' . $photo->id); ?>"
                                                 title="<?php echo __('AI Scan'); ?>">
                                             <i class="fas fa-robot"></i>
                                         </button>
@@ -177,7 +177,7 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                                         <button class="btn btn-outline-warning"
                                                 data-action="contribute-training"
                                                 data-photo-id="<?php echo $photo->id; ?>"
-                                                data-image-src="/uploads/condition_photos/<?php echo $photo->filename; ?>"
+                                                data-image-src="<?php echo url_for('@condition_photo_file?id=' . $photo->id); ?>"
                                                 title="<?php echo __('Contribute to Training'); ?>">
                                             <i class="fas fa-graduation-cap"></i>
                                         </button>

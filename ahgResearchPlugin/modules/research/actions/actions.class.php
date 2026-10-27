@@ -5928,8 +5928,108 @@ class researchActions extends AhgController
         }
 
         return $this->renderText(json_encode([
-            'url' => '/uploads/research/notes/' . $filename,
+            'url' => $this->getController()->genUrl('@research_note_image?file=' . $filename),
         ]));
+    }
+
+    /**
+     * Serve an image embedded in a note. The file is named note_<researcher>_...,
+     * so its owner is known without a lookup. Others see it only where the note
+     * holding it is visible to them: signed in for a shared note or journal
+     * entry, anyone for a public annotation. Staff see all.
+     */
+    public function executeNoteImage($request)
+    {
+        $file = basename((string) $request->getParameter('file'));
+        if (!preg_match('/^note_(\d+)_\d+_[0-9a-f]+\.(jpg|png|gif|webp)$/', $file, $m)) {
+            $this->forward404();
+        }
+
+        $user = $this->getUser();
+        $allowed = $this->isReadingRoomStaff();
+        if (!$allowed && $user->isAuthenticated()) {
+            $researcher = $this->service->getResearcherByUserId($user->getAttribute('user_id'));
+            $allowed = $researcher && (int) $researcher->id === (int) $m[1];
+        }
+        if (!$allowed) {
+            $like = '%/' . $file . '%';
+            $public = DB::table('research_annotation')->where('content', 'like', $like)->where('visibility', 'public')->exists();
+            $allowed = $public || ($user->isAuthenticated() && (
+                DB::table('research_annotation')->where('content', 'like', $like)
+                    ->where(fn ($q) => $q->where('is_private', 0)->orWhereIn('visibility', ['shared', 'public']))->exists()
+                || DB::table('research_journal_entry')->where('content', 'like', $like)->where('is_private', 0)->exists()
+            ));
+        }
+        if (!$allowed) {
+            $this->forward404();
+        }
+
+        return $this->sendStoredFile(sfConfig::get('sf_root_dir') . '/uploads/research/notes/' . $file, $file, true);
+    }
+
+    /**
+     * Download a document uploaded to a project, for those who can open the
+     * project: the same checks as viewProject.
+     */
+    public function executeProjectDocument($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+        $researcher = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        $resource = DB::table('research_project_resource')
+            ->where('id', (int) $request->getParameter('id'))
+            ->where('resource_type', 'document')
+            ->first();
+        if (!$researcher || !$resource || empty($resource->file_path)) {
+            $this->forward404();
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        if (!(new ProjectService())->getProject((int) $resource->project_id, $researcher->id)) {
+            $this->forward404();
+        }
+        $odrl = $this->enforceOdrl('project', (int) $resource->project_id, $researcher->id, 'use');
+        if ($odrl && !$odrl['permitted']) {
+            $this->forward404();
+        }
+
+        return $this->sendStoredFile(sfConfig::get('sf_root_dir') . '/' . ltrim($resource->file_path, '/'), (string) $resource->file_name, false);
+    }
+
+    /**
+     * Stream a file from uploads/research. Confined to that folder, since the
+     * path is built from a stored value. Raster images may show inline; anything
+     * else downloads, so an uploaded HTML or SVG file never renders on this site.
+     */
+    private function sendStoredFile(string $path, string $name, bool $inline)
+    {
+        $base = realpath(sfConfig::get('sf_root_dir') . '/uploads/research');
+        $real = realpath($path);
+        if (false === $base || false === $real || 0 !== strpos($real, $base . '/') || !is_file($real)) {
+            $this->forward404('The file is missing from storage.');
+        }
+
+        $type = (string) mime_content_type($real);
+        $inline = $inline && in_array($type, ['image/png', 'image/jpeg', 'image/gif', 'image/webp'], true);
+        $name = '' !== $name ? $name : basename($real);
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType($type ?: 'application/octet-stream');
+        $response->setHttpHeader('Content-Disposition', sprintf(
+            '%s; filename="%s"; filename*=UTF-8\'\'%s',
+            $inline ? 'inline' : 'attachment',
+            str_replace('"', '', $name),
+            rawurlencode($name)
+        ));
+        $response->setHttpHeader('Content-Length', (string) filesize($real));
+        $response->setHttpHeader('Cache-Control', 'private, max-age=3600');
+        $response->setHttpHeader('X-Content-Type-Options', 'nosniff');
+        $response->sendHttpHeaders();
+        readfile($real);
+
+        return sfView::NONE;
     }
 
     /**

@@ -144,7 +144,7 @@ $photoTypes = [
             ?>
             <div class="photo-item">
                 <span class="photo-type"><?php echo esc_entities($photoTypes[$photo->photo_type] ?? $photo->photo_type) ?></span>
-                <img src="/uploads/condition_photos/<?php echo esc_entities($photo->filename) ?>" alt="<?php echo esc_entities($photo->caption) ?>">
+                <img src="<?php echo url_for('@condition_photo_file?id=' . $photo->id) ?>" alt="<?php echo esc_entities($photo->caption) ?>">
                 <div class="photo-caption"><?php echo esc_entities($photo->caption ?: 'No caption') ?></div>
                 
                 <?php if (!empty($annotations)): ?>

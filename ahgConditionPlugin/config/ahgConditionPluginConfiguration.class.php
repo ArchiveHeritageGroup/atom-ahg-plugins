@@ -45,6 +45,7 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
         $router->any('condition_photo_upload', '/condition/check/:id/upload', 'upload', ['id' => '\d+|new']);
         $router->any('condition_photo_delete', '/condition/photo/:id/delete', 'deletePhoto', ['id' => '\d+']);
         $router->any('condition_photo_view', '/condition/photo/:id/view', 'viewPhoto', ['id' => '\d+']);
+        $router->any('condition_photo_file', '/condition/photo/:id/file', 'photoFile', ['id' => '\d+']);
         $router->any('condition_photo_update_meta', '/condition/photo/:id/update-meta', 'updatePhotoMeta', ['id' => '\d+']);
         $router->any('condition_report_export', '/condition/check/:id/export', 'exportReport', ['id' => '\d+']);
         $router->any('condition_list_photos', '/condition/check/:id/list', 'listPhotos', ['id' => '\d+|new']);
