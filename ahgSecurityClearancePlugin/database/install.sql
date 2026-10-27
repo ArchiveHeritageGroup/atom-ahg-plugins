@@ -364,6 +364,14 @@ CREATE TABLE IF NOT EXISTS `user_security_clearance` (
   `granted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires_at` datetime DEFAULT NULL,
   `notes` text CHARACTER SET utf8mb4,
+  `vetting_reference` varchar(100) DEFAULT NULL COMMENT 'reference of the vetting that supports the clearance',
+  `vetting_date` date DEFAULT NULL COMMENT 'date the vetting was completed',
+  `vetting_authority` varchar(255) DEFAULT NULL COMMENT 'body that carried out the vetting',
+  `renewal_status` varchar(20) NOT NULL DEFAULT 'none' COMMENT 'none, pending, approved, rejected',
+  `renewal_requested_date` date DEFAULT NULL,
+  `renewal_notes` text,
+  `two_factor_verified` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 once the holder has verified two-factor sign-in',
+  `two_factor_verified_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_usc_user` (`user_id`),
   KEY `idx_usc_classification_id` (`classification_id`),
@@ -460,10 +468,15 @@ UNLOCK TABLES;
 CREATE TABLE IF NOT EXISTS `access_justification_template` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `category` varchar(50) DEFAULT NULL COMMENT 'research, legal, personal, administrative, ...',
   `paia_section` varchar(50) DEFAULT NULL,
+  `popia_ground` varchar(50) DEFAULT NULL COMMENT 'POPIA lawful processing ground: consent, legitimate_interest, legal_obligation, public_function, ...',
+  `required_evidence` json DEFAULT NULL COMMENT 'list of supporting documents to ask for',
   `template_text` text NOT NULL,
   `is_active` tinyint(1) DEFAULT '1',
+  `created_by` int DEFAULT NULL COMMENT 'user.id',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

@@ -131,16 +131,20 @@ class SecurityClearanceService
                 ->where('user_id', $userId)
                 ->first();
 
-            // One clearance row per user (user_id is UNIQUE): replace it. This wrote
-            // granted_date, expiry_date, active and vetting_* - none of which exist in
-            // user_security_clearance - so every grant through this service failed.
-            // ponytail: vetting_* has no column; it is dropped until the table grows one.
+            // One clearance row per user (user_id is UNIQUE): replace it. A new grant
+            // also closes any renewal that was pending (catalog #314).
             DB::table('user_security_clearance')->updateOrInsert(['user_id' => $userId], [
                 'classification_id' => $classificationId,
                 'granted_by' => $grantedBy,
                 'granted_at' => date('Y-m-d H:i:s'),
                 'expires_at' => ($data['expires_at'] ?? $data['expiry_date'] ?? null) ?: null,
                 'notes' => $data['notes'] ?? null,
+                'vetting_reference' => ($data['vetting_reference'] ?? null) ?: null,
+                'vetting_date' => ($data['vetting_date'] ?? null) ?: null,
+                'vetting_authority' => ($data['vetting_authority'] ?? null) ?: null,
+                'renewal_status' => 'none',
+                'renewal_requested_date' => null,
+                'renewal_notes' => null,
             ]);
 
             // Determine action type
@@ -216,12 +220,17 @@ class SecurityClearanceService
      */
     public static function requestRenewal(int $userId, string $notes = ''): bool
     {
-        // ponytail: user_security_clearance has no renewal_* columns, so the request
-        // is kept in the clearance history rather than on the clearance itself.
+        // The pending state sits on the clearance (shown on the dashboard and the
+        // user's page); the request is also kept in the clearance history.
         $clearance = DB::table('user_security_clearance')->where('user_id', $userId)->first();
         if (!$clearance) {
             return false;
         }
+        DB::table('user_security_clearance')->where('id', $clearance->id)->update([
+            'renewal_status' => 'pending',
+            'renewal_requested_date' => date('Y-m-d'),
+            'renewal_notes' => '' !== $notes ? $notes : null,
+        ]);
         self::recordClearanceHistory($userId, $clearance->classification_id, $clearance->classification_id, 'renewal_requested', $userId, $notes);
 
         return true;
@@ -250,7 +259,7 @@ class SecurityClearanceService
 
             DB::table('user_security_clearance')
                 ->where('id', $clearance->id)
-                ->update(['expires_at' => $expiry.' 23:59:59']);
+                ->update(['expires_at' => $expiry.' 23:59:59', 'renewal_status' => 'approved']);
 
             self::recordClearanceHistory(
                 $userId,
@@ -289,7 +298,7 @@ class SecurityClearanceService
                 'sc.code',
                 'sc.name as clearance_name',
                 DB::raw('DATE(usc.expires_at) as expiry_date'),
-                DB::raw('NULL as renewal_status'),
+                'usc.renewal_status',
                 DB::raw('DATEDIFF(usc.expires_at, CURDATE()) as days_remaining'),
             ])
             ->orderBy('usc.expires_at')
@@ -364,8 +373,12 @@ class SecurityClearanceService
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        // The verification lives in security_2fa_session above; user_security_clearance
-        // has no two_factor_verified columns (the update here failed on every verify).
+        // The session above is what sign-in checks; the flag on the clearance is what
+        // the clearance screens show.
+        DB::table('user_security_clearance')->where('user_id', $userId)->update([
+            'two_factor_verified' => 1,
+            'two_factor_verified_at' => date('Y-m-d H:i:s'),
+        ]);
 
         self::logAccess($userId, null, null, null, '2fa_verified', true);
 

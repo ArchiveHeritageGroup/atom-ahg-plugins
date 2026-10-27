@@ -105,7 +105,7 @@ class AccessJustificationService
     {
         try {
             $templates = DB::table('access_justification_template')
-                ->where('active', 1)
+                ->where('is_active', 1)
                 ->orderBy('category')
                 ->orderBy('name')
                 ->get()
@@ -131,7 +131,7 @@ class AccessJustificationService
         try {
             return DB::table('access_justification_template')
                 ->where('category', $category)
-                ->where('active', 1)
+                ->where('is_active', 1)
                 ->orderBy('name')
                 ->get()
                 ->toArray();
@@ -172,7 +172,7 @@ class AccessJustificationService
                 'paia_section' => $paiaSection,
                 'popia_ground' => $popiaGround,
                 'required_evidence' => $requiredEvidence,
-                'active' => 1,
+                'is_active' => 1,
                 'created_by' => $createdBy,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
@@ -331,7 +331,7 @@ class AccessJustificationService
                 'paia_section' => 'Section 23',
                 'popia_ground' => 'consent',
                 'required_evidence' => json_encode(['Identity verification', 'Proof of relationship']),
-                'active' => 1,
+                'is_active' => 1,
             ],
             [
                 'id' => 2,
@@ -341,7 +341,7 @@ class AccessJustificationService
                 'paia_section' => 'Section 46',
                 'popia_ground' => 'legitimate_interest',
                 'required_evidence' => json_encode(['Research proposal', 'Ethics clearance', 'Institutional affiliation']),
-                'active' => 1,
+                'is_active' => 1,
             ],
             [
                 'id' => 3,
@@ -351,7 +351,7 @@ class AccessJustificationService
                 'paia_section' => 'Section 70',
                 'popia_ground' => 'legal_obligation',
                 'required_evidence' => json_encode(['Court order or subpoena', 'Legal practitioner credentials', 'Case reference']),
-                'active' => 1,
+                'is_active' => 1,
             ],
             [
                 'id' => 4,
@@ -361,7 +361,7 @@ class AccessJustificationService
                 'paia_section' => 'Section 34',
                 'popia_ground' => 'consent',
                 'required_evidence' => json_encode(['Proof of family relationship', 'Identity document']),
-                'active' => 1,
+                'is_active' => 1,
             ],
             [
                 'id' => 5,
@@ -371,7 +371,7 @@ class AccessJustificationService
                 'paia_section' => 'Section 46',
                 'popia_ground' => 'public_function',
                 'required_evidence' => json_encode(['Public interest justification', 'Media credentials if applicable']),
-                'active' => 1,
+                'is_active' => 1,
             ],
             [
                 'id' => 6,
@@ -381,7 +381,7 @@ class AccessJustificationService
                 'paia_section' => null,
                 'popia_ground' => null,
                 'required_evidence' => json_encode(['Security vetting certificate', 'Line manager approval', 'Need-to-know justification']),
-                'active' => 1,
+                'is_active' => 1,
             ],
         ];
     }

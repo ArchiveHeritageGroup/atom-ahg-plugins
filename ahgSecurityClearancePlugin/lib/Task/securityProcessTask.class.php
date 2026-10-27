@@ -86,7 +86,11 @@ EOF;
     }
 
     /**
-     * Mark expired clearances as inactive.
+     * Remove clearances past expires_at, as a revocation does, and record each
+     * expiry in the clearance history. An expired clearance already grants
+     * nothing (reads check expires_at); this keeps the table and history true.
+     * It read and wrote active and expiry_date, which the table does not have,
+     * so it failed on every run (catalog #314).
      */
     private function processExpiredClearances(): void
     {
@@ -95,16 +99,15 @@ EOF;
         $db = Illuminate\Database\Capsule\Manager::connection();
 
         $expired = $db->table('user_security_clearance')
-            ->where('active', 1)
-            ->whereNotNull('expiry_date')
-            ->where('expiry_date', '<', date('Y-m-d'))
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<', date('Y-m-d H:i:s'))
             ->get();
 
         $count = 0;
         foreach ($expired as $clearance) {
             $db->table('user_security_clearance')
                 ->where('id', $clearance->id)
-                ->update(['active' => 0, 'updated_at' => date('Y-m-d H:i:s')]);
+                ->delete();
 
             $db->table('security_clearance_history')->insert([
                 'user_id' => $clearance->user_id,

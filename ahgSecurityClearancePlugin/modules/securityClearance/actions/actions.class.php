@@ -408,8 +408,7 @@ class securityClearanceActions extends AhgController
                 'u.id as user_id',
                 'sc.name as clearance_name', 
                 'sc.color',
-                $db::raw('DATEDIFF(usc.expires_at, CURDATE()) as days_remaining'),
-                $db::raw("'none' as renewal_status")
+                $db::raw('DATEDIFF(usc.expires_at, CURDATE()) as days_remaining')
             )
             ->orderBy('usc.expires_at')
             ->limit(10)
