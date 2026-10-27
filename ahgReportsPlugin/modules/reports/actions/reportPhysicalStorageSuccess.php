@@ -8,8 +8,8 @@
 
   <section class="sidebar-widget">
     
-    <div style="margin-bottom: 1rem;">
-      <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>" class="c-btn" style="width:100%;">
+    <div data-ahg-style="margin-bottom: 1rem;">
+      <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>" class="c-btn" data-ahg-style="width:100%;">
         <i class="fa fa-arrow-left"></i> <?php echo __('Back to Reports'); ?>
       </a>
     </div>
@@ -61,8 +61,8 @@
         <input class="c-btn c-btn-submit" type="submit" value="<?php echo __('Search'); ?>"/>
       </section>
 
-      <div style="margin-top: 1rem;">
-        <button type="button" data-ahg-call="exportTableToCSV" class="c-btn" style="width:100%;">
+      <div data-ahg-style="margin-top: 1rem;">
+        <button type="button" data-ahg-call="exportTableToCSV" class="c-btn" data-ahg-style="width:100%;">
           <i class="fa fa-download"></i> <?php echo __('Export CSV'); ?>
         </button>
       </div>
@@ -81,7 +81,7 @@
       <?php echo __('Found %1% results', ['%1%' => $total]); ?>
     </div>
 
-    <div style="margin-bottom: 1rem; font-size: 0.85rem;">
+    <div data-ahg-style="margin-bottom: 1rem; font-size: 0.85rem;">
       <strong><?php echo __('Show/Hide Columns'); ?>:</strong><br/>
       <label><input type="checkbox" data-ahg-toggle-column="0" checked> <?php echo __('Name'); ?></label>
       <label><input type="checkbox" data-ahg-toggle-column="1" checked> <?php echo __('Location'); ?></label>
@@ -139,7 +139,7 @@
     }
     </script>
 
-    <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+    <div class="table-responsive" data-ahg-style="max-height: 600px; overflow: auto;">
       <table id="reportTable" class="table table-bordered table-striped table-sm">
         <thead>
           <tr>
@@ -178,7 +178,7 @@
               <?php if (isset($_GET['showLinkedIO']) && $_GET['showLinkedIO']) { ?>
                 <td>
                   <?php if (isset($item->linkedInformationObjects) && count($item->linkedInformationObjects) > 0) { ?>
-                    <ul style="margin: 0; padding-left: 20px;">
+                    <ul data-ahg-style="margin: 0; padding-left: 20px;">
                       <?php foreach ($item->linkedInformationObjects as $io) { ?>
                         <li>
                           <?php echo link_to($io->title . ' (' . $io->identifier . ')', ['module' => 'informationobject', 'slug' => $io->id]); ?>

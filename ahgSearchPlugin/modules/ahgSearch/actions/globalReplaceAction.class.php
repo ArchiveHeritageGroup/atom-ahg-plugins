@@ -152,7 +152,7 @@ class ahgSearchGlobalReplaceAction extends AhgController
         $choices = $service->getIoI18nColumns();
 
         $this->form->setValidator('column', new sfValidatorString());
-        $this->form->setWidget('column', new sfWidgetFormSelect(['choices' => $choices], ['style' => 'width: auto']));
+        $this->form->setWidget('column', new sfWidgetFormSelect(['choices' => $choices], ['data-ahg-style' => 'width: auto']));
 
         // Search-replace values
         $this->form->setValidator('pattern', new sfValidatorString());

@@ -42,7 +42,7 @@
 
   <?php } else { ?>
     <div data-ahg-style="text-align: center">
-      <?php echo image_tag($representation->getFullPath(), ['style' => 'border: #999 1px solid', 'alt' => '']); ?>
+      <?php echo image_tag($representation->getFullPath(), ['data-ahg-style' => 'border: #999 1px solid', 'alt' => '']); ?>
     </div>
   <?php } ?>
 

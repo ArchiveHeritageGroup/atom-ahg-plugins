@@ -82,7 +82,7 @@ class SettingsIcipSettingsAction extends AhgController
         // Consent Expiry Warning
         $this->form->setWidget('consent_expiry_warning_days', new sfWidgetFormInput([], [
             'class' => 'form-control',
-            'style' => 'max-width: 100px;',
+            'data-ahg-style' => 'max-width: 100px;',
         ]));
         $this->form->setValidator('consent_expiry_warning_days', new sfValidatorInteger([
             'required' => false,
@@ -93,7 +93,7 @@ class SettingsIcipSettingsAction extends AhgController
         // Consultation Follow-up
         $this->form->setWidget('default_consultation_follow_up_days', new sfWidgetFormInput([], [
             'class' => 'form-control',
-            'style' => 'max-width: 100px;',
+            'data-ahg-style' => 'max-width: 100px;',
         ]));
         $this->form->setValidator('default_consultation_follow_up_days', new sfValidatorInteger([
             'required' => false,

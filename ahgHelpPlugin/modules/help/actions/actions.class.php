@@ -263,7 +263,11 @@ class helpActions extends AhgController
             // Bare /heritage is the discovery landing page. Exact, or it swallows every entry above.
             ['pattern' => '/heritage', 'match' => 'exact', 'slug' => 'heritage-sites-user-guide', 'title' => 'Heritage Discovery Platform'],
 
-            ['pattern' => '/admin/ipsas', 'slug' => 'ipsas-accounting-user-guide', 'title' => 'IPSAS 45 Heritage Asset Accounting'],
+            // Archaeology (ahgArchaeologyPlugin) and site records (ahgSiteRecordPlugin).
+            ['pattern' => '/archaeology', 'slug' => 'archaeology-user-guide', 'title' => 'Archaeology'],
+            ['pattern' => '/site-record', 'slug' => 'site-record-user-guide', 'title' => 'Site Records'],
+
+            ['pattern' => '/admin/ipsas','slug' => 'ipsas-accounting-user-guide', 'title' => 'IPSAS 45 Heritage Asset Accounting'],
             ['pattern' => '/label', 'slug' => 'label-printing-user-guide', 'title' => 'Label Printing'],
 
             // Spectrum pages are /:slug/spectrum/* - the slug comes first, so a

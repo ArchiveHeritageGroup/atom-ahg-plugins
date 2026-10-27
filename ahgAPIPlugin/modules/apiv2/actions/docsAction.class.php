@@ -21,11 +21,15 @@ class apiv2DocsAction extends AhgApiController
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AtoM Heratio API — v2 reference</title>
+  <title>AtoM Heratio API - v2 reference</title>
   <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/swagger-ui.css">
+  <style{$nonce}>
+    .api-key-note { background:#10373E; color:#F2EDE6; padding:10px 20px; font:15px Arial,sans-serif; }
+    .api-key-note a { color:#E1B34F; font-weight:bold; }
+  </style>
 </head>
 <body>
-  <div style="background:#10373E;color:#F2EDE6;padding:10px 20px;font:15px Arial,sans-serif">Requests need an API key in the X-API-Key header. <a href="/api/keys" style="color:#E1B34F;font-weight:bold">Get or manage your API keys</a></div>
+  <div class="api-key-note">Requests need an API key in the X-API-Key header. <a href="/api/keys">Get or manage your API keys</a></div>
   <div id="swagger-ui"></div>
   <script src="/plugins/ahgThemeB5Plugin/web/js/swagger-ui-bundle.js"></script>
   <script{$nonce}>

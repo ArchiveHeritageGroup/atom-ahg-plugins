@@ -650,6 +650,18 @@ SHIMS;
         // is why the name is passed through untouched.
         $js = <<<'APPLIER'
 (function () {
+  // Give the page nonce to <style> elements that scripts create, so libraries
+  // that inject their own CSS (3d-force-graph, Mirador) work without
+  // style-src 'unsafe-inline'. Only script-created elements pass through here;
+  // a <style> smuggled into the markup still has no nonce and is still refused.
+  var nonce = document.currentScript && document.currentScript.nonce;
+  if (nonce) {
+    var stamp = function (n) { if (n && 'STYLE' === n.nodeName && !n.nonce) { n.nonce = nonce; } return n; };
+    var append = Node.prototype.appendChild, insert = Node.prototype.insertBefore;
+    Node.prototype.appendChild = function (n) { return append.call(this, stamp(n)); };
+    Node.prototype.insertBefore = function (n, r) { return insert.call(this, stamp(n), r); };
+  }
+
   function applyEl(el) {
     var decls = el.getAttribute('data-ahg-style');
     el.removeAttribute('data-ahg-style');

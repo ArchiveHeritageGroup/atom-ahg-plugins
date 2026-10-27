@@ -20,7 +20,7 @@ class helpImportTask extends arBaseTask
     protected static $subcategoryMap = [
         // Archaeology first: these keywords are distinctive and must not be
         // shadowed by a generic later entry (first-match-wins, see $pluginMap).
-        'Archaeology' => ['archaeology-', 'harris-', 'stratigraph'],
+        'Archaeology' => ['archaeology-', 'harris-', 'stratigraph', 'site-record-'],
         'Research' => ['researcher-', 'research-'],
         'GLAM Sectors' => ['glam-', 'dam-', 'gallery-', 'museum-', 'library-'],
         'AI & Automation' => ['ai-', 'ner-', 'semantic-', 'translation-', 'duplicate-', 'dedupe-', 'fuzzy-'],
@@ -53,6 +53,7 @@ class helpImportTask extends arBaseTask
         'ai-tools' => 'ahgAIPlugin',
         'api-' => 'ahgAPIPlugin',
         'archaeology' => 'ahgArchaeologyPlugin',
+        'site-record' => 'ahgSiteRecordPlugin',
         'audio-player' => 'ahgIiifPlugin',
         'audit-trail' => 'ahgAuditTrailPlugin',
         'backup-restore' => 'ahgBackupPlugin',

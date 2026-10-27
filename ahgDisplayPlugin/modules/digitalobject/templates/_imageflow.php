@@ -153,7 +153,7 @@ function _getFileIcon($path, $extIconMap, $imageExts)
                 <i class="<?php echo $iconClass; ?> fa-3x text-secondary"></i>
               </span>
               <?php else: ?>
-              <?php echo image_tag($filePath, ['class' => 'img-thumbnail mx-2', 'longdesc' => $href, 'alt' => strip_markdown($item->getDigitalObjectAltText() ?: $title), 'style' => 'max-height:'.$_carouselHeight.'px;']); ?>
+              <?php echo image_tag($filePath, ['class' => 'img-thumbnail mx-2', 'longdesc' => $href, 'alt' => strip_markdown($item->getDigitalObjectAltText() ?: $title), 'data-ahg-style' => 'max-height:'.$_carouselHeight.'px;']); ?>
               <?php endif; ?>
             </a>
           <?php } ?>
