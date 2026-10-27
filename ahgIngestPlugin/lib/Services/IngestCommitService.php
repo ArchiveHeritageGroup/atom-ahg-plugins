@@ -1159,6 +1159,11 @@ class IngestCommitService
                   . substr($checksum, 2, 1) . '/'
                   . $checksum;
 
+        // The object store may be a network mount that is not there (#313): without
+        // this check the file would be written to the empty local directory and look
+        // lost once the mount returns. Throws when the configured sentinel is missing.
+        \AtomExtensions\Services\DigitalObjectService::assertObjectStoreAvailableAt($webDir . '/uploads/r');
+
         $uploadsDir = $webDir . '/uploads/r/' . $repoSlug . '/' . $hashPath;
         if (!is_dir($uploadsDir)) {
             @mkdir($uploadsDir, 0755, true);

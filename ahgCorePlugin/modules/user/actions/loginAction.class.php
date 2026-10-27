@@ -91,6 +91,10 @@ class UserLoginAction extends sfAction
 
                 if (!$lockedOut) {
                     if ($this->context->user->authenticate($email, $this->form->getValue('password'))) {
+                        // Move a legacy (sha1 + salt) or outdated hash to Argon2id while
+                        // the plaintext is at hand (catalog #243). Never blocks sign-in.
+                        $this->upgradePasswordHash((string) $this->form->getValue('password'));
+
                         // Record successful login attempt
                         try {
                             \AtomFramework\Core\Security\LoginSecurityService::recordAttempt($email, $ip, true);
@@ -186,5 +190,30 @@ class UserLoginAction extends sfAction
         }
 
         return $next;
+    }
+
+    /**
+     * Rehash the signed-in user's password with the framework's current scheme
+     * when PasswordService says it needs it. Base AtoM only verifies (QubitUser,
+     * locked), so legacy hashes were never upgraded. LDAP accounts hold no local
+     * password and are skipped.
+     */
+    private function upgradePasswordHash(string $plaintext): void
+    {
+        if ('' === $plaintext || $this->context->user instanceof ldapUser
+            || !class_exists('\\AtomFramework\\Core\\Security\\PasswordService')) {
+            return;
+        }
+
+        try {
+            $userId = (int) $this->context->user->getUserID();
+            $row = \Illuminate\Database\Capsule\Manager::table('user')->where('id', $userId)->first(['password_hash', 'salt']);
+            if ($row && \AtomFramework\Core\Security\PasswordService::needsUpgrade((string) $row->password_hash, $row->salt)) {
+                \Illuminate\Database\Capsule\Manager::table('user')->where('id', $userId)
+                    ->update(\AtomFramework\Core\Security\PasswordService::hash($plaintext));
+            }
+        } catch (\Throwable $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+        }
     }
 }
