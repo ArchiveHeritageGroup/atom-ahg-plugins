@@ -270,6 +270,8 @@ class federationActions extends AhgController
         $query = \Illuminate\Database\Capsule\Manager::table('federation_harvest_log as l')
             ->leftJoin('federation_peer as p', 'l.peer_id', '=', 'p.id')
             ->leftJoin('information_object as io', 'l.information_object_id', '=', 'io.id')
+            // Slugs live in the slug table: information_object has no slug column.
+            ->leftJoin('slug as s', 's.object_id', '=', 'io.id')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('io.id', '=', 'ioi.id')
                      ->where('ioi.culture', '=', $this->getContext()->user->getCulture() ?: 'en');
@@ -292,7 +294,7 @@ class federationActions extends AhgController
                 'l.*',
                 'p.name as peer_name',
                 'ioi.title as object_title',
-                'io.slug as object_slug',
+                's.slug as object_slug',
             ])
             ->orderBy('l.harvest_date', 'desc')
             ->limit($perPage)
