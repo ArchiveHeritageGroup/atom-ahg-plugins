@@ -336,7 +336,9 @@ class iiifActions extends AhgController
         // (anonymous or authenticated-without-readMaster) gets the reference. Cache
         // each tier separately and mark the response private.
         $canMaster = $this->staffMasterView((int) $object['id']);
-        $tier = 'v2-' . ($canMaster ? 'master' : 'ref');
+        // Short tier keys: the cache key is "{culture}:{tier}" in a VARCHAR(10)
+        // column, and "en:v2-master" did not fit, so staff manifests never cached.
+        $tier = 'v2' . ($canMaster ? 'm' : 'r');
         $this->getResponse()->setHttpHeader('Cache-Control', 'private, no-cache');
 
         // Check manifest cache (per access tier)
@@ -659,7 +661,9 @@ class iiifActions extends AhgController
         // derivative. Cache each access tier separately and mark the response
         // private so a public request can never receive a staff-cached master.
         $canMaster = $this->staffMasterView((int) $object['id']);
-        $tier = 'v3-' . ($canMaster ? 'master' : 'ref');
+        // Short tier keys: the cache key is "{culture}:{tier}" in a VARCHAR(10)
+        // column, and "en:v3-master" did not fit, so staff manifests never cached.
+        $tier = 'v3' . ($canMaster ? 'm' : 'r');
         $this->getResponse()->setHttpHeader('Cache-Control', 'private, no-cache');
 
         // Check v3 manifest cache (per access tier)
