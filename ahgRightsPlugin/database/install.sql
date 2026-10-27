@@ -789,7 +789,7 @@ LOCK TABLES `rights_tk_label` WRITE;
 /*!40000 ALTER TABLE `rights_tk_label` DISABLE KEYS */;
 INSERT IGNORE INTO `rights_tk_label` VALUES (1,'TK-A','attribution','https://localcontexts.org/label/tk-attribution/','#4A90D9',NULL,1,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (2,'TK-NC','tk','https://localcontexts.org/label/tk-non-commercial/','#7B8D42',NULL,2,1,'2025-12-11 07:48:41');
-INSERT IGNORE INTO `rights_tk_label` VALUES (3,'TK-C','tk','https://localcontexts.org/label/tk-community/','#D35400',NULL,3,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (3,'TK-C','tk','https://localcontexts.org/label/tk-community-voice/','#D35400',NULL,3,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (4,'TK-CV','tk','https://localcontexts.org/label/tk-culturally-sensitive/','#8E44AD',NULL,4,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (5,'TK-SS','tk','https://localcontexts.org/label/tk-secret-sacred/','#C0392B',NULL,5,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (6,'TK-MC','tk','https://localcontexts.org/label/tk-multiple-communities/','#16A085',NULL,6,1,'2025-12-11 07:48:41');
@@ -800,7 +800,7 @@ INSERT IGNORE INTO `rights_tk_label` VALUES (10,'TK-F','tk','https://localcontex
 INSERT IGNORE INTO `rights_tk_label` VALUES (11,'TK-O','tk','https://localcontexts.org/label/tk-outreach/','#3498DB',NULL,11,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (12,'TK-V','tk','https://localcontexts.org/label/tk-verified/','#1ABC9C',NULL,12,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (13,'TK-NV','tk','https://localcontexts.org/label/tk-non-verified/','#95A5A6',NULL,13,1,'2025-12-11 07:48:41');
-INSERT IGNORE INTO `rights_tk_label` VALUES (14,'BC-R','bc','https://localcontexts.org/label/bc-research/','#9B59B6',NULL,14,1,'2025-12-11 07:48:41');
+INSERT IGNORE INTO `rights_tk_label` VALUES (14,'BC-R','bc','https://localcontexts.org/label/bc-research-use/','#9B59B6',NULL,14,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (15,'BC-CB','bc','https://localcontexts.org/label/bc-consent-before/','#E67E22',NULL,15,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (16,'BC-P','bc','https://localcontexts.org/label/bc-provenance/','#1ABC9C',NULL,16,1,'2025-12-11 07:48:41');
 INSERT IGNORE INTO `rights_tk_label` VALUES (17,'BC-MC','bc','https://localcontexts.org/label/bc-multiple-communities/','#3498DB',NULL,17,1,'2025-12-11 07:48:41');
