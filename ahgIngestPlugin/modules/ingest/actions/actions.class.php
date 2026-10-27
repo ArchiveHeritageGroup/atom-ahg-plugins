@@ -213,10 +213,7 @@ class ingestActions extends sfActions
                 $this->redirect(['module' => 'ingest', 'action' => 'map', 'id' => $id]);
             }
 
-            $uploadDir = sfConfig::get('sf_upload_dir') . '/ingest/' . $id;
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
+            $uploadDir = \AhgIngestPlugin\Services\IngestService::workDir((string) $id);
 
             $file = $request->getFiles('ingest_file');
             $folder = $request->getFiles('ingest_folder');
@@ -566,10 +563,7 @@ class ingestActions extends sfActions
         }
 
         $browser = new \AtomExtensions\SharePoint\Services\SharePointBrowserService();
-        $uploadDir = sfConfig::get('sf_upload_dir') . '/ingest/' . $id;
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0775, true);
-        }
+        $uploadDir = \AhgIngestPlugin\Services\IngestService::workDir((string) $id);
 
         $imported = 0;
         $errors = [];
@@ -963,11 +957,7 @@ class ingestActions extends sfActions
             if (!$dispatched) {
                 // Fallback: legacy nohup launch
                 $atomRoot = sfConfig::get('sf_root_dir');
-                $logFile = sfConfig::get('sf_upload_dir') . '/ingest/job_' . $jobId . '.log';
-                $logDir = dirname($logFile);
-                if (!is_dir($logDir)) {
-                    @mkdir($logDir, 0755, true);
-                }
+                $logFile = \AhgIngestPlugin\Services\IngestService::workDir() . '/job_' . $jobId . '.log';
 
                 $cmd = sprintf(
                     'nohup php %s/symfony ingest:commit --job-id=%d > %s 2>&1 &',
@@ -1065,7 +1055,7 @@ class ingestActions extends sfActions
             // check if the background process is still alive
             if (($allProcessed && $elapsed > 300) || $elapsed > 1800) {
                 $processAlive = false;
-                $logFile = sfConfig::get('sf_upload_dir') . '/ingest/job_' . $jobId . '.log';
+                $logFile = \AhgIngestPlugin\Services\IngestService::workDir() . '/job_' . $jobId . '.log';
                 if (file_exists($logFile)) {
                     // If log file hasn't been modified in > 2 minutes, process is dead
                     $processAlive = (time() - filemtime($logFile)) < 120;

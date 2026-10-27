@@ -6,6 +6,8 @@ use AtomExtensions\SharePoint\Repositories\SharePointDriveRepository;
 use AtomExtensions\SharePoint\Repositories\SharePointTenantRepository;
 use Illuminate\Database\Capsule\Manager as DB;
 
+require_once __DIR__.'/SharePointWorkDir.php';
+
 /**
  * SharePointPushService — orchestrates a manual push from SPFx.
  *
@@ -182,11 +184,7 @@ class SharePointPushService
 
     private function downloadItemAsUser(int $tenantId, string $oboToken, string $siteId, string $driveId, string $itemId, int $sessionId, string $name): string
     {
-        $base = sfConfig::get('sf_upload_dir');
-        $dir = $base . '/sharepoint/push/' . $sessionId;
-        if (!is_dir($dir)) {
-            mkdir($dir, 0775, true);
-        }
+        $dir = SharePointWorkDir::path('sharepoint/push/' . $sessionId);
         $clean = preg_replace('/[^A-Za-z0-9._-]+/', '_', $name) ?? 'item';
         $absPath = $dir . '/' . substr($clean, 0, 200);
 

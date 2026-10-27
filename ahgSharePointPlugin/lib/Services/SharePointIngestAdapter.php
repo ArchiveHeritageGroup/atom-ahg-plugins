@@ -7,6 +7,8 @@ use AtomExtensions\SharePoint\Repositories\SharePointEventRepository;
 use AtomExtensions\SharePoint\Repositories\SharePointTenantRepository;
 use Illuminate\Database\Capsule\Manager as DB;
 
+require_once __DIR__.'/SharePointWorkDir.php';
+
 /**
  * SharePointIngestAdapter — bridges a sharepoint_event row to the existing
  * IngestCommitService pipeline.
@@ -21,7 +23,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *   6. Apply allowlist filter — drive.auto_ingest_labels must contain the tag.
  *   7. Project SP item via SharePointMappingService.
  *   8. Resolve disposition via SharePointRetentionMapper.
- *   9. Download driveItem content to uploads/sharepoint/{event_id}/.
+ *   9. Download driveItem content to the ingest work folder, sharepoint/{event_id}/.
  *  10. Create synthetic ingest_session (source='sharepoint_auto'), ingest_row,
  *      ingest_file. Hand to IngestCommitService.
  *  11. Audit + mark completed.
@@ -190,14 +192,7 @@ class SharePointIngestAdapter
 
     private function resolveUploadDir(int $eventId): string
     {
-        $base = function_exists('sfConfig::get')
-            ? \sfConfig::get('sf_upload_dir')
-            : (defined('SF_ROOT_DIR') ? SF_ROOT_DIR . '/uploads' : sys_get_temp_dir());
-        $dir = $base . '/sharepoint/' . $eventId;
-        if (!is_dir($dir)) {
-            mkdir($dir, 0775, true);
-        }
-        return $dir;
+        return SharePointWorkDir::path('sharepoint/' . $eventId);
     }
 
     private function safeFileName(string $raw): string

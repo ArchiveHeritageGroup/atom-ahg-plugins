@@ -1314,7 +1314,7 @@ class IngestCommitService
         }
 
         // The SIP manifest (with or without the preservation plugin)
-        $sipPath = $session->output_sip_path ?: (\sfConfig::get('sf_upload_dir') . '/sip');
+        $sipPath = $session->output_sip_path ?: IngestService::workDir('sip');
         if (!is_dir($sipPath)) {
             @mkdir($sipPath, 0755, true);
         }
@@ -1358,7 +1358,7 @@ class IngestCommitService
         }
 
         $session = $this->ingestService->getSession($job->session_id);
-        $aipPath = $session->output_aip_path ?: (\sfConfig::get('sf_upload_dir') . '/aip');
+        $aipPath = $session->output_aip_path ?: IngestService::workDir('aip');
         if (!is_dir($aipPath)) {
             @mkdir($aipPath, 0755, true);
         }
@@ -1440,7 +1440,7 @@ class IngestCommitService
         }
 
         $session = $this->ingestService->getSession($job->session_id);
-        $dipPath = $session->output_dip_path ?: (\sfConfig::get('sf_upload_dir') . '/dip');
+        $dipPath = $session->output_dip_path ?: IngestService::workDir('dip');
         if (!is_dir($dipPath)) {
             @mkdir($dipPath, 0755, true);
         }
@@ -1509,7 +1509,7 @@ class IngestCommitService
         $job = DB::table('ingest_job')->where('id', $jobId)->first();
         $session = $this->ingestService->getSession($job->session_id);
 
-        $manifestDir = \sfConfig::get('sf_upload_dir') . '/ingest/manifests';
+        $manifestDir = IngestService::workDir('manifests');
         if (!is_dir($manifestDir)) {
             mkdir($manifestDir, 0755, true);
         }
@@ -1675,17 +1675,16 @@ class IngestCommitService
      */
     private function deletePackages(object $session): void
     {
-        $uploads = \sfConfig::get('sf_upload_dir');
         $sid = (int) $session->id;
         foreach ([
-            ($session->output_sip_path ?: $uploads.'/sip')."/sip_{$sid}_*.json",
-            ($session->output_dip_path ?: $uploads.'/dip')."/dip_{$sid}_*.json",
+            ($session->output_sip_path ?: IngestService::workDir('sip'))."/sip_{$sid}_*.json",
+            ($session->output_dip_path ?: IngestService::workDir('dip'))."/dip_{$sid}_*.json",
         ] as $pattern) {
             foreach (glob($pattern) ?: [] as $file) {
                 @unlink($file);
             }
         }
-        foreach (glob(($session->output_aip_path ?: $uploads.'/aip')."/aip_{$sid}_*", GLOB_ONLYDIR) ?: [] as $dir) {
+        foreach (glob(($session->output_aip_path ?: IngestService::workDir('aip'))."/aip_{$sid}_*", GLOB_ONLYDIR) ?: [] as $dir) {
             foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST) as $f) {
                 $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
             }

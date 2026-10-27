@@ -89,7 +89,7 @@ class SharePointBrowserService
      * Download a single driveItem to local disk. Returns the absolute path.
      *
      * Caller is responsible for picking an appropriate destination (typically
-     * uploads/ingest/{session_id}/{name}).
+     * the ingest work folder, {session_id}/{name}).
      */
     public function downloadItem(int $tenantId, string $driveId, string $itemId, string $destPath): string
     {

@@ -4,6 +4,8 @@ namespace AtomExtensions\SharePoint\Services;
 
 use Illuminate\Database\Capsule\Manager as DB;
 
+require_once __DIR__.'/SharePointWorkDir.php';
+
 /**
  * PostIngestHookService — runs after ingest:commit to close GCIS RFB-001
  * compliance gaps 1, 2, 4, 5:
@@ -223,8 +225,7 @@ class PostIngestHookService
             return false;
         }
 
-        $base = \sfConfig::get('sf_upload_dir') ?: '/usr/share/nginx/archive/uploads';
-        $aipDir = $base . '/aip/' . $atomId;
+        $aipDir = SharePointWorkDir::path('aip') . '/' . $atomId;
         if (is_dir($aipDir)) {
             return false; // already packaged
         }

@@ -8,6 +8,32 @@ require_once __DIR__.'/HierarchyPlanner.php';
 
 class IngestService
 {
+    /**
+     * Private working storage: uploaded files, job logs, manifests and the
+     * default SIP/AIP/DIP folders.
+     *
+     * Not under uploads/: the AtoM checkout is the web root, so anything there
+     * downloads without signing in. /var/lib because php-fpm's
+     * ProtectSystem=full mounts /usr read-only. Named after the instance so two
+     * AtoMs on one host do not share a store. Override with ingest_work_dir.
+     * ahgSharePointPlugin's SharePointWorkDir applies the same rule.
+     */
+    public static function workDir(string $sub = ''): string
+    {
+        $base = class_exists(\AtomExtensions\Services\AhgSettingsService::class)
+            ? trim((string) \AtomExtensions\Services\AhgSettingsService::get('ingest_work_dir', ''))
+            : '';
+        if ('' === $base) {
+            $base = '/var/lib/ahg-ingest/'.basename(rtrim((string) \sfConfig::get('sf_root_dir'), '/'));
+        }
+        $dir = rtrim($base, '/').('' !== $sub ? '/'.$sub : '');
+        if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) {
+            throw new \RuntimeException("Cannot create the ingest work folder {$dir}. Create it, owned by www-data.");
+        }
+
+        return $dir;
+    }
+
     // ─── AtoM CSV Field Definitions ─────────────────────────────────────
 
     /**

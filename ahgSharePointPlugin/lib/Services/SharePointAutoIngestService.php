@@ -5,6 +5,8 @@ namespace AtomExtensions\SharePoint\Services;
 use AtomExtensions\SharePoint\Repositories\SharePointDriveRepository;
 use Illuminate\Database\Capsule\Manager as DB;
 
+require_once __DIR__.'/SharePointWorkDir.php';
+
 /**
  * SharePointAutoIngestService — cron-driven SP→AtoM ingest.
  *
@@ -17,7 +19,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  *      - create one ingest_session (source='sharepoint_auto', source_id=rule.id)
  *      - copy sharepoint_mapping for the drive into ingest_mapping
  *        (fallback to safe defaults when no template exists)
- *      - download new items to uploads/ingest/{session_id}/
+ *      - download new items to the ingest work folder, {session_id}/
  *      - insert one ingest_file per item (file_type='sharepoint', sidecar_json=SP meta)
  *      - hand off to IngestService::parseRows() + IngestCommitService
  *
@@ -567,7 +569,7 @@ class SharePointAutoIngestService
 
     private function sessionDownloadDir(int $sessionId): string
     {
-        return rtrim(\sfConfig::get('sf_upload_dir'), '/') . '/ingest/' . $sessionId;
+        return SharePointWorkDir::path((string) $sessionId);
     }
 
     private function sanitizeFilename(string $name): string
