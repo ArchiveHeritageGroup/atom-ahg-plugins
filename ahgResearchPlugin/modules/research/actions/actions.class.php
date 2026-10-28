@@ -464,7 +464,7 @@ class researchActions extends AhgController
                 $notifyEmail = DB::table('email_setting')
                     ->where('setting_key', 'notify_new_booking')
                     ->value('setting_value');
-                if (!empty($notifyEmail) && filter_var($notifyEmail, FILTER_VALIDATE_EMAIL) && $this->loadEmailService()) {
+                if ($this->loadEmailService() && \AhgCore\Services\EmailService::addresses($notifyEmail)) {
                     $placeholders = [
                         'researcher_name' => $this->researcher->name ?? '',
                         'booking_date' => $request->getParameter('booking_date'),

@@ -64,6 +64,18 @@ class EmailService
     }
 
     /**
+     * The valid addresses in a comma, semicolon or space separated list.
+     *
+     * @return string[]
+     */
+    public static function addresses(?string $list): array
+    {
+        $parts = preg_split('/[\s,;]+/', (string) $list, -1, PREG_SPLIT_NO_EMPTY);
+
+        return array_values(array_unique(array_filter($parts, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL))));
+    }
+
+    /**
      * Get a setting value.
      */
     public static function getSetting(string $key, $default = null)
@@ -86,6 +98,18 @@ class EmailService
      */
     public static function send(string $to, string $subject, string $body, array $options = []): bool
     {
+        // The notification settings may hold several addresses ("a@x, b@y"): one
+        // message each, so recipients do not see one another. True if all were sent.
+        $list = self::addresses($to);
+        if (count($list) > 1) {
+            $ok = true;
+            foreach ($list as $one) {
+                $ok = self::send($one, $subject, $body, $options) && $ok;
+            }
+
+            return $ok;
+        }
+
         if (!self::isEnabled()) {
             error_log("Email not sent (disabled): To: {$to}, Subject: {$subject}");
 

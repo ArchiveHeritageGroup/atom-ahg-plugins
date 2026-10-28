@@ -197,11 +197,17 @@ class UserLoginAction extends sfAction
      * when PasswordService says it needs it. Base AtoM only verifies (QubitUser,
      * locked), so legacy hashes were never upgraded. LDAP accounts hold no local
      * password and are skipped.
+     *
+     * Only where base verifies through PasswordService: stock base QubitUser checks
+     * password_verify(sha1(salt.plaintext)) and cannot read an Argon2id hash, so on
+     * RARI and Archaeology every user could sign in once and was then locked out
+     * (28 Oct 2026).
      */
     private function upgradePasswordHash(string $plaintext): void
     {
         if ('' === $plaintext || $this->context->user instanceof ldapUser
-            || !class_exists('\\AtomFramework\\Core\\Security\\PasswordService')) {
+            || !class_exists('\\AtomFramework\\Core\\Security\\PasswordService')
+            || !self::baseVerifiesNewScheme()) {
             return;
         }
 
@@ -214,6 +220,24 @@ class UserLoginAction extends sfAction
             }
         } catch (\Throwable $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+        }
+    }
+
+    /**
+     * Whether base QubitUser::checkCredentials verifies through PasswordService.
+     * ponytail: reads the method's source; if base ever moves the check elsewhere
+     * this says no and hashes simply stay legacy, which still signs in.
+     */
+    private static function baseVerifiesNewScheme(): bool
+    {
+        try {
+            $m = new \ReflectionMethod('QubitUser', 'checkCredentials');
+            $lines = file((string) $m->getFileName());
+            $body = implode('', array_slice($lines, $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1));
+
+            return false !== strpos($body, 'PasswordService::verify');
+        } catch (\Throwable $e) {
+            return false;
         }
     }
 }

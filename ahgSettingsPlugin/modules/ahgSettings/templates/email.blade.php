@@ -70,9 +70,10 @@
               <label class="form-label">
                 {{ __(ucwords(str_replace('_', ' ', str_replace('notify_', '', $setting->setting_key)))) }}
               </label>
-              <input type="email" name="settings[{{ $setting->setting_key }}]"
+              <input type="email" multiple name="settings[{{ $setting->setting_key }}]"
                      class="form-control" value="{{ e($setting->setting_value ?? '') }}"
-                     placeholder="admin@example.com">
+                     placeholder="admin@example.com, colleague@example.com">
+              <small class="form-text d-block">{{ __('Several addresses are allowed, separated by commas.') }}</small>
               @if ($setting->description)
                 <small class="text-muted">{{ e($setting->description) }}</small>
               @endif

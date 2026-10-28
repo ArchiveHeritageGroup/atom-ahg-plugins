@@ -72,9 +72,10 @@
               <label class="form-label">
                 <?php echo __(ucwords(str_replace('_', ' ', str_replace('notify_', '', $setting->setting_key)))); ?>
               </label>
-              <input type="email" name="settings[<?php echo $setting->setting_key; ?>]" 
+              <input type="email" multiple name="settings[<?php echo $setting->setting_key; ?>]" 
                      class="form-control" value="<?php echo htmlspecialchars($setting->setting_value ?? ''); ?>"
-                     placeholder="admin@example.com">
+                     placeholder="admin@example.com, colleague@example.com">
+              <small class="form-text d-block"><?php echo __('Several addresses are allowed, separated by commas.'); ?></small>
               <?php if ($setting->description): ?>
                 <small class="text-muted"><?php echo htmlspecialchars($setting->description); ?></small>
               <?php endif; ?>

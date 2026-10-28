@@ -518,15 +518,8 @@ class RegistrationService
             $siteName = \sfConfig::get('app_siteTitle', 'AtoM');
             $siteUrl = \sfConfig::get('app_siteBaseUrl', '');
 
-            // Get admin emails
-            $admins = DB::table('user')
-                ->join('acl_user_group', 'user.id', '=', 'acl_user_group.user_id')
-                ->where('acl_user_group.group_id', 100)
-                ->where('user.active', 1)
-                ->select('user.email')
-                ->get();
-
-            if ($admins->isEmpty()) {
+            $recipients = $this->registrationRecipients();
+            if (!$recipients) {
                 return;
             }
 
@@ -540,14 +533,50 @@ class RegistrationService
             $body .= "Review this request at:\n{$siteUrl}/admin/registrations\n\n";
             $body .= "Regards,\n{$siteName}";
 
-            foreach ($admins as $admin) {
+            foreach ($recipients as $to) {
                 // Settings-driven AHG mailer (email_setting), not AtoM's Swift mailer.
-                \AhgCore\Services\EmailService::send($admin->email, $subject, $body);
+                \AhgCore\Services\EmailService::send($to, $subject, $body);
             }
         } catch (\Exception $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
             // Non-fatal
         }
+    }
+
+    /**
+     * Who hears about a new registration: the access request approvers with email
+     * notifications on (/security/approvers), plus the "New Researcher" address in
+     * Settings > Email. Only when neither gives an address, every active administrator
+     * (the old behaviour, which on RARI mailed AHG staff and a member who had left).
+     *
+     * @return string[]
+     */
+    private function registrationRecipients(): array
+    {
+        $emails = [];
+        try {
+            $emails = DB::table('access_request_approver as ara')
+                ->join('user as u', 'ara.user_id', '=', 'u.id')
+                ->where('ara.active', 1)
+                ->where('ara.email_notifications', 1)
+                ->where('u.active', 1)
+                ->pluck('u.email')->all();
+        } catch (\Throwable $e) {
+            // No access request tables on this site.
+        }
+        $emails = array_merge($emails, \AhgCore\Services\EmailService::addresses(\AhgCore\Services\EmailService::getSetting('notify_new_researcher', '')));
+
+        if (!$emails) {
+            $emails = DB::table('user')
+                ->join('acl_user_group', 'user.id', '=', 'acl_user_group.user_id')
+                ->where('acl_user_group.group_id', 100)
+                ->where('user.active', 1)
+                ->pluck('user.email')->all();
+        }
+
+        $emails = array_filter($emails, fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+
+        return array_values(array_unique(array_map('strtolower', $emails)));
     }
 
     /**
