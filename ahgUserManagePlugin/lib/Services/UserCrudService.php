@@ -158,8 +158,7 @@ class UserCrudService
                 ]);
             }
 
-            // Argon2id over plaintext, empty salt (migration 2026-06-15).
-            $ph = \AtomFramework\Core\Security\PasswordService::hash((string) ($data['password'] ?? ''));
+            $ph = self::passwordFields((string) ($data['password'] ?? ''));
 
             DB::table('user')->insert([
                 'id' => $id,
@@ -219,9 +218,9 @@ class UserCrudService
             $updateFields['active'] = (int) $data['active'];
         }
 
-        // Update password if provided — Argon2id over plaintext (migration 2026-06-15).
+        // Update password if provided.
         if (!empty($data['password'])) {
-            $ph = \AtomFramework\Core\Security\PasswordService::hash((string) $data['password']);
+            $ph = self::passwordFields((string) $data['password']);
             $updateFields['password_hash'] = $ph['password_hash'];
             $updateFields['salt'] = $ph['salt'];
         }
@@ -404,6 +403,23 @@ class UserCrudService
         // Scheme-aware: empty salt = new Argon2id-over-plaintext; non-empty =
         // legacy sha1(salt.plaintext). Migration 2026-06-15.
         return \AtomFramework\Core\Security\PasswordService::verify($password, (string) $user->password_hash, $user->salt ?? '');
+    }
+
+    /**
+     * Password columns in the shape stock AtoM verifies: a random salt and
+     * password_hash(sha1(salt.plaintext)), as ahgUserRegistrationPlugin writes.
+     *
+     * PasswordService::hash() gives Argon2id over the plaintext with an empty salt,
+     * which QubitUser::checkCredentials() in unmodified AtoM cannot read, so a user
+     * created or given a password here on RARI or Archaeology could never sign in
+     * (28 Oct 2026). A non-empty salt is PasswordService::verify()'s legacy branch,
+     * so AHG-verifying sites read it too, and their sign-in upgrades it to Argon2id.
+     */
+    private static function passwordFields(string $plaintext): array
+    {
+        $salt = bin2hex(random_bytes(16));
+
+        return ['password_hash' => password_hash(sha1($salt.$plaintext), PASSWORD_DEFAULT), 'salt' => $salt];
     }
 
     /**
