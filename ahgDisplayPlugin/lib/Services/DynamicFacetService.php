@@ -139,6 +139,43 @@ class DynamicFacetService
      */
     public function getFacetCounts(string $facetType): array
     {
+        // Live counts run once per facet on every filtered browse. On a large
+        // stock AtoM site one count ran for minutes and kept running after the
+        // visitor left (RARI, 29 Oct 2026), so each gets a time limit from a
+        // shared per-request budget; a facet that runs out is left off the sidebar.
+        $remaining = self::BUDGET_MS - self::$spentMs;
+        if ($remaining < 200) {
+            return [];
+        }
+        $limit = (int) min(self::PER_FACET_MS, $remaining);
+        $before = (int) DB::selectOne('SELECT @@SESSION.max_execution_time AS ms')->ms;
+        if ($before > 0) {
+            $limit = min($limit, $before);
+        }
+        $start = microtime(true);
+        try {
+            DB::statement('SET SESSION max_execution_time = '.$limit);
+
+            return $this->countFacet($facetType);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (3024 !== (int) ($e->errorInfo[1] ?? 0)) {
+                throw $e;
+            }
+
+            return [];
+        } finally {
+            self::$spentMs += (int) ((microtime(true) - $start) * 1000);
+            DB::statement('SET SESSION max_execution_time = '.$before);
+        }
+    }
+
+    /** Total time all live facet counts of one request may take, and the most one may take. */
+    private const BUDGET_MS = 6000;
+    private const PER_FACET_MS = 2500;
+    private static int $spentMs = 0;
+
+    private function countFacet(string $facetType): array
+    {
         switch ($facetType) {
             case 'creator':
                 return $this->getCreatorCounts();
