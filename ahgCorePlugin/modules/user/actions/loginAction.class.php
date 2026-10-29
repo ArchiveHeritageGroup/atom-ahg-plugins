@@ -164,6 +164,9 @@ class UserLoginAction extends sfAction
             'sort' => 'updatedDown',
             'className' => 'QubitInformationObject',
             'dateOf' => 'CREATED_AT',
+            // The count covers every draft, but the page defaults to the last month,
+            // so older drafts were counted and then not shown (RARI, 29 Oct 2026).
+            'startDate' => '1970-01-01',
             'publicationStatus' => QubitTerm::PUBLICATION_STATUS_DRAFT_ID,
         ]);
 
