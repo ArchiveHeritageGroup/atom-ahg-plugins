@@ -432,11 +432,11 @@ export class IiifViewerManager {
         const container = document.getElementById(containerId);
         if (container) {
             container.innerHTML = `
-                <div data-ahg-style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;text-align:center;padding:20px;">
+                <div role="status" data-ahg-style="display:flex;align-items:center;justify-content:center;height:100%;background:#f8f9fa;color:#212529;text-align:center;padding:20px;">
                     <div>
-                        <i class="fas fa-exclamation-triangle" data-ahg-style="font-size:48px;color:#ffc107;margin-bottom:16px;"></i>
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true" data-ahg-style="font-size:48px;color:#856404;margin-bottom:16px;"></i>
                         <p data-ahg-style="margin:0;font-size:16px;">${message}</p>
-                        <p data-ahg-style="margin:8px 0 0;font-size:14px;opacity:0.7;">Check browser console for details</p>
+                        <p data-ahg-style="margin:8px 0 0;font-size:14px;color:#495057;">Check browser console for details</p>
                     </div>
                 </div>
             `;

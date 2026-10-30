@@ -184,6 +184,86 @@
     });
   }
 
+  // ── Accessible names for repeating rows (WCAG 1.3.1, 3.3.2, 4.1.2; #213 F-03, F-28) ──
+  //
+  // Group captions such as "Date(s)" are <label> elements with no "for", so they name
+  // nothing, and the row controls carry at most a placeholder. One pass here covers all
+  // six standards: each orphan caption becomes the name of a role="group" wrapper, each
+  // row control is named "<group> <row> - <column>", an empty column header gets hidden
+  // text, and rows added later are named as they arrive.
+
+  var groupSeq = 0;
+
+  function hasName(el) {
+    if (el.getAttribute('aria-label') || el.getAttribute('aria-labelledby') || el.closest('label')) { return true; }
+    return !!(el.id && document.querySelector('label[for="' + el.id + '"]'));
+  }
+
+  function controlsIn(root) {
+    return root.querySelectorAll('input:not([type=hidden]):not([type=button]):not([type=submit]), select, textarea');
+  }
+
+  function groupCaption(label) {
+    if (label.getAttribute('for') || label.querySelector('input, select, textarea')) { return null; }
+    var wrap = label.parentNode;
+    if (!wrap || wrap.tagName === 'FORM') { return null; }
+    if (!label.id) { label.id = 'ahg-io-group-' + (++groupSeq); }
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-labelledby', label.id);
+    return label.textContent.replace(/\s+/g, ' ').replace(/\*/g, '').trim();
+  }
+
+  function nameTable(table, group) {
+    var heads = Array.prototype.map.call(table.querySelectorAll('thead th'), function (th) {
+      var text = th.textContent.trim();
+      if (!text) {
+        th.innerHTML = '<span class="visually-hidden">' + escHtml(labels.actions || 'Actions') + '</span>';
+        text = '';
+      }
+      return text;
+    });
+    var tbody = table.tBodies[0];
+    if (!tbody) { return; }
+
+    function nameRows() {
+      Array.prototype.forEach.call(tbody.rows, function (tr, r) {
+        var prefix = (group ? group + ' ' : '') + (r + 1);
+        Array.prototype.forEach.call(tr.cells, function (td, c) {
+          Array.prototype.forEach.call(controlsIn(td), function (el) {
+            if (!hasName(el) || el.hasAttribute('data-ahg-auto-name')) {
+              el.setAttribute('aria-label', prefix + (heads[c] ? ' - ' + heads[c] : ''));
+              el.setAttribute('data-ahg-auto-name', '');
+            }
+          });
+          var remove = td.querySelector('.btn-remove-row');
+          if (remove) { remove.setAttribute('aria-label', (labels.remove || 'Remove') + ' ' + prefix); }
+        });
+      });
+    }
+
+    nameRows();
+    // Renumber after rows are added or removed.
+    new MutationObserver(nameRows).observe(tbody, {childList: true});
+  }
+
+  function nameRepeatingFields() {
+    document.querySelectorAll('form label.form-label').forEach(function (label) {
+      var group = groupCaption(label);
+      if (null === group) { return; }
+      var wrap = label.parentNode;
+      var tables = wrap.querySelectorAll('table');
+      tables.forEach(function (t) { nameTable(t, group); });
+      // Single controls in the group (access point pickers and the like).
+      Array.prototype.forEach.call(controlsIn(wrap), function (el) {
+        if (!el.closest('table') && !hasName(el)) { el.setAttribute('aria-label', group); }
+      });
+    });
+    // Tables with no caption still get column names.
+    document.querySelectorAll('form table').forEach(function (t) {
+      if (!t.closest('[role=group]')) { nameTable(t, ''); }
+    });
+  }
+
   // Close dropdowns on an outside click.
   document.addEventListener('click', function(e) {
     if (!e.target.closest('.ac-dropdown') && !e.target.classList.contains('actor-autocomplete')
@@ -210,7 +290,9 @@
 
   if ('loading' === document.readyState) {
     document.addEventListener('DOMContentLoaded', initTermAccessPoints);
+    document.addEventListener('DOMContentLoaded', nameRepeatingFields);
   } else {
     initTermAccessPoints();
+    nameRepeatingFields();
   }
 })(window, document);

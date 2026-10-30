@@ -529,6 +529,7 @@ body:has(.heritage-landing) .container-xxl {
 .heritage-carousel-indicators {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 8px;
     margin-top: 1rem;
     padding: 0.5rem 0;
@@ -553,6 +554,28 @@ body:has(.heritage-landing) .container-xxl {
 .heritage-carousel-dot.active {
     background: var(--heritage-primary);
     transform: scale(1.2);
+}
+
+/* WCAG 2.2.2: visible pause/play control for the auto-rotating strip */
+.heritage-carousel-pause {
+    width: 32px;
+    height: 32px;
+    margin-right: 0.5rem;
+    border: 1px solid var(--heritage-gray);
+    border-radius: 50%;
+    background: white;
+    color: var(--heritage-dark);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    align-self: center;
+}
+
+.heritage-carousel-pause:focus-visible {
+    outline: 3px solid var(--heritage-primary);
+    outline-offset: 2px;
 }
 
 /* Auto-rotate pause indicator */
@@ -921,14 +944,18 @@ body:has(.heritage-landing) .container-xxl {
     font-size: 0.875rem;
 }
 
-.heritage-footer-links a {
-    color: rgba(255,255,255,0.7);
-    text-decoration: none;
+/* WCAG 1.4.3: the theme's global link colour (a:not(.btn)...) out-ranked the old
+   selector and drew #005837 on the dark footer at 1.8:1. Cream on #212529 is about 13:1. */
+.heritage-footer .heritage-footer-links a:not(.btn):not(.nav-link) {
+    color: #F2EDE6;
+    text-decoration: underline;
+    text-underline-offset: 3px;
     transition: color 0.2s ease;
 }
 
-.heritage-footer-links a:hover {
-    color: white;
+.heritage-footer .heritage-footer-links a:not(.btn):not(.nav-link):hover,
+.heritage-footer .heritage-footer-links a:not(.btn):not(.nav-link):focus {
+    color: #E1B34F;
 }
 
 .heritage-footer-copyright {

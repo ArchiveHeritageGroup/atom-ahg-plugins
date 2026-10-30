@@ -826,7 +826,8 @@ function ahg_iiif_render_viewer_controls($viewerId, $manifestUrl, $objectId, $op
     
     // IIIF badge
     $html .= '<div>';
-    $html .= '<span class="badge bg-info"><i class="fas fa-certificate me-1"></i>IIIF</span>';
+    // text-bg-info sets dark text: white on the theme's info green was 3.2:1 (WCAG 1.4.3, #213 F-08).
+    $html .= '<span class="badge text-bg-info"><i class="fas fa-certificate me-1" aria-hidden="true"></i>IIIF</span>';
     $html .= '</div>';
     
     // Control buttons
@@ -1028,7 +1029,7 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
     $n = sfConfig::get('csp_nonce', '');
     $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
     $js = '<script type="module"' . $nonceAttr . '>' . "\n";
-    $js .= 'import { IiifViewerManager } from "' . $config['pluginPath'] . '/js/iiif-viewer-manager.js";' . "\n";
+    $js .= 'import { IiifViewerManager } from "' . $config['pluginPath'] . '/js/iiif-viewer-manager.js?v=213";' . "\n";
     $js .= 'document.addEventListener("DOMContentLoaded", function() {' . "\n";
     $js .= '    const viewer = new IiifViewerManager("' . $viewerId . '", {' . "\n";
     $js .= '        objectId: ' . $objectId . ',' . "\n";

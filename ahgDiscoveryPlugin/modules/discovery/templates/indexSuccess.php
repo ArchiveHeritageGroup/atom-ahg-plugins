@@ -5,6 +5,11 @@
 <?php
 $popularTopics = sfOutputEscaper::unescape($popularTopics ?? []);
 $initialQuery = $sf_data->getRaw('query') ?? '';
+// WCAG 2.4.2 (#213 F-09): name the page and the query, not just the site.
+// getTitle() is already escaped, so escape only the new part; JS gets the plain text.
+$siteTitleHtml = $sf_response->getTitle();
+$siteTitle = html_entity_decode($siteTitleHtml, ENT_QUOTES, 'UTF-8');
+$sf_response->setTitle(esc_specialchars('' !== trim($initialQuery) ? __('Discovery: %1%', ['%1%' => trim($initialQuery)]) : __('Discover')).' - '.$siteTitleHtml, false);
 ?>
 
 <?php slot('title'); ?>
@@ -28,6 +33,7 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
         <span class="input-group-text bg-white border-end-0">
           <i class="fas fa-search text-muted"></i>
         </span>
+        <label for="discovery-query" class="visually-hidden"><?php echo __('Search the collections'); ?></label>
         <input type="text"
                id="discovery-query"
                class="form-control border-start-0 ps-0"
@@ -41,9 +47,9 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
       </div>
 
       <!-- Search Mode Selector -->
-      <div class="mt-3 d-flex align-items-center gap-2">
-        <small class="text-muted me-1"><i class="fas fa-sliders-h me-1"></i>Search mode:</small>
-        <div class="btn-group btn-group-sm" role="group" id="discovery-mode-group">
+      <div class="mt-3 d-flex flex-wrap align-items-center gap-2">
+        <small class="text-muted me-1" id="discovery-mode-label"><i class="fas fa-sliders-h me-1" aria-hidden="true"></i><?php echo __('Search mode:'); ?></small>
+        <div class="btn-group btn-group-sm flex-wrap" role="group" id="discovery-mode-group" aria-labelledby="discovery-mode-label">
           <button type="button" class="btn btn-outline-primary active" data-mode="standard"
                   title="<?php echo __('Keyword search using Elasticsearch'); ?>">
             <i class="fas fa-search me-1"></i><?php echo __('Standard'); ?>
@@ -151,6 +157,12 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
 .discovery-result-reasons .badge.reason-context { border-left-color: #E1B34F; }
 #discovery-mode-group .btn { background: #fff !important; color: var(--ahg-primary, #005837) !important; border-color: currentColor !important; }
 #discovery-mode-group .btn.active { background: var(--ahg-primary, #005837) !important; color: #fff !important; box-shadow: 0 0 0 3px #E1B34F; }
+/* WCAG 1.4.10 (#213 F-10): no sideways scrolling at 320px. */
+@media (max-width: 400px) {
+  #discovery-mode-group { width: 100%; }
+  #discovery-mode-group .btn { flex: 1 1 auto; }
+  #discovery-search-btn { padding-left: .75rem !important; padding-right: .75rem !important; }
+}
 /* Discovery Page Styles */
 .discovery-container { max-width: 960px; margin: 0 auto; }
 
@@ -268,6 +280,7 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
   var viewGrouped  = document.getElementById('view-grouped');
   var viewFlat     = document.getElementById('view-flat');
 
+  var siteTitle = <?php echo json_encode($siteTitle); ?>;
   var currentPage = 1;
   var currentQuery = '';
   var currentMode = 'standard';
@@ -340,6 +353,7 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
     if (currentMode !== 'standard') { url.searchParams.set('mode', currentMode); }
     else { url.searchParams.delete('mode'); }
     history.replaceState(null, '', url);
+    document.title = <?php echo json_encode(__('Discovery:')); ?> + ' ' + q + ' - ' + siteTitle;
 
     // Show loading
     loadingEl.classList.remove('d-none');

@@ -61,7 +61,7 @@
           <td>
             <?php $form->setDefault('note', $event['note']->getContent()); ?>
             <?php echo render_field($form->note, $event['note'], [
-                'aria-labelledby' => 'accession-events-note-head',
+                'aria-labelledby' => 'accession-events-notes-head',
                 'aria-describedby' => 'accession-events-note-help',
                 'onlyInputs' => true,
                 'name' => 'content',
@@ -106,7 +106,7 @@
         <td>
           <?php $form->setDefault('note', ''); ?>
           <?php echo render_field($form->note, null, [
-              'aria-labelledby' => 'accession-events-note-head',
+              'aria-labelledby' => 'accession-events-notes-head',
               'aria-describedby' => 'accession-events-note-help',
               'onlyInputs' => true,
           ]); ?>

@@ -65,6 +65,8 @@ $fullHistoryUrl = url_for([
   .vc-panel .vc-row .vc-num { font-weight: 600; }
   .vc-panel .vc-row .vc-meta { color: #6c757d; font-size: .8rem; }
   .vc-panel .badge-restore { background:#fff3cd; color:#856404; border:1px solid #ffeeba; }
+  /* WCAG 1.4.1 (#213 F-13): links in running text need a cue besides colour. */
+  .vc-panel p a { text-decoration: underline; }
 </style>
 
 <div class="vc-panel">

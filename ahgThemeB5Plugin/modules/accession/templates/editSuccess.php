@@ -181,7 +181,7 @@
               .ts-dropdown .ts-dropdown-content { max-height: 360px; }
             </style>
             <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
-            <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgThemeB5Plugin/web/js/io-tom-select.js?v=1"></script>
+            <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgThemeB5Plugin/web/js/io-tom-select.js?v=2"></script>
           </div>
         </div>
       </div>

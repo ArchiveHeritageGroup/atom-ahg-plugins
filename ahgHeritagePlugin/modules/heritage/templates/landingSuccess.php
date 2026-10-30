@@ -8,6 +8,9 @@
 // Use full-width layout without sidebar
 decorate_with('layout_1col');
 
+// WCAG 2.4.2 (#213 F-09): name the page, not only the site. getTitle() is already escaped.
+$sf_response->setTitle(esc_specialchars(__('Discover our heritage')).' - '.$sf_response->getTitle(), false);
+
 // Helper to unwrap Symfony escaper objects
 $unwrap = function ($value) use (&$unwrap) {
     if ($value instanceof sfOutputEscaperObjectDecorator) {
@@ -261,7 +264,11 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
             </button>
 
             <!-- Carousel indicators -->
-            <div class="heritage-carousel-indicators" id="collections-indicators"></div>
+            <div class="heritage-carousel-indicators" id="collections-indicators">
+                <button type="button" class="heritage-carousel-pause" aria-pressed="false">
+                    <i class="fas fa-pause" aria-hidden="true"></i><span class="visually-hidden">Pause automatic scrolling</span>
+                </button>
+            </div>
         </div>
     </section>
     <?php endif; ?>
@@ -602,6 +609,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         let currentPosition = 0;
         let autorotateInterval = null;
         let isPaused = false;
+        // WCAG 2.2.2: a visible stop control, and no motion when the user asks for less.
+        const pauseBtn = carousel.querySelector('.heritage-carousel-pause');
+        let isStopped = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         // Calculate number of visible cards and total scroll positions
         const trackWidth = track.offsetWidth;
@@ -613,7 +623,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             for (let i = 0; i < totalPositions; i++) {
                 const dot = document.createElement('button');
                 dot.className = 'heritage-carousel-dot' + (i === 0 ? ' active' : '');
+                dot.type = 'button';
                 dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+                if (i === 0) dot.setAttribute('aria-current', 'true');
                 dot.addEventListener('click', function() {
                     goToPosition(i);
                     resetAutorotate();
@@ -627,6 +639,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             const dots = indicatorsContainer.querySelectorAll('.heritage-carousel-dot');
             dots.forEach(function(dot, index) {
                 dot.classList.toggle('active', index === currentPosition);
+                if (index === currentPosition) dot.setAttribute('aria-current', 'true'); else dot.removeAttribute('aria-current');
             });
         }
 
@@ -644,8 +657,28 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
 
         function startAutorotate() {
-            if (totalPositions <= 1) return;
+            if (totalPositions <= 1 || isStopped) return;
             autorotateInterval = setInterval(nextPosition, autorotateDelay);
+        }
+
+        function showPauseState() {
+            if (!pauseBtn) return;
+            pauseBtn.setAttribute('aria-pressed', isStopped ? 'true' : 'false');
+            // A toggle keeps one name; aria-pressed carries the state. Only the icon changes.
+            pauseBtn.querySelector('i').className = 'fas ' + (isStopped ? 'fa-play' : 'fa-pause');
+        }
+
+        if (pauseBtn) {
+            if (totalPositions <= 1) {
+                pauseBtn.hidden = true;
+            }
+            pauseBtn.addEventListener('click', function() {
+                isStopped = !isStopped;
+                clearInterval(autorotateInterval);
+                startAutorotate();
+                showPauseState();
+            });
+            showPauseState();
         }
 
         function resetAutorotate() {

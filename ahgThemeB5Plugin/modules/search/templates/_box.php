@@ -106,9 +106,14 @@
       placeholder="<?php echo sfConfig::get('app_ui_label_globalSearch'); ?>"
       data-url="<?php echo url_for(['module' => 'search', 'action' => 'autocomplete']); ?>"
       data-bs-toggle="dropdown"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-controls="search-box-results"
       aria-label="<?php echo sfConfig::get('app_ui_label_globalSearch'); ?>"
       aria-expanded="false">
-    <ul id="search-box-results" class="dropdown-menu mt-2" aria-labelledby="search-box-input"></ul>
+    <?php // WCAG 4.1.2 (#213 F-11): aria-expanded is only valid on a combobox, not on a plain
+          // search box. The suggestions stay a list of links that ArrowDown moves into. ?>
+    <ul id="search-box-results" class="dropdown-menu mt-2" aria-label="<?php echo __('Search suggestions'); ?>"></ul>
     <button class="btn btn-sm atom-btn-secondary" type="submit">
       <i class="fas fa-search" aria-hidden="true"></i>
       <span class="visually-hidden"><?php echo __('Search in browse page'); ?></span>
@@ -117,6 +122,19 @@
 </form>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Tell screen reader users when suggestions arrive and how to reach them (#213 F-11).
+(function() {
+  var results = document.getElementById('search-box-results');
+  if (!results || !window.MutationObserver) return;
+  var said = '';
+  new MutationObserver(function() {
+    var count = results.querySelectorAll('a[href]').length;
+    var msg = count ? <?php echo json_encode(__('%1% suggestions. Press the down arrow to reach them.')); ?>.replace('%1%', count) : '';
+    if (msg && msg !== said && window.ahgAnnounce) { window.ahgAnnounce(msg); }
+    said = msg;
+  }).observe(results, {childList: true});
+})();
+
 (function() {
   var searchBox = document.getElementById('search-box');
   var queryInput = document.getElementById('search-box-input');

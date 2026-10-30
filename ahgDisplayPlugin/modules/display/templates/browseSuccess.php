@@ -25,6 +25,19 @@ $parentId = $sf_request->getParameter('parent') ?: $sf_request->getParameter('an
 $total = $sf_data->getRaw('total') ?: 0;
 $totalPages = $sf_data->getRaw('totalPages') ?: 1;
 $parent = $sf_data->getRaw('parent');
+
+// WCAG 2.4.2 (#213 F-09): every browse and search page was titled with the site name
+// alone, so tabs and history entries could not be told apart.
+$titleQuery = trim((string) $sf_request->getParameter('query', ''));
+if ('' !== $titleQuery) {
+    $pageTitle = __('Search results for "%1%" (%2%)', ['%1%' => $titleQuery, '%2%' => $total]);
+} elseif ($parent) {
+    $pageTitle = __('Browse %1%', ['%1%' => $parent->title ?: __('[Untitled]')]);
+} else {
+    $pageTitle = __('Browse collections');
+}
+// getTitle() is already escaped, so escape only the new part.
+$sf_response->setTitle(esc_specialchars($pageTitle).' - '.$sf_response->getTitle(), false);
 $digitalObjectCount = $sf_data->getRaw('digitalObjectCount') ?: 0;
 $objects = $sf_data->getRaw('objects') ?: [];
 $types = $sf_data->getRaw('types') ?: [];
@@ -545,6 +558,10 @@ function getItemUrl($obj) {
 .full-img { width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; }
 .card-img-browse { max-height: 150px; object-fit: contain; }
 .browse-hidden { display: none; }
+/* WCAG 1.4.3 (#213 F-06): the theme draws the active facet item light grey, so the white
+   "All" link sat at 1.3:1. AHG green with white text is about 12:1. */
+[id^="facet"] .list-group-item.active { background-color: #10373E; border-color: #10373E; }
+[id^="facet"] .list-group-item.active > a:not(.btn) { color: #fff !important; }
 </style>
   <!-- Active Filters -->
   <div class="d-flex flex-wrap gap-2 mb-3">
@@ -861,7 +878,7 @@ function getItemUrl($obj) {
                 <p class="card-text mb-1 small">
                   <span class="text-success"><?php echo esc_entities($obj->identifier ?: '') ?></span>
                   <?php if ($obj->level_name): ?><span class="mx-1">&middot;</span><?php echo esc_entities($obj->level_name) ?><?php endif ?>
-                  <?php if ($obj->child_count > 0): ?><span class="mx-1">&middot;</span><a href="<?php echo buildUrl($fp, ['parent' => $obj->id]) ?>"><i class="fas fa-folder"></i> <?php echo $obj->child_count ?></a><?php endif ?>
+                  <?php if ($obj->child_count > 0): ?><span class="mx-1">&middot;</span><a href="<?php echo buildUrl($fp, ['parent' => $obj->id]) ?>" class="text-decoration-underline"><i class="fas fa-folder" aria-hidden="true"></i> <?php echo $obj->child_count ?><span class="visually-hidden"> <?php echo __('child records'); ?></span></a><?php endif ?>
                 </p>
                 <?php if ($obj->scope_and_content): ?>
                   <p class="card-text text-muted small mb-1"><?php echo esc_entities(mb_substr($obj->scope_and_content, 0, 150)) ?>...</p>
@@ -903,7 +920,7 @@ function getItemUrl($obj) {
                   elseif (strpos($reasonLower, 'child') !== false) { $rBg = 'secondary'; $rIcon = 'fa-level-down-alt'; $rLabel = 'Related (child)'; }
                   else { $rBg = 'dark'; $rIcon = 'fa-tag'; $rLabel = $reason; }
                 ?>
-                  <span class="badge bg-<?php echo $rBg; ?> bg-opacity-75"><i class="fas <?php echo $rIcon; ?> me-1"></i><?php echo esc_entities($rLabel); ?></span>
+                  <span class="badge text-bg-<?php echo $rBg; ?>"><i class="fas <?php echo $rIcon; ?> me-1"></i><?php echo esc_entities($rLabel); ?></span>
                 <?php endforeach; ?>
               </div>
               <?php

@@ -34,7 +34,8 @@ $basePath = sfContext::getInstance()->getRequest()->getScriptName();
     <h4><?php echo __('Subject access points'); ?></h4>
     <ul class="list-unstyled">
       <?php foreach ($subjects as $subject) {
-        $subjectName = $subject->name ?? '';
+        // A term with no name in this culture rendered as an empty link (WCAG 2.4.4, #213); fall back to its slug.
+        $subjectName = '' !== trim((string) ($subject->name ?? '')) ? $subject->name : str_replace('-', ' ', (string) $subject->slug);
         $isMasked = false;
         if ($piiEnabled && function_exists('pii_mask_value')) {
             $maskResult = pii_mask_value($resourceId, $subjectName, 'PERSON');
@@ -64,7 +65,8 @@ $basePath = sfContext::getInstance()->getRequest()->getScriptName();
   <div<?php echo isset($sidebar) ? '' : ' class="'.render_b5_show_value_css_classes().'"'; ?>>
     <ul class="<?php echo isset($sidebar) ? 'list-unstyled' : render_b5_show_list_css_classes(); ?>">
       <?php foreach ($subjects as $subject) {
-        $subjectName = $subject->name ?? '';
+        // A term with no name in this culture rendered as an empty link (WCAG 2.4.4, #213); fall back to its slug.
+        $subjectName = '' !== trim((string) ($subject->name ?? '')) ? $subject->name : str_replace('-', ' ', (string) $subject->slug);
         $isMasked = false;
         if ($piiEnabled && function_exists('pii_mask_value')) {
             $maskResult = pii_mask_value($resourceId, $subjectName, 'PERSON');

@@ -58,7 +58,7 @@
       return;
     }
 
-    new TomSelect(el, {
+    var ts = new TomSelect(el, {
       valueField: 'value',
       labelField: 'text',
       searchField: 'text',
@@ -97,6 +97,16 @@
         }
       }
     });
+
+    // WCAG 4.1.2 (#213 F-04): the visible search box TomSelect builds needs a name.
+    // Use the field's own <label> when there is one, else the field's placeholder.
+    var label = el.id ? document.querySelector('label[for="' + el.id + '"]') : null;
+    if (ts.control_input && !ts.control_input.getAttribute('aria-labelledby')) {
+      ts.control_input.setAttribute('aria-label', label ? label.textContent.trim() : ts.settings.placeholder);
+    }
+    if (!label && !el.getAttribute('aria-label')) {
+      el.setAttribute('aria-label', ts.settings.placeholder);
+    }
   }
 
   function initAll() {

@@ -838,7 +838,7 @@
     }
   };
 </script>
-<script src="/plugins/ahgCorePlugin/web/js/io-form.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/io-form.js?v=213"></script>
 <script <?php echo $na; ?>>
 (function() {
   'use strict';

@@ -13,6 +13,15 @@
  *  - Heading hierarchy warnings (admin/edit only, console)
  */
 ?>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+/* WCAG 1.4.10 Reflow (#213 F-10): no sideways scrolling at 320px. Long titles in the
+   record context menu break anywhere, and the image carousel never exceeds its column. */
+#contextArea a, #context-menu a, .sidebar a { overflow-wrap: anywhere; }
+#atom-slider-images, #atom-slider-images .slick-list { max-width: 100%; overflow: hidden; }
+@media (max-width: 400px) {
+  #collapse-carousel .accordion-body { padding-left: .5rem !important; padding-right: .5rem !important; }
+}
+</style>
 <!-- ARIA Live Region for dynamic announcements -->
 <div id="ahgLiveRegion" class="visually-hidden" aria-live="polite" aria-atomic="true" role="status"></div>
 
