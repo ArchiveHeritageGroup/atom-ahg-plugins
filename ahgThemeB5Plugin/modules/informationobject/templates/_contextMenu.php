@@ -58,7 +58,7 @@ if (isset($resource)) {
       // block without it, so the injector could not tell it was already there and
       // Provenance appeared twice. ?>
 <section class="sidebar-widget ahg-collections-management">
-  <h4><?php echo __('Collections Management'); ?></h4>
+  <h2 class="h4"><?php echo __('Collections Management'); ?></h2>
   <ul class="list-unstyled">
     <?php if ($hasCco): ?>
     <li><a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resourceSlug]); ?>"><i class="fas fa-sitemap fa-fw me-2"></i><?php echo __('Provenance'); ?></a></li>
@@ -119,7 +119,7 @@ if (isset($resource)) {
       \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);}
 ?>
 <section class="sidebar-widget">
-  <h4><?php echo __('AI Tools'); ?></h4>
+  <h2 class="h4"><?php echo __('AI Tools'); ?></h2>
   <ul class="list-unstyled">
     <li>
       <a href="#" id="nerExtractBtn" data-object-id="<?php echo $resource->id; ?>">
@@ -528,7 +528,7 @@ function scanForPii(objectId) {
 <!-- Privacy & PII Section -->
 <?php if (isset($resource) && $sf_user->isAuthenticated() && isPluginActive('ahgPrivacyPlugin')): ?>
 <section class="sidebar-widget">
-  <h4><?php echo __('Privacy & PII'); ?></h4>
+  <h2 class="h4"><?php echo __('Privacy & PII'); ?></h2>
   <ul class="list-unstyled">
     <?php // "Scan for PII" runs AI NER (ahgNerService) - only show when the AI plugin is enabled. ?>
     <?php if (isPluginActive('ahgAIPlugin')): ?>
@@ -572,7 +572,7 @@ function scanForPii(objectId) {
       // the link into them from the record. ?>
 <?php if (isPluginActive('ahgICIPPlugin') && $sf_user->isAuthenticated() && isset($resource->slug)): ?>
 <section class="sidebar-section">
-  <h4><?php echo __('Indigenous cultural & IP'); ?></h4>
+  <h2 class="h4"><?php echo __('Indigenous cultural & IP'); ?></h2>
   <ul class="list-unstyled">
     <li><a href="<?php echo url_for('/object/' . $resource->slug . '/icip'); ?>">
       <i class="fas fa-hands me-1"></i><?php echo __('Manage cultural notices & labels'); ?></a></li>
@@ -605,7 +605,7 @@ if (isset($resource) && \AtomExtensions\Services\AhgSettingsService::getBool('sh
             $qrSvg = (new \AtomExtensions\Services\QrCodeService())->svg($qrUrl, 3, 2);
             ?>
             <section class="mb-3" aria-labelledby="record-qr-heading">
-              <h5 id="record-qr-heading" class="h6"><?php echo __('Scan this record'); ?></h5>
+              <h3 id="record-qr-heading" class="h6"><?php echo __('Scan this record'); ?></h3>
               <div class="text-center p-2 bg-white border rounded">
                 <?php echo $qrSvg; ?>
                 <div class="small text-muted mt-1"><?php echo __('Scan to open on a phone'); ?></div>

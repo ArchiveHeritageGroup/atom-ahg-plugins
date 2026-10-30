@@ -54,8 +54,11 @@ class ahgHeritagePluginConfiguration extends sfPluginConfiguration
         $action = $event['action'] ?? $request->getParameter('action');
 
         // Check if this is the homepage
+        // staticpage/index shows every static page, so only its "home" slug is the
+        // homepage. Without the slug test, anonymous visitors could open no static
+        // page at all, the accessibility statement included (#213 F-23).
         $isHomepage = ('staticpage' === $module && 'home' === $action)
-            || ('staticpage' === $module && 'index' === $action)
+            || ('staticpage' === $module && 'index' === $action && 'home' === $request->getParameter('slug', 'home'))
             || ('default' === $module && 'index' === $action);
 
         // If on homepage and NOT authenticated, redirect to heritage landing

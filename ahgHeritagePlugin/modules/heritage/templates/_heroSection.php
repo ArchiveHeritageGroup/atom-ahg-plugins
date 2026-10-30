@@ -86,16 +86,17 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
 
         <!-- Search Box -->
         <form action="<?php echo url_for(['module' => 'heritage', 'action' => 'search']); ?>" method="get" class="heritage-search-form mx-auto mb-4" data-ahg-style="max-width: 600px;">
+            <?php // A real label, not only the placeholder, which vanishes on typing (WCAG 3.3.2, #213 F-29). ?>
+            <label for="heritage-search-input" class="visually-hidden"><?php echo __('Search the collections'); ?></label>
             <div class="input-group input-group-lg shadow-lg">
                 <input type="text"
                        name="q"
                        class="form-control border-0 py-3"
                        placeholder="<?php echo esc_specialchars($searchPlaceholder); ?>"
-                       aria-label="Search"
                        autocomplete="off"
                        id="heritage-search-input">
                 <button class="btn btn-primary px-4" type="submit" aria-label="Search">
-                    <i class="fas fa-search"></i>
+                    <i class="fas fa-search" aria-hidden="true"></i>
                 </button>
             </div>
 

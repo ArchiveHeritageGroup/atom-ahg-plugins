@@ -23,6 +23,8 @@
 }
 /* WCAG 2.4.1 (#213 F-14): the skip link focuses #main-column (tabindex="-1"); no ring on a non-control. */
 #main-column:focus { outline: none; }
+/* WCAG 1.4.3 (#213 F-22): Bootstrap's pink code text on the help-text grey is 3.8:1. */
+.form-text code { color: #212529; }
 </style>
 <!-- ARIA Live Region for dynamic announcements -->
 <div id="ahgLiveRegion" class="visually-hidden" aria-live="polite" aria-atomic="true" role="status"></div>

@@ -59,14 +59,14 @@ class LauncherInjector
         $ver = \ahgChatbotPluginConfiguration::$version;
 
         $block = '<link rel="stylesheet" href="'.$base.'/css/chatbot.css?v='.$ver.'">'
-            .'<div id="ahg-chatbot"'
+            .'<aside id="ahg-chatbot" aria-label="'.$e(AhgSettingsService::get('chatbot_button_label', 'Ask the archive')).'"'
             .' data-ask-url="'.$e($context->getController()->genUrl('chatbot/ask')).'"'
             .' data-feedback-url="'.$e($context->getController()->genUrl('chatbot/feedback')).'"'
             .' data-label="'.$e(AhgSettingsService::get('chatbot_button_label', 'Ask the archive')).'"'
             .' data-notice="'.$e(AhgSettingsService::get('chatbot_notice', '')).'"'
             .' data-page-slug="'.$e(self::pageSlug($context)).'"'
             .' data-help="'.(self::helpAvailable() ? '1' : '0').'"'
-            .'></div>'
+            .'></aside>'
             .'<script src="'.$base.'/js/chatbot.js?v='.$ver.'"'.$nonceAttr.' defer></script>';
 
         $pos = strripos($content, '</body>');

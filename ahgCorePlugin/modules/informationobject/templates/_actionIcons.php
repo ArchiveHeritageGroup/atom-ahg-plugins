@@ -1,13 +1,13 @@
 <section id="action-icons">
 
-  <h4 class="h5 mb-2"><?php echo __('Clipboard'); ?></h4>
+  <h2 class="h5 mb-2"><?php echo __('Clipboard'); ?></h2>
   <ul class="list-unstyled">
     <li>
       <?php echo get_component('clipboard', 'button', ['slug' => $resource->slug, 'wide' => true, 'type' => 'informationObject']); ?>
     </li>
   </ul>
 
-  <h4 class="h5 mb-2"><?php echo __('Explore'); ?></h4>
+  <h2 class="h5 mb-2"><?php echo __('Explore'); ?></h2>
   <ul class="list-unstyled">
 
     <li>
@@ -44,7 +44,7 @@
   </ul>
 
   <?php if ($sf_user->isAdministrator()) { ?>
-    <h4 class="h5 mb-2"><?php echo __('Import'); ?></h4>
+    <h2 class="h5 mb-2"><?php echo __('Import'); ?></h2>
     <ul class="list-unstyled">
       <li>
         <a class="atom-icon-link" href="<?php echo url_for([$resource, 'module' => 'object', 'action' => 'importSelect', 'type' => 'xml']); ?>">
@@ -62,7 +62,7 @@
     </ul>
   <?php } ?>
 
-  <h4 class="h5 mb-2"><?php echo __('Export'); ?></h4>
+  <h2 class="h5 mb-2"><?php echo __('Export'); ?></h2>
   <ul class="list-unstyled">
     <?php if ($sf_context->getConfiguration()->isPluginEnabled('sfDcPlugin')) { ?>
       <li>

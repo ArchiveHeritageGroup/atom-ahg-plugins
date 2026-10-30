@@ -710,7 +710,8 @@ function getItemUrl($obj) {
        class="btn btn-sm <?php echo $topLevelOnly === '1' ? 'btn-success' : 'btn-outline-success' ?>"
        title="<?php echo __('Group by top level only'); ?>"
        aria-label="<?php echo __('Group by top level only'); ?>"
-       aria-pressed="<?php echo $topLevelOnly === '1' ? 'true' : 'false' ?>"><i class="fas fa-layer-group"></i></a>
+       role="button" data-ahg-toggle-link
+       aria-pressed="<?php echo $topLevelOnly === '1' ? 'true' : 'false' ?>"><i class="fas fa-layer-group" aria-hidden="true"></i></a>
 
     <div class="dropdown">
       <button class="btn btn-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><?php echo $limit ?>/<?php echo __('page'); ?></button>
@@ -1097,6 +1098,13 @@ function getItemUrl($obj) {
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+  // aria-pressed is only valid on a button, so the toggle link has role="button";
+  // a button also answers the Space key (WCAG 4.1.2, #213 F-30).
+  document.querySelectorAll('[data-ahg-toggle-link]').forEach(function(a) {
+    a.addEventListener('keydown', function(e) {
+      if (' ' === e.key) { e.preventDefault(); a.click(); }
+    });
+  });
   var queryInput = document.getElementById('semantic-query-input');
   var semanticToggle = document.getElementById('modal-semantic-toggle');
   var expansionPreview = document.getElementById('expansion-preview');

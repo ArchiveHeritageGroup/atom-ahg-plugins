@@ -1029,7 +1029,7 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
     $n = sfConfig::get('csp_nonce', '');
     $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
     $js = '<script type="module"' . $nonceAttr . '>' . "\n";
-    $js .= 'import { IiifViewerManager } from "' . $config['pluginPath'] . '/js/iiif-viewer-manager.js?v=213";' . "\n";
+    $js .= 'import { IiifViewerManager } from "' . $config['pluginPath'] . '/js/iiif-viewer-manager.js?v=213.3";' . "\n";
     $js .= 'document.addEventListener("DOMContentLoaded", function() {' . "\n";
     $js .= '    const viewer = new IiifViewerManager("' . $viewerId . '", {' . "\n";
     $js .= '        objectId: ' . $objectId . ',' . "\n";

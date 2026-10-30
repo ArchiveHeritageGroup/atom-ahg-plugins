@@ -530,12 +530,13 @@ body:has(.heritage-landing) .container-xxl {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 14px;
     margin-top: 1rem;
     padding: 0.5rem 0;
 }
 
 .heritage-carousel-dot {
+    position: relative;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -544,6 +545,13 @@ body:has(.heritage-landing) .container-xxl {
     cursor: pointer;
     padding: 0;
     transition: all 0.3s ease;
+}
+
+/* WCAG 2.5.8 (#213 F-26): a 24 x 24 px hit area round the 10 px dot; the 14 px gap keeps neighbours apart. */
+.heritage-carousel-dot::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
 }
 
 .heritage-carousel-dot:hover {
@@ -672,6 +680,13 @@ body:has(.heritage-landing) .container-xxl {
     cursor: pointer;
     transition: transform 0.2s ease;
     z-index: 1;
+}
+
+/* WCAG 2.5.8 (#213 F-26): 24 x 24 px hit area round the 16 px marker. */
+.heritage-timeline-marker::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
 }
 
 .heritage-timeline-marker:hover {

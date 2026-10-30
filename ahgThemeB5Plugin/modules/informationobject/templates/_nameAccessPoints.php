@@ -94,7 +94,7 @@ $basePath = sfContext::getInstance()->getRequest()->getScriptName();
 ?>
 <?php if ($isSidebar) { ?>
   <section id="nameAccessPointsSection">
-    <h4><?php echo __('Related people and organizations'); ?></h4>
+    <h2 class="h4"><?php echo __('Related people and organizations'); ?></h2>
     <ul class="list-unstyled">
       <?php foreach ($allActors as $actor) { ?>
         <li>

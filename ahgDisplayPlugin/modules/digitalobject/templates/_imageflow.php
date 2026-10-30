@@ -190,14 +190,35 @@ function _getFileIcon($path, $extIconMap, $imageExts)
   </div>
 </div>
 <?php if ('1' === $_carousel['description_carousel_autoplay']) { ?>
+<?php // WCAG 2.2.2 (#213): anything that moves on its own needs a pause control. One name,
+      // with the state in aria-pressed, as on the heritage landing carousel. ?>
+<div class="text-end mt-1 d-none" id="atom-slider-pause-wrap">
+  <button type="button" class="btn btn-sm atom-btn-white" id="atom-slider-pause" aria-pressed="false">
+    <i class="fas fa-pause" aria-hidden="true"></i>
+    <span class="ms-1"><?php echo __('Pause automatic scrolling'); ?></span>
+  </button>
+</div>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Autoplay for the description carousel. The slider is started by AtoM's own
-// script; switch autoplay on once it has started.
+// script; switch autoplay on once it has started, unless the visitor asks for
+// reduced motion.
 window.addEventListener('load', function () {
   var el = window.jQuery && window.jQuery('#atom-slider-images');
-  if (el && el.length && el.hasClass('slick-initialized')) {
-    el.slick('slickSetOption', { autoplay: true, autoplaySpeed: <?php echo (int) max(2000, min(15000, (int) $_carousel['description_carousel_interval'])); ?> }, true);
+  if (!el || !el.length || !el.hasClass('slick-initialized')) { return; }
+  var btn = document.getElementById('atom-slider-pause');
+  var stopped = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function show() {
+    btn.setAttribute('aria-pressed', stopped ? 'true' : 'false');
+    btn.querySelector('i').className = 'fas ' + (stopped ? 'fa-play' : 'fa-pause');
   }
+  el.slick('slickSetOption', { autoplay: !stopped, autoplaySpeed: <?php echo (int) max(2000, min(15000, (int) $_carousel['description_carousel_interval'])); ?> }, true);
+  document.getElementById('atom-slider-pause-wrap').classList.remove('d-none');
+  show();
+  btn.addEventListener('click', function () {
+    stopped = !stopped;
+    el.slick(stopped ? 'slickPause' : 'slickPlay');
+    show();
+  });
 });
 </script>
 <?php } ?>

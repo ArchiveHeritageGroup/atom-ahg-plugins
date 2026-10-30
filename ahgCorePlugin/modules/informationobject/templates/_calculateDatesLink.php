@@ -1,5 +1,5 @@
 <?php if (QubitAcl::check($resource, 'update')) { ?>
-  <h4 class="h5 mb-2"><?php echo __('Tasks'); ?></h4>
+  <h2 class="h5 mb-2"><?php echo __('Tasks'); ?></h2>
   <ul class="list-unstyled">
 
     <li>

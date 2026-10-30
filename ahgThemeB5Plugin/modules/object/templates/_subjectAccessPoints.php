@@ -31,7 +31,7 @@ $basePath = sfContext::getInstance()->getRequest()->getScriptName();
 ?>
 <?php if ($isSidebar) { ?>
   <section id="subjectAccessPointsSection">
-    <h4><?php echo __('Subject access points'); ?></h4>
+    <h2 class="h4"><?php echo __('Subject access points'); ?></h2>
     <ul class="list-unstyled">
       <?php foreach ($subjects as $subject) {
         // A term with no name in this culture rendered as an empty link (WCAG 2.4.4, #213); fall back to its slug.

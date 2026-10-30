@@ -57,14 +57,18 @@
 
   // Panel
   // A div, not a section: themes style section generically (AHG theme: position relative !important).
+  // A non-modal region, not a dialog (WCAG 4.1.2, #213 F-18): the page underneath stays
+  // usable and Tab moves on past the panel, which a dialog would have to prevent.
   var panel = el('div', 'ahg-chatbot-panel');
   panel.id = 'ahg-chatbot-panel';
-  panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', label);
+  panel.setAttribute('role', 'region');
+  panel.setAttribute('aria-labelledby', 'ahg-chatbot-title');
   panel.hidden = true;
 
-  var head = el('header', 'ahg-chatbot-head');
-  head.appendChild(el('h2', 'ahg-chatbot-title', label));
+  var head = el('div', 'ahg-chatbot-head');
+  var title = el('h2', 'ahg-chatbot-title', label);
+  title.id = 'ahg-chatbot-title';
+  head.appendChild(title);
   var reset = el('button', 'ahg-chatbot-icon-btn', 'New');
   reset.type = 'button';
   reset.title = 'Start a new conversation';
@@ -83,12 +87,13 @@
   if (!helpOn || !MODES[state.mode]) { state.mode = 'collection'; }
   var tabs = null;
   if (helpOn) {
+    // Two toggle buttons, not a tablist: there are no tab panels to control (#213 F-18).
     tabs = el('div', 'ahg-chatbot-tabs');
-    tabs.setAttribute('role', 'tablist');
+    tabs.setAttribute('role', 'group');
+    tabs.setAttribute('aria-label', 'What to ask about');
     Object.keys(MODES).forEach(function (m) {
       var t = el('button', 'ahg-chatbot-tab', MODES[m].tab);
       t.type = 'button';
-      t.setAttribute('role', 'tab');
       t.dataset.mode = m;
       t.addEventListener('click', function () { setMode(m); });
       tabs.appendChild(t);
@@ -118,6 +123,15 @@
   panel.appendChild(form);
   root.appendChild(button);
   root.appendChild(panel);
+
+  // The launcher is the last thing on the page; a skip link at the top reaches it in
+  // one Tab instead of dozens (#213 F-30).
+  var skip = el('a', 'visually-hidden-focusable ahg-chatbot-skip', label);
+  skip.href = '#ahg-chatbot-panel';
+  skip.addEventListener('click', function (e) { e.preventDefault(); setOpen(true); });
+  // After the theme's own "Skip to main content", which should stay first.
+  var firstSkip = document.querySelector('body > .visually-hidden-focusable');
+  document.body.insertBefore(skip, firstSkip ? firstSkip.nextSibling : document.body.firstChild);
 
   // Rendering
   // Light formatting only: paragraphs, "- " bullets, "1." steps and **bold**, all as text nodes.
@@ -199,7 +213,7 @@
     input.placeholder = MODES[state.mode].placeholder;
     if (tabs) {
       Array.prototype.forEach.call(tabs.children, function (t) {
-        t.setAttribute('aria-selected', t.dataset.mode === state.mode ? 'true' : 'false');
+        t.setAttribute('aria-pressed', t.dataset.mode === state.mode ? 'true' : 'false');
       });
     }
     state.turns.forEach(renderTurn);

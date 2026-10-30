@@ -30,7 +30,7 @@ if ($sf_user->isAuthenticated()) {
 ?>
 <?php if ($showResearch): ?>
 <section class="sidebar-section">
-  <h4><?php echo __('Research Tools'); ?></h4>
+  <h2 class="h4"><?php echo __('Research Tools'); ?></h2>
   <ul class="list-unstyled">
     <li>
       <a href="/index.php/research/source-assessment/<?php echo $resource->id; ?>">

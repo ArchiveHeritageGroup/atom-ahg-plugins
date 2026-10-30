@@ -31,7 +31,7 @@ $basePath = sfContext::getInstance()->getRequest()->getScriptName();
 ?>
 <?php if ($isSidebar) { ?>
   <section id="placeAccessPointsSection">
-    <h4><?php echo __('Place access points'); ?></h4>
+    <h2 class="h4"><?php echo __('Place access points'); ?></h2>
     <ul class="list-unstyled">
       <?php foreach ($places as $place) {
         $placeName = $place->name ?? '';

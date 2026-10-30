@@ -110,7 +110,7 @@
   cursor: pointer;
 }
 
-.ahg-chatbot-tab[aria-selected="true"] {
+.ahg-chatbot-tab[aria-pressed="true"] {
   border-bottom-color: var(--ahg-chatbot-accent);
   color: #262626;
   font-weight: 600;
@@ -287,4 +287,16 @@
     max-height: 100vh;
     border-radius: 0;
   }
+}
+
+/* Skip link to the assistant (#213 F-30): shown only when it has keyboard focus. */
+.ahg-chatbot-skip:focus {
+  position: fixed;
+  top: .5rem;
+  left: .5rem;
+  z-index: 1100;
+  padding: .5rem .75rem;
+  background: #fff;
+  color: #10373E;
+  border: 2px solid #10373E;
 }

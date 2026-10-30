@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // client-side getSettings self-disable was unreliable (the engine could
       // start before it ran), so gate it server-side. ?>
 <?php if (\AtomExtensions\Services\AhgSettingsService::getBool('voice_enabled', false)) { ?>
-  <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/voiceCommands.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/voiceCommands.css?v=213" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
   <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_voiceCommands.php'); ?>
 
@@ -86,6 +86,26 @@ document.addEventListener('DOMContentLoaded', function() {
     data-text-signin="<?php echo __('Sign in (new tab)'); ?>"
     data-text-held="<?php echo __('Not saved yet: your session has ended. Your changes are still on this page. Sign in again in a new tab, then come back here and press Save.'); ?>"
     <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<?php } ?>
+
+<?php // Site footer with the accessibility statement link (#213 F-23, F-15 contentinfo).
+      // It appears once a static page with the slug "accessibility" exists, so the
+      // link is never dead on a site that has not published a statement yet. ?>
+<?php
+$ahgA11yStatement = false;
+try {
+    $ahgA11yStatement = \Illuminate\Database\Capsule\Manager::table('slug')
+        ->join('static_page', 'static_page.id', '=', 'slug.object_id')
+        ->where('slug.slug', 'accessibility')
+        ->exists();
+} catch (\Throwable $e) {
+    \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+}
+?>
+<?php if ($ahgA11yStatement) { ?>
+<footer class="ahg-site-footer border-top py-2 text-center small">
+  <a href="<?php echo url_for(['module' => 'staticpage', 'slug' => 'accessibility']); ?>"><?php echo __('Accessibility'); ?></a>
+</footer>
 <?php } ?>
 
 <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_whatsappBubble.php'); ?>

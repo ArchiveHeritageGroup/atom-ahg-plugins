@@ -14,6 +14,27 @@
  * @version 1.1.0
  */
 
+// WCAG 1.1.1 / 4.1.2 (#213 F-20): OpenSeadragon, alone or inside Mirador, makes its
+// canvas focusable with no role or name, so a screen reader meets an anonymous group.
+// Name it after the record and say how to operate it.
+function labelViewerCanvases() {
+    const h1 = document.querySelector('h1');
+    const title = h1 ? h1.textContent.replace(/\s+/g, ' ').trim() : '';
+    document.querySelectorAll('.openseadragon-canvas:not([aria-label])').forEach((c) => {
+        c.setAttribute('role', 'application');
+        c.setAttribute('aria-roledescription', 'image viewer');
+        c.setAttribute('aria-label', (title ? 'Image: ' + title + '. ' : 'Image. ') + 'Use plus and minus to zoom and the arrow keys to pan.');
+    });
+}
+if (typeof document !== 'undefined') {
+    let queued = false;
+    new MutationObserver(() => {
+        if (queued) { return; }
+        queued = true;
+        requestAnimationFrame(() => { queued = false; labelViewerCanvases(); });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+}
+
 export class IiifViewerManager {
     constructor(viewerId, options = {}) {
         this.viewerId = viewerId;
@@ -327,7 +348,7 @@ export class IiifViewerManager {
             // Verify OpenSeadragon loaded
             if (!window.OpenSeadragon) {
                 console.error('OpenSeadragon failed to load');
-                this.showError(containerId, 'Failed to load image viewer');
+                this.showError(containerId, 'The image viewer could not be loaded. Please try again later.');
                 return;
             }
 
@@ -336,7 +357,7 @@ export class IiifViewerManager {
 
             if (!manifest) {
                 console.error('Failed to fetch manifest from:', this.options.manifestUrl);
-                this.showError(containerId, 'Failed to load image manifest');
+                this.showError(containerId, 'The images for this description could not be loaded. Please try again later.');
                 return;
             }
 
@@ -344,7 +365,7 @@ export class IiifViewerManager {
 
             if (tileSources.length === 0) {
                 console.error('No tile sources found in manifest:', manifest);
-                this.showError(containerId, 'No images found in manifest');
+                this.showError(containerId, 'No images are available for this description.');
                 return;
             }
 
@@ -353,7 +374,7 @@ export class IiifViewerManager {
 
             if (validTileSources.length === 0) {
                 console.error('No valid tile sources after filtering:', tileSources);
-                this.showError(containerId, 'Invalid image sources');
+                this.showError(containerId, 'No images are available for this description.');
                 return;
             }
 
@@ -421,7 +442,7 @@ export class IiifViewerManager {
             }
         } catch (error) {
             console.error('OpenSeadragon initialization failed:', error);
-            this.showError(containerId, 'Failed to initialize image viewer');
+            this.showError(containerId, 'The image viewer could not be loaded. Please try again later.');
         }
     }
 
@@ -436,7 +457,6 @@ export class IiifViewerManager {
                     <div>
                         <i class="fas fa-exclamation-triangle" aria-hidden="true" data-ahg-style="font-size:48px;color:#856404;margin-bottom:16px;"></i>
                         <p data-ahg-style="margin:0;font-size:16px;">${message}</p>
-                        <p data-ahg-style="margin:8px 0 0;font-size:14px;color:#495057;">Check browser console for details</p>
                     </div>
                 </div>
             `;

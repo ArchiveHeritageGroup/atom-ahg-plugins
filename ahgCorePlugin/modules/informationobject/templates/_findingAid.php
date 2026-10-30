@@ -1,4 +1,4 @@
-<h4 class="h5 mb-2"><?php echo __('Finding aid'); ?></h4>
+<h2 class="h5 mb-2"><?php echo __('Finding aid'); ?></h2>
 <ul class="list-unstyled">
 
   <?php if ($showStatus) { ?>

@@ -1,0 +1,6 @@
+/* Static error pages served by nginx (error_page). No inline styles, so no CSP exception is needed. */
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #262626; background: #F2EDE6; }
+main { max-width: 36rem; margin: 4rem auto; padding: 2rem; background: #fff; border-top: 6px solid #10373E; }
+h1 { margin-top: 0; color: #10373E; font-size: 1.6rem; }
+a { color: #653332; }
+a:focus { outline: 3px solid #10373E; outline-offset: 2px; }

@@ -126,14 +126,16 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
             <?php endif; ?>
 
             <!-- Search Box -->
-            <form action="<?php echo url_for(['module' => 'heritage', 'action' => 'search']); ?>" method="get" class="heritage-search-box">
+            <form action="<?php echo url_for(['module' => 'heritage', 'action' => 'search']); ?>" method="get" class="heritage-search-box" role="search">
+                <?php // A real label, not only the placeholder, which vanishes on typing (WCAG 3.3.2, #213 F-29). ?>
+                <label for="heritage-search-input" class="visually-hidden"><?php echo __('Search the collections'); ?></label>
                 <input type="text"
                        name="q"
                        placeholder="<?php echo esc_specialchars($searchPlaceholder); ?>"
                        autocomplete="off"
                        id="heritage-search-input">
-                <button type="submit" aria-label="Search">
-                    <i class="fas fa-search"></i>
+                <button type="submit" aria-label="<?php echo __('Search'); ?>">
+                    <i class="fas fa-search" aria-hidden="true"></i>
                 </button>
             </form>
 
@@ -235,7 +237,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                         <?php if (!empty($collection['thumbnail'])): ?>
                         <img class="main-image"
                              src="<?php echo esc_specialchars($collection['thumbnail']); ?>"
-                             alt="<?php echo esc_specialchars($collection['name']); ?>"
+                             alt=""
                              loading="lazy"
                              data-ahg-onerror="hide-show-next">
                         <div class="main-image fallback-gradient" data-ahg-style="background: <?php echo $placeholderGradients[$index % 6]; ?>; height: 280px; display: none; align-items: center; justify-content: center;">
@@ -316,7 +318,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                 <a href="<?php echo url_for(['module' => 'actor', 'slug' => $creator->slug]); ?>" class="heritage-creator-card">
                     <img class="heritage-creator-avatar"
                          src="<?php echo $avatarSvg; ?>"
-                         alt="<?php echo esc_specialchars($creator->name); ?>">
+                         alt="">
                     <div class="heritage-creator-name"><?php echo esc_specialchars($creator->name); ?></div>
                     <div class="heritage-creator-count"><?php echo number_format($creator->item_count); ?> items</div>
                 </a>
@@ -439,8 +441,9 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                 ?>
                 <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $item->slug]); ?>" class="heritage-masonry-item">
                     <img src="<?php echo esc_specialchars($thumbPath); ?>"
-                         alt="<?php echo esc_specialchars($item->title ?? 'Item'); ?>"
+                         alt=""
                          data-ahg-onerror="hide-parent">
+                    <?php // alt="": the title below already names the link (WCAG 1.1.1, #213 F-27). ?>
                     <div class="heritage-masonry-overlay">
                         <h3 class="heritage-masonry-title"><?php echo esc_specialchars($item->title ?? 'Untitled'); ?></h3>
                     </div>

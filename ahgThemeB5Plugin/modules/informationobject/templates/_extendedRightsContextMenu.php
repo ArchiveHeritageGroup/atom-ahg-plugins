@@ -24,7 +24,7 @@ $hasEmbargo = $activeEmbargo !== null;
 
 <?php if ($canEdit): ?>
 <section id="extended-rights-menu">
-  <h4><?php echo __('Rights'); ?></h4>
+  <h2 class="h4"><?php echo __('Rights'); ?></h2>
   <ul class="list-unstyled">
     <li>
       <a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'edit', 'slug' => $resource->slug]); ?>">
@@ -73,7 +73,7 @@ $hasEmbargo = $activeEmbargo !== null;
 
 <?php if ($hasRights || $hasEmbargo): ?>
 <section id="rights-status-menu">
-  <h4><?php echo __('Rights Status'); ?></h4>
+  <h2 class="h4"><?php echo __('Rights Status'); ?></h2>
   <ul class="list-unstyled">
     <?php if ($hasRights): ?>
     <li><i class="fas fa-copyright text-info fa-fw me-1"></i><?php echo __('Extended rights applied'); ?></li>
