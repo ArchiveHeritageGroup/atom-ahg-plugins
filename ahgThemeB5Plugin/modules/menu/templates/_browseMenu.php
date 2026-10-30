@@ -4,9 +4,9 @@
   </button>
   <ul class="dropdown-menu mt-2" aria-labelledby="browse-menu">
     <li>
-      <h6 class="dropdown-header">
+      <span class="dropdown-header">
         <?php echo $browseMenu->getLabel(['cultureFallback' => true]); ?>
-      </h6>
+      </span>
     </li>
     <?php foreach ($browseMenu->getChildren() as $child) { ?>
       <?php if ($child->checkUserAccess()) { ?>

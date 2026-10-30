@@ -130,13 +130,13 @@ if ($isAdmin && $hasResearcher) {
     <span class="visually-hidden"><?php echo __('AHG Plugins'); ?></span>
   </a>
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="ahg-plugins-menu">
-    <li><h6 class="dropdown-header"><?php echo __('Settings'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Settings'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('AHG Settings'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgDropdown', 'action' => 'index']); ?>"><i class="fas fa-list-alt fa-fw me-1"></i><?php echo __('Dropdown Manager'); ?></a></li>
 
     <?php if ($hasSecurityClearance): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Security'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Security'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'index']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Clearances'); ?></a></li>
     <?php if ($sf_user->isAdministrator()): ?>
     <li><a class="dropdown-item" href="<?php echo url_for('@sso_admin'); ?>"><i class="fas fa-key fa-fw me-1"></i><?php echo __('Single sign-on'); ?></a></li>
@@ -145,7 +145,7 @@ if ($isAdmin && $hasResearcher) {
 
     <?php if ($hasResearch): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Research'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Research'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-book-reader fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
     <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>"><span><i class="fas fa-users fa-fw me-1"></i><?php echo __('Researchers'); ?></span><?php if ($pendingResearchers > 0): ?><span class="badge bg-warning text-dark rounded-pill"><?php echo $pendingResearchers; ?></span><?php endif; ?></a></li>
     <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>"><span><i class="fas fa-calendar-alt fa-fw me-1"></i><?php echo __('Bookings'); ?></span><?php if ($pendingBookings > 0): ?><span class="badge bg-danger rounded-pill"><?php echo $pendingBookings; ?></span><?php endif; ?></a></li>
@@ -154,7 +154,7 @@ if ($isAdmin && $hasResearcher) {
 
     <?php if ($hasResearcher): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Researcher Submissions'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Researcher Submissions'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'researcher', 'action' => 'dashboard']); ?>"><i class="fas fa-cloud-upload-alt fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
     <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'researcher', 'action' => 'submissions', 'status' => 'submitted']); ?>"><span><i class="fas fa-inbox fa-fw me-1"></i><?php echo __('Pending Review'); ?></span><?php if ($pendingSubmissions > 0): ?><span class="badge bg-warning text-dark rounded-pill"><?php echo $pendingSubmissions; ?></span><?php endif; ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'researcher', 'action' => 'importExchange']); ?>"><i class="fas fa-file-import fa-fw me-1"></i><?php echo __('Import Exchange'); ?></a></li>
@@ -162,14 +162,14 @@ if ($isAdmin && $hasResearcher) {
 
     <?php if ($hasAccessRequest): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Access'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Access'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'pending']); ?>"><i class="fas fa-shield-alt fa-fw me-1"></i><?php echo __('Requests'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check fa-fw me-1"></i><?php echo __('Approvers'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasAuditTrail): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Audit'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Audit'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'statistics']); ?>"><i class="fas fa-chart-line fa-fw me-1"></i><?php echo __('Statistics'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list fa-fw me-1"></i><?php echo __('Logs'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'settings']); ?>"><i class="fas fa-sliders-h fa-fw me-1"></i><?php echo __('Settings'); ?></a></li>
@@ -178,13 +178,13 @@ if ($isAdmin && $hasResearcher) {
 
     <?php if ($hasRic): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('RiC'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('RiC'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-project-diagram fa-fw me-1"></i><?php echo __('RiC Dashboard'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasDataMigration || $hasDedupePlugin): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Data Quality'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Data Quality'); ?></span></li>
     <?php if ($hasDataMigration): ?>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']); ?>"><i class="fas fa-exchange-alt fa-fw me-1"></i><?php echo __('Data Migration'); ?></a></li>
     <?php endif; ?>
@@ -195,13 +195,13 @@ if ($isAdmin && $hasResearcher) {
 
     <?php if ($hasFormsPlugin): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Data Entry'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Data Entry'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'forms', 'action' => 'index']); ?>"><i class="fas fa-edit fa-fw me-1"></i><?php echo __('Form Templates'); ?></a></li>
     <?php endif; ?>
 
     <?php if (ahgIsPluginEnabled('ahgIngestPlugin')): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Data Ingest'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Data Ingest'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ingest', 'action' => 'index']); ?>"><i class="fas fa-file-upload fa-fw me-1"></i><?php echo __('Ingest Dashboard'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ingest', 'action' => 'configure']); ?>"><i class="fas fa-plus-circle fa-fw me-1"></i><?php echo __('New Ingest'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for('@ingest_grid'); ?>"><i class="fas fa-table fa-fw me-1"></i><?php echo __('Grid entry'); ?></a></li>
@@ -209,14 +209,14 @@ if ($isAdmin && $hasResearcher) {
 
     <?php if ($hasDoiPlugin): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('DOI Management'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('DOI Management'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'doi', 'action' => 'index']); ?>"><i class="fas fa-link fa-fw me-1"></i><?php echo __('DOI Dashboard'); ?></a></li>
     <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for(['module' => 'doi', 'action' => 'queue']); ?>"><span><i class="fas fa-tasks fa-fw me-1"></i><?php echo __('Minting Queue'); ?></span><?php if ($pendingDois > 0): ?><span class="badge bg-info rounded-pill"><?php echo $pendingDois; ?></span><?php endif; ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasHeritage): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Heritage'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Heritage'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminDashboard']); ?>"><i class="fas fa-landmark fa-fw me-1"></i><?php echo __('Admin'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'analyticsDashboard']); ?>"><i class="fas fa-chart-line fa-fw me-1"></i><?php echo __('Analytics'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'custodianDashboard']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Custodian'); ?></a></li>
@@ -226,13 +226,13 @@ if ($isAdmin && $hasResearcher) {
           // and Storage locations sits in the Manage menu beside Physical storage. ?>
     <?php if ($hasStrongroom && !$hasStorageLocations): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Storage'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Storage'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'strongroom', 'action' => 'browse']); ?>"><i class="fas fa-warehouse fa-fw me-1"></i><?php echo __('Strongrooms'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasExhibitionSpace): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Exhibition spaces'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Exhibition spaces'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'browse']); ?>"><i class="fas fa-palette fa-fw me-1"></i><?php echo __('Exhibition spaces'); ?></a></li>
     <?php endif; ?>
 
@@ -242,13 +242,13 @@ if ($isAdmin && $hasResearcher) {
     <?php // Digital preservation pages (ahgPreservationPlugin), incl. the triage dashboard (#154). ?>
     <?php if (ahgIsPluginEnabled('ahgPreservationPlugin')): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Preservation'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Preservation'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for('@preservation_index'); ?>"><i class="fas fa-shield-alt fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for('@preservation_triage'); ?>"><i class="fas fa-list-ol fa-fw me-1"></i><?php echo __('Triage'); ?></a></li>
     <?php endif; ?>
 
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><?php echo __('Maintenance'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Maintenance'); ?></span></li>
     <?php if ($hasBackup): ?>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'backup', 'action' => 'index']); ?>"><i class="fas fa-database fa-fw me-1"></i><?php echo __('Backup'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'backup', 'action' => 'restore']); ?>"><i class="fas fa-undo-alt fa-fw me-1"></i><?php echo __('Restore'); ?></a></li>

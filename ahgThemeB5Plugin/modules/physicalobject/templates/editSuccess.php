@@ -2,8 +2,13 @@
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
-    <h1 class="mb-0"><?php echo render_title($resource); ?></h1>
-    <span class="small"><?php echo __('Edit %1%', ['%1%' => sfConfig::get('app_ui_label_physicalobject')]); ?></span>
+    <?php // WCAG 2.4.6 (#213 F-17): a new record is added, not edited, and has no title yet. ?>
+    <?php if ($resource->id) { ?>
+      <h1 class="mb-0"><?php echo render_title($resource); ?></h1>
+      <span class="small"><?php echo __('Edit %1%', ['%1%' => sfConfig::get('app_ui_label_physicalobject')]); ?></span>
+    <?php } else { ?>
+      <h1 class="mb-0"><?php echo __('Add new %1%', ['%1%' => sfConfig::get('app_ui_label_physicalobject')]); ?></h1>
+    <?php } ?>
   </div>
 <?php end_slot(); ?>
 
@@ -21,7 +26,7 @@
       <!-- Basic Information -->
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">
-          <h5 class="mb-0"><i class="fas fa-warehouse me-2"></i><?php echo __('Basic Information'); ?></h5>
+          <h2 class="h5 mb-0"><i class="fas fa-warehouse me-2" aria-hidden="true"></i><?php echo __('Basic Information'); ?></h2>
         </div>
         <div class="card-body">
           <div class="row">
@@ -61,7 +66,7 @@
       <?php $loc = null !== ($storageLevels ?? null) ? $storageLevels : $extendedData; ?>
       <div class="card mb-4">
         <div class="card-header bg-success text-white">
-          <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i><?php echo __('Location Details'); ?></h5>
+          <h2 class="h5 mb-0"><i class="fas fa-map-marker-alt me-2" aria-hidden="true"></i><?php echo __('Location Details'); ?></h2>
         </div>
         <div class="card-body">
           <div class="row">
@@ -149,7 +154,7 @@
       <!-- Dimensions -->
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="mb-0"><i class="fas fa-ruler-combined me-2"></i><?php echo __('Dimensions (cm)'); ?></h5>
+          <h2 class="h5 mb-0"><i class="fas fa-ruler-combined me-2" aria-hidden="true"></i><?php echo __('Dimensions (cm)'); ?></h2>
         </div>
         <div class="card-body">
           <div class="row">
@@ -181,7 +186,7 @@
       <!-- Capacity Tracking -->
       <div class="card mb-4">
         <div class="card-header bg-info text-white">
-          <h5 class="mb-0"><i class="fas fa-boxes me-2"></i><?php echo __('Capacity Tracking'); ?></h5>
+          <h2 class="h5 mb-0"><i class="fas fa-boxes me-2" aria-hidden="true"></i><?php echo __('Capacity Tracking'); ?></h2>
         </div>
         <div class="card-body">
           <div class="row">
@@ -258,7 +263,7 @@
       <!-- Status -->
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="mb-0"><i class="fas fa-toggle-on me-2"></i><?php echo __('Status'); ?></h5>
+          <h2 class="h5 mb-0"><i class="fas fa-toggle-on me-2" aria-hidden="true"></i><?php echo __('Status'); ?></h2>
         </div>
         <div class="card-body">
           <div class="mb-3">
@@ -276,7 +281,7 @@
       <!-- Environmental -->
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="mb-0"><i class="fas fa-thermometer-half me-2"></i><?php echo __('Environmental'); ?></h5>
+          <h2 class="h5 mb-0"><i class="fas fa-thermometer-half me-2" aria-hidden="true"></i><?php echo __('Environmental'); ?></h2>
         </div>
         <div class="card-body">
           <div class="mb-3 form-check">
@@ -322,7 +327,7 @@
       <!-- Security -->
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="mb-0"><i class="fas fa-lock me-2"></i><?php echo __('Security'); ?></h5>
+          <h2 class="h5 mb-0"><i class="fas fa-lock me-2" aria-hidden="true"></i><?php echo __('Security'); ?></h2>
         </div>
         <div class="card-body">
           <div class="mb-3">
@@ -346,7 +351,7 @@
       <!-- Notes -->
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i><?php echo __('Notes'); ?></h5>
+          <h2 class="h5 mb-0"><i class="fas fa-sticky-note me-2" aria-hidden="true"></i><?php echo __('Notes'); ?></h2>
         </div>
         <div class="card-body">
           <div class="mb-3">

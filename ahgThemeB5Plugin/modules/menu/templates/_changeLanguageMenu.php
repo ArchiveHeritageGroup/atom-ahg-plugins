@@ -23,9 +23,9 @@
   </a>
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="language-menu">
     <li>
-      <h6 class="dropdown-header">
+      <span class="dropdown-header">
         <?php echo __('Language'); ?>
-      </h6>
+      </span>
     </li>
     <?php foreach ($langCodes as $value) { ?>
       <li>

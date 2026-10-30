@@ -36,7 +36,7 @@ $isAdmin = $sf_user->isAdministrator();
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="glam-dam-menu">
     
     <!-- Browse by Sector -->
-    <li><h6 class="dropdown-header"><?php echo __('Browse by Sector'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Browse by Sector'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'display', 'action' => 'browse']); ?>"><i class="fas fa-th fa-fw me-2"></i><?php echo __('All Collections'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'archive']); ?>"><i class="fas fa-archive fa-fw me-2"></i><?php echo __('Archives'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'museum']); ?>"><i class="fas fa-university fa-fw me-2"></i><?php echo __('Museum Objects'); ?></a></li>
@@ -46,7 +46,7 @@ $isAdmin = $sf_user->isAdministrator();
     <li><hr class="dropdown-divider"></li>
     
     <!-- Digital Assets -->
-    <li><h6 class="dropdown-header"><?php echo __('Digital Assets'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Digital Assets'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'digitalobject', 'action' => 'browse']); ?>"><i class="fas fa-photo-video fa-fw me-2"></i><?php echo __('Browse Digital Objects'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'hasDigital' => '1']); ?>"><i class="fas fa-file-image fa-fw me-2"></i><?php echo __('Items with Media'); ?></a></li>
     
@@ -54,14 +54,14 @@ $isAdmin = $sf_user->isAdministrator();
     <li><hr class="dropdown-divider"></li>
     
     <!-- Reports -->
-    <li><h6 class="dropdown-header"><?php echo __('Reports'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Reports'); ?></span></li>
     <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt fa-fw me-2"></i><?php echo __('Central Dashboard'); ?></a></li>
     <?php endif; ?>
     
     <li><hr class="dropdown-divider"></li>
     
     <!-- More -->
-    <li><h6 class="dropdown-header"><?php echo __('More'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('More'); ?></span></li>
     <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'conditionPhotos']); ?>"><i class="fas fa-clipboard-check fa-fw me-2"></i><?php echo __('Condition Assessment'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index']); ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Collections Procedures'); ?></a></li>

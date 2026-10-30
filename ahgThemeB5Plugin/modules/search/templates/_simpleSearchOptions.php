@@ -51,9 +51,9 @@ $popular = $searchService->getPopularSearches(5);
   
   <!-- Quick Search Templates -->
   <?php if (!empty($templates)): ?>
-  <h6 class="dropdown-header">
+  <span class="dropdown-header">
     <i class="fa fa-bolt me-1"></i><?php echo __('Quick Searches'); ?>
-  </h6>
+  </span>
   <?php foreach ($templates as $template): ?>
   <a class="dropdown-item" href="<?php echo url_for(['module' => 'searchEnhancement', 'action' => 'runTemplate', 'id' => $template->id]); ?>">
     <i class="fa <?php echo esc_entities($template->icon); ?> me-2 text-<?php echo esc_entities($template->color); ?>"></i>
@@ -68,9 +68,9 @@ $popular = $searchService->getPopularSearches(5);
   
   <!-- Saved Searches (Authenticated users) -->
   <?php if ($isAuthenticated && !empty($savedSearches)): ?>
-  <h6 class="dropdown-header">
+  <span class="dropdown-header">
     <i class="fa fa-bookmark me-1"></i><?php echo __('Saved Searches'); ?>
-  </h6>
+  </span>
   <?php foreach ($savedSearches as $saved): ?>
   <a class="dropdown-item" href="<?php echo url_for(['module' => 'searchEnhancement', 'action' => 'runSavedSearch', 'id' => $saved->id]); ?>">
     <i class="fa fa-bookmark-o me-2"></i>
@@ -88,9 +88,9 @@ $popular = $searchService->getPopularSearches(5);
   
   <!-- Recent Searches -->
   <?php if (!empty($history)): ?>
-  <h6 class="dropdown-header">
+  <span class="dropdown-header">
     <i class="fa fa-history me-1"></i><?php echo __('Recent Searches'); ?>
-  </h6>
+  </span>
   <?php foreach ($history as $item): ?>
   <?php 
     $params = json_decode($item->search_params, true) ?: [];
@@ -110,9 +110,9 @@ $popular = $searchService->getPopularSearches(5);
   
   <!-- Popular Searches -->
   <?php if (!empty($popular)): ?>
-  <h6 class="dropdown-header">
+  <span class="dropdown-header">
     <i class="fa fa-fire me-1"></i><?php echo __('Popular'); ?>
-  </h6>
+  </span>
   <?php foreach (array_slice($popular, 0, 3) as $p): ?>
   <?php 
     $params = json_decode($p->search_params, true) ?: [];

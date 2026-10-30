@@ -12,10 +12,10 @@
 <?php $addDivider = false; ?>
 <?php if ($descriptions->getTotalHits() > 0) { ?>
   <li>
-    <h6 class="dropdown-header">
+    <span class="dropdown-header">
       <i class="fas fa-lg fa-file-alt me-2" aria-hidden="true"></i>
       <?php echo sfConfig::get('app_ui_label_informationobject'); ?>
-    </h6>
+    </span>
   </li>
   <?php foreach ($descriptions->getResults() as $hit) { ?>
     <?php $doc = $hit->getData(); ?>
@@ -50,10 +50,10 @@
     <li><hr class="dropdown-divider"></li>
   <?php } ?>
   <li>
-    <h6 class="dropdown-header">
+    <span class="dropdown-header">
       <i class="fas fa-lg fa-university me-2" aria-hidden="true"></i>
       <?php echo sfConfig::get('app_ui_label_repository'); ?>
-    </h6>
+    </span>
   </li>
   <?php foreach ($repositories->getResults() as $hit) { ?>
     <?php $doc = $hit->getData(); ?>
@@ -83,10 +83,10 @@
     <li><hr class="dropdown-divider"></li>
   <?php } ?>
   <li>
-    <h6 class="dropdown-header">
+    <span class="dropdown-header">
       <i class="fas fa-lg fa-user me-2" aria-hidden="true"></i>
       <?php echo sfConfig::get('app_ui_label_actor'); ?>
-    </h6>
+    </span>
   </li>
   <?php foreach ($actors->getResults() as $hit) { ?>
     <?php $doc = $hit->getData(); ?>
@@ -116,10 +116,10 @@
     <li><hr class="dropdown-divider"></li>
   <?php } ?>
   <li>
-    <h6 class="dropdown-header">
+    <span class="dropdown-header">
       <i class="fas fa-lg fa-map-marker-alt me-2" aria-hidden="true"></i>
       <?php echo sfConfig::get('app_ui_label_place'); ?>
-    </h6>
+    </span>
   </li>
   <?php foreach ($places->getResults() as $hit) { ?>
     <?php $doc = $hit->getData(); ?>
@@ -149,10 +149,10 @@
     <li><hr class="dropdown-divider"></li>
   <?php } ?>
   <li>
-    <h6 class="dropdown-header">
+    <span class="dropdown-header">
       <i class="fas fa-lg fa-tag me-2" aria-hidden="true"></i>
       <?php echo sfConfig::get('app_ui_label_subject'); ?>
-    </h6>
+    </span>
   </li>
   <?php foreach ($subjects->getResults() as $hit) { ?>
     <?php $doc = $hit->getData(); ?>

@@ -442,7 +442,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                          alt="<?php echo esc_specialchars($item->title ?? 'Item'); ?>"
                          data-ahg-onerror="hide-parent">
                     <div class="heritage-masonry-overlay">
-                        <h4 class="heritage-masonry-title"><?php echo esc_specialchars($item->title ?? 'Untitled'); ?></h4>
+                        <h3 class="heritage-masonry-title"><?php echo esc_specialchars($item->title ?? 'Untitled'); ?></h3>
                     </div>
                 </a>
                 <?php endforeach; ?>
@@ -487,7 +487,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 
             <!-- Leaderboard -->
             <div class="heritage-leaderboard">
-                <h4 class="heritage-leaderboard-title">Top Contributors This Month</h4>
+                <h3 class="heritage-leaderboard-title">Top Contributors This Month</h3>
                 <div class="heritage-leaderboard-row">
                     <?php
                     $topContributors = \Illuminate\Database\Capsule\Manager::table('heritage_contributor')

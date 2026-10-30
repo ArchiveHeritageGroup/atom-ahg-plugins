@@ -14,7 +14,7 @@
   </div>
 <?php } ?>
 
-<header id="top-bar" class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation" aria-label="<?php echo __('Main navigation'); ?>">
+<header id="top-bar" class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <?php if (sfConfig::get('app_toggleLogo') || sfConfig::get('app_toggleTitle')) { ?>
       <a class="navbar-brand d-flex flex-wrap flex-lg-nowrap align-items-center py-0 me-0" href="<?php echo url_for('@homepage'); ?>" title="<?php echo __('Home'); ?>" rel="home">
@@ -52,7 +52,7 @@
       <i class="fas fa-2x fa-fw fa-bars" data-bs-toggle="tooltip" data-bs-placement="bottom" title="<?php echo __('Toggle navigation'); ?>" aria-hidden="true"></i>
       <span class="visually-hidden"><?php echo __('Toggle navigation'); ?></span>
     </button>
-    <div class="collapse navbar-collapse flex-wrap justify-content-end me-1" id="navbar-content">
+    <nav class="collapse navbar-collapse flex-wrap justify-content-end me-1" id="navbar-content" aria-label="<?php echo __('Main navigation'); ?>">
       <div class="d-flex flex-wrap flex-lg-nowrap flex-grow-1">
         <?php echo get_component('menu', 'browseMenu', ['sf_cache_key' => 'dominion-b5'.$sf_user->getCulture().$sf_user->getUserID()]); ?>
         <?php echo get_component('search', 'box'); ?>
@@ -86,7 +86,7 @@
               </span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="ric-tools-menu">
-              <li><h6 class="dropdown-header"><?php echo __('RiC Tools'); ?></h6></li>
+              <li><span class="dropdown-header"><?php echo __('RiC Tools'); ?></span></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Dashboard'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'syncStatus']); ?>"><i class="fas fa-sync me-2"></i><?php echo __('Sync Status'); ?></a></li>
               <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'queue']); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Queue'); ?></a></li>
@@ -144,12 +144,12 @@
         </ul>
         <?php echo get_component('menu', 'userMenu'); ?>
       </div>
-    </div>
+    </nav>
   </div>
 </header>
 
 <?php if (sfConfig::get('app_toggleDescription') && !empty(sfConfig::get('app_siteDescription'))) { ?>
-  <div class="bg-secondary text-white">
+  <div class="bg-secondary text-white" role="region" aria-label="<?php echo __('Site notice'); ?>">
     <div class="container-xl py-1">
       <?php echo esc_specialchars(sfConfig::get('app_siteDescription')); ?>
     </div>

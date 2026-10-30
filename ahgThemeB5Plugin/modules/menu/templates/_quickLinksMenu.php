@@ -48,7 +48,7 @@ if (empty($quickLinks)) {
     <span class="visually-hidden"><?php echo __('Quick links'); ?></span>
   </a>
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="quick-links-menu">
-    <li><h6 class="dropdown-header"><?php echo __('Quick links'); ?></h6></li>
+    <li><span class="dropdown-header"><?php echo __('Quick links'); ?></span></li>
     <?php foreach ($quickLinks as $slug => $link) { ?>
       <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'staticpage', 'action' => 'index', 'slug' => $slug]); ?>"><i class="fas <?php echo $link['icon']; ?> fa-fw me-2"></i><?php echo $link['label']; ?></a></li>
     <?php } ?>

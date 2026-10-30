@@ -5,9 +5,9 @@
     </button>
     <div class="dropdown-menu dropdown-menu-lg-end mt-2" aria-labelledby="user-menu">
       <div>
-        <h6 class="dropdown-header">
+        <span class="dropdown-header">
           <?php echo __('Have an account?'); ?>
-        </h6>
+        </span>
       </div>
       <?php if ($sf_context->getConfiguration()->isPluginEnabled('arCasPlugin')) { ?>
         <?php echo $form->renderFormTag(url_for(['module' => 'cas', 'action' => 'login']), ['class' => 'mx-3 my-2']); ?>
@@ -32,10 +32,10 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-lg-end mt-2" aria-labelledby="user-menu">
       <li>
-        <h6 class="dropdown-header">
+        <span class="dropdown-header">
           <?php echo image_tag($gravatar, ['alt' => '']); ?>&nbsp;
           <?php echo __('Hi, %1%', ['%1%' => $sf_user->user->username]); ?>
-        </h6>
+        </span>
       </li>
       <li><?php echo link_to($menuLabels['myProfile'], [$sf_user->user, 'module' => 'user'], ['class' => 'dropdown-item']); ?></li>
       <li>

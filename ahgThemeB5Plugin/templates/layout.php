@@ -2,7 +2,7 @@
 <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_adminNotifications.php'); ?>
 <div id="wrapper" class="container-xxl pt-3 flex-grow-1">
   <?php echo get_partial('alerts'); ?>
-  <div id="main-column" role="main">
+  <div id="main-column" role="main" tabindex="-1">
     <?php include_slot('title'); ?>
     <?php include_slot('before-content'); ?>
     <?php if (!include_slot('content')) { ?>

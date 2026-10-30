@@ -2,12 +2,17 @@
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
-    <h1 class="mb-0" aria-describedby="heading-label">
-      <?php echo __('Edit accession record'); ?>
-    </h1>
-    <span class="small" id="heading-label">
-      <?php echo render_title($resource); ?>
-    </span>
+    <?php // WCAG 2.4.6 (#213 F-17): a new record is added, not edited, and has no title yet. ?>
+    <?php if ($resource->id) { ?>
+      <h1 class="mb-0" aria-describedby="heading-label">
+        <?php echo __('Edit accession record'); ?>
+      </h1>
+      <span class="small" id="heading-label">
+        <?php echo render_title($resource); ?>
+      </span>
+    <?php } else { ?>
+      <h1 class="mb-0"><?php echo __('Add new accession record'); ?></h1>
+    <?php } ?>
   </div>
 <?php end_slot(); ?>
 
@@ -105,13 +110,15 @@
                         .url_for(['module' => 'actor', 'action' => 'add'])
                         .' #authorizedFormOfName">';
                 }
-                echo render_field(
+                // WCAG 4.1.1 (#213): base render_field also emits an empty hidden input with the
+                // same id as the control; drop that id so the label names the visible control.
+                echo str_replace('name="creators" type="hidden" id="creators"', 'name="creators" type="hidden"', render_field(
                     $form->creators->label(__('Creators'))->help(__(
                         'The name of the creator of the accession or the name of the department that created the accession.'
                     )),
                     null,
                     ['class' => 'form-autocomplete', 'extraInputs' => $extraInputs]
-                );
+                ));
             ?>
 
             <?php echo get_partial('sfIsadPlugin/event', $sf_data->getRaw('eventComponent')->getVarHolder()->getAll() + ['help' => __('"Identify and record the date(s) of the unit of description. Identify the type of date given. Record as a single date or a range of dates as appropriate.” (ISAD 3.1.3). The Date display field can be used to enter free-text date information, including typographical marks to express approximation, uncertainty, or qualification. Use the start and end fields to make the dates searchable. Do not use any qualifiers or typographical symbols to express uncertainty. Acceptable date formats: YYYYMMDD, YYYY-MM-DD, YYYY-MM, YYYY.')]); ?>
@@ -166,11 +173,12 @@
                 // this was free text. The endpoint returns the same HTML the JS parses. ?>
           <div class="accordion-body" data-io-remote-url="<?php echo url_for(['module' => 'informationobject', 'action' => 'autocomplete']); ?>">
             <?php
-                echo render_field(
+                // Same duplicate id as creators above (#213).
+                echo str_replace('name="informationObjects" type="hidden" id="informationObjects"', 'name="informationObjects" type="hidden"', render_field(
                     $form->informationObjects->label(sfConfig::get('app_ui_label_informationobject')),
                     null,
                     ['class' => 'form-select tom-remote-io']
-                );
+                ));
             ?>
             <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
             <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

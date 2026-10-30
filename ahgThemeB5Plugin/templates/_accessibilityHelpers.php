@@ -21,6 +21,8 @@
 @media (max-width: 400px) {
   #collapse-carousel .accordion-body { padding-left: .5rem !important; padding-right: .5rem !important; }
 }
+/* WCAG 2.4.1 (#213 F-14): the skip link focuses #main-column (tabindex="-1"); no ring on a non-control. */
+#main-column:focus { outline: none; }
 </style>
 <!-- ARIA Live Region for dynamic announcements -->
 <div id="ahgLiveRegion" class="visually-hidden" aria-live="polite" aria-atomic="true" role="status"></div>
@@ -137,4 +139,33 @@
         initA11y(); observeValidation(); checkHeadingHierarchy();
     }
 })();
+</script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// WCAG 2.4.4 (#213): base AtoM's read-more expander cuts long fields at 255 characters
+// and can leave an empty link (and list item) at the cut in its .summary copy. The full
+// text is in .details, so the empty remnants are dropped. Runs on load, after the expander.
+// WCAG 1.3.1 (#213 F-15): embedded viewers such as Mirador render their own <main>
+// inside the page's main landmark, giving the page two. A nested one becomes a region.
+(function () {
+    function demote() {
+        document.querySelectorAll('[role=main] main:not([role]), main main:not([role])').forEach(function (m) {
+            m.setAttribute('role', 'region');
+            if (!m.getAttribute('aria-label') && !m.getAttribute('aria-labelledby')) { m.setAttribute('aria-label', 'Viewer'); }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var mc = document.getElementById('main-column');
+        if (mc) { demote(); new MutationObserver(demote).observe(mc, {childList: true, subtree: true}); }
+    });
+})();
+window.addEventListener('load', function () {
+    document.querySelectorAll('.summary a').forEach(function (a) {
+        var sum = a.closest('.summary'), det = sum.nextElementSibling;
+        if (!det || !det.classList.contains('details')) { return; }
+        if (a.textContent.trim() || a.getAttribute('aria-label') || a.querySelector('img, svg, i')) { return; }
+        var li = a.closest('li');
+        a.remove();
+        if (li && !li.textContent.trim() && !li.querySelector('img, a')) { li.remove(); }
+    });
+});
 </script>

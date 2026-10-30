@@ -94,7 +94,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
     <i class="fas fa-sign-in-alt me-1"></i><?php echo $menuLabels['login'] ?? __('Log in'); ?>
   </button>
   <div class="dropdown-menu dropdown-menu-lg-end mt-2 p-3" aria-labelledby="user-menu" data-ahg-style="min-width: 280px;">
-    <h6 class="dropdown-header px-0"><?php echo __('Have an account?'); ?></h6>
+    <span class="dropdown-header px-0"><?php echo __('Have an account?'); ?></span>
     <?php echo $form->renderFormTag(url_for(['module' => 'user', 'action' => 'login']), ['class' => 'mt-2']); ?>
       <?php echo $form->renderHiddenFields(); ?>
       <?php echo render_field($form->email, null, ['class' => 'form-control-sm']); ?>
@@ -145,7 +145,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
   <ul class="dropdown-menu dropdown-menu-lg-end mt-2" aria-labelledby="user-menu">
 
     <!-- Profile Section -->
-    <li><h6 class="dropdown-header"><i class="fas fa-user me-1"></i><?php echo __('Profile'); ?></h6></li>
+    <li><span class="dropdown-header"><i class="fas fa-user me-1"></i><?php echo __('Profile'); ?></span></li>
     <li>
       <?php
         // 'user/<slug>' has no route: Symfony reads it as module user, action
@@ -167,7 +167,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
     <?php if ($hasSpectrum && $sf_user->hasCredential(['administrator', 'editor', 'contributor', 'translator'], false)): ?>
     <!-- Spectrum Tasks Section -->
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><i class="fas fa-tasks me-1"></i><?php echo __('Tasks'); ?></h6></li>
+    <li><span class="dropdown-header"><i class="fas fa-tasks me-1"></i><?php echo __('Tasks'); ?></span></li>
     <li>
       <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@spectrum_my_tasks'); ?>">
         <span><i class="fas fa-clipboard-list me-2"></i><?php echo __('My Tasks'); ?></span>
@@ -186,7 +186,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
     <?php if ($hasResearch): ?>
     <!-- Research Section -->
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><i class="fas fa-book-reader me-1"></i><?php echo __('Research'); ?></h6></li>
+    <li><span class="dropdown-header"><i class="fas fa-book-reader me-1"></i><?php echo __('Research'); ?></span></li>
     <li>
       <a class="dropdown-item" href="<?php echo url_for('@research_dashboard'); ?>">
         <i class="fas fa-folder-open me-2"></i><?php echo __('My Workspace'); ?>
@@ -207,7 +207,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
     <?php if ($hasAccessRequest): ?>
     <!-- Security Section -->
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><i class="fas fa-shield-alt me-1"></i><?php echo __('Security'); ?></h6></li>
+    <li><span class="dropdown-header"><i class="fas fa-shield-alt me-1"></i><?php echo __('Security'); ?></span></li>
     <li>
       <a class="dropdown-item" href="<?php echo url_for('@access_request_my'); ?>">
         <i class="fas fa-key me-2"></i><?php echo __('My Access Requests'); ?>
@@ -235,7 +235,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
     <!-- SAHRA heritage permits -->
     <?php if ($hasSahra && $sahraTotal > 0): ?>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><i class="fas fa-landmark me-1"></i><?php echo __('Heritage permits'); ?></h6></li>
+    <li><span class="dropdown-header"><i class="fas fa-landmark me-1"></i><?php echo __('Heritage permits'); ?></span></li>
     <?php if ($sahraEndorseCount > 0): ?>
     <li>
       <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@sahra_approvals'); ?>">
@@ -257,7 +257,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
     <?php if ($isAdmin && $hasResearch && ($pendingResearcherCount > 0 || $pendingBookingCount > 0)): ?>
     <!-- Admin Notifications -->
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header"><i class="fas fa-bell me-1"></i><?php echo __('Notifications'); ?></h6></li>
+    <li><span class="dropdown-header"><i class="fas fa-bell me-1"></i><?php echo __('Notifications'); ?></span></li>
     <?php if ($pendingResearcherCount > 0): ?>
     <li>
       <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@research_researchers'); ?>">

@@ -3,10 +3,10 @@
 <div id="wrapper" class="container-xxl pt-3 flex-grow-1">
   <?php echo get_partial('alerts'); ?>
   <div class="row">
-    <div id="sidebar" class="col-md-3" role="complementary" aria-label="Filters and navigation">
+    <div id="sidebar" class="col-md-3" role="complementary" aria-label="<?php echo __('Filters and navigation'); ?>">
       <?php include_slot('sidebar'); ?>
     </div>
-    <div id="main-column" class="col-md-9" role="main">
+    <div id="main-column" class="col-md-9" role="main" tabindex="-1">
       <?php include_slot('title'); ?>
       <?php include_slot('before-content'); ?>
       <?php if (!include_slot('content')) { ?>

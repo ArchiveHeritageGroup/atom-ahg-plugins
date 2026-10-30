@@ -38,9 +38,9 @@
   </a>
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="<?php echo $menu->getName(); ?>-menu">
     <li>
-      <h6 class="dropdown-header">
+      <span class="dropdown-header">
         <?php echo $menu->getLabel(['cultureFallback' => true]); ?>
-      </h6>
+      </span>
     </li>
     <li class="text-muted text-nowrap px-3 pb-2">
       <span

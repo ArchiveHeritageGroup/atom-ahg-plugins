@@ -13,8 +13,8 @@
   id="search-box"
   class="d-flex flex-grow-1 my-2"
   role="search"
+  aria-label="<?php echo __('Search'); ?>"
   action="<?php echo AhgNav::safeUrl('@glam_browse', url_for(['module' => 'informationobject', 'action' => 'browse'])); ?>">
-  <h2 class="visually-hidden"><?php echo __('Search'); ?></h2>
   <input type="hidden" name="topLod" value="0">
   <input type="hidden" name="sort" value="relevance">
   <div class="input-group flex-nowrap">

@@ -744,7 +744,7 @@
 
     <!-- Admin area -->
     <div class="card mb-3">
-      <div class="card-header"><h5 class="mb-0"><?php echo __('Administration area'); ?></h5></div>
+      <div class="card-header"><h2 class="h5 mb-0"><?php echo __('Administration area'); ?></h2></div>
       <div class="card-body">
         <?php if (!$isNew && $rawIo['parentTitle']) { ?>
           <div class="mb-3">

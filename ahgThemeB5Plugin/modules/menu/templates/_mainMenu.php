@@ -60,9 +60,9 @@ $hasRic = checkPluginEnabled('ahgRicManagePlugin');
       </a>
       <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="<?php echo $menu->getName(); ?>-menu">
         <li>
-          <h6 class="dropdown-header">
+          <span class="dropdown-header">
             <?php echo $menu->getLabel(['cultureFallback' => true]); ?>
-          </h6>
+          </span>
         </li>
         <?php foreach ($menu->getChildren() as $child) { ?>
           <?php if ($child->checkUserAccess()) { ?>
@@ -80,7 +80,7 @@ $hasRic = checkPluginEnabled('ahgRicManagePlugin');
         <?php if ('add' == $menu->getName()): ?>
           <?php if ($hasLibrary || $hasMuseum || $hasGallery || $hasDam || $hasRic): ?>
             <li><hr class="dropdown-divider"></li>
-            <li><h6 class="dropdown-header"><?php echo __('Sector Items'); ?></h6></li>
+            <li><span class="dropdown-header"><?php echo __('Sector Items'); ?></span></li>
           <?php endif; ?>
           <?php if ($hasRic): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricManage', 'action' => 'add']); ?>"><i class="fas fa-project-diagram fa-fw me-2"></i><?php echo __('Records in Context (RiC)'); ?></a></li>
