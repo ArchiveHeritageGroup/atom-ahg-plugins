@@ -19,7 +19,9 @@ use Illuminate\Support\Collection;
  */
 class WatermarkRepository
 {
-    protected static string $systemWatermarkPath = '/images/watermarks/';
+    // Shipped with ahgCorePlugin; the images were never part of any plugin before, so system
+    // and security watermarks silently did nothing on every site without a hand-made copy (#296).
+    protected static string $systemWatermarkPath = '/plugins/ahgCorePlugin/web/images/watermarks/';
 
     /**
      * Get watermark settings for an object.

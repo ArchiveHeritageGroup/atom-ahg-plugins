@@ -17,7 +17,9 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class WatermarkSettingsService
 {
-    protected static string $watermarkPath = '/images/watermarks/';
+    // Shipped with ahgCorePlugin; the images were never part of any plugin before, so system
+    // and security watermarks silently did nothing on every site without a hand-made copy (#296).
+    protected static string $watermarkPath = '/plugins/ahgCorePlugin/web/images/watermarks/';
     protected static string $cacheFile = '/tmp/cantaloupe_classifications.json';
 
     /**

@@ -48,7 +48,8 @@ $certaintyClass = function ($c) {
 <?php } ?>
 <div class="card mb-3 provenance-display">
   <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-    <h6 class="mb-0"><i class="fas fa-clock-rotate-left me-2"></i><?php echo __('Provenance') ?></h6>
+    <?php // h2 sized as h6: the panel sits under the record's h2 sections (WCAG 1.3.1, #213). ?>
+    <h2 class="h6 mb-0"><i class="fas fa-clock-rotate-left me-2" aria-hidden="true"></i><?php echo __('Provenance') ?></h2>
     <?php if ($slug): ?>
     <div class="btn-group btn-group-sm" role="group">
       <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $slug]) ?>" class="btn btn-outline-primary">
