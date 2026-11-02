@@ -154,7 +154,8 @@ class SettingsServicesAction extends AhgController
                 $engineVersion = SearchEngineFactory::getEngineVersion($host, (int) $port);
             }
 
-            $ch = curl_init("http://{$host}:{$port}/_cluster/health");
+            $ch = curl_init(\AtomFramework\Services\Search\SearchConnection::url('/_cluster/health'));
+            curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 5,

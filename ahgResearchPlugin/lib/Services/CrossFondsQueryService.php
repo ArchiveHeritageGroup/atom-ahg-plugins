@@ -27,8 +27,8 @@ class CrossFondsQueryService
 
     public function __construct()
     {
-        // Read the search.yml or fall back to host/port defaults
-        $this->baseUrl   = (string) (sfConfig::get('app_search_host_url') ?: 'http://localhost:9200');
+        // Scheme, host, port and credentials come from the framework (catalog #316)
+        $this->baseUrl   = \AtomFramework\Services\Search\SearchConnection::baseUrl();
         $this->indexName = $this->resolveIndexName();
     }
 
@@ -182,6 +182,7 @@ class CrossFondsQueryService
 
         $url = rtrim($this->baseUrl, '/') . '/' . $this->indexName . '/_search';
         $ch = curl_init($url);
+        curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => json_encode($payload),

@@ -5,7 +5,7 @@
 <?php
 $fonds = sfOutputEscaper::unescape($fonds ?? []);
 $results = sfOutputEscaper::unescape($results);
-$selected = $selectedFondsIds ?? [];
+$selected = sfOutputEscaper::unescape($selectedFondsIds ?? []);
 ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">

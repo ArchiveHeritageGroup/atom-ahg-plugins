@@ -102,6 +102,10 @@ final class AtomElasticsearchConnector implements PeerConnector
 
         $url = rtrim($base, '/') . '/' . $index . '/_search';
         $ch = curl_init($url);
+        // Local credentials only for the local engine, never sent to a peer's own base_url
+        if (!isset($this->config['base_url'])) {
+            curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
+        }
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($body),
@@ -181,7 +185,7 @@ final class AtomElasticsearchConnector implements PeerConnector
     {
         // Per-peer override, falls back to AtoM-wide setting
         return (string) ($this->config['base_url']
-            ?? (\sfConfig::get('app_search_host_url') ?: 'http://localhost:9200'));
+            ?? \AtomFramework\Services\Search\SearchConnection::baseUrl());
     }
 
     private function openSearchIndex(): string
