@@ -68,8 +68,18 @@
 
             <div class="mb-3">
               <label for="content" class="form-label"><?php echo __('Content'); ?></label>
-              <textarea class="form-control" id="content" name="content" rows="20"><?php echo esc_specialchars($rawRecord['content'] ?? ''); ?></textarea>
-              <div class="form-text"><?php echo __('HTML content is allowed.'); ?></div>
+              <?php // Content Security Policy note, as upstream AtoM 2.11 adds it (artefactual/atom#2330, catalog #317).
+                    // Shown only when this request carries a CSP nonce, i.e. the site enforces the policy. ?>
+              <?php $cspOn = '' !== (string) sfConfig::get('csp_nonce', ''); ?>
+              <textarea class="form-control" id="content" name="content" rows="20" aria-describedby="content-help"><?php echo esc_specialchars($rawRecord['content'] ?? ''); ?></textarea>
+              <div class="form-text" id="content-help">
+                <?php echo __('HTML content is allowed.'); ?>
+                <?php if ($cspOn) { ?>
+                  <?php echo esc_specialchars(__('This site has a Content Security Policy, so <script> and <style> elements and style="..." attributes in the content are saved but do not take effect.')); ?>
+                  <?php echo esc_specialchars(__('Style the page with Bootstrap 5 classes instead (for example class="lead" or class="text-center"), or with classes added to the site theme.')); ?>
+                  <a href="https://accesstomemory.org/en/docs/2.10/user-manual/administer/static-pages/#styling-static-pages" target="_blank" rel="noopener"><?php echo __('Styling static pages'); ?></a>
+                <?php } ?>
+              </div>
             </div>
 
           </div>
