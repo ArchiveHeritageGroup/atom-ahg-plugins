@@ -1,5 +1,44 @@
-<?php decorate_with('layout_1col'); ?>
+<?php // Facets in a sidebar, as in upstream AtoM 2.11 (artefactual/atom#2207, catalog #317).
+      // Shown when there are results, or a filter is set and "All" is the way back. ?>
+<?php $facetFilters = $sf_data->getRaw('filters'); ?>
+<?php $showFacets = ($pager->getNbResults() > 0) || !empty($facetFilters); ?>
+<?php decorate_with($showFacets ? 'layout_2col' : 'layout_1col'); ?>
 <?php use_helper('Date'); ?>
+
+<?php if ($showFacets) { ?>
+  <?php slot('sidebar'); ?>
+    <h2 class="d-grid">
+      <button
+        class="btn btn-lg atom-btn-white collapsed text-wrap"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapse-aggregations"
+        aria-expanded="false"
+        aria-controls="collapse-aggregations">
+        <?php echo sfConfig::get('app_ui_label_facetstitle', __('Narrow your results by:')); ?>
+      </button>
+    </h2>
+
+    <div class="collapse" id="collapse-aggregations">
+      <?php foreach ([
+          'acquisitionType' => __('Acquisition type'),
+          'resourceType' => __('Resource type'),
+          'processingStatus' => __('Processing status'),
+          'processingPriority' => __('Processing priority'),
+          'donor' => __('Donor'),
+          'creator' => __('Creator'),
+      ] as $facetName => $facetLabel) { ?>
+        <?php echo get_partial('search/aggregation', [
+            'id' => '#facet-'.$facetName,
+            'label' => $facetLabel,
+            'name' => $facetName,
+            'aggs' => $sf_data->getRaw('aggs'),
+            'filters' => $facetFilters,
+        ]); ?>
+      <?php } ?>
+    </div>
+  <?php end_slot(); ?>
+<?php } ?>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Browse accessions'); ?></h1>

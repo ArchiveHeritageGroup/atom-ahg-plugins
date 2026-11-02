@@ -74,6 +74,12 @@ class accessionManageActions extends AhgController
         // Create service
         $service = new \AhgAccessionManage\Services\AccessionBrowseService($culture);
 
+        // Selected facets (#317); the service accepts numeric ids only.
+        $facetParams = [];
+        foreach (array_keys(\AhgAccessionManage\Services\AccessionBrowseService::AGGS) as $name) {
+            $facetParams[$name] = (string) $request->getParameter($name, '');
+        }
+
         // Execute browse
         $browseResult = $service->browse([
             'page' => $page,
@@ -82,7 +88,11 @@ class accessionManageActions extends AhgController
             'sortDir' => $sortDir,
             'subquery' => $subquery,
             'repository' => (int) $request->getParameter('repository'),
-        ]);
+        ] + $facetParams);
+
+        // Facets (#317): buckets with names, and the filters now applied.
+        $this->aggs = $browseResult['aggs'] ?? [];
+        $this->filters = $browseResult['filters'] ?? [];
 
         // Build pager
         $this->pager = new \AhgAccessionManage\SimplePager(

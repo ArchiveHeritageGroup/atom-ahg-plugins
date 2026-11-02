@@ -29,6 +29,20 @@ class AccessionBrowseService
         $this->indexName = $indexName . '_qubitaccession';
     }
 
+    /**
+     * Browse facets, as upstream AtoM 2.11 adds them (artefactual/atom#2207,
+     * catalog #317): request parameter => index field. The four term facets
+     * resolve to term names, donor and creator to actor names.
+     */
+    public const AGGS = [
+        'acquisitionType' => 'acquisitionType.id',
+        'resourceType' => 'resourceType.id',
+        'processingStatus' => 'processingStatus.id',
+        'processingPriority' => 'processingPriority.id',
+        'donor' => 'donors.id',
+        'creator' => 'creators.id',
+    ];
+
     public function browse(array $params): array
     {
         $page = max(1, (int) ($params['page'] ?? 1));
@@ -104,6 +118,16 @@ class AccessionBrowseService
             $boolQuery['filter'] = [['ids' => ['values' => array_map('strval', $repoIds)]]];
         }
 
+        // Selected facets (#317). Ids only: anything else in the URL is ignored.
+        $filters = [];
+        foreach (self::AGGS as $name => $field) {
+            $value = (string) ($params[$name] ?? '');
+            if ('' !== $value && ctype_digit($value)) {
+                $filters[$name] = (int) $value;
+                $boolQuery['filter'][] = ['term' => [$field => (int) $value]];
+            }
+        }
+
         // Sort
         $sort = $this->buildSort(
             $params['sort'] ?? 'lastUpdated',
@@ -125,6 +149,7 @@ class AccessionBrowseService
             '_source' => $source,
             'query' => ['bool' => $boolQuery],
             'sort' => $sort,
+            'aggs' => array_map(fn ($field) => ['terms' => ['field' => $field, 'size' => 10]], self::AGGS),
         ];
 
         $response = $this->esRequest($this->indexName, '/_search', $body);
@@ -135,6 +160,8 @@ class AccessionBrowseService
                 'total' => 0,
                 'page' => $page,
                 'limit' => $limit,
+                'aggs' => [],
+                'filters' => $filters,
             ];
         }
 
@@ -204,7 +231,57 @@ class AccessionBrowseService
             'total' => $total,
             'page' => $page,
             'limit' => $limit,
+            'aggs' => $this->populateAggs($response['aggregations'] ?? []),
+            'filters' => $filters,
         ];
+    }
+
+    /**
+     * Buckets as the theme's search/aggregation partial expects them:
+     * key, display, doc_count. Names in the user's culture, else the source
+     * culture; a bucket whose id no longer resolves is dropped.
+     */
+    protected function populateAggs(array $raw): array
+    {
+        $ids = ['term' => [], 'actor' => []];
+        foreach (self::AGGS as $name => $field) {
+            foreach ($raw[$name]['buckets'] ?? [] as $b) {
+                $ids[in_array($name, ['donor', 'creator'], true) ? 'actor' : 'term'][] = (int) $b['key'];
+            }
+        }
+
+        $c = $this->culture;
+        $names = ['term' => [], 'actor' => []];
+        foreach (['term' => 'name', 'actor' => 'authorized_form_of_name'] as $table => $column) {
+            if ([] === $ids[$table]) {
+                continue;
+            }
+            $names[$table] = DB::table($table)
+                ->leftJoin("{$table}_i18n as cur", function ($j) use ($table, $c) {
+                    $j->on('cur.id', '=', "{$table}.id")->where('cur.culture', '=', $c);
+                })
+                ->leftJoin("{$table}_i18n as src", function ($j) use ($table) {
+                    $j->on('src.id', '=', "{$table}.id")->on('src.culture', '=', "{$table}.source_culture");
+                })
+                ->whereIn("{$table}.id", array_unique($ids[$table]))
+                ->selectRaw("{$table}.id, COALESCE(NULLIF(cur.{$column}, ''), src.{$column}) AS name")
+                ->pluck('name', 'id')
+                ->all();
+        }
+
+        $aggs = [];
+        foreach (self::AGGS as $name => $field) {
+            $table = in_array($name, ['donor', 'creator'], true) ? 'actor' : 'term';
+            $aggs[$name] = [];
+            foreach ($raw[$name]['buckets'] ?? [] as $b) {
+                $label = $names[$table][(int) $b['key']] ?? null;
+                if (null !== $label && '' !== $label) {
+                    $aggs[$name][] = ['key' => (int) $b['key'], 'display' => $label, 'doc_count' => (int) $b['doc_count']];
+                }
+            }
+        }
+
+        return $aggs;
     }
 
     /** Accession ids whose CAAIS 1.1 repository is $repositoryId. */
