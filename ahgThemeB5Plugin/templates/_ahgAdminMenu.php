@@ -130,6 +130,7 @@ if ($isAdmin && $hasResearcher) {
     <span class="visually-hidden"><?php echo __('AHG Plugins'); ?></span>
   </a>
   <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="ahg-plugins-menu">
+    <?php ob_start(); ?>
     <li><span class="dropdown-header"><?php echo __('Settings'); ?></span></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('AHG Settings'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgDropdown', 'action' => 'index']); ?>"><i class="fas fa-list-alt fa-fw me-1"></i><?php echo __('Dropdown Manager'); ?></a></li>
@@ -254,6 +255,46 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'backup', 'action' => 'restore']); ?>"><i class="fas fa-undo-alt fa-fw me-1"></i><?php echo __('Restore'); ?></a></li>
     <?php endif; ?>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'jobs', 'action' => 'browse']); ?>"><i class="fas fa-tasks fa-fw me-1"></i><?php echo __('Jobs'); ?></a></li>
+    <?php
+    // Entries plugins register with AhgNav::register('manage', ...) (catalog #292).
+    // On stock AtoM ahgCorePlugin renders them; with this theme only this menu can,
+    // so any not already linked from this list or from AtoM's own menus are added here.
+    $ahgMenuHtml = ob_get_clean();
+    echo $ahgMenuHtml;
+    $ahgNavExtra = [];
+    if (class_exists('AhgNav')) {
+        $ahgNorm = static fn ($h) => rtrim((string) parse_url($h, PHP_URL_PATH), '/').'?'.(string) parse_url($h, PHP_URL_QUERY);
+        preg_match_all('/href="([^"]+)"/', $ahgMenuHtml, $m);
+        $ahgLinked = array_flip(array_map($ahgNorm, $m[1]));
+        try {
+            foreach (\Illuminate\Database\Capsule\Manager::table('menu')->whereNotNull('path')->pluck('path') as $ahgPath) {
+                if (false === strpos($ahgPath, '%')) {
+                    try {
+                        $ahgLinked[$ahgNorm(url_for($ahgPath))] = true;
+                    } catch (Exception $e) {
+                        // A menu row naming a route that is not loaded links nowhere.
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+        }
+        foreach (AhgNav::resolved('manage', $sf_user) as $item) {
+            $ahgKey = $ahgNorm($item['href']);
+            if (!isset($ahgLinked[$ahgKey])) {
+                $ahgLinked[$ahgKey] = true;
+                $ahgNavExtra[] = $item;
+            }
+        }
+    }
+    ?>
+    <?php if ($ahgNavExtra): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><span class="dropdown-header"><?php echo __('More'); ?></span></li>
+    <?php foreach ($ahgNavExtra as $item): ?>
+    <li><a class="dropdown-item" href="<?php echo htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(__($item['label']), ENT_QUOTES, 'UTF-8'); ?><?php if (!empty($item['badgeCount'])): ?> <span class="badge bg-secondary rounded-pill"><?php echo (int) $item['badgeCount']; ?></span><?php endif; ?></a></li>
+    <?php endforeach; ?>
+    <?php endif; ?>
   </ul>
 </li>
 <?php endif; ?>

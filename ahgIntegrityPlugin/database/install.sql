@@ -228,32 +228,9 @@ VALUES
 (1, 'Daily Sample Check', 'Verifies a sample of 200 digital objects daily to detect early signs of data corruption', 'global', 'sha256', 'daily', 200, 10, 512, 30, 1, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY), 1, 1),
 (2, 'Weekly Full Scan', 'Comprehensive weekly verification of all master digital objects across all repositories', 'global', 'sha256', 'weekly', 0, 5, 1024, 480, 1, 0, NULL, 1, 1);
 
--- =====================================================
--- Admin menu entry: Admin > Integrity
--- Inserts as last child of the Admin menu node (name='admin')
--- Uses MPTT: shift rgt values to make room, then insert
--- =====================================================
-SET @admin_rgt = (SELECT rgt FROM menu WHERE name = 'admin' LIMIT 1);
-
--- Only insert if not already present
-SET @exists = (SELECT COUNT(*) FROM menu WHERE name = 'integrity');
-
--- Make room in the nested set: shift nodes to the right
-UPDATE menu SET rgt = rgt + 2 WHERE rgt >= @admin_rgt AND @exists = 0;
-UPDATE menu SET lft = lft + 2 WHERE lft > @admin_rgt AND @exists = 0;
-
--- Insert the menu node as last child of Admin
-INSERT INTO menu (parent_id, name, path, lft, rgt, created_at, updated_at, source_culture, serial_number)
-SELECT id, 'integrity', 'integrity/index', @admin_rgt, @admin_rgt + 1, NOW(), NOW(), 'en', 0
-FROM menu WHERE name = 'admin' AND @exists = 0
-LIMIT 1;
-
--- Insert the i18n label
-INSERT INTO menu_i18n (id, culture, label, description)
-SELECT m.id, 'en', 'Integrity', 'Integrity assurance: fixity verification, retention policies, legal holds, alerting'
-FROM menu m WHERE m.name = 'integrity' AND NOT EXISTS (
-    SELECT 1 FROM menu_i18n mi WHERE mi.id = m.id AND mi.culture = 'en'
-);
+-- No menu row: the plugin registers its menu entry at runtime with
+-- AhgNav::register('manage', ...), so it disappears when the plugin is disabled
+-- (catalog #273).
 
 -- =====================================================
 -- Settings defaults for integrity assurance

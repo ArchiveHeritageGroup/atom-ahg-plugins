@@ -14,32 +14,9 @@
 --
 -- Installing schema and deciding to run a plugin are separate acts.
 
--- =====================================================
--- Menu entry: Import > FTP Upload
--- Inserts as last child of the Import menu node (name='import')
--- Uses MPTT: shift rgt values to make room, then insert
--- =====================================================
-SET @import_rgt = (SELECT rgt FROM menu WHERE name = 'import' LIMIT 1);
-
--- Only insert if not already present
-SET @exists = (SELECT COUNT(*) FROM menu WHERE name = 'ftpUpload');
-
--- Make room in the nested set: shift nodes to the right
-UPDATE menu SET rgt = rgt + 2 WHERE rgt >= @import_rgt AND @exists = 0;
-UPDATE menu SET lft = lft + 2 WHERE lft > @import_rgt AND @exists = 0;
-
--- Insert the menu node as last child of Import
-INSERT INTO menu (parent_id, name, path, lft, rgt, created_at, updated_at, source_culture, serial_number)
-SELECT id, 'ftpUpload', 'ftpUpload/index', @import_rgt, @import_rgt + 1, NOW(), NOW(), 'en', 0
-FROM menu WHERE name = 'import' AND @exists = 0
-LIMIT 1;
-
--- Insert the i18n label
-INSERT INTO menu_i18n (id, culture, label, description)
-SELECT m.id, 'en', 'FTP Upload', 'Upload digital objects via FTP/SFTP for CSV import'
-FROM menu m WHERE m.name = 'ftpUpload' AND NOT EXISTS (
-    SELECT 1 FROM menu_i18n mi WHERE mi.id = m.id AND mi.culture = 'en'
-);
+-- No menu row: the plugin registers its menu entry at runtime with
+-- AhgNav::register('manage', ...), so it disappears when the plugin is disabled
+-- (catalog #273).
 
 -- =====================================================
 -- Default settings (group: ftp)

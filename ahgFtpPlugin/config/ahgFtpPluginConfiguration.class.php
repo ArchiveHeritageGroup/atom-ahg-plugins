@@ -28,7 +28,7 @@ class ahgFtpPluginConfiguration extends sfPluginConfiguration
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'Ftp', [
                 'url' => '/index.php/ftp-upload',
-                'label' => 'Ftp',
+                'label' => 'FTP upload',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 70,
             ]);

@@ -46,32 +46,9 @@ CREATE TABLE IF NOT EXISTS portable_export_token (
     INDEX idx_portable_export_token (token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================================================
--- Admin menu entry: Admin > Portable Export
--- Inserts as last child of the Admin menu node (name='admin')
--- Uses MPTT: shift rgt values to make room, then insert
--- =====================================================
-SET @admin_rgt = (SELECT rgt FROM menu WHERE name = 'admin' LIMIT 1);
-
--- Only insert if not already present
-SET @exists = (SELECT COUNT(*) FROM menu WHERE name = 'portableExport');
-
--- Make room in the nested set: shift nodes to the right
-UPDATE menu SET rgt = rgt + 2 WHERE rgt >= @admin_rgt AND @exists = 0;
-UPDATE menu SET lft = lft + 2 WHERE lft > @admin_rgt AND @exists = 0;
-
--- Insert the menu node as last child of Admin
-INSERT INTO menu (parent_id, name, path, lft, rgt, created_at, updated_at, source_culture, serial_number)
-SELECT id, 'portableExport', 'portableExport/index', @admin_rgt, @admin_rgt + 1, NOW(), NOW(), 'en', 0
-FROM menu WHERE name = 'admin' AND @exists = 0
-LIMIT 1;
-
--- Insert the i18n label
-INSERT INTO menu_i18n (id, culture, label, description)
-SELECT m.id, 'en', 'Portable Export', 'Export catalogue to CD/USB/ZIP for offline viewing'
-FROM menu m WHERE m.name = 'portableExport' AND NOT EXISTS (
-    SELECT 1 FROM menu_i18n mi WHERE mi.id = m.id AND mi.culture = 'en'
-);
+-- No menu row: the plugin registers its menu entry at runtime with
+-- AhgNav::register('manage', ...), so it disappears when the plugin is disabled
+-- (catalog #273).
 
 -- =====================================================
 -- Import job tracking
