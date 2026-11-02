@@ -72,7 +72,8 @@
         <td>
           <?php if (isset($doc['thematicAreas'])) { ?>
             <?php foreach ($doc['thematicAreas'] as $areaTerm) { ?>
-              <li><?php echo term_name($areaTerm) ?: ''; ?></li>
+              <?php // A paragraph per area, not a bare <li> outside any list (artefactual/atom#2371, catalog #317). ?>
+              <p class="mb-0"><?php echo term_name($areaTerm) ?: ''; ?></p>
             <?php } ?>
           <?php } ?>
         </td>

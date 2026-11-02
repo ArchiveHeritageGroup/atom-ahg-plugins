@@ -73,7 +73,8 @@
           <?php if (isset($rawDoc['thematicAreas'])) { ?>
             <?php $rawThematicNames = sfOutputEscaper::unescape($thematicAreaNames); ?>
             <?php foreach ($rawDoc['thematicAreas'] as $areaTerm) { ?>
-              <li><?php echo render_value_inline($rawThematicNames[(int) $areaTerm] ?? ''); ?></li>
+              <?php // A paragraph per area, not a bare <li> outside any list (artefactual/atom#2371, catalog #317). ?>
+              <p class="mb-0"><?php echo render_value_inline($rawThematicNames[(int) $areaTerm] ?? ''); ?></p>
             <?php } ?>
           <?php } ?>
         </td>
