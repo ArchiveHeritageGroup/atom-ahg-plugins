@@ -32,7 +32,7 @@ class ahgOcflPluginConfiguration extends sfPluginConfiguration
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'Ocfl', [
                 'url' => '/index.php/admin/ocfl',
-                'label' => 'Ocfl',
+                'label' => 'OCFL storage',
                 'credentials' => ['administrator'],
                 'weight' => 70,
             ]);

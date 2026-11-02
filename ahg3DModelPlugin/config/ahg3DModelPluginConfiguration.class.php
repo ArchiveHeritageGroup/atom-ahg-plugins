@@ -30,7 +30,7 @@ class ahg3DModelPluginConfiguration extends sfPluginConfiguration
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', '3DModel', [
                 'url' => '/index.php/ahg3DModel/index',
-                'label' => '3 D Model',
+                'label' => '3D models',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 70,
             ]);

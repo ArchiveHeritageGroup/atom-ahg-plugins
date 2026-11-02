@@ -33,7 +33,7 @@ class ahgRdmPluginConfiguration extends sfPluginConfiguration
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'Rdm', [
                 'url' => '/index.php/research/datasets',
-                'label' => 'Rdm',
+                'label' => 'Research datasets',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 70,
             ]);

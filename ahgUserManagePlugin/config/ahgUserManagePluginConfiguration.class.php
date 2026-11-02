@@ -14,8 +14,8 @@ class ahgUserManagePluginConfiguration extends sfPluginConfiguration
         // Without it the plugin was reachable only by typing its URL.
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'UserManage', [
-                'url' => '/index.php/user',
-                'label' => 'User Manage',
+                'url' => '/index.php/user/list',
+                'label' => 'Users',
                 'credentials' => ['administrator'], // the page admits administrators only
                 'weight' => 70,
             ]);

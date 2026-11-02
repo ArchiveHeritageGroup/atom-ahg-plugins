@@ -14,8 +14,8 @@ class ahgJobsManagePluginConfiguration extends sfPluginConfiguration
         // Without it the plugin was reachable only by typing its URL.
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'JobsManage', [
-                'url' => '/index.php/jobs',
-                'label' => 'Jobs Manage',
+                'url' => '/index.php/jobs/browse',
+                'label' => 'Jobs',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 70,
             ]);

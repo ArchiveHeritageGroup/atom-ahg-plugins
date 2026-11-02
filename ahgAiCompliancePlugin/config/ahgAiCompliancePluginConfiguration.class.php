@@ -31,7 +31,7 @@ class ahgAiCompliancePluginConfiguration extends sfPluginConfiguration
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'AiCompliance', [
                 'url' => '/index.php/admin/ai-act',
-                'label' => 'Ai Compliance',
+                'label' => 'AI Act compliance',
                 'credentials' => ['administrator'],
                 'weight' => 70,
             ]);

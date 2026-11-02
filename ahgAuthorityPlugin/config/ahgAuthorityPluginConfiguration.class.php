@@ -38,7 +38,7 @@ class ahgAuthorityPluginConfiguration extends sfPluginConfiguration
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'Authority', [
                 'url' => '/index.php/admin/authority/dedup',
-                'label' => 'Authority',
+                'label' => 'Authority deduplication',
                 'credentials' => ['administrator'],
                 'weight' => 70,
             ]);
