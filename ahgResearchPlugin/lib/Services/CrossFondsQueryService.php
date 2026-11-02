@@ -5,8 +5,8 @@
  *
  * Spec: docs/atom-heratio-research-enhancements-spec.md §1.6
  *
- * Fan-out: one ES/OpenSearch query per selected fonds, scoped by lft/rgt range
- * (lft >= fonds.lft AND rgt <= fonds.rgt). Top-K=10 per fonds, merged by _score,
+ * Fan-out: one ES/OpenSearch query per selected fonds, scoped by ancestor id
+ * (the fonds itself or any record with it in ancestors). Top-K=10 per fonds, merged by _score,
  * final top-K=30.
  *
  * Optional thesaurus expansion via SemanticSearchService (if enabled).
@@ -95,16 +95,16 @@ class CrossFondsQueryService
             }
         }
 
-        // Look up fonds lft/rgt ranges
+        // Only fonds that exist
         $fondsRows = DB::table('information_object')
             ->whereIn('id', $fondsIds)
-            ->select('id', 'lft', 'rgt')
+            ->select('id')
             ->get()
             ->all();
 
         $all = [];
         foreach ($fondsRows as $f) {
-            $hits = $this->queryFonds($effectiveQuery, (int) $f->lft, (int) $f->rgt, $perFondsK);
+            $hits = $this->queryFonds($effectiveQuery, (int) $f->id, $perFondsK);
             foreach ($hits as $h) {
                 $h['fonds_id'] = (int) $f->id;
                 $all[] = $h;
@@ -160,9 +160,10 @@ class CrossFondsQueryService
     }
 
     /**
-     * Issue one OpenSearch query scoped to the lft/rgt range of a single fonds.
+     * Issue one OpenSearch query scoped to a single fonds and its descendants.
+     * The index stores each record's ancestor ids but not rgt, so scope by ancestors.
      */
-    protected function queryFonds(string $query, int $lft, int $rgt, int $k): array
+    protected function queryFonds(string $query, int $fondsId, int $k): array
     {
         $payload = [
             'size'    => $k,
@@ -173,8 +174,10 @@ class CrossFondsQueryService
                         ['query_string' => ['query' => $query, 'fields' => ['i18n.*.title^3', 'i18n.*.scope_and_content', 'i18n.*.extent_and_medium', 'identifier']]],
                     ],
                     'filter' => [
-                        ['range' => ['lft' => ['gte' => $lft]]],
-                        ['range' => ['rgt' => ['lte' => $rgt]]],
+                        ['bool' => ['should' => [
+                            ['term' => ['ancestors' => $fondsId]],
+                            ['ids' => ['values' => [(string) $fondsId]]],
+                        ], 'minimum_should_match' => 1]],
                     ],
                 ],
             ],
