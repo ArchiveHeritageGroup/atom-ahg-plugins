@@ -82,6 +82,18 @@ class iiifActions extends AhgController
     }
 
     /**
+     * Whether this user may write annotations on a record: the same right as
+     * editing it (catalog #294). Annotations are shown to every visitor, so a
+     * signed-in account alone is not enough.
+     */
+    private function canAnnotate(int $objectId): bool
+    {
+        $resource = \QubitInformationObject::getById($objectId);
+
+        return null !== $resource && \QubitAcl::check($resource, 'update');
+    }
+
+    /**
      * Whether this user may see the record at all: its publication state, and
      * nothing the access filter hides (embargo, classification, donor
      * restriction, ICIP, ODRL). Manifests and content search only checked
@@ -867,9 +879,17 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Object ID required']));
         }
 
+        // Same rule as the manifest: no annotations for a record this user may not see.
+        if (!$this->canSeeRecord((int) $objectId)) {
+            $this->response->setStatusCode(404);
+
+            return $this->renderText(json_encode(['error' => 'Not found']));
+        }
+
         $service = new IiifAnnotationService();
         $annotations = $service->getAnnotationsForObject($objectId);
         $page = $service->formatAsAnnotationPage($annotations, $objectId);
+        $page['items'] = array_merge($page['items'], $service->getPublicResearchItems((int) $objectId));
 
         $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
 
@@ -883,7 +903,6 @@ class iiifActions extends AhgController
     public function executeAnnotationsCreate($request)
     {
         $this->response->setContentType('application/json');
-        $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
 
         if (!$this->getUser()->isAuthenticated()) {
             $this->response->setStatusCode(401);
@@ -897,6 +916,12 @@ class iiifActions extends AhgController
             $this->response->setStatusCode(400);
 
             return $this->renderText(json_encode(['error' => 'Invalid annotation data']));
+        }
+
+        if (!$this->canAnnotate((int) $data['object_id'])) {
+            $this->response->setStatusCode(403);
+
+            return $this->renderText(json_encode(['error' => 'Not allowed to annotate this record']));
         }
 
         $service = new IiifAnnotationService();
@@ -914,7 +939,7 @@ class iiifActions extends AhgController
 
         return $this->renderText(json_encode([
             'success' => true,
-            'id' => '#' . $annotationId,
+            'id' => $service->annotationUri($annotationId),
         ]));
     }
 
@@ -943,7 +968,7 @@ class iiifActions extends AhgController
         $service = new IiifAnnotationService();
         $existing = $service->getAnnotation($annotationId);
 
-        if (!$existing) {
+        if (!$existing || !$this->canSeeRecord((int) $existing->object_id)) {
             $this->response->setStatusCode(404);
 
             return $this->renderText(json_encode(['error' => 'Annotation not found']));
@@ -959,7 +984,6 @@ class iiifActions extends AhgController
     public function executeAnnotationsUpdate($request)
     {
         $this->response->setContentType('application/json');
-        $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
 
         if (!$this->getUser()->isAuthenticated()) {
             $this->response->setStatusCode(401);
@@ -984,6 +1008,12 @@ class iiifActions extends AhgController
             $this->response->setStatusCode(404);
 
             return $this->renderText(json_encode(['error' => 'Annotation not found']));
+        }
+
+        if (!$this->canAnnotate((int) $existing->object_id)) {
+            $this->response->setStatusCode(403);
+
+            return $this->renderText(json_encode(['error' => 'Not allowed to annotate this record']));
         }
 
         $updateData = [];
@@ -1021,7 +1051,6 @@ class iiifActions extends AhgController
     public function executeAnnotationsDelete($request)
     {
         $this->response->setContentType('application/json');
-        $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
 
         if (!$this->getUser()->isAuthenticated()) {
             $this->response->setStatusCode(401);
@@ -1045,6 +1074,12 @@ class iiifActions extends AhgController
             $this->response->setStatusCode(404);
 
             return $this->renderText(json_encode(['error' => 'Annotation not found']));
+        }
+
+        if (!$this->canAnnotate((int) $existing->object_id)) {
+            $this->response->setStatusCode(403);
+
+            return $this->renderText(json_encode(['error' => 'Not allowed to annotate this record']));
         }
 
         $objectId = $existing->object_id;

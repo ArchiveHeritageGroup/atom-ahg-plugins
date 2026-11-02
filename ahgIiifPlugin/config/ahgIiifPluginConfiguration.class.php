@@ -97,10 +97,14 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
      */
     protected function setConfigDefaults()
     {
-        // Auto-detect base URL from request
-        $host = $_SERVER['HTTP_HOST'] ?? 'psis.theahg.co.za';
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $baseUrl = "{$scheme}://{$host}";
+        // Base URL from configuration or the request (catalog #294). This used to fall
+        // back to one customer's domain, so CLI tasks and jobs on any other site pointed
+        // their IIIF and Cantaloupe URLs at psis.theahg.co.za. Loaded by path: plugin
+        // classes are not autoloadable yet while the configuration initialises.
+        if (!class_exists('IiifBaseUrl', false)) {
+            require_once __DIR__.'/../lib/Services/IiifBaseUrl.php';
+        }
+        $baseUrl = IiifBaseUrl::detect();
 
         // Plugin sets its own config when enabled
         sfConfig::set('app_iiif_enabled', true);

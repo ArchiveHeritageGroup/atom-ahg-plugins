@@ -1,0 +1,25 @@
+{
+  "name": "ahg-mirador-annotations-build",
+  "private": true,
+  "description": "Builds ahgIiifPlugin/web/public/mirador/mirador-annotations.min.js: Mirador 3.4.3 with mirador-annotations 0.4.0 and the AHG adapter (catalog #294).",
+  "scripts": {
+    "build": "webpack --mode production"
+  },
+  "dependencies": {
+    "@material-ui/core": "4.12.4",
+    "@material-ui/icons": "4.11.3",
+    "@material-ui/lab": "4.0.0-alpha.61",
+    "lodash": "4.17.21",
+    "mirador": "3.4.3",
+    "mirador-annotations": "0.4.0",
+    "prop-types": "15.8.1",
+    "react": "16.14.0",
+    "react-dom": "16.14.0",
+    "url": "^0.11.4",
+    "uuid": "8.3.2"
+  },
+  "devDependencies": {
+    "webpack": "5.97.1",
+    "webpack-cli": "5.1.4"
+  }
+}

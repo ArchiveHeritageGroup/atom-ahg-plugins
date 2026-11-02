@@ -1338,6 +1338,13 @@ slot('title', $title);
                                                    placeholder="/uploads/dip">
                                         </div>
                                         <div class="col-md-6">
+                                            <label for="ingest_work_retention_days" class="form-label"><?php echo __('Keep ingest working files for (days)') ?></label>
+                                            <input type="number" min="1" max="3650" class="form-control" id="ingest_work_retention_days" name="settings[ingest_work_retention_days]"
+                                                   value="<?php echo htmlspecialchars($settings['ingest_work_retention_days'] ?? '30') ?>"
+                                                   aria-describedby="ingest_work_retention_days_help">
+                                            <div class="form-text" id="ingest_work_retention_days_help"><?php echo __('Uploaded files, job logs and manifests of finished sessions are deleted after this many days. SIP, AIP and DIP packages are never deleted.') ?></div>
+                                        </div>
+                                        <div class="col-md-6">
                                             <label for="ingest_default_sector" class="form-label"><?php echo __('Default sector') ?></label>
                                             <select class="form-select" id="ingest_default_sector" name="settings[ingest_default_sector]">
                                                 <?php foreach (['archive' => 'Archive', 'museum' => 'Museum', 'library' => 'Library', 'gallery' => 'Gallery', 'dam' => 'DAM'] as $val => $label): ?>

@@ -1024,12 +1024,19 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
         'sideBarOpenByDefault' => false,
         'defaultSideBarPanel' => 'info',
     ]);
+
+    // Drawing and editing annotations in Mirador is for people who may edit the
+    // record; the server checks the same right on every save (catalog #294).
+    $annotatable = \QubitInformationObject::getById((int) $objectId);
+    $canAnnotate = null !== $annotatable
+        && sfContext::getInstance()->getUser()->isAuthenticated()
+        && \QubitAcl::check($annotatable, 'update');
     
     // OpenSeadragon loaded locally by the viewer manager module
     $n = sfConfig::get('csp_nonce', '');
     $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
     $js = '<script type="module"' . $nonceAttr . '>' . "\n";
-    $js .= 'import { IiifViewerManager } from "' . $config['pluginPath'] . '/js/iiif-viewer-manager.js?v=213.3";' . "\n";
+    $js .= 'import { IiifViewerManager } from "' . $config['pluginPath'] . '/js/iiif-viewer-manager.js?v=294.1";' . "\n";
     $js .= 'document.addEventListener("DOMContentLoaded", function() {' . "\n";
     $js .= '    const viewer = new IiifViewerManager("' . $viewerId . '", {' . "\n";
     $js .= '        objectId: ' . $objectId . ',' . "\n";
@@ -1039,6 +1046,7 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
     $js .= '        pluginPath: "' . $config['pluginPath'] . '",' . "\n";
     $js .= '        defaultViewer: "' . $opts['viewer'] . '",' . "\n";
     $js .= '        flags: ' . $flagsJson . ',' . "\n";
+    $js .= '        canAnnotate: ' . ($canAnnotate ? 'true' : 'false') . ',' . "\n";
     $carouselConfig = json_encode([
         'autoplay' => get_iiif_setting('carousel_autoplay', '1') === '1',
         'interval' => (int) get_iiif_setting('carousel_interval', 5000),

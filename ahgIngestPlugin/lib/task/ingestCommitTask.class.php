@@ -118,6 +118,16 @@ EOF;
             $this->logSection('ingest', "Manifest: {$job->manifest_path}");
         }
 
+        // Housekeeping: working files past the retention period (catalog #319).
+        // Here as well as in ingest:cleanup, so a site without the cron still
+        // clears old files whenever it ingests.
+        try {
+            $c = \AhgIngestPlugin\Services\IngestService::cleanupWorkFiles();
+            $this->logSection('ingest', "Cleanup: {$c['sessions']} session folders, {$c['logs']} logs, {$c['manifests']} manifests past retention");
+        } catch (\Throwable $e) {
+            $this->logSection('ingest', 'Cleanup skipped: '.$e->getMessage(), null, 'ERROR');
+        }
+
         return $job->status === 'completed' ? 0 : 1;
     }
 }

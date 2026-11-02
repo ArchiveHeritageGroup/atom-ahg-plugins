@@ -206,6 +206,16 @@ class IiifAnnotationService
     // ========================================================================
 
     /**
+     * The annotation's own URL, which GET, PUT and DELETE /iiif/annotations/:id
+     * answer. It was a bare "#<id>" fragment, which no client could resolve or
+     * send back for an update (catalog #294).
+     */
+    public function annotationUri($annotationId): string
+    {
+        return $this->baseUrl.'/iiif/annotations/'.$annotationId;
+    }
+
+    /**
      * Format annotations as IIIF Annotation Page
      */
     public function formatAsAnnotationPage($annotations, $objectId)
@@ -233,7 +243,7 @@ class IiifAnnotationService
     {
         $iiifAnnotation = [
             '@context' => 'http://www.w3.org/ns/anno.jsonld',
-            'id' => '#' . $annotation->id,
+            'id' => $this->annotationUri($annotation->id),
             'type' => 'Annotation',
             'motivation' => $annotation->motivation,
         ];
@@ -265,8 +275,104 @@ class IiifAnnotationService
     }
 
     /**
+     * Public research annotations on this record's images, read only (catalog #294).
+     *
+     * iiif_annotation is the store for image annotations; research notes stay in
+     * ahgResearchPlugin's own tables and are shown here, not copied. Only notes
+     * marked public appear, because this endpoint needs no sign-in; private and
+     * shared notes stay with the researcher. ahgResearchPlugin is not a declared
+     * dependency, so each table is skipped when it is absent.
+     */
+    public function getPublicResearchItems(int $objectId): array
+    {
+        $slug = DB::table('slug')->where('object_id', $objectId)->value('slug');
+
+        if (!$slug) {
+            return [];
+        }
+
+        // The manifest gives every canvas of a record the same annotation page, so a
+        // note that names no canvas goes on the first one.
+        $firstCanvas = "{$this->baseUrl}/iiif/v3/manifest/{$slug}/canvas/1";
+        $items = [];
+
+        if (self::tableExists('research_annotation')) {
+            $rows = DB::table('research_annotation')
+                ->where('object_id', $objectId)
+                ->where('visibility', 'public')
+                ->where(function ($q) {
+                    $q->where('canvas_id', '!=', '')->orWhere('target_selector', '!=', '');
+                })
+                ->orderBy('created_at')
+                ->get();
+
+            foreach ($rows as $r) {
+                $target = ['source' => $r->canvas_id ?: $firstCanvas];
+                $selector = json_decode((string) $r->target_selector, true);
+
+                if (is_array($selector)) {
+                    $target['selector'] = $selector;
+                }
+
+                $items[] = [
+                    'id' => '#research-'.$r->id,
+                    'type' => 'Annotation',
+                    'motivation' => self::MOTIVATION_COMMENTING,
+                    'body' => [[
+                        'type' => 'TextualBody',
+                        'value' => (string) $r->content,
+                        'format' => 'html' === $r->content_format ? 'text/html' : 'text/plain',
+                        'purpose' => 'commenting',
+                    ]],
+                    'target' => $target,
+                ];
+            }
+        }
+
+        if (self::tableExists('research_annotation_v2') && self::tableExists('research_annotation_target')) {
+            $rows = DB::table('research_annotation_v2 as a')
+                ->join('research_annotation_target as t', 't.annotation_id', '=', 'a.id')
+                ->where('t.source_type', 'information_object')
+                ->where('t.source_id', $objectId)
+                ->whereIn('t.selector_type', ['FragmentSelector', 'SvgSelector', 'PointSelector'])
+                ->where('a.status', 'active')
+                ->where('a.visibility', 'public')
+                ->orderBy('a.created_at')
+                ->select(['a.id', 'a.motivation', 'a.body_json', 't.selector_json', 't.source_url'])
+                ->get();
+
+            foreach ($rows as $r) {
+                $source = ($r->source_url && str_contains($r->source_url, '/canvas/')) ? $r->source_url : $firstCanvas;
+                $target = ['source' => $source];
+                $selector = json_decode((string) $r->selector_json, true);
+
+                if (is_array($selector)) {
+                    $target['selector'] = $selector;
+                }
+
+                $item = [
+                    'id' => '#research-v2-'.$r->id,
+                    'type' => 'Annotation',
+                    'motivation' => $r->motivation ?: self::MOTIVATION_COMMENTING,
+                    'target' => $target,
+                ];
+                $body = json_decode((string) $r->body_json, true);
+
+                if (is_array($body)) {
+                    $item['body'] = $body;
+                }
+
+                $items[] = $item;
+            }
+        }
+
+        return $items;
+    }
+
+    /**
      * Sync a research annotation to an IIIF annotation.
-     * Called from ahgResearchPlugin when saving canvas-linked notes.
+     * Nothing calls this: research notes are shown by getPublicResearchItems()
+     * instead of being copied (catalog #294).
      *
      * @param int $researchAnnotationId  The research_annotation.id
      * @param int|null $iiifAnnotationId Existing IIIF annotation to update (null = create new)

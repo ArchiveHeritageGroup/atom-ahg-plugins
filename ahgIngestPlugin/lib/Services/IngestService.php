@@ -34,6 +34,94 @@ class IngestService
         return $dir;
     }
 
+    /**
+     * Delete ingest working files older than the retention period
+     * (ingest_work_retention_days, default 30; catalog #319).
+     *
+     * Covers session upload folders (named by session id), job logs and
+     * manifests. SIP, AIP and DIP packages are outputs, not working files, and
+     * are never touched; neither is anything else in the folder. A session
+     * folder goes only when nothing in it has changed for the whole period and
+     * the session has no queued or running job.
+     *
+     * @return array{sessions:int, logs:int, manifests:int, deleted:string[]}
+     */
+    public static function cleanupWorkFiles(?int $days = null, bool $dryRun = false): array
+    {
+        if (null === $days) {
+            $days = (int) \AtomExtensions\Services\AhgSettingsService::get('ingest_work_retention_days', '30');
+        }
+        $days = max(1, $days);
+        $cutoff = time() - $days * 86400;
+        $base = self::workDir();
+        $done = ['sessions' => 0, 'logs' => 0, 'manifests' => 0, 'deleted' => []];
+
+        $busy = DB::table('ingest_job')->whereIn('status', ['queued', 'running'])->get(['id', 'session_id']);
+        $busySessions = $busy->pluck('session_id')->map('intval')->all();
+        $busyJobs = $busy->pluck('id')->map('intval')->all();
+
+        foreach (glob($base.'/*', GLOB_ONLYDIR) ?: [] as $dir) {
+            $id = basename($dir);
+            if (!ctype_digit($id) || in_array((int) $id, $busySessions, true) || self::newestMtime($dir) >= $cutoff) {
+                continue;
+            }
+            $done['deleted'][] = $dir;
+            ++$done['sessions'];
+            if (!$dryRun) {
+                self::removeTree($dir);
+            }
+        }
+
+        foreach (glob($base.'/job_*.log') ?: [] as $file) {
+            if (preg_match('/job_(\d+)/', basename($file), $m) && in_array((int) $m[1], $busyJobs, true)) {
+                continue;
+            }
+            if (filemtime($file) < $cutoff) {
+                $done['deleted'][] = $file;
+                ++$done['logs'];
+                if (!$dryRun) {
+                    @unlink($file);
+                }
+            }
+        }
+
+        foreach (glob($base.'/manifests/*') ?: [] as $file) {
+            if (is_file($file) && filemtime($file) < $cutoff) {
+                $done['deleted'][] = $file;
+                ++$done['manifests'];
+                if (!$dryRun) {
+                    @unlink($file);
+                }
+            }
+        }
+
+        return $done;
+    }
+
+    private static function newestMtime(string $dir): int
+    {
+        $newest = (int) filemtime($dir);
+        $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $f) {
+            $newest = max($newest, (int) $f->getMTime());
+        }
+
+        return $newest;
+    }
+
+    private static function removeTree(string $dir): void
+    {
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($it as $f) {
+            // Never follow a link out of the work folder.
+            $f->isDir() && !$f->isLink() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
+        }
+        @rmdir($dir);
+    }
+
     // ─── AtoM CSV Field Definitions ─────────────────────────────────────
 
     /**

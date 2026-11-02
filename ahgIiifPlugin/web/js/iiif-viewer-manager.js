@@ -538,9 +538,12 @@ export class IiifViewerManager {
                 document.head.appendChild(link);
             }
 
-            // Load Mirador JS
+            // Load Mirador JS. People who may edit the record get the build with the
+            // annotation editor (catalog #294); everyone else the smaller stock build.
             if (!window.Mirador) {
-                await this.loadScript(`${path}/public/mirador/mirador.min.js`);
+                await this.loadScript(this.options.canAnnotate
+                    ? `${path}/public/mirador/mirador-annotations.min.js?v=0.4.0-1`
+                    : `${path}/public/mirador/mirador.min.js`);
             }
 
             // Verify Mirador loaded
@@ -572,6 +575,14 @@ export class IiifViewerManager {
             const actions = window.Mirador.actions || {};
             const inline = typeof actions.receiveManifest === 'function' && typeof actions.addWindow === 'function';
             const inlineId = 'urn:ahg:inline-manifest:' + encodeURIComponent(this.options.manifestUrl);
+
+            const annotationPlugins = (this.options.canAnnotate && window.Mirador.annotationPlugins) || [];
+            const annotationConfig = annotationPlugins.length ? {
+                annotation: {
+                    adapter: (canvasId) => new window.Mirador.AhgAnnotationAdapter(canvasId, this.options.baseUrl, this.options.objectId),
+                    exportLocalStorageAnnotations: false
+                }
+            } : {};
 
             this.miradorInstance = Mirador.viewer({
                 id: `mirador-${vid}`,
@@ -611,8 +622,9 @@ export class IiifViewerManager {
                     crossOriginPolicy: 'Anonymous',
                     ajaxWithCredentials: false
                 },
-                ...this.options.miradorConfig
-            });
+                ...this.options.miradorConfig,
+                ...annotationConfig
+            }, annotationPlugins);
 
             if (inline) {
                 const copy = JSON.parse(JSON.stringify(manifest));
