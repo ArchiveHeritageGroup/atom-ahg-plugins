@@ -158,7 +158,7 @@ class SearchService
         }
 
         // Execute _msearch
-        $url = sprintf('http://%s:%d/_msearch', $this->esHost, $this->esPort);
+        $url = \AtomFramework\Services\Search\SearchConnection::url('/_msearch');
         $response = $this->esCurlRequest($url, $ndjson, 'application/x-ndjson');
 
         if (!$response || !isset($response['responses'])) {
@@ -532,7 +532,7 @@ class SearchService
      */
     protected function esRequest(string $index, string $endpoint, array $body): ?array
     {
-        $url = sprintf('http://%s:%d/%s%s', $this->esHost, $this->esPort, $index, $endpoint);
+        $url = \AtomFramework\Services\Search\SearchConnection::url('/'.$index.$endpoint);
 
         return $this->esCurlRequest($url, json_encode($body));
     }
@@ -543,6 +543,7 @@ class SearchService
     protected function esCurlRequest(string $url, string $body, string $contentType = 'application/json'): ?array
     {
         $ch = curl_init($url);
+        curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 10,

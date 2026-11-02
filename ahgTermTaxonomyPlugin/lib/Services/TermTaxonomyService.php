@@ -808,9 +808,10 @@ class TermTaxonomyService
      */
     protected function esRequest(string $index, string $endpoint, array $body): ?array
     {
-        $url = sprintf('http://%s:%d/%s%s', $this->esHost, $this->esPort, $index, $endpoint);
+        $url = \AtomFramework\Services\Search\SearchConnection::url('/'.$index.$endpoint);
 
         $ch = curl_init($url);
+        curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 10,

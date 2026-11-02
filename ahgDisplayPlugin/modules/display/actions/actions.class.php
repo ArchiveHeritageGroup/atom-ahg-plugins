@@ -1566,9 +1566,10 @@ class displayActions extends AhgController
                 ],
         ];
 
-        $url = sprintf('http://%s:%d/%s/_search', $esHost, $esPort, $indexName);
+        $url = \AtomFramework\Services\Search\SearchConnection::url('/'.$indexName.'/_search');
 
         $ch = curl_init($url);
+        curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 5,

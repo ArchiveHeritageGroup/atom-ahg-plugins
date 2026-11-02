@@ -1014,9 +1014,10 @@ class ActorBrowseService
      */
     protected function esRequest(string $endpoint, array $body): ?array
     {
-        $url = sprintf('http://%s:%d/%s%s', $this->esHost, $this->esPort, $this->indexName, $endpoint);
+        $url = \AtomFramework\Services\Search\SearchConnection::url('/'.$this->indexName.$endpoint);
 
         $ch = curl_init($url);
+        curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 10,

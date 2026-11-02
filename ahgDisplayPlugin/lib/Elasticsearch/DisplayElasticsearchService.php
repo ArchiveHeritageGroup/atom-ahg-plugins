@@ -48,8 +48,9 @@ class DisplayElasticsearchService
      */
     protected function esRequest(string $method, string $path, ?array $body = null): ?array
     {
-        $url = sprintf('http://%s:%d%s', $this->esHost, $this->esPort, $path);
+        $url = \AtomFramework\Services\Search\SearchConnection::url($path);
         $ch = curl_init($url);
+        curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
         $opts = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => $method,
@@ -78,8 +79,9 @@ class DisplayElasticsearchService
      */
     protected function esBulk(string $ndjson): ?array
     {
-        $url = sprintf('http://%s:%d/_bulk', $this->esHost, $this->esPort);
+        $url = \AtomFramework\Services\Search\SearchConnection::url('/_bulk');
         $ch = curl_init($url);
+        curl_setopt_array($ch, \AtomFramework\Services\Search\SearchConnection::curlOptions());
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
