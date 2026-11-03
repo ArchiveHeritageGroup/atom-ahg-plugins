@@ -309,6 +309,10 @@ class conditionActions extends AhgController
         $this->conditionCheck = $service->getConditionCheckWithObject((int) $this->photo->condition_check_id);
         $this->annotations = $service->getAnnotations($this->photoId);
         $this->imageUrl = $this->getController()->genUrl('@condition_photo_file?id=' . $this->photo->id);
+
+        // No template of its own: show the annotation page read-only.
+        $this->canEdit = false;
+        $this->setTemplate('annotate');
     }
 
     /**

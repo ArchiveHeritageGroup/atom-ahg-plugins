@@ -31,7 +31,7 @@
         <a href="<?php echo url_for(['module' => 'embargo', 'action' => 'view', 'id' => $embargo->id]); ?>">
           <?php echo __('Object #%1%', ['%1%' => $embargo->object_id]); ?>
         </a>
-        - <?php echo __('Expires: %1%', ['%1%' => $embargo->end_date->format('Y-m-d')]); ?>
+        - <?php echo __('Expires: %1%', ['%1%' => substr((string) $embargo->end_date, 0, 10)]); ?>
         (<?php echo $embargo->days_remaining; ?> <?php echo __('days'); ?>)
       </li>
     <?php endforeach; ?>
@@ -70,12 +70,12 @@
                   <?php echo ucfirst(str_replace('_', ' ', $embargo->embargo_type)); ?>
                 </span>
               </td>
-              <td><?php echo $embargo->start_date->format('Y-m-d'); ?></td>
+              <td><?php echo substr((string) $embargo->start_date, 0, 10); ?></td>
               <td>
                 <?php if ($embargo->is_perpetual): ?>
                   <span class="text-danger"><?php echo __('Perpetual'); ?></span>
                 <?php elseif ($embargo->end_date): ?>
-                  <?php echo $embargo->end_date->format('Y-m-d'); ?>
+                  <?php echo substr((string) $embargo->end_date, 0, 10); ?>
                   <?php if ($embargo->days_remaining <= 30): ?>
                     <span class="badge bg-warning"><?php echo $embargo->days_remaining; ?>d</span>
                   <?php endif; ?>

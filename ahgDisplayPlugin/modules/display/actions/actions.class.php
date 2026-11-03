@@ -371,7 +371,7 @@ class displayActions extends AhgController
                 ->where('io.id', $this->parentId)
                 ->select('io.id', 'io.parent_id', 'i18n.title', 'slug.slug')
                 ->first();
-            $this->breadcrumb = $this->buildBreadcrumb($this->parentId);
+            $this->breadcrumb = $this->buildBreadcrumb((int) $this->parentId);
         } else {
             $this->parent = null;
             $this->breadcrumb = [];

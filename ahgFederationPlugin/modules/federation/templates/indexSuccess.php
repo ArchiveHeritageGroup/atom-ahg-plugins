@@ -48,7 +48,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <?php
-                $activePeers = array_filter($peers, function($p) { return $p->is_active; });
+                $activePeers = array_filter(sfOutputEscaper::unescape($peers), function($p) { return $p->is_active; });
               ?>
               <h2 class="mb-0"><?php echo count($activePeers) ?></h2>
               <small>Active Peers</small>
@@ -64,7 +64,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <?php
-                $runningSessions = array_filter($recentSessions, function($s) { return $s->status === 'running'; });
+                $runningSessions = array_filter(sfOutputEscaper::unescape($recentSessions), function($s) { return $s->status === 'running'; });
               ?>
               <h2 class="mb-0"><?php echo count($runningSessions) ?></h2>
               <small>Running Harvests</small>
@@ -100,7 +100,7 @@
                 </tr>
               </thead>
               <tbody>
-                <?php foreach (array_slice($peers, 0, 5) as $peer): ?>
+                <?php foreach ($peers as $i => $peer): if ($i >= 5) { break; } ?>
                 <tr>
                   <td>
                     <strong><?php echo esc_specialchars($peer->name) ?></strong>
@@ -168,7 +168,7 @@
         <div class="card-body p-0">
           <?php if (!empty($recentSessions)): ?>
           <ul class="list-group list-group-flush">
-            <?php foreach (array_slice($recentSessions, 0, 5) as $session): ?>
+            <?php foreach ($recentSessions as $i => $session): if ($i >= 5) { break; } ?>
             <li class="list-group-item">
               <div class="d-flex justify-content-between align-items-start">
                 <div>
