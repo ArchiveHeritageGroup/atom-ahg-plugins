@@ -34,7 +34,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="voice-help-label"><i class="bi bi-mic me-2"></i><?php echo __('Voice Commands'); ?></h5>
+        <h2 class="modal-title h5" id="voice-help-label"><i class="bi bi-mic me-2"></i><?php echo __('Voice Commands'); ?></h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php echo __('Close'); ?>"></button>
       </div>
       <div class="modal-body">
@@ -61,7 +61,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
         };
         ?>
 
-        <h6><i class="bi bi-signpost-2 me-1"></i><?php echo __('Navigation'); ?></h6>
+        <h3 class="h6"><i class="bi bi-signpost-2 me-1"></i><?php echo __('Navigation'); ?></h3>
         <?php $renderSection([
             'go home' => 'Go to homepage',
             'browse / go to browse' => 'Browse archival records',
@@ -87,14 +87,14 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'browse dam / browse photos' => 'Browse DAM/photo records',
         ]); ?>
 
-        <h6><i class="bi bi-pencil me-1"></i><?php echo __('Actions (Edit)'); ?></h6>
+        <h3 class="h6"><i class="bi bi-pencil me-1"></i><?php echo __('Actions (Edit)'); ?></h3>
         <?php $renderSection([
             'save / save record' => 'Save the current record',
             'cancel' => 'Cancel editing',
             'delete / delete record' => 'Delete the current record',
         ], 'edit'); ?>
 
-        <h6><i class="bi bi-eye me-1"></i><?php echo __('Actions (View)'); ?></h6>
+        <h3 class="h6"><i class="bi bi-eye me-1"></i><?php echo __('Actions (View)'); ?></h3>
         <?php $renderSection([
             'edit / edit record' => 'Edit the current record',
             'print' => 'Print the current page',
@@ -102,14 +102,14 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'export ead' => 'Export as EAD',
         ], 'view'); ?>
 
-        <h6><i class="bi bi-list-ul me-1"></i><?php echo __('Actions (Browse)'); ?></h6>
+        <h3 class="h6"><i class="bi bi-list-ul me-1"></i><?php echo __('Actions (Browse)'); ?></h3>
         <?php $renderSection([
             'first result / open first' => 'Open the first result',
             'sort by title' => 'Sort results by title',
             'sort by date' => 'Sort results by date',
         ], 'browse'); ?>
 
-        <h6><i class="bi bi-globe me-1"></i><?php echo __('Global'); ?></h6>
+        <h3 class="h6"><i class="bi bi-globe me-1"></i><?php echo __('Global'); ?></h3>
         <?php $renderSection([
             'toggle advanced search' => 'Toggle advanced search',
             'clear search' => 'Clear search and reload',
@@ -121,7 +121,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'stop continuous / single command' => 'Stop after each command',
         ], 'global'); ?>
 
-        <h6><i class="bi bi-image me-1"></i><?php echo __('Image & Reading'); ?></h6>
+        <h3 class="h6"><i class="bi bi-image me-1"></i><?php echo __('Image & Reading'); ?></h3>
         <?php $renderSection([
             'read metadata / read all fields' => 'Read all populated fields aloud',
             'read title' => 'Read the record title',
@@ -133,7 +133,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'slower / faster' => 'Adjust speech rate',
         ], 'view'); ?>
 
-        <h6><i class="bi bi-robot me-1"></i><?php echo __('AI Image Description'); ?></h6>
+        <h3 class="h6"><i class="bi bi-robot me-1"></i><?php echo __('AI Image Description'); ?></h3>
         <?php $renderSection([
             'describe image / AI describe' => 'Generate AI description of image',
             'save to description' => 'Save AI description to record',
@@ -142,7 +142,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'discard' => 'Discard AI description',
         ], 'ai'); ?>
 
-        <h6><i class="bi bi-keyboard me-1"></i><?php echo __('Dictation'); ?></h6>
+        <h3 class="h6"><i class="bi bi-keyboard me-1"></i><?php echo __('Dictation'); ?></h3>
         <?php $renderSection([
             'start dictating' => 'Start dictating into focused field',
             'stop dictating' => 'Stop dictation, return to command mode',
@@ -164,7 +164,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'read back' => 'Read the field content aloud',
         ], 'dictation'); ?>
 
-        <h6><i class="bi bi-universal-access me-1"></i><?php echo __('Accessibility'); ?></h6>
+        <h3 class="h6"><i class="bi bi-universal-access me-1"></i><?php echo __('Accessibility'); ?></h3>
         <?php $renderSection([
             'where am I' => 'Announce current page and available actions',
             'how many results' => 'Announce the number of results on browse pages',
@@ -172,7 +172,7 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
             'enable voice / voice on' => 'Re-enable voice commands',
         ]); ?>
 
-        <h6><i class="bi bi-question-circle me-1"></i><?php echo __('Help'); ?></h6>
+        <h3 class="h6"><i class="bi bi-question-circle me-1"></i><?php echo __('Help'); ?></h3>
         <?php $renderSection([
             'help / show commands' => 'Show this help modal',
             'list commands / list sections' => 'Read available sections aloud, then say a section name',

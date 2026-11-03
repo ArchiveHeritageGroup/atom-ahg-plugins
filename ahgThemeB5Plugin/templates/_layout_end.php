@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // client-side getSettings self-disable was unreliable (the engine could
       // start before it ran), so gate it server-side. ?>
 <?php if (\AtomExtensions\Services\AhgSettingsService::getBool('voice_enabled', false)) { ?>
-  <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/voiceCommands.css?v=213" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/voiceCommands.css?v=213.1" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
   <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_voiceCommands.php'); ?>
 

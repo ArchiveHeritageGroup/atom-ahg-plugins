@@ -116,7 +116,7 @@
 }
 
 /* -- Help modal ----------------------------------------------- */
-#voice-help-modal .modal-body h6 {
+#voice-help-modal .modal-body .h6 {
   border-bottom: 1px solid var(--bs-border-color, #dee2e6);
   padding-bottom: 0.4rem;
   margin-top: 1rem;
