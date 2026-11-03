@@ -6,6 +6,17 @@ class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
 
     public function initialize(): void
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'HeritageAssets', [
+                'url' => '/index.php/heritage/dashboard',
+                'label' => 'Heritage assets',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'configureRouting']);
     }
 

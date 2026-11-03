@@ -41,6 +41,17 @@ class ahgLoanPluginConfiguration extends sfPluginConfiguration
      */
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Loans', [
+                'url' => '/index.php/loan',
+                'label' => 'Loans',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         // Register routes
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 

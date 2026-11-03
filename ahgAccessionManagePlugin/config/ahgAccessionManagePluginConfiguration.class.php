@@ -7,6 +7,17 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'AccessionsDashboard', [
+                'url' => '/index.php/admin/accessions/dashboard',
+                'label' => 'Accessions dashboard',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->registerAutoloader();
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);

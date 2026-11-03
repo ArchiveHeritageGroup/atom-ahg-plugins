@@ -45,6 +45,17 @@ class ahgSAHRAPluginConfiguration extends sfPluginConfiguration
 
     public function initialize(): void
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Sahra', [
+                'url' => '/index.php/sahra',
+                'label' => 'SAHRA permits',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->registerAutoloader();
 
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);

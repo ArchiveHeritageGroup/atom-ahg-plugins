@@ -13,6 +13,17 @@ class ahgStatisticsPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Statistics', [
+                'url' => '/index.php/statistics/dashboard',
+                'label' => 'Usage statistics',
+                'credentials' => ['administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 

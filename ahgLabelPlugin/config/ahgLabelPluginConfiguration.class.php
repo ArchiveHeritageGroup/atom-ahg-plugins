@@ -7,6 +7,17 @@ class ahgLabelPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'LabelTemplates', [
+                'url' => '/index.php/label/templates',
+                'label' => 'Label templates',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'label';
         sfConfig::set('sf_enabled_modules', $enabledModules);

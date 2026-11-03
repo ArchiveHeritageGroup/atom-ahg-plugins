@@ -14,6 +14,17 @@ class ahgTranslationPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'TranslationSettings', [
+                'url' => '/index.php/translation/settings',
+                'label' => 'Translation settings',
+                'credentials' => ['administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->dispatcher->connect('routing.load_configuration', array($this, 'routingLoadConfiguration'));
     }
 

@@ -7,6 +7,17 @@ class ahgExportPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Export', [
+                'url' => '/index.php/export',
+                'label' => 'Export',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'export';
         $enabledModules[] = 'clipboardExport';

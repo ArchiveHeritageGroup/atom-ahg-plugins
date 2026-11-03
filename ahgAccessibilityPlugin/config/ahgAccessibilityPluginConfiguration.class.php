@@ -15,6 +15,17 @@ class ahgAccessibilityPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #292).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Accessibility', [
+                'url' => '/index.php/accessibility/alt-text',
+                'label' => 'Image alt text',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->registerAutoloader();
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'configureRouting']);
