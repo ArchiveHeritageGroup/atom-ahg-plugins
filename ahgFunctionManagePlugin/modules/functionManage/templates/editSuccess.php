@@ -65,13 +65,13 @@
 
             <div class="mb-3">
               <label for="parallelNames" class="form-label"><?php echo __('Parallel form(s) of name'); ?></label>
-              <textarea class="form-control" id="parallelNames" name="parallelNames" rows="2" aria-describedby="parallelNames-help"><?php echo esc_specialchars(implode("\n", $func['parallelNames'] ?? [])); ?></textarea>
+              <textarea class="form-control" id="parallelNames" name="parallelNames" rows="2" aria-describedby="parallelNames-help"><?php echo esc_specialchars(implode("\n", (array) sfOutputEscaper::unescape($func['parallelNames'] ?? []))); ?></textarea>
               <div id="parallelNames-help" class="form-text"><?php echo __('One per line.'); ?></div>
             </div>
 
             <div class="mb-3">
               <label for="otherNames" class="form-label"><?php echo __('Other form(s) of name'); ?></label>
-              <textarea class="form-control" id="otherNames" name="otherNames" rows="2" aria-describedby="otherNames-help"><?php echo esc_specialchars(implode("\n", $func['otherNames'] ?? [])); ?></textarea>
+              <textarea class="form-control" id="otherNames" name="otherNames" rows="2" aria-describedby="otherNames-help"><?php echo esc_specialchars(implode("\n", (array) sfOutputEscaper::unescape($func['otherNames'] ?? []))); ?></textarea>
               <div id="otherNames-help" class="form-text"><?php echo __('One per line.'); ?></div>
             </div>
 

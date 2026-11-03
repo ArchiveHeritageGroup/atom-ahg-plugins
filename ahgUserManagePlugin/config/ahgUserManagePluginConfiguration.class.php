@@ -84,6 +84,8 @@ class ahgUserManagePluginConfiguration extends sfPluginConfiguration
         // The link in the reset email. Without it /user/:slug reads "passwordResetConfirm"
         // as a username and 404s, so no reset could ever be completed.
         $userPassthrough->any('user_password_reset_confirm_passthrough', '/user/passwordResetConfirm', 'passwordResetConfirm');
+        // Same for base's user autocomplete: /user/:slug read "autocomplete" as a username.
+        $userPassthrough->any('user_autocomplete_passthrough', '/user/autocomplete', 'autocomplete');
 
         $userPassthrough->register($routing);
     }

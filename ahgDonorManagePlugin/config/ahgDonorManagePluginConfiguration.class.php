@@ -56,7 +56,10 @@ class ahgDonorManagePluginConfiguration extends sfPluginConfiguration
         // All routes target donorManage module
         // Catch-all slug routes registered first = checked last
         $router = new \AtomFramework\Routing\RouteLoader('donorManage');
-        $router->any('donor_view_override', '/donor/:slug', 'view');
+        // Never "dashboard": that is ahgDonorAgreementPlugin's /donor/dashboard, and
+        // whether its route is checked before this one depends on plugin load order,
+        // which differs between sites (stock AtoM loads plugins in list order).
+        $router->any('donor_view_override', '/donor/:slug', 'view', ['slug' => '(?!dashboard(?:/|$))[^/]+']);
         $router->any('donor_delete_override', '/donor/:slug/delete', 'delete');
         $router->any('donor_edit_override', '/donor/:slug/edit', 'edit');
         // Specific routes registered last = checked first

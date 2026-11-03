@@ -63,5 +63,11 @@ class ahgFunctionManagePluginConfiguration extends sfPluginConfiguration
         $router->any('function_browse_override', '/function/browse', 'browse');
 
         $router->register($event->getSubject());
+
+        // Base's function autocomplete, registered after the catch-all so it is checked
+        // first; otherwise /function/:slug reads "autocomplete" as a slug and 404s.
+        $base = new \AtomFramework\Routing\RouteLoader('function');
+        $base->any('function_autocomplete_passthrough', '/function/autocomplete', 'autocomplete');
+        $base->register($event->getSubject());
     }
 }
