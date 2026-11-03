@@ -1,0 +1,6 @@
+# donor module of this plugin (autocomplete, and the dashboard forward to
+# donorAgreement/dashboard). Without this file the module inherits base AtoM's
+# `default: is_secure: false` and fails open. Same rule as donorAgreement.
+
+all:
+  is_secure: true
