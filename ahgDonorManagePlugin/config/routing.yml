@@ -2,9 +2,13 @@
 # gets prepended last (checked first). Put catch-all /:slug FIRST
 # so it ends up checked LAST after prepending.
 
+# Same requirement as the PHP route of this name: prependRoute() keeps this
+# definition's contents, so without it "dashboard" (ahgDonorAgreementPlugin's
+# /donor/dashboard) was read as a donor slug on sites that load that plugin first.
 donor_view_override:
   url: /donor/:slug
   param: { module: donorManage, action: view }
+  requirements: { slug: '(?!dashboard(?:/|$))[^/]+' }
 
 donor_delete_override:
   url: /donor/:slug/delete
