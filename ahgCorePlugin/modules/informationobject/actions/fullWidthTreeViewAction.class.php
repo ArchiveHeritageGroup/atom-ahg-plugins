@@ -119,4 +119,24 @@ class InformationObjectFullWidthTreeViewAction extends DefaultFullTreeViewAction
             ->search($query->getQuery(false, false))
             ->getTotalHits();
     }
+
+    /**
+     * Same as the parent, but takes the hit with getResults() instead of
+     * current(): arOpenSearchPlugin's result set has no current(), so the
+     * first tree load failed on OpenSearch sites. Elastica's ResultSet has
+     * getResults() too.
+     */
+    protected function getElasticSearchResult($id, $options = [])
+    {
+        $results = $this->doElasticsearchQuery(
+            new \Elastica\Query\Term(['_id' => $id]),
+            $options
+        );
+
+        if (0 === $results->count()) {
+            return null;
+        }
+
+        return $results->getResults()[0] ?? null;
+    }
 }
