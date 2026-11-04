@@ -1,3 +1,6 @@
+# The QubitResourceRoute entries here also exist in this plugin's PHP RouteLoader,
+# but this file's definition is the one that runs, and it must stay: the
+# actions read $this->getRoute()->resource, which only QubitResourceRoute sets.
 # Catch-all FIRST in file = checked LAST after prepending
 actor_view_override:
   class: QubitResourceRoute
@@ -16,16 +19,3 @@ actor_edit_override:
   url: /actor/:slug/edit
   param: { module: sfIsaarPlugin, action: edit }
   requirements: { slug: "[a-zA-Z0-9_.-]+" }
-
-# Specific routes LAST in file = checked FIRST after prepending
-actor_add_override:
-  url: /actor/add
-  param: { module: sfIsaarPlugin, action: edit }
-
-actor_browse_override:
-  url: /actor/browse
-  param: { module: actorManage, action: browse }
-
-actor_autocomplete_override:
-  url: /actor/autocomplete
-  param: { module: actorManage, action: autocomplete }

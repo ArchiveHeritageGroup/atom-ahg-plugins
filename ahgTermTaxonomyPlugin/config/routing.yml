@@ -1,3 +1,6 @@
+# The QubitResourceRoute entries here also exist in this plugin's PHP RouteLoader,
+# but this file's definition is the one that runs, and it must stay: the
+# actions read $this->getRoute()->resource, which only QubitResourceRoute sets.
 term_edit_override:
   class: QubitResourceRoute
   url: /term/:slug/edit
@@ -30,9 +33,4 @@ term_browse_override:
 taxonomy_skos_export:
   url: /taxonomy/:id/skos
   param: { module: termTaxonomy, action: exportSkos }
-  requirements: { id: \d+ }
-
-taxonomy_browse_override:
-  url: /taxonomy/:id
-  param: { module: termTaxonomy, action: taxonomyIndex }
   requirements: { id: \d+ }

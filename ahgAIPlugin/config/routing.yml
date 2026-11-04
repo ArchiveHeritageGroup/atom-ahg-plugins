@@ -1,14 +1,5 @@
 # AI Plugin Routes (NER, Summarize)
 
-# NER Routes
-ahg_ai_ner_extract:
-  url: /ai/ner/extract/:id
-  param: { module: ai, action: extract }
-
-ahg_ai_ner_review:
-  url: /ai/ner/review
-  param: { module: ai, action: review }
-
 ahg_ai_ner_entities:
   url: /ai/ner/entities/:id
   param: { module: ai, action: getEntities }
@@ -32,20 +23,6 @@ ahg_ai_ner_create_subject:
 ahg_ai_ner_health:
   url: /ai/ner/health
   param: { module: ai, action: health }
-
-ahg_ai_ner_bulk_save:
-  url: /ai/ner/bulk-save
-  param: { module: ai, action: bulkSave }
-
-# Summarize Route
-ahg_ai_summarize:
-  url: /ai/summarize/:id
-  param: { module: ai, action: summarize }
-
-# Handwriting Text Recognition (HTR) Route
-ahg_ai_htr:
-  url: /ai/htr/:id
-  param: { module: ai, action: htr }
 
 # Legacy NER routes (backward compatibility)
 ahg_ner_extract:
@@ -77,50 +54,15 @@ ahg_ner_htr:
 # LLM Description Suggestion Routes
 # ============================================================================
 
-# Generate suggestion
-ahg_ai_suggest:
-  url: /ai/suggest/:id
-  param: { module: ai, action: suggest }
-
-# Preview suggestion without saving
-ahg_ai_suggest_preview:
-  url: /ai/suggest/:id/preview
-  param: { module: ai, action: suggestPreview }
-
 # View single suggestion
 ahg_ai_suggest_view:
   url: /ai/suggest/:id/view
   param: { module: ai, action: suggestView }
 
-# Process suggestion decision (approve/reject)
-ahg_ai_suggest_decision:
-  url: /ai/suggest/:id/decision
-  param: { module: ai, action: suggestDecision }
-
 # Get suggestions for an object
 ahg_ai_suggest_object:
   url: /ai/suggest/object/:id
   param: { module: ai, action: suggestObject }
-
-# Suggestion review dashboard
-ahg_ai_suggest_review:
-  url: /ai/suggest/review
-  param: { module: ai, action: suggestReview }
-
-# LLM configurations
-ahg_ai_llm_configs:
-  url: /ai/llm/configs
-  param: { module: ai, action: llmConfigs }
-
-# LLM health check
-ahg_ai_llm_health:
-  url: /ai/llm/health
-  param: { module: ai, action: llmHealth }
-
-# Prompt templates
-ahg_ai_templates:
-  url: /ai/templates
-  param: { module: ai, action: templates }
 
 # ============================================================================
 # AI Batch Queue Routes
@@ -169,18 +111,6 @@ ahg_ai_job_view:
 # ============================================================================
 # NER PDF Overlay Display Routes (Issue #20)
 # ============================================================================
-
-# PDF overlay viewer
-ahg_ai_ner_pdf_overlay:
-  url: /ai/ner/pdf-overlay/:id
-  param: { module: ai, action: pdfOverlay }
-  requirements: { id: \d+ }
-
-# Get approved/linked entities for overlay
-ahg_ai_ner_approved_entities:
-  url: /ai/ner/approved-entities/:id
-  param: { module: ai, action: getApprovedEntities }
-  requirements: { id: \d+ }
 
 # ============================================================================
 # AI Inventory & Governance dashboard (heratio#137)

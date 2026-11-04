@@ -1,3 +1,6 @@
+# The QubitResourceRoute entries here also exist in this plugin's PHP RouteLoader,
+# but this file's definition is the one that runs, and it must stay: the
+# actions read $this->getRoute()->resource, which only QubitResourceRoute sets.
 # Catch-all FIRST in file = checked LAST after prepending
 accession_view_override:
   class: QubitResourceRoute
@@ -22,7 +25,3 @@ accession_add_override:
   url: /accession/add
   class: AddActionRoute
   param: { module: accession, action: edit }
-
-accession_browse_override:
-  url: /accession/browse
-  param: { module: accessionManage, action: browse }
