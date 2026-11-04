@@ -16,7 +16,7 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
         $router = new \AtomFramework\Routing\RouteLoader('ai');
 
         // NER routes
-        $router->any('ahg_ai_ner_extract', '/ai/ner/extract/:id', 'nerExtract');
+        $router->any('ahg_ai_ner_extract', '/ai/ner/extract/:id', 'extract');
         $router->any('ahg_ai_ner_review', '/ai/ner/review', 'review');
         $router->any('ahg_ai_ner_bulk_save', '/ai/ner/bulk-save', 'bulkSave');
         $router->any('ahg_ai_create_date', '/ai/ner/create-date', 'createDate');

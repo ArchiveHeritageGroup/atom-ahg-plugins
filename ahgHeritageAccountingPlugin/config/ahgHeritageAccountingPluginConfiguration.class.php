@@ -120,7 +120,9 @@ class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
 
         $api->any('heritage_api_asset', '/api/heritage/asset/:id', 'asset', ['id' => '\d+']);
         $api->any('heritage_api_actor_autocomplete', '/api/heritage/actor-autocomplete', 'actorAutocomplete');
-        $api->any('heritage_api_autocomplete', '/api/heritage/autocomplete', 'autocomplete');
+        // Not "heritage_api_autocomplete": ahgHeritagePlugin's routing.yml uses that name,
+        // and a routing.yml definition replaces a PHP route of the same name.
+        $api->any('heritage_accounting_api_autocomplete', '/api/heritage/autocomplete', 'autocomplete');
         $api->any('heritage_api_summary', '/api/heritage/summary', 'summary');
 
         $api->register($routing);
