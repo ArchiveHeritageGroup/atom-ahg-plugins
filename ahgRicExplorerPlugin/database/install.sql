@@ -345,3 +345,19 @@ CREATE TABLE IF NOT EXISTS `ric_shacl_report` (
   KEY `idx_ric_shacl_created` (`created_at`),
   KEY `idx_ric_shacl_conforms` (`conforms`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Same-story links (#196): records whose text largely overlaps,
+-- written by `php symfony ric:same-story`. object_a_id < object_b_id.
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `ric_same_story_link` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `object_a_id` int NOT NULL COMMENT 'information_object.id, the lower of the pair',
+  `object_b_id` int NOT NULL COMMENT 'information_object.id, the higher of the pair',
+  `overlap` decimal(4,2) NOT NULL COMMENT 'share of the smaller text''s word 6-grams found in the other',
+  `kind` varchar(20) NOT NULL DEFAULT 'same_story' COMMENT 'same_story, same_leaf (a page photographed twice)',
+  `computed_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_ric_same_story_pair` (`object_a_id`,`object_b_id`),
+  KEY `idx_ric_same_story_b` (`object_b_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
