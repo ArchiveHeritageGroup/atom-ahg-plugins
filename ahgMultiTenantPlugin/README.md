@@ -156,7 +156,7 @@ if (TenantResolver::isTenantRequest()) {
 |--------|------|-------------|
 | tenant_id | INT | FK to heritage_tenant |
 | user_id | INT | FK to user |
-| role | ENUM | `owner`, `super_user`, `editor`, `contributor`, `viewer` |
+| role | VARCHAR(58) | `owner`, `super_user`, `editor`, `contributor`, `viewer` |
 | is_primary | TINYINT | User's primary tenant flag |
 | assigned_at | DATETIME | Assignment timestamp |
 | assigned_by | INT | User who made assignment |
