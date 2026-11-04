@@ -170,7 +170,7 @@ if (isset($resource) && $resource->id) {
         <!-- Upload New Custom Watermark -->
         <div class="card bg-light mb-3">
           <div class="card-body">
-            <h6 class="card-title"><?php echo __('Upload NEW Custom Watermark'); ?></h6><small class="text-muted d-block mb-2"><?php echo __('Leave empty to keep existing selection above'); ?></small>
+            <h3 class="card-title h6"><?php echo __('Upload NEW Custom Watermark'); ?></h3><small class="text-muted d-block mb-2"><?php echo __('Leave empty to keep existing selection above'); ?></small>
             
             <div class="mb-2">
               <label for="new_watermark_name" class="form-label"><?php echo __('Watermark Name'); ?></label>
