@@ -1,1 +1,0 @@
-jurisdictionAddSuccess.blade.php
