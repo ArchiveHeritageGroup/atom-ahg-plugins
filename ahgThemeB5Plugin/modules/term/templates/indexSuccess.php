@@ -7,7 +7,9 @@
   // linked to this term (and its narrower terms, unless onlyDirect), as base
   // AtoM's count does. ponytail: with a sidebar filter applied this can
   // subtract a little too much - the count errs low, never high.
-  $ahgVisibleNb = $pager->getNbResults();
+  // Only places, subjects and genres have a pager (base sets it with
+  // addBrowseElements); other terms, such as note types, have none.
+  $ahgVisibleNb = isset($pager) ? $pager->getNbResults() : 0;
   try {
       $ahgUserId = $sf_user->getAttribute('user_id');
       $ahgHidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()

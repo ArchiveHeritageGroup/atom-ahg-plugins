@@ -21,7 +21,8 @@ class sharepointActions extends sfActions
     public function executeTenants(sfWebRequest $request)
     {
         $this->checkAdmin();
-        // TODO: list rows from SharePointTenantRepository::all().
+        require_once __DIR__ . '/../../../lib/Repositories/SharePointTenantRepository.php';
+        $this->tenants = (new \AtomExtensions\SharePoint\Repositories\SharePointTenantRepository())->all();
         return sfView::SUCCESS;
     }
 
