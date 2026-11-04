@@ -70,3 +70,14 @@ A master must answer `{"allowed": false}`. Then request the same master through
 `/iiif/2/<identifier>/full/max/0/default.jpg` as an anonymous caller and confirm
 403. Restart Cantaloupe and empty its cache first: the delegate caches verdicts for a
 minute, and a cached image is served without any check. Ask twice; both must be 403.
+
+## An image server shared with other sites
+
+Where one Cantaloupe also fronts other sites (on the AHG host it serves Heratio as
+well, with its own redaction check), the installed delegate is a merge of this file
+and theirs, not a copy of it. Every change to this file then has to be merged into
+the installed one by hand, and nothing reports when that is forgotten. Twice it was:
+the master grant (v3.121.68) and fail-closed (v3.121.65) reached this file but not the
+host, so staff saw a blank viewer and one broken check would have served every master
+(#228). After changing this file, diff it against the installed delegate, merge,
+restart Cantaloupe, and run the checks above.
