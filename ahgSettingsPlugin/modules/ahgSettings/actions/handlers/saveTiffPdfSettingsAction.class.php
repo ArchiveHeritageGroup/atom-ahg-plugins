@@ -9,7 +9,7 @@ use AtomFramework\Http\Controllers\AhgController;
 
 use Illuminate\Database\Capsule\Manager as DB;
 
-class saveTiffPdfSettingsAction extends AhgController
+class SettingsSaveTiffPdfSettingsAction extends AhgController
 {
     public function execute($request)
     {

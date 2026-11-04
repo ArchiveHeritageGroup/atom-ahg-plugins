@@ -4,7 +4,7 @@ use AtomFramework\Http\Controllers\AhgController;
 /**
  * DAM Tools Action
  */
-class damToolsAction extends AhgController
+class SettingsDamToolsAction extends AhgController
 {
     public function execute($request)
     {
