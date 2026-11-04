@@ -13,6 +13,17 @@ class ahgTimeLimitedShareLinkPluginConfiguration extends sfPluginConfiguration
 
     public function initialize(): void
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #291).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Share links', [
+                'url' => '/index.php/admin/share-links',
+                'label' => 'Share links',
+                'credentials' => ['administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->registerAutoloader();
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);

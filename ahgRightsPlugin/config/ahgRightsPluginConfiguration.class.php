@@ -12,6 +12,17 @@ class ahgRightsPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #291).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Rights management', [
+                'url' => '/index.php/rightsAdmin',
+                'label' => 'Rights management',
+                'credentials' => ['administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         // Register autoloader for plugin namespace
         spl_autoload_register(function ($class) {
             if (strpos($class, 'Plugins\\ahgRightsPlugin\\') === 0) {

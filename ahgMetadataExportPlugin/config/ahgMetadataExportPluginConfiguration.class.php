@@ -7,6 +7,17 @@ class ahgMetadataExportPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #291).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Metadata export', [
+                'url' => '/index.php/metadataExport',
+                'label' => 'Metadata export',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'metadataExport';
         sfConfig::set('sf_enabled_modules', $enabledModules);

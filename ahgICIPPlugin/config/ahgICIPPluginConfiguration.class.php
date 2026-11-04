@@ -34,6 +34,17 @@ class ahgICIPPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Menu entry, registered here so it exists exactly while this plugin is
+        // enabled and appears on any theme (catalog #291).
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'ICIP', [
+                'url' => '/index.php/icip',
+                'label' => 'ICIP management',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 
         // Enable module
