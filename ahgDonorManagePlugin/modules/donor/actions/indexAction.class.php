@@ -20,6 +20,14 @@ class DonorIndexAction extends AhgController
             $this->forward404();
         }
 
+        // Leave out accessions another plugin hides from this user, for
+        // example another tenant's (ahgMultiTenantPlugin, #217).
+        $hidden = isset($this->dispatcher) ? $this->dispatcher->filter(
+            new sfEvent($this, 'accession.hidden_ids', ['user_id' => $this->getUser()->getAttribute('user_id')]),
+            []
+        )->getReturnValue() : [];
+        $this->donor['accessions'] = array_values(array_filter($this->donor['accessions'], fn ($a) => !in_array((int) $a->id, $hidden, true)));
+
         // ACL check — donors require authenticated editor/admin
         $user = $this->getUser();
         $isAdmin = $user->isAuthenticated() && ($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID));

@@ -160,10 +160,10 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
      * dashboard, the valuation report, CSV export) are refused to scoped
      * users outright. Administrators and unscoped users are never refused.
      *
-     * ponytail: the /api/accession/... JSON endpoints take checklist, item
-     * and container ids, not accession ids, and are not checked; they need an
-     * editor who already knows those ids. Check them by parent accession if
-     * that ever matters. Donor pages still list a donor's accessions.
+     * The /api/accession/... JSON endpoints name checklist items,
+     * attachments, criteria, containers, container items and rights rather
+     * than accessions; accessionIdsFor() traces each back to its accession.
+     * Donor pages leave hidden accessions out through accession.hidden_ids.
      */
     public function enforceAccessionAccess(sfEvent $event): void
     {
@@ -193,18 +193,8 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
             if (in_array($module . '/' . ($event['action'] ?? ''), $wholeCollection, true)) {
                 $refuse = true;
             } else {
-                $accessionId = 0;
-                $slug = (string) $request->getParameter('slug', '');
-                if ('' !== $slug) {
-                    $accessionId = (int) \Illuminate\Database\Capsule\Manager::table('slug as s')
-                        ->join('accession as a', 'a.id', '=', 's.object_id')
-                        ->where('s.slug', $slug)
-                        ->value('a.id');
-                } elseif (preg_match('#^/admin/accessions/(\d+)/#', $request->getPathInfo(), $m)) {
-                    $accessionId = (int) $m[1];
-                }
-                $refuse = $accessionId > 0
-                    && in_array($accessionId, \AhgMultiTenant\Services\TenantScope::hiddenAccessionIds($userId), true);
+                $ids = self::accessionIdsFor($module, (string) ($event['action'] ?? ''), $request);
+                $refuse = (bool) array_intersect($ids, \AhgMultiTenant\Services\TenantScope::hiddenAccessionIds($userId));
             }
         } catch (\Throwable $e) {
             error_log('tenant.accession_check_failed: ' . $e->getMessage());
@@ -221,6 +211,71 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
         $context->getController()->forward('accessFilter', 'denied');
 
         throw new sfStopException();
+    }
+
+    /**
+     * The accessions a request touches: by slug, by /admin/accessions/<id>/,
+     * or, for the JSON endpoints, through the record each one names.
+     *
+     * @return int[]
+     */
+    private static function accessionIdsFor(string $module, string $action, sfWebRequest $request): array
+    {
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $ids = [];
+        $slug = (string) $request->getParameter('slug', '');
+        if ('' !== $slug) {
+            $ids[] = $db::table('slug as s')->join('accession as a', 'a.id', '=', 's.object_id')->where('s.slug', $slug)->value('a.id');
+        } elseif (preg_match('#^/admin/accessions/(\d+)/#', $request->getPathInfo(), $m)) {
+            $ids[] = $m[1];
+        }
+        if (0 !== strpos($request->getPathInfo(), '/api/accession/')) {
+            return array_values(array_filter(array_map('intval', $ids)));
+        }
+
+        $container = fn ($id) => $db::table('accession_container')->where('id', (int) $id)->value('accession_id');
+        $item = fn ($id) => $container($db::table('accession_container_item')->where('id', (int) $id)->value('container_id'));
+        $ids[] = $request->getParameter('accession_id');
+        if ($request->getParameter('container_id')) {
+            $ids[] = $container($request->getParameter('container_id'));
+        }
+        if ($request->getParameter('item_id')) {
+            $ids[] = $item($request->getParameter('item_id'));
+        }
+        if ($request->getParameter('right_id')) {
+            $ids[] = $db::table('accession_rights')->where('id', (int) $request->getParameter('right_id'))->value('accession_id');
+        }
+        if ('apiBarcodeLookup' === $action && '' !== (string) $request->getParameter('barcode', '')) {
+            $ids[] = $db::table('accession_container')->where('barcode', (string) $request->getParameter('barcode'))->value('accession_id');
+        }
+
+        $id = (int) $request->getParameter('id');
+        if ($id > 0) {
+            switch ($module . '/' . $action) {
+                case 'accessionIntake/apiChecklistToggle':
+                    $ids[] = $db::table('accession_intake_checklist')->where('id', $id)->value('accession_id');
+                    break;
+                case 'accessionIntake/apiAttachmentDelete':
+                    $ids[] = $db::table('accession_attachment')->where('id', $id)->value('accession_id');
+                    break;
+                case 'accessionAppraisal/apiAppraisalScore':
+                    $ids[] = $db::table('accession_appraisal_criterion as c')->join('accession_appraisal as a', 'a.id', '=', 'c.appraisal_id')->where('c.id', $id)->value('a.accession_id');
+                    break;
+                case 'accessionContainer/apiContainerDelete':
+                    $ids[] = $container($id);
+                    break;
+                case 'accessionContainer/apiContainerItemDelete':
+                case 'accessionContainer/apiContainerItemLink':
+                    $ids[] = $item($id);
+                    break;
+                case 'accessionContainer/apiRightsDelete':
+                case 'accessionContainer/apiRightsInherit':
+                    $ids[] = $db::table('accession_rights')->where('id', $id)->value('accession_id');
+                    break;
+            }
+        }
+
+        return array_values(array_filter(array_map('intval', $ids)));
     }
 
     public function onContextLoadFactories(sfEvent $event): void

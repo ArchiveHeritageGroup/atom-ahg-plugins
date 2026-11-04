@@ -4,6 +4,7 @@ $tenants = $sf_data->getRaw('tenants');
 <h1><?php echo __('SharePoint Tenants') ?></h1>
 
 <p>
+    <a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'tenantEdit', 'id' => 0]) ?>" class="btn btn-primary"><?php echo __('Add tenant') ?></a>
     <a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'drives']) ?>" class="btn btn-outline-secondary"><?php echo __('Drives') ?></a>
     <a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'rules']) ?>" class="btn btn-outline-secondary"><?php echo __('Rules') ?></a>
     <a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'mappings']) ?>" class="btn btn-outline-secondary"><?php echo __('Mapping templates') ?></a>
@@ -21,6 +22,7 @@ $tenants = $sf_data->getRaw('tenants');
             <th><?php echo __('Status') ?></th>
             <th><?php echo __('Last token') ?></th>
             <th><?php echo __('Last error') ?></th>
+            <th><span class="visually-hidden"><?php echo __('Actions') ?></span></th>
         </tr>
     </thead>
     <tbody>
@@ -38,10 +40,9 @@ $tenants = $sf_data->getRaw('tenants');
             </td>
             <td><?php echo esc_entities($t->last_token_at ?: '-') ?></td>
             <td><small class="text-danger"><?php echo esc_entities(mb_strimwidth((string) $t->last_error, 0, 120, '...')) ?></small></td>
+            <td><a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'tenantEdit', 'id' => (int) $t->id]) ?>" class="btn btn-sm btn-outline-primary"><?php echo __('Edit') ?><span class="visually-hidden"> <?php echo esc_entities($t->name) ?></span></a></td>
         </tr>
     <?php endforeach ?>
     </tbody>
 </table>
 <?php endif ?>
-
-<?php // ponytail: list only. Adding and editing a tenant (with its write-only client secret via SharePointTenantRepository::persistSecret()) is tenantEdit, still a stub. ?>

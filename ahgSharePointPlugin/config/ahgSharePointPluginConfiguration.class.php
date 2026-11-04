@@ -95,5 +95,11 @@ class ahgSharePointPluginConfiguration extends sfPluginConfiguration
         $r->any('sharepoint_drive_register', '/sharepoint/drives/register',             'driveRegister');
         $r->any('sharepoint_drive_save',     '/sharepoint/drives/save',                 'driveSave');
         $r->any('sharepoint_drive_delete',   '/sharepoint/drives/:id/delete',           'driveDelete', ['id' => '\d+']);
+
+        // Without this none of the routes above existed: pages answered only
+        // through base AtoM's /:module/:action route, so every route with an
+        // :id (tenant edit, events, mappings, rules) and the /api/v2 push
+        // routes were 404.
+        $r->register($event->getSubject());
     }
 }

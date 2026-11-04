@@ -26,22 +26,129 @@ class sharepointActions extends sfActions
         return sfView::SUCCESS;
     }
 
+    /**
+     * Add (id 0) or edit a tenant. The client secret is write-only: the form
+     * never shows it, a blank field keeps the stored one, and a new value is
+     * encrypted with the framework EncryptionService into ahg_settings by
+     * SharePointTenantRepository::persistSecret(); the tenant row holds only
+     * the reference.
+     *
+     * ponytail: a new secret replaces the old one at once. The table has
+     * previous_secret_ref / previous_secret_until for a rotation overlap, but
+     * nothing reads them yet; use them if a secret must keep working while
+     * Azure propagates the new one.
+     */
     public function executeTenantEdit(sfWebRequest $request)
     {
         $this->checkAdmin();
-        // TODO: GET = render form, POST = validate + persist via repository.
-        // client_secret field is write-only (renders empty, only updates on non-empty submit).
-        // Encrypt client_secret via EncryptionService before persisting.
-        return sfView::SUCCESS;
+        require_once __DIR__ . '/../../../lib/Repositories/SharePointTenantRepository.php';
+        $repo = new \AtomExtensions\SharePoint\Repositories\SharePointTenantRepository();
+
+        $id = (int) $request->getParameter('id');
+        $this->tenant = $id > 0 ? $repo->find($id) : null;
+        if ($id > 0 && null === $this->tenant) {
+            $this->forward404();
+        }
+        $this->errors = [];
+        $this->values = [
+            'name' => $this->tenant->name ?? '',
+            'tenant_id' => $this->tenant->tenant_id ?? '',
+            'client_id' => $this->tenant->client_id ?? '',
+            'graph_endpoint' => $this->tenant->graph_endpoint ?? 'https://graph.microsoft.com/v1.0',
+            'default_site_id' => $this->tenant->default_site_id ?? '',
+            'status' => $this->tenant->status ?? 'active',
+        ];
+
+        if (!$request->isMethod('post')) {
+            return sfView::SUCCESS;
+        }
+
+        foreach (array_keys($this->values) as $field) {
+            $this->values[$field] = trim((string) $request->getParameter($field, ''));
+        }
+        $secret = (string) $request->getParameter('client_secret', '');
+        $guid = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
+
+        if ('' === $this->values['name']) {
+            $this->errors['name'] = 'Enter a name.';
+        }
+        foreach (['tenant_id' => 'Tenant ID', 'client_id' => 'Client ID'] as $field => $label) {
+            if (!preg_match($guid, $this->values[$field])) {
+                $this->errors[$field] = $label . ' must be a GUID, for example 00000000-0000-0000-0000-000000000000.';
+            }
+        }
+        if (!preg_match('#^https://[^\s]+$#', $this->values['graph_endpoint'])) {
+            $this->errors['graph_endpoint'] = 'The Graph endpoint must be an https:// URL.';
+        }
+        if (!in_array($this->values['status'], ['active', 'disabled'], true)) {
+            $this->values['status'] = 'active';
+        }
+        if (null === $this->tenant && '' === trim($secret)) {
+            $this->errors['client_secret'] = 'A new tenant needs its client secret.';
+        }
+        if ($this->errors) {
+            return sfView::SUCCESS;
+        }
+
+        $row = $this->values;
+        $row['default_site_id'] = '' === $row['default_site_id'] ? null : $row['default_site_id'];
+
+        try {
+            \Illuminate\Database\Capsule\Manager::connection()->transaction(function () use ($repo, $row, $secret, &$id) {
+                if ($id > 0) {
+                    $repo->update($id, $row);
+                } else {
+                    $id = $repo->create($row + [
+                        'client_secret_ref' => '',
+                        'webhook_client_state' => bin2hex(random_bytes(16)),
+                    ]);
+                }
+                if ('' !== trim($secret)) {
+                    $repo->persistSecret($id, trim($secret));
+                }
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            $this->errors['tenant_id'] = 23000 == $e->getCode()
+                ? 'Another tenant already uses this tenant ID and client ID.'
+                : 'The tenant could not be saved.';
+            error_log('sharepoint.tenant_save_failed: ' . $e->getMessage());
+
+            return sfView::SUCCESS;
+        } catch (\Throwable $e) {
+            // Most often: no readable encryption key (/etc/atom/encryption.key).
+            $this->errors['client_secret'] = 'The secret could not be encrypted, so nothing was saved: ' . $e->getMessage();
+            error_log('sharepoint.tenant_secret_failed: ' . $e->getMessage());
+
+            return sfView::SUCCESS;
+        }
+
+        $this->getUser()->setFlash('notice', 'Tenant saved.');
+        $this->redirect(['module' => 'sharepoint', 'action' => 'tenants']);
     }
 
+    /**
+     * Connection test for the tenant edit page: acquire a token and list up
+     * to five sites, as `php symfony sharepoint:test-connection` does.
+     */
     public function executeTenantTest(sfWebRequest $request)
     {
         $this->checkAdmin();
-        // TODO: invoke same logic as `php symfony sharepoint:test-connection --tenant=:id`,
-        // return JSON result for AJAX consumer in tenantEdit page.
-        $this->renderText(json_encode(['status' => 'not_implemented']));
-        return sfView::NONE;
+        require_once __DIR__ . '/../../../lib/Services/GraphTokenCache.php';
+        require_once __DIR__ . '/../../../lib/Services/GraphClientService.php';
+        require_once __DIR__ . '/../../../lib/Repositories/SharePointTenantRepository.php';
+        $this->getResponse()->setContentType('application/json');
+
+        $tenantId = (int) $request->getParameter('id');
+        try {
+            $graph = new \AtomExtensions\SharePoint\Services\GraphClientService();
+            $graph->acquireToken($tenantId);
+            $sites = $graph->get($tenantId, '/sites?search=*&$top=5');
+            $result = ['status' => 'ok', 'sites' => array_map(fn ($site) => $site['displayName'] ?? '?', $sites['value'] ?? [])];
+        } catch (\Throwable $e) {
+            $result = ['status' => 'error', 'message' => mb_strimwidth($e->getMessage(), 0, 500, '...')];
+        }
+
+        return $this->renderText(json_encode($result));
     }
 
     public function executeDrives(sfWebRequest $request)
