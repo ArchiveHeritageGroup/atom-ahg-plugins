@@ -56,5 +56,13 @@
         "Dashboard widgets",
         "Security clearance per section",
         "Live and snapshot data binding"
-    ]
+    ],
+    "vendor": {
+        "tiptap": {
+            "version": "custom bundle",
+            "sha256": "2b34b7e3560c75469b744b5ab69f92d77d1438e50dcdfee7a8f5e39258d27745",
+            "bytes": 324380,
+            "note": "Built locally, not a published file. The same bundle is in ahgReportBuilderPlugin and ahgResearchPlugin; keep the sha256 equal in both when either changes."
+        }
+    }
 }

@@ -28,5 +28,13 @@
         "viewer_3d_settings",
         "object_3d_camera_bookmark",
         "triposr_jobs"
-    ]
+    ],
+    "vendor": {
+        "three": {
+            "version": "0.128.0",
+            "source": "https://unpkg.com/three@0.128.0/build/three.min.js",
+            "sha256": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2",
+            "bytes": 603445
+        }
+    }
 }

@@ -31,5 +31,13 @@
         "database": false
     },
     "tables": [],
-    "category": "viewer"
+    "category": "viewer",
+    "vendor": {
+        "openseadragon": {
+            "version": "4.1.0",
+            "source": "https://unpkg.com/openseadragon@4.1.0/build/openseadragon/openseadragon.min.js",
+            "sha256": "4c9ca413d83ef99525abb30801ea80d7478707b8629522ed1183be00044ea36b",
+            "bytes": 247016
+        }
+    }
 }

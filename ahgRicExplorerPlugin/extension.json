@@ -28,5 +28,13 @@
     "shared_tables": [],
     "helpers": [],
     "category": "metadata",
-    "load_order": 65
+    "load_order": 65,
+    "vendor": {
+        "three": {
+            "version": "0.128.0",
+            "source": "https://unpkg.com/three@0.128.0/build/three.min.js",
+            "sha256": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2",
+            "bytes": 603445
+        }
+    }
 }

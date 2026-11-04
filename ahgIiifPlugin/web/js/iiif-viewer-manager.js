@@ -342,7 +342,7 @@ export class IiifViewerManager {
         try {
             // Load OSD if not loaded
             if (!window.OpenSeadragon) {
-                await this.loadScript(this.options.pluginPath + '/js/vendor/openseadragon.min.js');
+                await this.loadScript(this.options.pluginPath + '/public/openseadragon/openseadragon.min.js');
             }
 
             // Verify OpenSeadragon loaded

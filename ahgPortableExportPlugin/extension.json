@@ -44,5 +44,13 @@
         "2.0.0": "Archive export mode with re-importable JSON, manifest checksums, dry-run estimates, verification CLI",
         "1.1.0": "Queue integration, clipboard export, quick-start from description page",
         "1.0.0": "Initial release with full export pipeline and static viewer"
+    },
+    "vendor": {
+        "bootstrap-icons": {
+            "version": "1.11.3",
+            "source": "https://unpkg.com/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
+            "sha256": "f643d6fe7e679f9de3e16311600c5ef5cd6b098f7a3a8828fcc29255d2b33e62",
+            "bytes": 85875
+        }
     }
 }

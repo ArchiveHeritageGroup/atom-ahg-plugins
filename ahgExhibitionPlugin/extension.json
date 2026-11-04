@@ -43,5 +43,13 @@
         "exhibition_media",
         "ahg_exhibition_space",
         "ahg_exhibition_placement"
-    ]
+    ],
+    "vendor": {
+        "three": {
+            "version": "0.137.5",
+            "source": "https://unpkg.com/three@0.137.5/build/three.min.js",
+            "sha256": "cd9de529c20c05126990fd5c7ec70f0bcb31dc0d5abe1b6886fd43be2bff71ec",
+            "bytes": 619013
+        }
+    }
 }

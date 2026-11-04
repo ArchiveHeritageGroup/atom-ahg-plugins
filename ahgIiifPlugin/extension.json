@@ -55,5 +55,37 @@
         "media_audio_description",
         "iiif_ai_extract",
         "object_security_classification"
-    ]
+    ],
+    "vendor": {
+        "three": {
+            "version": "0.128.0",
+            "source": "https://unpkg.com/three@0.128.0/build/three.min.js",
+            "sha256": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2",
+            "bytes": 603445
+        },
+        "openseadragon": {
+            "version": "4.1.0",
+            "source": "https://unpkg.com/openseadragon@4.1.0/build/openseadragon/openseadragon.min.js",
+            "sha256": "4c9ca413d83ef99525abb30801ea80d7478707b8629522ed1183be00044ea36b",
+            "bytes": 247016
+        },
+        "mirador": {
+            "version": "3.4.3",
+            "source": "https://unpkg.com/mirador@3.4.3/dist/mirador.min.js",
+            "sha256": "43caefc0eb119c8152e573a028c78c8b8a0497da20055358104c273fe2b98eac",
+            "bytes": 2338717
+        },
+        "pdfjs": {
+            "version": "3.11.174",
+            "source": "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js",
+            "sha256": "5b5799e6f8c680663207ac5b42ee14eed2a406fa7af48f50c154f0c0b1566946",
+            "bytes": 320004
+        },
+        "pdfjs-worker": {
+            "version": "3.11.174",
+            "source": "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js",
+            "sha256": "feabdf309770ed24bba31a5467836cdc8cf639c705af27d52b585b041bb8527b",
+            "bytes": 1087212
+        }
+    }
 }

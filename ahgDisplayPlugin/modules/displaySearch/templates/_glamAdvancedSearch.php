@@ -354,7 +354,7 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
   </div>
 </div>
 
-<script src="/plugins/ahgThemeB5Plugin/web/js/tom-select.complete.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var repoSelect = document.getElementById('repo-select');

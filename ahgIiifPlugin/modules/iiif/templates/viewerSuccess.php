@@ -85,7 +85,7 @@
             miradorContainer.style.display = 'none';
             return;
         }
-        loadScript(pluginPath + '/js/vendor/openseadragon.min.js').then(function() {
+        loadScript(pluginPath + '/public/openseadragon/openseadragon.min.js').then(function() {
             // Fetch manifest and extract tile sources
             fetch(manifestUrl).then(function(r) { return r.json(); }).then(function(manifest) {
                 // Presentation 3 (what /iiif/manifest serves) and 2. Reading only v2

@@ -50,5 +50,13 @@
         "email_setting",
         "ahg_workflow_queue",
         "ahg_workflow_sla_policy"
-    ]
+    ],
+    "vendor": {
+        "tom-select": {
+            "version": "2.2.2",
+            "source": "https://unpkg.com/tom-select@2.2.2/dist/js/tom-select.complete.min.js",
+            "sha256": "6e5e5d665ac1716a663e5646801072f5518f19a72c6558bbbc70807d9d9bcba0",
+            "bytes": 49028
+        }
+    }
 }

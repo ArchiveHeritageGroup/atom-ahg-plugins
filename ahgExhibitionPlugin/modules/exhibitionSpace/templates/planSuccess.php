@@ -190,7 +190,7 @@ $urls = [
 </div>
 
 <link href="/plugins/ahgThemeB5Plugin/web/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="/plugins/ahgThemeB5Plugin/web/js/tom-select.complete.min.js"<?php echo $nonce ?>></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"<?php echo $nonce ?>></script>
 <script src="/plugins/ahgThemeB5Plugin/web/js/konva.min.js"<?php echo $nonce ?>></script>
 <script<?php echo $nonce ?>>
 window.AHG_PLAN_BOOT = {

@@ -20,5 +20,13 @@
         "ahgUiOverridesPlugin",
         "ahgMetadataExtractionPlugin"
     ],
-    "tables": []
+    "tables": [],
+    "vendor": {
+        "bootstrap-icons": {
+            "version": "1.11.3",
+            "source": "https://unpkg.com/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
+            "sha256": "f643d6fe7e679f9de3e16311600c5ef5cd6b098f7a3a8828fcc29255d2b33e62",
+            "bytes": 85875
+        }
+    }
 }
