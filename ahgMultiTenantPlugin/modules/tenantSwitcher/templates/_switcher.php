@@ -48,12 +48,14 @@ if (count($repositories) <= 1 && !$isAdmin) {
 }
 ?>
 
-<li class="nav-item dropdown tenant-switcher">
-  <a class="nav-link dropdown-toggle" href="#" id="tenantSwitcherDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="fas fa-building me-1"></i>
-    <span class="tenant-name"><?php echo esc_specialchars($currentRepoName) ?></span>
+<li class="nav-item dropdown d-flex flex-column tenant-switcher">
+  <?php // Same shape as the theme's other navbar icons: icon with tooltip, name as text on small screens. ?>
+  <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" id="tenantSwitcherDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-2x fa-fw fa-building px-0 px-lg-2 py-2" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="d-none d-lg-block" title="<?php echo esc_specialchars($currentRepoName) ?>" aria-hidden="true"></i>
+    <span class="d-lg-none mx-1 tenant-name" aria-hidden="true"><?php echo esc_specialchars($currentRepoName) ?></span>
+    <span class="visually-hidden"><?php echo __('Repository: %1%', ['%1%' => esc_specialchars($currentRepoName)]) ?></span>
   </a>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="tenantSwitcherDropdown">
+  <ul class="dropdown-menu dropdown-menu-end mb-2" aria-labelledby="tenantSwitcherDropdown">
     <?php if ($isAdmin): ?>
       <li>
         <a class="dropdown-item <?php echo $viewAllMode ? 'active' : '' ?>" href="<?php echo url_for('tenant_switch_all') ?>">

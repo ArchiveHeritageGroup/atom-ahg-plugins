@@ -88,6 +88,12 @@ class accessionManageActions extends AhgController
             'sortDir' => $sortDir,
             'subquery' => $subquery,
             'repository' => (int) $request->getParameter('repository'),
+            // Accessions another plugin hides from this user, for example
+            // another tenant's (ahgMultiTenantPlugin, #217).
+            'exclude' => isset($this->dispatcher) ? $this->dispatcher->filter(
+                new sfEvent($this, 'accession.hidden_ids', ['user_id' => $this->getUser()->getAttribute('user_id')]),
+                []
+            )->getReturnValue() : [],
         ] + $facetParams);
 
         // Facets (#317): buckets with names, and the filters now applied.

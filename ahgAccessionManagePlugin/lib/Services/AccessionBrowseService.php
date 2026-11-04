@@ -118,6 +118,12 @@ class AccessionBrowseService
             $boolQuery['filter'] = [['ids' => ['values' => array_map('strval', $repoIds)]]];
         }
 
+        // Accessions hidden from this user (#217)
+        $exclude = array_map('strval', array_map('intval', $params['exclude'] ?? []));
+        if ($exclude) {
+            $boolQuery['must_not'] = [['ids' => ['values' => $exclude]]];
+        }
+
         // Selected facets (#317). Ids only: anything else in the URL is ignored.
         $filters = [];
         foreach (self::AGGS as $name => $field) {

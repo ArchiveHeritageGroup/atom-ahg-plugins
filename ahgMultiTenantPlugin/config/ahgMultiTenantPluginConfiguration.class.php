@@ -34,6 +34,11 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
 
         // Hook into context end for tenant context cleanup
         $this->dispatcher->connect('context.load_factories', [$this, 'onContextLoadFactories']);
+
+        // Accessions of other tenants: refuse their pages, and hand their ids
+        // to accession browse (#217)
+        $this->dispatcher->connect('controller.change_action', [$this, 'enforceAccessionAccess']);
+        $this->dispatcher->connect('accession.hidden_ids', [$this, 'filterHiddenAccessionIds']);
     }
 
     /**
@@ -129,6 +134,93 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
             return \AhgMultiTenant\Services\TenantScope::hiddenObjectIds($userId);
         });
         $done = true;
+    }
+
+    /**
+     * Accession browse asks for the accessions to leave out (#217).
+     */
+    public function filterHiddenAccessionIds(sfEvent $event, array $ids): array
+    {
+        try {
+            $userId = $event['user_id'] ?? null;
+
+            return array_merge($ids, \AhgMultiTenant\Services\TenantScope::hiddenAccessionIds($userId ? (int) $userId : null));
+        } catch (\Throwable $e) {
+            error_log('tenant.accession_filter_failed: ' . $e->getMessage());
+
+            return $ids;
+        }
+    }
+
+    /**
+     * Refuse another tenant's accession (#217): its view, edit and delete
+     * pages (/accession/<slug>) and its intake, appraisal, container and
+     * rights pages (/admin/accessions/<id>/...). Pages listing every
+     * accession that cannot be narrowed to a tenant (the intake queue, the
+     * dashboard, the valuation report, CSV export) are refused to scoped
+     * users outright. Administrators and unscoped users are never refused.
+     *
+     * ponytail: the /api/accession/... JSON endpoints take checklist, item
+     * and container ids, not accession ids, and are not checked; they need an
+     * editor who already knows those ids. Check them by parent accession if
+     * that ever matters. Donor pages still list a donor's accessions.
+     */
+    public function enforceAccessionAccess(sfEvent $event): void
+    {
+        $module = $event['module'] ?? '';
+        if (0 !== strpos($module, 'accession')) {
+            return;
+        }
+
+        $context = sfContext::getInstance();
+        $userId = (int) $context->getUser()->getAttribute('user_id');
+        $request = $context->getRequest();
+        if (!$userId || $request->getAttribute('ahg_tenant_accession_checked')) {
+            return;
+        }
+        $request->setAttribute('ahg_tenant_accession_checked', true);
+
+        $wholeCollection = [
+            'accession/exportCsv', 'accessionIntake/queue', 'accessionManage/dashboard', 'accessionAppraisal/valuationReport',
+        ];
+
+        try {
+            $scoped = null !== \AhgMultiTenant\Services\TenantScope::allowedRepositoryIds($userId);
+            if (!$scoped) {
+                return;
+            }
+
+            if (in_array($module . '/' . ($event['action'] ?? ''), $wholeCollection, true)) {
+                $refuse = true;
+            } else {
+                $accessionId = 0;
+                $slug = (string) $request->getParameter('slug', '');
+                if ('' !== $slug) {
+                    $accessionId = (int) \Illuminate\Database\Capsule\Manager::table('slug as s')
+                        ->join('accession as a', 'a.id', '=', 's.object_id')
+                        ->where('s.slug', $slug)
+                        ->value('a.id');
+                } elseif (preg_match('#^/admin/accessions/(\d+)/#', $request->getPathInfo(), $m)) {
+                    $accessionId = (int) $m[1];
+                }
+                $refuse = $accessionId > 0
+                    && in_array($accessionId, \AhgMultiTenant\Services\TenantScope::hiddenAccessionIds($userId), true);
+            }
+        } catch (\Throwable $e) {
+            error_log('tenant.accession_check_failed: ' . $e->getMessage());
+            $refuse = true; // fail closed: an accession page is refused if the check cannot run
+        }
+
+        if (!$refuse) {
+            return;
+        }
+
+        // Same refusal as a hidden description: accessFilter/denied answers
+        // 403 without the record's title.
+        $request->setAttribute('ahg_hide_title', true);
+        $context->getController()->forward('accessFilter', 'denied');
+
+        throw new sfStopException();
     }
 
     public function onContextLoadFactories(sfEvent $event): void

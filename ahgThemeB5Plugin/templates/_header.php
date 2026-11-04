@@ -131,6 +131,11 @@
           <?php } // $ahgHelpUrl ?>
           <?php endif; ?>
 
+          <?php // Tenant switcher: shows itself only to administrators and users with more than one repository. ?>
+          <?php if (in_array('ahgMultiTenantPlugin', sfProjectConfiguration::getActive()->getPlugins())) { ?>
+            <?php echo get_component('tenantSwitcher', 'switcher'); ?>
+          <?php } ?>
+
           <?php echo get_component('menu', 'mainMenu', ['sf_cache_key' => 'dominion-b5'.$sf_user->getCulture().$sf_user->getUserID()]); ?>
           <?php echo get_component('menu', 'clipboardMenu'); ?>
           <?php if (sfConfig::get('app_toggleLanguageMenu')) { ?>

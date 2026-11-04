@@ -70,9 +70,13 @@ $access = json_decode(json_encode(sfOutputEscaper::unescape($access ?? [])), tru
                                 <i class="fas fa-sign-in-alt me-1"></i> Log In
                             </a>
                         <?php else: ?>
-                            <a href="<?php echo url_for('@access_request_object?type=information_object&id='.(int) $objectId); ?>" class="btn btn-primary">
+                            <?php // Only for a description (an accession refusal has none). The route is ahgAccessRequestPlugin's: without that plugin url_for() throws and the refusal became a 500. ?>
+                            <?php $ahgRequestUrl = null; if ((int) $objectId > 0) try { $ahgRequestUrl = url_for('@access_request_object?type=information_object&id='.(int) $objectId); } catch (Exception $e) { } ?>
+                            <?php if (null !== $ahgRequestUrl): ?>
+                            <a href="<?php echo $ahgRequestUrl; ?>" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-1"></i> Request Access
                             </a>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
