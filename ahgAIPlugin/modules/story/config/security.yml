@@ -1,0 +1,13 @@
+# story module access (#155).
+#
+# A missing modules/<name>/config/security.yml inherits `default: is_secure: false`
+# and FAILS OPEN. The story editor is for editors and administrators; only the
+# story page itself is public, and it shows drafts to staff only (checked in the
+# action). Double-bracket credentials are an OR; `all:` secures any new action.
+
+show:
+  is_secure: false
+
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

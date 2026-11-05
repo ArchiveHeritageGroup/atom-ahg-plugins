@@ -21,6 +21,7 @@
         ]
     },
     "tables": [
+        "ahg_story",
         "actor_face_index",
         "digital_object_faces",
         "ahg_ai_settings",

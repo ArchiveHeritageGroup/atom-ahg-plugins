@@ -59,6 +59,13 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
         $router->any('ahg_ai_ner_approved_entities', '/ai/ner/approved-entities/:id', 'getApprovedEntities', ['id' => '\d+']);
 
         $router->register($event->getSubject());
+
+        // Storytelling engine (#155): staff editor, and the public story page
+        $stories = new \AtomFramework\Routing\RouteLoader('story');
+        $stories->any('ahg_story_search', '/admin/stories/search', 'search');
+        $stories->any('ahg_story_index', '/admin/stories', 'index');
+        $stories->any('ahg_story_show', '/stories/:slug', 'show', ['slug' => '[a-z0-9][a-z0-9-]*']);
+        $stories->register($event->getSubject());
     }
 
     public function initialize()
@@ -72,11 +79,18 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 70,
             ]);
+            AhgNav::register('manage', 'AiStories', [
+                'url' => '/index.php/admin/stories',
+                'label' => 'Stories of the collection',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 71,
+            ]);
         }
 
         // Enable the ai module
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'ai';
+        $enabledModules[] = 'story';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);

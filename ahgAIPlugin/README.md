@@ -17,6 +17,7 @@ AI-powered tools for archival management: Named Entity Recognition (NER), Transl
 - summarize
 - spellcheck
 - suggest
+- stories of the collection (`/admin/stories`, editors and administrators; Manage menu): a theme, hand-picked records, notes, web pages and PDF or text documents become a short public story written by the AI gateway from published records only (email addresses and long numbers masked). Staff edit it, save a draft or publish it at `/stories/<slug>`, with its records and sources listed. "On this day" writes one from records dated today, else this month. Check: `testing/story-check.js` (test instance, daytime).
 
 ## Requirements
 
@@ -38,8 +39,9 @@ These are used when present and are not required:
 
 ## Database tables
 
-Creates 27 table(s):
+Creates 28 table(s):
 
+- `ahg_story`
 - `actor_face_index`
 - `digital_object_faces`
 - `ahg_ai_settings`

@@ -1136,3 +1136,21 @@ FROM ahg_ner_settings
 WHERE setting_key COLLATE utf8mb4_unicode_ci NOT IN (
     SELECT setting_key FROM ahg_ai_settings WHERE feature = 'general'
 );
+
+-- Storytelling engine (#155, same table as Heratio's, heratio#1202): saved
+-- stories of the collection. draft = staff only, published = public at /stories/<slug>.
+CREATE TABLE IF NOT EXISTS `ahg_story` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `slug` VARCHAR(96) NOT NULL COMMENT 'public URL part, fixed at first save',
+  `title` VARCHAR(200) NOT NULL,
+  `theme` VARCHAR(200) NULL,
+  `body` MEDIUMTEXT NOT NULL,
+  `object_ids` TEXT NULL COMMENT 'JSON array of information_object ids, in story order',
+  `sources_json` TEXT NULL COMMENT 'JSON array of {type: note, url, upload, record; label; url}',
+  `status` VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, published',
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ahg_story_slug_unique` (`slug`),
+  KEY `ahg_story_status_idx` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
