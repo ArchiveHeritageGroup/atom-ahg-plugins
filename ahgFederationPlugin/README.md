@@ -15,10 +15,15 @@ OAI-PMH Federation plugin for Heritage Platform metadata exchange
 - oai_heritage_format
 - harvest_client
 - provenance_tracking
+- union catalogue (`/admin/federation/union`): local and harvested records in one list
+- loan requests (`/admin/federation/loans`): ask a peer to lend an item, or record a peer asking us. Status runs requested, approved or declined, in transit, returned (cancelled as an early exit), with who and when on every change, plus approval rate, days to decide and busiest partners. "Request loan" on a harvested record in the union catalogue fills the form in.
+- join the network (`/federation/join`, public): institutions ask to join; administrators review them at `/admin/federation/join-requests`. Approving is a label only; add the institution as a peer to bring it in.
+
+Check: `testing/loan-join-check.js` (test instance only).
 
 ## Database tables
 
-Creates 10 table(s):
+Creates 12 table(s):
 
 - `federation_peer`
 - `federation_harvest_log`
@@ -30,6 +35,8 @@ Creates 10 table(s):
 - `federation_term_mapping`
 - `federation_vocab_change`
 - `federation_vocab_sync_log`
+- `federation_loan_request` (same table as Heratio's; a member id is a `federation_peer.id`, 0 = this institution)
+- `federation_join_request`
 
 ## Installation
 

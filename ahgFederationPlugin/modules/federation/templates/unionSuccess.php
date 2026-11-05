@@ -8,7 +8,7 @@ $unionUrl = url_for(['module' => 'federation', 'action' => 'union']);
 <div class="container-fluid py-3 federation-union">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0"><i class="fas fa-network-wired me-2"></i><?php echo __('Union catalogue') ?></h1>
-    <a href="<?php echo url_for(['module' => 'federation', 'action' => 'index']) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Federation') ?></a>
+    <div><a href="<?php echo url_for(['module' => 'federation', 'action' => 'loans']) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Loan requests') ?></a> <a href="<?php echo url_for(['module' => 'federation', 'action' => 'index']) ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Federation') ?></a></div>
   </div>
 
   <div class="row mb-4">
@@ -55,7 +55,7 @@ $unionUrl = url_for(['module' => 'federation', 'action' => 'union']);
   </form>
 
   <div class="card">
-    <div class="card-body p-0">
+    <div class="card-body p-0 table-responsive">
       <table class="table table-hover table-sm mb-0 align-middle">
         <thead class="table-light"><tr><th><?php echo __('Title') ?></th><th><?php echo __('Source') ?></th><th></th></tr></thead>
         <tbody>
@@ -65,7 +65,7 @@ $unionUrl = url_for(['module' => 'federation', 'action' => 'union']);
           <tr>
             <td><?php echo esc_entities((string) ($r->title ?: ('#' . $r->id))) ?></td>
             <td><?php if ($r->source_peer): ?><span class="badge bg-info text-dark"><?php echo esc_entities($r->source_peer) ?></span><?php else: ?><span class="badge bg-light text-dark border"><?php echo __('Local') ?></span><?php endif ?></td>
-            <td class="text-end"><?php if (!empty($r->slug)): ?><a class="btn btn-sm btn-outline-primary" href="/<?php echo esc_entities($r->slug) ?>" target="_blank"><?php echo __('Open') ?></a><?php endif ?></td>
+            <td class="text-end text-nowrap"><?php if ($r->source_peer_id): ?><a class="btn btn-sm btn-outline-secondary" href="<?php echo url_for(['module' => 'federation', 'action' => 'loanNew']) . '?direction=outgoing&peer_id=' . (int) $r->source_peer_id . '&item_ref=' . (int) $r->id ?>"><?php echo __('Request loan') ?></a> <?php endif ?><?php if (!empty($r->slug)): ?><a class="btn btn-sm btn-outline-primary" href="/<?php echo esc_entities($r->slug) ?>" target="_blank"><?php echo __('Open') ?></a><?php endif ?></td>
           </tr>
         <?php endforeach ?>
         <?php endif ?>

@@ -112,6 +112,14 @@ class ahgFederationPluginConfiguration extends sfPluginConfiguration
         // Union catalogue (#151)
         $router->any('federation_union', '/admin/federation/union', 'union');
 
+        // Loan requests and joining the network (#151)
+        $router->any('federation_loans', '/admin/federation/loans', 'loans');
+        $router->any('federation_loan_new', '/admin/federation/loans/new', 'loanNew');
+        $router->any('federation_loan', '/admin/federation/loans/:id', 'loan', ['id' => '\d+']);
+        $router->any('federation_join_requests', '/admin/federation/join-requests', 'joinRequests');
+        $router->any('federation_join', '/federation/join', 'join');
+        $router->any('federation_join_thanks', '/federation/join/thanks', 'joinThanks');
+
         // API endpoints for AJAX
         $router->any('federation_api_test_peer', '/admin/federation/api/test-peer', 'testPeer');
         $router->any('federation_api_harvest_run', '/admin/federation/api/harvest/:peerId', 'runHarvest', ['peerId' => '\d+']);

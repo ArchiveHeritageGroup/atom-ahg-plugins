@@ -8,6 +8,7 @@
 CREATE TABLE IF NOT EXISTS federation_peer (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL COMMENT 'Human-readable name for the peer repository',
+    peer_type VARCHAR(64) NOT NULL DEFAULT 'oai_pmh' COMMENT 'oai_pmh, atom_local, sharepoint_graph_search (read by the union catalogue and federated search)',
     base_url VARCHAR(500) NOT NULL COMMENT 'Base URL of the OAI-PMH endpoint',
     oai_identifier VARCHAR(255) NULL COMMENT 'Optional OAI repository identifier',
     api_key VARCHAR(255) NULL COMMENT 'Optional API key for authentication',
@@ -282,4 +283,46 @@ CREATE TABLE IF NOT EXISTS federation_vocab_sync_log (
     CONSTRAINT fk_vocab_log_peer
         FOREIGN KEY (peer_id) REFERENCES federation_peer(id)
         ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Loan requests between federation members (#151, same table as Heratio's,
+-- heratio#1203). On AtoM a member is a federation_peer; 0 = this institution.
+-- No foreign keys: both member ids and item_ref are soft references.
+CREATE TABLE IF NOT EXISTS federation_loan_request (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    requesting_member_id INT NOT NULL COMMENT 'federation_peer.id asking to borrow; 0 = this institution',
+    holding_member_id INT NOT NULL COMMENT 'federation_peer.id that holds the item; 0 = this institution',
+    item_ref VARCHAR(255) NULL COMMENT 'local information_object id (our record or the harvested copy), soft ref',
+    item_title VARCHAR(1024) NULL COMMENT 'label for the requested item, captured at request time',
+    purpose VARCHAR(2048) NULL COMMENT 'why the loan is requested (exhibition, research, conservation, etc.)',
+    status VARCHAR(32) NOT NULL DEFAULT 'requested' COMMENT 'requested, approved, declined, in_transit, returned, cancelled',
+    needed_from DATE NULL COMMENT 'start of the requested loan window',
+    needed_to DATE NULL COMMENT 'end of the requested loan window',
+    notes TEXT NULL COMMENT 'notes, with a dated line per status change',
+    decided_by VARCHAR(255) NULL COMMENT 'user who last changed the status',
+    decided_at DATETIME NULL COMMENT 'when the status last changed',
+    created_at DATETIME NULL,
+    updated_at DATETIME NULL,
+    INDEX idx_flr_status (status),
+    INDEX idx_flr_requesting (requesting_member_id),
+    INDEX idx_flr_holding (holding_member_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Public "Join the network" requests (#151, same table as Heratio's). Approval
+-- is a label only; adding the institution as a peer stays a separate step.
+CREATE TABLE IF NOT EXISTS federation_join_request (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    institution_name VARCHAR(255) NOT NULL COMMENT 'name of the institution asking to join',
+    contact_name VARCHAR(255) NULL COMMENT 'person submitting the request',
+    contact_email VARCHAR(255) NULL COMMENT 'contact email for follow-up',
+    base_url VARCHAR(1024) NULL COMMENT 'public catalogue or site URL',
+    what_they_share TEXT NULL COMMENT 'collections they would contribute',
+    notes TEXT NULL COMMENT 'notes from the requester, then review notes',
+    status VARCHAR(32) NOT NULL DEFAULT 'pending' COMMENT 'pending, reviewing, approved, declined',
+    reviewed_by VARCHAR(255) NULL COMMENT 'administrator who last changed the status',
+    reviewed_at DATETIME NULL COMMENT 'when the status last changed',
+    created_at DATETIME NULL,
+    updated_at DATETIME NULL,
+    INDEX idx_fjr_status (status),
+    INDEX idx_fjr_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

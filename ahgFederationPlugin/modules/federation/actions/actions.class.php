@@ -518,4 +518,134 @@ class federationActions extends AhgController
 
         return sfView::SUCCESS;
     }
+
+    /**
+     * Loan requests between federation members (#151)
+     */
+    public function executeLoans($request)
+    {
+        $this->adminOnly();
+        $svc = $this->loanService();
+
+        $this->status = (string) $request->getParameter('status', '');
+        $this->direction = (string) $request->getParameter('direction', '');
+        $this->loans = $svc->list($this->status, $this->direction);
+        $this->counts = $svc->statusCounts();
+        $this->report = $svc->report();
+        $this->statuses = \AhgFederation\LoanRequestService::STATUSES;
+    }
+
+    public function executeLoanNew($request)
+    {
+        $this->adminOnly();
+        $svc = $this->loanService();
+
+        if ($request->isMethod('post')) {
+            $result = $svc->create($request->getPostParameters());
+            if (is_int($result)) {
+                $this->getUser()->setFlash('notice', __('Loan request created.'));
+                $this->redirect(['module' => 'federation', 'action' => 'loan', 'id' => $result]);
+            }
+            $this->getUser()->setFlash('error', __($result));
+        }
+
+        // Prefill from the union catalogue: a harvested record asks its peer, a local one is incoming.
+        $ref = (int) $request->getParameter('item_ref', 0);
+        $this->form = [
+            'direction' => (string) $request->getParameter('direction', 'outgoing'),
+            'peer_id' => (int) $request->getParameter('peer_id', 0),
+            'item_ref' => $ref ?: '',
+            'item_title' => (string) $request->getParameter('item_title', \AhgFederation\LoanRequestService::recordTitle($ref) ?? ''),
+            'purpose' => (string) $request->getParameter('purpose', ''),
+            'needed_from' => (string) $request->getParameter('needed_from', ''),
+            'needed_to' => (string) $request->getParameter('needed_to', ''),
+            'notes' => (string) $request->getParameter('notes', ''),
+        ];
+        $this->peers = $svc->peers();
+    }
+
+    public function executeLoan($request)
+    {
+        $this->adminOnly();
+        $svc = $this->loanService();
+        $id = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            $to = (string) $request->getParameter('to');
+            $ok = $svc->transition($id, $to, (string) $this->getUser()->getUserName(), $request->getParameter('note'));
+            $this->getUser()->setFlash($ok ? 'notice' : 'error', $ok
+                ? __('Loan request moved to: %1%', ['%1%' => __(ucfirst(str_replace('_', ' ', $to)))])
+                : __('That status change is not allowed from the current state.'));
+            $this->redirect(['module' => 'federation', 'action' => 'loan', 'id' => $id]);
+        }
+
+        $this->loan = $svc->find($id);
+        if (!$this->loan) {
+            $this->forward404('Loan request not found');
+        }
+        $this->allowed = \AhgFederation\LoanRequestService::TRANSITIONS[$this->loan->status] ?? [];
+    }
+
+    /**
+     * Public "Join the network" form (#151). Anonymous on purpose; requests
+     * are moderated. A honeypot field and a minimum time on the page drop
+     * most bots without telling them so.
+     */
+    public function executeJoin($request)
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/JoinRequestService.php';
+        $this->form = $request->getPostParameters();
+        $this->renderedAt = time();
+
+        if ($request->isMethod('post')) {
+            $bot = '' !== trim((string) $request->getParameter('website', ''))
+                || time() - (int) $request->getParameter('rendered_at', 0) < 3;
+            $result = $bot ? 0 : (new \AhgFederation\JoinRequestService())->submit($this->form);
+            if (is_int($result)) {
+                $this->redirect(['module' => 'federation', 'action' => 'joinThanks']);
+            }
+            $this->getUser()->setFlash('error', __($result));
+        }
+    }
+
+    public function executeJoinThanks($request)
+    {
+    }
+
+    public function executeJoinRequests($request)
+    {
+        $this->adminOnly();
+        require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/JoinRequestService.php';
+        $svc = new \AhgFederation\JoinRequestService();
+
+        if ($request->isMethod('post')) {
+            $ok = $svc->setStatus((int) $request->getParameter('id'), (string) $request->getParameter('status'),
+                (string) $this->getUser()->getUserName(), $request->getParameter('review_note'));
+            $this->getUser()->setFlash($ok ? 'notice' : 'error', $ok ? __('Request updated.') : __('Could not update that request.'));
+            $this->redirect(['module' => 'federation', 'action' => 'joinRequests']);
+        }
+
+        $this->filter = (string) $request->getParameter('status', '');
+        $queue = $svc->queue($this->filter ?: null);
+        $this->requests = $queue['requests'];
+        $this->counts = $queue['counts'];
+        $this->statuses = \AhgFederation\JoinRequestService::STATUSES;
+    }
+
+    private function adminOnly(): void
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    private function loanService(): \AhgFederation\LoanRequestService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/LoanRequestService.php';
+
+        return new \AhgFederation\LoanRequestService();
+    }
 }

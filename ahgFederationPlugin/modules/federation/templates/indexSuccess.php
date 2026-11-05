@@ -8,6 +8,9 @@
       <p class="text-muted mb-0">Manage federation peers and harvest records from remote OAI-PMH repositories</p>
     </div>
     <div>
+      <a href="<?php echo url_for(['module' => 'federation', 'action' => 'union']) ?>" class="btn btn-outline-secondary"><i class="bi bi-collection me-1"></i><?php echo __('Union catalogue') ?></a>
+      <a href="<?php echo url_for(['module' => 'federation', 'action' => 'loans']) ?>" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-right me-1"></i><?php echo __('Loan requests') ?></a>
+      <a href="<?php echo url_for(['module' => 'federation', 'action' => 'joinRequests']) ?>" class="btn btn-outline-secondary"><i class="bi bi-person-plus me-1"></i><?php echo __('Join requests') ?></a>
       <a href="<?php echo url_for(['module' => 'federation', 'action' => 'addPeer']) ?>" class="btn btn-primary">
         <i class="bi bi-plus-circle me-1"></i> Add Peer
       </a>

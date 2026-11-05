@@ -1,0 +1,19 @@
+# federation module access.
+#
+# A missing modules/<name>/config/security.yml inherits `default: is_secure: false`
+# from apps/qubit/config/security.yml - it FAILS OPEN. Every federation screen is
+# for administrators; the actions also check this themselves.
+#
+# Double-bracket credentials are an OR. `all:` is the fallback for any action not
+# named here, so a new action is secured by default rather than public by default.
+
+# The public "Join the network" form and its confirmation page (#151).
+join:
+  is_secure: false
+
+joinThanks:
+  is_secure: false
+
+all:
+  is_secure:   true
+  credentials: [[ administrator ]]

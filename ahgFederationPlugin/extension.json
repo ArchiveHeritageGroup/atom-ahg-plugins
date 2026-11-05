@@ -137,6 +137,8 @@
         "federation_vocab_sync",
         "federation_term_mapping",
         "federation_vocab_change",
-        "federation_vocab_sync_log"
+        "federation_vocab_sync_log",
+        "federation_loan_request",
+        "federation_join_request"
     ]
 }

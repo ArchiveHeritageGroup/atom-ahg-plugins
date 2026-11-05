@@ -21,8 +21,12 @@ class UnionCatalogueService
             ->select('peer_id', DB::raw('COUNT(DISTINCT information_object_id) AS c'))
             ->groupBy('peer_id')->pluck('c', 'peer_id');
 
-        $peers = DB::table('federation_peer')->orderBy('name')
-            ->get(['id', 'name', 'peer_type', 'base_url', 'is_active', 'last_harvest_at', 'last_harvest_status'])->all();
+        // peer_type came later than the first install.sql; older installs lack it.
+        $cols = ['id', 'name', 'base_url', 'is_active', 'last_harvest_at', 'last_harvest_status'];
+        if (DB::schema()->hasColumn('federation_peer', 'peer_type')) {
+            $cols[] = 'peer_type';
+        }
+        $peers = DB::table('federation_peer')->orderBy('name')->get($cols)->all();
         foreach ($peers as $p) {
             $p->records = (int) ($counts[$p->id] ?? 0);
         }
@@ -79,7 +83,7 @@ class UnionCatalogueService
         $items = $base->groupBy('io.id', 'i.title', 's.slug')
             ->orderBy('i.title')
             ->offset(($page - 1) * $per)->limit($per)
-            ->get(['io.id', 'i.title', 's.slug', DB::raw('MAX(p.name) AS source_peer')])
+            ->get(['io.id', 'i.title', 's.slug', DB::raw('MAX(p.name) AS source_peer'), DB::raw('MAX(p.id) AS source_peer_id')])
             ->all();
 
         return ['items' => $items, 'total' => $total, 'page' => $page, 'pages' => (int) ceil($total / $per)];
