@@ -831,3 +831,52 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
 -- SET pjr.is_installed = 1, pjr.is_active = 1, pjr.installed_at = NOW()
 -- WHERE pjr.code IN (SELECT code FROM privacy_jurisdiction WHERE is_active = 1);
 -- =====================================================
+
+-- Compliance autopilot (#153) needs the DPIA register on a fresh install too;
+-- extension:install does not run database/migrations. Same as migrations/add_dpia_table.sql.
+CREATE TABLE IF NOT EXISTS `privacy_dpia` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `processing_activity_id` INT UNSIGNED DEFAULT NULL COMMENT 'privacy_processing_activity.id (nullable until linked)',
+  `description` TEXT DEFAULT NULL,
+  `necessity_proportionality` TEXT DEFAULT NULL COMMENT 'Step 1: necessity and proportionality assessment',
+  `risks_to_subjects` TEXT DEFAULT NULL COMMENT 'Step 2: identified risks to data subjects',
+  `measures_to_mitigate` TEXT DEFAULT NULL COMMENT 'Step 3: mitigation measures',
+  `residual_risks` TEXT DEFAULT NULL COMMENT 'Step 3: residual risk after mitigation',
+  `dpo_opinion` TEXT DEFAULT NULL COMMENT 'Step 4: DPO consultation opinion',
+  `dpo_consulted_at` DATE DEFAULT NULL,
+  `completed_at` DATE DEFAULT NULL,
+  `high_risk` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'auto-flag: special category / large-scale / biometric / cross-border',
+  `signed_off_by_user_id` INT DEFAULT NULL,
+  `signed_off_at` DATETIME DEFAULT NULL,
+  `status` VARCHAR(16) NOT NULL DEFAULT 'draft' COMMENT 'draft, review, completed, archived',
+  `created_by_user_id` INT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_dpia_status` (`status`),
+  KEY `idx_dpia_activity` (`processing_activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Compliance autopilot retention proposals (#153, same table as Heratio's,
+-- heratio#1199): one row per data category found by the catalogue scan, for
+-- the DPO to accept. A re-scan refreshes proposed rows, never accepted ones.
+CREATE TABLE IF NOT EXISTS `ahg_retention_proposal` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `category` VARCHAR(64) NOT NULL COMMENT 'data category key, e.g. email, phone, national_id',
+  `category_label` VARCHAR(191) NOT NULL,
+  `records_affected` INT UNSIGNED NOT NULL DEFAULT 0,
+  `retention_period` VARCHAR(191) NOT NULL,
+  `legal_basis` TEXT,
+  `disposal_action` VARCHAR(191) DEFAULT NULL,
+  `rationale` TEXT,
+  `source` VARCHAR(32) NOT NULL DEFAULT 'autopilot' COMMENT 'llm, heuristic',
+  `status` VARCHAR(32) NOT NULL DEFAULT 'proposed' COMMENT 'proposed, accepted',
+  `accepted_at` TIMESTAMP NULL DEFAULT NULL,
+  `accepted_by` BIGINT UNSIGNED DEFAULT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_retention_category` (`category`),
+  KEY `idx_retention_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

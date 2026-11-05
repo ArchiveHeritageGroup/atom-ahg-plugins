@@ -232,6 +232,12 @@
                         </div>
                         <?php endif; ?>
                         <div class="col-md-2 col-6 text-center mb-3">
+                            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'autopilot']); ?>" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-wand-magic-sparkles d-block mb-2 fa-2x"></i>
+                                <?php echo __('Compliance autopilot'); ?>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6 text-center mb-3">
                             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'dpiaList']); ?>" class="btn btn-outline-danger btn-lg w-100">
                                 <i class="fas fa-shield-halved d-block mb-2 fa-2x"></i>
                                 <?php echo __('DPIAs'); ?>

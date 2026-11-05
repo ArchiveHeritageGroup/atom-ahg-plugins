@@ -10,6 +10,20 @@ POPIA/GDPR Privacy Compliance Management - DSAR tracking, Breach register, ROPA,
 | Licence | AGPL-3.0-or-later |
 | Author | The Archive and Heritage Group (Pty) Ltd |
 
+## Compliance autopilot
+
+Admin > Privacy > Compliance autopilot (`/admin/privacy/autopilot`, administrators only) scans
+catalogue descriptions for personal data and drafts, for the data protection officer:
+
+- a processing activity (ROPA) from the categories found, saved only when Create is clicked;
+- retention proposals, one per category (`ahg_retention_proposal`), worded by the AI gateway or,
+  without it, fixed wording; accepted proposals are never overwritten by a new scan;
+- a DPIA in the DPIA register when the rule screen finds special category data, profiling,
+  biometric data or a transfer abroad without safeguards; only a draft is ever refreshed.
+
+Demonstration records (titled `[SYNTHETIC]`) are left out. Checks: `testing/autopilot-check.php`
+(no database) and `testing/autopilot-check.js` (test instance).
+
 ## Requirements
 
 | Component | Version |
@@ -30,9 +44,11 @@ These are used when present and are not required:
 
 ## Database tables
 
-Creates 34 table(s):
+Creates 36 table(s):
 
 - `digital_object_metadata`
+- `privacy_dpia`
+- `ahg_retention_proposal`
 - `privacy_audit_log`
 - `privacy_breach`
 - `privacy_breach_i18n`

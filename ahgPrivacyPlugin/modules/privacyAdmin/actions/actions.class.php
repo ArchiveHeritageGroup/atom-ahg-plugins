@@ -2429,4 +2429,74 @@ class privacyAdminActions extends AhgController
             // never block the DSAR update
         }
     }
+
+    /**
+     * Compliance autopilot (#153): scan the catalogue for personal data and
+     * draft a ROPA entry, retention proposals and a DPIA for the DPO.
+     * Administrators only. The scan reads; only the buttons write.
+     */
+    public function executeAutopilot($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/ComplianceAutopilotService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/DpiaService.php';
+        $svc = new \ahgPrivacyPlugin\Service\ComplianceAutopilotService();
+        $self = ['module' => 'privacyAdmin', 'action' => 'autopilot'];
+
+        if ($request->isMethod('post')) {
+            $do = (string) $request->getParameter('form_action');
+            if ('create_ropa' === $do) {
+                $p = $request->getPostParameters();
+                $lines = fn ($v) => array_values(array_filter(array_map('trim', preg_split('/\r?\n/', (string) $v))));
+                if ('' === trim((string) ($p['name'] ?? ''))) {
+                    $this->getUser()->setFlash('error', __('The activity needs a name.'));
+                    $this->redirect($self);
+                }
+                $id = $this->getService()->saveRopa([
+                    'name' => mb_substr(trim($p['name']), 0, 255),
+                    'purpose' => $p['purpose'] ?? null,
+                    'jurisdiction' => $this->getJurisdiction() ?? 'popia',
+                    'lawful_basis' => mb_substr(trim((string) ($p['lawful_basis'] ?? '')), 0, 100) ?: null,
+                    'data_categories' => $lines($p['data_categories'] ?? ''),
+                    'data_subjects' => $p['data_subjects'] ?? null,
+                    'recipients' => $p['recipients'] ?? null,
+                    'retention_period' => mb_substr(trim((string) ($p['retention_period'] ?? '')), 0, 100) ?: null,
+                    'security_measures' => $p['security_measures'] ?? null,
+                    'dpia_required' => \ahgPrivacyPlugin\Service\ComplianceAutopilotService::screen($p + ['data_categories' => $lines($p['data_categories'] ?? '')])['high_risk'] ? 1 : 0,
+                    'status' => 'draft',
+                ], null, $this->getUserId());
+                $this->getUser()->setFlash('success', __('Draft processing activity created. Review and complete it.'));
+                $this->redirect(['module' => 'privacyAdmin', 'action' => 'ropaView', 'id' => $id]);
+            } elseif ('draft_retention' === $do) {
+                $r = $svc->draftRetentionSchedule($svc->scanCatalogue());
+                $this->getUser()->setFlash('success', $r['proposals']
+                    ? __('Retention proposals drafted (%1%).', ['%1%' => 'llm' === $r['source'] ? __('suggested by the AI gateway') : __('fixed wording; the AI gateway was not available')])
+                    : __('No personal data found, so there is nothing to propose.'));
+            } elseif ('accept_retention' === $do) {
+                $ok = $svc->acceptRetention((int) $request->getParameter('id'), $this->getUserId());
+                $this->getUser()->setFlash($ok ? 'success' : 'error', $ok ? __('Retention proposal accepted.') : __('That proposal could not be accepted.'));
+            } elseif ('draft_dpia' === $do) {
+                $r = $svc->draftDpia($svc->scanCatalogue(), $this->getUserId());
+                $msg = !$r['high_risk'] ? __('No DPIA needed: %1%', ['%1%' => $r['note']])
+                    : (($r['dpia'] && 'draft' === $r['dpia']->status) ? __('DPIA drafted (%1%).', ['%1%' => 'llm' === $r['source'] ? __('narrative by the AI gateway') : __('fixed wording; the AI gateway was not available')])
+                    : __('The DPIA has moved past draft, so it was left unchanged.'));
+                $this->getUser()->setFlash('success', $msg);
+            } elseif ('accept_dpia' === $do) {
+                $ok = $svc->acceptDpia((int) $request->getParameter('id'));
+                $this->getUser()->setFlash($ok ? 'success' : 'error', $ok ? __('DPIA moved to review.') : __('Only a draft can be moved to review.'));
+            }
+            $this->redirect($self);
+        }
+
+        $this->scan = $svc->scanCatalogue();
+        $this->draft = $svc->draftRopa($this->scan);
+        $this->screen = \ahgPrivacyPlugin\Service\ComplianceAutopilotService::screen($this->draft);
+        $this->autoRopa = $svc->autoRopa();
+        $this->proposals = $svc->retentionProposals();
+        $this->dpia = $svc->autoDpia();
+        $samples = array_merge([], ...array_column($this->scan['categories'], 'samples'));
+        $this->slugs = $samples ? DB::table('slug')->whereIn('object_id', $samples)->pluck('slug', 'object_id')->all() : [];
+    }
 }

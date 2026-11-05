@@ -169,6 +169,9 @@ HTML;
         $admin->any('privacy_admin', '/admin/privacy', 'index');
         $admin->any('privacy_admin_config', '/admin/privacy/config', 'config');
 
+        // Compliance autopilot (#153)
+        $admin->any('privacy_autopilot', '/admin/privacy/autopilot', 'autopilot');
+
         // Embedded-metadata PII review (#751)
         $admin->any('privacy_embedded_pii_resolve', '/admin/privacy/embedded-pii/resolve', 'embeddedPiiResolve');
         $admin->any('privacy_embedded_pii', '/admin/privacy/embedded-pii', 'embeddedPii');

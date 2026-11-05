@@ -21,6 +21,8 @@
     },
     "tables": [
         "digital_object_metadata",
+        "privacy_dpia",
+        "ahg_retention_proposal",
         "privacy_audit_log",
         "privacy_breach",
         "privacy_breach_i18n",
