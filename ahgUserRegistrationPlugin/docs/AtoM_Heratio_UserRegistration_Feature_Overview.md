@@ -1,10 +1,10 @@
-# AtoM Heratio — User Registration Plugin
+# AHG Extensions for AtoM - User Registration Plugin
 
 ## Feature Overview
 
 ### Purpose
 
-The User Registration Plugin enables public self-registration for AtoM Heratio instances, allowing external researchers, scholars, and institutional users to request access to the system. All registrations go through a structured email verification and administrator approval workflow before any account is created.
+The User Registration Plugin enables public self-registration for AtoM instances, allowing external researchers, scholars, and institutional users to request access to the system. All registrations go through a structured email verification and administrator approval workflow before any account is created.
 
 ### Key Features
 
@@ -31,7 +31,7 @@ User → Register → Verify Email → Admin Notified → Admin Reviews → Appr
 
 ### Technical Requirements
 
-- AtoM Heratio Framework v2.8.0+
+- atom-framework v2.8.0+
 - PHP 8.1+
 - Email transport configured (SMTP, PHP mail, or sendmail)
 - MySQL 8.0+
@@ -44,4 +44,4 @@ User → Register → Verify Email → Admin Notified → Admin Reviews → Appr
 
 ---
 
-*AtoM Heratio is developed by The Archive and Heritage Group (Pty) Ltd for GLAM and DAM institutions worldwide.*
+*The AHG Extensions for AtoM are offered by The Archive and Heritage Group (Pty) Ltd for GLAM and DAM institutions worldwide.*

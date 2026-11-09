@@ -1,4 +1,4 @@
-# AtoM Heratio — Portable Export & Import
+# AHG Extensions for AtoM - Portable Export & Import
 
 ## Feature Overview
 
@@ -10,7 +10,7 @@
 
 ## Overview
 
-The Portable Export & Import plugin provides a complete data portability solution for AtoM Heratio archival management instances. It enables institutions to:
+The Portable Export & Import plugin provides a complete data portability solution for AtoM archival management instances. It enables institutions to:
 
 1. **Export** entire AtoM instances as structured, verifiable archive packages
 2. **Import** archive packages into fresh or existing instances with full ID remapping
@@ -126,7 +126,7 @@ export-{id}/
 
 ## Technical Requirements
 
-- AtoM Heratio Framework v2.0+
+- atom-framework v2.0+
 - PHP 8.1+
 - MySQL 8.0+
 - ahgCorePlugin (dependency)

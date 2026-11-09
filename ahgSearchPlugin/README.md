@@ -1,6 +1,6 @@
 # AHG Search
 
-Global search, autocomplete, description updates, and search/replace for AtoM Heratio
+Global search, autocomplete, description updates, and search/replace for AtoM
 
 | | |
 |---|---|

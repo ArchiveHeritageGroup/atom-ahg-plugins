@@ -1,4 +1,4 @@
-# AtoM Heratio -- Integrity Assurance Plugin: Field Definitions
+# AHG Extensions for AtoM - Integrity Assurance Plugin: Field Definitions
 
 **Version:** 1.2.0
 **Author:** The Archive and Heritage Group (Pty) Ltd

@@ -19,7 +19,7 @@
 
 ## Introduction
 
-The Export plugin provides multiple export formats for AtoM Heratio data. Records can be exported from the web UI at **Admin > Export** (`/export`).
+The Export plugin provides multiple export formats for AtoM data. Records can be exported from the web UI at **Admin > Export** (`/export`).
 
 ---
 

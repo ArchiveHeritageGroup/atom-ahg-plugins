@@ -1,6 +1,6 @@
 # ahgSharePointPlugin
 
-Microsoft 365 SharePoint integration for AtoM Heratio. One-way ingest from SharePoint into AtoM with eventual records-handoff via Graph webhooks and federated search across both surfaces.
+Microsoft 365 SharePoint integration for AtoM. One-way ingest from SharePoint into AtoM with eventual records-handoff via Graph webhooks and federated search across both surfaces.
 
 **Status:** Phase 1 scaffold (v0.1.0). Tables and config skeleton in place; service implementations are TODO.
 

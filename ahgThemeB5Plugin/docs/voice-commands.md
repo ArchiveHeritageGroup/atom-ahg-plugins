@@ -1,7 +1,7 @@
 # AHG Voice Command System
 
 ## Overview
-Voice-driven navigation and actions for AtoM Heratio using the Web Speech API. Includes dictation mode, metadata reading, and AI-powered image description via Ollama (local) or Anthropic Claude (cloud).
+Voice-driven navigation and actions for AtoM using the Web Speech API. Includes dictation mode, metadata reading, and AI-powered image description via Ollama (local) or Anthropic Claude (cloud).
 
 ## Browser Compatibility
 | Browser | Speech Recognition | Speech Synthesis | Notes |

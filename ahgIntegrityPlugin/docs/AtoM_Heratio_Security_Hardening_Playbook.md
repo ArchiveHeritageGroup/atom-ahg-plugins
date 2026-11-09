@@ -1,9 +1,9 @@
-# AtoM Heratio Security Hardening Playbook
+# AHG Extensions for AtoM Security Hardening Playbook
 
 **Version:** 1.0.0
 **Author:** The Archive and Heritage Group (Pty) Ltd
 **Date:** 2026-03-01
-**Audience:** System administrators deploying AtoM Heratio in production environments
+**Audience:** System administrators deploying AtoM in production environments
 
 ---
 
@@ -23,7 +23,7 @@
 
 ## 1. Introduction
 
-This playbook provides a comprehensive server hardening guide for production deployments of AtoM Heratio. It covers the full stack: PHP, MySQL, Nginx, file system, intrusion prevention, logging, and backup security.
+This playbook provides a comprehensive server hardening guide for production deployments of AtoM. It covers the full stack: PHP, MySQL, Nginx, file system, intrusion prevention, logging, and backup security.
 
 All recommendations assume an Ubuntu 22.04 server running PHP 8.3, MySQL 8, and Nginx. Adjust paths and service names if your distribution differs.
 
@@ -314,7 +314,7 @@ server {
 }
 ```
 
-**Note on CSP:** AtoM Heratio manages Content Security Policy through `config/app.yml` and the `QubitCSPFilter` (see CLAUDE.md). Do not add a duplicate CSP header in Nginx, as it will conflict with the application-level CSP. The application generates per-request nonces that Nginx cannot replicate.
+**Note on CSP:** AtoM manages Content Security Policy through `config/app.yml` and the `QubitCSPFilter` (see CLAUDE.md). Do not add a duplicate CSP header in Nginx, as it will conflict with the application-level CSP. The application generates per-request nonces that Nginx cannot replicate.
 
 ### 4.3 Rate Limiting
 

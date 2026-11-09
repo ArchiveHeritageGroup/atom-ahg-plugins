@@ -1,6 +1,6 @@
 # Portable Export & Import
 
-Full-system portable export and import for AtoM Heratio. Export complete instances with 15 entity types, SHA-256 checksummed manifests, and self-documenting packages. Import archives into fresh instances with ID remapping, merge/replace/dry-run modes. Also supports offline HTML viewer export for CD/USB/ZIP distribution.
+Full-system portable export and import for AtoM. Export complete instances with 15 entity types, SHA-256 checksummed manifests, and self-documenting packages. Import archives into fresh instances with ID remapping, merge/replace/dry-run modes. Also supports offline HTML viewer export for CD/USB/ZIP distribution.
 
 | | |
 |---|---|

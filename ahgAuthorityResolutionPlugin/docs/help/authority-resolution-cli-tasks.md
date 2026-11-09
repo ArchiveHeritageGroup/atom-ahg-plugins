@@ -1,6 +1,6 @@
 # Authority Resolution - CLI Tasks
 
-The AtoM Heratio side ships the engine as a set of Symfony 1.4 tasks under the `auth-res:` namespace. They live in `atom-ahg-plugins/ahgAuthorityResolutionPlugin/lib/task/` and are run with:
+The AtoM side ships the engine as a set of Symfony 1.4 tasks under the `auth-res:` namespace. They live in `atom-ahg-plugins/ahgAuthorityResolutionPlugin/lib/task/` and are run with:
 
 ```bash
 sudo -u www-data php symfony auth-res:<task> [args] [--option=value]
@@ -203,7 +203,7 @@ None of the eleven tasks require a cron schedule out of the box. Suggested ops p
 0 4 * * * cd /usr/share/nginx/archive && sudo -u www-data php symfony auth-res:export-ner-feedback --format=jsonl >/dev/null 2>&1
 ```
 
-If you are running AtoM Heratio and Laravel Heratio side-by-side against the same database, schedule the periodic tasks on ONE codebase only. The Laravel side ships its cron under `/etc/cron.d/heratio` already; keep the AtoM tasks for ad-hoc runs.
+If you are running AtoM and Heratio side-by-side against the same database, schedule the periodic tasks on ONE codebase only. The Laravel side ships its cron under `/etc/cron.d/heratio` already; keep the AtoM tasks for ad-hoc runs.
 
 ## Symfony 1.4 implementation notes
 

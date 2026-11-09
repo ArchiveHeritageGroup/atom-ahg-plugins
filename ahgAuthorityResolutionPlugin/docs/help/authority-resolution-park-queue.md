@@ -15,7 +15,7 @@ Do not park to "save for later" just because the queue is long. Park only when t
 
 ## Park screen
 
-- AtoM Heratio: `/admin/authorityResolution/park`
+- AtoM: `/admin/authorityResolution/park`
 - Laravel Heratio: `/admin/authority-resolution/park`
 
 The screen lists every active park row (`ahg_mention_park` UNIQUE on `mention_id`). Filters available as GET query string:

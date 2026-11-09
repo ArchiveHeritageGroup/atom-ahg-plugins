@@ -1,11 +1,11 @@
-# AtoM Heratio — Accession Management V2
+# AHG Extensions for AtoM - Accession Management V2
 
 ## Feature Overview
 
 **Plugin:** ahgAccessionManagePlugin v2.0.0
 **Author:** The Archive and Heritage Group (Pty) Ltd
 **Date:** February 2026
-**Framework:** AtoM Heratio v2.8.2
+**Framework:** atom-framework v2.8.2
 
 ---
 
@@ -61,7 +61,7 @@ This upgrade maintains full backward compatibility with base AtoM's `accession` 
 
 ## Technical Requirements
 
-- **AtoM Heratio Framework:** v2.8.0 or later
+- **atom-framework:** v2.8.0 or later
 - **PHP:** 8.1 or later
 - **MySQL:** 8.0 (with JSON column support)
 - **Dependencies:** ahgCorePlugin

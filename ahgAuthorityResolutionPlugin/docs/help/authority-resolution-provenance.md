@@ -21,7 +21,7 @@ Isolation is by **named graph URI**, not by dataset. The host runs a single Fuse
 | Graph URI | Holds |
 |---|---|
 | `urn:heratio:auth-res:graph:decisions` | Laravel Heratio decision provenance |
-| `urn:atom:auth-res:graph:decisions` | AtoM Heratio decision provenance |
+| `urn:atom:auth-res:graph:decisions` | AtoM decision provenance |
 | `urn:heratio:auth-res:graph:field-provenance` | Laravel per-field create-new provenance |
 | `urn:atom:auth-res:graph:field-provenance` | AtoM per-field create-new provenance |
 

@@ -1,4 +1,4 @@
-# AtoM Heratio — Data Ingest Plugin
+# AHG Extensions for AtoM - Data Ingest Plugin
 
 **Version:** 1.1.0
 **Author:** The Archive and Heritage Group (Pty) Ltd
@@ -8,7 +8,7 @@
 
 ## Overview
 
-The Data Ingest plugin provides an OAIS-aligned 6-step batch ingestion pipeline for AtoM Heratio. It supports importing archival descriptions across all GLAM sectors (Archives, Museums, Libraries, Galleries, DAM) as well as accession records following NARSSA transfer workflows.
+The Data Ingest plugin provides an OAIS-aligned 6-step batch ingestion pipeline for AtoM. It supports importing archival descriptions across all GLAM sectors (Archives, Museums, Libraries, Galleries, DAM) as well as accession records following NARSSA transfer workflows.
 
 ---
 
@@ -74,7 +74,7 @@ php symfony ingest:commit --session-id=456
 
 ## Technical Requirements
 
-- AtoM Heratio Framework v2.0+
+- atom-framework v2.0+
 - PHP 8.1+
 - MySQL 8.0+
 - ahgCorePlugin (dependency)

@@ -1,6 +1,6 @@
 # ahgAuthorityResolutionPlugin - Technical Documentation
 
-Symfony 1.4 plugin that implements the AHG Authority Resolution Engine on the AtoM Heratio side. Mirror of the Laravel `packages/ahg-authority-resolution/` package: same MySQL tables, same five decision outcomes, same ten evidence evaluators, same RDF-Star provenance shape (isolated by named-graph URI), same seven external authority adapters.
+Symfony 1.4 plugin that implements the AHG Authority Resolution Engine on the AtoM side. Mirror of the Laravel `packages/ahg-authority-resolution/` package: same MySQL tables, same five decision outcomes, same ten evidence evaluators, same RDF-Star provenance shape (isolated by named-graph URI), same seven external authority adapters.
 
 - Plugin root: `atom-ahg-plugins/ahgAuthorityResolutionPlugin/`
 - Database: `archive`

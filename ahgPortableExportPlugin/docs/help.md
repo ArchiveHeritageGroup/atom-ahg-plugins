@@ -22,7 +22,7 @@
 
 ## Introduction
 
-The Portable Export & Import plugin provides a complete exit/portability solution for AtoM Heratio instances. It enables:
+The Portable Export & Import plugin provides a complete exit/portability solution for AtoM instances. It enables:
 
 - **Viewer Export** — Self-contained HTML/JS viewer for offline browsing (CD, USB, web download)
 - **Archive Export** — Structured JSON data covering 15 entity types with SHA-256 checksummed manifests
@@ -115,7 +115,7 @@ Before starting an archive export, use the **Estimate Export Size** button to ge
 
 ### Overview
 
-Archive packages can be imported into any AtoM Heratio instance. The import process:
+Archive packages can be imported into any AtoM instance. The import process:
 
 1. Validates the archive structure and checksums
 2. Imports entities in FK-dependency order (taxonomies first, then repositories, authorities, descriptions, etc.)

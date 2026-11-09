@@ -1,4 +1,4 @@
-# AtoM Heratio — User Registration Plugin
+# AHG Extensions for AtoM - User Registration Plugin
 
 ## Overview
 

@@ -1,6 +1,6 @@
 # Authority Resolution - Creating a New Authority Record
 
-When none of the ranked candidates fits a mention, you click **Create new** on the review screen. The engine opens a pre-fill wizard that queries every enabled external authority source, merges the results by precedence, and presents a form pre-populated with values that you can accept, override, or skip. This article covers the wizard's behaviour on the AtoM Heratio side; Laravel Heratio renders the same form with Tailwind 4 styling instead of Bootstrap 5.
+When none of the ranked candidates fits a mention, you click **Create new** on the review screen. The engine opens a pre-fill wizard that queries every enabled external authority source, merges the results by precedence, and presents a form pre-populated with values that you can accept, override, or skip. This article covers the wizard's behaviour on the AtoM side; Laravel Heratio renders the same form with Tailwind 4 styling instead of Bootstrap 5.
 
 ## Route
 

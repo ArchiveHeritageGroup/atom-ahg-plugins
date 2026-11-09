@@ -1,4 +1,4 @@
-# AtoM Heratio --- Integrity Assurance Plugin: Governance Mapping
+# AHG Extensions for AtoM - Integrity Assurance Plugin: Governance Mapping
 
 **Plugin:** ahgIntegrityPlugin v1.2.0
 **Author:** The Archive and Heritage Group (Pty) Ltd
@@ -203,4 +203,4 @@ The following matrix provides a summary view of which plugin features address wh
 
 ---
 
-*AtoM Heratio is developed by The Archive and Heritage Group (Pty) Ltd for the international GLAM and DAM community.*
+*The AHG Extensions for AtoM are offered by The Archive and Heritage Group (Pty) Ltd for the international GLAM and DAM community.*

@@ -1,6 +1,6 @@
 # Authority Resolution - Review Screen Reference
 
-The review screen is where archivists make decisions on promoted mentions. On the AtoM Heratio side it lives at `/admin/authorityResolution/:id/review`; on Laravel Heratio it is `/admin/authority-resolution/review/:id`. Both render the same three regions and expose the same five action buttons.
+The review screen is where archivists make decisions on promoted mentions. On the AtoM side it lives at `/admin/authorityResolution/:id/review`; on Laravel Heratio it is `/admin/authority-resolution/review/:id`. Both render the same three regions and expose the same five action buttons.
 
 ## Layout
 

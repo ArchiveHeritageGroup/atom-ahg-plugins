@@ -1,4 +1,4 @@
-# AtoM Heratio — Authority Records User Manual
+# AHG Extensions for AtoM - Authority Records User Manual
 
 **Version:** 1.0.0
 **Plugin:** ahgAuthorityPlugin
@@ -29,7 +29,7 @@
 
 ### Prerequisites
 
-- Administrator access to AtoM Heratio
+- Administrator access to AtoM
 - ahgAuthorityPlugin enabled via Admin > Plugins
 
 ### Accessing Authority Records Enhancement

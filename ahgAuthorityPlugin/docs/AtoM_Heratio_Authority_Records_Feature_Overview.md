@@ -1,9 +1,9 @@
-# AtoM Heratio — Authority Records Enhancement
+# AHG Extensions for AtoM - Authority Records Enhancement
 
 **Version:** 1.0.0
 **Plugin:** ahgAuthorityPlugin
 **Author:** The Archive and Heritage Group (Pty) Ltd
-**Compatibility:** AtoM Heratio Framework v2.8+
+**Compatibility:** atom-framework v2.8+
 
 ---
 
@@ -162,7 +162,7 @@ The plugin addresses 10 enhancement areas that collectively transform authority 
 
 ## Technical Requirements
 
-- AtoM Heratio Framework v2.8+
+- atom-framework v2.8+
 - PHP 8.1+
 - MySQL 8.0+
 - Required plugins: ahgCorePlugin, ahgActorManagePlugin

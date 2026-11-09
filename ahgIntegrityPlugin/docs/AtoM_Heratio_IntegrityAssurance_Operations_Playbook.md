@@ -1,4 +1,4 @@
-# AtoM Heratio - Integrity Assurance Operations Playbook
+# AHG Extensions for AtoM - Integrity Assurance Operations Playbook
 
 **Version:** 1.2.0
 **Author:** The Archive and Heritage Group (Pty) Ltd
@@ -924,5 +924,5 @@ echo "=== End Health Check ==="
 
 ---
 
-*AtoM Heratio - Integrity Assurance Plugin v1.2.0*
+*AHG Extensions for AtoM - Integrity Assurance Plugin v1.2.0*
 *The Archive and Heritage Group (Pty) Ltd*

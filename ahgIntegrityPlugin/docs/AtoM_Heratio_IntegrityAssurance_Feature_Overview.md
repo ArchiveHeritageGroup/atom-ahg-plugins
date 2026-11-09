@@ -1,4 +1,4 @@
-# AtoM Heratio — Integrity Assurance Plugin
+# AHG Extensions for AtoM - Integrity Assurance Plugin
 
 ## Feature Overview
 
@@ -11,7 +11,7 @@
 
 ## What It Does
 
-The Integrity Assurance plugin provides enterprise-grade automated integrity verification for digital objects managed by AtoM Heratio. It ensures that archival files remain unchanged over time by comparing stored cryptographic checksums against current file hashes, detecting corruption, unauthorized modifications, or storage failures before they become unrecoverable.
+The Integrity Assurance plugin provides enterprise-grade automated integrity verification for digital objects managed by AtoM. It ensures that archival files remain unchanged over time by comparing stored cryptographic checksums against current file hashes, detecting corruption, unauthorized modifications, or storage failures before they become unrecoverable.
 
 The plugin builds on the existing Digital Preservation plugin's checksum infrastructure, adding sophisticated scheduling, concurrency controls, failure management, retention policies, legal holds, and threshold-based alerting required by large-scale GLAM and DAM institutions.
 
@@ -128,7 +128,7 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 
 | Requirement | Details |
 |-------------|---------|
-| **AtoM Heratio** | v2.8+ with atom-framework v2.8.0+ |
+| **AtoM** | v2.8+ with atom-framework v2.8.0+ |
 | **Dependencies** | ahgCorePlugin, ahgPreservationPlugin (for baseline checksums) |
 | **PHP** | 8.1 or higher |
 | **Database** | MySQL 8.0+ (8 tables) |
@@ -200,4 +200,4 @@ php symfony integrity:retention --status
 
 ---
 
-*AtoM Heratio is developed by The Archive and Heritage Group (Pty) Ltd for the international GLAM and DAM community.*
+*The AHG Extensions for AtoM are offered by The Archive and Heritage Group (Pty) Ltd for the international GLAM and DAM community.*

@@ -2,7 +2,7 @@
 
 The **AHG Authority Resolution Engine** turns named-entity mentions extracted from your archival descriptions into archivally-defensible authority links. The archivist is always in the loop: the engine assembles the evidence, ranks the candidates, and presents one of five outcomes. The engine never auto-links.
 
-This guide walks you through the day-to-day workflow on the **AtoM Heratio** side. The Laravel Heratio side ships the same engine and the same five outcomes, so the workflow on either codebase is identical.
+This guide walks you through the day-to-day workflow on the **AtoM** side. The Laravel Heratio side ships the same engine and the same five outcomes, so the workflow on either codebase is identical.
 
 ## What the engine does, in one sentence
 
@@ -55,7 +55,7 @@ The engine remembers everything you saw on screen at the moment of decision (the
 
 ## Two implementations, one engine
 
-The engine ships twice, once per codebase: as a Laravel package on Heratio, and as a Symfony 1.4 plugin on AtoM Heratio. Both write to the same MySQL tables and the same Fuseki dataset, isolated by named-graph URI. The UI layer differs (Bootstrap 5 in AtoM, Tailwind 4 in Heratio), but the data layer and the workflow converge.
+The engine ships twice, once per codebase: as a Laravel package on Heratio, and as a Symfony 1.4 plugin on AtoM. Both write to the same MySQL tables and the same Fuseki dataset, isolated by named-graph URI. The UI layer differs (Bootstrap 5 in AtoM, Tailwind 4 in Heratio), but the data layer and the workflow converge.
 
 ## Further reading
 
