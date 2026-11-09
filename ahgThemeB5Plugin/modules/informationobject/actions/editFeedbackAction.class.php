@@ -170,11 +170,11 @@ class InformationObjectEditFeedbackAction extends AhgEditController
                 break;
 
             case 'unique_identifier':
-                $informationObj = QubitInformationObject::getById($this->resource->id);
-                foreach ($informationObj->getPhysicalObjects() as $item) {
-                    $this->form->setDefault('unique_identifier', $item->uniqueIdentifier); // bring a value of the  field in feedback
-                }
-                $this->form->setValidator('unique_identifier', new sfValidatorString());
+                // This used to be pre-filled from $physicalObject->uniqueIdentifier, a property
+                // no AtoM physical object has: any record with physical storage threw
+                // "Unknown record property" and the feedback page answered 500. The field
+                // stays, for the user to fill in.
+                $this->form->setValidator('unique_identifier', new sfValidatorString(['required' => false]));
                 $this->form->setWidget('unique_identifier', new sfWidgetFormInput());
 
                 break;
