@@ -1,6 +1,6 @@
 # Registry Plugin
 
-AtoM/Heratio Community Hub & Registry - Directory of institutions, vendors, software, user groups, discussions, blog, and sync API for the GLAM community.
+AtoM Community Hub & Registry - Directory of institutions, vendors, software, user groups, discussions, blog, and sync API for the GLAM community.
 
 | | |
 |---|---|
