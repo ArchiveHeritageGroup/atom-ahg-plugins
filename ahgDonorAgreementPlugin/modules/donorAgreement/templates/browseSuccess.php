@@ -13,7 +13,7 @@
       <h1 class="h3 mb-0">
         <i class="fas fa-file-contract text-primary me-2"></i>
         <?php echo __('Donor Agreements') ?>
-        <span class="badge bg-secondary ms-2"><?php echo number_format($result['total'] ?? 0) ?></span>
+        <span class="badge bg-secondary ms-2"><?php echo number_format((int) ($total ?? 0)) ?></span>
       </h1>
     </div>
     <a href="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'add']) ?>" class="btn btn-primary">

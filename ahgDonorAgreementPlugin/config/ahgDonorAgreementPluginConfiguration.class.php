@@ -25,9 +25,9 @@ class ahgDonorAgreementPluginConfiguration extends sfPluginConfiguration
 
         // Agreement CRUD
         $router->get('donor_agreement_browse', '/donor/agreement/browse', 'browse');
-        $router->get('donor_agreement_add', '/donor/agreement/add', 'add');
+        $router->any('donor_agreement_add', '/donor/agreement/add', 'add');
         $router->get('donor_agreement_view', '/donor/agreement/:id', 'view', ['id' => '\d+']);
-        $router->get('donor_agreement_edit', '/donor/agreement/:id/edit', 'edit', ['id' => '\d+']);
+        $router->any('donor_agreement_edit', '/donor/agreement/:id/edit', 'edit', ['id' => '\d+']);
         $router->any('donor_agreement_delete', '/donor/agreement/:id/delete', 'delete', ['id' => '\d+']);
 
         // Reminders
