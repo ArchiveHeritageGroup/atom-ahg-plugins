@@ -200,6 +200,12 @@ check('an escalated ticket says critical in the body',
 // THE GUARD THAT MATTERS: a rename must break this test, not silently demote the path.
 $atomRoot = dirname(dirname(dirname(__DIR__)));
 $missing = C::criticalPathsMissing($atomRoot);
+// CI checks out this repo alone, so atom-framework is not beside it there. Skip only
+// the framework paths in that case; the plugin paths are still checked.
+if (!is_dir($atomRoot . '/atom-framework')) {
+    $missing = array_values(array_filter($missing, fn ($p) => !str_starts_with($p, 'atom-framework/')));
+    echo "  SKIP  atom-framework critical paths: framework not checked out here\n";
+}
 check(
     'every listed critical path still exists (a rename must fail here, not demote silently): '
         . ($missing ? implode(', ', $missing) : 'all present'),
