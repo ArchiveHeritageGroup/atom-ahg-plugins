@@ -58,7 +58,7 @@
 
   <div class="alert alert-warning small">
     <i class="fas fa-exclamation-triangle me-1"></i>
-    <?php echo __('All sources default to disabled. Heratio will never make outbound HTTP calls until a source is explicitly enabled here.'); ?>
+    <?php echo __('All sources default to disabled. This site makes no outbound calls to a source until it is enabled here.'); ?>
   </div>
 
   <div class="card mb-3">

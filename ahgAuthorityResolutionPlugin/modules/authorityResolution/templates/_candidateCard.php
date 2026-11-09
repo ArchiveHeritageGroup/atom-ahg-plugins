@@ -12,11 +12,16 @@
  * GPL-3.0-or-later.
  */
 
-$signals = $candidate->evidence_signals !== null && $candidate->evidence_signals !== ''
-  ? json_decode((string) $candidate->evidence_signals, true)
+// The JSON columns are read raw: through the output escaper their quotes arrive as
+// &quot; and json_decode fails, so every card said "No evidence signals computed."
+// Only these two fields are unescaped; the decoded values are escaped again when
+// passed to the evidenceRow partial.
+$rawCandidate = $sf_data->getRaw('candidate');
+$signals = $rawCandidate->evidence_signals !== null && $rawCandidate->evidence_signals !== ''
+  ? (json_decode((string) $rawCandidate->evidence_signals, true) ?: [])
   : [];
-$evdata  = $candidate->evidence_data !== null && $candidate->evidence_data !== ''
-  ? json_decode((string) $candidate->evidence_data, true)
+$evdata  = $rawCandidate->evidence_data !== null && $rawCandidate->evidence_data !== ''
+  ? (json_decode((string) $rawCandidate->evidence_data, true) ?: [])
   : [];
 
 $sourceBadge = [

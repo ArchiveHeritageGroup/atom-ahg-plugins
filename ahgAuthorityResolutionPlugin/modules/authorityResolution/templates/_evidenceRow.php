@@ -11,6 +11,12 @@
  * GPL-3.0-or-later.
  */
 
+// Raw values: this partial escapes its own output with htmlspecialchars, so the
+// escaper's copies would be escaped twice.
+$dimension = (string) $sf_data->getRaw('dimension');
+$signal    = (string) $sf_data->getRaw('signal');
+$detail    = $sf_data->getRaw('detail');
+
 $signalConfig = [
   'match'    => ['cls' => 'success', 'icon' => 'fa-check',         'label' => 'Match'],
   'conflict' => ['cls' => 'danger',  'icon' => 'fa-times',         'label' => 'Conflict'],

@@ -12,7 +12,7 @@
         <target></target>
       </trans-unit>
       <trans-unit id="3">
-        <source>All sources default to disabled. Heratio will never make outbound HTTP calls until a source is explicitly enabled here.</source>
+        <source>All sources default to disabled. This site makes no outbound calls to a source until it is enabled here.</source>
         <target></target>
       </trans-unit>
       <trans-unit id="4">

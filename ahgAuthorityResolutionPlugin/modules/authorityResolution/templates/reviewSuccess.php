@@ -45,6 +45,29 @@
   $nearbyPlaces = $context_row && $context_row->nearby_places ? json_decode((string) $context_row->nearby_places, true) : [];
   $roleTokens   = $context_row && $context_row->role_language_tokens ? json_decode((string) $context_row->role_language_tokens, true) : [];
 
+  // When NER has run more than once on a record, the context lists hold the same
+  // name several times. Show each name once, at its nearest distance, and leave
+  // out the mention itself (its duplicates come back at distance 0).
+  // ponytail: display only; the stored context keeps the repeats until NER stops duplicating.
+  $onePerName = function ($items) {
+      $seen = [];
+      foreach ((array) $items as $e) {
+          $key = mb_strtolower(($e['type'] ?? '') . '|' . ($e['value'] ?? ''));
+          $dist = (int) ($e['distance_chars'] ?? 0);
+          if ($dist === 0) {
+              continue;
+          }
+          if (!isset($seen[$key]) || $dist < (int) ($seen[$key]['distance_chars'] ?? 0)) {
+              $seen[$key] = $e;
+          }
+      }
+      uasort($seen, fn ($a, $b) => (int) ($a['distance_chars'] ?? 0) <=> (int) ($b['distance_chars'] ?? 0));
+
+      return array_values($seen);
+  };
+  $coOccurring  = $onePerName($coOccurring);
+  $nearbyPlaces = $onePerName($nearbyPlaces);
+
   $textBefore = $context_row ? (string) $context_row->surrounding_text_before : '';
   $textAfter  = $context_row ? (string) $context_row->surrounding_text_after : '';
 ?>
