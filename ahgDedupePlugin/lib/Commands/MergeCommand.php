@@ -120,15 +120,13 @@ class MergeCommand extends BaseCommand
         $service = new \ahgDedupePlugin\Services\DedupeService();
 
         try {
-            $result = $service->mergeRecords($detectionId, $primaryId, 1);
+            $result = $service->mergeDetection($detectionId, $primaryId);
 
             $this->newline();
             $this->bold('  === Merge Complete ===');
             $this->line("  Primary record: {$primaryId}");
             $this->line("  Merge log ID: {$result['merge_log_id']}");
-            $this->line("  Digital objects moved: {$result['digital_objects_moved']}");
-            $this->line("  Children moved: {$result['children_moved']}");
-            $this->line("  Slugs redirected: {$result['slugs_redirected']}");
+            $this->line("  Done: {$result['summary']}");
 
             return 0;
         } catch (\Exception $e) {

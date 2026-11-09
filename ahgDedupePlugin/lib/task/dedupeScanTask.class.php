@@ -15,6 +15,7 @@ class dedupeScanTask extends sfBaseTask
             new sfCommandOption('repository', null, sfCommandOption::PARAMETER_OPTIONAL, 'Repository ID to scan'),
             new sfCommandOption('all', null, sfCommandOption::PARAMETER_NONE, 'Scan entire system'),
             new sfCommandOption('limit', null, sfCommandOption::PARAMETER_OPTIONAL, 'Maximum records to scan'),
+            new sfCommandOption('scan-id', null, sfCommandOption::PARAMETER_OPTIONAL, 'Run a scan already created (the Start Scan Job button)'),
         ]);
 
         $this->namespace = 'dedupe';
@@ -43,15 +44,25 @@ EOF;
 
         $repositoryId = $options['repository'] ? (int) $options['repository'] : null;
 
-        if (!$options['all'] && !$repositoryId) {
-            $this->logSection('dedupe', 'Please specify --repository=ID or --all', null, 'ERROR');
+        if (!empty($options['scan-id'])) {
+            // A scan created from the web page: run that row instead of starting another.
+            $scanId = (int) $options['scan-id'];
+            if (!DB::table('ahg_dedupe_scan')->where('id', $scanId)->where('status', 'pending')->exists()) {
+                $this->logSection('dedupe', "Scan #{$scanId} is not pending", null, 'ERROR');
 
-            return 1;
+                return 1;
+            }
+        } else {
+            if (!$options['all'] && !$repositoryId) {
+                $this->logSection('dedupe', 'Please specify --repository=ID, --all or --scan-id=ID', null, 'ERROR');
+
+                return 1;
+            }
+
+            // Create scan job
+            $scanId = $service->startScan($repositoryId);
         }
-
-        // Create scan job
-        $scanId = $service->startScan($repositoryId);
-        $this->logSection('dedupe', "Started scan job #{$scanId}");
+        $this->logSection('dedupe', "Running scan job #{$scanId}");
 
         // Get scan info
         $scan = DB::table('ahg_dedupe_scan')->where('id', $scanId)->first();

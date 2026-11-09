@@ -20,7 +20,7 @@
 
     <div class="alert alert-warning">
         <i class="fas fa-exclamation-triangle me-2"></i>
-        <strong>Warning:</strong> Merging records is permanent. The secondary record will be archived and its digital objects and child records transferred to the primary record.
+        <strong>Warning:</strong> Merging moves content from the secondary record to the primary record and cannot be undone automatically. Nothing is deleted: the secondary record is kept as a draft, with a note pointing to the primary.
     </div>
 
     <form method="post" id="mergeForm">
@@ -136,19 +136,27 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <i class="fas fa-file me-2 text-primary"></i>
-                        Digital objects from the secondary record will be transferred to the primary record
+                        The secondary record's digital object moves to the primary record. If both have a master file, the merge is refused: a record can hold only one.
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-align-left me-2 text-primary"></i>
+                        Description fields that are empty on the primary record are filled from the secondary record; fields already filled are never overwritten
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-tags me-2 text-primary"></i>
+                        Subject, place and genre access points move to the primary record, unless it already has them
                     </li>
                     <li class="list-group-item">
                         <i class="fas fa-sitemap me-2 text-primary"></i>
-                        Child records from the secondary record will be moved under the primary record
+                        Child records from the secondary record are moved under the primary record (as a background move job, like Move)
                     </li>
                     <li class="list-group-item">
                         <i class="fas fa-link me-2 text-primary"></i>
-                        The secondary record's slug will redirect to the primary record
+                        The secondary record gets a note with the primary record's address
                     </li>
                     <li class="list-group-item">
                         <i class="fas fa-archive me-2 text-primary"></i>
-                        The secondary record will be archived (not deleted) for audit purposes
+                        The secondary record is set to draft (not deleted), so visitors no longer see it and staff can still check it
                     </li>
                     <li class="list-group-item">
                         <i class="fas fa-history me-2 text-primary"></i>
@@ -164,10 +172,14 @@
                 <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Step 3: Confirm Merge</h5>
             </div>
             <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label" for="mergeNotes">Notes (optional, kept in the merge log)</label>
+                    <input type="text" class="form-control" id="mergeNotes" name="notes">
+                </div>
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="confirmMerge" required>
                     <label class="form-check-label" for="confirmMerge">
-                        I understand that this action is permanent and cannot be undone.
+                        I have checked that these are the same record.
                     </label>
                 </div>
 

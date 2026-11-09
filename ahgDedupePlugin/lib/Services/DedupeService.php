@@ -706,74 +706,160 @@ class DedupeService
     }
 
     /**
-     * Merge two records.
-     *
-     * @param int   $primaryId   Record to keep
-     * @param int   $mergedId    Record to merge
-     * @param array $fieldChoices Which fields to take from merged record
-     * @param string|null $notes Notes
-     *
-     * @return bool
+     * Description fields copied from the duplicate into the kept record where the kept
+     * record's own field is empty. Title is never copied.
      */
-    public function mergeRecords(int $primaryId, int $mergedId, array $fieldChoices = [], ?string $notes = null): bool
+    private const MERGE_FILL_FIELDS = [
+        'alternate_title', 'edition', 'extent_and_medium', 'archival_history', 'acquisition',
+        'scope_and_content', 'appraisal', 'accruals', 'arrangement', 'access_conditions',
+        'reproduction_conditions', 'physical_characteristics', 'finding_aids',
+        'location_of_originals', 'location_of_copies', 'related_units_of_description',
+        'rules', 'sources', 'revision_history',
+    ];
+
+    /**
+     * Merge the duplicate of a detected pair into the record the archivist keeps.
+     *
+     * The old mergeRecords() only moved digital objects and logged it: the duplicate stayed
+     * published as an empty record, nothing was copied, and the action called it with the
+     * arguments in the wrong order, so it never ran. This does the whole job:
+     *
+     *  - refuses when one record sits inside the other's hierarchy, or when both have a
+     *    master file (AtoM allows one master per record);
+     *  - fills the kept record's empty description fields from the duplicate, per culture;
+     *  - moves the duplicate's digital object, subject/place/genre access points not
+     *    already on the kept record, and its child records (through arObjectMoveJob, as
+     *    AtoM's own Move does, so the tree and search index stay right);
+     *  - unpublishes the duplicate and adds a note pointing to the kept record;
+     *  - marks the detection merged and logs what was done.
+     *
+     * Nothing is deleted: anything not moved stays on the (now draft) duplicate.
+     *
+     * @return array{merge_log_id:int, summary:string}
+     *
+     * @throws \RuntimeException when the merge is refused
+     */
+    public function mergeDetection(int $detectionId, int $primaryId, ?string $notes = null): array
     {
-        // Get slugs from merged record
-        $mergedSlugs = DB::table('slug')
-            ->where('object_id', $mergedId)
-            ->pluck('slug')
-            ->toArray();
+        $detection = DB::table('ahg_duplicate_detection')->where('id', $detectionId)->first();
+        if (!$detection) {
+            throw new \RuntimeException('Detection not found.');
+        }
+        if (!in_array($primaryId, [(int) $detection->record_a_id, (int) $detection->record_b_id], true)) {
+            throw new \RuntimeException('Choose one of the two records to keep.');
+        }
+        $mergedId = $primaryId === (int) $detection->record_a_id ? (int) $detection->record_b_id : (int) $detection->record_a_id;
 
-        // Get digital objects from merged record
-        $mergedDigitalObjects = DB::table('digital_object')
-            ->where('object_id', $mergedId)
-            ->pluck('id')
-            ->toArray();
-
-        // Move digital objects to primary
-        if (!empty($mergedDigitalObjects)) {
-            DB::table('digital_object')
-                ->whereIn('id', $mergedDigitalObjects)
-                ->update(['object_id' => $primaryId]);
+        $primary = DB::table('information_object')->where('id', $primaryId)->first();
+        $merged = DB::table('information_object')->where('id', $mergedId)->first();
+        if (!$primary || !$merged) {
+            throw new \RuntimeException('One of the two records no longer exists.');
+        }
+        if (($merged->lft > $primary->lft && $merged->rgt < $primary->rgt) || ($primary->lft > $merged->lft && $primary->rgt < $merged->rgt)) {
+            throw new \RuntimeException('One record is inside the other\'s hierarchy; move it out before merging.');
         }
 
-        // Update detection record if exists
-        $detection = DB::table('ahg_duplicate_detection')
-            ->where(function ($q) use ($primaryId, $mergedId) {
-                $q->where(function ($q2) use ($primaryId, $mergedId) {
-                    $q2->where('record_a_id', $primaryId)->where('record_b_id', $mergedId);
-                })->orWhere(function ($q2) use ($primaryId, $mergedId) {
-                    $q2->where('record_a_id', $mergedId)->where('record_b_id', $primaryId);
-                });
-            })
-            ->first();
-
-        if ($detection) {
-            DB::table('ahg_duplicate_detection')
-                ->where('id', $detection->id)
-                ->update(['status' => 'merged']);
+        $masterOf = fn (int $id) => DB::table('digital_object')->where('object_id', $id)->where('usage_id', \QubitTerm::MASTER_ID)->pluck('id')->all();
+        $primaryMasters = $masterOf($primaryId);
+        $mergedMasters = $masterOf($mergedId);
+        if ($primaryMasters && $mergedMasters) {
+            throw new \RuntimeException('Both records have a master file. A record can hold only one: remove or move one of them first.');
         }
 
-        // Log the merge
-        DB::table('ahg_merge_log')->insert([
-            'primary_id' => $primaryId,
-            'merged_id' => $mergedId,
-            'detection_id' => $detection->id ?? null,
-            'field_choices_json' => json_encode($fieldChoices),
-            'slugs_redirected' => json_encode($mergedSlugs),
-            'digital_objects_moved' => json_encode($mergedDigitalObjects),
-            'merged_by' => $this->getCurrentUserId(),
-            'merged_at' => date('Y-m-d H:i:s'),
-            'notes' => $notes,
+        $done = [];
+
+        // 1. Fill empty description fields, culture by culture.
+        $filled = [];
+        $mergedI18n = DB::table('information_object_i18n')->where('id', $mergedId)->get();
+        foreach ($mergedI18n as $row) {
+            $mine = DB::table('information_object_i18n')->where('id', $primaryId)->where('culture', $row->culture)->first();
+            $update = [];
+            foreach (self::MERGE_FILL_FIELDS as $field) {
+                $theirs = trim((string) ($row->{$field} ?? ''));
+                if ('' !== $theirs && (!$mine || '' === trim((string) ($mine->{$field} ?? '')))) {
+                    $update[$field] = $row->{$field};
+                    $filled[] = $field . ' (' . $row->culture . ')';
+                }
+            }
+            if ($update) {
+                if ($mine) {
+                    DB::table('information_object_i18n')->where('id', $primaryId)->where('culture', $row->culture)->update($update);
+                } else {
+                    DB::table('information_object_i18n')->insert(['id' => $primaryId, 'culture' => $row->culture] + $update);
+                }
+            }
+        }
+        if ($filled) {
+            $done[] = count($filled) . ' empty field(s) filled';
+        }
+
+        // 2. Digital object (only reachable when the kept record has no master).
+        $movedObjects = DB::table('digital_object')->where('object_id', $mergedId)->pluck('id')->all();
+        if ($movedObjects) {
+            DB::table('digital_object')->whereIn('id', $movedObjects)->update(['object_id' => $primaryId]);
+            $done[] = count($movedObjects) . ' digital object(s) moved';
+        }
+
+        // 3. Subject, place and genre access points not already on the kept record.
+        $have = DB::table('object_term_relation')->where('object_id', $primaryId)->pluck('term_id')->all();
+        $movedTerms = DB::table('object_term_relation')->where('object_id', $mergedId)->whereNotIn('term_id', $have ?: [0])->pluck('id')->all();
+        if ($movedTerms) {
+            DB::table('object_term_relation')->whereIn('id', $movedTerms)->update(['object_id' => $primaryId]);
+            $done[] = count($movedTerms) . ' access point(s) moved';
+        }
+
+        // 4. Child records, queued as AtoM's own move jobs.
+        $children = DB::table('information_object')->where('parent_id', $mergedId)->orderBy('lft')->pluck('id')->all();
+        foreach ($children as $childId) {
+            \QubitJob::runJob('arObjectMoveJob', ['objectId' => (int) $childId, 'parentId' => $primaryId]);
+        }
+        if ($children) {
+            $done[] = count($children) . ' child record(s) queued to move';
+        }
+
+        // 5. Unpublish the duplicate and point it at the kept record.
+        DB::table('status')->where('object_id', $mergedId)->where('type_id', \QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+            ->update(['status_id' => \QubitTerm::PUBLICATION_STATUS_DRAFT_ID]);
+        $primarySlug = DB::table('slug')->where('object_id', $primaryId)->value('slug');
+        $note = new \QubitNote();
+        $note->objectId = $mergedId;
+        $note->typeId = \QubitTerm::GENERAL_NOTE_ID;
+        $note->content = 'Merged into /' . $primarySlug . ' on ' . date('Y-m-d') . ' (duplicate detection ' . $detectionId . '). This record is kept as a draft for reference.';
+        $note->save();
+        $done[] = 'duplicate set to draft, with a note pointing to the kept record';
+
+        // 6. Reindex both records.
+        foreach ([$primaryId, $mergedId] as $id) {
+            try {
+                if ($io = \QubitInformationObject::getById($id)) {
+                    \QubitSearch::getInstance()->update($io);
+                }
+            } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+            }
+        }
+
+        DB::table('ahg_duplicate_detection')->where('id', $detectionId)->update([
+            'status' => 'merged',
+            'reviewed_by' => $this->getCurrentUserId(),
+            'reviewed_at' => date('Y-m-d H:i:s'),
+            'review_notes' => $notes,
         ]);
 
-        // Soft delete the merged record (or delete completely based on config)
-        // For now, we'll just update slug to redirect
-        foreach ($mergedSlugs as $slug) {
-            // The redirect would be handled by the routing system
-            // Here we just record it
-        }
+        $summary = $done ? implode('; ', $done) : 'nothing to move';
+        $logId = DB::table('ahg_merge_log')->insertGetId([
+            'primary_id' => $primaryId,
+            'merged_id' => $mergedId,
+            'detection_id' => $detectionId,
+            'field_choices_json' => json_encode(['filled' => $filled, 'access_points' => $movedTerms, 'children' => $children]),
+            'slugs_redirected' => json_encode(DB::table('slug')->where('object_id', $mergedId)->pluck('slug')->all()),
+            'digital_objects_moved' => json_encode($movedObjects),
+            'merged_by' => $this->getCurrentUserId(),
+            'merged_at' => date('Y-m-d H:i:s'),
+            'notes' => trim(($notes ? $notes . ' | ' : '') . $summary),
+        ]);
 
-        return true;
+        return ['merge_log_id' => (int) $logId, 'summary' => $summary];
     }
 
     // =========================================

@@ -121,14 +121,12 @@ EOF;
         $service = new \ahgDedupePlugin\Services\DedupeService();
 
         try {
-            $result = $service->mergeRecords($detectionId, $primaryId, sfContext::getInstance()->user->getUserId() ?? 1);
+            $result = $service->mergeDetection($detectionId, $primaryId);
 
             $this->logSection('dedupe', '=== Merge Complete ===');
             $this->log("Primary record: {$primaryId}");
             $this->log("Merge log ID: {$result['merge_log_id']}");
-            $this->log("Digital objects moved: {$result['digital_objects_moved']}");
-            $this->log("Children moved: {$result['children_moved']}");
-            $this->log("Slugs redirected: {$result['slugs_redirected']}");
+            $this->log("Done: {$result['summary']}");
 
             return 0;
         } catch (\Exception $e) {

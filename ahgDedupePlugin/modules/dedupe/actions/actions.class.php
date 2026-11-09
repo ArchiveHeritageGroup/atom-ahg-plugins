@@ -234,18 +234,21 @@ class dedupeActions extends AhgController
 
         if ($request->isMethod('post')) {
             $primaryId = (int) $request->getParameter('primary_id');
-            $fieldChoices = $request->getParameter('field_choices', []);
 
             require_once $this->config('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
             $service = new \ahgDedupePlugin\Services\DedupeService();
 
+            // The old call passed its arguments in the wrong order to a method that did not
+            // take them, so every merge failed; redirect() inside the try was also caught.
+            $result = null;
             try {
-                $result = $service->mergeRecords($id, $primaryId, $this->getUser()->getUserId(), $fieldChoices);
-
-                $this->getUser()->setFlash('notice', 'Records merged successfully. Merge log ID: ' . $result['merge_log_id']);
+                $result = $service->mergeDetection($id, $primaryId, trim((string) $request->getParameter('notes', '')) ?: null);
+            } catch (\Throwable $e) {
+                $this->getUser()->setFlash('error', 'Merge not done: ' . $e->getMessage());
+            }
+            if ($result) {
+                $this->getUser()->setFlash('notice', 'Records merged (log ' . $result['merge_log_id'] . '): ' . $result['summary'] . '.');
                 $this->redirect(['module' => 'dedupe', 'action' => 'browse']);
-            } catch (\Exception $e) {
-                $this->getUser()->setFlash('error', 'Merge failed: ' . $e->getMessage());
             }
         }
     }
@@ -275,12 +278,25 @@ class dedupeActions extends AhgController
             require_once $this->config('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
             $service = new \ahgDedupePlugin\Services\DedupeService();
 
+            // The button used to create a pending scan row and nothing ever ran it (scans 1
+            // and 2 stayed pending from February), and the redirect inside the try was
+            // caught as a failure. Now the scan runs in the background, as ingest does.
+            $scanId = null;
             try {
-                $scanId = $service->startScan($repositoryId, $this->getUser()->getUserId());
-                $this->getUser()->setFlash('notice', "Scan job #{$scanId} started. Run 'php symfony dedupe:scan' to process.");
-                $this->redirect(['module' => 'dedupe', 'action' => 'index']);
-            } catch (\Exception $e) {
+                $scanId = $service->startScan($repositoryId);
+                $root = $this->config('sf_root_dir');
+                exec(sprintf(
+                    'nohup php %s/symfony dedupe:scan --scan-id=%d > %s 2>&1 &',
+                    escapeshellarg($root),
+                    $scanId,
+                    escapeshellarg($root . '/log/dedupe-scan-' . $scanId . '.log')
+                ));
+            } catch (\Throwable $e) {
                 $this->getUser()->setFlash('error', 'Failed to start scan: ' . $e->getMessage());
+            }
+            if ($scanId) {
+                $this->getUser()->setFlash('notice', "Scan #{$scanId} is running. Its results appear under Browse when it finishes.");
+                $this->redirect(['module' => 'dedupe', 'action' => 'index']);
             }
         }
     }
