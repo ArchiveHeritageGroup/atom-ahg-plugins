@@ -42,6 +42,11 @@ class donorAgreementAddAction extends AhgController
                 $this->getUser()->setFlash('notice', 'Agreement created successfully. Edit to link Archival Descriptions and Accessions.' . ($uploadResult ? ' ' . $uploadResult : ''));
                 $this->redirect(['module' => 'donorAgreement', 'action' => 'view', 'id' => $id]);
             } catch (Exception $e) {
+                // redirect() works by throwing sfStopException; catching it here
+                // added an empty "Error creating agreement:" to every successful save.
+                if ($e instanceof sfStopException) {
+                    throw $e;
+                }
                 $this->getUser()->setFlash('error', 'Error creating agreement: ' . $e->getMessage());
             }
         }
@@ -92,20 +97,20 @@ class donorAgreementAddAction extends AhgController
             // Title defaults to agreement number if not provided
             $title = !empty($data['title']) ? $data['title'] : $agreementNumber;
             
-            $id = \Illuminate\Database\Capsule\Manager::table('donor_agreement')->insertGetId([
-                'donor_id' => !empty($data['donor_id']) ? $data['donor_id'] : null,
-                'agreement_type_id' => $data['agreement_type_id'],
-                'agreement_number' => $agreementNumber,
-                'title' => $title,
-                'status' => $data['status'] ?? 'draft',
-                'effective_date' => !empty($data['effective_date']) ? $data['effective_date'] : null,
-                'expiry_date' => !empty($data['expiry_date']) ? $data['expiry_date'] : null,
-                'review_date' => !empty($data['review_date']) ? $data['review_date'] : null,
-                'created_by' => $data['created_by'] ?? null,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
-            
+            if (!class_exists(\AtomFramework\Services\DonorAgreement\DonorAgreementService::class)) {
+                require_once dirname(__DIR__, 3) . '/lib/Service/DonorAgreementService.php';
+            }
+            $id = \Illuminate\Database\Capsule\Manager::table('donor_agreement')->insertGetId(array_merge(
+                \AtomFramework\Services\DonorAgreement\DonorAgreementService::formColumns($data),
+                [
+                    'agreement_number' => $agreementNumber,
+                    'title' => $title,
+                    'created_by' => $data['created_by'] ?? null,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]
+            ));
+
             // Also insert into i18n table if it exists
             try {
                 \Illuminate\Database\Capsule\Manager::table('donor_agreement_i18n')->insert([

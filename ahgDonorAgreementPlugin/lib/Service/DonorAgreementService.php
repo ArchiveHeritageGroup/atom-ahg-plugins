@@ -12,6 +12,59 @@ use Illuminate\Support\Collection;
 
 class DonorAgreementService
 {
+    /**
+     * The donor_agreement columns the add and edit forms both write, from the
+     * posted agreement[...] fields. One list for both actions: add used to keep
+     * its own short list and silently dropped scope, transfer, terms, signatures
+     * and most dates.
+     */
+    public static function formColumns(array $data): array
+    {
+        $text = fn (string $k) => isset($data[$k]) && '' !== trim((string) $data[$k]) ? $data[$k] : null;
+
+        return [
+            'donor_id' => !empty($data['donor_id']) ? $data['donor_id'] : null,
+            'agreement_type_id' => $data['agreement_type_id'],
+            'description' => $data['description'] ?? null,
+            'status' => $data['status'] ?? 'draft',
+            'donor_name' => $text('donor_name'),
+            'donor_contact_info' => $text('donor_contact_info'),
+            'institution_name' => $text('institution_name'),
+            'institution_contact_info' => $text('institution_contact_info'),
+            'repository_representative' => $text('repository_representative'),
+            'repository_representative_title' => $text('repository_representative_title'),
+            'legal_representative' => $text('legal_representative'),
+            'legal_representative_title' => $text('legal_representative_title'),
+            'legal_representative_contact' => $text('legal_representative_contact'),
+            'agreement_date' => $text('agreement_date'),
+            'effective_date' => $text('effective_date'),
+            'expiry_date' => $text('expiry_date'),
+            'review_date' => $text('review_date'),
+            'termination_date' => $text('termination_date'),
+            'termination_reason' => $text('termination_reason'),
+            'scope_description' => $text('scope_description'),
+            'extent_statement' => $text('extent_statement'),
+            'transfer_method' => $text('transfer_method'),
+            'transfer_date' => $text('transfer_date'),
+            'received_by' => $text('received_by'),
+            'has_financial_terms' => !empty($data['has_financial_terms']) ? 1 : 0,
+            'purchase_amount' => $text('purchase_amount'),
+            'currency' => $data['currency'] ?? 'ZAR',
+            'payment_terms' => $text('payment_terms'),
+            'general_terms' => $text('general_terms'),
+            'special_conditions' => $text('special_conditions'),
+            'donor_signature_date' => $text('donor_signature_date'),
+            'donor_signature_name' => $text('donor_signature_name'),
+            'repository_signature_date' => $text('repository_signature_date'),
+            'repository_signature_name' => $text('repository_signature_name'),
+            'witness_name' => $text('witness_name'),
+            'witness_date' => $text('witness_date'),
+            'internal_notes' => $text('internal_notes'),
+            'is_template' => !empty($data['is_template']) ? 1 : 0,
+            'supersedes_agreement_id' => !empty($data['supersedes_agreement_id']) ? $data['supersedes_agreement_id'] : null,
+        ];
+    }
+
     protected AhgTaxonomyService $taxonomyService;
 
     public function __construct()

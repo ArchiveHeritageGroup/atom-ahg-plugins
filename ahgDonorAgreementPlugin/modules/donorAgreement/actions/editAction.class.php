@@ -137,64 +137,23 @@ class donorAgreementEditAction extends AhgController
         $db = \Illuminate\Database\Capsule\Manager::connection();
         $db->beginTransaction();
         
+        if (!class_exists(\AtomFramework\Services\DonorAgreement\DonorAgreementService::class)) {
+            require_once dirname(__DIR__, 3) . '/lib/Service/DonorAgreementService.php';
+        }
+
         try {
             // Update main record
             \Illuminate\Database\Capsule\Manager::table('donor_agreement')
                 ->where('id', $id)
-                ->update([
-                    'donor_id' => !empty($data['donor_id']) ? $data['donor_id'] : null,
-                    'agreement_type_id' => $data['agreement_type_id'],
-                    'agreement_number' => $data['agreement_number'] ?: null,
-                    'title' => $data['title'] ?: $data['agreement_number'],
-                    'description' => $data['description'] ?? null,
-                    'status' => $data['status'] ?? 'draft',
-                    // Donor info
-                    'donor_name' => $data['donor_name'] ?? null,
-                    'donor_contact_info' => $data['donor_contact_info'] ?? null,
-                    // Institution info
-                    'institution_name' => $data['institution_name'] ?? null,
-                    'institution_contact_info' => $data['institution_contact_info'] ?? null,
-                    'repository_representative' => $data['repository_representative'] ?? null,
-                    'repository_representative_title' => $data['repository_representative_title'] ?? null,
-                    // Legal representative
-                    'legal_representative' => $data['legal_representative'] ?? null,
-                    'legal_representative_title' => $data['legal_representative_title'] ?? null,
-                    'legal_representative_contact' => $data['legal_representative_contact'] ?? null,
-                    // Dates
-                    'agreement_date' => !empty($data['agreement_date']) ? $data['agreement_date'] : null,
-                    'effective_date' => !empty($data['effective_date']) ? $data['effective_date'] : null,
-                    'expiry_date' => !empty($data['expiry_date']) ? $data['expiry_date'] : null,
-                    'review_date' => !empty($data['review_date']) ? $data['review_date'] : null,
-                    'termination_date' => !empty($data['termination_date']) ? $data['termination_date'] : null,
-                    'termination_reason' => $data['termination_reason'] ?? null,
-                    // Scope & transfer
-                    'scope_description' => $data['scope_description'] ?? null,
-                    'extent_statement' => $data['extent_statement'] ?? null,
-                    'transfer_method' => $data['transfer_method'] ?? null,
-                    'transfer_date' => !empty($data['transfer_date']) ? $data['transfer_date'] : null,
-                    'received_by' => $data['received_by'] ?? null,
-                    // Financial
-                    'has_financial_terms' => !empty($data['has_financial_terms']) ? 1 : 0,
-                    'purchase_amount' => !empty($data['purchase_amount']) ? $data['purchase_amount'] : null,
-                    'currency' => $data['currency'] ?? 'ZAR',
-                    'payment_terms' => $data['payment_terms'] ?? null,
-                    // Terms
-                    'general_terms' => $data['general_terms'] ?? null,
-                    'special_conditions' => $data['special_conditions'] ?? null,
-                    // Signatures
-                    'donor_signature_date' => !empty($data['donor_signature_date']) ? $data['donor_signature_date'] : null,
-                    'donor_signature_name' => $data['donor_signature_name'] ?? null,
-                    'repository_signature_date' => !empty($data['repository_signature_date']) ? $data['repository_signature_date'] : null,
-                    'repository_signature_name' => $data['repository_signature_name'] ?? null,
-                    'witness_name' => $data['witness_name'] ?? null,
-                    'witness_date' => !empty($data['witness_date']) ? $data['witness_date'] : null,
-                    // Admin
-                    'internal_notes' => $data['internal_notes'] ?? null,
-                    'is_template' => !empty($data['is_template']) ? 1 : 0,
-                    'supersedes_agreement_id' => !empty($data['supersedes_agreement_id']) ? $data['supersedes_agreement_id'] : null,
-                    'updated_at' => date('Y-m-d H:i:s'),
-                    'updated_by' => $this->getUser()->getAttribute('user_id'),
-                ]);
+                ->update(array_merge(
+                    \AtomFramework\Services\DonorAgreement\DonorAgreementService::formColumns($data),
+                    [
+                        'agreement_number' => $data['agreement_number'] ?: null,
+                        'title' => $data['title'] ?: $data['agreement_number'],
+                        'updated_at' => date('Y-m-d H:i:s'),
+                        'updated_by' => $this->getUser()->getAttribute('user_id'),
+                    ]
+                ));
             
             // Update i18n
             \Illuminate\Database\Capsule\Manager::table('donor_agreement_i18n')
