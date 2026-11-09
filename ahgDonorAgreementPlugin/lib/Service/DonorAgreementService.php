@@ -269,7 +269,12 @@ class DonorAgreementService
             DB::table('donor_agreement_right')->where('donor_agreement_id', $id)->delete();
         }
         if ($this->tableExists('donor_agreement_history')) {
-            DB::table('donor_agreement_history')->where('donor_agreement_id', $id)->delete();
+            // This table's key is agreement_id; donor_agreement_id made every delete fail.
+            DB::table('donor_agreement_history')->where('agreement_id', $id)->delete();
+        }
+        if ($this->tableExists('donor_agreement_accession')) {
+            // No foreign key on this one, so nothing cascades: remove its links here.
+            DB::table('donor_agreement_accession')->where('donor_agreement_id', $id)->delete();
         }
 
         return DB::table('donor_agreement')->where('id', $id)->delete() > 0;

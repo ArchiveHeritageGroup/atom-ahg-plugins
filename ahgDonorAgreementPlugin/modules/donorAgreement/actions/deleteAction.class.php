@@ -16,6 +16,11 @@ class donorAgreementDeleteAction extends AhgController
 
         \AhgCore\Core\AhgDb::init();
 
+        // The service is not autoloadable: without this, deleting died with
+        // "Class not found" and a blank page.
+        if (!class_exists(\AtomFramework\Services\DonorAgreement\DonorAgreementService::class)) {
+            require_once dirname(__DIR__, 3) . '/lib/Service/DonorAgreementService.php';
+        }
         $service = new \AtomFramework\Services\DonorAgreement\DonorAgreementService();
 
         try {
