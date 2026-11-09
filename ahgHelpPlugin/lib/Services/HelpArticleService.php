@@ -319,6 +319,9 @@ class HelpArticleService
             ];
 
             if ($existing) {
+                // Re-importing or rebuilding must never re-publish an article
+                // someone hid (e.g. internal security reports): keep its flag.
+                $row['is_published'] = $existing->is_published;
                 $row['updated_at'] = date('Y-m-d H:i:s');
                 DB::table('help_article')->where('id', $existing->id)->update($row);
                 $articleId = $existing->id;
