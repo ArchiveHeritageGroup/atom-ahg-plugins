@@ -55,8 +55,8 @@
 
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>Note:</strong> This will create a scan job. To process the scan, run:
-                            <br><code>php symfony dedupe:scan --all</code> or <code>php symfony dedupe:scan --repository=ID</code>
+                            <strong>Note:</strong> The scan runs in the background; its results appear under Browse when it finishes. A scan of the whole catalogue can add many pairs to the review queue.
+                            <br>From the command line: <code>php symfony dedupe:scan --all</code> or <code>php symfony dedupe:scan --repository=ID</code>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
