@@ -43,10 +43,14 @@ class dedupeActions extends AhgController
                 $join->on('dd.record_b_id', '=', 'ioi_b.id')
                     ->where('ioi_b.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
+            ->leftJoin('slug as slug_a', 'dd.record_a_id', '=', 'slug_a.object_id')
+            ->leftJoin('slug as slug_b', 'dd.record_b_id', '=', 'slug_b.object_id')
             ->select([
                 'dd.*',
                 'ioi_a.title as title_a',
                 'ioi_b.title as title_b',
+                'slug_a.slug as slug_a',
+                'slug_b.slug as slug_b',
             ])
             ->where('dd.status', 'pending')
             ->orderBy('dd.similarity_score', 'desc')
@@ -91,10 +95,14 @@ class dedupeActions extends AhgController
             })
             ->leftJoin('information_object as io_a', 'dd.record_a_id', '=', 'io_a.id')
             ->leftJoin('information_object as io_b', 'dd.record_b_id', '=', 'io_b.id')
+            ->leftJoin('slug as slug_a', 'dd.record_a_id', '=', 'slug_a.object_id')
+            ->leftJoin('slug as slug_b', 'dd.record_b_id', '=', 'slug_b.object_id')
             ->select([
                 'dd.*',
                 'ioi_a.title as title_a',
                 'ioi_b.title as title_b',
+                'slug_a.slug as slug_a',
+                'slug_b.slug as slug_b',
                 'io_a.identifier as identifier_a',
                 'io_b.identifier as identifier_b',
             ]);

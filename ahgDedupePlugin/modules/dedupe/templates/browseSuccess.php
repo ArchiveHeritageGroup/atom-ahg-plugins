@@ -116,7 +116,7 @@
                                 </td>
                                 <td>
                                     <div>
-                                        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $dup->record_a_id]); ?>" target="_blank">
+                                        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $dup->slug_a]); ?>" target="_blank">
                                             <?php echo htmlspecialchars($dup->title_a ?? 'Untitled'); ?>
                                             <i class="fas fa-external-link-alt fa-xs text-muted"></i>
                                         </a>
@@ -127,7 +127,7 @@
                                 </td>
                                 <td>
                                     <div>
-                                        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $dup->record_b_id]); ?>" target="_blank">
+                                        <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $dup->slug_b]); ?>" target="_blank">
                                             <?php echo htmlspecialchars($dup->title_b ?? 'Untitled'); ?>
                                             <i class="fas fa-external-link-alt fa-xs text-muted"></i>
                                         </a>

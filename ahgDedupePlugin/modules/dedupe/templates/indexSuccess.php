@@ -108,12 +108,12 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $dup->record_a_id]); ?>">
+                                            <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $dup->slug_a]); ?>">
                                                 <?php echo htmlspecialchars(mb_substr($dup->title_a ?? 'Untitled', 0, 40)); ?>
                                             </a>
                                         </td>
                                         <td>
-                                            <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $dup->record_b_id]); ?>">
+                                            <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $dup->slug_b]); ?>">
                                                 <?php echo htmlspecialchars(mb_substr($dup->title_b ?? 'Untitled', 0, 40)); ?>
                                             </a>
                                         </td>
