@@ -12,8 +12,14 @@ use Illuminate\Database\Capsule\Manager as DB;
  *    'labels' => [['iri', 'code', 'label', 'source_code']]]
  *
  * Read only, from the tables of ahgRightsPlugin, ahgExtendedRightsPlugin and
- * ahgICIPPlugin, each only when present (AhgDb::hasOptionalTable). Only rights in
- * force today. Holders are given to staff only: a holder is often a donor.
+ * ahgICIPPlugin and from AtoM's PREMIS rights, each only when present
+ * (AhgDb::hasOptionalTable). Only rights in force today. Holders are given to
+ * staff only: a holder is often a donor.
+ *
+ * grants is {act: {restriction, note?}} in OpenRiC's codes (render, disseminate,
+ * replicate, migrate, modify, delete, print, use, discover; allow, disallow,
+ * conditional), the same as Heratio's API. Sources: AtoM granted_right (the
+ * "Display" act is sent as render) and ahgRightsPlugin rights_grant.
  *
  * Labels carry their Local Contexts code (tk_s, tk_co, ...), worked out from the
  * label's Local Contexts address, then its English name - never from the stored
@@ -22,6 +28,12 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class ApiRights
 {
+    /** AtoM's relation type linking a description to a PREMIS rights record (QubitTerm::RIGHT_ID). */
+    private const RIGHT_RELATION_TYPE_ID = 168;
+
+    /** AtoM granted_right.restriction (QubitGrantedRight DENY/GRANT/CONDITIONAL_RIGHT). */
+    private const PREMIS_RESTRICTIONS = [0 => 'disallow', 1 => 'allow', 2 => 'conditional'];
+
     /** Local Contexts label address slug => code (localcontexts.org/label/<slug>/). */
     private const LC_CODES = [
         'tk-attribution' => 'tk_a', 'tk-clan' => 'tk_cl', 'tk-family' => 'tk_f', 'tk-multiple-communities' => 'tk_mc',
@@ -74,6 +86,64 @@ class ApiRights
                         $labels[] = self::label($l->uri, $name, $l->code);
                     }
                 }
+            }
+        }
+
+        // AtoM PREMIS rights (rights + granted_right, linked by a RIGHT relation),
+        // with their granted acts. AtoM's "Display" act is sent as render.
+        if ($has('rights') && $has('granted_right')) {
+            $rows = DB::table('relation as rel')->join('rights as r', 'r.id', '=', 'rel.object_id')
+                ->where('rel.subject_id', $objectId)->where('rel.type_id', self::RIGHT_RELATION_TYPE_ID)
+                ->where(fn ($q) => $q->whereNull('r.start_date')->orWhere('r.start_date', '<=', $today))
+                ->where(fn ($q) => $q->whereNull('r.end_date')->orWhere('r.end_date', '>=', $today))
+                ->select('r.id', 'r.start_date', 'r.end_date', 'r.rights_holder_id')->get();
+            foreach ($rows as $r) {
+                $grants = [];
+                $q = DB::table('granted_right as g')
+                    ->leftJoin('term_i18n as t', fn ($j) => $j->on('t.id', '=', 'g.act_id')->where('t.culture', '=', 'en'))
+                    ->where('g.rights_id', $r->id)
+                    ->where(fn ($w) => $w->whereNull('g.start_date')->orWhere('g.start_date', '<=', $today))
+                    ->where(fn ($w) => $w->whereNull('g.end_date')->orWhere('g.end_date', '>=', $today))
+                    ->select('t.name', 'g.restriction', 'g.notes');
+                foreach ($q->get() as $g) {
+                    $act = 'display' === strtolower((string) $g->name) ? 'render' : strtolower((string) $g->name);
+                    self::grant($grants, $act, self::PREMIS_RESTRICTIONS[(int) $g->restriction] ?? null, $g->notes);
+                }
+                $holder = null;
+                if ($staff && $r->rights_holder_id) {
+                    $name = DB::table('actor_i18n')->where('id', $r->rights_holder_id)->where('culture', $culture)->value('authorized_form_of_name');
+                    $holder = $name ? ['name' => $name, 'iri' => null] : null;
+                }
+                $rules[] = self::rule(null, null, $holder, $r->start_date, $r->end_date, $grants);
+            }
+        }
+
+        // ahgRightsPlugin records (rights_record + rights_grant), already in these act codes.
+        if ($has('rights_record') && $has('rights_grant')) {
+            $rows = DB::table('rights_record')->where('object_id', $objectId)
+                ->where(fn ($q) => $q->whereNull('start_date')->orWhere('start_date', '<=', $today))
+                ->where(fn ($q) => $q->whereNull('end_date')->orWhere('end_date', '>=', $today))
+                ->get();
+            foreach ($rows as $r) {
+                $grants = [];
+                $q = DB::table('rights_grant as g')
+                    ->leftJoin('rights_grant_i18n as gi', fn ($j) => $j->on('gi.id', '=', 'g.id')->where('gi.culture', '=', $culture))
+                    ->where('g.rights_record_id', $r->id)
+                    ->where(fn ($w) => $w->whereNull('g.start_date')->orWhere('g.start_date', '<=', $today))
+                    ->where(fn ($w) => $w->whereNull('g.end_date')->orWhere('g.end_date', '>=', $today))
+                    ->select('g.act', 'g.restriction', 'gi.restriction_note');
+                foreach ($q->get() as $g) {
+                    self::grant($grants, strtolower((string) $g->act), strtolower((string) $g->restriction), $g->restriction_note);
+                }
+                $holder = $staff && $r->copyright_holder ? ['name' => $r->copyright_holder, 'iri' => null] : null;
+                $rules[] = self::rule(
+                    $r->rights_statement_id ? self::statement((int) $r->rights_statement_id, $culture) : null,
+                    $r->cc_license_id ? self::licence((int) $r->cc_license_id) : null,
+                    $holder,
+                    $r->start_date,
+                    $r->end_date,
+                    $grants
+                );
             }
         }
 
@@ -133,10 +203,24 @@ class ApiRights
         ];
     }
 
-    private static function rule(?array $statement, ?array $licence, ?array $holder, $starts, $ends): array
+    /** grants is {act: {restriction, note?}}; empty grants encode as {} for clients. */
+    private static function rule(?array $statement, ?array $licence, ?array $holder, $starts, $ends, array $grants = []): array
     {
         return ['statement' => $statement, 'licence' => $licence, 'holder' => $holder,
-            'starts_on' => $starts ?: null, 'ends_on' => $ends ?: null, 'grants' => (object) []];
+            'starts_on' => $starts ?: null, 'ends_on' => $ends ?: null, 'grants' => (object) $grants];
+    }
+
+    /** Add one granted act; when an act appears twice the stricter restriction wins. */
+    private static function grant(array &$grants, string $act, ?string $restriction, ?string $note): void
+    {
+        $rank = ['allow' => 0, 'conditional' => 1, 'disallow' => 2];
+        if ('' === $act || !isset($rank[$restriction])) {
+            return;
+        }
+        if (isset($grants[$act]) && $rank[$grants[$act]['restriction']] >= $rank[$restriction]) {
+            return;
+        }
+        $grants[$act] = ['restriction' => $restriction, 'note' => trim((string) $note) !== '' ? trim((string) $note) : null];
     }
 
     private static function statement(int $id, string $culture): ?array
