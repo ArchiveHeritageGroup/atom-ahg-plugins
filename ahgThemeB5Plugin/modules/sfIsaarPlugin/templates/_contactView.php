@@ -7,8 +7,9 @@ use AtomFramework\Extensions\Contact\Repositories\ContactInformationRepository;
 
 // A person's or family's contact details are personal information (POPIA):
 // only editors and administrators see them. Organisations keep showing their
-// public contact details to everyone.
-$isPersonal = in_array((int) $resource->entityTypeId, [QubitTerm::PERSON_ID, QubitTerm::FAMILY_ID], true);
+// public contact details to everyone. A record with no entity type set is
+// treated as personal, since it may well be a person.
+$isPersonal = QubitTerm::CORPORATE_BODY_ID !== (int) $resource->entityTypeId;
 if ($isPersonal && !sfContext::getInstance()->getUser()->hasCredential(['administrator', 'editor'], false)) {
     return;
 }
