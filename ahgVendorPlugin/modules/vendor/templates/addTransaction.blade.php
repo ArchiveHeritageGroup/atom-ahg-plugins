@@ -97,7 +97,7 @@
                             <label class="form-label">Search GLAM Items</label>
                             <div class="input-group">
                                 <input type="text" id="glamSearch" class="form-control" placeholder="Type title or identifier to search..." autocomplete="off">
-                                <button type="button" class="btn btn-outline-secondary" onclick="clearSearch()">
+                                <button type="button" class="btn btn-outline-secondary" data-vend-action="clear-search">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -220,6 +220,7 @@
 
 <script @cspNonce>
 var selectedItems = [];
+var searchResults = [];
 var searchTimeout;
 
 var conditionRatings = @json($conditionRatings);
@@ -240,10 +241,11 @@ document.getElementById('glamSearch').addEventListener('input', function() {
             .then(function(data) {
                 if (data.length > 0) {
                     var html = '';
-                    data.forEach(function(item) {
+                    searchResults = data;
+                    data.forEach(function(item, i) {
                         var isSelected = selectedItems.some(function(s) { return s.id === item.id; });
                         if (!isSelected) {
-                            html += '<div class="ac-item" onclick=\'addItem(' + JSON.stringify(item) + ')\'>'
+                            html += '<div class="ac-item" data-vend-add="' + i + '">'
                                 + '<div class="ac-title">' + escapeHtml(item.value) + '</div>'
                                 + '<div class="ac-meta">'
                                 + (item.identifier ? '<code>' + escapeHtml(item.identifier) + '</code> &bull; ' : '')
@@ -308,7 +310,7 @@ function renderSelectedItems() {
             + '<small class="text-muted">' + (item.identifier ? escapeHtml(item.identifier) : '') + '</small></td>'
             + '<td><select name="condition_ratings[]" class="form-select form-select-sm">' + conditionOptions + '</select></td>'
             + '<td><input type="number" name="declared_values[]" class="form-control form-control-sm" step="0.01" placeholder="0.00"></td>'
-            + '<td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(' + item.id + ')"><i class="fas fa-times"></i></button></td>'
+            + '<td><button type="button" class="btn btn-sm btn-outline-danger" data-vend-remove="' + item.id + '"><i class="fas fa-times"></i></button></td>'
             + '</tr>';
     }).join('');
 }
@@ -325,7 +327,23 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Inline onclick handlers are blocked by the site's content security policy,
+// so results, remove buttons and the clear button are handled here instead.
 document.addEventListener('click', function(e) {
+    var add = e.target.closest('[data-vend-add]');
+    if (add && searchResults[add.dataset.vendAdd]) {
+        addItem(searchResults[add.dataset.vendAdd]);
+        return;
+    }
+    var rm = e.target.closest('[data-vend-remove]');
+    if (rm) {
+        removeItem(parseInt(rm.dataset.vendRemove, 10));
+        return;
+    }
+    if (e.target.closest('[data-vend-action="clear-search"]')) {
+        clearSearch();
+        return;
+    }
     if (!e.target.closest('#glamSearch') && !e.target.closest('#searchResults')) {
         document.getElementById('searchResults').style.display = 'none';
     }

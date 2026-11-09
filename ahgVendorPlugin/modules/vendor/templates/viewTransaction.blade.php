@@ -102,7 +102,7 @@ $statusColors = [
                                     <td>{{ $item->unit_cost ? 'R' . number_format($item->unit_cost * ($item->quantity ?? 1), 2) : '-' }}</td>
                                     <td><span class="badge bg-{{ ['pending'=>'warning','in_progress'=>'info','completed'=>'success'][$item->status ?? 'pending'] ?? 'secondary' }}">{{ ucfirst(str_replace('_', ' ', $item->status ?? 'pending')) }}</span></td>
                                     <td>
-                                        <a href="@url('ahg_vend_transaction_item_remove', ['transaction_id' => $transaction->id, 'item_id' => $item->id])" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this item?');"><i class="fas fa-unlink"></i></a>
+                                        <a href="@url('ahg_vend_transaction_item_remove', ['transaction_id' => $transaction->id, 'item_id' => $item->id])" class="btn btn-sm btn-outline-danger" data-vend-confirm="Remove this item?"><i class="fas fa-unlink"></i></a>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -179,4 +179,14 @@ $statusColors = [
 </div>
 
 @include('_addItemModal', ['transaction' => $transaction])
+{{-- Inline onclick handlers are blocked by the site's content security policy, so
+     the confirmation for links marked data-vend-confirm is attached here. --}}
+<script @cspNonce>
+document.addEventListener('click', function(e) {
+    var a = e.target.closest('[data-vend-confirm]');
+    if (a && !confirm(a.dataset.vendConfirm)) {
+        e.preventDefault();
+    }
+});
+</script>
 @endsection

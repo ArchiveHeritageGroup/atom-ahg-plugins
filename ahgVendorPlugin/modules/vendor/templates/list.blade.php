@@ -140,7 +140,7 @@
                                     <a href="@url('ahg_vend_transaction_add', ['vendor' => $vendor->slug])" class="btn btn-outline-success" title="New Transaction">
                                         <i class="fas fa-plus"></i>
                                     </a>
-                                    <button type="button" class="btn btn-outline-danger" title="Delete" onclick="deleteVendor('{{ $vendor->slug }}', '{{ e($vendor->name) }}')">
+                                    <button type="button" class="btn btn-outline-danger" title="Delete" data-vend-delete="{{ $vendor->slug }}" data-vend-name="{{ $vendor->name }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -199,9 +199,18 @@ function deleteVendor(slug, name) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 
+// Inline onclick handlers are blocked by the site's content security policy.
+document.addEventListener('click', function(e) {
+    var b = e.target.closest('[data-vend-delete]');
+    if (b) {
+        deleteVendor(b.dataset.vendDelete, b.dataset.vendName);
+    }
+});
+
 document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
     const form = document.getElementById('deleteVendorForm');
-    form.action = '/index.php/ahg/vend/delete/' + deleteSlug;
+    // The old address (/ahg/vend/delete/...) was not a route, so delete never worked.
+    form.action = '/index.php/vendor/' + encodeURIComponent(deleteSlug) + '/delete';
     form.submit();
 });
 </script>

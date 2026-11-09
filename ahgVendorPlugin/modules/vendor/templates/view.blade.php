@@ -166,7 +166,7 @@ $statsArr = is_object($stats) ? (array) $stats : $stats;
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a href="@url('ahg_vend_contact_delete', ['slug' => $vendor->slug, 'contact_id' => $contact->id])" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Delete this contact?');">
+                                            <a href="@url('ahg_vend_contact_delete', ['slug' => $vendor->slug, 'contact_id' => $contact->id])" class="btn btn-outline-danger" title="Delete" data-vend-confirm="Delete this contact?">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
@@ -439,4 +439,14 @@ $statsArr = is_object($stats) ? (array) $stats : $stats;
         </div>
     </div>
 </div>
+{{-- Inline onclick handlers are blocked by the site's content security policy, so
+     the confirmation for links marked data-vend-confirm is attached here. --}}
+<script @cspNonce>
+document.addEventListener('click', function(e) {
+    var a = e.target.closest('[data-vend-confirm]');
+    if (a && !confirm(a.dataset.vendConfirm)) {
+        e.preventDefault();
+    }
+});
+</script>
 @endsection

@@ -33,7 +33,7 @@
                                         <span id="selectedLevel" class="badge bg-secondary ms-2"></span>
                                     </small>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSelection()">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-vend-action="clear-selection">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -116,6 +116,7 @@
 
 <script @cspNonce>
 var autocompleteTimeout;
+var autocompleteData = [];
 
 document.getElementById('glamAutocomplete').addEventListener('input', function() {
     clearTimeout(autocompleteTimeout);
@@ -133,8 +134,9 @@ document.getElementById('glamAutocomplete').addEventListener('input', function()
             .then(function(data) {
                 if (data.length > 0) {
                     var html = '';
-                    data.forEach(function(item) {
-                        html += '<div class="autocomplete-item" onclick="selectGlamItem(' + JSON.stringify(item).replace(/"/g, '&quot;') + ')">'
+                    autocompleteData = data;
+                    data.forEach(function(item, i) {
+                        html += '<div class="autocomplete-item" data-vend-pick="' + i + '">'
                             + '<div class="item-title">' + escapeHtmlModal(item.value) + '</div>'
                             + '<div class="item-meta">'
                             + (item.identifier ? '<code>' + escapeHtmlModal(item.identifier) + '</code> &bull; ' : '')
@@ -183,7 +185,18 @@ function escapeHtmlModal(text) {
     return div.innerHTML;
 }
 
+// Inline onclick handlers are blocked by the site's content security policy,
+// so picking a result and clearing the selection are handled here instead.
 document.addEventListener('click', function(e) {
+    var pick = e.target.closest('[data-vend-pick]');
+    if (pick && autocompleteData[pick.dataset.vendPick]) {
+        selectGlamItem(autocompleteData[pick.dataset.vendPick]);
+        return;
+    }
+    if (e.target.closest('[data-vend-action="clear-selection"]')) {
+        clearSelection();
+        return;
+    }
     if (!e.target.closest('#glamAutocomplete') && !e.target.closest('#autocompleteResults')) {
         document.getElementById('autocompleteResults').style.display = 'none';
     }
