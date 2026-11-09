@@ -254,6 +254,8 @@ class ChatbotService
             // summary, leaving room for the passages that matched.
             $passages = $r->passages ?? [];
             $block = '--- '.($r->identifier ? '['.$r->identifier.'] ' : '').($r->title ?: $r->slug)." ---\n"
+                .([] !== ($r->creators ?? []) ? 'Creator: '.implode('; ', $r->creators)."\n" : '')
+                .([] !== ($r->dates ?? []) ? 'Date: '.implode('; ', $r->dates)."\n" : '')
                 .('' !== $scope ? mb_substr($scope, 0, [] === $passages ? 1200 : 400) : '(no scope and content recorded)')."\n";
             foreach ($passages as $passage) {
                 $block .= "Text from the record's digital object: ".$passage."\n";

@@ -22,6 +22,7 @@ class ChatbotRetriever
     private const PUBLICATION_STATUS_PUBLISHED_ID = 160;
     private const MASTER_USAGE_ID = 140;
     private const THUMBNAIL_USAGE_ID = 142;
+    private const CREATION_EVENT_TYPE_ID = 111;
 
     /** Records handed to the model. */
     public const MAX_RECORDS = 6;
@@ -292,12 +293,43 @@ class ChatbotRetriever
             ->get(['io.id', 'io.identifier', 'ioi.title', 'ioi.scope_and_content', 's.slug', 'dt.path as thumb_path', 'dt.name as thumb_name'])
             ->keyBy('id');
 
+        // Creators and dates, so "who made this?" and "when?" can be answered.
+        // Only the record's own creation events are read.
+        $events = DB::table('event as e')
+            ->leftJoin('event_i18n as ei', static function ($j) use ($culture) {
+                $j->on('ei.id', '=', 'e.id')->where('ei.culture', $culture);
+            })
+            ->leftJoin('actor as a', 'a.id', '=', 'e.actor_id')
+            ->leftJoin('actor_i18n as an', static function ($j) use ($culture) {
+                $j->on('an.id', '=', 'e.actor_id')->where('an.culture', $culture);
+            })
+            ->leftJoin('actor_i18n as asrc', static function ($j) {
+                $j->on('asrc.id', '=', 'e.actor_id')->whereColumn('asrc.culture', 'a.source_culture');
+            })
+            ->whereIn('e.object_id', $ids)->where('e.type_id', self::CREATION_EVENT_TYPE_ID)
+            ->get(['e.object_id', 'ei.date', 'e.start_date', 'e.end_date', DB::raw('COALESCE(an.authorized_form_of_name, asrc.authorized_form_of_name) AS name')])
+            ->groupBy('object_id');
+
         $out = [];
         foreach ($ids as $id) {
             if (!isset($rows[$id])) {
                 continue;
             }
             $r = $rows[$id];
+            $r->creators = $r->dates = [];
+            foreach ($events[$id] ?? [] as $e) {
+                if ($e->name) {
+                    $r->creators[] = $e->name;
+                }
+                $start = substr((string) $e->start_date, 0, 4);
+                $end = substr((string) $e->end_date, 0, 4);
+                $d = $e->date ?: ($start && $end && $end !== $start ? $start.'-'.$end : ($start ?: $end));
+                if ($d) {
+                    $r->dates[] = $d;
+                }
+            }
+            $r->creators = array_values(array_unique($r->creators));
+            $r->dates = array_values(array_unique($r->dates));
             $r->thumbnail = $r->thumb_path && $r->thumb_name ? $r->thumb_path.$r->thumb_name : null;
             unset($r->thumb_path, $r->thumb_name);
             $out[] = $r;
