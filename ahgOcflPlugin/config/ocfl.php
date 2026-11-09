@@ -14,7 +14,8 @@
  */
 
 return [
-    // Absolute path to the OCFL storage root. Defaults to <sf_root_dir>/ocfl.
+    // Absolute path to the OCFL storage root. Defaults to /var/lib/ahg-ocfl/<instance>/root
+    // (instance = the AtoM folder name). Never inside the AtoM root: it is the web root.
     // Point at NAS-backed storage in production, e.g. /mnt/nas/heratio/ocfl.
     'ocfl_storage_root' => null,
 
@@ -26,6 +27,6 @@ return [
     // 'sha512' (recommended) or 'sha256'.
     'ocfl_digest_algorithm' => 'sha512',
 
-    // Where ocfl:export writes tarballs. Defaults to <sf_root_dir>/cache/ocfl-exports.
+    // Where ocfl:export writes tarballs. Defaults to /var/lib/ahg-ocfl/<instance>/exports.
     'ocfl_export_path' => null,
 ];

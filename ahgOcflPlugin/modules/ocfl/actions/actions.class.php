@@ -1,6 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use Illuminate\Database\Capsule\Manager as DB;
 
 /**
  * ocfl module - admin dashboard + API for the OCFL preservation storage layer.
@@ -56,7 +57,12 @@ class ocflActions extends AhgController
             foreach ($root->list() as $objectId) {
                 try {
                     $obj = $root->read($objectId);
+                    // The record behind the object, so the row can act on it (the API
+                    // takes the information object id) and name it.
+                    $ioId = (int) DB::table('ahg_ocfl_object_map')->where('ocfl_object_id', $objectId)->value('information_object_id');
                     $this->objects[] = [
+                        'io_id' => $ioId,
+                        'title' => $ioId ? DB::table('information_object_i18n')->where('id', $ioId)->orderByRaw("culture = 'en' DESC")->value('title') : null,
                         'object_id' => $objectId,
                         'head' => $obj->inventory->head,
                         'versions' => count($obj->inventory->versions),

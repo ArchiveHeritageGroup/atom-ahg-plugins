@@ -59,9 +59,20 @@ class OcflService
         return $default;
     }
 
+    /**
+     * Private base for OCFL files: /var/lib/ahg-ocfl/<instance>. The AtoM root is the
+     * web root, so the old defaults (<root>/ocfl and <root>/cache/ocfl-exports) would
+     * have put master files and export tarballs where nginx can serve them, and php-fpm
+     * cannot write under /usr anyway (ProtectSystem=full).
+     */
+    public function privateBase(): string
+    {
+        return '/var/lib/ahg-ocfl/' . basename(rtrim($this->rootDir(), '/'));
+    }
+
     public function storageRootPath(): string
     {
-        return $this->setting('ocfl_storage_root', $this->rootDir() . '/ocfl');
+        return $this->setting('ocfl_storage_root', $this->privateBase() . '/root');
     }
 
     public function layout(): string
@@ -76,7 +87,7 @@ class OcflService
 
     public function exportPath(): string
     {
-        return $this->setting('ocfl_export_path', $this->rootDir() . '/cache/ocfl-exports');
+        return $this->setting('ocfl_export_path', $this->privateBase() . '/exports');
     }
 
     /** Build (and cache) the StorageRoot for the configured storage root path. */
