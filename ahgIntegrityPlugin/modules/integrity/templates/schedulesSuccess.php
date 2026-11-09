@@ -43,9 +43,23 @@
                   <td><?php echo $s->next_run_at ?? '—'; ?></td>
                   <td><?php echo $s->total_runs; ?></td>
                   <td>
-                    <a href="<?php echo url_for(['module' => 'integrity', 'action' => 'scheduleEdit', 'id' => $s->id]); ?>" class="btn btn-outline-secondary btn-sm">
-                      <i class="fas fa-edit"></i>
-                    </a>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button type="button" class="btn btn-outline-primary" title="<?php echo __('Run now'); ?>" aria-label="<?php echo __('Run now'); ?>"
+                              data-integrity-action="run" data-url="<?php echo url_for('@integrity_api_run_schedule?id='.$s->id); ?>">
+                        <i class="fas fa-play"></i>
+                      </button>
+                      <button type="button" class="btn btn-outline-secondary" title="<?php echo $s->is_enabled ? __('Disable') : __('Enable'); ?>" aria-label="<?php echo $s->is_enabled ? __('Disable') : __('Enable'); ?>"
+                              data-integrity-action="toggle" data-url="<?php echo url_for('@integrity_api_schedule_toggle?id='.$s->id); ?>">
+                        <i class="fas <?php echo $s->is_enabled ? 'fa-pause' : 'fa-toggle-on'; ?>"></i>
+                      </button>
+                      <a href="<?php echo url_for(['module' => 'integrity', 'action' => 'scheduleEdit', 'id' => $s->id]); ?>" class="btn btn-outline-secondary" title="<?php echo __('Edit'); ?>" aria-label="<?php echo __('Edit'); ?>">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>" aria-label="<?php echo __('Delete'); ?>"
+                              data-integrity-action="delete" data-name="<?php echo htmlspecialchars($s->name); ?>" data-url="<?php echo url_for('@integrity_api_schedule_delete?id='.$s->id); ?>">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -56,3 +70,28 @@
     </div>
   </div>
 </main>
+
+<?php $n = sfConfig::get('csp_nonce', ''); ?>
+<script <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Run now, enable/disable and delete: the API existed but the list offered only Edit,
+// so a check could be started only from cron or the command line.
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-integrity-action]');
+  if (!b) return;
+  var act = b.dataset.integrityAction;
+  if (act === 'delete' && !confirm('<?php echo __('Delete this schedule?'); ?> ' + b.dataset.name)) return;
+  b.disabled = true;
+  if (act === 'run') b.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+  fetch(b.dataset.url, { method: 'POST' })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      if (!res.success) { alert(res.error || 'Failed'); b.disabled = false; return; }
+      if (act === 'run' && res.result && res.result.run_id) {
+        window.location = '<?php echo url_for(['module' => 'integrity', 'action' => 'runDetail', 'id' => 0]); ?>'.replace(/0$/, res.result.run_id);
+        return;
+      }
+      window.location.reload();
+    })
+    .catch(function () { alert('Failed'); b.disabled = false; });
+});
+</script>

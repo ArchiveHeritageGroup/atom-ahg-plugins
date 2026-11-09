@@ -174,6 +174,15 @@ class integrityActions extends AhgController
             ->values()
             ->all();
 
+        // Title of the top record for a hierarchy-scoped schedule, shown in the form.
+        $this->scopeRecordTitle = null;
+        if ($this->schedule && $this->schedule->information_object_id) {
+            $this->scopeRecordTitle = DB::table('information_object_i18n')
+                ->where('id', $this->schedule->information_object_id)
+                ->orderByRaw("culture = 'en' DESC")
+                ->value('title');
+        }
+
         if ($request->isMethod('post')) {
             $data = [
                 'name' => $request->getParameter('name', 'New Schedule'),
