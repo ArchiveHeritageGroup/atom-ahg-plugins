@@ -84,6 +84,8 @@ CREATE TABLE IF NOT EXISTS `integrity_ledger` (
   `outcome` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'pass, mismatch, missing, unreadable, permission_error, path_drift, no_baseline, error',
   `error_detail` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `duration_ms` int unsigned DEFAULT NULL,
+  `actor` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Who or what ran the check (user, scheduler, api)',
+  `hostname` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Server the check ran on',
   `previous_hash` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `chain_valid` tinyint(1) DEFAULT '1',
   `verified_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -128,13 +130,15 @@ CREATE TABLE IF NOT EXISTS `integrity_dead_letter` (
 
 -- ============================================================
 -- Issue #188: Add actor/hostname/previous_hash tracking to ledger
--- (Programmatic migration via runMigration() checks INFORMATION_SCHEMA before ALTER)
+-- (IntegrityService::runMigration() would add these, but nothing calls it)
 -- ============================================================
+-- Sites created before 9 Nov 2026 lack actor and hostname, and every verification run fails
+-- with "Unknown column 'actor'". Add them where missing:
 -- ALTER TABLE `integrity_ledger` ADD COLUMN `actor` VARCHAR(255) NULL AFTER `duration_ms`;
 -- ALTER TABLE `integrity_ledger` ADD COLUMN `hostname` VARCHAR(255) NULL AFTER `actor`;
 -- ALTER TABLE `integrity_ledger` ADD COLUMN `previous_hash` VARCHAR(128) NULL AFTER `hostname`;
--- NOTE: The above ALTERs are applied programmatically by IntegrityService::runMigration()
---       to avoid errors on re-run. They are commented here for documentation only.
+-- NOTE: nothing calls IntegrityService::runMigration(), so these ALTERs are NOT applied for you;
+-- run them by hand on an existing site where the columns are missing.
 
 -- ============================================================
 -- Table: integrity_retention_policy (Issue #189)
@@ -157,7 +161,7 @@ CREATE TABLE IF NOT EXISTS `integrity_retention_policy` (
     INDEX `idx_irp_scope` (`scope_type`, `repository_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Issue #189: object_format column migration (programmatic via runMigration())
+-- Issue #189: object_format column, for retention tables created before it existed (run by hand)
 -- ALTER TABLE `integrity_retention_policy` ADD COLUMN `object_format` VARCHAR(100) NULL AFTER `information_object_id`;
 
 -- ============================================================
