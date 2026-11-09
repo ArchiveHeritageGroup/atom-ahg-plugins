@@ -3,7 +3,7 @@
     "machine_name": "ahgRegistryPlugin",
     "version": "1.0.0",
     "status": "source",
-    "description": "AtoM/Heratio Community Hub & Registry - Directory of institutions, vendors, software, user groups, discussions, blog, and sync API for the GLAM community.",
+    "description": "AtoM Community Hub & Registry - Directory of institutions, vendors, software, user groups, discussions, blog, and sync API for the GLAM community.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "requires": {
