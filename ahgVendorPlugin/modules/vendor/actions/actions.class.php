@@ -90,6 +90,8 @@ class vendorActions extends AhgController
             $result = $this->service->createVendor($data, $this->getUser()->getUserId());
 
             if ($result['success']) {
+                // Add never saved the ticked services; only edit did.
+                $this->syncVendorServices($result['vendor_id'], $request->getParameter('service_ids', []));
                 $this->getUser()->setFlash('notice', 'Vendor created successfully');
                 $vendor = $this->service->getVendor($result['vendor_id']);
                 $this->redirect(['module' => 'vendor', 'action' => 'view', 'slug' => $vendor->slug]);
@@ -347,6 +349,10 @@ class vendorActions extends AhgController
 
         if ($request->isMethod('post')) {
             $data = $this->extractTransactionData($request);
+            // There are no description or priority columns: on a new transaction the
+            // form's Description and Priority go into the vendor notes, so neither is lost.
+            // ponytail: add only; edit has no description to show, so doing this there would overwrite the notes.
+            $data['vendor_notes'] = $this->vendorNotesFromForm($request);
             $result = $this->service->createTransaction($data, $this->getUser()->getUserId());
 
             if ($result['success']) {
@@ -355,17 +361,26 @@ class vendorActions extends AhgController
                 $values = $request->getParameter('declared_values', []);
                 $ratings = $request->getParameter('condition_ratings', []);
 
+                $itemErrors = [];
                 foreach ($informationObjectIds as $index => $ioId) {
                     if (!empty($ioId)) {
+                        // Empty boxes post '', which strict MySQL rejects for the decimal
+                        // value column; the insert failed and the item was silently lost.
                         $itemData = [
-                            'condition_before' => $conditions[$index] ?? null,
-                            'condition_before_rating' => $ratings[$index] ?? null,
-                            'declared_value' => $values[$index] ?? null,
+                            'condition_before' => ($conditions[$index] ?? '') !== '' ? $conditions[$index] : null,
+                            'condition_before_rating' => ($ratings[$index] ?? '') !== '' ? $ratings[$index] : null,
+                            'declared_value' => ($values[$index] ?? '') !== '' ? $values[$index] : null,
                         ];
-                        $this->service->addItemToTransaction($result['transaction_id'], (int)$ioId, $itemData);
+                        $added = $this->service->addItemToTransaction($result['transaction_id'], (int)$ioId, $itemData);
+                        if (empty($added['success'])) {
+                            $itemErrors[] = $added['errors']['general'] ?? 'item ' . (int) $ioId;
+                        }
                     }
                 }
 
+                if ($itemErrors) {
+                    $this->getUser()->setFlash('error', 'Transaction created, but some items could not be added: ' . implode('; ', $itemErrors));
+                }
                 $this->getUser()->setFlash('notice', 'Transaction created successfully');
                 $this->redirect(['module' => 'vendor', 'action' => 'viewTransaction', 'id' => $result['transaction_id']]);
             }
@@ -423,7 +438,8 @@ class vendorActions extends AhgController
     {
         $id = (int)$request->getParameter('id');
         $status = $request->getParameter('status');
-        $notes = $request->getParameter('notes');
+        // The status modal names its field status_notes.
+        $notes = $request->getParameter('status_notes') ?: $request->getParameter('notes');
 
         $result = $this->service->updateTransactionStatus($id, $status, $this->getUser()->getUserId(), $notes);
 
@@ -442,10 +458,11 @@ class vendorActions extends AhgController
             'vendor_id' => $request->getParameter('vendor_id'),
             'service_type_id' => $request->getParameter('service_type_id'),
             'request_date' => $request->getParameter('request_date'),
-            'expected_return_date' => $request->getParameter('expected_return_date') ?: null,
+            // The add form names this field due_date.
+            'expected_return_date' => ($request->getParameter('expected_return_date') ?: $request->getParameter('due_date')) ?: null,
             'estimated_cost' => $request->getParameter('estimated_cost') ?: null,
             'actual_cost' => $request->getParameter('actual_cost') ?: null,
-            'quote_reference' => $request->getParameter('quote_reference'),
+            'quote_reference' => $request->getParameter('quote_reference') ?: $request->getParameter('reference_number'),
             'invoice_reference' => $request->getParameter('invoice_reference'),
             'invoice_date' => $request->getParameter('invoice_date') ?: null,
             'payment_status' => $request->getParameter('payment_status', 'pending'),
@@ -456,8 +473,26 @@ class vendorActions extends AhgController
             'tracking_number' => $request->getParameter('tracking_number'),
             'courier_company' => $request->getParameter('courier_company'),
             'dispatch_notes' => $request->getParameter('dispatch_notes'),
-            'internal_notes' => $request->getParameter('internal_notes'),
+            'internal_notes' => $request->getParameter('internal_notes') ?: $request->getParameter('notes'),
         ];
+    }
+
+    protected function vendorNotesFromForm(sfWebRequest $request): ?string
+    {
+        $notes = $request->getParameter('vendor_notes');
+        if ($notes) {
+            return $notes;
+        }
+        $parts = [];
+        $priority = (string) $request->getParameter('priority', '');
+        if ('' !== $priority && 'normal' !== strtolower($priority)) {
+            $parts[] = 'Priority: ' . ucfirst($priority);
+        }
+        if ('' !== trim((string) $request->getParameter('description', ''))) {
+            $parts[] = trim((string) $request->getParameter('description'));
+        }
+
+        return $parts ? implode("\n", $parts) : null;
     }
 
     public function executeAddTransactionItem($request)
