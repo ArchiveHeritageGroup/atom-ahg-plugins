@@ -58,7 +58,7 @@ function lbl_barcode_value(array $r, $t): string
   <div class="mt-3">
     <button class="btn btn-primary"><i class="fas fa-eye me-1"></i><?php echo __('Generate'); ?></button>
     <?php if ($hasSelection && !empty($records)): ?>
-      <button type="button" class="btn btn-success" data-ahg-action="print"><i class="fas fa-print me-1"></i><?php echo __('Print'); ?></button>
+      <button type="button" class="btn btn-success" data-ahg-call="printSheets"><i class="fas fa-print me-1"></i><?php echo __('Print'); ?></button>
       <span class="ms-2 text-muted"><?php echo count($records); ?> <?php echo __('labels'); ?></span>
     <?php endif; ?>
     <a class="btn btn-link" href="<?php echo url_for(['module' => 'label', 'action' => 'templates']); ?>"><?php echo __('Templates'); ?></a>
@@ -70,7 +70,7 @@ function lbl_barcode_value(array $r, $t): string
 <?php endif; ?>
 
 <?php if (!empty($records) && $t): ?>
-<style <?php echo $nonceAttr; ?>>
+<style id="label-sheet-css" <?php echo $nonceAttr; ?>>
   @page { size: <?php echo $t->page_size; ?>; margin: <?php echo $margin; ?>mm; }
   .label-sheet { display: grid; grid-template-columns: repeat(<?php echo $cols; ?>, <?php echo $lw; ?>mm); gap: <?php echo $gutter; ?>mm; max-width: <?php echo $pageW; ?>mm; }
   .label-cell { width: <?php echo $lw; ?>mm; height: <?php echo $lh; ?>mm; border: 1px dashed #bbb; padding: 1.5mm; font-size: <?php echo $font; ?>pt; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; }
@@ -114,4 +114,21 @@ function lbl_barcode_value(array $r, $t): string
 </div>
 <?php endforeach; ?>
 </div>
+<script <?php echo $nonceAttr; ?>>
+// Prints the sheets alone, from a hidden frame. Printing the page itself, even with
+// everything else hidden, kept the page's height and fed out a blank sheet.
+function printSheets() {
+    var css = document.getElementById('label-sheet-css').textContent
+        + 'body{margin:0;font-family:Arial,sans-serif;color:#000}.label-cell{border:none}.label-sheet{break-after:page;margin:0}.label-sheet:last-child{break-after:auto}.text-muted{color:#555}';
+    var f = document.createElement('iframe');
+    f.setAttribute('aria-hidden', 'true');
+    f.style.position = 'fixed'; f.style.width = '0'; f.style.height = '0'; f.style.border = '0';
+    document.body.appendChild(f);
+    var d = f.contentWindow.document;
+    d.open();
+    d.write('<!doctype html><html><head><meta charset="utf-8"><title></title><style nonce="<?php echo preg_replace('/^nonce=/', '', (string) $nonce); ?>">' + css + '</style></head><body>' + document.querySelector('.label-print-area').innerHTML + '</body></html>');
+    d.close();
+    setTimeout(function () { f.contentWindow.focus(); f.contentWindow.print(); setTimeout(function () { f.remove(); }, 1000); }, 300);
+}
+</script>
 <?php endif; ?>

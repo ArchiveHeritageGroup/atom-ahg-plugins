@@ -22,7 +22,7 @@
         <td><?php echo (int) $t->columns; ?>&times;<?php echo (int) $t->rows; ?></td>
         <td><?php echo rtrim(rtrim((string) $t->label_width_mm, '0'), '.'); ?>&times;<?php echo rtrim(rtrim((string) $t->label_height_mm, '0'), '.'); ?></td>
         <td class="small">
-          <?php $bits = []; if ($t->show_identifier) $bits[] = __('ID'); if ($t->show_title) $bits[] = __('title'); if ($t->show_barcode) $bits[] = __('barcode') . ' (' . $t->barcode_source . ')'; if ($t->show_qr) $bits[] = 'QR'; echo htmlspecialchars(implode(', ', $bits)); ?>
+          <?php $bits = []; if ($t->show_identifier) $bits[] = __('ID'); if ($t->show_title) $bits[] = __('title'); if ($t->show_repository) $bits[] = __('repository'); if ($t->show_barcode) $bits[] = __('barcode') . ' (' . $t->barcode_source . ')'; if ($t->show_qr) $bits[] = 'QR'; echo htmlspecialchars(implode(', ', $bits)); ?>
         </td>
         <td class="text-end">
           <a class="btn btn-outline-primary btn-sm" href="<?php echo url_for(['module' => 'label', 'action' => 'templateEdit', 'id' => $t->id]); ?>"><i class="fas fa-pen"></i></a>

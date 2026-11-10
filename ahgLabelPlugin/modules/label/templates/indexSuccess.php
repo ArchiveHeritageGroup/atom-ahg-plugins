@@ -278,7 +278,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
             <a class="btn btn-outline-secondary" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]); ?>">
                 <i class="fas fa-arrow-left me-1"></i><?php echo __('Back'); ?>
             </a>
-            <button type="button" class="btn btn-primary" data-ahg-action="print">
+            <button type="button" class="btn btn-primary" data-ahg-call="printLabel">
                 <i class="fas fa-print me-1"></i><?php echo __('Print Label'); ?>
             </button>
         </div>
@@ -331,6 +331,26 @@ function updateBarcodeSource() {
     }
 
     document.getElementById('barcodeText').textContent = value;
+}
+
+// Prints the label alone, from a hidden frame. Printing the page itself, even with
+// everything else hidden, kept the page's height and fed out a blank second sheet.
+function printLabel() {
+    var label = document.getElementById('labelContent');
+    var css = '@page{size:auto;margin:5mm}body{margin:0;font-family:Arial,sans-serif;color:#000}'
+        + '.label-preview{border:1px solid #ccc;padding:3mm;text-align:center;box-sizing:border-box}'
+        + '.lbl-s{width:50mm}.lbl-m{width:75mm}.lbl-l{width:100mm}'
+        + '.fw-bold{font-weight:700}.mb-2{margin-bottom:2mm}.mt-1{margin-top:1mm}.small{font-size:8pt}.text-muted{color:#555}'
+        + '.barcode-img{max-height:15mm;max-width:100%}.qr-img{width:25mm;height:25mm}';
+    var f = document.createElement('iframe');
+    f.setAttribute('aria-hidden', 'true');
+    f.style.position = 'fixed'; f.style.width = '0'; f.style.height = '0'; f.style.border = '0';
+    document.body.appendChild(f);
+    var d = f.contentWindow.document;
+    d.open();
+    d.write('<!doctype html><html><head><meta charset="utf-8"><title></title><style nonce="<?php echo preg_replace('/^nonce=/', '', (string) sfConfig::get('csp_nonce', '')); ?>">' + css + '</style></head><body>' + label.outerHTML + '</body></html>');
+    d.close();
+    setTimeout(function () { f.contentWindow.focus(); f.contentWindow.print(); setTimeout(function () { f.remove(); }, 1000); }, 300);
 }
 
 function updateLabelSize() {
