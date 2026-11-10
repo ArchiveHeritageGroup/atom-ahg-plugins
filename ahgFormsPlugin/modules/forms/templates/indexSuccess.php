@@ -1,4 +1,9 @@
 <?php use_helper('Date') ?>
+<?php
+// Raw: (array) on the escaper's wrapper object counted its properties, not the
+// template types, so the dashboard said 2 templates when there were 5.
+$stats = isset($sf_data) ? $sf_data->getRaw('stats') : $stats;
+?>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -21,7 +26,7 @@
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h4><?php echo array_sum((array) ($stats['templates_by_type'] ?? [0])) ?></h4>
+                    <h4 class="text-white"><?php echo array_sum((array) ($stats['templates_by_type'] ?? [0])) ?></h4>
                     <p class="mb-0">Total Templates</p>
                 </div>
             </div>
@@ -29,7 +34,7 @@
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h4><?php echo $stats['active_assignments'] ?? 0 ?></h4>
+                    <h4 class="text-white"><?php echo $stats['active_assignments'] ?? 0 ?></h4>
                     <p class="mb-0">Active Assignments</p>
                 </div>
             </div>
@@ -37,7 +42,7 @@
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h4><?php echo $stats['pending_drafts'] ?? 0 ?></h4>
+                    <h4 class="text-white"><?php echo $stats['pending_drafts'] ?? 0 ?></h4>
                     <p class="mb-0">Pending Drafts</p>
                 </div>
             </div>
@@ -45,7 +50,7 @@
         <div class="col-md-3">
             <div class="card bg-secondary text-white">
                 <div class="card-body">
-                    <h4><?php echo array_sum((array) ($stats['submissions_30_days'] ?? [0])) ?></h4>
+                    <h4 class="text-white"><?php echo array_sum((array) ($stats['submissions_30_days'] ?? [0])) ?></h4>
                     <p class="mb-0">Submissions (30 days)</p>
                 </div>
             </div>

@@ -234,11 +234,15 @@ class formsActions extends AhgController
             ->where('template_id', $templateId)
             ->max('sort_order') ?? 0;
 
+        $map = $atomField ? $this->resolveAtomFieldMapping($atomField) : null;
+
         $fieldId = \Illuminate\Database\Capsule\Manager::table('ahg_form_field')->insertGetId([
             'template_id' => $templateId,
-            'field_name' => strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $label)),
-            'field_type' => $fieldType,
+            'field_name' => $map['field_name'] ?? strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $label)),
+            // AtoM fields arrived as type "atom", which the form drew as plain text.
+            'field_type' => $map['field_type'] ?? $fieldType,
             'label' => $label,
+            'autocomplete_source' => $map['autocomplete_source'] ?? null,
             'sort_order' => $maxSort + 1,
             'is_required' => 0,
             'is_readonly' => 0,
@@ -248,12 +252,14 @@ class formsActions extends AhgController
         // Persist the AtoM field link as a real mapping row (there is no
         // atom_field column on ahg_form_field — mappings live in
         // ahg_form_field_mapping).
-        if ($atomField) {
-            $map = $this->resolveAtomFieldMapping($atomField);
+        if ($map) {
             \Illuminate\Database\Capsule\Manager::table('ahg_form_field_mapping')->insert([
                 'field_id' => $fieldId,
                 'target_table' => $map['target_table'],
                 'target_column' => $map['target_column'],
+                'target_type_id' => $map['target_type_id'] ?? null,
+                'transformation' => $map['transformation'] ?? null,
+                'transformation_config' => $map['transformation_config'] ?? null,
                 'is_i18n' => $map['is_i18n'],
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
@@ -270,23 +276,32 @@ class formsActions extends AhgController
      */
     protected function resolveAtomFieldMapping(string $atomField): array
     {
+        // The palette's level, extent, dates, creators and subjects mapped to columns
+        // that do not exist (information_object.dates and so on), so whatever was
+        // entered in them was never saved. These are the targets the system
+        // templates use, which the submit service knows how to write.
+        $known = [
+            'title' => ['title', 'text', null, 'information_object_i18n', 'title', null, null, null, 1],
+            'identifier' => ['identifier', 'text', null, 'information_object', 'identifier', null, null, null, 0],
+            'level_of_description' => ['levelOfDescription', 'select', 'taxonomy:level_of_description', 'information_object', 'level_of_description_id', null, 'term_id', '{"taxonomy_id": 34}', 0],
+            'scope_and_content' => ['scopeAndContent', 'textarea', null, 'information_object_i18n', 'scope_and_content', null, null, null, 1],
+            'extent_and_medium' => ['extentAndMedium', 'textarea', null, 'information_object_i18n', 'extent_and_medium', null, null, null, 1],
+            'dates' => ['date', 'daterange', null, 'event', 'date', 111, null, null, 0],
+            'creators' => ['creators', 'autocomplete', 'actor:creator', 'event', 'actor', 111, null, null, 0],
+            'subjects' => ['subjects', 'autocomplete', 'taxonomy:subject', 'object_term_relation', 'term', 35, null, null, 0],
+        ];
+        if (isset($known[$atomField])) {
+            [$name, $type, $source, $table, $column, $typeId, $transform, $config, $i18n] = $known[$atomField];
+
+            return ['field_name' => $name, 'field_type' => $type, 'autocomplete_source' => $source,
+                'target_table' => $table, 'target_column' => $column, 'target_type_id' => $typeId,
+                'transformation' => $transform, 'transformation_config' => $config, 'is_i18n' => $i18n];
+        }
+
+        // Any other ISAD(G) text field: its column on information_object_i18n.
         $column = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $atomField));
 
-        $i18nFields = [
-            'title', 'alternate_title', 'scope_and_content', 'arrangement',
-            'archival_history', 'acquisition', 'appraisal', 'accruals',
-            'physical_characteristics', 'finding_aids', 'access_conditions',
-            'reproduction_conditions', 'location_of_originals', 'location_of_copies',
-            'related_units_of_description', 'rules', 'sources', 'revision_history',
-        ];
-
-        $isI18n = in_array($column, $i18nFields, true);
-
-        return [
-            'target_table' => $isI18n ? 'information_object_i18n' : 'information_object',
-            'target_column' => $column,
-            'is_i18n' => $isI18n ? 1 : 0,
-        ];
+        return ['target_table' => 'information_object_i18n', 'target_column' => $column, 'is_i18n' => 1];
     }
 
     /**

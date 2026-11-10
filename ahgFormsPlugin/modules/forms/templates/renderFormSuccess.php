@@ -4,6 +4,10 @@
  *
  * Vars: $template, $formHtml, $formType, $objectId, $record, $submitLabel.
  */
+// The form markup is built by FormRenderService, which escapes every label and value.
+// Through the output escaper it arrived escaped a second time and the page showed
+// the HTML as text instead of the fields.
+$formHtml = isset($sf_data) ? $sf_data->getRaw('formHtml') : $formHtml;
 $isEdit = !empty($objectId);
 $recordTitle = null;
 if ($isEdit && $record) {

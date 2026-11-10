@@ -204,6 +204,29 @@ class FormRenderService
 
             case 'select':
             case 'autocomplete':
+                // A field filled from a source (autocomplete_source) used to render as an
+                // empty <select>: Creator, Repository and Subjects could not be filled in.
+                $src = (string) ($field->autocomplete_source ?? '');
+                if ('' !== $src && !$this->fieldOptions($field)) {
+                    $choices = $this->sourceChoices($src);
+                    if (str_starts_with($src, 'repository') || str_starts_with($src, 'taxonomy:level')) {
+                        // Fixed lists: a plain select (repository by id, level by name).
+                        $field = clone $field;
+                        $field->options = array_map(fn ($v, $l) => ['value' => $v, 'label' => $l], array_keys($choices), $choices);
+
+                        return $this->renderSelect($field, $id, $name, $val, false, $required, $disabled);
+                    }
+                    // People and terms: free text with suggestions; the submit resolves names.
+                    $list = $id . '_list';
+                    $html = '<input type="text" class="form-control" id="' . $id . '" name="' . $name . '" value="' . $this->esc(is_array($val) ? implode('; ', $val) : (string) $val) . '" list="' . $list . '"' . $placeholder . $required . $readonly . '>';
+                    $html .= '<datalist id="' . $list . '">';
+                    foreach ($choices as $label) {
+                        $html .= '<option value="' . $this->esc($label) . '">';
+                    }
+
+                    return $html . '</datalist>';
+                }
+
                 return $this->renderSelect($field, $id, $name, $val, false, $required, $disabled);
 
             case 'multiselect':
@@ -286,6 +309,51 @@ class FormRenderService
         }
 
         return is_array($options) ? $options : [];
+    }
+
+    /**
+     * Choices for an autocomplete_source such as "repository:all", "actor:creator",
+     * "taxonomy:subject" or "taxonomy:level_of_description".
+     * Repositories are keyed by id (the repository_id column takes an id); everything
+     * else by its name, which the submit resolves.
+     *
+     * @return array<string,string> value => label
+     */
+    private function sourceChoices(string $source): array
+    {
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $culture = 'en';
+        try {
+            [$kind, $which] = array_pad(explode(':', $source, 2), 2, '');
+            if ('repository' === $kind) {
+                return $db::table('repository as r')->join('actor_i18n as a', 'a.id', '=', 'r.id')
+                    ->where('a.culture', $culture)->whereNotNull('a.authorized_form_of_name')
+                    ->orderBy('a.authorized_form_of_name')->pluck('a.authorized_form_of_name', 'r.id')->all();
+            }
+            if ('taxonomy' === $kind) {
+                $taxonomies = ['level_of_description' => 34, 'subject' => 35, 'place' => 42, 'genre' => 78];
+                $tid = $taxonomies[$which] ?? (ctype_digit($which) ? (int) $which : 0);
+                $names = $db::table('term as t')->join('term_i18n as ti', 'ti.id', '=', 't.id')
+                    ->where('t.taxonomy_id', $tid)->where('ti.culture', $culture)->whereNotNull('ti.name')
+                    ->orderBy('ti.name')->limit(500)->pluck('ti.name')->all();
+
+                return array_combine($names, $names) ?: [];
+            }
+            if ('actor' === $kind) {
+                // ponytail: first 500 names as suggestions; a large catalogue needs a search endpoint.
+                $names = $db::table('actor as a')->join('actor_i18n as ai', 'ai.id', '=', 'a.id')
+                    ->leftJoin('repository as r', 'r.id', '=', 'a.id')->leftJoin('user as u', 'u.id', '=', 'a.id')
+                    ->whereNull('r.id')->whereNull('u.id')->where('a.id', '<>', 3)
+                    ->where('ai.culture', $culture)->whereNotNull('ai.authorized_form_of_name')
+                    ->orderBy('ai.authorized_form_of_name')->limit(500)->pluck('ai.authorized_form_of_name')->all();
+
+                return array_combine($names, $names) ?: [];
+            }
+        } catch (\Throwable $e) {
+            error_log('forms.source_choices_failed: ' . $e->getMessage());
+        }
+
+        return [];
     }
 
     /**
