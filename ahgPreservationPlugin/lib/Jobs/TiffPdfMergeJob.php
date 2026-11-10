@@ -13,6 +13,23 @@ class TiffPdfMergeJob
     public function __construct(int $mergeJobId)
     {
         $this->mergeJobId = $mergeJobId;
+        $this->applyTimezone();
+    }
+
+    /**
+     * The web side takes its time zone from the default_timezone setting (a
+     * Symfony listener in ahgCorePlugin). The worker runs without Symfony, in
+     * UTC, so a job created at 20:58 showed as completed at 18:58.
+     */
+    protected function applyTimezone(): void
+    {
+        try {
+            $tz = trim((string) DB::table('ahg_settings')->where('setting_key', 'default_timezone')->value('setting_value'));
+            if ('' !== $tz && in_array($tz, \DateTimeZone::listIdentifiers(), true)) {
+                date_default_timezone_set($tz);
+            }
+        } catch (\Throwable $e) {
+        }
     }
 
     public function handle(): bool
