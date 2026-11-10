@@ -134,7 +134,7 @@ if ($informationObject) {
                             <?php endif; ?>
                         </div>
                         <div>
-                            <button type="button" class="btn btn-outline-danger me-2" id="tpmClearBtn" class="d-none">
+                            <button type="button" class="btn btn-outline-danger me-2 d-none" id="tpmClearBtn">
                                 <i class="fas fa-trash me-1"></i>Clear All
                             </button>
                             <button type="button" class="btn btn-primary btn-lg" id="tpmCreateBtn" disabled>
@@ -155,7 +155,7 @@ if ($informationObject) {
                             <strong><?php echo htmlspecialchars($pJob->job_name); ?></strong><br>
                             <small class="text-muted"><?php echo $pJob->file_count; ?> files • <?php echo $pJob->created_at; ?></small>
                         </div>
-                        <span class="badge bg-<?php echo $pJob->status === 'pending' ? 'warning' : ($pJob->status === 'processing' ? 'info' : ($pJob->status === 'completed' ? 'success' : 'danger')); ?>">
+                        <span class="badge bg-<?php echo ['pending' => 'warning', 'queued' => 'info', 'processing' => 'info', 'completed' => 'success'][$pJob->status] ?? 'danger'; ?>">
                             <?php echo ucfirst($pJob->status); ?>
                         </span>
                     </div>
@@ -314,11 +314,19 @@ if ($informationObject) {
         try {
             const res = await fetch('<?php echo url_for(['module' => 'tiffpdfmerge', 'action' => 'process']); ?>', {
                 method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ job_id: currentJob })
+                // The job was created when the page opened; send what is on screen now.
+                body: new URLSearchParams({
+                    job_id: currentJob,
+                    job_name: document.getElementById('tpmJobName')?.value || '',
+                    pdf_standard: document.getElementById('tpmPdfStandard')?.value || 'pdfa-2b',
+                    dpi: document.getElementById('tpmDpi')?.value || '300',
+                    compression_quality: document.getElementById('tpmQuality')?.value || '85',
+                    attach_to_record: document.getElementById('tpmAttachToRecord')?.checked ? '1' : '0'
+                })
             });
             const result = await res.json();
             if (result.success) {
-                showAlert("<i class=\"fas fa-check-circle me-2\"></i><strong>Job queued!</strong> Redirecting...", "success"); setTimeout(() => window.location.href = "/index.php/tiff-pdf-merge/jobs", 2000);
+                showAlert("<i class=\"fas fa-check-circle me-2\"></i><strong>Job queued!</strong> Redirecting...", "success"); setTimeout(() => window.location.href = <?php echo json_encode(url_for(['module' => 'tiffpdfmerge', 'action' => 'browse'])); ?>, 2000);
                 uploadedFiles = [];
                 updateFileList();
                 updateButtons();
@@ -348,10 +356,10 @@ if ($informationObject) {
 
     function updateButtons() {
         document.getElementById('tpmCreateBtn').disabled = !uploadedFiles.length;
-        document.getElementById('tpmClearBtn').style.display = uploadedFiles.length ? 'inline-block' : 'none';
+        document.getElementById('tpmClearBtn').classList.toggle('d-none', !uploadedFiles.length);
     }
 
-    function showProgress(s) { document.getElementById('tpmProgressContainer').style.display = s ? 'block' : 'none'; }
+    function showProgress(s) { document.getElementById('tpmProgressContainer').classList.toggle('d-none', !s); }
     function updateProgress(c, t) { document.getElementById('tpmProgressBar').style.width = (t ? Math.round(c/t*100) : 0) + '%'; document.getElementById('tpmProgressText').textContent = c + ' of ' + t; }
     function showAlert(m, t) { const a = document.getElementById('tpmAlert'); a.className = 'alert alert-' + t; a.innerHTML = m; a.style.display = 'block'; }
     function hideAlert() { document.getElementById('tpmAlert').style.display = 'none'; }

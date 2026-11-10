@@ -104,18 +104,6 @@ class TiffPdfMergeJob
                     ]);
                     $this->log('Attached as digital object ID: ' . $digitalObjectId);
 
-                    // Reindex the information object in Elasticsearch
-                    try {
-                        $io = \QubitInformationObject::getById($mergeJob->information_object_id);
-                        if ($io) {
-                            \QubitSearch::getInstance()->update($io);
-                            $this->log('Elasticsearch index updated for record');
-                        }
-                    } catch (\Throwable $e) {
-                        // \Throwable, not \Exception: QubitSearch/QubitInformationObject
-                        // are undefined in the framework-only worker and throw \Error.
-                        $this->log('Warning: Search index update skipped: ' . $e->getMessage());
-                    }
                 }
             }
 
@@ -130,6 +118,13 @@ class TiffPdfMergeJob
             // web request filter that would commit it, so the digital_object rows
             // were being rolled back at process exit (visible mid-run, gone after).
             $this->commitIfOpen();
+
+            // The worker runs without Symfony, so QubitSearch was never there and
+            // the record stayed out of search with its PDF. Queued after the commit
+            // so the background run sees the new digital object.
+            if ($digitalObjectId) {
+                $this->queueReindex((int) $mergeJob->information_object_id);
+            }
 
             // Start fresh: remove the combined source files so the next convert is
             // clean and never re-combines stale leftovers (only under the FTP folder).
@@ -287,6 +282,9 @@ class TiffPdfMergeJob
             return ['success' => false, 'error' => 'Combined PDF is no longer on disk; please re-run the combine'];
         }
 
+        if (DB::table('digital_object')->where('object_id', $informationObjectId)->exists()) {
+            return ['success' => false, 'error' => 'That record already has a digital object. Choose a record without one.'];
+        }
         $doId = $this->attachToRecord($informationObjectId, $path, $name);
         if (!$doId) {
             return ['success' => false, 'error' => 'Attach failed'];
@@ -301,37 +299,30 @@ class TiffPdfMergeJob
 
         $this->commitIfOpen();
 
-        try {
-            $io = \QubitInformationObject::getById($informationObjectId);
-            if ($io) {
-                \QubitSearch::getInstance()->update($io);
-            }
-        } catch (\Throwable $e) {
-            // \Throwable, not \Exception: QubitSearch/QubitInformationObject are
-            // undefined in the framework-only worker and throw \Error.
-            $this->log('Warning: Search index update skipped: ' . $e->getMessage());
-        }
+        $this->queueReindex($informationObjectId);
 
-        // The framework-only worker cannot reindex via QubitSearch, so kick off
-        // regen-derivatives (--index) in the background: it builds the merged PDF's
-        // thumbnail/reference derivatives AND updates the search index, so the
-        // record shows its digital object in browse/search.
+        return ['success' => true, 'digital_object_id' => $doId];
+    }
+
+    /**
+     * Build the PDF's derivatives and update the search index in the background
+     * (regen-derivatives --index); the worker has no Symfony to do it in-process.
+     */
+    protected function queueReindex(int $informationObjectId): void
+    {
         try {
-            $reindexSlug = DB::table('slug')->where('object_id', $informationObjectId)->value('slug');
-            if (!empty($reindexSlug)) {
-                $reindexRoot = dirname(__DIR__, 4);
-                $reindexLog = $reindexRoot . '/log/merge_derivatives.log';
-                exec('cd ' . escapeshellarg($reindexRoot)
+            $slug = DB::table('slug')->where('object_id', $informationObjectId)->value('slug');
+            if (!empty($slug)) {
+                $root = dirname(__DIR__, 4);
+                exec('cd ' . escapeshellarg($root)
                     . ' && php symfony digitalobject:regen-derivatives --slug='
-                    . escapeshellarg($reindexSlug) . ' --force --index >> '
-                    . escapeshellarg($reindexLog) . ' 2>&1 &');
-                $this->log('Queued background derivative/reindex for ' . $reindexSlug);
+                    . escapeshellarg($slug) . ' --force --index >> '
+                    . escapeshellarg($root . '/log/merge_derivatives.log') . ' 2>&1 &');
+                $this->log('Queued background derivative/reindex for ' . $slug);
             }
         } catch (\Throwable $e) {
             $this->log('Warning: could not queue reindex: ' . $e->getMessage());
         }
-
-        return ['success' => true, 'digital_object_id' => $doId];
     }
 
     protected function attachToRecord($informationObjectId, $filePath, $filename): ?int
@@ -341,6 +332,13 @@ class TiffPdfMergeJob
 
         if (!$io) {
             $this->log('Warning: Information object not found');
+            return null;
+        }
+
+        // A description holds one master digital object. A second one was added
+        // beside the first, which AtoM never shows or deletes cleanly.
+        if (DB::table('digital_object')->where('object_id', $informationObjectId)->exists()) {
+            $this->log('Not attached: the record already has a digital object. The PDF is kept and can be linked to another record.');
             return null;
         }
 

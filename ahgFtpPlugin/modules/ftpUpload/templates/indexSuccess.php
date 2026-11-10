@@ -41,7 +41,7 @@
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0"><i class="fa fa-cloud-upload-alt me-2"></i><?php echo __('Upload Files') ?>
-                    <small class="ms-2 opacity-75">(<?php echo __('supports files up to 2 GB — chunked upload with resume') ?>)</small>
+                    <small class="ms-2 opacity-75">(<?php echo __('supports files up to 2 GB - chunked upload with resume') ?>)</small>
                 </h5>
             </div>
             <div class="card-body">
@@ -688,8 +688,8 @@
                         var speed = bytesUploaded / elapsed;
                         var remaining = (file.size - bytesUploaded) / speed;
                         detail.textContent = '<?php echo __('Chunk') ?> ' + (state.currentChunk + 1) + '/' + totalChunks +
-                            ' — ' + formatBytes(Math.round(speed)) + '/s' +
-                            ' — ' + formatTime(remaining) + ' <?php echo __('remaining') ?>';
+                            ' - ' + formatBytes(Math.round(speed)) + '/s' +
+                            ' - ' + formatTime(remaining) + ' <?php echo __('remaining') ?>';
                     }
                 }
             });
@@ -753,7 +753,7 @@
                 var delay = RETRY_DELAY_MS * state.retries;
                 detail.innerHTML = '<i class="fa fa-exclamation-triangle text-warning me-1"></i>' +
                     '<?php echo __('Retry') ?> ' + state.retries + '/' + MAX_RETRIES +
-                    ' <?php echo __('in') ?> ' + (delay / 1000) + 's — ' + escapeHtml(msg);
+                    ' <?php echo __('in') ?> ' + (delay / 1000) + 's - ' + escapeHtml(msg);
                 status.textContent = '<?php echo __('Retrying') ?>...';
                 status.className = 'upload-status badge bg-warning text-dark';
                 setTimeout(function() {
@@ -777,7 +777,7 @@
                 status.textContent = '<?php echo __('Failed') ?>';
                 status.className = 'upload-status badge bg-danger';
                 detail.innerHTML = '<i class="fa fa-times-circle text-danger me-1"></i>' + escapeHtml(msg) +
-                    ' — <?php echo __('chunk') ?> ' + (state.currentChunk + 1) + '/' + totalChunks;
+                    ' - <?php echo __('chunk') ?> ' + (state.currentChunk + 1) + '/' + totalChunks;
                 pauseBtn.classList.add('d-none');
                 resumeBtn.classList.remove('d-none');
                 resumeBtn.innerHTML = '<i class="fa fa-redo me-1"></i><?php echo __('Retry') ?>';

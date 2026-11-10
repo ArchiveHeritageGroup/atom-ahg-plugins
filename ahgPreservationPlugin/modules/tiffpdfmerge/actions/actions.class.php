@@ -39,6 +39,26 @@ class tiffpdfmergeActions extends AhgController
         return \Illuminate\Database\Capsule\Manager::class;
     }
 
+    /** Merging and attaching change records: contributors, editors and administrators only. */
+    protected function canMerge(): bool
+    {
+        return $this->getUser()->isAuthenticated()
+            && $this->getUser()->hasCredential(['contributor', 'editor', 'administrator'], false);
+    }
+
+    /**
+     * Delete a file only when it lives in this job's own upload folder. Folder
+     * combines reference the FTP originals in place, and Delete removed those.
+     */
+    protected function unlinkOwned(?string $path, int $jobId): void
+    {
+        $own = '/tmp/tiff-pdf-merge/job_' . $jobId . '/';
+        $real = $path ? realpath($path) : false;
+        if ($real && 0 === strpos($real, $own) && is_file($real)) {
+            @unlink($real);
+        }
+    }
+
     public function executeIndex($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
@@ -57,7 +77,10 @@ class tiffpdfmergeActions extends AhgController
         }
 
         $userId = $this->getUser()->getAttribute('user_id');
-        $this->pendingJobs = $this->getRepository()->getPendingJobs($userId);
+        // Each visit to this page opens a job; one left without files is not a job
+        // anyone made, so it is not listed as theirs.
+        $this->pendingJobs = $this->getRepository()->getPendingJobs($userId)
+            ->filter(function ($j) { return (int) $j->file_count > 0; });
         $this->stats = $this->getRepository()->getStatistics($userId);
     }
 
@@ -65,8 +88,8 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
 
         if (!$request->isMethod('POST')) {
@@ -103,8 +126,8 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
 
         $mergeJobId = (int) $request->getParameter('job_id');
@@ -214,8 +237,8 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
 
         $mergeJobId = (int) $request->getParameter('job_id');
@@ -238,10 +261,13 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
 
+        if (!$request->isMethod('POST')) {
+            return $this->renderJson(['success' => false, 'error' => 'POST required']);
+        }
         $fileId = (int) $request->getParameter('file_id');
         $db = $this->getDB();
         $file = $db::table('tiff_pdf_merge_file')->where('id', $fileId)->first();
@@ -250,9 +276,7 @@ class tiffpdfmergeActions extends AhgController
             return $this->renderJson(['success' => false, 'error' => 'File not found']);
         }
 
-        if (file_exists($file->file_path)) {
-            @unlink($file->file_path);
-        }
+        $this->unlinkOwned($file->file_path, (int) $file->merge_job_id);
 
         $this->getRepository()->deleteFile($fileId);
         return $this->renderJson(['success' => true]);
@@ -262,6 +286,10 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
         
+        // Answered anyone before, server paths included.
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
+        }
         $mergeJobId = (int) $request->getParameter('job_id');
         $job = $this->getRepository()->getJob($mergeJobId);
 
@@ -277,8 +305,8 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
 
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
 
         $mergeJobId = (int) $request->getParameter('job_id');
@@ -305,14 +333,29 @@ class tiffpdfmergeActions extends AhgController
         // (hundreds of 40 MB+ TIFFs) must never run in the web request - they
         // exceed the request time and memory limits. The worker runs the
         // memory-safe batched merge and notifies the user on completion.
+        // The job is created when the page opens, so a name or setting chosen
+        // afterwards never reached it. Take them from the Create PDF request.
+        $update = ['status' => 'queued', 'error_message' => null, 'updated_at' => date('Y-m-d H:i:s')];
+        $name = trim((string) $request->getParameter('job_name', ''));
+        if ('' !== $name) {
+            $update['job_name'] = mb_substr($name, 0, 255);
+        }
+        if (in_array($std = (string) $request->getParameter('pdf_standard', ''), ['pdfa-1b', 'pdfa-2b', 'pdfa-3b', 'pdf'], true)) {
+            $update['pdf_standard'] = $std;
+        }
+        if (in_array($dpi = (int) $request->getParameter('dpi', 0), [150, 300, 400, 600], true)) {
+            $update['dpi'] = $dpi;
+        }
+        if (($q = (int) $request->getParameter('compression_quality', 0)) >= 50 && $q <= 100) {
+            $update['compression_quality'] = $q;
+        }
+        if (null !== $request->getParameter('attach_to_record')) {
+            $update['attach_to_record'] = (int) $request->getParameter('attach_to_record') ? 1 : 0;
+        }
         $db = $this->getDB();
         $db::table('tiff_pdf_merge_job')
             ->where('id', $mergeJobId)
-            ->update([
-                'status' => 'queued',
-                'error_message' => null,
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
+            ->update($update);
 
         return $this->renderJson([
             'success' => true,
@@ -331,8 +374,8 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
 
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
 
         $mergeJobId = (int) $request->getParameter('job_id');
@@ -383,8 +426,8 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
 
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
         if (!$request->isMethod('POST')) {
             return $this->renderJson(['success' => false, 'error' => 'POST required']);
@@ -396,8 +439,15 @@ class tiffpdfmergeActions extends AhgController
             return $this->renderJson(['success' => false, 'error' => 'Folder not found']);
         }
 
-        $base = realpath($this->getImportBase());
-        if (!$base || strpos($real, $base) !== 0) {
+        $inside = false;
+        foreach ($this->getImportBases() as $b) {
+            $b = realpath($b);
+            if ($b && ($real === $b || 0 === strpos($real, rtrim($b, '/') . '/'))) {
+                $inside = true;
+                break;
+            }
+        }
+        if (!$inside) {
             return $this->renderJson(['success' => false, 'error' => 'Folder is outside the allowed import area']);
         }
 
@@ -459,8 +509,8 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
 
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
 
         $db = \Illuminate\Database\Capsule\Manager::class;
@@ -496,8 +546,8 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
 
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
         if (!$request->isMethod('POST')) {
             return $this->renderJson(['success' => false, 'error' => 'POST required']);
@@ -525,12 +575,24 @@ class tiffpdfmergeActions extends AhgController
         return $this->renderJson($result);
     }
 
-    /** Allowed base directory for folder imports (configurable; defaults to the web dir). */
-    protected function getImportBase()
+    /**
+     * Allowed folders for folder imports: the configured base (default the web
+     * dir), plus the FTP drop folder, which the FTP page's "Combine a folder"
+     * always sends and which sat outside the web dir, so every combine was refused.
+     */
+    protected function getImportBases(): array
     {
-        $cfg = sfConfig::get('app_tiff_combine_import_base');
+        $bases = [sfConfig::get('app_tiff_combine_import_base') ?: sfConfig::get('sf_web_dir')];
+        try {
+            $ftp = (string) \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                ->where('setting_key', 'ftp_disk_path')->value('setting_value');
+            if ('' !== trim($ftp)) {
+                $bases[] = $ftp;
+            }
+        } catch (\Throwable $e) {
+        }
 
-        return $cfg ?: sfConfig::get('sf_web_dir');
+        return array_filter($bases);
     }
 
     /** Best-effort image mime from extension (for the file row). */
@@ -565,6 +627,10 @@ class tiffpdfmergeActions extends AhgController
 
     public function executeDownload($request)
     {
+        // Anyone, signed in or not, could download any merged PDF by job number.
+        if (!$this->canMerge()) {
+            $this->forward404('PDF not found');
+        }
         $mergeJobId = (int) $request->getParameter('job_id');
         $job = $this->getRepository()->getJob($mergeJobId);
 
@@ -591,22 +657,25 @@ class tiffpdfmergeActions extends AhgController
     {
         sfConfig::set('sf_web_debug', false);
         
-        if (!$this->getUser()->isAuthenticated()) {
-            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        if (!$this->canMerge()) {
+            return $this->renderJson(['success' => false, 'error' => 'Not allowed']);
         }
 
+        if (!$request->isMethod('POST')) {
+            return $this->renderJson(['success' => false, 'error' => 'POST required']);
+        }
         $mergeJobId = (int) $request->getParameter('job_id');
         $files = $this->getRepository()->getJobFiles($mergeJobId);
 
+        // Only this job's own uploads and output; a folder combine's sources are
+        // the FTP originals, referenced in place, and must survive a job delete.
         foreach ($files as $file) {
-            if (file_exists($file->file_path)) {
-                @unlink($file->file_path);
-            }
+            $this->unlinkOwned($file->file_path, $mergeJobId);
         }
 
         $job = $this->getRepository()->getJob($mergeJobId);
-        if ($job && $job->output_path && file_exists($job->output_path)) {
-            @unlink($job->output_path);
+        if ($job) {
+            $this->unlinkOwned($job->output_path, $mergeJobId);
         }
 
         $this->getRepository()->deleteJob($mergeJobId);
