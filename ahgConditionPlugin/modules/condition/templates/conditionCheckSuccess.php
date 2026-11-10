@@ -130,7 +130,7 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
                       ?>
                       <span class="badge <?php echo $wfBadge ?>"><?php echo esc_entities(ucfirst(str_replace('_', ' ', $wfState))) ?></span>
                     </td>
-                    <td><?php echo esc_entities($condition->checked_by ?? '-') ?></td>
+                    <td><?php echo esc_entities($condition->checked_by ?? '-') ?><?php if (str_starts_with((string) $condition->checked_by, 'AI (')): ?><br><span class="badge bg-warning text-dark" title="Made by an AI model from a photograph and not checked by a person"><i class="fas fa-robot me-1"></i>AI suggestion - not verified</span><?php endif ?></td>
                     <?php $note = $condition->condition_description ?: ($condition->condition_note ?? ''); ?>
                     <td><?php echo esc_entities(mb_substr($note, 0, 50)) ?><?php echo mb_strlen($note) > 50 ? '...' : '' ?></td>
                     <td>

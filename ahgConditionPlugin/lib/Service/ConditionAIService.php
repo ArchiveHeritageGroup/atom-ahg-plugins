@@ -28,8 +28,12 @@ class ConditionAIService
     /** Valid overall ratings */
     private const RATINGS = ['excellent', 'good', 'fair', 'poor', 'critical'];
 
-    /** Severity levels */
-    private const SEVERITIES = ['minor', 'moderate', 'severe', 'critical'];
+    /** Severity levels. "none" is a real answer (no damage seen); without it the parser
+     *  kept its default "moderate" and an "excellent" rating showed moderate severity. */
+    private const SEVERITIES = ['none', 'minor', 'moderate', 'severe', 'critical'];
+
+    /** checked_by of every AI check starts with this; screens use it to label AI checks. */
+    public const CHECKED_BY_PREFIX = 'AI (';
 
     public function __construct()
     {
@@ -116,11 +120,19 @@ class ConditionAIService
             return $result;
         }
 
-        // Create or update condition check
+        // Same reference scheme as a check recorded on the form (CC-date-object[-n]).
+        $base = 'CC-' . date('Ymd') . '-' . $objectId;
+        $ref = $base;
+        for ($n = 2; DB::table('spectrum_condition_check')->where('condition_check_reference', $ref)->exists(); ++$n) {
+            $ref = $base . '-' . $n;
+        }
+
         $checkId = DB::table('spectrum_condition_check')->insertGetId([
             'object_id'              => $objectId,
+            'condition_check_reference' => $ref,
+            'condition_reference'    => $ref,
             'check_date'             => date('Y-m-d'),
-            'checked_by'             => 'AI (' . $this->model . ')',
+            'checked_by'             => self::CHECKED_BY_PREFIX . $this->model . ')',
             'overall_condition'      => $result['overall_rating'],
             'condition_rating'       => $result['overall_rating'],
             'condition_description'  => $result['description'],
@@ -129,19 +141,35 @@ class ConditionAIService
             'material_type'          => $materialType !== 'unknown' ? $materialType : null,
             'photo_count'            => 1,
             'workflow_state'         => 'completed',
-            'condition_note'         => 'AI-generated assessment via ' . $this->model,
+            'condition_note'         => 'AI suggestion (' . $this->model . '), not verified. Check the photograph and record your own assessment.',
             'created_by'             => $userId,
             'created_at'             => date('Y-m-d H:i:s'),
             'updated_at'             => date('Y-m-d H:i:s'),
         ]);
 
-        // Link photo to this check — duplicate the reference, don't move from original check
+        // The photo stays on its own check; the AI check gets its own copy of the file.
+        // The copy used to point at the original file, so deleting either photo deleted
+        // the image of the other.
         $photoData = (array) $photo;
         unset($photoData['id']);
         $photoData['condition_check_id'] = $checkId;
         $photoData['created_at'] = date('Y-m-d H:i:s');
         $photoData['updated_at'] = null;
-        DB::table('spectrum_condition_photo')->insert($photoData);
+        $uploadDir = dirname($imagePath);
+        $ext = strtolower(pathinfo($photo->filename ?: $imagePath, PATHINFO_EXTENSION)) ?: 'jpg';
+        $copyName = sprintf('condition_%d_%s.%s', $checkId, uniqid(), $ext);
+        if (copy($imagePath, $uploadDir . '/' . $copyName)) {
+            $thumb = $uploadDir . '/thumb_' . basename($imagePath);
+            if (is_file($thumb)) {
+                @copy($thumb, $uploadDir . '/thumb_' . $copyName);
+            }
+            $photoData['filename'] = $copyName;
+            $photoData['file_path'] = '/uploads/condition_photos/' . $copyName;
+            DB::table('spectrum_condition_photo')->insert($photoData);
+        } else {
+            // No copy, no link: a shared file would be lost when either photo is deleted.
+            DB::table('spectrum_condition_check')->where('id', $checkId)->update(['photo_count' => 0]);
+        }
 
         // Insert damage records
         if (!empty($result['damage_types'])) {
@@ -152,7 +180,7 @@ class ConditionAIService
                         'damage_type'         => $damage['type'],
                         'severity'            => $damage['severity'] ?? $result['severity'],
                         'location'            => $damage['location'] ?? 'overall',
-                        'treatment_required'  => ($result['severity'] !== 'minor') ? 1 : 0,
+                        'treatment_required'  => in_array($result['severity'], ['minor', 'none'], true) ? 0 : 1,
                         'treatment_notes'     => $damage['notes'] ?? null,
                         'created_at'          => date('Y-m-d H:i:s'),
                     ]);
@@ -182,7 +210,7 @@ You are a professional conservator assessing the physical condition of a cultura
 Respond in EXACTLY this format (one item per line):
 
 RATING: [one of: excellent, good, fair, poor, critical]
-SEVERITY: [one of: minor, moderate, severe, critical]
+SEVERITY: [one of: none, minor, moderate, severe, critical]
 DAMAGE: [comma-separated list from: tear, stain, foxing, fading, water_damage, mold, pest_damage, abrasion, brittleness, loss, crack, corrosion, discolouration, deformation, dust, none]
 DESCRIPTION: [2-3 sentences describing the visible condition]
 RECOMMENDATIONS: [1-2 sentences on conservation treatment needed]
@@ -297,13 +325,16 @@ PROMPT;
     /**
      * Map severity to treatment priority.
      */
-    private function mapSeverityToPriority(string $severity): string
+    private function mapSeverityToPriority(string $severity): ?string
     {
+        // Codes of the treatment priority vocabulary (low, medium, high, urgent);
+        // "normal" is not one of them. No damage: no priority.
         return match ($severity) {
             'critical' => 'urgent',
             'severe'   => 'high',
-            'moderate' => 'normal',
-            default    => 'low',
+            'moderate' => 'medium',
+            'minor'    => 'low',
+            default    => null,
         };
     }
 

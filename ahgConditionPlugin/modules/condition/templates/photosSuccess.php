@@ -311,17 +311,20 @@ document.addEventListener('click', function(e) {
             return;
         }
 
-        var gradeColors = {excellent:'success',good:'info',fair:'warning',poor:'danger',critical:'dark'};
+        // Model output is text, not markup.
+        var esc = function (t) { var d = document.createElement('div'); d.textContent = String(t == null ? '' : t); return d.innerHTML; };
+        var gradeColors = {excellent:'success',good:'info',fair:'warning',poor:'danger',critical:'dark',none:'success',minor:'info',moderate:'warning',severe:'danger'};
         var grade = data.overall_rating || 'unknown';
         var severity = data.severity || 'unknown';
 
-        var html = '<div class="text-center mb-3">';
+        var html = '<div class="alert alert-warning py-2 small"><i class="fas fa-robot me-1"></i><?php echo __('AI suggestion - not verified. AI models can miss damage that is plain to see: check the photograph yourself.') ?></div>';
+        html += '<div class="text-center mb-3">';
         html += '<span class="badge bg-' + (gradeColors[grade]||'secondary') + ' fs-5 me-2">' + grade.charAt(0).toUpperCase() + grade.slice(1) + '</span>';
         html += '<span class="badge bg-' + (gradeColors[severity]||'secondary') + ' fs-5">Severity: ' + severity.charAt(0).toUpperCase() + severity.slice(1) + '</span>';
         html += '</div>';
 
         if (data.description) {
-            html += '<p class="mb-3">' + data.description + '</p>';
+            html += '<p class="mb-3">' + esc(data.description) + '</p>';
         }
 
         if (data.damage_types && data.damage_types.length) {
@@ -330,7 +333,7 @@ document.addEventListener('click', function(e) {
                 var dtype = (d.type || 'unknown').replace(/_/g, ' ');
                 var sev = d.severity || severity;
                 var sevColor = gradeColors[sev] || 'secondary';
-                html += '<li class="list-group-item py-1 d-flex justify-content-between"><span class="badge bg-' + sevColor + '">' + dtype + '</span><small class="text-muted">' + sev + '</small></li>';
+                html += '<li class="list-group-item py-1 d-flex justify-content-between"><span class="badge bg-' + sevColor + '">' + esc(dtype) + '</span><small class="text-muted">' + esc(sev) + '</small></li>';
             });
             html += '</ul>';
         } else {
@@ -338,7 +341,7 @@ document.addEventListener('click', function(e) {
         }
 
         if (data.recommendations) {
-            html += '<div class="mt-2"><h6><?php echo __('Recommendations'); ?></h6><p class="small text-muted">' + data.recommendations + '</p></div>';
+            html += '<div class="mt-2"><h6><?php echo __('Recommendations'); ?></h6><p class="small text-muted">' + esc(data.recommendations) + '</p></div>';
         }
 
         resultEl.innerHTML = html;

@@ -45,6 +45,10 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
                 <?php echo ucfirst($check->overall_condition ?: 'Not rated') ?>
             </span>
             <br>
+            <?php // AI checks are suggestions until a person has looked: say so wherever a check is shown. ?>
+            <?php if (str_starts_with((string) $check->checked_by, 'AI (')): ?>
+            <span class="badge bg-warning text-dark" title="Made by an AI model from a photograph and not checked by a person"><i class="fas fa-robot me-1"></i>AI suggestion - not verified</span><br>
+            <?php endif ?>
             <?php if ($check->slug): ?>
             <a href="/condition/check/<?php echo (int) $check->id ?>/edit" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-edit me-1"></i> Edit
@@ -55,6 +59,10 @@ $ratingColor = $ratingColors[$check->overall_condition] ?? 'secondary';
             </a>
         </div>
     </div>
+
+    <?php if (str_starts_with((string) $check->checked_by, 'AI (')): ?>
+    <div class="alert alert-warning"><i class="fas fa-robot me-1"></i><?php echo __('This assessment was suggested by an AI model from a photograph and has not been verified. AI models can miss damage that is plain to see. Check the object or the photograph yourself, and record your own condition check.') ?></div>
+    <?php endif ?>
 
     <div class="row">
         <!-- Main Content -->

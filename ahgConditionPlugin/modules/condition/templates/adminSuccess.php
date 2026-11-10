@@ -99,7 +99,7 @@ $conditionColors = [
                                     <td><?php echo htmlspecialchars(mb_strimwidth($check->object_title ?? 'Untitled', 0, 40, '...')); ?></td>
                                     <td><span class="badge bg-<?php echo $color; ?>"><?php echo htmlspecialchars(ucfirst($check->overall_condition ?? '')); ?></span></td>
                                     <td><?php echo $check->check_date ?? ''; ?></td>
-                                    <td><?php echo htmlspecialchars($check->checked_by ?? ''); ?></td>
+                                    <td><?php echo htmlspecialchars($check->checked_by ?? ''); ?><?php if (str_starts_with((string) ($check->checked_by ?? ''), 'AI (')): ?><br><span class="badge bg-warning text-dark" title="Made by an AI model from a photograph and not checked by a person"><i class="fas fa-robot me-1"></i>AI suggestion - not verified</span><?php endif ?></td>
                                     <td>
                                         <a href="/condition/check/<?php echo $check->id; ?>/photos" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-camera"></i>

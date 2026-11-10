@@ -99,6 +99,7 @@ $annotationOverlay = function ($photo, array $annotations) {
         .photo-type { display: inline-block; padding: 2px 8px; background: #eee; font-size: 9pt; margin-bottom: 5px; }
         .annotation-list { margin-top: 10px; font-size: 10pt; }
         .annotation-item { padding: 3px 0; border-bottom: 1px dotted #ddd; }
+        .ai-note { border: 2px solid #b8860b; background: #fff8e1; padding: 8px 12px; margin: 0 0 20px; }
         .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #999; font-size: 9pt; color: #666; }
         @media print {
             body { padding: 0; }
@@ -111,6 +112,9 @@ $annotationOverlay = function ($photo, array $annotations) {
         <h1>Condition Check Report</h1>
         <div class="subtitle"><?php echo esc_entities($conditionCheck->identifier) ?> - <?php echo esc_entities($conditionCheck->object_title) ?></div>
     </div>
+    <?php if (str_starts_with((string) $conditionCheck->checked_by, 'AI (')): ?>
+    <p class="ai-note"><strong>AI suggestion - not verified.</strong> This assessment was made by an AI model from a photograph and has not been checked by a person.</p>
+    <?php endif ?>
     
     <table class="meta-table">
         <tr>
@@ -208,10 +212,7 @@ $annotationOverlay = function ($photo, array $annotations) {
                     <strong>Annotations (<?php echo count($annotations) ?>):</strong>
                     <?php foreach (array_values($annotations) as $i => $ann): ?>
                     <div class="annotation-item">
-                        <?php echo $i + 1 ?>. <?php echo esc_entities($ann['label'] ?? 'Note') ?>
-                        <?php if (!empty($ann['notes'])): ?>
-                        : <?php echo esc_entities($ann['notes']) ?>
-                        <?php endif ?>
+                        <?php echo $i + 1 ?>. <?php echo esc_entities($ann['label'] ?? 'Note') ?><?php if (!empty($ann['notes'])): ?>: <?php echo esc_entities($ann['notes']) ?><?php endif ?>
                         <?php if (!empty($ann['ai_generated'])): ?>
                         <em>(AI detected)</em>
                         <?php endif ?>
