@@ -267,12 +267,13 @@ class FtpService
         }
         // Files in subfolders are listed by their path ("folder/file.jpg"): a folder
         // upload used to vanish from the list because only the top level was read.
-        // Hidden folders (a watched folder's .processed and .failed) are skipped.
+        // Hidden folders (a watched folder's .processed and .failed) are skipped, and
+        // so is _trash, where a PDF combine parks its source pages until the purge.
         $files = [];
         $it = new \RecursiveIteratorIterator(
             new \RecursiveCallbackFilterIterator(
                 new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-                fn ($f) => '.' !== substr($f->getFilename(), 0, 1)
+                fn ($f) => '.' !== substr($f->getFilename(), 0, 1) && !($f->isDir() && '_trash' === $f->getFilename())
             )
         );
         foreach ($it as $f) {

@@ -244,10 +244,12 @@ class tiffpdfmergeActions extends AhgController
         $mergeJobId = (int) $request->getParameter('job_id');
         $fileOrder = $request->getParameter('file_order', []);
 
-        // Symfony may return a comma-separated string instead of an array
-        if (is_string($fileOrder)) {
-            $fileOrder = array_filter(array_map('intval', explode(',', $fileOrder)));
-        }
+        // Both merge screens post URLSearchParams({'file_order[]': ids}), which
+        // sends ONE value "12,13,14", so PHP sees ['12,13,14'] and MySQL matched
+        // only the first id: the order shown on screen was never saved. Accept a
+        // string, an array, or an array of comma lists.
+        $fileOrder = array_values(array_filter(array_map('intval',
+            explode(',', implode(',', (array) $fileOrder)))));
 
         if (!$mergeJobId || empty($fileOrder)) {
             return $this->renderJson(['success' => false, 'error' => 'Invalid parameters']);

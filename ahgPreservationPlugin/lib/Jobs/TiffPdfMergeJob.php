@@ -597,6 +597,18 @@ class TiffPdfMergeJob
             // folder) is recoverable. purgeQuarantine() finally removes folders past
             // the retention window (ahg_settings pdf_combine_trash_days, default 7).
             // rename() is safe-by-default: a file it cannot move is left in place.
+            // Only files inside the FTP folder are moved. A merge from browser
+            // uploads has none, and an empty _trash/<stamp> folder was left behind
+            // each time, showing up in the FTP page's file list.
+            $inBase = array_filter(iterator_to_array($files), function ($f) use ($base) {
+                $p = $f->file_path ?? '';
+
+                return $p !== '' && is_file($p) && strpos($p, $base . '/') === 0 && strpos($p, $base . '/_trash/') !== 0;
+            });
+            if (!$inBase) {
+                return;
+            }
+
             $stamp = date('Ymd-His') . '-' . substr(md5(uniqid('', true)), 0, 6);
             $trashDir = $base . '/_trash/' . $stamp;
             @mkdir($trashDir, 0775, true);
