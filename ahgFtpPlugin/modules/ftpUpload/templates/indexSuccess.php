@@ -1,8 +1,6 @@
 <?php use_helper('I18N') ?>
 
-<?php slot('title') ?>
-  <?php echo __('FTP Upload') ?>
-<?php end_slot() ?>
+<?php // No 'title' slot: this theme prints it in the page body, above the breadcrumb. ?>
 
 <div class="container-fluid py-4">
     <!-- Breadcrumb -->

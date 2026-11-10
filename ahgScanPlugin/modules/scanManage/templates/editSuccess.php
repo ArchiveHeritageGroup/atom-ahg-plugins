@@ -105,8 +105,9 @@ $sel = function ($field, $option, $src) use ($val, $sval) {
                     <div class="mb-3">
                         <label class="form-label">Descriptive standard</label>
                         <select name="standard" class="form-select">
-                            <?php foreach (['isadg', 'dc', 'spectrum', 'cco', 'rad', 'dacs'] as $opt): ?>
-                                <option value="<?php echo $opt ?>" <?php echo $sel('standard', $opt, 'session') ?>><?php echo $opt ?></option>
+                            <?php // Values are the ingest codes; the labels are what people read. ?>
+                            <?php foreach (['isadg' => 'ISAD(G)', 'dc' => 'Dublin Core', 'spectrum' => 'Museum collection procedures', 'cco' => 'CCO (museum objects)', 'rad' => 'RAD', 'dacs' => 'DACS'] as $opt => $optLabel): ?>
+                                <option value="<?php echo $opt ?>" <?php echo $sel('standard', $opt, 'session') ?>><?php echo $optLabel ?></option>
                             <?php endforeach ?>
                         </select>
                     </div>

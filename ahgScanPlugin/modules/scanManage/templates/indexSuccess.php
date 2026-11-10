@@ -54,10 +54,10 @@
                         </td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-primary" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'edit', 'id' => $f->id]) ?>"><i class="fas fa-pen"></i></a>
-                            <a class="btn btn-sm btn-outline-success" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'run', 'id' => $f->id]) ?>" title="Scan now"><i class="fas fa-play"></i></a>
+                            <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'scanManage', 'action' => 'run', 'id' => $f->id]) ?>"><button type="submit" class="btn btn-sm btn-outline-success" title="Scan now" aria-label="Scan now"><i class="fas fa-play"></i></button></form>
                             <a class="btn btn-sm btn-outline-secondary" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'history', 'id' => $f->id]) ?>" title="History"><i class="fas fa-clock-rotate-left"></i></a>
-                            <a class="btn btn-sm btn-outline-warning" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'toggle', 'id' => $f->id]) ?>" title="Toggle"><i class="fas fa-power-off"></i></a>
-                            <a class="btn btn-sm btn-outline-danger" href="<?php echo url_for(['module' => 'scanManage', 'action' => 'delete', 'id' => $f->id]) ?>" data-ahg-confirm="Remove this watched folder? Ingest history is retained." title="Delete"><i class="fas fa-trash"></i></a>
+                            <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'scanManage', 'action' => 'toggle', 'id' => $f->id]) ?>"><button type="submit" class="btn btn-sm btn-outline-warning" title="Toggle" aria-label="Toggle"><i class="fas fa-power-off"></i></button></form>
+                            <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'scanManage', 'action' => 'delete', 'id' => $f->id]) ?>"><button type="submit" class="btn btn-sm btn-outline-danger" title="Delete" aria-label="Delete" data-ahg-confirm="Remove this watched folder? Ingest history is retained."><i class="fas fa-trash"></i></button></form>
                         </td>
                     </tr>
                 <?php endforeach ?>

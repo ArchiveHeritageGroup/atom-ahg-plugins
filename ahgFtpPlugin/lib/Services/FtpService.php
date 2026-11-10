@@ -265,27 +265,37 @@ class FtpService
         if ($dir === '' || !is_dir($dir)) {
             return ['success' => true, 'files' => []];
         }
+        // Files in subfolders are listed by their path ("folder/file.jpg"): a folder
+        // upload used to vanish from the list because only the top level was read.
+        // Hidden folders (a watched folder's .processed and .failed) are skipped.
         $files = [];
-        foreach (scandir($dir) ?: [] as $f) {
-            if ($f === '.' || $f === '..') {
-                continue;
-            }
-            $p = $dir . '/' . $f;
-            if (!is_file($p)) {
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveCallbackFilterIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+                fn ($f) => '.' !== substr($f->getFilename(), 0, 1)
+            )
+        );
+        foreach ($it as $f) {
+            if (!$f->isFile()) {
                 continue;
             }
             $files[] = [
-                'name' => $f,
-                'size' => (int) @filesize($p),
-                'modified' => date('M d H:i', (int) @filemtime($p)),
+                'name' => ltrim(substr($f->getPathname(), strlen($dir)), '/'),
+                'size' => (int) $f->getSize(),
+                'modified' => date('M d H:i', (int) $f->getMTime()),
             ];
         }
+        usort($files, fn ($a, $b) => strcmp($a['name'], $b['name']));
 
         return ['success' => true, 'files' => $files];
     }
 
     protected function localDelete(string $filename): array
     {
+        // Names may now include a subfolder; nothing may point outside the folder.
+        if ('' === $filename || '/' === $filename[0] || preg_match('#(^|/)\.\.(/|$)#', $filename)) {
+            return ['success' => false, 'message' => 'Invalid file name'];
+        }
         $dest = $this->localDir . '/' . $filename;
         if (!is_file($dest)) {
             return ['success' => false, 'message' => 'File not found'];

@@ -281,7 +281,10 @@ class ScannerService
             return $jobId;
         }
 
-        $php = PHP_BINARY ?: 'php';
+        // Under php-fpm PHP_BINARY is the FastCGI server (php-fpm8.3), which printed
+        // its usage and exited: every "Scan now" queued a commit job that never ran.
+        $php = (PHP_SAPI === 'cli' && PHP_BINARY) ? PHP_BINARY
+            : (is_executable(PHP_BINDIR . '/php') ? PHP_BINDIR . '/php' : 'php');
         if ($jobId) {
             $cmd = escapeshellarg($php) . ' ' . escapeshellarg($symfony)
                 . ' ingest:commit --job-id=' . (int) $jobId;

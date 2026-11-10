@@ -56,6 +56,10 @@ class scanManageActions extends AhgController
             $id = $svc->create($this->collectInput($request), $this->userId() ?? 1);
             $this->getUser()->setFlash('notice', 'Watched folder created.');
             $this->redirect(['module' => 'scanManage', 'action' => 'edit', 'id' => $id]);
+        } catch (sfStopException $e) {
+            // redirect() works by throwing; caught below it became "Could not create
+            // folder:" with no message.
+            throw $e;
         } catch (\Throwable $e) {
             $this->getUser()->setFlash('error', 'Could not create folder: ' . $e->getMessage());
             $this->redirect(['module' => 'scanManage', 'action' => 'new']);
@@ -84,6 +88,10 @@ class scanManageActions extends AhgController
     {
         $this->requireAdmin();
         $id = (int) $request->getParameter('id');
+        // Acted on a plain link (GET) before; the list now posts a small form.
+        if ('POST' !== $request->getMethod()) {
+            $this->redirect(['module' => 'scanManage', 'action' => 'index']);
+        }
         $svc = $this->services();
         $svc->delete($id);
         $this->getUser()->setFlash('notice', 'Watched folder removed (history retained).');
@@ -94,6 +102,10 @@ class scanManageActions extends AhgController
     {
         $this->requireAdmin();
         $id = (int) $request->getParameter('id');
+        // Acted on a plain link (GET) before; the list now posts a small form.
+        if ('POST' !== $request->getMethod()) {
+            $this->redirect(['module' => 'scanManage', 'action' => 'index']);
+        }
         $svc = $this->services();
         $folder = $svc->find($id);
         if ($folder) {
@@ -109,6 +121,10 @@ class scanManageActions extends AhgController
     {
         $this->requireAdmin();
         $id = (int) $request->getParameter('id');
+        // Acted on a plain link (GET) before; the list now posts a small form.
+        if ('POST' !== $request->getMethod()) {
+            $this->redirect(['module' => 'scanManage', 'action' => 'index']);
+        }
         $svc = $this->services();
         $folder = $svc->find($id);
         if (!$folder) {
@@ -158,13 +174,30 @@ class scanManageActions extends AhgController
         // first use, so they need not exist yet.
         $roots = \AtomExtensions\Services\PathGuard::defaultRoots();
 
+        // PathGuard returns nothing for a path outside the permitted roots, and that
+        // was saved as an empty path without a word. Say what is wrong instead.
+        $guard = function (string $field, bool $forWrite) use ($request, $roots) {
+            $in = trim((string) $request->getParameter($field));
+            if ('' === $in) {
+                return '';
+            }
+            $ok = $forWrite ? \AtomExtensions\Services\PathGuard::withinForWrite($in, $roots)
+                : \AtomExtensions\Services\PathGuard::within($in, $roots);
+            if (null === $ok || '' === (string) $ok) {
+                throw new \InvalidArgumentException(sprintf('%s is not inside a permitted folder%s. Permitted: %s. Add a folder to the file_access_roots setting to allow it.',
+                    $in, $forWrite ? '' : ' (or does not exist)', implode(', ', $roots)));
+            }
+
+            return (string) $ok;
+        };
+        if ('' === trim((string) $request->getParameter('path'))) {
+            throw new \InvalidArgumentException('Enter the folder to watch.');
+        }
+
         return [
             'code' => trim((string) $request->getParameter('code')),
             'label' => trim((string) $request->getParameter('label')),
-            'path' => (string) \AtomExtensions\Services\PathGuard::within(
-                trim((string) $request->getParameter('path')),
-                $roots
-            ),
+            'path' => $guard('path', false),
             'layout' => $request->getParameter('layout', 'flat'),
             'parent_id' => $request->getParameter('parent_id') ? (int) $request->getParameter('parent_id') : null,
             'repository_id' => $request->getParameter('repository_id') ? (int) $request->getParameter('repository_id') : null,
@@ -172,14 +205,8 @@ class scanManageActions extends AhgController
             'standard' => $request->getParameter('standard', 'isadg'),
             'disposition_success' => $request->getParameter('disposition_success', 'move'),
             'disposition_failure' => $request->getParameter('disposition_failure', 'quarantine'),
-            'processed_path' => \AtomExtensions\Services\PathGuard::withinForWrite(
-                trim((string) $request->getParameter('processed_path')),
-                $roots
-            ),
-            'failed_path' => \AtomExtensions\Services\PathGuard::withinForWrite(
-                trim((string) $request->getParameter('failed_path')),
-                $roots
-            ),
+            'processed_path' => $guard('processed_path', true),
+            'failed_path' => $guard('failed_path', true),
             'min_quiet_seconds' => (int) $request->getParameter('min_quiet_seconds', 10),
             'auto_commit' => $request->getParameter('auto_commit') ? 1 : 0,
             'enabled' => $request->getParameter('enabled') ? 1 : 0,

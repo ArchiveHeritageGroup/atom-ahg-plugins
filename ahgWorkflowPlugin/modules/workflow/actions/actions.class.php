@@ -1263,7 +1263,8 @@ class workflowActions extends AhgController
         $cmd = sprintf(
             'cd %s && %s symfony workflow:seed-spectrum %s 2>&1',
             escapeshellarg(sfConfig::get('sf_root_dir')),
-            escapeshellcmd(PHP_BINARY),
+            // PHP_BINARY is php-fpm under the web server, not the CLI.
+            escapeshellcmd((PHP_SAPI === 'cli' && PHP_BINARY) ? PHP_BINARY : (is_executable(PHP_BINDIR . '/php') ? PHP_BINDIR . '/php' : 'php')),
             $overwrite ? '--overwrite' : ''
         );
         $output = [];

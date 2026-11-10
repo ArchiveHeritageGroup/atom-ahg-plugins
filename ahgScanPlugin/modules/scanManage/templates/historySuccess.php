@@ -5,9 +5,9 @@
             <p class="text-muted"><code><?php echo htmlspecialchars($folder->path) ?></code></p>
         </div>
         <div class="col-auto">
-            <a href="<?php echo url_for(['module' => 'scanManage', 'action' => 'run', 'id' => $folder->id]) ?>" class="btn btn-success">
-                <i class="fas fa-play me-1"></i> Scan now
-            </a>
+            <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'scanManage', 'action' => 'run', 'id' => $folder->id]) ?>">
+                <button type="submit" class="btn btn-success"><i class="fas fa-play me-1"></i> Scan now</button>
+            </form>
             <a href="<?php echo url_for(['module' => 'scanManage', 'action' => 'index']) ?>" class="btn btn-outline-secondary">Back</a>
         </div>
     </div>
