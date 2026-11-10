@@ -12,6 +12,55 @@ $photoTypes = [
     'raking' => 'Raking Light',
     'uv' => 'UV Light',
 ];
+// Raw rows: through the output escaper the annotations JSON arrives with &quot; and
+// json_decode fails. Every value printed below is escaped explicitly.
+$photos = isset($sf_data) ? $sf_data->getRaw('photos') : $photos;
+
+/**
+ * SVG overlay of a photo's annotations. Coordinates are stored in image pixels
+ * (condition-annotator.js toJSON divides by the canvas scale), so the viewBox is the
+ * image size and the overlay scales with the image.
+ */
+$annotationOverlay = function ($photo, array $annotations) {
+    $w = (int) $photo->width;
+    $h = (int) $photo->height;
+    if ((!$w || !$h) && $photo->file_path) {
+        $size = @getimagesize(sfConfig::get('sf_root_dir') . '/' . ltrim((string) $photo->file_path, '/'));
+        if ($size) {
+            [$w, $h] = $size;
+        }
+    }
+    if (!$w || !$h || !$annotations) {
+        return '';
+    }
+    $e = fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES);
+    $n = fn ($v) => round((float) $v, 1);
+    $r = max(12, round(min($w, $h) / 45));
+    $out = '';
+    foreach (array_values($annotations) as $i => $ann) {
+        $fd = $ann['fabricData'] ?? $ann;
+        $type = $fd['type'] ?? ($ann['type'] ?? '');
+        $c = $e($ann['color'] ?? ($fd['stroke'] ?? '#FF0000'));
+        $x = $n($fd['left'] ?? 0);
+        $y = $n($fd['top'] ?? 0);
+        $line = 'fill="none" stroke="' . $c . '" stroke-width="3" vector-effect="non-scaling-stroke"';
+        if ('ellipse' === $type || 'circle' === $type) {
+            $rx = $n($fd['rx'] ?? (($fd['width'] ?? 50) / 2));
+            $ry = $n($fd['ry'] ?? (($fd['height'] ?? 50) / 2));
+            $out .= '<ellipse cx="' . ($x + $rx) . '" cy="' . ($y + $ry) . '" rx="' . $rx . '" ry="' . $ry . '" ' . $line . '/>';
+        } elseif (in_array($type, ['i-text', 'text', 'group', 'marker'], true)) {
+            // Text labels and numbered markers: shown by their number only.
+        } else {
+            // Rectangles, and the bounding box of arrows and freehand lines.
+            $dash = 'rect' === $type ? '' : ' stroke-dasharray="8 5"';
+            $out .= '<rect x="' . $x . '" y="' . $y . '" width="' . $n($fd['width'] ?? 0) . '" height="' . $n($fd['height'] ?? 0) . '" ' . $line . $dash . '/>';
+        }
+        $out .= '<circle cx="' . ($x + $r) . '" cy="' . ($y + $r) . '" r="' . $r . '" fill="' . $c . '"/>'
+            . '<text x="' . ($x + $r) . '" y="' . ($y + $r) . '" font-size="' . round($r * 1.2) . '" font-family="Arial,sans-serif" font-weight="bold" fill="#fff" text-anchor="middle" dominant-baseline="central">' . ($i + 1) . '</text>';
+    }
+
+    return '<svg class="annotation-overlay" viewBox="0 0 ' . $w . ' ' . $h . '" preserveAspectRatio="none" aria-hidden="true">' . $out . '</svg>';
+};
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,7 +92,9 @@ $photoTypes = [
         .section h2 { font-size: 14pt; border-bottom: 1px solid #999; padding-bottom: 5px; margin-bottom: 10px; }
         .photo-grid { display: flex; flex-wrap: wrap; gap: 15px; }
         .photo-item { width: calc(50% - 10px); border: 1px solid #ddd; padding: 10px; }
-        .photo-item img { max-width: 100%; height: auto; display: block; margin-bottom: 10px; }
+        .photo-item img { max-width: 100%; height: auto; display: block; }
+        .photo-frame { position: relative; margin-bottom: 10px; line-height: 0; }
+        .annotation-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
         .photo-caption { font-size: 10pt; color: #666; }
         .photo-type { display: inline-block; padding: 2px 8px; background: #eee; font-size: 9pt; margin-bottom: 5px; }
         .annotation-list { margin-top: 10px; font-size: 10pt; }
@@ -140,19 +191,24 @@ $photoTypes = [
         <?php else: ?>
         <div class="photo-grid">
             <?php foreach ($photos as $photo): 
-                $annotations = json_decode($photo->annotation_data ?: '[]', true);
+                // The column is `annotations`; reading `annotation_data` (no such column) left every report without its annotations.
+                $annotations = json_decode($photo->annotations ?: '[]', true);
+                $annotations = is_array($annotations) ? $annotations : [];
             ?>
             <div class="photo-item">
                 <span class="photo-type"><?php echo esc_entities($photoTypes[$photo->photo_type] ?? $photo->photo_type) ?></span>
-                <img src="<?php echo url_for('@condition_photo_file?id=' . $photo->id) ?>" alt="<?php echo esc_entities($photo->caption) ?>">
+                <div class="photo-frame">
+                    <img src="<?php echo url_for('@condition_photo_file?id=' . $photo->id) ?>" alt="<?php echo esc_entities($photo->caption) ?>">
+                    <?php echo $annotationOverlay($photo, $annotations) ?>
+                </div>
                 <div class="photo-caption"><?php echo esc_entities($photo->caption ?: 'No caption') ?></div>
                 
                 <?php if (!empty($annotations)): ?>
                 <div class="annotation-list">
                     <strong>Annotations (<?php echo count($annotations) ?>):</strong>
-                    <?php foreach ($annotations as $ann): ?>
+                    <?php foreach (array_values($annotations) as $i => $ann): ?>
                     <div class="annotation-item">
-                        • <?php echo esc_entities($ann['label'] ?? 'Note') ?>
+                        <?php echo $i + 1 ?>. <?php echo esc_entities($ann['label'] ?? 'Note') ?>
                         <?php if (!empty($ann['notes'])): ?>
                         : <?php echo esc_entities($ann['notes']) ?>
                         <?php endif ?>
