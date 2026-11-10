@@ -118,7 +118,8 @@ class formsActions extends AhgController
         $this->forward404Unless($source);
 
         if ($request->isMethod('post')) {
-            $newId = $service->cloneTemplate($sourceId, $request->getParameter('name'));
+            $name = trim((string) $request->getParameter('name')) ?: 'Copy of ' . $source->name;
+            $newId = $service->cloneTemplate($sourceId, mb_substr($name, 0, 255));
             $this->redirect(['module' => 'forms', 'action' => 'builder', 'id' => $newId]);
         }
 
