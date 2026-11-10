@@ -746,7 +746,7 @@ class WorkflowService
             ->where('h.object_id', $objectId)
             ->where('h.object_type', $objectType)
             ->select('h.*', 'u.username', 'u.email', 'w.name as workflow_name', 's.name as step_name')
-            ->orderBy('h.performed_at', 'desc')
+            ->orderBy('h.performed_at', 'desc')->orderBy('h.id', 'desc') // same-second steps in the order they happened
             ->get()
             ->toArray();
     }

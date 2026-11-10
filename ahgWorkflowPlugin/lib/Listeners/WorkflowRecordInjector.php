@@ -73,7 +73,7 @@ class WorkflowRecordInjector
         } else {
             $item = '<li><a href="' . $e($routing->generate('workflow_start', ['object_id' => $id])) . '"><i class="fas fa-paper-plane fa-fw me-2"></i>' . $e(__('Submit for review')) . '</a></li>';
         }
-        $item .= '<li><a href="' . $e($routing->generate('workflow_timeline', ['object_id' => $id])) . '"><i class="fas fa-history fa-fw me-2"></i>' . $e(__('Workflow history')) . '</a></li>';
+        $item .= '<li><a href="' . $e($routing->generate('workflow_object_history', ['object_id' => $id])) . '"><i class="fas fa-history fa-fw me-2"></i>' . $e(__('Workflow history')) . '</a></li>';
 
         $block = '<section class="sidebar-widget ahg-workflow-block"><h2 class="h4">' . $e(__('Workflow')) . '</h2><ul class="list-unstyled">' . $item . '</ul></section>' . "\n";
         self::$injected = true;

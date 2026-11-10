@@ -55,9 +55,9 @@
                             <td><?php echo esc_entities($entry->step_name ?? '-') ?></td>
                             <td class="text-nowrap">
                                 <?php if (!empty($entry->from_status) || !empty($entry->to_status)): ?>
-                                    <small class="text-muted"><?php echo esc_entities($entry->from_status ?? '?') ?></small>
+                                    <small class="text-muted"><?php echo esc_entities($entry->from_status ?? '-') ?></small>
                                     <i class="fas fa-arrow-right mx-1 small"></i>
-                                    <small><?php echo esc_entities($entry->to_status ?? '?') ?></small>
+                                    <small><?php echo esc_entities($entry->to_status ?? '-') ?></small>
                                 <?php else: ?>
                                     -
                                 <?php endif ?>

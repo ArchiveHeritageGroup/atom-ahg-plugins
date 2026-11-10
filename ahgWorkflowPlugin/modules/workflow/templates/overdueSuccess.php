@@ -183,7 +183,9 @@
                 <tbody>
                     <?php foreach ($overdueTasks as $task): ?>
                         <?php
-                            $sla = $task->sla ?? [];
+                            // The SLA arrives as an object (stdClass); reading it as an array was a fatal error
+                            // ("Cannot use object of type stdClass as array") as soon as a task was overdue.
+                            $sla = (array) ($task->sla ?? []);
                             $slaStatus = $sla['sla_status'] ?? 'overdue';
                             $slaBadge = match ($slaStatus) {
                                 'at_risk' => 'bg-warning text-dark',
