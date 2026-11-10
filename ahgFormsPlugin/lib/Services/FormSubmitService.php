@@ -127,6 +127,14 @@ class FormSubmitService
             $savedId = $this->saveAccession($objectId, $entityData, $culture);
         } else {
             $savedId = $this->saveInformationObject($objectId, $entityData, $culture);
+            if ($isCreate) {
+                // A description needs a publication status: without one its page failed
+                // with "No publication status set" (HTTP 500). New records start as drafts.
+                $hasStatus = DB::table('status')->where('object_id', $savedId)->where('type_id', 158)->exists();
+                if (!$hasStatus) {
+                    DB::table('status')->insert(['object_id' => $savedId, 'type_id' => 158, 'status_id' => 159]);
+                }
+            }
             // property/note/event/term+actor-relation records attach to the IO object id
             $this->writeProperties($savedId, $properties, $culture);
             $this->writeNotes($savedId, $notes, $culture);
@@ -339,6 +347,13 @@ class FormSubmitService
     {
         foreach ($events as $typeId => $parts) {
             $date = $parts['date'] ?? null;
+            // A date range arrives as "start - end"; strtotime() cannot read that, so the
+            // event kept only the display text and no start or end date.
+            if (!isset($parts['start_date']) && !isset($parts['end_date'])
+                && preg_match('/^(\d{4}(?:-\d{2}){0,2})\s+-\s+(\d{4}(?:-\d{2}){0,2})$/', trim((string) $date), $m)) {
+                $parts['start_date'] = $m[1];
+                $parts['end_date'] = $m[2];
+            }
             $startDate = $this->toIsoDate($parts['start_date'] ?? $date);
             $endDate = $this->toIsoDate($parts['end_date'] ?? null);
             $actorId = isset($parts['actor']) ? $this->resolveActor((string) $parts['actor'], $culture) : null;

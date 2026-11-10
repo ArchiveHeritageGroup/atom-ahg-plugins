@@ -321,6 +321,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Palette items could only be dragged: no way in from a keyboard. A click or
+    // Enter adds the field at the end of the form, as a drop does.
+    document.querySelectorAll('.palette-item').forEach(function(item) {
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('title', 'Click or drag to add');
+        var add = function() { addNewField(item.dataset.fieldType, item.dataset.atomField || null); };
+        item.addEventListener('click', add);
+        item.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); add(); } });
+    });
+
     canvas.addEventListener('dragover', function(e) {
         e.preventDefault();
         this.classList.add('drag-over');
