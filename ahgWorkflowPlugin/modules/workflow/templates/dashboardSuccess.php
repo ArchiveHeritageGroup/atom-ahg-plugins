@@ -14,18 +14,6 @@
         <?php endif ?>
     </div>
 
-    <?php if ($sf_user->hasFlash('notice')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo $sf_user->getFlash('notice') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?php echo __('Close') ?>"></button>
-        </div>
-    <?php endif ?>
-    <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?php echo $sf_user->getFlash('error') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?php echo __('Close') ?>"></button>
-        </div>
-    <?php endif ?>
 
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
@@ -206,9 +194,15 @@
                                                 'returned' => 'warning',
                                                 default => 'secondary'
                                             };
-                                        ?>" role="status" aria-label="<?php echo __('Action: %1%', ['%1%' => ucfirst($activity->action)]) ?>"><?php echo ucfirst($activity->action) ?></span>
+                                        ?>" role="status" aria-label="<?php echo __('Action: %1%', ['%1%' => ucfirst(str_replace('_', ' ', $activity->action))]) ?>"><?php echo ucfirst(str_replace('_', ' ', $activity->action)) ?></span>
                                     </td>
-                                    <td><?php echo esc_entities($activity->object_title ?? "#{$activity->object_id}") ?></td>
+                                    <?php
+                                        // Research requests and mentions share this history; name them
+                                        // by kind rather than a bare "#13".
+                                        $kinds = ['research_reproduction_request' => 'Reproduction request', 'research_material_request' => 'Material request', 'ahg_mention' => 'Name mention', 'researcher_submission' => 'Researcher submission'];
+                                        $objLabel = $activity->object_title ?? ((isset($kinds[$activity->object_type]) ? $kinds[$activity->object_type] . ' ' : '') . '#' . $activity->object_id);
+                                    ?>
+                                    <td><?php echo esc_entities($objLabel) ?></td>
                                     <td><small><?php echo esc_entities($activity->username ?? 'Unknown') ?></small></td>
                                 </tr>
                             <?php endforeach ?>

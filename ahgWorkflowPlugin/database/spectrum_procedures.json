@@ -3,7 +3,7 @@
   "source_note": "Paraphrased starting templates based on the Spectrum 5.1 framework structure (UK Collections Trust). These are NOT verbatim spec text and not a substitute for the full spec — they are intended as a procedurally-correct starting point that museums review and refine against their own Collections Trust subscription before claiming Spectrum compliance.",
   "procedures": {
     "object_entry": {
-      "name": "Spectrum: Object entry",
+      "name": "Collections procedures: Object entry",
       "description": "Document objects arriving on the museum's premises — whether for acquisition, loan, or any other purpose — and assign initial accountability.",
       "steps": [
         { "name": "Receive object", "step_type": "review", "action_required": "approve_reject", "instructions": "Receive the object at the agreed point of delivery. Record date, time, conveyor, and method of arrival." },
@@ -14,7 +14,7 @@
       ]
     },
     "acquisition": {
-      "name": "Spectrum: Acquisition and accessioning",
+      "name": "Collections procedures: Acquisition and accessioning",
       "description": "Take legal and physical ownership of an object and formally enter it into the permanent collection.",
       "steps": [
         { "name": "Acquisition proposal", "step_type": "review", "action_required": "approve_reject", "instructions": "Prepare and submit the acquisition proposal — provenance, condition, significance, cost, fit with collecting policy." },
@@ -25,7 +25,7 @@
       ]
     },
     "inventory": {
-      "name": "Spectrum: Inventory",
+      "name": "Collections procedures: Inventory",
       "description": "Verify what the museum holds, where it is, and that records are accurate.",
       "steps": [
         { "name": "Define inventory scope", "step_type": "review", "action_required": "approve_reject", "instructions": "Scope the inventory exercise — full collection, sample, or single location. Agree timetable and resources." },
@@ -36,7 +36,7 @@
       ]
     },
     "location_movement": {
-      "name": "Spectrum: Location and movement control",
+      "name": "Collections procedures: Location and movement control",
       "description": "Track where every object is at all times and document every movement.",
       "steps": [
         { "name": "Move request", "step_type": "review", "action_required": "approve_reject", "instructions": "Capture the reason for moving the object — loan, conservation, exhibition, storage reorganisation, etc." },
@@ -47,7 +47,7 @@
       ]
     },
     "cataloguing": {
-      "name": "Spectrum: Cataloguing",
+      "name": "Collections procedures: Cataloguing",
       "description": "Create the authoritative descriptive record for each object.",
       "steps": [
         { "name": "Identify object", "step_type": "review", "action_required": "approve_reject", "instructions": "Establish what the object is — title, classification, materials, technique. Reference authority lists." },
@@ -58,7 +58,7 @@
       ]
     },
     "object_exit": {
-      "name": "Spectrum: Object exit",
+      "name": "Collections procedures: Object exit",
       "description": "Document objects leaving the museum's care, whether temporarily or permanently.",
       "steps": [
         { "name": "Reason for exit", "step_type": "review", "action_required": "approve_reject", "instructions": "Record why the object is leaving — loan return, disposal, transfer, conservation off-site, etc." },
@@ -69,7 +69,7 @@
       ]
     },
     "loans_in": {
-      "name": "Spectrum: Loans in (borrowing)",
+      "name": "Collections procedures: Loans in (borrowing)",
       "description": "Manage objects borrowed from external lenders, from request through return.",
       "steps": [
         { "name": "Loan request", "step_type": "review", "action_required": "approve_reject", "instructions": "Prepare the loan request, including purpose, duration, environmental requirements, and security." },
@@ -80,7 +80,7 @@
       ]
     },
     "loans_out": {
-      "name": "Spectrum: Loans out (lending)",
+      "name": "Collections procedures: Loans out (lending)",
       "description": "Manage objects lent from the museum to external borrowers.",
       "steps": [
         { "name": "Borrower request review", "step_type": "review", "action_required": "approve_reject", "instructions": "Assess the borrower's request — purpose, venue suitability, security, environmental conditions." },
@@ -91,7 +91,7 @@
       ]
     },
     "insurance": {
-      "name": "Spectrum: Insurance and indemnity",
+      "name": "Collections procedures: Insurance and indemnity",
       "description": "Manage insurance and government indemnity arrangements for the collection.",
       "steps": [
         { "name": "Valuation for insurance", "step_type": "review", "action_required": "approve_reject", "instructions": "Establish or refresh insurance values — periodic for permanent collection, per-loan for borrowed/lent items." },
@@ -101,7 +101,7 @@
       ]
     },
     "damage_loss": {
-      "name": "Spectrum: Damage and loss",
+      "name": "Collections procedures: Damage and loss",
       "description": "Respond to and document any damage to or loss of collection objects.",
       "steps": [
         { "name": "Discovery & immediate response", "step_type": "review", "action_required": "approve_reject", "instructions": "On discovery of damage or loss, secure the area / object, prevent further harm, and notify the registrar." },
@@ -112,7 +112,7 @@
       ]
     },
     "conservation": {
-      "name": "Spectrum: Conservation and collections care",
+      "name": "Collections procedures: Conservation and collections care",
       "description": "Maintain the physical condition of the collection through preventive care and active conservation treatment.",
       "steps": [
         { "name": "Condition assessment", "step_type": "review", "action_required": "approve_reject", "instructions": "Assess the current condition of the object — visual examination, instrumentation if needed." },
@@ -123,7 +123,7 @@
       ]
     },
     "audit": {
-      "name": "Spectrum: Audit",
+      "name": "Collections procedures: Audit",
       "description": "Systematically verify the integrity of collection records and procedures.",
       "steps": [
         { "name": "Audit planning", "step_type": "review", "action_required": "approve_reject", "instructions": "Define audit scope, sampling method, and timetable. Identify the auditor(s)." },
@@ -134,7 +134,7 @@
       ]
     },
     "condition_check": {
-      "name": "Spectrum: Object condition checking and technical assessment",
+      "name": "Collections procedures: Object condition checking and technical assessment",
       "description": "Detailed assessment of an object's physical state, periodically and at key moments (loans in/out, exhibition).",
       "steps": [
         { "name": "Initial visual inspection", "step_type": "review", "action_required": "approve_reject", "instructions": "Visual inspection covering structural, surface, and material condition." },
@@ -144,7 +144,7 @@
       ]
     },
     "valuation": {
-      "name": "Spectrum: Object valuation",
+      "name": "Collections procedures: Object valuation",
       "description": "Establish and maintain insurance, fair-market, and replacement values for collection objects.",
       "steps": [
         { "name": "Valuation request", "step_type": "review", "action_required": "approve_reject", "instructions": "Capture the trigger for valuation — insurance, loan, deaccession, periodic review." },
@@ -154,7 +154,7 @@
       ]
     },
     "risk_management": {
-      "name": "Spectrum: Risk management",
+      "name": "Collections procedures: Risk management",
       "description": "Systematically identify, assess, and mitigate risks to the collection.",
       "steps": [
         { "name": "Risk identification", "step_type": "review", "action_required": "approve_reject", "instructions": "Identify risks across storage, display, transit, environment, security, governance." },
@@ -165,7 +165,7 @@
       ]
     },
     "emergency_planning": {
-      "name": "Spectrum: Emergency planning for collections",
+      "name": "Collections procedures: Emergency planning for collections",
       "description": "Prepare for and rehearse the museum's response to fire, flood, theft, conflict, or other emergencies.",
       "steps": [
         { "name": "Hazard identification", "step_type": "review", "action_required": "approve_reject", "instructions": "Identify the hazards relevant to the building and collection (fire, flood, theft, civil disturbance, etc.)." },
@@ -176,7 +176,7 @@
       ]
     },
     "use_of_collections": {
-      "name": "Spectrum: Use of collections",
+      "name": "Collections procedures: Use of collections",
       "description": "Document and manage authorised access to and use of collection objects (research, education, exhibition).",
       "steps": [
         { "name": "Use request", "step_type": "review", "action_required": "approve_reject", "instructions": "Capture the user's request — who, what, why, when, how (handling? imaging?)." },
@@ -187,7 +187,7 @@
       ]
     },
     "rights_management": {
-      "name": "Spectrum: Rights management",
+      "name": "Collections procedures: Rights management",
       "description": "Document and manage rights (copyright, moral rights, traditional knowledge, etc.) attached to collection objects.",
       "steps": [
         { "name": "Rights identification", "step_type": "review", "action_required": "approve_reject", "instructions": "Identify the rights that apply — copyright, moral rights, performers' rights, indigenous TK, contractual restrictions." },
@@ -198,7 +198,7 @@
       ]
     },
     "reproduction": {
-      "name": "Spectrum: Reproduction",
+      "name": "Collections procedures: Reproduction",
       "description": "Manage the creation of copies and surrogates of collection objects (digitisation, replicas, publishable images).",
       "steps": [
         { "name": "Reproduction request", "step_type": "review", "action_required": "approve_reject", "instructions": "Capture the request — what object, what format, what purpose." },
@@ -209,7 +209,7 @@
       ]
     },
     "deaccessioning": {
-      "name": "Spectrum: Deaccessioning and disposal",
+      "name": "Collections procedures: Deaccessioning and disposal",
       "description": "Formally remove an object from the permanent collection through governance-approved disposal.",
       "steps": [
         { "name": "Deaccession proposal", "step_type": "review", "action_required": "approve_reject", "instructions": "Prepare the deaccession case — rationale, due diligence, ethical considerations, disposal method." },
@@ -220,7 +220,7 @@
       ]
     },
     "retrospective_doc": {
-      "name": "Spectrum: Retrospective documentation",
+      "name": "Collections procedures: Retrospective documentation",
       "description": "Catch up on documentation for historic items where records are incomplete or non-existent.",
       "steps": [
         { "name": "Identify undocumented items", "step_type": "review", "action_required": "approve_reject", "instructions": "Identify items needing retrospective documentation — survey existing records, flag gaps." },

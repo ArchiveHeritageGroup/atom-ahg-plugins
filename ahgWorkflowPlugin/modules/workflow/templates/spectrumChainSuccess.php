@@ -9,12 +9,6 @@
 
   <p class="text-muted"><?php echo __('When a procedure completes, automatically spawn a task on a downstream procedure for the same object.') ?></p>
 
-  <?php if ($sf_user->hasFlash('notice')): ?>
-    <div class="alert alert-success alert-dismissible fade show"><?php echo $sf_user->getFlash('notice') ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-  <?php endif ?>
-  <?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger alert-dismissible fade show"><?php echo $sf_user->getFlash('error') ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-  <?php endif ?>
 
   <div class="card mb-4">
     <div class="card-header"><strong><?php echo __('Add a chain rule') ?></strong></div>

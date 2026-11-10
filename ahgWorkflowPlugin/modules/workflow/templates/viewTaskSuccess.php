@@ -17,18 +17,6 @@
         <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'taskDiagram', 'id' => $task->id]) ?>" class="btn btn-outline-info"><i class="fas fa-project-diagram me-1"></i><?php echo __('Progress diagram') ?></a>
     </div>
 
-    <?php if ($sf_user->hasFlash('notice')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo $sf_user->getFlash('notice') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?php echo __('Close') ?>"></button>
-        </div>
-    <?php endif ?>
-    <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?php echo $sf_user->getFlash('error') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?php echo __('Close') ?>"></button>
-        </div>
-    <?php endif ?>
 
     <div class="row">
         <!-- Main Content -->

@@ -141,13 +141,17 @@ class workflowActions extends AhgController
                     $chain = (new SpectrumComplianceService())->applyChainOnTaskApproved($taskId);
                     $msg = 'Task approved';
                     if (($chain['spawned'] ?? 0) > 0) {
-                        $msg .= sprintf(' (Spectrum chain spawned %d downstream task(s))', $chain['spawned']);
+                        $msg .= sprintf(' (procedure chain started %d follow-on task(s))', $chain['spawned']);
                     }
                     $this->getUser()->setFlash('notice', $msg);
                 } catch (\Throwable $chainErr) {
                     $this->getUser()->setFlash('notice', 'Task approved');
                 }
                 $this->redirect('workflow/my-tasks');
+            } catch (sfStopException $e) {
+                // redirect() works by throwing; catching it as an error showed an empty
+                // red alert and sent the user back to the task instead of My Tasks.
+                throw $e;
             } catch (Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
                 $this->redirect('@workflow_view_task?id=' . $taskId);
@@ -174,6 +178,10 @@ class workflowActions extends AhgController
                 $this->getService()->rejectTask($taskId, $this->getCurrentUserId(), $comment);
                 $this->getUser()->setFlash('notice', 'Task rejected');
                 $this->redirect('workflow/my-tasks');
+            } catch (sfStopException $e) {
+                // redirect() works by throwing; catching it as an error showed an empty
+                // red alert and sent the user back to the task instead of My Tasks.
+                throw $e;
             } catch (Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
                 $this->redirect('@workflow_view_task?id=' . $taskId);
@@ -216,21 +224,45 @@ class workflowActions extends AhgController
     {
         $this->requireAuth();
         $objectId = (int) $request->getParameter('object_id');
+        $service = $this->getService();
 
+        // A record already in a workflow goes to its task.
+        $active = \Illuminate\Database\Capsule\Manager::table('ahg_workflow_task')
+            ->where('object_id', $objectId)->where('object_type', 'information_object')
+            ->whereNotIn('status', ['approved', 'rejected', 'cancelled'])->value('id');
+        if ($active) {
+            $this->redirect('@workflow_view_task?id=' . $active);
+        }
+
+        // Starting used to happen on a plain GET: opening the link (or a prefetch)
+        // created the task and notified every eligible reviewer. GET now shows what
+        // will start; only the button on that page (POST) starts it.
+        if (!$request->isMethod('post')) {
+            $this->objectId = $objectId;
+            $this->record = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+                ->leftJoin('information_object_i18n as i', function ($j) {
+                    $j->on('i.id', '=', 'io.id')->where('i.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+                })->leftJoin('slug as s', 's.object_id', '=', 'io.id')
+                ->where('io.id', $objectId)->first(['io.id', 'io.identifier', 'i.title', 's.slug']);
+            $this->forward404Unless($this->record);
+            $this->workflow = $service->getApplicableWorkflow($objectId, 'information_object');
+
+            return sfView::SUCCESS;
+        }
+
+        $taskId = null;
         try {
-            $taskId = $this->getService()->startWorkflow($objectId, $this->getCurrentUserId());
-            if ($taskId) {
-                $this->getUser()->setFlash('notice', 'Workflow started successfully');
-                $this->redirect('@workflow_view_task?id=' . $taskId);
-            } else {
-                $this->getUser()->setFlash('error', 'No workflow configured for this item');
-            }
+            $taskId = $service->startWorkflow($objectId, $this->getCurrentUserId());
+            $this->getUser()->setFlash($taskId ? 'notice' : 'error', $taskId ? 'Submitted for review: the first step is waiting in the task pool.' : 'No workflow applies to this record.');
         } catch (Exception $e) {
             $this->getUser()->setFlash('error', $e->getMessage());
         }
 
-        // #187: getReferer() returns '' (not null) when absent, so ?? wouldn't fall
-        // back and redirect('') 500s ("Cannot redirect to an empty URL"). Use ?:.
+        // Redirect outside the try: redirect() throws sfStopException, which the catch
+        // above used to turn into an empty error message.
+        if ($taskId) {
+            $this->redirect('@workflow_view_task?id=' . $taskId);
+        }
         $this->redirect($request->getReferer() ?: 'workflow/dashboard');
     }
 

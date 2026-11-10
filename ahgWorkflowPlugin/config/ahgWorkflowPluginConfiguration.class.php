@@ -52,6 +52,10 @@ class ahgWorkflowPluginConfiguration extends sfPluginConfiguration
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 
+        // "Submit for review" / open task on the record page (no theme change).
+        require_once __DIR__ . '/../lib/Listeners/WorkflowRecordInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\\AhgWorkflowPlugin\\Listeners\\WorkflowRecordInjector', 'filter']);
+
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'workflow';
         sfConfig::set('sf_enabled_modules', $enabledModules);

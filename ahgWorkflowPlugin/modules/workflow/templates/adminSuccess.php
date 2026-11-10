@@ -51,18 +51,6 @@
         </form>
     <?php endif ?>
 
-    <?php if ($sf_user->hasFlash('notice')): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <?php echo $sf_user->getFlash('notice') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif ?>
-    <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <?php echo $sf_user->getFlash('error') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif ?>
 
     <?php if (empty($workflows)): ?>
         <div class="text-center text-muted py-5">
@@ -95,7 +83,7 @@
                                     <strong><?php echo esc_entities($wf->name) ?></strong>
                                 </a>
                                 <?php if ($wf->description): ?>
-                                    <br><small class="text-muted"><?php echo esc_entities($wf->description) ?></small>
+                                    <br><small class="text-muted"><?php echo $wf->description /* already escaped by the output escaper; esc_entities() made "museum's" read "museum&#039;s" */ ?></small>
                                 <?php endif ?>
                             </td>
                             <td>

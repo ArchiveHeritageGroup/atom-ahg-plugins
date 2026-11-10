@@ -17,12 +17,6 @@
         <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'designer', 'id' => $workflow->id]) ?>" class="btn btn-outline-primary"><i class="fas fa-pencil-ruler me-1"></i><?php echo __('Designer') ?></a>
     </div>
 
-    <?php if ($sf_user->hasFlash('notice')): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <?php echo $sf_user->getFlash('notice') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif ?>
 
     <div class="row">
         <div class="col-lg-8">

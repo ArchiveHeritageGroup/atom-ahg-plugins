@@ -150,7 +150,7 @@ class workflowSeedSpectrumTask extends sfBaseTask
     {
         $now = date('Y-m-d H:i:s');
         return (int) DB::table('ahg_workflow')->insertGetId([
-            'name'                 => $procedure['name'] ?? "Spectrum: {$code}",
+            'name'                 => $procedure['name'] ?? "Collections procedures: {$code}",
             'description'          => $procedure['description'] ?? null,
             'scope_type'           => 'global',
             'trigger_event'        => 'submit',
