@@ -125,6 +125,8 @@ class versionControlActions extends sfActions
     public function executeRestore(sfWebRequest $request): void
     {
         $this->requireAuthenticated();
+        // __() for the flash messages; without it every restore ended in a fatal error.
+        $this->getContext()->getConfiguration()->loadHelpers(['I18N']);
 
         if (!$request->isMethod('post')) {
             $this->forward404();
@@ -171,6 +173,16 @@ class versionControlActions extends sfActions
                     ? (int) $this->getUser()->getAttribute('user_id')
                     : null,
             );
+            // Restore writes the tables directly; refresh the search index so
+            // search and browse show the restored text.
+            try {
+                $resource = 'actor' === $entityType ? \QubitActor::getById($entityId) : \QubitInformationObject::getById($entityId);
+                if (null !== $resource) {
+                    \QubitSearch::getInstance()->update($resource);
+                }
+            } catch (\Throwable $e) {
+                \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
+            }
             $this->getUser()->setFlash(
                 'notice',
                 sprintf(__('Restored from v%1$d. New version v%2$d created.'), $versionNumber, $newVersion),

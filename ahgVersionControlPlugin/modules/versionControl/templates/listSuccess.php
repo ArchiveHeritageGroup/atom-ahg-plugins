@@ -36,7 +36,7 @@
     </div>
 <?php else: ?>
 
-<form id="vc-diff-form" method="get" action="<?php echo url_for(['module' => 'versionControl', 'action' => 'diff', 'entity' => $entityType, 'id' => $entityId]) ?>" class="mb-2">
+<form id="vc-diff-form" method="get" action="<?php echo url_for(['module' => 'versionControl', 'action' => 'list', 'entity' => $entityType, 'id' => $entityId]) ?>" class="mb-2">
     <div class="d-flex align-items-center gap-2">
         <button type="submit" class="btn btn-outline-primary btn-sm" disabled id="vc-compare-btn">
             <i class="fas fa-code-compare me-1"></i><?php echo __('Compare selected') ?>
@@ -143,11 +143,11 @@
         var checked = Array.from(picks).filter(function (c) { return c.checked; })
             .map(function (c) { return parseInt(c.value, 10); })
             .sort(function (a, b) { return a - b; });
-        if (checked.length !== 2) { e.preventDefault(); return; }
-        // Remove the raw vc-pick fields; rewrite as v1/v2 query params
-        Array.from(form.querySelectorAll('input[name="vc-pick"]')).forEach(function (n) { n.remove(); });
-        var v1 = document.createElement('input'); v1.type='hidden'; v1.name='v1'; v1.value=String(checked[0]); form.appendChild(v1);
-        var v2 = document.createElement('input'); v2.type='hidden'; v2.name='v2'; v2.value=String(checked[1]); form.appendChild(v2);
+        e.preventDefault();
+        if (checked.length !== 2) { return; }
+        // The diff route takes the versions in the path (/diff/:v1/:v2); the form's
+        // action is this list page's address.
+        window.location.href = form.getAttribute('action').replace(/\/$/, '') + '/diff/' + checked[0] + '/' + checked[1];
     });
 })();
 </script>
