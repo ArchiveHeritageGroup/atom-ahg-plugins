@@ -88,6 +88,57 @@ class LabelService
         return $this->baseRecordQuery($culture)->whereIn('io.id', $ids)->get()->map(fn ($r) => $this->mapRow($r))->all();
     }
 
+    /**
+     * Resolve what staff type: database ids, slugs or reference identifiers
+     * (HRD/1955), in the order given. Only ids worked before, and staff never see
+     * those. With $withChildren every record below each one follows it, in
+     * hierarchy order, so a whole series or fonds can be labelled at once.
+     *
+     * @param string[] $tokens
+     */
+    public function resolveTokens(array $tokens, bool $withChildren = false, string $culture = 'en', int $limit = 500): array
+    {
+        $ids = [];
+        foreach ($tokens as $tok) {
+            $tok = trim((string) $tok);
+            if ('' === $tok) {
+                continue;
+            }
+            $id = ctype_digit($tok) ? (int) $tok : 0;
+            if (!$id) {
+                $id = (int) DB::table('slug')->where('slug', $tok)->value('object_id');
+            }
+            if (!$id) {
+                $id = (int) DB::table('information_object')->where('identifier', $tok)->orderBy('lft')->value('id');
+            }
+            if ($id > 1 && !in_array($id, $ids, true)) {
+                $ids[] = $id;
+            }
+        }
+        $order = [];
+        foreach ($ids as $id) {
+            $order[] = $id;
+            if ($withChildren) {
+                $n = DB::table('information_object')->where('id', $id)->first(['lft', 'rgt']);
+                if ($n && $n->rgt - $n->lft > 1) {
+                    foreach (DB::table('information_object')->where('lft', '>', $n->lft)->where('rgt', '<', $n->rgt)->orderBy('lft')->pluck('id') as $c) {
+                        $order[] = (int) $c;
+                    }
+                }
+            }
+        }
+        $order = array_slice(array_values(array_unique($order)), 0, $limit);
+        if (!$order) {
+            return [];
+        }
+        $rows = [];
+        foreach ($this->baseRecordQuery($culture)->whereIn('io.id', $order)->get() as $r) {
+            $rows[(int) $r->id] = $this->mapRow($r);
+        }
+
+        return array_values(array_filter(array_map(fn ($id) => $rows[$id] ?? null, $order)));
+    }
+
     public function resolveByRepository(int $repositoryId, string $culture = 'en', int $limit = 500): array
     {
         if ($repositoryId <= 0) {
@@ -130,8 +181,11 @@ class LabelService
                 $j->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 's.object_id', '=', 'io.id')
+            // A description usually inherits its repository from the fonds; the
+            // label showed none for every lower-level record.
             ->leftJoin('actor_i18n as ri', function ($j) use ($culture) {
-                $j->on('ri.id', '=', 'io.repository_id')->where('ri.culture', '=', $culture);
+                $j->on('ri.id', '=', DB::raw('(SELECT a.repository_id FROM information_object a WHERE a.lft <= io.lft AND a.rgt >= io.rgt AND a.repository_id IS NOT NULL ORDER BY a.lft DESC LIMIT 1)'))
+                    ->where('ri.culture', '=', $culture);
             })
             ->select([
                 'io.id',
@@ -152,10 +206,26 @@ class LabelService
             'identifier' => $r->identifier ?? null,
             'title' => $r->title ?? null,
             'repository' => $r->repository ?? null,
-            'accession' => $this->safe('accession', $oid),
+            'accession' => $this->accessionNumber($oid),
             'call_number' => $this->safe('library_item', $oid, 'call_number'),
             'isbn' => $this->safe('library_item', $oid, 'isbn'),
         ];
+    }
+
+    /** Accessions link to a description through relation (type 167), not a column. */
+    private function accessionNumber(int $oid): ?string
+    {
+        try {
+            $v = DB::table('relation as r')->join('accession as a', function ($j) {
+                $j->on('a.id', '=', 'r.object_id')->orOn('a.id', '=', 'r.subject_id');
+            })->where('r.type_id', 167)
+                ->where(function ($q) use ($oid) { $q->where('r.subject_id', $oid)->orWhere('r.object_id', $oid); })
+                ->value('a.identifier');
+
+            return null !== $v ? (string) $v : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     private function safe(string $table, int $oid, string $col = 'identifier'): ?string

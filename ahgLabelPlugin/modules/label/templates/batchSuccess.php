@@ -10,8 +10,10 @@ $records = $sf_data->getRaw('records') ?: [];
 $hasSelection = $sf_data->getRaw('hasSelection');
 $idsRaw = (string) $sf_data->getRaw('idsRaw');
 $repositoryId = (int) $sf_data->getRaw('repositoryId');
+$withChildren = (bool) $sf_data->getRaw('withChildren');
 $batchUrl = url_for(['module' => 'label', 'action' => 'batch']);
-$base = rtrim((string) sfConfig::get('app_siteBaseUrl', ''), '/');
+$base = rtrim((string) sfConfig::get('app_siteBaseUrl', ''), '/') ?: sfContext::getInstance()->getRequest()->getUriPrefix();
+$perSheet = $t ? max(1, (int) $t->columns * (int) $t->rows) : 24;
 $nonce = sfConfig::get('csp_nonce', '');
 $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
 
@@ -41,13 +43,14 @@ function lbl_barcode_value(array $r, $t): string
       <?php if (empty($templates)): ?><div class="form-text text-danger"><?php echo __('Create a template first.'); ?> <a href="<?php echo url_for(['module' => 'label', 'action' => 'templateEdit']); ?>"><?php echo __('New template'); ?></a></div><?php endif; ?>
     </div>
     <div class="col-md-4">
-      <label class="form-label"><?php echo __('Object IDs'); ?></label>
-      <input class="form-control" name="ids" value="<?php echo htmlspecialchars($idsRaw); ?>" placeholder="<?php echo __('e.g. 631, 642, 700'); ?>">
-      <div class="form-text"><?php echo __('Comma/space separated. Overrides repository.'); ?></div>
+      <label class="form-label" for="lbl-ids"><?php echo __('Records'); ?></label>
+      <input class="form-control" id="lbl-ids" name="ids" value="<?php echo htmlspecialchars($idsRaw); ?>" placeholder="<?php echo __('e.g. HRD/1955, farm-diary-volume-1-1934'); ?>">
+      <div class="form-text"><?php echo __('Identifiers, slugs or ids, separated by commas or spaces. Overrides repository.'); ?></div>
+      <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="children" value="1" id="lbl-children"<?php echo $withChildren ? ' checked' : ''; ?>><label class="form-check-label" for="lbl-children"><?php echo __('Include the records below each one'); ?></label></div>
     </div>
     <div class="col-md-4">
-      <label class="form-label"><?php echo __('…or whole repository'); ?></label>
-      <select class="form-select" name="repository_id"><option value=""><?php echo __('— none —'); ?></option>
+      <label class="form-label"><?php echo __('...or a whole repository'); ?></label>
+      <select class="form-select" name="repository_id"><option value=""><?php echo __('- none -'); ?></option>
         <?php foreach ($repositoryOptions as $rid => $rname): ?><option value="<?php echo (int) $rid; ?>"<?php echo $repositoryId === (int) $rid ? ' selected' : ''; ?>><?php echo htmlspecialchars((string) $rname); ?></option><?php endforeach; ?>
       </select>
     </div>
@@ -75,13 +78,27 @@ function lbl_barcode_value(array $r, $t): string
   .label-cell .l-title { flex: 1; overflow: hidden; }
   .label-cell .l-codes { display: flex; gap: 2mm; align-items: flex-end; }
   .label-cell .l-codes img { max-height: <?php echo max(8, (int) ($lh / 3)); ?>mm; }
-  @media print { .no-print { display: none !important; } .label-cell { border: none; } body { background: #fff; } }
+  .label-sheet + .label-sheet { margin-top: 6mm; }
+  /* Only the sheets print. Hiding .no-print left the site header, banner and
+     floating buttons on the page, and labels ran on without a break, so a second
+     sheet started part-way down the label stock. */
+  @media print {
+    body * { visibility: hidden !important; }
+    .label-sheet, .label-sheet * { visibility: visible !important; }
+    .label-print-area { position: absolute; left: 0; top: 0; }
+    .label-sheet { break-after: page; margin: 0 !important; }
+    .label-sheet:last-child { break-after: auto; }
+    .label-cell { border: none; }
+    body { background: #fff !important; }
+  }
 </style>
+<div class="label-print-area">
+<?php foreach (array_chunk($records, $perSheet) as $sheet): ?>
 <div class="label-sheet">
-  <?php foreach ($records as $r): ?>
+  <?php foreach ($sheet as $r): ?>
     <?php
         $bcVal = lbl_barcode_value($r, $t);
-        $qrData = ($t->qr_target === 'identifier') ? ($r['identifier'] ?? '') : ($base && !empty($r['slug']) ? $base . '/index.php/' . $r['slug'] : ($r['slug'] ?? ''));
+        $qrData = ($t->qr_target === 'identifier') ? ($r['identifier'] ?? '') : (!empty($r['slug']) ? $base . '/' . $r['slug'] : '');
     ?>
     <div class="label-cell">
       <?php if ($t->show_identifier && !empty($r['identifier'])): ?><div class="l-id"><?php echo htmlspecialchars((string) $r['identifier']); ?></div><?php endif; ?>
@@ -94,5 +111,7 @@ function lbl_barcode_value(array $r, $t): string
       </div>
     </div>
   <?php endforeach; ?>
+</div>
+<?php endforeach; ?>
 </div>
 <?php endif; ?>

@@ -149,6 +149,22 @@ foreach ($preferredOrder as $key) {
 
 $qrUrl = sfContext::getInstance()->getRequest()->getUriPrefix() . '/' . $resource->slug;
 
+// A lower-level description inherits its repository from the fonds; the label
+// showed none for those. Nearest ancestor (or itself) with a repository.
+$repoName = '';
+try {
+    $node = DB::table('information_object')->where('id', $objectId)->first(['lft', 'rgt']);
+    if ($node) {
+        $repoName = (string) DB::table('information_object as a')
+            ->join('actor_i18n as ai', 'ai.id', '=', 'a.repository_id')
+            ->where('a.lft', '<=', $node->lft)->where('a.rgt', '>=', $node->rgt)
+            ->whereNotNull('a.repository_id')
+            ->orderByDesc('a.lft')->orderByRaw("ai.culture = 'en' DESC")
+            ->value('ai.authorized_form_of_name');
+    }
+} catch (\Exception $e) {
+}
+
 // Generated locally as data URIs rather than fetched from barcodeapi.org and
 // api.qrserver.com, which sent the identifier and public URL to third parties
 // and produced nothing offline (#260). Every dropdown option is pre-rendered so
@@ -172,11 +188,16 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
 ?>
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+/* Only the label prints. Hiding nav/header/footer left the site banner, the
+   preview card, "Back to record" and the floating buttons on the page. */
 @media print {
-    .no-print, #sidebar, #context-menu, nav, header, footer { display: none !important; }
+    body * { visibility: hidden !important; }
+    #labelContent, #labelContent * { visibility: visible !important; }
+    #labelContent { position: absolute; left: 0; top: 0; margin: 0 !important; box-shadow: none !important; border: 1px solid #ccc !important; }
     body { background: white !important; }
-    .label-preview { width: fit-content; min-width: 200px; box-shadow: none !important; border: 1px solid #ccc !important; }
 }
+/* The sizes are millimetres; they were pixels before, so a "75 mm" label was not. */
+#labelContent.lbl-s { width: 50mm; } #labelContent.lbl-m { width: 75mm; } #labelContent.lbl-l { width: 100mm; }
 .label-preview { width: fit-content; min-width: 200px;
     background: white;
     border: 2px solid #333;
@@ -193,7 +214,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         <div class="card mb-3">
             <div class="card-header">
                 <i class="fas fa-cog me-2"></i><?php echo __('Label Configuration'); ?>
-                <span class="badge bg-secondary ms-2"><?php echo $sectorLabel; ?></span>
+                <span class="badge bg-light text-dark ms-2"><?php echo $sectorLabel; ?></span>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -218,9 +239,9 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold"><?php echo __('Label Size'); ?></label>
                         <select class="form-select" id="labelSize" data-ahg-call="updateLabelSize" data-ahg-on="change">
-                            <option value="200"><?php echo __('Small (50mm)'); ?></option>
-                            <option value="300" selected><?php echo __('Medium (75mm)'); ?></option>
-                            <option value="400"><?php echo __('Large (100mm)'); ?></option>
+                            <option value="lbl-s"><?php echo __('Small (50 mm)'); ?></option>
+                            <option value="lbl-m" selected><?php echo __('Medium (75 mm)'); ?></option>
+                            <option value="lbl-l"><?php echo __('Large (100 mm)'); ?></option>
                         </select>
                     </div>
                     
@@ -260,9 +281,6 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
             <button type="button" class="btn btn-primary" data-ahg-action="print">
                 <i class="fas fa-print me-1"></i><?php echo __('Print Label'); ?>
             </button>
-            <button type="button" class="btn btn-secondary" data-ahg-call="downloadLabel">
-                <i class="fas fa-download me-1"></i><?php echo __('Download PNG'); ?>
-            </button>
         </div>
     </div>
     
@@ -270,15 +288,13 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         <div class="card">
             <div class="card-header"><?php echo __('Preview'); ?></div>
             <div class="card-body text-center">
-                <div class="label-preview" id="labelContent" data-ahg-style="max-width: 300px;">
+                <div class="label-preview lbl-m" id="labelContent">
                     <div id="labelTitle" class="fw-bold mb-2" data-ahg-style="font-size: 11pt;">
                         <?php echo esc_specialchars(html_entity_decode($resource->title ?? $resource->slug, ENT_QUOTES, 'UTF-8')); ?>
                     </div>
                     
                     <div id="labelRepo" class="small text-muted mb-2">
-                        <?php if ($resource->repository): ?>
-                            <?php echo esc_entities($resource->repository->getAuthorizedFormOfName(['cultureFallback' => true])); ?>
-                        <?php endif; ?>
+                        <?php echo esc_entities($repoName); ?>
                     </div>
                     
                     <div id="barcodeSection" class="mb-2">
@@ -318,7 +334,9 @@ function updateBarcodeSource() {
 }
 
 function updateLabelSize() {
-    document.getElementById('labelContent').style.maxWidth = document.getElementById('labelSize').value + 'px';
+    var el = document.getElementById('labelContent');
+    el.classList.remove('lbl-s', 'lbl-m', 'lbl-l');
+    el.classList.add(document.getElementById('labelSize').value);
 }
 
 function toggleBarcode() {
@@ -337,16 +355,4 @@ function toggleRepo() {
     document.getElementById('labelRepo').style.display = document.getElementById('showRepo').checked ? 'block' : 'none';
 }
 
-function downloadLabel() {
-    if (typeof html2canvas !== 'undefined') {
-        html2canvas(document.getElementById('labelContent')).then(function(canvas) {
-            var link = document.createElement('a');
-            link.download = 'label-<?php echo $resource->slug; ?>.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        });
-    } else {
-        alert('<?php echo __('Download requires html2canvas. Use Print instead.'); ?>');
-    }
-}
 </script>

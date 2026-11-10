@@ -23,6 +23,10 @@ class ahgLabelPluginConfiguration extends sfPluginConfiguration
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
+
+        // "Print label" on description pages (the theme side menu is locked).
+        require_once __DIR__ . '/../lib/Listeners/LabelLinkInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\\AhgLabelPlugin\\Listeners\\LabelLinkInjector', 'filter']);
     }
 
     public function loadRoutes(sfEvent $event)

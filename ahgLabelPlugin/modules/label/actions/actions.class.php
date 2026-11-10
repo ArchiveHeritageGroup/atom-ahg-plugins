@@ -42,8 +42,9 @@ class labelActions extends AhgController
     protected function requireLabelAdmin(): void
     {
         $user = $this->getUser();
+        // The menu offers templates to editors as well; they were then refused.
         if (!$user->isAuthenticated()
-            || !$user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID)
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasCredential('editor'))
         ) {
             \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
@@ -103,9 +104,9 @@ class labelActions extends AhgController
         $records = [];
         $idsRaw = trim((string) $request->getParameter('ids'));
         $repositoryId = (int) $request->getParameter('repository_id');
+        $this->withChildren = (bool) $request->getParameter('children');
         if ($idsRaw !== '') {
-            $ids = array_filter(array_map('intval', preg_split('/[\s,]+/', $idsRaw)));
-            $records = $svc->resolveByIds($ids, $culture);
+            $records = $svc->resolveTokens(preg_split('/[\s,]+/', $idsRaw), $this->withChildren, $culture);
         } elseif ($repositoryId > 0) {
             $records = $svc->resolveByRepository($repositoryId, $culture);
         }
