@@ -8,6 +8,11 @@
 /** @var array<string,mixed> $snapshot */
 /** @var array<int,string>   $changedFields */
 
+// Raw arrays: through the output escaper they arrive as decorator objects, is_array()
+// fails, and every section read "0 fields" although the snapshot was complete.
+// Every value printed below is escaped explicitly (esc_entities / htmlspecialchars).
+$snapshot = $sf_data->getRaw('snapshot');
+$changedFields = $sf_data->getRaw('changedFields');
 $base = is_array($snapshot['base'] ?? null) ? $snapshot['base'] : [];
 $i18n = is_array($snapshot['i18n'] ?? null) ? $snapshot['i18n'] : [];
 $ap = is_array($snapshot['access_points'] ?? null) ? $snapshot['access_points'] : [];

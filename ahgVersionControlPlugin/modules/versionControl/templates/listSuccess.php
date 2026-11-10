@@ -58,6 +58,12 @@
         </tr>
     </thead>
     <tbody>
+    <?php
+      // changed_fields read raw: escaped, its quotes became &quot; and json_decode
+      // failed, so every version showed no changes.
+      $rawChanged = [];
+      foreach ($sf_data->getRaw('versions') as $rv) { $rawChanged[$rv->id] = $rv->changed_fields; }
+    ?>
     <?php foreach ($versions as $v): ?>
         <?php
             $detailUrl = url_for([
@@ -67,7 +73,8 @@
                 'id'     => $entityId,
                 'number' => (int) $v->version_number,
             ]);
-            $changed = is_string($v->changed_fields) ? (json_decode($v->changed_fields, true) ?? []) : [];
+            $rawJson = $rawChanged[$v->id] ?? null;
+            $changed = is_string($rawJson) ? (json_decode($rawJson, true) ?? []) : [];
             $changedCount = is_array($changed) ? count($changed) : 0;
         ?>
         <tr>

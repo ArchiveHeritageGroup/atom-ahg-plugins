@@ -30,8 +30,19 @@ use AhgVersionControl\Services\VersionWriter;
 final class SaveListener
 {
     /** Modules where a save targets an information_object. */
+    // These must be MODULE names (what sfContext::getModuleName() returns after any
+    // forward), not plugin names. The list held only plugin names, so saves through
+    // the AHG editors (ahgIoForm forwards to ioManage, dcManage, ...) were never
+    // versioned: PSIS captured 6 versions between May and November 2026.
     private const IO_MODULES = [
         'informationobject',
+        'ahgIoForm',
+        'ioManage',
+        'dacsManage',
+        'dcManage',
+        'modsManage',
+        'radManage',
+        // old plugin-name entries, kept in case a module was ever named after its plugin
         'ahgInformationObjectManage',
         'ahgDacsManage',
         'ahgDcManage',
@@ -42,6 +53,15 @@ final class SaveListener
     /** Modules where a save targets an actor. */
     private const ACTOR_MODULES = [
         'actor',
+        'actorManage',
+        'sfIsaarPlugin',
+        'donor',
+        'donorManage',
+        'repositoryManage',
+        'sfIsdiahPlugin',
+        'rightsholder',
+        'rightsHolderManage',
+        // old plugin-name entries
         'ahgActorManage',
         'ahgDonorManage',
         'ahgRepositoryManage',
