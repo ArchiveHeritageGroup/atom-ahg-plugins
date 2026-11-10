@@ -379,6 +379,19 @@ class FormSubmitService
             }
 
             $now = date('Y-m-d H:i:s');
+            // Editing through the form added a new event on every save, so dates and
+            // creators piled up. Update the record's existing event of this type.
+            $existing = DB::table('event')->where('object_id', $objectId)->where('type_id', (int) $typeId)->orderBy('id')->value('id');
+            if ($existing) {
+                DB::table('event')->where('id', $existing)->update(array_filter([
+                    'actor_id' => $actorId, 'start_date' => $startDate, 'end_date' => $endDate,
+                ], fn ($v) => null !== $v));
+                DB::table('object')->where('id', $existing)->update(['updated_at' => $now]);
+                if (null !== $date && '' !== (string) $date) {
+                    DB::table('event_i18n')->updateOrInsert(['id' => $existing, 'culture' => $culture], ['date' => (string) $date]);
+                }
+                continue;
+            }
             $eventId = DB::table('object')->insertGetId([
                 'class_name' => 'QubitEvent',
                 'created_at' => $now,

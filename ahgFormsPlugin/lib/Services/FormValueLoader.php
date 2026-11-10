@@ -33,7 +33,7 @@ class FormValueLoader
         $mappings = DB::table('ahg_form_field as f')
             ->join('ahg_form_field_mapping as m', 'm.field_id', '=', 'f.id')
             ->where('f.template_id', $templateId)
-            ->select(['f.field_name', 'm.target_table', 'm.target_column', 'm.target_type_id'])
+            ->select(['f.field_name', 'm.target_table', 'm.target_column', 'm.target_type_id', 'm.transformation'])
             ->get();
 
         if ($mappings->isEmpty()) {
@@ -61,7 +61,34 @@ class FormValueLoader
                 $row = $isI18n ? $i18nRow : $coreRow;
                 if (array_key_exists($col, $row)) {
                     $values[$m->field_name] = $row[$col];
+                    // A term id (level of description) is shown by name: the form's
+                    // options carry names, so the id matched nothing and the field
+                    // came back empty - and Level is required.
+                    if ('term_id' === $m->transformation && is_numeric($row[$col])) {
+                        $values[$m->field_name] = $this->termName((int) $row[$col], $culture);
+                    }
                 }
+            } elseif ('event' === $table) {
+                // Dates and creator were never read back, so editing through the form
+                // showed them empty.
+                $event = DB::table('event')->where('object_id', $objectId)->where('type_id', (int) ($m->target_type_id ?: 111))->orderBy('id')->first();
+                if ($event) {
+                    if ('date' === $col) {
+                        $values[$m->field_name] = ['start' => $event->start_date, 'end' => $event->end_date];
+                    } elseif ('actor' === $col && $event->actor_id) {
+                        $values[$m->field_name] = $this->actorName((int) $event->actor_id, $culture);
+                    } elseif (in_array($col, ['start_date', 'end_date'], true)) {
+                        $values[$m->field_name] = $event->{$col};
+                    }
+                }
+            } elseif ('object_term_relation' === $table && null !== $m->target_type_id) {
+                $values[$m->field_name] = implode(' | ', DB::table('object_term_relation as r')->join('term as t', 't.id', '=', 'r.term_id')
+                    ->join('term_i18n as ti', 'ti.id', '=', 't.id')->where('r.object_id', $objectId)
+                    ->where('t.taxonomy_id', (int) $m->target_type_id)->where('ti.culture', $culture)->pluck('ti.name')->all());
+            } elseif ('actor_relation' === $table) {
+                $values[$m->field_name] = implode(' | ', DB::table('relation as r')->join('actor_i18n as a', 'a.id', '=', 'r.object_id')
+                    ->where('r.subject_id', $objectId)->where('r.type_id', (int) ($m->target_type_id ?: 161))->where('a.culture', $culture)
+                    ->pluck('a.authorized_form_of_name')->all());
             } elseif ('property' === $table) {
                 $values[$m->field_name] = $this->loadProperty($objectId, $col, $culture);
             } elseif ('note' === $table && null !== $m->target_type_id) {
@@ -70,6 +97,20 @@ class FormValueLoader
         }
 
         return $values;
+    }
+
+    private function termName(int $termId, string $culture): ?string
+    {
+        $name = DB::table('term_i18n')->where('id', $termId)->where('culture', $culture)->value('name');
+
+        return null !== $name ? (string) $name : null;
+    }
+
+    private function actorName(int $actorId, string $culture): ?string
+    {
+        $name = DB::table('actor_i18n')->where('id', $actorId)->where('culture', $culture)->value('authorized_form_of_name');
+
+        return null !== $name ? (string) $name : null;
     }
 
     /**

@@ -257,7 +257,9 @@ class FormRenderService
     private function renderSelect(object $field, string $id, string $name, $val, bool $multiple, string $required, string $disabled): string
     {
         $options = $this->fieldOptions($field);
-        $selected = $multiple ? (is_array($val) ? array_map('strval', $val) : []) : [(string) $val];
+        // Compared without case: a level loaded by name ("Item") must select the
+        // option "item".
+        $selected = array_map('strtolower', $multiple ? (is_array($val) ? array_map('strval', $val) : []) : [(string) $val]);
 
         $html = '<select class="form-select" id="' . $id . '" name="' . $name . '"' . ($multiple ? ' multiple' : '') . $required . $disabled . '>';
         if (!$multiple) {
@@ -266,7 +268,7 @@ class FormRenderService
         foreach ($options as $opt) {
             $optVal = is_object($opt) ? ($opt->value ?? '') : ($opt['value'] ?? '');
             $optLabel = is_object($opt) ? ($opt->label ?? $optVal) : ($opt['label'] ?? $optVal);
-            $isSel = in_array((string) $optVal, $selected, true) ? ' selected' : '';
+            $isSel = in_array(strtolower((string) $optVal), $selected, true) ? ' selected' : '';
             $html .= '<option value="' . $this->esc((string) $optVal) . '"' . $isSel . '>' . $this->esc((string) $optLabel) . '</option>';
         }
         $html .= '</select>';
