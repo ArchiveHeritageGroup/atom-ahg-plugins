@@ -127,7 +127,23 @@ class FormSubmitService
             $savedId = $this->saveAccession($objectId, $entityData, $culture);
         } else {
             $savedId = $this->saveInformationObject($objectId, $entityData, $culture);
+            // Writes go through the query builder, which never touches the search index:
+            // without this, form-saved descriptions were missing from search and browse.
+            if (class_exists('IoFormHelper')) {
+                \IoFormHelper::reindexAfterRequest($savedId);
+            }
             if ($isCreate) {
+                // The shared write service inserts the row without a place in the
+                // hierarchy (lft/rgt NULL), and the record's page then failed with
+                // "Could not build SQL for expression: information_object.LFT > NULL".
+                // Same helper ahgCorePlugin's own create uses: last child of the parent.
+                $node = DB::table('information_object')->where('id', $savedId)->first(['lft', 'parent_id']);
+                if ($node && null === $node->lft) {
+                    if (!class_exists(\AhgCore\Services\NestedSetService::class)) {
+                        require_once \sfConfig::get('sf_root_dir') . '/plugins/ahgCorePlugin/lib/Services/NestedSetService.php';
+                    }
+                    \AhgCore\Services\NestedSetService::insertUnder((int) ($node->parent_id ?: 1), $savedId);
+                }
                 // A description needs a publication status: without one its page failed
                 // with "No publication status set" (HTTP 500). New records start as drafts.
                 $hasStatus = DB::table('status')->where('object_id', $savedId)->where('type_id', 158)->exists();
