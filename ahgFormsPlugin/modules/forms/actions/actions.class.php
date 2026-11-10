@@ -98,7 +98,19 @@ class formsActions extends AhgController
         require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
-        $service->deleteTemplate((int) $request->getParameter('id'));
+        $id = (int) $request->getParameter('id');
+        // Delete only on POST, after the confirmation page (it deleted on a plain GET).
+        if (!$request->isMethod('post')) {
+            $template = \Illuminate\Database\Capsule\Manager::table('ahg_form_template')->where('id', $id)->first();
+            $this->forward404Unless($template && !$template->is_system);
+            $this->what = 'form template';
+            $this->detail = $template->name;
+            $this->back = ['module' => 'forms', 'action' => 'templates'];
+            $this->setTemplate('deleteConfirm');
+
+            return sfView::SUCCESS;
+        }
+        $service->deleteTemplate($id);
 
         $this->redirect(['module' => 'forms', 'action' => 'templates']);
     }
@@ -460,7 +472,20 @@ class formsActions extends AhgController
         require_once $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/FormService.php';
         $service = new \ahgFormsPlugin\Services\FormService();
 
-        $service->deleteAssignment((int) $request->getParameter('id'));
+        $id = (int) $request->getParameter('id');
+        if (!$request->isMethod('post')) {
+            $a = \Illuminate\Database\Capsule\Manager::table('ahg_form_assignment as a')
+                ->join('ahg_form_template as t', 't.id', '=', 'a.template_id')
+                ->where('a.id', $id)->first(['t.name']);
+            $this->forward404Unless($a);
+            $this->what = 'form assignment';
+            $this->detail = 'the assignment of ' . $a->name;
+            $this->back = ['module' => 'forms', 'action' => 'assignments'];
+            $this->setTemplate('deleteConfirm');
+
+            return sfView::SUCCESS;
+        }
+        $service->deleteAssignment($id);
 
         $this->redirect(['module' => 'forms', 'action' => 'assignments']);
     }

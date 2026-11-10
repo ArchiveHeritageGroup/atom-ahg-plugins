@@ -101,8 +101,7 @@
                                         </a>
                                         <?php if (!$template->is_system): ?>
                                             <a href="<?php echo url_for(['module' => 'forms', 'action' => 'templateDelete', 'id' => $template->id]) ?>"
-                                               class="btn btn-outline-danger" title="Delete"
-                                               data-ahg-confirm="Delete this template?">
+                                               class="btn btn-outline-danger" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         <?php endif ?>

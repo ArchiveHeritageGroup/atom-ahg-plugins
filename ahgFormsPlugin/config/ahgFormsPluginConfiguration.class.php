@@ -70,8 +70,8 @@ class ahgFormsPluginConfiguration extends sfPluginConfiguration
         $router->any('ahg_forms_assignment_create', '/admin/forms/assignment/create', 'assignmentCreate');
         $router->any('ahg_forms_assignment_delete', '/admin/forms/assignment/:id/delete', 'assignmentDelete', ['id' => '\d+']);
 
-        // Field mappings
-        $router->any('ahg_forms_mappings', '/admin/forms/mappings', 'mappings');
+        // (No mappings page: the route pointed at an action that never existed. Mappings
+        // are set per field, through the builder palette and the system templates.)
 
         // API routes for AJAX operations
         $router->any('ahg_forms_api_save_fields', '/api/forms/template/:id/fields', 'apiSaveFields', ['id' => '\d+']);
