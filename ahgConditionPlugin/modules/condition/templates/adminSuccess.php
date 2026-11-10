@@ -21,7 +21,7 @@ $conditionColors = [
         <div class="col-md-4">
             <div class="card text-white bg-primary">
                 <div class="card-body text-center">
-                    <h3><?php echo number_format($totalChecksVal); ?></h3>
+                    <h3 class="text-white"><?php echo number_format($totalChecksVal); ?></h3>
                     <small><?php echo __('Total Condition Checks'); ?></small>
                 </div>
             </div>
@@ -29,7 +29,7 @@ $conditionColors = [
         <div class="col-md-4">
             <div class="card text-white bg-info">
                 <div class="card-body text-center">
-                    <h3><?php echo number_format($totalPhotosVal); ?></h3>
+                    <h3 class="text-white"><?php echo number_format($totalPhotosVal); ?></h3>
                     <small><?php echo __('Condition Photos'); ?></small>
                 </div>
             </div>
@@ -37,7 +37,7 @@ $conditionColors = [
         <div class="col-md-4">
             <div class="card text-white bg-success">
                 <div class="card-body text-center">
-                    <h3><?php echo number_format($totalAnnotationsVal); ?></h3>
+                    <h3 class="text-white"><?php echo number_format($totalAnnotationsVal); ?></h3>
                     <small><?php echo __('Annotations'); ?></small>
                 </div>
             </div>

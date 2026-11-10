@@ -15,15 +15,21 @@ $photoTypes = [
 ];
 ?>
 
+<?php // The header was written for a dark band whose styles never existed: white breadcrumb links on the light page, unlabelled facts. ?>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  .condition-check-header .check-meta { display: flex; flex-wrap: wrap; gap: .25rem 2rem; margin: .5rem 0 1rem; }
+  .condition-check-header .meta-label { font-weight: 600; margin-right: .4rem; }
+  .condition-check-header .meta-label::after { content: ':'; }
+</style>
 <div class="condition-check-header">
     <nav aria-label="breadcrumb" class="mb-2">
         <ol class="breadcrumb mb-0" data-ahg-style="background: transparent; padding: 0;">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage') ?>" data-ahg-style="color: rgba(255,255,255,0.8);">Home</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage') ?>">Home</a></li>
             <?php if ($conditionCheck->slug): ?>
-            <li class="breadcrumb-item"><a href="/<?php echo $conditionCheck->slug ?>" data-ahg-style="color: rgba(255,255,255,0.8);"><?php echo $conditionCheck->identifier ?></a></li>
+            <li class="breadcrumb-item"><a href="/<?php echo $conditionCheck->slug ?>"><?php echo $conditionCheck->identifier ?></a></li>
             <?php endif ?>
-            <li class="breadcrumb-item"><a href="<?php echo url_for('@condition_photos?id=' . $photo->condition_check_id) ?>" data-ahg-style="color: rgba(255,255,255,0.8);">Condition Photos</a></li>
-            <li class="breadcrumb-item active" data-ahg-style="color: #fff;">Annotate</li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('@condition_photos?id=' . $photo->condition_check_id) ?>">Condition Photos</a></li>
+            <li class="breadcrumb-item active">Annotate</li>
         </ol>
     </nav>
     

@@ -686,8 +686,14 @@ class conditionActions extends AhgController
                 ->orderByDesc('count')
                 ->get();
 
-            $this->totalPhotos = DB::table('condition_photo')->count();
-            $this->totalAnnotations = DB::table('condition_annotation')->count();
+            // Photos and their annotations (a JSON list per photo) live in
+            // spectrum_condition_photo. The old condition_photo/condition_annotation
+            // tables do not exist; the failed count dropped into the catch below and
+            // the whole dashboard read 0.
+            $this->totalPhotos = DB::table('spectrum_condition_photo')->count();
+            $this->totalAnnotations = (int) DB::table('spectrum_condition_photo')
+                ->selectRaw('COALESCE(SUM(CASE WHEN JSON_VALID(annotations) THEN JSON_LENGTH(annotations) ELSE 0 END), 0) AS n')
+                ->value('n');
         } catch (\Exception $e) {
             $this->totalChecks = 0;
             $this->recentChecks = collect();
