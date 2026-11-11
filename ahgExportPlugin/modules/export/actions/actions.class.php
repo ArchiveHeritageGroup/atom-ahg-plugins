@@ -654,12 +654,40 @@ class exportActions extends AhgController
 
         $records = $query->get();
 
+        // Dates and creators: AtoM keeps both as events (creation, accumulation...).
+        // The export had neither. One query for all records, written in AtoM's own
+        // CSV import columns, several events joined with "|", so the file reads back.
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $events = [];
+        foreach (array_chunk($records->pluck('id')->all(), 1000) as $ids) {
+            $rows = $DB::table('event as e')
+                ->leftJoin('event_i18n as ei', function ($j) use ($culture) {
+                    $j->on('ei.id', '=', 'e.id')->where('ei.culture', '=', $culture);
+                })
+                ->leftJoin('term_i18n as ti', function ($j) use ($culture) {
+                    $j->on('ti.id', '=', 'e.type_id')->where('ti.culture', '=', $culture);
+                })
+                ->leftJoin('actor_i18n as ai', function ($j) use ($culture) {
+                    $j->on('ai.id', '=', 'e.actor_id')->where('ai.culture', '=', $culture);
+                })
+                ->whereIn('e.object_id', $ids)
+                ->orderBy('e.object_id')->orderBy('e.id')
+                ->get(['e.object_id', 'e.start_date', 'e.end_date', 'ei.date', 'ti.name as type', 'ai.authorized_form_of_name as actor']);
+            foreach ($rows as $ev) {
+                $events[(int) $ev->object_id][] = $ev;
+            }
+        }
+        $eventCol = function (int $id, string $field) use (&$events): string {
+            return implode('|', array_map(fn ($ev) => str_replace('|', '/', (string) ($ev->{$field} ?? '')), $events[$id] ?? []));
+        };
+
         // Build CSV
         $columns = [
             'legacyId', 'identifier', 'slug', 'title', 'levelOfDescription',
             'repository', 'parentId', 'scopeAndContent', 'extentAndMedium',
             'archivalHistory', 'arrangement', 'accessConditions',
             'reproductionConditions', 'physicalCharacteristics', 'findingAids',
+            'eventActors', 'eventTypes', 'eventDates', 'eventStartDates', 'eventEndDates',
             'createdAt', 'updatedAt',
         ];
 
@@ -701,6 +729,11 @@ class exportActions extends AhgController
                 $r->reproduction_conditions,
                 $r->physical_characteristics,
                 $r->finding_aids,
+                $eventCol((int) $r->id, 'actor'),
+                $eventCol((int) $r->id, 'type'),
+                $eventCol((int) $r->id, 'date'),
+                $eventCol((int) $r->id, 'start_date'),
+                $eventCol((int) $r->id, 'end_date'),
                 $r->created_at,
                 $r->updated_at,
             ]);
