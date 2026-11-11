@@ -104,6 +104,10 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
         $this->dispatcher->connect('response.filter_content', [$this, 'filterContent']);
 
+        // "Pages: type and privacy" in AI Tools on records with a PDF (catalogue#320).
+        require_once __DIR__ . '/../lib/Listeners/PagesLinkInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\\AhgAIPlugin\\Listeners\\PagesLinkInjector', 'filter']);
+
         // Auto-trigger NER on digital object upload (Issue #19)
         $this->dispatcher->connect('QubitDigitalObject::insert', [$this, 'onDigitalObjectInsert']);
 
