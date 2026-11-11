@@ -440,6 +440,8 @@ class shareLinkActions extends sfActions
         }
 
         $flashKey = $result['was_already_revoked'] ? 'info' : 'success';
+        // __() for the message; without it the revoke was saved and the page then died.
+        $this->getContext()->getConfiguration()->loadHelpers(['I18N']);
         $flashMsg = $result['was_already_revoked']
             ? __('This share link was already revoked.')
             : __('Share link revoked.');

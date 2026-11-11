@@ -15,7 +15,6 @@
   .sl-card .icon { font-size: 3rem; color: #dc3545; margin-bottom: 1rem; }
   .sl-card h1 { font-size: 1.5rem; margin: 0 0 1rem; }
   .sl-card p { color: #6c757d; line-height: 1.5; }
-  .sl-status { display: inline-block; padding: .25rem .5rem; background: #f8d7da; color: #721c24; border-radius: .25rem; font-family: monospace; font-size: .85rem; margin-top: 1rem; }
 </style>
 </head>
 <body>
@@ -23,7 +22,8 @@
     <div class="icon">⚠</div>
     <h1>Share link unavailable</h1>
     <p><?php echo esc_entities($reason ?? 'This share link is no longer valid.') ?></p>
-    <div class="sl-status">HTTP 410 · <?php echo esc_entities($result->action) ?></div>
+    <?php // The status code and log code are for staff (the link's access log), not the visitor. ?>
+    <p class="text-muted small"><?php echo __('If you still need this record, ask the person who sent you the link.') ?></p>
 </div>
 </body>
 </html>
