@@ -143,18 +143,13 @@ class ProvenanceInjector
 
         // Where a left block already exists - the treeview on a description page -
         // add to it rather than building a second one beside it.
-        // layout_3col names it left-column; missing that wrapped main-column in a
-        // second row on library pages and pushed the record under the sidebar.
-        $existing = stripos($content, '<div id="sidebar"');
-        if (false === $existing) {
-            $existing = stripos($content, '<div id="left-column"');
-        }
-        if (false !== $existing) {
-            $openEnd = strpos($content, '>', $existing);
-            if (false === $openEnd) {
-                return $content;
-            }
-            $closeAt = $this->matchingClose($content, $openEnd + 1);
+        // layout_3col names it left-column, and as an <aside>, not a <div>: looking
+        // for <div id="left-column"> missed it, so a second sidebar was built inside
+        // main-column and its col-md-9 pushed the right column under the left one
+        // (every library item page, PSIS and WDB, 11 Nov 2026).
+        if (preg_match('#<(div|aside)\b[^>]*\bid="(?:sidebar|left-column)"[^>]*>#i', $content, $m, PREG_OFFSET_CAPTURE)) {
+            $openEnd = $m[0][1] + strlen($m[0][0]) - 1;
+            $closeAt = $this->matchingClose($content, $openEnd + 1, strtolower($m[1][0]));
 
             return null === $closeAt ? $content : substr_replace($content, $block, $closeAt, 0);
         }
@@ -446,13 +441,13 @@ class ProvenanceInjector
      * Counting is necessary because the sidebar contains nested divs; matching the
      * first </div> would land inside the treeview.
      */
-    private function matchingClose(string $html, int $from): ?int
+    private function matchingClose(string $html, int $from, string $tag = 'div'): ?int
     {
         $depth = 1;
         $offset = $from;
 
         while ($depth > 0) {
-            if (!preg_match('#<(/?)div\b[^>]*>#i', $html, $m, PREG_OFFSET_CAPTURE, $offset)) {
+            if (!preg_match('#<(/?)'.$tag.'\b[^>]*>#i', $html, $m, PREG_OFFSET_CAPTURE, $offset)) {
                 return null;   // malformed markup: leave the page alone
             }
             $depth += '/' === $m[1][0] ? -1 : 1;
