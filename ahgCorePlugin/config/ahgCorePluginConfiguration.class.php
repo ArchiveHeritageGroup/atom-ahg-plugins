@@ -145,6 +145,10 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         require_once __DIR__.'/../lib/Listeners/LoginRegisterLinkInjector.php';
         $this->dispatcher->connect('response.filter_content', ['\AhgCore\Listeners\LoginRegisterLinkInjector', 'filter']);
 
+        // Background JSON requests must not use up a flash meant for the next page.
+        require_once __DIR__.'/../lib/Listeners/FlashKeeper.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgCore\Listeners\FlashKeeper', 'filter']);
+
         // Attribution in the footer of pages an AHG plugin serves. See injectPluginCredit().
         $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectPluginCredit']);
     }
