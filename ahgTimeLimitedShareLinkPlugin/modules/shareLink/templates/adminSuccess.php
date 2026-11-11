@@ -111,7 +111,7 @@ $badgeFor = function (object $row) use ($now): array {
         </td>
         <td><?php echo esc_entities($t->issuer_username ?? ('#' . $t->issued_by)) ?></td>
         <td>
-          <?php echo $t->recipient_email ? esc_entities($t->recipient_email) : '<span class="text-muted">—</span>' ?>
+          <?php echo $t->recipient_email ? esc_entities($t->recipient_email) : '<span class="text-muted">-</span>' ?>
         </td>
         <td><span class="meta"><?php echo esc_entities($t->created_at) ?></span></td>
         <td><span class="meta"><?php echo esc_entities($t->expires_at) ?></span></td>

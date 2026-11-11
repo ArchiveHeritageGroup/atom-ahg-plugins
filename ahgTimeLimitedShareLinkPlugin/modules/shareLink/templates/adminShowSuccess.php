@@ -16,13 +16,14 @@ $statusBadges = [
 
 $accessIcons = [
     'view'           => ['fa-check text-success',  __('Viewed')],
-    'denied_expired' => ['fa-clock text-warning',  __('Denied — expired')],
-    'denied_revoked' => ['fa-ban text-secondary',  __('Denied — revoked')],
-    'denied_quota'   => ['fa-stop text-info',      __('Denied — quota exhausted')],
-    'denied_unknown' => ['fa-question text-muted', __('Denied — unknown')],
+    'denied_expired' => ['fa-clock text-warning',  __('Denied - expired')],
+    'denied_revoked' => ['fa-ban text-secondary',  __('Denied - revoked')],
+    'denied_quota'   => ['fa-stop text-info',      __('Denied - quota exhausted')],
+    'denied_unknown' => ['fa-question text-muted', __('Denied - unknown')],
 ];
 
-$publicUrl = $request->getUriPrefix() . '/share/' . $tokenRow->token;
+// $sf_request: a template has no $request, and every link's page died on this line.
+$publicUrl = $sf_request->getUriPrefix() . '/share/' . $tokenRow->token;
 ?>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   .sl-show .label { color: #6c757d; font-size: .85rem; }
@@ -116,8 +117,8 @@ $publicUrl = $request->getUriPrefix() . '/share/' . $tokenRow->token;
       <tr>
         <td><?php echo esc_entities($a->accessed_at) ?></td>
         <td><i class="fas <?php echo $icon ?> me-1"></i><?php echo esc_entities($label) ?></td>
-        <td><?php echo esc_entities($a->ip_address ?? '—') ?></td>
-        <td class="text-truncate" data-ahg-style="max-width:300px;"><?php echo esc_entities($a->user_agent ?? '—') ?></td>
+        <td><?php echo esc_entities($a->ip_address ?? '-') ?></td>
+        <td class="text-truncate" data-ahg-style="max-width:300px;"><?php echo esc_entities($a->user_agent ?? '-') ?></td>
       </tr>
     <?php endforeach ?>
   </tbody>

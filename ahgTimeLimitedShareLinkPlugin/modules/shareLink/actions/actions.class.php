@@ -34,7 +34,7 @@ class shareLinkActions extends sfActions
      *
      * @phase E
      */
-    public function executeIssue(sfWebRequest $request): void
+    public function executeIssue(sfWebRequest $request)
     {
         // Decide response format up-front: explicit Accept header wins; otherwise
         // we look at the X-Requested-With header (XHR/fetch). Anything else is
@@ -48,8 +48,7 @@ class shareLinkActions extends sfActions
         // ---------------------------------------------------------------------
         if (!$request->isMethod('POST')) {
             if ($wantsJson) {
-                $this->renderJsonError('method_not_allowed', 'POST required', 405);
-                return;
+                return $this->renderJsonError('method_not_allowed', 'POST required', 405);
             }
             $this->renderIssueForm($request);
             return;
@@ -65,16 +64,14 @@ class shareLinkActions extends sfActions
         $user = $this->getUser();
         if (!$user || !$user->isAuthenticated()) {
             if ($wantsJson) {
-                $this->renderJsonError('not_authenticated', 'Authentication required', 401);
-                return;
+                return $this->renderJsonError('not_authenticated', 'Authentication required', 401);
             }
             $this->redirect('@homepage');
         }
         $userId = (int) $user->getUserID();
         if ($userId <= 0) {
             if ($wantsJson) {
-                $this->renderJsonError('not_authenticated', 'No user id on session', 401);
-                return;
+                return $this->renderJsonError('not_authenticated', 'No user id on session', 401);
             }
             $this->redirect('@homepage');
         }
@@ -82,8 +79,7 @@ class shareLinkActions extends sfActions
         $ioId = (int) $request->getParameter('information_object_id');
         if ($ioId <= 0) {
             if ($wantsJson) {
-                $this->renderJsonError('invalid_request', 'information_object_id is required', 422);
-                return;
+                return $this->renderJsonError('invalid_request', 'information_object_id is required', 422);
             }
             $this->getUser()->setFlash('share_link_error', 'information_object_id is required');
             $this->redirect('@homepage');
@@ -96,10 +92,9 @@ class shareLinkActions extends sfActions
                 $expiresAt = new \DateTimeImmutable($expiresAtParam);
             } catch (\Throwable $e) {
                 if ($wantsJson) {
-                    $this->renderJsonError('invalid_request', 'expires_at could not be parsed', 422);
-                    return;
+                    return $this->renderJsonError('invalid_request', 'expires_at could not be parsed', 422);
                 }
-                $this->renderIssueForm($request, 'Could not parse expires_at — please pick a valid date.');
+                $this->renderIssueForm($request, 'Could not parse expires date - please pick a valid date.');
                 return;
             }
         }
@@ -107,8 +102,7 @@ class shareLinkActions extends sfActions
         $recipientEmail = trim((string) $request->getParameter('recipient_email')) ?: null;
         if ($recipientEmail !== null && !filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
             if ($wantsJson) {
-                $this->renderJsonError('invalid_request', 'recipient_email is not a valid email address', 422);
-                return;
+                return $this->renderJsonError('invalid_request', 'recipient_email is not a valid email address', 422);
             }
             $this->renderIssueForm($request, 'Recipient email is not a valid email address.');
             return;
@@ -119,8 +113,7 @@ class shareLinkActions extends sfActions
         if ($maxAccessRaw !== null && $maxAccessRaw !== '') {
             if (!is_numeric($maxAccessRaw) || (int) $maxAccessRaw < 1) {
                 if ($wantsJson) {
-                    $this->renderJsonError('invalid_request', 'max_access must be a positive integer', 422);
-                    return;
+                    return $this->renderJsonError('invalid_request', 'max_access must be a positive integer', 422);
                 }
                 $this->renderIssueForm($request, 'Max views must be a positive integer.');
                 return;
@@ -161,14 +154,13 @@ class shareLinkActions extends sfActions
             }
 
             if ($wantsJson) {
-                $this->renderJson([
+                return $this->renderJson([
                     'ok'         => true,
                     'token'      => $result['token'],
                     'token_id'   => $result['token_id'],
                     'expires_at' => $result['expires_at'],
                     'public_url' => $absolute,
                 ], 201);
-                return;
             }
 
             // Browser path: render the success template with the new token.
@@ -185,23 +177,23 @@ class shareLinkActions extends sfActions
             $this->setTemplate('issue');
             return;
         } catch (\AhgShareLink\Services\NotAuthenticatedException $e) {
-            if ($wantsJson) { $this->renderJsonError('not_authenticated', $e->getMessage(), 401); return; }
+            if ($wantsJson) { return $this->renderJsonError('not_authenticated', $e->getMessage(), 401); }
             $this->renderIssueForm($request, $e->getMessage());
         } catch (\AhgShareLink\Services\PermissionDeniedException $e) {
-            if ($wantsJson) { $this->renderJsonError('permission_denied', $e->getMessage(), 403); return; }
+            if ($wantsJson) { return $this->renderJsonError('permission_denied', $e->getMessage(), 403); }
             $this->renderIssueForm($request, $e->getMessage());
         } catch (\AhgShareLink\Services\InsufficientClearanceException $e) {
-            if ($wantsJson) { $this->renderJsonError('insufficient_clearance', $e->getMessage(), 403); return; }
+            if ($wantsJson) { return $this->renderJsonError('insufficient_clearance', $e->getMessage(), 403); }
             $this->renderIssueForm($request, $e->getMessage());
         } catch (\AhgShareLink\Services\ExpiryCapExceededException $e) {
-            if ($wantsJson) { $this->renderJsonError('expiry_cap_exceeded', $e->getMessage(), 422); return; }
+            if ($wantsJson) { return $this->renderJsonError('expiry_cap_exceeded', $e->getMessage(), 422); }
             $this->renderIssueForm($request, $e->getMessage());
         } catch (\AhgShareLink\Services\InvalidRequestException $e) {
-            if ($wantsJson) { $this->renderJsonError('invalid_request', $e->getMessage(), 422); return; }
+            if ($wantsJson) { return $this->renderJsonError('invalid_request', $e->getMessage(), 422); }
             $this->renderIssueForm($request, $e->getMessage());
         } catch (\Throwable $e) {
             error_log('shareLink/issue unexpected: ' . $e->getMessage());
-            if ($wantsJson) { $this->renderJsonError('server_error', 'An unexpected error occurred', 500); return; }
+            if ($wantsJson) { return $this->renderJsonError('server_error', 'An unexpected error occurred', 500); }
             $this->renderIssueForm($request, 'An unexpected error occurred. Please try again.');
         }
     }
@@ -286,16 +278,23 @@ class shareLinkActions extends sfActions
         }
     }
 
-    private function renderJson(array $payload, int $status = 200): void
+    /**
+     * Returns sfView::NONE, and callers return it. It returned nothing before, so
+     * the action went on to render its template: the share form received a whole
+     * HTML page (status 201) instead of the JSON with the link, and never showed it.
+     */
+    private function renderJson(array $payload, int $status = 200): string
     {
         $this->getResponse()->setStatusCode($status);
-        $this->renderText(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        $this->getResponse()->setContentType('application/json');
         $this->setLayout(false);
+
+        return $this->renderText(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
 
-    private function renderJsonError(string $code, string $message, int $status): void
+    private function renderJsonError(string $code, string $message, int $status): string
     {
-        $this->renderJson(['ok' => false, 'error' => ['code' => $code, 'message' => $message]], $status);
+        return $this->renderJson(['ok' => false, 'error' => ['code' => $code, 'message' => $message]], $status);
     }
 
     /**
