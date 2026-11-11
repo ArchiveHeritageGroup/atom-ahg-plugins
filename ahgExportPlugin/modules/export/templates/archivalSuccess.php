@@ -30,7 +30,13 @@
                                 <option value="ead" <?php echo $format === 'ead' ? 'selected' : ''; ?>>EAD 2002 (Single Record)</option>
                                 <option value="dc" <?php echo $format === 'dc' ? 'selected' : ''; ?>>Dublin Core (Single Record)</option>
                             </select>
-                            <div class="form-text"><?php echo __('CSV supports bulk export. EAD/DC require selecting a specific record.'); ?></div>
+                            <div class="form-text"><?php echo __('CSV supports bulk export. EAD and Dublin Core export one record (with the records below it, for EAD).'); ?></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="export-record"><?php echo __('Record (EAD and Dublin Core)'); ?></label>
+                            <input type="text" id="export-record" name="record" class="form-control" value="<?php echo esc_entities((string) $sf_request->getParameter('record')); ?>" placeholder="<?php echo __('Identifier or slug, e.g. HRD/1 or harts-river-farm-diaries'); ?>">
+                            <div class="form-text"><?php echo __('Not used for CSV.'); ?></div>
                         </div>
 
                         <div class="col-md-6 mb-3">

@@ -315,7 +315,8 @@ class exportActions extends AhgController
         // EAD root
         $ead = $dom->createElementNS('urn:isbn:1-931666-22-9', 'ead');
         $ead->setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-        $ead->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+        // setAttributeNS declares xmlns:xsi itself; setting it by hand as well made the
+        // attribute appear twice and the file invalid XML ("Attribute xmlns:xsi redefined").
         $ead->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation',
             'urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd');
         $dom->appendChild($ead);
@@ -579,11 +580,27 @@ class exportActions extends AhgController
 
             if ($format === 'csv') {
                 return $this->processArchivalCsvExport($request, $DB, $repositoryId, $levelIds, $limit);
-            } elseif ($format === 'ead') {
-                $this->getUser()->setFlash('info', 'For EAD export, please navigate to a specific fonds/collection and use Export from the More menu.');
-                return;
+            } elseif (in_array($format, ['ead', 'dc'], true)) {
+                // EAD 2002 and Dublin Core are single-record exports. This page sent
+                // the user away to find the record; it now takes the record here
+                // (identifier or slug) and hands over to AtoM's own export of it.
+                $record = trim((string) $request->getParameter('record'));
+                $slug = '' === $record ? null : $DB::table('slug')->where('slug', $record)->value('slug');
+                if (!$slug && '' !== $record) {
+                    $slug = $DB::table('information_object as io')->join('slug as s', 's.object_id', '=', 'io.id')
+                        ->where('io.identifier', $record)->orderBy('io.lft')->value('s.slug');
+                }
+                if (!$slug) {
+                    $this->getUser()->setFlash('error', '' === $record
+                        ? 'Enter the record to export (its identifier or slug).'
+                        : sprintf('No record with the identifier or slug "%s".', $record));
+
+                    return;
+                }
+                $this->redirect('/'.$slug.';'.$format.'?sf_format=xml');
             } else {
-                $this->getUser()->setFlash('info', 'This format requires selecting a specific record. Navigate to the record and use Export from the More menu.');
+                $this->getUser()->setFlash('error', 'Choose CSV, EAD 2002 or Dublin Core.');
+
                 return;
             }
         }
@@ -720,8 +737,12 @@ class exportActions extends AhgController
             ->get();
 
         // Get actor count
+        // Authority records only: users, repositories, donors and rights holders are
+        // also rows of `actor` (their own object class) and were counted and exported.
         $this->actorCount = $DB::table('actor')
-            ->where('id', '!=', QubitActor::ROOT_ID)
+            ->join('object', 'object.id', '=', 'actor.id')
+            ->where('object.class_name', 'QubitActor')
+            ->where('actor.id', '!=', QubitActor::ROOT_ID)
             ->count();
 
         // Handle export
@@ -734,7 +755,10 @@ class exportActions extends AhgController
                 ->join('actor_i18n as ai', 'a.id', '=', 'ai.id')
                 ->leftJoin('object as o', 'a.id', '=', 'o.id')
                 ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
-                ->where('a.id', '!=', QubitActor::ROOT_ID);
+                ->where('a.id', '!=', QubitActor::ROOT_ID)
+                // Authority records only (see the count above): this exported user
+                // accounts, repositories and donors as empty "Unknown" authorities.
+                ->where('o.class_name', 'QubitActor');
 
             if ($entityTypeId) {
                 $query->where('a.entity_type_id', '=', $entityTypeId);
@@ -838,7 +862,8 @@ class exportActions extends AhgController
         $root = $dom->createElement('eac-cpf-collection');
         $root->setAttribute('xmlns', 'urn:isbn:1-931666-33-4');
         $root->setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-        $root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+        // setAttributeNS declares xmlns:xsi itself; setting it by hand as well made the
+        // attribute appear twice and the file invalid XML ("Attribute xmlns:xsi redefined").
         $root->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation',
             'urn:isbn:1-931666-33-4 http://eac.staatsbibliothek-berlin.de/schema/cpf.xsd');
         $dom->appendChild($root);

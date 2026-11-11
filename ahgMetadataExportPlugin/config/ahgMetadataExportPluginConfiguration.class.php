@@ -28,6 +28,16 @@ class ahgMetadataExportPluginConfiguration extends sfPluginConfiguration
      * Keys must match ExportService::$exporterClasses. (Previously referenced but
      * undefined — the index UI fataled; defining it here fixes that + lists all formats.)
      */
+    /**
+     * One format's details, or null. The preview, download and bulk actions call
+     * this; it was removed in v3.2.14 while they still did, so every single-record
+     * and bulk export died with "Call to undefined method" and sent an empty page.
+     */
+    public static function getFormat(string $code): ?array
+    {
+        return self::getFormats()[$code] ?? null;
+    }
+
     public static function getFormats(): array
     {
         return [
