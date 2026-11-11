@@ -168,6 +168,14 @@ class IngestCommitService
             $errors[] = ['stage' => 'derivatives', 'error' => $e->getMessage()];
         }
 
+        // Per-page document type and privacy screening (catalogue#320), when the
+        // AI settings ask for it on ingest; PDFs only, run in the background.
+        try {
+            $this->classifyPages($jobId);
+        } catch (\Throwable $e) {
+            $errors[] = ['stage' => 'classify_pages', 'error' => $e->getMessage()];
+        }
+
         // OCR
         if ($session->process_ocr) {
             try {
@@ -1211,6 +1219,37 @@ class IngestCommitService
     }
 
     // ─── Post-Commit Operations ─────────────────────────────────────────
+
+    /**
+     * Hand the PDFs of this job to ai:classify-pages (ahgAIPlugin) when
+     * ai_page_classify_on_ingest is on, limited to its collections. One
+     * background run for the whole job; nothing happens without ahgAIPlugin.
+     */
+    public function classifyPages(int $jobId): void
+    {
+        $classifier = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin/lib/Services/PageClassifier.php';
+        if (!is_file($classifier)) {
+            return;
+        }
+        require_once $classifier;
+        if ('1' !== \AhgAIPlugin\Services\PageClassifier::setting('ai_page_classify_on_ingest', '0')) {
+            return;
+        }
+        $session = DB::table('ingest_job')->where('id', $jobId)->value('session_id');
+        $ids = DB::table('ingest_row as r')
+            ->join('digital_object as d', 'd.object_id', '=', 'r.created_atom_id')
+            ->where('r.session_id', $session)->whereNotNull('r.created_atom_id')
+            ->whereNull('d.parent_id')->where('d.mime_type', 'application/pdf')
+            ->distinct()->pluck('r.created_atom_id')->map(fn ($i) => (int) $i)
+            ->filter(fn ($id) => \AhgAIPlugin\Services\PageClassifier::wantsOnIngest($id))->values()->all();
+        if (!$ids) {
+            return;
+        }
+        $root = \sfConfig::get('sf_root_dir');
+        $php = (PHP_SAPI === 'cli' && PHP_BINARY) ? PHP_BINARY : (is_executable(PHP_BINDIR . '/php') ? PHP_BINDIR . '/php' : 'php');
+        exec(sprintf('cd %s && nohup %s symfony ai:classify-pages --id=%s >> %s 2>&1 &',
+            escapeshellarg($root), escapeshellarg($php), implode(',', $ids), escapeshellarg($root . '/log/ai-pages.log')));
+    }
 
     public function generateDerivatives(int $jobId): void
     {

@@ -48,6 +48,15 @@ try {
         </a>
     </div>
 
+    <?php if ($hasPdf && ($sf_user->isAdministrator() || $sf_user->hasCredential('editor'))): ?>
+    <!-- Per-page document type and privacy (catalogue#320) -->
+    <div class="mb-2">
+        <a href="<?php echo url_for('@ahg_ai_pages?slug=' . $resource->slug); ?>" class="btn btn-outline-secondary btn-sm w-100">
+            <i class="fas fa-layer-group me-1"></i><?php echo __('Pages: type and privacy'); ?>
+        </a>
+    </div>
+    <?php endif; ?>
+
     <?php if ($hasPdf && $approvedEntityCount > 0): ?>
     <!-- View PDF with Entity Highlights Button -->
     <div class="mb-2">

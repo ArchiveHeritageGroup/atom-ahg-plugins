@@ -1,0 +1,4 @@
+# Page results hold privacy findings: editors and administrators only.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

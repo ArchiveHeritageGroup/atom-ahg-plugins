@@ -66,6 +66,13 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
         $stories->any('ahg_story_index', '/admin/stories', 'index');
         $stories->any('ahg_story_show', '/stories/:slug', 'show', ['slug' => '[a-z0-9][a-z0-9-]*']);
         $stories->register($event->getSubject());
+
+        // Pages of a record's PDF: type and privacy per page (catalogue#320).
+        $pages = new \AtomFramework\Routing\RouteLoader('aiPages');
+        $pages->any('ahg_ai_pages_review', '/ai/pages/:slug/review/:inference', 'review', ['inference' => '\d+']);
+        $pages->any('ahg_ai_pages_settings', '/ai/pages/:slug/settings', 'settings');
+        $pages->any('ahg_ai_pages', '/ai/pages/:slug', 'index');
+        $pages->register($event->getSubject());
     }
 
     public function initialize()
@@ -91,6 +98,7 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'ai';
         $enabledModules[] = 'story';
+        $enabledModules[] = 'aiPages';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
