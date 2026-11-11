@@ -201,6 +201,7 @@ class HarvestService
 
         // Save the object
         $object->save();
+        $this->commitPropel();
 
         // Record provenance
         $this->provenance->recordHarvest(
@@ -217,6 +218,24 @@ class HarvestService
     }
 
     /**
+     * Commit what Propel saved before the provenance is written. In a web request
+     * AtoM's QubitTransactionFilter holds one Propel transaction for the whole
+     * request; the provenance goes through the Laravel connection, a second
+     * connection, whose insert into property waits on the uncommitted row until
+     * php-fpm kills the request. A new transaction is opened so the filter's own
+     * commit at the end of the request still has one to commit.
+     */
+    protected function commitPropel(): void
+    {
+        $con = \Propel::getConnection();
+        // PropelPDO counts nesting and only commits at depth 1.
+        if ($con instanceof \PropelPDO && 1 === $con->getNestedTransactionCount()) {
+            $con->commit();
+            $con->beginTransaction();
+        }
+    }
+
+    /**
      * Update an existing record from OAI harvest
      */
     public function updateRecord(array $oaiRecord, \QubitInformationObject $existing, int $peerId, string $metadataPrefix): void
@@ -229,6 +248,7 @@ class HarvestService
 
         // Save the object
         $existing->save();
+        $this->commitPropel();
 
         // Record provenance
         $this->provenance->recordHarvest(
