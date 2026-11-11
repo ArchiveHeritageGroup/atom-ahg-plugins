@@ -362,6 +362,13 @@ class federationActions extends AhgController
         if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unauthorized']));
         }
+        // A harvest creates records: only from the harvest page's POST, never from a
+        // link an administrator happens to open.
+        if (!$request->isMethod('post')) {
+            $this->getResponse()->setStatusCode(405);
+
+            return $this->renderText(json_encode(['success' => false, 'error' => 'POST required']));
+        }
 
         $peerId = $request->getParameter('peerId');
 
@@ -435,7 +442,8 @@ class federationActions extends AhgController
                 'sessionId' => $sessionId,
             ]));
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            // \Throwable: a PHP error left the session 'running' for ever.
             // Update session with error
             \Illuminate\Database\Capsule\Manager::table('federation_harvest_session')
                 ->where('id', $sessionId)

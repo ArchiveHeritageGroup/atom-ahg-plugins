@@ -281,7 +281,8 @@
         </div>
         <div class="card-body p-0" data-ahg-style="max-height: 300px; overflow-y: auto;">
           <ul class="list-group list-group-flush">
-            <?php foreach (array_slice($sets, 0, 20) as $set): ?>
+            <?php // getRaw: the escaped wrapper is not an array, and array_slice() died on it. ?>
+            <?php foreach (array_slice((array) $sf_data->getRaw('sets'), 0, 20) as $set): ?>
             <li class="list-group-item py-2">
               <code class="small"><?php echo esc_specialchars($set['setSpec']) ?></code><br>
               <small><?php echo esc_specialchars($set['setName'] ?: 'No name') ?></small>
