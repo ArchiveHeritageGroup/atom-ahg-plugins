@@ -124,10 +124,7 @@
               </td>
               <td>
                 <?php if ($log->object_title && $log->object_slug): ?>
-                <a href="<?php echo url_for([$log->object_slug]) ?>">
-                  <?php echo esc_specialchars(mb_substr($log->object_title, 0, 50)) ?>
-                  <?php if (mb_strlen($log->object_title) > 50): ?>...<?php endif ?>
-                </a>
+                <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $log->object_slug]) ?>" title="<?php echo esc_specialchars($log->object_title) ?>"><?php echo esc_specialchars(mb_strlen($log->object_title) > 50 ? mb_substr($log->object_title, 0, 50) . '...' : $log->object_title) ?></a>
                 <?php else: ?>
                 <span class="text-muted">Record #<?php echo $log->information_object_id ?></span>
                 <?php endif ?>
