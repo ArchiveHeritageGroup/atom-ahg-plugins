@@ -61,7 +61,7 @@ class GatewayProvider implements LlmProviderInterface
                 'temperature' => $options['temperature'] ?? $this->temperature,
                 'max_tokens' => $options['max_tokens'] ?? $this->maxTokens,
                 'timeout' => $this->timeout,
-            ]
+            ] + (isset($options['think']) ? ['think' => (bool) $options['think']] : [])
         );
 
         $generationTime = round((microtime(true) - $startTime) * 1000);

@@ -72,6 +72,7 @@ class aiPagesActions extends AhgController
             'window' => \AhgAIPlugin\Services\PageClassifier::setting('ai_page_window_words', '0'),
             'on_ingest' => \AhgAIPlugin\Services\PageClassifier::setting('ai_page_classify_on_ingest', '0'),
             'collections' => \AhgAIPlugin\Services\PageClassifier::setting('ai_page_classify_collections', ''),
+            'model' => \AhgAIPlugin\Services\PageClassifier::setting('ai_page_model', \AhgAIPlugin\Services\PageClassifier::DEFAULT_MODEL),
         ];
         $this->getResponse()->setTitle(__('Pages') . ' - ' . ($this->io->title ?? $this->io->slug));
     }
@@ -112,7 +113,11 @@ class aiPagesActions extends AhgController
             $this->getUser()->setFlash('error', __('Collections must be record ids separated by commas.'));
             $this->redirect('@ahg_ai_pages?slug=' . $io->slug);
         }
-        foreach (['ai_page_window_words' => (string) $window, 'ai_page_classify_on_ingest' => $request->getParameter('on_ingest') ? '1' : '0', 'ai_page_classify_collections' => $cols] as $k => $v) {
+        $model = trim((string) $request->getParameter('model'));
+        if (!preg_match('/^[A-Za-z0-9._:\/-]{1,100}$/', $model)) {
+            $model = \AhgAIPlugin\Services\PageClassifier::DEFAULT_MODEL;
+        }
+        foreach (['ai_page_model' => $model, 'ai_page_window_words' => (string) $window, 'ai_page_classify_on_ingest' => $request->getParameter('on_ingest') ? '1' : '0', 'ai_page_classify_collections' => $cols] as $k => $v) {
             DB::table('ahg_settings')->updateOrInsert(['setting_key' => $k], ['setting_value' => $v, 'setting_group' => 'ai', 'updated_at' => date('Y-m-d H:i:s')]);
         }
         $this->getUser()->setFlash('notice', __('Page settings saved.'));

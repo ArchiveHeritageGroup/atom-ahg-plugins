@@ -130,16 +130,21 @@ $pagesUrl = url_for('@ahg_ai_pages?slug=' . $io->slug);
   <form method="post" action="<?php echo url_for('@ahg_ai_pages_settings?slug=' . $io->slug); ?>" class="card-body">
     <div class="row g-3">
       <div class="col-md-3">
+        <label class="form-label" for="pg-model"><?php echo __('Document type model'); ?></label>
+        <input class="form-control" id="pg-model" name="model" value="<?php echo $e($settings['model']); ?>">
+        <div class="form-text"><?php echo __('A model on the AHG AI gateway.'); ?></div>
+      </div>
+      <div class="col-md-2">
         <label class="form-label" for="pg-window"><?php echo __('Words per unit'); ?></label>
         <input class="form-control" type="number" min="0" max="20000" id="pg-window" name="window_words" value="<?php echo $e($settings['window']); ?>">
         <div class="form-text"><?php echo __('0 reads page by page.'); ?></div>
       </div>
-      <div class="col-md-5">
+      <div class="col-md-4">
         <label class="form-label" for="pg-cols"><?php echo __('Collections read on ingest'); ?></label>
         <input class="form-control" id="pg-cols" name="collections" value="<?php echo $e($settings['collections']); ?>" placeholder="913567">
         <div class="form-text"><?php echo __('Record ids, separated by commas. Empty: every collection.'); ?></div>
       </div>
-      <div class="col-md-4 d-flex align-items-center">
+      <div class="col-md-3 d-flex align-items-center">
         <div class="form-check"><input class="form-check-input" type="checkbox" id="pg-ingest" name="on_ingest" value="1"<?php echo '1' === $settings['on_ingest'] ? ' checked' : ''; ?>><label class="form-check-label" for="pg-ingest"><?php echo __('Read PDFs page by page after ingest'); ?></label></div>
       </div>
     </div>

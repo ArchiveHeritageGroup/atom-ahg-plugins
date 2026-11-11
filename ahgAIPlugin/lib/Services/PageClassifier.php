@@ -38,6 +38,9 @@ class PageClassifier
     /** A weak or unvalidated finding (a date with no "born" near it) may not flag a page. */
     public const MIN_CONFIDENCE = 0.5;
 
+    /** Gateway model for the document type (setting ai_page_model). */
+    public const DEFAULT_MODEL = 'qwen3:8b';
+
     /** Used only when the list has no rows yet (database/seed_page_document_type.sql). */
     private const FALLBACK_TYPES = [
         'letter' => 'Letter', 'form' => 'Form', 'invoice' => 'Invoice', 'purchase_order' => 'Purchase order',
@@ -352,7 +355,11 @@ class PageClassifier
         $list = implode("\n", array_map(fn ($c, $l) => "{$c} - {$l}", array_keys($types), $types));
         $res = (new \LlmService())->complete(
             "You classify one page of an archival file. Answer with exactly one code from this list and nothing else:\n{$list}",
-            mb_substr($text, 0, 6000), null, ['temperature' => 0, 'max_tokens' => 20]
+            mb_substr($text, 0, 6000), null,
+            // qwen3:8b got every clear page of the test file right where the
+            // default mistral:7b got half; thinking off, or it spends the 20
+            // tokens on a hidden reasoning pass and answers nothing.
+            ['temperature' => 0, 'max_tokens' => 20, 'think' => false, 'model' => self::setting('ai_page_model', self::DEFAULT_MODEL)]
         );
         if (empty($res['success'])) {
             return null;
