@@ -561,7 +561,10 @@ function scanForPii(objectId) {
 <?php include_partial('informationobject/researchToolsContextMenu', ['resource' => $resource]); ?>
 
 <?php // Wikidata links for this description's creators and name access points (#209). ?>
-<?php if (in_array('authority', sfConfig::get('sf_enabled_modules', []), true)) { ?>
+<?php // The plugin, not the module name: ahgMuseumPlugin also enables an "authority"
+      // module, without this partial, and every description page failed on a site
+      // running the museum plugin without ahgAuthorityPlugin (WDB, 11 Nov 2026). ?>
+<?php if (isPluginActive('ahgAuthorityPlugin')) { ?>
   <?php include_partial('authority/descriptionWikidata', ['ioId' => $resource->id]); ?>
 <?php } ?>
 <?php endif; ?>

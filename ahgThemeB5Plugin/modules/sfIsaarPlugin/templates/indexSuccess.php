@@ -45,7 +45,9 @@
 <?php slot('context-menu'); ?>
 
   <?php // External identifiers (Wikidata, VIAF, ...) from ahgAuthorityPlugin (#209). ?>
-  <?php if (in_array('authority', sfConfig::get('sf_enabled_modules', []), true)) { ?>
+  <?php // The plugin, not the module name: ahgMuseumPlugin also enables an "authority"
+        // module, without this partial (WDB, 11 Nov 2026). ?>
+  <?php if ($sf_context->getConfiguration()->isPluginEnabled('ahgAuthorityPlugin')) { ?>
     <?php include_partial('authority/identifierPanel', ['actorId' => $resource->id]); ?>
   <?php } ?>
 
