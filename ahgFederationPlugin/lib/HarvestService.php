@@ -406,6 +406,22 @@ class HarvestService
             $object->scopeAndContent = $description;
         }
 
+        // Type: a level of description, when it names one that exists here
+        // (Collection, Item, File...). Unknown types are left unset, never created.
+        if (!empty($metadata['type']) && !$object->levelOfDescriptionId) {
+            foreach ((array) $metadata['type'] as $type) {
+                $levelId = \Illuminate\Database\Capsule\Manager::table('term as t')
+                    ->join('term_i18n as ti', 'ti.id', '=', 't.id')
+                    ->where('t.taxonomy_id', \QubitTaxonomy::LEVEL_OF_DESCRIPTION_ID)
+                    ->whereRaw('LOWER(ti.name) = ?', [mb_strtolower(trim((string) $type))])
+                    ->value('t.id');
+                if ($levelId) {
+                    $object->levelOfDescriptionId = (int) $levelId;
+                    break;
+                }
+            }
+        }
+
         // Identifier
         if (!empty($metadata['identifier'])) {
             // Use the first non-URL identifier as reference code
