@@ -93,14 +93,15 @@ class SchemaOrgExporter extends AbstractRdfExporter
      */
     protected function buildGraph($resource): array
     {
-        // Detect resource type
+        // Detect resource type. instanceof, not isset($resource->class_name): a Qubit
+        // object throws "Unknown record property" on that, so every export failed.
         $className = is_object($resource) ? get_class($resource) : '';
 
-        if ($className === 'QubitRepository' || (isset($resource->class_name) && $resource->class_name === 'QubitRepository')) {
+        if ($resource instanceof \QubitRepository || $className === 'QubitRepository') {
             return $this->buildRepositoryGraph($resource);
         }
 
-        if ($className === 'QubitActor' || (isset($resource->class_name) && $resource->class_name === 'QubitActor')) {
+        if ($resource instanceof \QubitActor || $className === 'QubitActor') {
             return $this->buildActorGraph($resource);
         }
 

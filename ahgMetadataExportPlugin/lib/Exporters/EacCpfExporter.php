@@ -44,7 +44,9 @@ class EacCpfExporter extends AbstractXmlExporter
 
         // control
         $control = $this->createElement('control', null, self::NS_EAC);
-        $recordId = $resource->identifier ?? ('actor-' . ($resource->id ?? ''));
+        // An actor's identifier is descriptionIdentifier; ->identifier does not exist
+        // and a Qubit object throws on it, so every EAC-CPF export failed.
+        $recordId = (string) ($resource->descriptionIdentifier ?? '') ?: ('actor-' . ($resource->id ?? ''));
         $control->appendChild($this->createElement('recordId', (string) $recordId, self::NS_EAC));
         $maintenanceStatus = $this->createElement('maintenanceStatus', 'new', self::NS_EAC);
         $control->appendChild($maintenanceStatus);

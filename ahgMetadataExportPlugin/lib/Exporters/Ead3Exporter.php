@@ -368,8 +368,15 @@ class Ead3Exporter extends AbstractXmlExporter
 
         // Check draft status
         if (!$this->options['includeDrafts']) {
-            $status = $resource->publicationStatus ?? null;
-            if ($status && 'Draft' === (string) $status) {
+            // getPublicationStatus(), not ->publicationStatus: a Qubit object throws
+            // "Unknown record property" for a name it does not have, even under ??,
+            // and the whole EAD3 export of a fonds failed on its first child.
+            $status = null;
+            try {
+                $status = method_exists($resource, 'getPublicationStatus') ? $resource->getPublicationStatus() : null;
+            } catch (\Throwable $e) {
+            }
+            if ($status && (\QubitTerm::PUBLICATION_STATUS_DRAFT_ID === (int) ($status->statusId ?? 0) || 'Draft' === (string) $status)) {
                 return null;
             }
         }
