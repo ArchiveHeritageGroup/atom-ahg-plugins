@@ -645,19 +645,18 @@ class shareLinkActions extends sfActions
         // Issuer name
         $userRow = \Illuminate\Database\Capsule\Manager::table('user')
             ->where('id', $tokenRow->issued_by)->first();
-        $this->issuerName = $userRow ? ($userRow->username ?: ('user #' . $tokenRow->issued_by)) : '(unknown)';
+        // The person's name (a user is an actor), not the login name.
+        $fullName = \Illuminate\Database\Capsule\Manager::table('actor_i18n')->where('id', $tokenRow->issued_by)
+            ->whereNotNull('authorized_form_of_name')->where('authorized_form_of_name', '!=', '')->value('authorized_form_of_name');
+        $this->issuerName = $fullName ?: ($userRow ? ($userRow->username ?: ('user #' . $tokenRow->issued_by)) : '(unknown)');
 
-        // Title + scope (current culture, fall back to any culture)
+        // The record as the recipient sees it (see RecordView).
+        require_once $libDir . '/RecordView.php';
         $culture = $this->getUser()->getCulture() ?: 'en';
-        $i18n = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
-            ->where('id', $ioId)->where('culture', $culture)->first();
-        if (!$i18n) {
-            $i18n = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
-                ->where('id', $ioId)->orderBy('culture')->first();
-        }
-        $this->title = $i18n->title ?? ('#' . $ioId);
-        $this->scopeAndContent = $i18n->scope_and_content ?? null;
-        $this->identifier = \Illuminate\Database\Capsule\Manager::table('information_object')
-            ->where('id', $ioId)->value('identifier');
+        $this->record = \AhgShareLink\Services\RecordView::build($ioId, $culture);
+        $this->title = $this->record['title'];
+        $this->getResponse()->setTitle($this->title . ' - ' . $this->getResponse()->getTitle());
+        // The token is in the URL: never hand it to another site as a referrer.
+        $this->getResponse()->setHttpHeader('Referrer-Policy', 'no-referrer');
     }
 }

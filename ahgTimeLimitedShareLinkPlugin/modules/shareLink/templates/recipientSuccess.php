@@ -1,57 +1,73 @@
 <?php
-/** @var string $title */
-/** @var ?string $scopeAndContent */
-/** @var ?string $identifier */
-/** @var int $informationObjectId */
-/** @var string $issuerName */
-/** @var string $expiresAt */
-/** @var stdClass $tokenRow */
+/**
+ * The page a share-link recipient sees. A fragment in the site layout (it was a
+ * whole HTML document nested inside the layout), in the AHG palette, with the
+ * record's dates, creators, extent, repository and reference image.
+ *
+ * @var array    $record     see AhgShareLink\Services\RecordView::build()
+ * @var string   $issuerName
+ * @var string   $expiresAt
+ */
+$r = $sf_data->getRaw('record');
+$e = fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+$ts = strtotime((string) $sf_data->getRaw('expiresAt'));
+$expires = $ts ? date('j F Y, H:i', $ts) : (string) $sf_data->getRaw('expiresAt');
+$nonce = preg_replace('/^nonce=/', '', (string) sfConfig::get('csp_nonce', ''));
+$facts = array_filter([
+    __('Reference code') => $r['identifier'] ?? null,
+    __('Level of description') => $r['level'] ?? null,
+    __('Dates') => $r['dates'] ? implode('; ', $r['dates']) : null,
+    __('Creator') => $r['creators'] ? implode('; ', $r['creators']) : null,
+    __('Extent') => $r['extent'] ?? null,
+    __('Repository') => $r['repository'] ?? null,
+]);
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer">
-<title><?php echo esc_entities($title) ?> · Shared record</title>
-<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; background: #f7f7f8; color: #212529; }
-  .sl-banner { background: #0d6efd; color: white; padding: .75rem 1.25rem; }
-  .sl-banner a { color: #fff; text-decoration: underline; }
-  .sl-content { max-width: 800px; margin: 1.5rem auto; padding: 1.5rem 2rem; background: #fff; border-radius: .375rem; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
-  .sl-content h1 { margin-top: 0; }
-  .sl-meta { color: #6c757d; font-size: .9rem; margin-bottom: 1.25rem; }
-  .sl-meta code { font-family: monospace; }
-  .sl-scope { white-space: pre-wrap; line-height: 1.5; }
-  .sl-footer { max-width: 800px; margin: 1.5rem auto; padding: 1rem 2rem; color: #6c757d; font-size: .85rem; }
+<style <?php echo $nonce ? 'nonce="' . $e($nonce) . '"' : ''; ?>>
+  .sl-banner { background: #10373E; color: #F2EDE6; padding: .75rem 1.25rem; border-radius: .375rem .375rem 0 0; }
+  .sl-banner strong { color: #E1B34F; }
+  .sl-card { background: #fff; border: 1px solid #C3CDCE; border-top: 0; border-radius: 0 0 .375rem .375rem; padding: 1.5rem 2rem; }
+  .sl-card h1 { margin-top: 0; }
+  .sl-facts dt { color: #6c757d; font-weight: normal; }
+  .sl-facts dd { margin-bottom: .6rem; }
+  .sl-scope { white-space: pre-wrap; line-height: 1.55; }
+  .sl-image img { max-width: 100%; height: auto; border: 1px solid #C3CDCE; border-radius: .25rem; }
+  .sl-footer { color: #6c757d; font-size: .85rem; margin: 1rem 0 2rem; }
 </style>
-</head>
-<body>
 
 <div class="sl-banner">
-    <strong><i class="fas fa-link me-2"></i>Shared record</strong> ·
-    Shared by <?php echo esc_entities($issuerName) ?> ·
-    Link expires <?php echo esc_entities($expiresAt) ?>
+  <strong><i class="fas fa-link me-2" aria-hidden="true"></i><?php echo __('Shared record'); ?></strong>
+  &middot; <?php echo __('Shared by %1%', ['%1%' => $e($sf_data->getRaw('issuerName'))]); ?>
+  &middot; <?php echo __('Link expires %1%', ['%1%' => $e($expires)]); ?>
 </div>
 
-<div class="sl-content">
-    <h1><?php echo esc_entities($title) ?></h1>
-    <?php if ($identifier): ?>
-        <div class="sl-meta">Reference code: <code><?php echo esc_entities($identifier) ?></code></div>
-    <?php endif ?>
-
-    <?php if ($scopeAndContent): ?>
-        <h2>Scope and content</h2>
-        <div class="sl-scope"><?php echo nl2br(esc_entities($scopeAndContent)) ?></div>
-    <?php else: ?>
-        <p class="text-muted">No descriptive scope or content recorded.</p>
-    <?php endif ?>
+<div class="sl-card">
+  <h1><?php echo $e($r['title']); ?></h1>
+  <div class="row g-4">
+    <div class="<?php echo $r['image'] ? 'col-md-7' : 'col-12'; ?>">
+      <?php if ($facts): ?>
+        <dl class="sl-facts row mb-3">
+          <?php foreach ($facts as $label => $value): ?>
+            <dt class="col-sm-4"><?php echo $e($label); ?></dt>
+            <dd class="col-sm-8"><?php echo $e($value); ?></dd>
+          <?php endforeach; ?>
+        </dl>
+      <?php endif; ?>
+      <h2 class="h5"><?php echo __('Scope and content'); ?></h2>
+      <?php if (!empty($r['scope'])): ?>
+        <div class="sl-scope"><?php echo $e($r['scope']); ?></div>
+      <?php else: ?>
+        <p class="text-muted"><?php echo __('No scope and content recorded.'); ?></p>
+      <?php endif; ?>
+      <?php if (!empty($r['imageWithheld'])): ?>
+        <p class="text-muted mt-3"><i class="fas fa-eye-slash me-1" aria-hidden="true"></i><?php echo __('The image of this record is not shown: its rights do not allow display.'); ?></p>
+      <?php endif; ?>
+    </div>
+    <?php if ($r['image']): ?>
+      <div class="col-md-5 sl-image">
+        <img src="<?php echo $e($r['image']); ?>" alt="<?php echo $e(__('Reference image of %1%', ['%1%' => $r['title']])); ?>">
+      </div>
+    <?php endif; ?>
+  </div>
 </div>
 
-<div class="sl-footer">
-    This is a time-limited share link. The link will stop working on <?php echo esc_entities($expiresAt) ?>.
-    All accesses are logged for audit purposes.
-</div>
-
-</body>
-</html>
+<p class="sl-footer"><?php echo __('This is a time-limited share link. It stops working on %1%. Every visit is logged.', ['%1%' => $e($expires)]); ?></p>
