@@ -81,6 +81,18 @@ class IssueService
             throw new InvalidRequestException("information_object {$informationObjectId} not found");
         }
 
+        // Guard 1b: a draft is shared only by an editor or administrator. A share
+        // link shows the record to whoever has the URL, so for a draft it is a
+        // limited publication; that decision is theirs (Dr Johan Pieterse, 11 Nov 2026).
+        $isDraft = DB::table('status')->where('object_id', $informationObjectId)
+            ->where('type_id', 158)->where('status_id', 159)->exists();
+        if ($isDraft) {
+            $groups = array_map('intval', DB::table('acl_user_group')->where('user_id', $userId)->pluck('group_id')->all());
+            if (!array_intersect([100, 101], $groups)) {   // administrator, editor
+                throw new PermissionDeniedException('Only an editor or administrator can share a draft record');
+            }
+        }
+
         // Guard 2 + 3: classified record gates.
         $classificationLevel = $clearance->resolveEntityClassificationLevel($informationObjectId);
         if ($classificationLevel !== null) {
