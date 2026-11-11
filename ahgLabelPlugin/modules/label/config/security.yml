@@ -1,0 +1,5 @@
+# Labels are staff work: printing for contributors and above, templates for
+# editors and administrators (checked again in the actions).
+all:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]

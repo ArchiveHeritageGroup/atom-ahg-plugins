@@ -214,7 +214,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         <div class="card mb-3">
             <div class="card-header">
                 <i class="fas fa-cog me-2"></i><?php echo __('Label Configuration'); ?>
-                <span class="badge bg-light text-dark ms-2"><?php echo $sectorLabel; ?></span>
+                <span class="ms-2 small fw-normal">(<?php echo $sectorLabel; ?>)</span>
             </div>
             <div class="card-body">
                 <div class="row">

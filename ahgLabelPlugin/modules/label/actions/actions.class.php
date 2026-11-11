@@ -6,8 +6,24 @@ use AtomFramework\Http\Controllers\AhgController;
  */
 class labelActions extends AhgController
 {
+    /**
+     * Labels are staff work. The label page answered anyone, signed in or not,
+     * so a draft's title, identifier and repository could be read by its slug;
+     * batch printing took any signed-in account, researchers included.
+     */
+    protected function requireLabelStaff(): void
+    {
+        $user = $this->getUser();
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasCredential('editor') || $user->hasCredential('contributor'))
+        ) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+    }
+
     public function executeIndex($request)
     {
+        $this->requireLabelStaff();
         $slug = $request->getParameter('slug');
 
         // Dual-mode: EntityQueryService (standalone) or Propel (legacy)
@@ -91,7 +107,7 @@ class labelActions extends AhgController
     /** Staff: batch label sheet. GET picker; with template+selection renders print sheet. */
     public function executeBatch($request)
     {
-        $this->requireAuth();
+        $this->requireLabelStaff();
         $svc = $this->labelService();
         $culture = $this->culture();
 
