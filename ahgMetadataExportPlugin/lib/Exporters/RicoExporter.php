@@ -630,7 +630,10 @@ class RicoExporter extends AbstractRdfExporter
     protected function getChildResources($resource): array
     {
         if (method_exists($resource, 'getChildren')) {
-            return $resource->getChildren()->toArray() ?? [];
+            $children = $resource->getChildren();
+            // QubitQuery has no toArray() and is not an array, but it is iterable: reading it
+            // as a list keeps the children and digital objects that were silently dropped.
+            return (is_array($children) ? $children : ($children instanceof \Traversable ? iterator_to_array($children, false) : []));
         }
 
         return [];
@@ -710,10 +713,9 @@ class RicoExporter extends AbstractRdfExporter
 
         try {
             $objects = $resource->getDigitalObjects();
-            if (method_exists($objects, 'toArray')) {
-                return $objects->toArray() ?? [];
-            }
-            return is_array($objects) ? $objects : [];
+            // QubitQuery has no toArray() and is not an array, but it is iterable: reading it
+            // as a list keeps the children and digital objects that were silently dropped.
+            return (is_array($objects) ? $objects : ($objects instanceof \Traversable ? iterator_to_array($objects, false) : []));
         } catch (\Exception $e) {
             return [];
         }

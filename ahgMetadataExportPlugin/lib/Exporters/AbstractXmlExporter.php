@@ -472,11 +472,9 @@ abstract class AbstractXmlExporter implements ExporterInterface
             // For QubitInformationObject
             if (method_exists($resource, 'getChildren')) {
                 $children = $resource->getChildren();
-                if (method_exists($children, 'toArray')) {
-                    return $children->toArray() ?? [];
-                }
-
-                return is_array($children) ? $children : [];
+                // QubitQuery has no toArray() and is not an array, but it is iterable: reading it
+                // as a list keeps the children and digital objects that were silently dropped.
+                return (is_array($children) ? $children : ($children instanceof \Traversable ? iterator_to_array($children, false) : []));
             }
         } catch (\Exception $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);
@@ -529,11 +527,9 @@ abstract class AbstractXmlExporter implements ExporterInterface
         try {
             if (method_exists($resource, 'getDigitalObjects')) {
                 $objects = $resource->getDigitalObjects();
-                if (method_exists($objects, 'toArray')) {
-                    return $objects->toArray() ?? [];
-                }
-
-                return is_array($objects) ? $objects : [];
+                // QubitQuery has no toArray() and is not an array, but it is iterable: reading it
+                // as a list keeps the children and digital objects that were silently dropped.
+                return (is_array($objects) ? $objects : ($objects instanceof \Traversable ? iterator_to_array($objects, false) : []));
             }
         } catch (\Exception $e) {
             \class_exists('AhgCore\\Core\\AhgLog') && \AhgCore\Core\AhgLog::swallowed($e, basename(__FILE__).':'.__LINE__);

@@ -595,7 +595,10 @@ class BibframeExporter extends AbstractRdfExporter
         }
 
         if (method_exists($resource, 'getDigitalObjects')) {
-            return $resource->getDigitalObjects()->toArray() ?? [];
+            $objects = $resource->getDigitalObjects();
+            // QubitQuery has no toArray() and is not an array, but it is iterable: reading it
+            // as a list keeps the children and digital objects that were silently dropped.
+            return (is_array($objects) ? $objects : ($objects instanceof \Traversable ? iterator_to_array($objects, false) : []));
         }
 
         return [];

@@ -34,9 +34,23 @@ class SchemaOrgExporter extends AbstractRdfExporter
     /**
      * {@inheritdoc}
      */
-    public function getFormatCode(): string
+    /**
+     * The interface asks for getFormat() and getSector(); this class had only
+     * getFormatCode(), so PHP refused to load it and every Schema.org export was a 500.
+     */
+    public function getFormat(): string
     {
         return 'schema-org';
+    }
+
+    public function getFormatCode(): string
+    {
+        return $this->getFormat();
+    }
+
+    public function getSector(): string
+    {
+        return 'Web';
     }
 
     /**
