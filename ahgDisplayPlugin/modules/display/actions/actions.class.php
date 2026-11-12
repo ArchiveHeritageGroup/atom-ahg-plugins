@@ -307,9 +307,13 @@ class displayActions extends AhgController
         }
 
         $this->totalPages = (int) ceil($this->total / $this->limit);
+        $countsSource = is_array($cachedCounts) ? 'cached' : 'live';
         if ($countKey && !is_array($cachedCounts) && !$this->discoveryMode && !$this->esIds) {
             $this->anonCacheSet($countKey, ['facets' => $this->facetSnapshot(), 'total' => $this->total], 600);
+            $countsSource = 'stored';
         }
+        // Diagnostic: live (counted, not cached), stored (counted, now cached), cached.
+        $this->getResponse()->setHttpHeader('X-Display-Counts', $countsSource);
 
         // Build main query
         $query = DB::table('information_object as io')
