@@ -189,7 +189,7 @@ class displayActions extends AhgController
 
         // Load facets: use dynamic counts when filters are active, cached counts otherwise
         $sfx = $this->isAuthenticated ? '_all' : '';
-        $facetService = new \AhgDisplay\Services\DynamicFacetService([
+        $facetOptions = [
             'isAuthenticated' => $this->isAuthenticated,
             'hiddenIds' => $this->hiddenIds(),
             'typeFilter' => $this->typeFilter,
@@ -228,47 +228,21 @@ class displayActions extends AhgController
             'creationPlaceFilter' => $this->creationPlaceFilter,
             'museumRepositoryFilter' => $this->museumRepositoryFilter,
             'languageFilter' => $this->languageFilter,
-        ]);
+        ];
+        $facetService = new \AhgDisplay\Services\DynamicFacetService($facetOptions);
 
-        // The cached counts include every description, so whenever this user
-        // has hidden ones, count live instead.
-        if ($facetService->hasActiveFacetFilters() || [] !== $this->hiddenIds()) {
-            // Dynamic disjunctive faceting: each facet excludes its own filter
-            $this->types = $facetService->getFacetCounts('glam_type');
-            $this->levels = $facetService->getFacetCounts('level');
-            $this->repositories = $facetService->getFacetCounts('repository');
-            $this->creators = $facetService->getFacetCounts('creator');
-            $this->subjects = $facetService->getFacetCounts('subject');
-            $this->places = $facetService->getFacetCounts('place');
-            $this->genres = $facetService->getFacetCounts('genre');
-            $this->mediaTypes = $facetService->getFacetCounts('media_type');
-            $this->languages = $facetService->getFacetCounts('language');
+        // Anonymous visitors all see the same records, so their facet counts and
+        // total are shared for 10 minutes per filter combination (12 Nov 2026: a
+        // scraper's multi-filter browse kept MySQL on every core at RARI).
+        $countKey = $this->anonCountKey($facetOptions);
+        $cachedCounts = $countKey ? $this->anonCacheGet($countKey) : null;
+        if (is_array($cachedCounts)) {
+            foreach ($cachedCounts['facets'] as $prop => $value) {
+                $this->$prop = $value;
+            }
         } else {
-            // No facet filters active: use pre-computed cached counts (zero overhead)
-            $this->types = $this->getCachedFacet('glam_type' . $sfx, 'object_type');
-            $this->levels = $this->getCachedFacet('level' . $sfx);
-            $this->repositories = $this->getCachedFacet('repository' . $sfx);
-            $this->creators = $this->getCachedFacet('creator' . $sfx);
-            $this->subjects = $this->getCachedFacet('subject' . $sfx);
-            $this->places = $this->getCachedFacet('place' . $sfx);
-            $this->genres = $this->getCachedFacet('genre' . $sfx);
-            $this->mediaTypes = $this->getCachedFacet('media_type' . $sfx, 'media_type');
+            $this->loadFacets($facetService, $sfx);
         }
-
-        // Library-only facets: always computed live (no cached version).
-        // getLibraryColumnCounts swallows the exception when library_item
-        // doesn't exist (plugin not installed) so non-library sites are safe.
-        $this->materialTypes      = $facetService->getFacetCounts('material_type');
-        $this->conditionGrades    = $facetService->getFacetCounts('condition_grade');
-        $this->acquisitionMethods = $facetService->getFacetCounts('acquisition_method');
-        $this->circulationStatuses = $facetService->getFacetCounts('circulation_status');
-
-        // Museum-only facets: live too. Auto-hide when CCO data isn't authored
-        // on the IOs in the result set.
-        $this->workTypes         = $facetService->getFacetCounts('work_type');
-        $this->materialsList     = $facetService->getFacetCounts('materials');
-        $this->creationPlaces    = $facetService->getFacetCounts('creation_place');
-        $this->museumRepositories = $facetService->getFacetCounts('museum_repository');
 
         // ── Discovery integration ──────────────────────────────────────
         // When a text query is present and ahgDiscoveryPlugin is enabled,
@@ -316,7 +290,7 @@ class displayActions extends AhgController
                 ->where('io.id', '>', 1);
 
             $this->applyFilters($countQuery);
-            $this->total = $countQuery->count();
+            $this->total = isset($cachedCounts['total']) ? (int) $cachedCounts['total'] : $countQuery->count();
 
             if ($this->total === 0 && $this->queryFilter) {
                 try {
@@ -333,6 +307,9 @@ class displayActions extends AhgController
         }
 
         $this->totalPages = (int) ceil($this->total / $this->limit);
+        if ($countKey && !is_array($cachedCounts) && !$this->discoveryMode && !$this->esIds) {
+            $this->anonCacheSet($countKey, ['facets' => $this->facetSnapshot(), 'total' => $this->total], 600);
+        }
 
         // Build main query
         $query = DB::table('information_object as io')
@@ -377,12 +354,16 @@ class displayActions extends AhgController
             $this->breadcrumb = [];
         }
 
-        $this->digitalObjectCount = DB::table('information_object as io')
-            ->join('digital_object as do', function($j) {
-                $j->on('io.id', '=', 'do.object_id')->whereNull('do.parent_id');
-            })
-            ->where('io.id', '>', 1)
-            ->count();
+        $this->digitalObjectCount = $this->anonCacheGet('do_count');
+        if (!is_int($this->digitalObjectCount)) {
+            $this->digitalObjectCount = DB::table('information_object as io')
+                ->join('digital_object as do', function($j) {
+                    $j->on('io.id', '=', 'do.object_id')->whereNull('do.parent_id');
+                })
+                ->where('io.id', '>', 1)
+                ->count();
+            $this->anonCacheSet('do_count', $this->digitalObjectCount, 600);
+        }
 
         // Sort
         $sortDir = $this->sortDir === 'desc' ? 'desc' : 'asc';
@@ -556,6 +537,116 @@ class displayActions extends AhgController
         return [] === $hidden ? $ids : array_values(array_diff($ids, $hidden));
     }
 
+    /** Properties holding facet counts, shared through the anonymous cache. */
+    private const FACET_PROPS = ['types', 'levels', 'repositories', 'creators', 'subjects', 'places', 'genres', 'mediaTypes', 'languages',
+        'materialTypes', 'conditionGrades', 'acquisitionMethods', 'circulationStatuses', 'workTypes', 'materialsList', 'creationPlaces', 'museumRepositories'];
+
+    /** Facet counts: live when filters are active or the user has hidden records, else the pre-computed cache. */
+    protected function loadFacets(\AhgDisplay\Services\DynamicFacetService $facetService, string $sfx): void
+    {
+        // The cached counts include every description, so whenever this user
+        // has hidden ones, count live instead.
+        if ($facetService->hasActiveFacetFilters() || [] !== $this->hiddenIds()) {
+            // Dynamic disjunctive faceting: each facet excludes its own filter
+            $this->types = $facetService->getFacetCounts('glam_type');
+            $this->levels = $facetService->getFacetCounts('level');
+            $this->repositories = $facetService->getFacetCounts('repository');
+            $this->creators = $facetService->getFacetCounts('creator');
+            $this->subjects = $facetService->getFacetCounts('subject');
+            $this->places = $facetService->getFacetCounts('place');
+            $this->genres = $facetService->getFacetCounts('genre');
+            $this->mediaTypes = $facetService->getFacetCounts('media_type');
+            $this->languages = $facetService->getFacetCounts('language');
+        } else {
+            // No facet filters active: use pre-computed cached counts (zero overhead)
+            $this->types = $this->getCachedFacet('glam_type' . $sfx, 'object_type');
+            $this->levels = $this->getCachedFacet('level' . $sfx);
+            $this->repositories = $this->getCachedFacet('repository' . $sfx);
+            $this->creators = $this->getCachedFacet('creator' . $sfx);
+            $this->subjects = $this->getCachedFacet('subject' . $sfx);
+            $this->places = $this->getCachedFacet('place' . $sfx);
+            $this->genres = $this->getCachedFacet('genre' . $sfx);
+            $this->mediaTypes = $this->getCachedFacet('media_type' . $sfx, 'media_type');
+        }
+
+        // Library-only facets: always computed live (no cached version).
+        // getLibraryColumnCounts swallows the exception when library_item
+        // doesn't exist (plugin not installed) so non-library sites are safe.
+        $this->materialTypes      = $facetService->getFacetCounts('material_type');
+        $this->conditionGrades    = $facetService->getFacetCounts('condition_grade');
+        $this->acquisitionMethods = $facetService->getFacetCounts('acquisition_method');
+        $this->circulationStatuses = $facetService->getFacetCounts('circulation_status');
+
+        // Museum-only facets: live too. Auto-hide when CCO data isn't authored
+        // on the IOs in the result set.
+        $this->workTypes         = $facetService->getFacetCounts('work_type');
+        $this->materialsList     = $facetService->getFacetCounts('materials');
+        $this->creationPlaces    = $facetService->getFacetCounts('creation_place');
+        $this->museumRepositories = $facetService->getFacetCounts('museum_repository');
+    }
+
+    /** @return array<string, mixed> the facet properties set on this action */
+    protected function facetSnapshot(): array
+    {
+        $out = [];
+        foreach (self::FACET_PROPS as $prop) {
+            if (isset($this->$prop)) {
+                $out[$prop] = $this->$prop;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Cache key for an anonymous visitor's counts, or null: signed-in users and
+     * text searches stay live. Built from the filters that take effect (the facet
+     * service options), so parameters the browse ignores do not split the cache.
+     */
+    protected function anonCountKey(array $facetOptions): ?string
+    {
+        if ($this->isAuthenticated || $this->queryFilter || !self::apcuOn()) {
+            return null;
+        }
+        unset($facetOptions['hiddenIds']);
+
+        return 'counts:' . md5(json_encode([$facetOptions, $this->customFieldFilters, \AtomExtensions\Helpers\CultureHelper::getCulture()]));
+    }
+
+    /**
+     * APCu: shared memory with a fixed size that evicts old entries itself, so an
+     * endless stream of filter combinations cannot fill a disk. Keys carry the
+     * site root, since every site under one php-fpm master shares the memory.
+     * No APCu, or any error: null, and the caller counts live as before.
+     */
+    protected function anonCacheGet(string $key)
+    {
+        if (!self::apcuOn()) {
+            return null;
+        }
+        $ok = false;
+        $value = @apcu_fetch(self::apcuPrefix() . $key, $ok);
+
+        return $ok ? $value : null;
+    }
+
+    protected function anonCacheSet(string $key, $value, int $ttl): void
+    {
+        if (self::apcuOn()) {
+            @apcu_store(self::apcuPrefix() . $key, $value, $ttl);
+        }
+    }
+
+    private static function apcuOn(): bool
+    {
+        return function_exists('apcu_enabled') && apcu_enabled();
+    }
+
+    private static function apcuPrefix(): string
+    {
+        return 'ahgdisplay:' . md5((string) sfConfig::get('sf_root_dir')) . ':';
+    }
+
     /** @return int[]|null ids hidden from this user, or null when that cannot be determined */
     protected function hiddenIds(): ?array
     {
@@ -564,9 +655,15 @@ class displayActions extends AhgController
         }
         try {
             $userId = $this->getContext()->getUser()->getAttribute('user_id');
-            $ids = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
-                ->getRestrictedObjectIds($userId ? (int) $userId : null);
-            $this->hiddenIdsCache = array_map('intval', $ids);
+            $ids = $userId ? null : $this->anonCacheGet('hidden_anon');
+            if (!is_array($ids)) {
+                $ids = array_map('intval', \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                    ->getRestrictedObjectIds($userId ? (int) $userId : null));
+                if (!$userId) {
+                    $this->anonCacheSet('hidden_anon', $ids, 300);
+                }
+            }
+            $this->hiddenIdsCache = $ids;
         } catch (\Throwable $e) {
             error_log('display.visibility_failed: ' . $e->getMessage());
             $this->hiddenIdsCache = null;
