@@ -327,7 +327,11 @@ class displayActions extends AhgController
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('io.id', '>', 1)
             ->select(
-                'io.id', 'io.identifier', 'io.parent_id',
+                // MySQL stops this query after 60 s, whatever connection runs it: a
+                // browse cut off by php-fpm otherwise keeps sorting the whole filtered
+                // set for many minutes (RARI, 13 Nov 2026). The hint must follow SELECT
+                // directly, so it rides on the first column.
+                DB::raw('/*+ MAX_EXECUTION_TIME(60000) */ `io`.`id`'), 'io.identifier', 'io.parent_id',
                 'i18n.title', 'i18n.scope_and_content',
                 'level.name as level_name',
                 'doc.object_type', 'slug.slug'
@@ -402,14 +406,24 @@ class displayActions extends AhgController
         }
 
         // Paginate — Discovery mode already sliced IDs, so fetch all matched
-        if ($this->discoveryMode && !empty($this->esIds)) {
-            $this->objects = $query->limit($this->limit)->get()->toArray();
-        } else {
-            $this->objects = $query
-                ->offset(($this->page - 1) * $this->limit)
-                ->limit($this->limit)
-                ->get()
-                ->toArray();
+        try {
+            if ($this->discoveryMode && !empty($this->esIds)) {
+                $this->objects = $query->limit($this->limit)->get()->toArray();
+            } else {
+                $this->objects = $query
+                    ->offset(($this->page - 1) * $this->limit)
+                    ->limit($this->limit)
+                    ->get()
+                    ->toArray();
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // 3024: stopped by the 60 s limit above. Show an empty page, not a 500.
+            if (3024 !== (int) ($e->errorInfo[1] ?? 0)) {
+                throw $e;
+            }
+            error_log('display.browse_timeout: ' . $request->getUri());
+            $this->objects = [];
+            $this->browseTimedOut = true;
         }
 
         // Enrich results
