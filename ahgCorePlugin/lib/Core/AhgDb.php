@@ -94,8 +94,7 @@ class AhgDb
         }
 
         try {
-            self::$capsule = new Capsule();
-            self::$capsule->addConnection([
+            $connection = [
                 'driver' => 'mysql',
                 'host' => $host,
                 'port' => $port,
@@ -105,7 +104,17 @@ class AhgDb
                 'charset' => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
                 'prefix' => '',
-            ]);
+            ];
+            // Web requests only: MySQL stops a read query after 60 s, so a query left
+            // running when php-fpm cuts a request off cannot pile up. Same rule as the
+            // framework's bootstrap.php and ConfigService (v2.19.45-47); this is the
+            // connection when the framework bootstrap has not run (RARI, 13 Nov 2026,
+            // where orphaned GLAM browse queries kept every core busy). CLI is not limited.
+            if ('fpm-fcgi' === PHP_SAPI) {
+                $connection['options'] = [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION max_execution_time = 60000'];
+            }
+            self::$capsule = new Capsule();
+            self::$capsule->addConnection($connection);
             self::$capsule->setAsGlobal();
             self::$capsule->bootEloquent();
             self::$initialized = true;
