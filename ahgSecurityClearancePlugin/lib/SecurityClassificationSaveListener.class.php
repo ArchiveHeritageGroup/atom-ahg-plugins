@@ -1,174 +1,153 @@
 <?php
 
 /**
- * Extended Information Object Edit Action.
+ * Saves the Security Classification and Watermark Settings fieldsets when a
+ * description is saved through base AtoM's edit form.
  *
- * This extends the base edit action to handle security classification
- * when saving archival descriptions.
+ * This plugin puts both fieldsets on base AtoM's ISAD form, but nothing saved
+ * them: on a site whose record "Edit" button opens that form (any AtoM without
+ * a base routing patch), a classification chosen there was silently discarded
+ * and the record stayed public. The AHG edit form (ioManage) saves them itself,
+ * through ahgCorePlugin's IoFormHelper, so it is left alone here.
  *
- * Option 1: Override in your plugin
- * Option 2: Use event listener approach (cleaner)
- */
-
-/**
- * Event listener for saving security classification.
+ * Stock AtoM fires no save event, so this hooks the redirect that follows a
+ * successful save: sfWebController::redirect() sends the response, and with it
+ * 'response.filter_content', after the action has saved and before it stops.
+ * A failed validation re-renders the form instead of redirecting, so nothing
+ * is saved then. Base AtoM is not touched.
  *
- * Add this to your plugin's configuration to handle security saving via events.
+ * The write itself waits for shutdown: QubitTransactionFilter commits the
+ * description only after the redirect has been sent, and writing before that
+ * (on the separate Laravel connection) waits on its locks until it times out.
+ * The parent-level rule is checked during the redirect, while a refusal can
+ * still be shown to the user as a flash message.
  */
 class SecurityClassificationSaveListener
 {
-    /**
-     * Handle post-save event for information objects.
-     */
-    public static function onInformationObjectSave(sfEvent $event)
+    /** 'response.filter_content' listener; returns the content unchanged. */
+    public static function onResponse(sfEvent $event, $content)
     {
-        $resource = $event->getSubject();
-        $request = sfContext::getInstance()->getRequest();
+        try {
+            $context = sfContext::getInstance();
+            $request = $context->getRequest();
+            $response = $event->getSubject();
 
-        // Check if security fields were submitted
-        $classificationId = $request->getParameter('security_classification_id');
+            if (!$request->isMethod('post')
+                || !$request->hasParameter('security_classification_id')
+                || $response->getStatusCode() < 300 || $response->getStatusCode() >= 400) {
+                return $content;
+            }
 
-        if (null === $classificationId) {
-            return; // Security fieldset not present in form
+            $entry = $context->getActionStack()->getLastEntry();
+            $action = $entry ? $entry->getActionInstance() : null;
+            // Base AtoM's description edit and add (every standard's edit action extends it).
+            // Subclasses that save the fieldset themselves (the museum CCO form) are left alone.
+            if (!$action instanceof InformationObjectEditAction || empty($action->resource->id)
+                || method_exists($action, 'saveSecurityClassification')) {
+                return $content;
+            }
+
+            $objectId = (int) $action->resource->id;
+            $refusal = self::refusal($request, $objectId);
+            if (null !== $refusal) {
+                $context->getUser()->setFlash('error', $refusal);
+
+                return $content;
+            }
+
+            $userId = (int) $context->getUser()->getUserId();
+            register_shutdown_function(static function () use ($request, $objectId, $userId) {
+                try {
+                    self::save($request, $objectId, $userId);
+                } catch (Throwable $e) {
+                    error_log('SecurityClassificationSaveListener: '.$e->getMessage());
+                }
+            });
+        } catch (Throwable $e) {
+            // The description itself has saved; never turn that into an error page.
+            error_log('SecurityClassificationSaveListener: '.$e->getMessage());
         }
 
-        // Load security service
+        return $content;
+    }
+
+    /**
+     * Why the posted classification cannot be applied, or null if it can. Read-only.
+     * A child record cannot be classified, or declassified, below its parent.
+     */
+    public static function refusal(sfWebRequest $request, int $objectId): ?string
+    {
         require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
 
-        $currentUserId = sfContext::getInstance()->user->getUserId();
+        $parent = SecurityClearanceService::getParentEffectiveClassification($objectId);
+        if (!$parent) {
+            return null;
+        }
+        $classificationId = (int) $request->getParameter('security_classification_id');
+        if ($classificationId <= 0) {
+            return null !== SecurityClearanceService::getObjectClassification($objectId)
+                ? sprintf('The description was saved, but its classification was kept: the parent record is classified "%s", and a child record cannot be lower.', $parent->name)
+                : null;
+        }
+        $new = SecurityClearanceService::getClassification($classificationId);
 
-        if (!empty($classificationId) && $classificationId > 0) {
-            // Build classification data array
-            $data = [
-                'reason' => $request->getParameter('security_reason'),
+        return ($new && $new->level < $parent->level)
+            ? sprintf('The description was saved, but not its classification: the parent record is classified "%s", and a child record cannot be lower.', $parent->name)
+            : null;
+    }
+
+    /** Persist both fieldsets for one object, from the posted form. */
+    public static function save(sfWebRequest $request, int $objectId, int $userId): void
+    {
+        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+
+        $classificationId = (int) $request->getParameter('security_classification_id');
+
+        if ($classificationId > 0) {
+            $result = SecurityClearanceService::classifyObject($objectId, $classificationId, [
+                'reason' => $request->getParameter('security_reason') ?: null,
                 'review_date' => $request->getParameter('security_review_date') ?: null,
                 'declassify_date' => $request->getParameter('security_declassify_date') ?: null,
-                'handling_instructions' => $request->getParameter('security_handling_instructions'),
-                'inherit_to_children' => (bool) $request->getParameter('security_inherit_to_children', true),
-            ];
-
-            // Apply classification (with escalation constraint validation)
-            $result = SecurityClearanceService::classifyObject(
-                $resource->id,
-                (int) $classificationId,
-                $data,
-                $currentUserId
-            );
-
-            // Handle validation failure (e.g., escalation constraint violated)
-            if (!$result['success']) {
-                sfContext::getInstance()->getUser()->setFlash('error', $result['error']);
+                'handling_instructions' => $request->getParameter('security_handling_instructions') ?: null,
+                'inherit_to_children' => $request->getParameter('security_inherit_to_children') ? 1 : 0,
+            ], $userId);
+            if (empty($result['success'])) {
+                error_log('SecurityClassificationSaveListener: object '.$objectId.' not classified: '.($result['error'] ?? 'unknown error'));
             }
-        } else {
-            // Remove classification if previously classified
-            $existing = SecurityClearanceService::getObjectClassification($resource->id);
-            if ($existing) {
-                // Check escalation constraint for declassification too
-                $parentClass = SecurityClearanceService::getParentEffectiveClassification($resource->id);
-                if ($parentClass) {
-                    // Cannot remove classification if parent has one (would be a downgrade to "Public")
-                    sfContext::getInstance()->getUser()->setFlash(
-                        'error',
-                        sprintf(
-                            'Cannot remove classification. Parent record has classification "%s". Child records must maintain at least the parent\'s classification level.',
-                            $parentClass->name
-                        )
-                    );
-                    return;
-                }
-
-                SecurityClearanceService::declassifyObject(
-                    $resource->id,
-                    null,
-                    $currentUserId,
-                    'Classification removed via edit form'
-                );
-            }
-        }
-    }
-}
-
-/**
- * Alternative: Extended Edit Action Class.
- *
- * If you prefer to override the action directly, use this approach.
- * Place in: apps/qubit/modules/informationobject/actions/editAction.class.php
- */
-class SecurityAwareEditAction extends InformationObjectEditAction
-{
-    /**
-     * Process form submission.
-     */
-    public function processForm()
-    {
-        // Call parent to save main form data
-        parent::processForm();
-
-        // Handle security classification
-        $this->saveSecurityClassification();
-    }
-
-    /**
-     * Save security classification data.
-     */
-    protected function saveSecurityClassification()
-    {
-        $classificationId = $this->request->getParameter('security_classification_id');
-
-        if (null === $classificationId) {
-            return; // Security fieldset not present
+        } elseif (null !== SecurityClearanceService::getObjectClassification($objectId)
+            && !SecurityClearanceService::getParentEffectiveClassification($objectId)) {
+            // The fieldset preselects the current level, so "Public (No Classification)"
+            // posted on a classified record is a deliberate declassification.
+            SecurityClearanceService::declassifyObject($objectId, null, $userId, 'Cleared via edit form');
         }
 
-        require_once sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+        self::saveWatermark($request, $objectId);
+    }
 
-        $currentUserId = $this->context->user->getUserId();
+    private static function saveWatermark(sfWebRequest $request, int $objectId): void
+    {
+        $svc = '\\AhgCore\\Services\\WatermarkSettingsService';
+        if (!$request->hasParameter('watermark_type_id') || !class_exists($svc)) {
+            return;
+        }
 
-        if (!empty($classificationId) && $classificationId > 0) {
-            // Build classification data array
-            $data = [
-                'reason' => $this->request->getParameter('security_reason'),
-                'review_date' => $this->request->getParameter('security_review_date') ?: null,
-                'declassify_date' => $this->request->getParameter('security_declassify_date') ?: null,
-                'handling_instructions' => $this->request->getParameter('security_handling_instructions'),
-                'inherit_to_children' => (bool) $this->request->getParameter('security_inherit_to_children', true),
-            ];
+        $opacity = $request->getParameter('new_watermark_opacity');
+        $opacity = is_numeric($opacity) ? max(0.0, min(1.0, round(((float) $opacity > 1 ? (float) $opacity / 100 : (float) $opacity), 2))) : null;
+        $typeId = (int) $request->getParameter('watermark_type_id');
 
-            // Apply classification (with escalation constraint validation)
-            $result = SecurityClearanceService::classifyObject(
-                $this->resource->id,
-                (int) $classificationId,
-                $data,
-                $currentUserId
-            );
+        $svc::saveObjectWatermark(
+            $objectId,
+            $typeId > 0 ? $typeId : null,
+            (bool) $request->getParameter('watermark_enabled'),
+            (int) $request->getParameter('custom_watermark_id'),
+            $request->getParameter('new_watermark_position') ?: null,
+            $opacity
+        );
 
-            // Handle validation failure (e.g., escalation constraint violated)
-            if (!$result['success']) {
-                $this->context->user->setFlash('error', $result['error']);
-            }
-        } else {
-            $existing = SecurityClearanceService::getObjectClassification($this->resource->id);
-            if ($existing) {
-                // Check escalation constraint for declassification too
-                $parentClass = SecurityClearanceService::getParentEffectiveClassification($this->resource->id);
-                if ($parentClass) {
-                    // Cannot remove classification if parent has one
-                    $this->context->user->setFlash(
-                        'error',
-                        sprintf(
-                            'Cannot remove classification. Parent record has classification "%s". Child records must maintain at least the parent\'s classification level.',
-                            $parentClass->name
-                        )
-                    );
-                    return;
-                }
-
-                SecurityClearanceService::declassifyObject(
-                    $this->resource->id,
-                    null,
-                    $currentUserId,
-                    'Classification removed via edit form'
-                );
-            }
+        // Derivatives carry the mark; regenerating them is opt-in, as on the AHG form.
+        $regen = '\\AhgCore\\Services\\DerivativeWatermarkService';
+        if ($request->getParameter('regenerate_derivatives') && class_exists($regen) && method_exists($regen, 'regenerateDerivatives')) {
+            $regen::regenerateDerivatives($objectId);
         }
     }
 }

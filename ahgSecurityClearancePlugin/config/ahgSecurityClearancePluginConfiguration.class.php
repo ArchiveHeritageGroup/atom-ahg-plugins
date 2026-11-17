@@ -62,6 +62,11 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         // The repository page's holdings list pages through base AtoM's
         // repository/holdings JSON, straight from the search index.
         $this->dispatcher->connect('response.filter_content', [$this, 'filterHoldingsJson']);
+
+        // Save the Security Classification and Watermark fieldsets this plugin adds
+        // to base AtoM's description form; until now nothing did, and a chosen
+        // classification was silently dropped. See SecurityClassificationSaveListener.
+        $this->dispatcher->connect('response.filter_content', ['SecurityClassificationSaveListener', 'onResponse']);
     }
 
     /**
