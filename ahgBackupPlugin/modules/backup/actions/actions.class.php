@@ -141,7 +141,9 @@ if (!$this->getUser()->isAdministrator()) {
 
         $root = sfConfig::get('sf_root_dir');
         $log = sfConfig::get('sf_log_dir').'/backup-create.log';
-        exec(sprintf('cd %s && nohup php symfony backup:create %s >> %s 2>&1 &', escapeshellarg($root), implode(' ', $flags), escapeshellarg($log)));
+        // CliTask: `php symfony` has no backup tasks on a stock ProjectConfiguration.
+        $cli = (class_exists('\\AtomFramework\\Services\\CliTask') ? \AtomFramework\Services\CliTask::command($root) : 'php symfony');
+        exec(sprintf('cd %s && nohup %s backup:create %s >> %s 2>&1 &', escapeshellarg($root), $cli, implode(' ', $flags), escapeshellarg($log)));
 
         return $this->renderJson(['started' => true]);
     }
@@ -661,7 +663,9 @@ if (!$this->getUser()->isAdministrator()) {
 
         $root = sfConfig::get('sf_root_dir');
         $log = sfConfig::get('sf_log_dir').'/backup-restore.log';
-        exec(sprintf('cd %s && nohup php symfony backup:restore %s %s >> %s 2>&1 &', escapeshellarg($root), $sourceFlag, implode(' ', $flags), escapeshellarg($log)));
+        // CliTask: `php symfony` has no backup tasks on a stock ProjectConfiguration.
+        $cli = (class_exists('\\AtomFramework\\Services\\CliTask') ? \AtomFramework\Services\CliTask::command($root) : 'php symfony');
+        exec(sprintf('cd %s && nohup %s backup:restore %s %s >> %s 2>&1 &', escapeshellarg($root), $cli, $sourceFlag, implode(' ', $flags), escapeshellarg($log)));
 
         return $this->renderJson(['started' => true, 'since' => date('Y-m-d H:i:s')]);
     }

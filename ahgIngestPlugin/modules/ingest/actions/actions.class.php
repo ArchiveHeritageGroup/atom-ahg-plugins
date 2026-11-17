@@ -959,9 +959,13 @@ class ingestActions extends sfActions
                 $atomRoot = sfConfig::get('sf_root_dir');
                 $logFile = \AhgIngestPlugin\Services\IngestService::workDir() . '/job_' . $jobId . '.log';
 
+                // CliTask: `php symfony` has no ingest tasks on a stock ProjectConfiguration.
+                $cli = class_exists('\AtomFramework\Services\CliTask')
+                    ? \AtomFramework\Services\CliTask::command($atomRoot)
+                    : 'php '.escapeshellarg($atomRoot.'/symfony');
                 $cmd = sprintf(
-                    'nohup php %s/symfony ingest:commit --job-id=%d > %s 2>&1 &',
-                    escapeshellarg($atomRoot),
+                    'nohup %s ingest:commit --job-id=%d > %s 2>&1 &',
+                    $cli,
                     $jobId,
                     escapeshellarg($logFile)
                 );

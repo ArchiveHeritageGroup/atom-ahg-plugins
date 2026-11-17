@@ -51,7 +51,7 @@ inside --every-days.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $configuration = ProjectConfiguration::getApplicationConfiguration(
             $options['application'], $options['env'], true

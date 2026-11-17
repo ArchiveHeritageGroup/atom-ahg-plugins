@@ -934,9 +934,11 @@ class portableExportActions extends sfActions
         $logDir = $atomRoot . '/downloads/portable-imports';
         @mkdir($logDir, 0755, true);
 
+        // CliTask: `php symfony` has no portable tasks on a stock ProjectConfiguration.
+        $cli = (class_exists('\\AtomFramework\\Services\\CliTask') ? \AtomFramework\Services\CliTask::command($atomRoot) : 'php '.escapeshellarg($atomRoot.'/symfony'));
         $cmd = sprintf(
-            'nohup php %s/symfony portable:import --import-id=%d > %s/import-%d.log 2>&1 &',
-            escapeshellarg($atomRoot),
+            'nohup %s portable:import --import-id=%d > %s/import-%d.log 2>&1 &',
+            $cli,
             $importId,
             $logDir,
             $importId
@@ -992,9 +994,11 @@ class portableExportActions extends sfActions
         // (the "Extracting catalogue data… (hangs)" symptom). nohup needs no
         // worker and is reliable wherever exec() is enabled.
         $atomRoot = sfConfig::get('sf_root_dir');
+        // CliTask: `php symfony` has no portable tasks on a stock ProjectConfiguration.
+        $cli = (class_exists('\\AtomFramework\\Services\\CliTask') ? \AtomFramework\Services\CliTask::command($atomRoot) : 'php '.escapeshellarg($atomRoot.'/symfony'));
         $cmd = sprintf(
-            'nohup php %s/symfony portable:export --export-id=%d > %s/downloads/portable-exports/export-%d.log 2>&1 &',
-            escapeshellarg($atomRoot),
+            'nohup %s portable:export --export-id=%d > %s/downloads/portable-exports/export-%d.log 2>&1 &',
+            $cli,
             $exportId,
             $atomRoot,
             $exportId

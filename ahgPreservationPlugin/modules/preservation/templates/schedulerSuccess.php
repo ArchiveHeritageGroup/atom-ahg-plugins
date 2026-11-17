@@ -283,15 +283,17 @@
                 <h5 class="mb-0"><i class="fas fa-terminal"></i> CLI Command</h5>
             </div>
             <div class="card-body">
-                <p class="small text-muted">Run the scheduler via cron to execute due workflows:</p>
+<?php // The AHG task runner: `php symfony` has no preservation tasks on a stock ProjectConfiguration.
+$cli = htmlspecialchars(class_exists('\AtomFramework\Services\CliTask') ? \AtomFramework\Services\CliTask::command() : 'php symfony'); ?>
+                <p class="small text-muted">Run the scheduler via cron, as the web server user, to execute due workflows:</p>
                 <pre class="bg-dark text-light p-3 rounded small"><code># Run every minute (recommended)
 * * * * * cd <?php echo htmlspecialchars(sfConfig::get('sf_root_dir')); ?> && \
-  php symfony preservation:scheduler >> \
+  <?php echo $cli; ?> preservation:scheduler >> \
   /var/log/atom/scheduler.log 2>&1</code></pre>
                 <p class="small text-muted mb-0">Or run individual workflows:</p>
-                <pre class="bg-dark text-light p-3 rounded small mb-0"><code>php symfony preservation:identify --limit=500
-php symfony preservation:fixity --limit=500
-php symfony preservation:virus-scan --limit=200</code></pre>
+                <pre class="bg-dark text-light p-3 rounded small mb-0"><code><?php echo $cli; ?> preservation:identify --limit=500
+<?php echo $cli; ?> preservation:fixity --limit=500
+<?php echo $cli; ?> preservation:virus-scan --limit=200</code></pre>
             </div>
         </div>
     </div>
