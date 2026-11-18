@@ -42,6 +42,13 @@ final class SaveListener
         'dcManage',
         'modsManage',
         'radManage',
+        // base AtoM's own edit forms, used where the AHG editors are not in front
+        // (stock sites, learn-ahg): without them no save there was ever versioned
+        'sfIsadPlugin',
+        'sfDcPlugin',
+        'sfModsPlugin',
+        'sfRadPlugin',
+        'arDacsPlugin',
         // old plugin-name entries, kept in case a module was ever named after its plugin
         'ahgInformationObjectManage',
         'ahgDacsManage',
@@ -137,20 +144,36 @@ final class SaveListener
         $userId = VersionContext::takeUserId() ?? $this->resolveUserId($context);
         $summary = VersionContext::takeSummary() ?? $this->buildDefaultSummary($module, $action);
 
-        $builder = new SnapshotBuilder();
-        $writer  = new VersionWriter();
+        // Written after the request ends, not here. Base AtoM's edit forms save
+        // inside QubitTransactionFilter's transaction, which is still open while
+        // the response is filtered: the writer's row lock on a second connection
+        // then waited 50 s and failed (MySQL 1205). After shutdown the save is
+        // committed, so the snapshot also reads what was actually stored.
+        static $queued = [];
+        $key = $entityType . ':' . $entityId;
+        if (isset($queued[$key])) {
+            return;
+        }
+        $queued[$key] = true;
 
-        $snapshot = $entityType === 'information_object'
-            ? $builder->buildForInformationObject($entityId)
-            : $builder->buildForActor($entityId);
+        register_shutdown_function(static function () use ($entityType, $entityId, $summary, $userId): void {
+            try {
+                $builder = new SnapshotBuilder();
+                $snapshot = $entityType === 'information_object'
+                    ? $builder->buildForInformationObject($entityId)
+                    : $builder->buildForActor($entityId);
 
-        $writer->write(
-            entityType: $entityType,
-            entityId: $entityId,
-            snapshot: $snapshot,
-            changeSummary: $summary,
-            userId: $userId,
-        );
+                (new VersionWriter())->write(
+                    entityType: $entityType,
+                    entityId: $entityId,
+                    snapshot: $snapshot,
+                    changeSummary: $summary,
+                    userId: $userId,
+                );
+            } catch (\Throwable $e) {
+                error_log('ahgVersionControlPlugin SaveListener error: ' . $e->getMessage());
+            }
+        });
     }
 
     /**
