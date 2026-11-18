@@ -91,6 +91,7 @@ class ahg3DModelPluginConfiguration extends sfPluginConfiguration
         // Access-controlled 3D model delivery: 3D files are masters, so the raw
         // /uploads/r/* URL is readMaster-gated (#258) and 404s anonymously.
         $model->any('ar3d_file', '/3d/file/:id', 'file', ['id' => '\\d+']);
+        $model->any('ar3d_model_file', '/3d/model/:id', 'modelFile', ['id' => '\\d+']);
         $model->register($event->getSubject());
 
         // model3dSettings module routes

@@ -1233,6 +1233,19 @@ class model3dActions extends AhgController
         require_once sfConfig::get('sf_plugins_dir') . '/ahg3DModelPlugin/lib/Model3DFileServer.php';
         $file = \Model3DFileServer::resolve($id, $this->getUser());
 
+        return $this->sendModelFile($file);
+    }
+
+    /** /3d/model/:id - a model stored by the upload form, which has no digital object. */
+    public function executeModelFile($request)
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahg3DModelPlugin/lib/Model3DFileServer.php';
+
+        return $this->sendModelFile(\Model3DFileServer::resolveModel((int) $request->getParameter('id'), $this->getUser()));
+    }
+
+    private function sendModelFile(?array $file)
+    {
         if (null === $file) {
             // One response for "not a 3D model", "no such object" and "not allowed",
             // so this cannot be used to probe what exists.

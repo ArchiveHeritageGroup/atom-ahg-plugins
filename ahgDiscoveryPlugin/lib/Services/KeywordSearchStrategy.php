@@ -90,7 +90,11 @@ class KeywordSearchStrategy
                 ],
             ];
 
-            $response = $client->search($params);
+            // Base AtoM's arElasticSearchPlugin holds an Elastica client, which has no
+            // array search(); send the same body as a raw request (same JSON back).
+            $response = $client instanceof \Elastica\Client
+                ? $client->request($params['index'].'/_search', 'POST', $params['body'])->getData()
+                : $client->search($params);
             return $this->parseResults($response);
         } catch (\Exception $e) {
             error_log('[ahgDiscovery] ES keyword search failed: ' . $e->getMessage());
@@ -149,7 +153,7 @@ class KeywordSearchStrategy
             foreach ($expanded['entityTerms'] as $entity) {
                 $should[] = [
                     'multi_match' => [
-                        'query'  => $entity['value'],
+                        'query'  => is_array($entity) ? ($entity['value'] ?? '') : (string) $entity,
                         'fields' => $fields,
                         'type'   => 'phrase',
                         'boost'  => 1.5,
@@ -168,13 +172,20 @@ class KeywordSearchStrategy
                 $dateFilter['lte'] = (string)$expanded['dateRange']['end'];
             }
             if (!empty($dateFilter)) {
+                // `dates` is a nested field in AtoM's mapping: a plain range on
+                // dates.startDate never matches, so "the 1960s" found nothing.
                 $filter[] = [
-                    'bool' => [
-                        'should' => [
-                            ['range' => ['dates.startDate' => $dateFilter]],
-                            ['range' => ['dates.endDate' => $dateFilter]],
+                    'nested' => [
+                        'path'  => 'dates',
+                        'query' => [
+                            'bool' => [
+                                'should' => [
+                                    ['range' => ['dates.startDate' => $dateFilter]],
+                                    ['range' => ['dates.endDate' => $dateFilter]],
+                                ],
+                                'minimum_should_match' => 1,
+                            ],
                         ],
-                        'minimum_should_match' => 1,
                     ],
                 ];
             }
@@ -252,14 +263,16 @@ class KeywordSearchStrategy
      * Get the search engine client (OpenSearch or Elasticsearch).
      *
      * Uses QubitSearch singleton which returns the arOpenSearchPlugin instance.
-     * The client is the OpenSearch\Client object on its public $client property.
+     * The client is the engine's public $client property: OpenSearch\Client (arOpenSearchPlugin)
+     * or Elastica\Client (base AtoM's arElasticSearchPlugin). QubitSearch is autoloaded: it
+     * is often not loaded yet when Discover runs, and without it there was no client at all.
      *
      * @return object|null  OpenSearch\Client or Elasticsearch\Client
      */
     private function getEsClient()
     {
         try {
-            if (class_exists('QubitSearch', false)) {
+            if (class_exists('QubitSearch')) {
                 $engine = \QubitSearch::getInstance();
                 if ($engine && isset($engine->client)) {
                     return $engine->client;
@@ -292,7 +305,7 @@ class KeywordSearchStrategy
     private function getIndexName(): string
     {
         try {
-            if (class_exists('QubitSearch', false)) {
+            if (class_exists('QubitSearch')) {
                 $engine = \QubitSearch::getInstance();
                 if ($engine && isset($engine->config['index']['name'])) {
                     return $engine->config['index']['name'] . '_qubitinformationobject';
