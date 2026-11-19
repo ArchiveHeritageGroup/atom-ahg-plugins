@@ -39,7 +39,9 @@ class DigitalObjectUploadAction extends AhgController
 
         $repo = $this->object->getRepository(['inherit' => true]);
 
-        if (isset($repo)) {
+        // A limit of -1 means no limit: skip the disk usage walk, which on a large
+        // upload folder took seconds per file (as in artefactual/atom#2439).
+        if (isset($repo) && -1 != $repo->uploadLimit) {
             $uploadLimit = $repo->uploadLimit;
             if (0 < $uploadLimit) {
                 $uploadLimit *= pow(10, 9); // Convert to bytes
