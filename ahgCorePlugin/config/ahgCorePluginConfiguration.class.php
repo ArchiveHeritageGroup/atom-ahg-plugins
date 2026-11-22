@@ -1174,9 +1174,10 @@ APPLIER;
 
     private static function moduleHasFormatTemplate($module, $format)
     {
-        // Formats are used to build a glob; keep them to a safe character set.
-        if (!preg_match('/^[a-z0-9]{1,16}$/i', (string) $format)) {
-            return true;
+        // Formats are used to build a glob; a value outside this safe character
+        // set cannot name a template, so it is refused as unavailable.
+        if (!is_string($format) || !preg_match('/^[a-z0-9]{1,16}$/iD', $format)) {
+            return false;
         }
 
         try {

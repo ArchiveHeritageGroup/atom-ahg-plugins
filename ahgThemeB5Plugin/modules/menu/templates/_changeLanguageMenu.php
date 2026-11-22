@@ -31,8 +31,9 @@
       <li>
         <?php echo link_to(
             ucfirst(format_language($value, $value)),
+            // Named parameters only: a request parameter called "0" would be read as the route's resource.
             ['sf_culture' => $value]
-                + $sf_data->getRaw('sf_request')->getParameterHolder()->getAll(),
+                + array_filter($sf_data->getRaw('sf_request')->getParameterHolder()->getAll(), 'is_string', ARRAY_FILTER_USE_KEY),
             ['class' => 'dropdown-item']
         ); ?>
       </li>
