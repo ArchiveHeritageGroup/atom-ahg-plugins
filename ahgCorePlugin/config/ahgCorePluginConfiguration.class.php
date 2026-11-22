@@ -55,6 +55,10 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         // that guard's HTML fallback for authority modules is applied first.
         $this->dispatcher->connect('controller.change_action', ['ahgCorePluginConfiguration', 'refuseUnavailableFormat']);
 
+        // default/fullTreeView is only a base class for the tree actions; it has no
+        // template, so opening it directly was a 500.
+        $this->dispatcher->connect('controller.change_action', ['ahgCorePluginConfiguration', 'refuseDirectFullTreeView']);
+
         // Sibling of the guard above, for the opposite case: no format asked for,
         // and the module can only answer in XML. /:slug;ead with no sf_format=xml
         // used to be a 500.
@@ -1193,6 +1197,18 @@ APPLIER;
         }
 
         return false;
+    }
+
+    /**
+     * Answer 404 when default/fullTreeView is requested directly.
+     *
+     * @param sfEvent $event
+     */
+    public static function refuseDirectFullTreeView($event)
+    {
+        if ('default' === ($event['module'] ?? null) && 'fullTreeView' === ($event['action'] ?? null)) {
+            throw new sfError404Exception('default/fullTreeView has no page of its own.');
+        }
     }
 
     /**

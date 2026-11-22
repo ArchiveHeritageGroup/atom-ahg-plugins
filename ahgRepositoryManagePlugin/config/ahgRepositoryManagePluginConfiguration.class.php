@@ -15,6 +15,9 @@ class ahgRepositoryManagePluginConfiguration extends sfPluginConfiguration
         // See dropUnresolvableTermValues() for why.
         $this->dispatcher->connect('request.filter_parameters', [$this, 'dropUnresolvableTermValues']);
 
+        // Base's holdings action has no template for a page past the search window.
+        $this->dispatcher->connect('controller.change_action', [$this, 'refuseHoldingsPastSearchWindow']);
+
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'repositoryManage';
         $enabledModules[] = 'sfIsdiahPlugin';
@@ -94,6 +97,38 @@ class ahgRepositoryManagePluginConfiguration extends sfPluginConfiguration
             '/repository/autocomplete',
             ['module' => 'repository', 'action' => 'autocomplete']
         ));
+
+        // Same trap for the holdings list: where a term owns the slug "holdings",
+        // '/repository/:slug' opened that term as a repository and returned a 500,
+        // so base's paging endpoint was never reached.
+        $routing->prependRoute('repository_holdings_override', new \ExplicitRoute(
+            '/repository/holdings',
+            ['module' => 'repository', 'action' => 'holdings']
+        ));
+    }
+
+    /**
+     * Answer 404 for a holdings page past the search window.
+     *
+     * Base returns nothing there, which makes symfony look for a holdingsSuccess
+     * template that does not exist. The list never asks for such a page itself.
+     */
+    public function refuseHoldingsPastSearchWindow(sfEvent $event): void
+    {
+        if ('repository' !== ($event['module'] ?? null) || 'holdings' !== ($event['action'] ?? null)
+            || !class_exists('arElasticSearchPluginConfiguration')) {
+            return;
+        }
+
+        $page = sfContext::getInstance()->getRequest()->getParameter('page');
+        if (!is_string($page) || !ctype_digit($page)) {
+            return; // base answers 404 for these
+        }
+
+        $limit = (int) sfConfig::get('app_hits_per_page', 10);
+        if ($limit * (float) $page > \arElasticSearchPluginConfiguration::getMaxResultWindow()) {
+            throw new sfError404Exception('Holdings page is past the search window.');
+        }
     }
 
     /**
