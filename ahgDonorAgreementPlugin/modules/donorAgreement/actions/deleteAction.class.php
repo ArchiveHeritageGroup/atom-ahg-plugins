@@ -9,6 +9,22 @@ class donorAgreementDeleteAction extends AhgController
             $this->redirect(['module' => 'user', 'action' => 'login']);
         }
 
+        // A delete must never run from a plain link.
+        if (!$request->isMethod('post')) {
+            $this->forward404('Agreement delete requires POST');
+        }
+
+        // Checked here rather than through CsrfService::enforce(), which only logs
+        // while the site's csrf_enforcement setting is in log mode.
+        $token = \AtomFramework\Services\CsrfService::getTokenFromRequest();
+        if (!$this->getUser()->hasCredential(['editor', 'administrator'], false)
+            || null === $token
+            || !\AtomFramework\Services\CsrfService::validateToken($token)) {
+            \AtomExtensions\Services\AclService::forwardToSecureAction();
+
+            return sfView::NONE;
+        }
+
         $id = (int) $request->getParameter('id');
         if (!$id) {
             $this->forward404('Agreement ID required');
