@@ -249,6 +249,8 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
     private function enforceFileAccess(sfContext $context): void
     {
         $path = rawurldecode((string) parse_url($context->getRequest()->getUri(), PHP_URL_PATH));
+        // /index.php/uploads/... reaches this action too, but the stored path has no front controller.
+        $path = preg_replace('#^/[^/]+\.php(?=/)#', '', preg_replace('#/{2,}#', '/', $path));
         $slash = strrpos($path, '/');
         if (false === $slash) {
             return;

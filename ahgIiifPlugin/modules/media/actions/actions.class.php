@@ -28,7 +28,7 @@ class mediaActions extends AhgController
         // master gate from #258 and leaked unpublished records. MediaFileServer
         // checks the parent description is readable AND honours PREMIS rights.
         require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/MediaFileServer.php';
-        if (null === \MediaFileServer::authorise($id)) {
+        if (null === \MediaFileServer::authorise($id, true)) {
             $this->forward404('Digital object not found');
         }
 

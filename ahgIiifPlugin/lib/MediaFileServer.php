@@ -38,18 +38,22 @@ class MediaFileServer
      * Authorisation only, no type allowlist - for endpoints that legitimately serve
      * any media type (streaming audio/video as well as documents).
      *
-     * Same two rules as resolve(): the description must be readable, and PREMIS
-     * granted rights are honoured. Returns the digital object when the caller may
-     * have it, null when they may not.
+     * The description must be readable, must not be restricted for this user
+     * (classification, donor, embargo, ICIP, ODRL), and PREMIS granted rights are
+     * honoured. A master also needs readMaster, except audio and video being
+     * streamed, which public players rely on. Returns the digital object when
+     * the caller may have it, null when they may not.
      *
      * @return \QubitDigitalObject|null
      */
-    public static function authorise(int $digitalObjectId)
+    public static function authorise(int $digitalObjectId, bool $streaming = false)
     {
         $digitalObject = \QubitDigitalObject::getById($digitalObjectId);
         if (!$digitalObject) {
             return null;
         }
+        $isMaster = empty($digitalObject->parentId);
+        $isAudioVideo = in_array((int) $digitalObject->mediaTypeId, [\QubitTerm::AUDIO_ID, \QubitTerm::VIDEO_ID], true);
 
         $resource = $digitalObject->object;
 
@@ -78,6 +82,14 @@ class MediaFileServer
             if (!\QubitGrantedRight::checkPremis($resource->id, 'readMaster', $denyReason)) {
                 return null;
             }
+        }
+
+        if (self::isWithheld((int) $resource->id)) {
+            return null;
+        }
+
+        if ($isMaster && !($streaming && $isAudioVideo) && !\QubitAcl::check($resource, 'readMaster')) {
+            return null;
         }
 
         return \QubitDigitalObject::getById($digitalObjectId);
@@ -130,6 +142,38 @@ class MediaFileServer
         }
 
         return ['path' => $safe, 'mime' => self::MIME_OUT[$ext], 'name' => $name];
+    }
+
+    /** Fails closed: if the restriction check cannot run, the file is withheld. */
+    private static function isWithheld(int $objectId): bool
+    {
+        try {
+            $user = \sfContext::getInstance()->getUser();
+            if ($user->isAdministrator()) {
+                return false;
+            }
+            $userId = $user->getAttribute('user_id');
+            $filter = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance();
+            if (in_array($objectId, $filter->getRestrictedObjectIds($userId ? (int) $userId : null), true)) {
+                return true;
+            }
+
+            // The filter only covers full embargoes; these two types also withhold the file.
+            // ponytail: embargo exceptions are not honoured here for these types; holders use an administrator until the filter covers them.
+            $today = date('Y-m-d');
+
+            return \Illuminate\Database\Capsule\Manager::table('rights_embargo')
+                ->where('object_id', $objectId)->where('status', 'active')
+                ->whereIn('embargo_type', ['metadata_only', 'digital_object'])
+                ->where('start_date', '<=', $today)
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('end_date')->orWhere('end_date', '>=', $today);
+                })->exists();
+        } catch (\Throwable $e) {
+            error_log('media.access.check_failed: ' . $e->getMessage());
+
+            return true;
+        }
     }
 
     private static function guard(string $path): ?string
