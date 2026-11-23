@@ -357,6 +357,60 @@ class mediaActions extends AhgController
         }
     }
 
+    /** Text derived from a file follows the same rule as streaming the file. */
+    private function mayReadMedia(int $digitalObjectId): bool
+    {
+        return null !== $this->authorisedMedia($digitalObjectId);
+    }
+
+    /** Changing it also needs update rights on the description. */
+    private function mayEditMedia(int $digitalObjectId): bool
+    {
+        $digitalObject = $this->authorisedMedia($digitalObjectId);
+        if (null === $digitalObject) {
+            return false;
+        }
+
+        try {
+            $resource = $digitalObject->object;
+            if ((!$resource || !isset($resource->id)) && !empty($digitalObject->parentId)) {
+                $parent = QubitDigitalObject::getById((int) $digitalObject->parentId);
+                $resource = $parent ? $parent->object : null;
+            }
+
+            return $resource && isset($resource->id) && QubitAcl::check($resource, 'update');
+        } catch (\Throwable $e) {
+            error_log('media.edit_check_failed: '.$e->getMessage());
+
+            return false;
+        }
+    }
+
+    private function authorisedMedia(int $digitalObjectId)
+    {
+        if ($digitalObjectId <= 0) {
+            return null;
+        }
+
+        try {
+            require_once sfConfig::get('sf_plugins_dir').'/ahgIiifPlugin/lib/MediaFileServer.php';
+
+            return \MediaFileServer::authorise($digitalObjectId, true);
+        } catch (\Throwable $e) {
+            error_log('media.access_check_failed: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    private function refuseMediaEdit()
+    {
+        $this->getResponse()->setStatusCode(404);
+        echo json_encode(['error' => 'Digital object not found']);
+
+        return sfView::NONE;
+    }
+
     /**
      * Get snippets for a digital object (AJAX)
      *
@@ -370,6 +424,12 @@ class mediaActions extends AhgController
 
         if (!$id) {
             echo json_encode(['error' => 'Digital object ID required']);
+            return sfView::NONE;
+        }
+
+        if (!$this->mayReadMedia($id)) {
+            echo json_encode(['snippets' => []]);
+
             return sfView::NONE;
         }
 
@@ -405,6 +465,12 @@ class mediaActions extends AhgController
             $doId = (int) $request->getParameter('digital_object_id');
             if (!$doId) {
                 echo json_encode(['error' => 'digital_object_id required']);
+
+                return sfView::NONE;
+            }
+
+            if (!$this->mayReadMedia($doId)) {
+                echo json_encode(['snippets' => []]);
 
                 return sfView::NONE;
             }
@@ -450,6 +516,10 @@ class mediaActions extends AhgController
             return sfView::NONE;
         }
 
+        if (!$this->mayEditMedia($digitalObjectId)) {
+            return $this->refuseMediaEdit();
+        }
+
         try {
             $id = DB::table('media_snippets')->insertGetId([
                 'digital_object_id' => $digitalObjectId,
@@ -483,6 +553,10 @@ class mediaActions extends AhgController
             return sfView::NONE;
         }
 
+        if (!$this->mayEditMedia((int) DB::table('media_snippets')->where('id', $id)->value('digital_object_id'))) {
+            return $this->refuseMediaEdit();
+        }
+
         try {
             if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
                 DB::table('media_snippets')->where('id', $id)->delete();
@@ -512,6 +586,10 @@ class mediaActions extends AhgController
             echo json_encode(['error' => 'Digital object ID required']);
 
             return sfView::NONE;
+        }
+
+        if (!$this->mayEditMedia($id)) {
+            return $this->refuseMediaEdit();
         }
 
         $digitalObject = QubitDigitalObject::getById($id);
@@ -611,6 +689,20 @@ class mediaActions extends AhgController
             return sfView::NONE;
         }
 
+        // Both values are written into the PHP worker script below.
+        if (!is_string($lang) || !is_string($model)
+            || !preg_match('/^[A-Za-z]{2,8}(-[A-Za-z0-9]{2,8})?$/D', $lang)
+            || !preg_match('/^[a-z0-9][a-z0-9.-]{0,31}$/D', $model)) {
+            $this->getResponse()->setStatusCode(400);
+            echo json_encode(['error' => 'Invalid language or model']);
+
+            return sfView::NONE;
+        }
+
+        if (!$this->mayEditMedia($id)) {
+            return $this->refuseMediaEdit();
+        }
+
         $digitalObject = QubitDigitalObject::getById($id);
         if (!$digitalObject) {
             echo json_encode(['error' => 'Digital object not found']);
@@ -699,6 +791,10 @@ PHP;
         if ($request->isMethod('delete') || $request->isMethod('post') && $request->getParameter('_method') === 'delete') {
             $this->getResponse()->setContentType('application/json');
 
+            if (!$this->mayEditMedia($id)) {
+                return $this->refuseMediaEdit();
+            }
+
             try {
                 if (class_exists('\\Illuminate\\Database\\Capsule\\Manager')) {
                     DB::table('media_transcription')->where('digital_object_id', $id)->delete();
@@ -711,6 +807,14 @@ PHP;
             } catch (\Throwable $e) {
                 echo json_encode(['error' => $e->getMessage()]);
             }
+
+            return sfView::NONE;
+        }
+
+        if (!$this->mayReadMedia($id)) {
+            $this->getResponse()->setStatusCode(404);
+            $this->getResponse()->setContentType('application/json');
+            echo json_encode(['error' => 'No transcription found']);
 
             return sfView::NONE;
         }
@@ -781,6 +885,12 @@ PHP;
         $id = (int) $request->getParameter('id');
         if (!$id) {
             echo json_encode(['error' => 'Digital object ID required']);
+
+            return sfView::NONE;
+        }
+
+        if (!$this->mayReadMedia($id)) {
+            echo json_encode(['error' => 'No metadata found']);
 
             return sfView::NONE;
         }
@@ -1029,7 +1139,9 @@ PHP;
     public function executeAudioDescription($request)
     {
         $doId = (int) $request->getParameter('id');
-        $row = $doId ? DB::table('media_audio_description')->where('digital_object_id', $doId)->first() : null;
+        $row = $doId && $this->mayReadMedia($doId)
+            ? DB::table('media_audio_description')->where('digital_object_id', $doId)->first()
+            : null;
 
         // Keep HTTP 200 even when empty — a 4xx makes AtoM render its themed
         // error page (swallowing the body). An empty WEBVTT is a valid track.
