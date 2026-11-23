@@ -46,13 +46,13 @@ class ApiVisibility
         return self::$hidden[$userId];
     }
 
-    /** Restrict a query aliased "io" to what this caller may see. */
-    public static function applyToQuery($query, \sfUser $user): void
+    /** Restrict a query to what this caller may see; $idColumn is the description id. */
+    public static function applyToQuery($query, \sfUser $user, string $idColumn = 'io.id'): void
     {
         if (!self::isStaff($user)) {
-            $query->whereExists(function ($q) {
+            $query->whereExists(function ($q) use ($idColumn) {
                 $q->select(DB::raw(1))->from('status')
-                    ->whereColumn('status.object_id', 'io.id')
+                    ->whereColumn('status.object_id', $idColumn)
                     ->where('status.type_id', self::PUBLICATION_STATUS_TYPE_ID)
                     ->where('status.status_id', self::PUBLISHED_ID);
             });
@@ -62,7 +62,7 @@ class ApiVisibility
         if (null === $hidden) {
             $query->whereRaw('1 = 0');
         } elseif ([] !== $hidden) {
-            $query->whereNotIn('io.id', $hidden);
+            $query->whereNotIn($idColumn, $hidden);
         }
     }
 

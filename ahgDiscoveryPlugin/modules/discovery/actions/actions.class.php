@@ -270,9 +270,19 @@ class discoveryActions extends AhgController
         $suggestions = [];
 
         try {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $hidden = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ? (int) $userId : null);
+
             foreach (DB::table('information_object_i18n as ioi')
+                ->join('status as st', function ($j) {
+                    $j->on('st.object_id', '=', 'ioi.id')
+                        ->where('st.type_id', '=', \QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+                        ->where('st.status_id', '=', \QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID);
+                })
                 ->leftJoin('slug', 'ioi.id', '=', 'slug.object_id')
                 ->where('ioi.culture', $culture)->where('ioi.title', 'like', $like)->where('ioi.id', '!=', 1)
+                ->whereNotIn('ioi.id', $hidden)
                 ->select('ioi.title as label', 'slug.slug')->limit(5)->get() as $r) {
                 $suggestions[] = ['label' => $r->label, 'slug' => $r->slug, 'type' => 'Archival description'];
             }
@@ -293,7 +303,7 @@ class discoveryActions extends AhgController
                     $suggestions[] = ['label' => $r->label, 'slug' => $r->slug, 'type' => 'Term'];
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['success' => true, 'suggestions' => []]);
         }
 

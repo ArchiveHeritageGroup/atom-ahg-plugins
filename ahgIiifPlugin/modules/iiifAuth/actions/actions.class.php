@@ -230,6 +230,22 @@ class iiifAuthActions extends AhgController
             ? $this->getUser()->getAttribute('user_id')
             : null;
 
+        // A description this user may not see must never be reported as allowed.
+        $resource = \QubitInformationObject::getById($objectId);
+        if (null !== $resource) {
+            try {
+                $denied = !\QubitAcl::check($resource, 'read') || in_array($objectId, array_map('intval',
+                    \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                        ->getRestrictedObjectIds($userId ? (int) $userId : null)), true);
+            } catch (\Throwable $e) {
+                error_log('iiif.auth.check_failed: ' . $e->getMessage());
+                $denied = true;
+            }
+            if ($denied) {
+                return $this->renderJson(['allowed' => false, 'degraded' => false, 'service' => null]);
+            }
+        }
+
         $result = $authService->checkAccess($objectId, $userId);
 
         return $this->renderJson($result);

@@ -50,6 +50,7 @@ class TreeviewService
                 's.slug'
             )
             ->orderBy('io.lft');
+        self::hideRestricted($query);
 
         return $query->get()->map(function ($row) {
             return self::formatNode($row);
@@ -122,7 +123,7 @@ class TreeviewService
             ->select('id', 'parent_id', 'lft', 'rgt', 'identifier')
             ->first();
 
-        if (!$node || $node->parent_id == self::ROOT_ID) {
+        if (!$node || $node->parent_id == self::ROOT_ID || self::isHidden($nodeId)) {
             return ['items' => [], 'hasMore' => false, 'remaining' => 0];
         }
 
@@ -204,7 +205,7 @@ class TreeviewService
             )
             ->first();
 
-        if (!$node) {
+        if (!$node || self::isHidden((int) $nodeId)) {
             return ['error' => 'Node not found'];
         }
 
@@ -373,6 +374,7 @@ class TreeviewService
                     ->where('st.type_id', '=', 158);
             })->where('st.status_id', 160); // PUBLICATION_STATUS_PUBLISHED_ID
         }
+        self::hideRestricted($query);
 
         self::applySortToQuery($query, $sort, $culture);
 
@@ -396,6 +398,43 @@ class TreeviewService
     // ────────────────────────────────────────────────────────────────────
     // Private helpers
     // ────────────────────────────────────────────────────────────────────
+
+    /** @return int[]|null ids hidden from this user, null when that cannot be determined */
+    private static function hiddenIds(): ?array
+    {
+        static $hidden = false;
+
+        if (false === $hidden) {
+            try {
+                $userId = \sfContext::getInstance()->getUser()->getAttribute('user_id');
+                $hidden = array_map('intval', \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                    ->getRestrictedObjectIds($userId ? (int) $userId : null));
+            } catch (\Throwable $e) {
+                error_log('treeview.visibility_failed: '.$e->getMessage());
+                $hidden = null;
+            }
+        }
+
+        return $hidden;
+    }
+
+    private static function isHidden(int $id): bool
+    {
+        $hidden = self::hiddenIds();
+
+        return null === $hidden || in_array($id, $hidden, true);
+    }
+
+    /** Fails closed: without a restriction list the query returns nothing. */
+    private static function hideRestricted($query): void
+    {
+        $hidden = self::hiddenIds();
+        if (null === $hidden) {
+            $query->whereRaw('1 = 0');
+        } elseif ([] !== $hidden) {
+            $query->whereNotIn('io.id', $hidden);
+        }
+    }
 
     /**
      * Build query for children of a parent node.
@@ -425,6 +464,7 @@ class TreeviewService
                     ->where('st.type_id', '=', 158);
             })->where('st.status_id', 160);
         }
+        self::hideRestricted($query);
 
         self::applySortToQuery($query, $sort, $culture);
 
@@ -462,6 +502,7 @@ class TreeviewService
                     ->where('st.type_id', '=', 158);
             })->where('st.status_id', 160);
         }
+        self::hideRestricted($query);
 
         // Apply position filter and sort
         switch ($sort) {

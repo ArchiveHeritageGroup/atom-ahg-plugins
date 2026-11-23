@@ -1,5 +1,7 @@
 <?php
 
+require_once sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/ApiVisibility.php';
+
 use AtomFramework\Http\Controllers\AhgController;
 class apiActions extends AhgController
 {
@@ -103,6 +105,7 @@ class apiActions extends AhgController
                   ->orWhere('information_object.identifier', 'LIKE', "%{$query}%");
             })
             ->where('information_object.id', '!=', 1) // Exclude root
+            ->tap(fn ($q) => ApiVisibility::applyToQuery($q, $this->getUser(), 'information_object.id'))
             ->select([
                 'information_object.id',
                 'information_object.identifier',
@@ -148,6 +151,7 @@ class apiActions extends AhgController
                   ->orWhere('information_object.identifier', 'LIKE', "%{$query}%");
             })
             ->where('information_object.id', '!=', 1)
+            ->tap(fn ($q) => ApiVisibility::applyToQuery($q, $this->getUser(), 'information_object.id'))
             ->select([
                 'information_object.id',
                 'information_object.identifier',

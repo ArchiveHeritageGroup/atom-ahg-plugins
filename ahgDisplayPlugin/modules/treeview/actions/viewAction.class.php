@@ -1,5 +1,7 @@
 <?php
 
+require_once sfConfig::get('sf_plugins_dir').'/ahgDisplayPlugin/lib/TreeviewVisibility.php';
+
 use AtomFramework\Http\Controllers\AhgController;
 /**
  * Treeview data action — returns JSON for sidebar and full-width treeview.
@@ -84,5 +86,7 @@ class treeviewViewAction extends AhgController
                     $this->siblingCountNext
                 );
         }
+
+        $this->items = TreeviewVisibility::filter($this->items);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+require_once sfConfig::get('sf_plugins_dir').'/ahgDisplayPlugin/lib/TreeviewVisibility.php';
+
 /**
  * Treeview component — sidebar vs full-width mode, ancestor loading.
  * Replaces base AtoM InformationObjectTreeViewComponent.
@@ -22,8 +24,7 @@ class treeviewViewComponent extends AhgComponents
         $this->sortable = 'none' === sfConfig::get('app_sort_treeview_informationobject')
             && \AtomExtensions\Services\AclService::check($this->resource, 'update');
 
-        // Load ancestors (no ACL check needed)
-        $this->ancestors = $this->resource->getAncestors()->orderBy('lft');
+        $this->ancestors = TreeviewVisibility::filter($this->resource->getAncestors()->orderBy('lft'));
 
         // Number of siblings shown above and below the current node
         $numberOfPreviousOrNextSiblings = 4;
@@ -39,6 +40,7 @@ class treeviewViewComponent extends AhgComponents
                 ['numberOfPreviousOrNextSiblings' => $numberOfPreviousOrNextSiblings],
                 $this->siblingCountNext
             );
+            $this->children = TreeviewVisibility::filter($this->children);
         }
         // Show siblings if no children, but not for root descriptions
         elseif (QubitInformationObject::ROOT_ID != $this->resource->parentId) {
@@ -53,7 +55,7 @@ class treeviewViewComponent extends AhgComponents
                 array_pop($this->prevSiblings);
             }
 
-            $this->prevSiblings = array_reverse($this->prevSiblings);
+            $this->prevSiblings = TreeviewVisibility::filter(array_reverse($this->prevSiblings));
 
             // Next siblings
             $this->nextSiblings = $this->resource->getTreeViewSiblings(
@@ -65,6 +67,7 @@ class treeviewViewComponent extends AhgComponents
             if ($this->hasNextSiblings) {
                 array_pop($this->nextSiblings);
             }
+            $this->nextSiblings = TreeviewVisibility::filter($this->nextSiblings);
         }
     }
 }
