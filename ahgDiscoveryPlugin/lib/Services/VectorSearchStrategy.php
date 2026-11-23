@@ -18,6 +18,9 @@ namespace AhgDiscovery\Services;
  */
 class VectorSearchStrategy
 {
+    /** Seconds a web request waits for the gateway to embed the query. */
+    private const WEB_EMBED_TIMEOUT = 3;
+
     /** Qdrant REST endpoint */
     private string $qdrantUrl;
 
@@ -150,7 +153,8 @@ class VectorSearchStrategy
     {
         $gateway = \AtomFramework\Services\AI\AiGatewayClient::fromSettings();
         if ($gateway->isConfigured()) {
-            $vector = $gateway->embed($text, self::gatewayModel($this->model));
+            // A web search must not wait on a slow gateway; it continues without this step.
+            $vector = $gateway->embed($text, self::gatewayModel($this->model), 'cli' === PHP_SAPI ? null : self::WEB_EMBED_TIMEOUT);
             if (!empty($vector)) {
                 return $vector;
             }
