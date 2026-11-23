@@ -154,7 +154,13 @@ class VectorSearchStrategy
             if (!empty($vector)) {
                 return $vector;
             }
-            error_log('[ahgDiscovery] gateway embedding failed, trying local script');
+            error_log('[ahgDiscovery] gateway embedding failed'.('cli' === PHP_SAPI ? ', trying local script' : ''));
+        }
+
+        // The local script loads a model for about 12 seconds at full CPU, so it
+        // never runs inside a web request. Search continues without the semantic step.
+        if ('cli' !== PHP_SAPI) {
+            return null;
         }
 
         if (!file_exists($this->embedScript)) {
