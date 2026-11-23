@@ -92,11 +92,17 @@ class KeywordSearchStrategy
 
             // Base AtoM's arElasticSearchPlugin holds an Elastica client, which has no
             // array search(); send the same body as a raw request (same JSON back).
-            $response = $client instanceof \Elastica\Client
-                ? $client->request($params['index'].'/_search', 'POST', $params['body'])->getData()
-                : $client->search($params);
+            // arOpenSearchPlugin's wrapper takes the index and body as two arguments.
+            if ($client instanceof \Elastica\Client) {
+                $response = $client->request($params['index'].'/_search', 'POST', $params['body'])->getData();
+            } elseif ($client instanceof \OpenSearchClient) {
+                $response = $client->search($params['index'], $params['body']);
+            } else {
+                $response = $client->search($params);
+            }
+
             return $this->parseResults($response);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             error_log('[ahgDiscovery] ES keyword search failed: ' . $e->getMessage());
             return [];
         }
