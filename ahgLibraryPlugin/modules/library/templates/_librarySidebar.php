@@ -6,7 +6,36 @@
 <!-- Library Hierarchy Navigation -->
 <?php if ($resource): ?>
 <?php
-  $children = $resource->getChildren();
+  // Only descriptions this user may see: not restricted, and drafts for staff only.
+  // Fails closed: if the check cannot run, no holdings or parent link are shown.
+  $children = [];
+  $parentVisible = false;
+  try {
+      $ahgUser = sfContext::getInstance()->getUser();
+      $ahgUserId = $ahgUser->getAttribute('user_id');
+      $ahgHidden = array_flip(array_map('intval', \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+          ->getRestrictedObjectIds($ahgUserId ? (int) $ahgUserId : null)));
+      $ahgStaff = $ahgUser->isAuthenticated() && $ahgUser->hasCredential(['administrator', 'editor', 'contributor'], false);
+      $ahgCandidates = [];
+      foreach ($resource->getChildren() as $ahgChild) {
+          $ahgCandidates[(int) $ahgChild->id] = $ahgChild;
+      }
+      $ahgParentId = (int) ($resource->parent->id ?? 0);
+      $ahgIds = array_merge(array_keys($ahgCandidates), $ahgParentId ? [$ahgParentId] : []);
+      $ahgPublished = $ahgStaff ? [] : array_flip(array_map('intval', \Illuminate\Database\Capsule\Manager::table('status')
+          ->where('type_id', QubitTerm::STATUS_TYPE_PUBLICATION_ID)
+          ->where('status_id', QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID)
+          ->whereIn('object_id', $ahgIds)->pluck('object_id')->all()));
+      $ahgMaySee = static fn (int $id) => !isset($ahgHidden[$id]) && ($ahgStaff || isset($ahgPublished[$id]));
+      foreach ($ahgCandidates as $ahgId => $ahgChild) {
+          if ($ahgMaySee($ahgId)) {
+              $children[] = $ahgChild;
+          }
+      }
+      $parentVisible = $ahgParentId && $ahgMaySee($ahgParentId);
+  } catch (\Throwable $e) {
+      error_log('library.sidebar.visibility_failed: '.$e->getMessage());
+  }
   $totalChildren = count($children);
   $hasMany = $totalChildren > 10;
 ?>
@@ -19,7 +48,7 @@
   </h4>
 
   <!-- Parent link (outside scrollable area) -->
-  <?php if ($resource->parent && $resource->parent->id != QubitInformationObject::ROOT_ID): ?>
+  <?php if ($parentVisible && $resource->parent->id != QubitInformationObject::ROOT_ID): ?>
   <div class="list-group mb-2">
     <a href="<?php echo url_for(['module' => 'library', 'action' => 'index', 'slug' => $resource->parent->slug]); ?>" class="list-group-item list-group-item-action">
       <i class="fas fa-level-up-alt me-2"></i>
