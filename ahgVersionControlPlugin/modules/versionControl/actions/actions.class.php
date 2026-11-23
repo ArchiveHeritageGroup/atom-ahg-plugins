@@ -270,7 +270,7 @@ class versionControlActions extends sfActions
 
         $check = new \AhgVersionControl\Services\AclCheck();
         if (!$check->canUserDo($userId, $action)) {
-            $this->forward403();
+            \AtomExtensions\Services\AclService::forwardToSecureAction();
         }
     }
 
