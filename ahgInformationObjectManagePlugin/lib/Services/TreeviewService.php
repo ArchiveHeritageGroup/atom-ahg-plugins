@@ -418,16 +418,40 @@ class TreeviewService
         return $hidden;
     }
 
+    /** Drafts are for staff; being signed in is not enough. Fails closed. */
+    private static function canSeeDrafts(): bool
+    {
+        try {
+            $user = \sfContext::getInstance()->getUser();
+
+            return $user->isAuthenticated() && $user->hasCredential(['administrator', 'editor', 'contributor'], false);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     private static function isHidden(int $id): bool
     {
         $hidden = self::hiddenIds();
+        if (null === $hidden || in_array($id, $hidden, true)) {
+            return true;
+        }
 
-        return null === $hidden || in_array($id, $hidden, true);
+        return !self::canSeeDrafts() && !DB::table('status')
+            ->where('object_id', $id)->where('type_id', 158)->where('status_id', 160)->exists();
     }
 
     /** Fails closed: without a restriction list the query returns nothing. */
     private static function hideRestricted($query): void
     {
+        if (!self::canSeeDrafts()) {
+            $query->whereExists(function ($q) {
+                $q->select(DB::raw(1))->from('status as vis')
+                    ->whereColumn('vis.object_id', 'io.id')
+                    ->where('vis.type_id', 158)->where('vis.status_id', 160);
+            });
+        }
+
         $hidden = self::hiddenIds();
         if (null === $hidden) {
             $query->whereRaw('1 = 0');
