@@ -54,6 +54,7 @@ class MediaFileServer
         }
         $isMaster = empty($digitalObject->parentId);
         $isAudioVideo = in_array((int) $digitalObject->mediaTypeId, [\QubitTerm::AUDIO_ID, \QubitTerm::VIDEO_ID], true);
+        $isText = \QubitTerm::TEXT_ID === (int) $digitalObject->mediaTypeId;
 
         $resource = $digitalObject->object;
 
@@ -88,8 +89,15 @@ class MediaFileServer
             return null;
         }
 
-        if ($isMaster && !($streaming && $isAudioVideo) && !\QubitAcl::check($resource, 'readMaster')) {
-            return null;
+        if ($isMaster && !($streaming && $isAudioVideo) && !($isText && self::textMastersArePublic())) {
+            // Stock AtoM answers yes to readMaster for every text object, so a document
+            // master also needs a signed-in user, as digitalobject/view requires.
+            if ($isText && !\sfContext::getInstance()->getUser()->isAuthenticated()) {
+                return null;
+            }
+            if (!\QubitAcl::check($resource, 'readMaster')) {
+                return null;
+            }
         }
 
         return \QubitDigitalObject::getById($digitalObjectId);
@@ -142,6 +150,16 @@ class MediaFileServer
         }
 
         return ['path' => $safe, 'mime' => self::MIME_OUT[$ext], 'name' => $name];
+    }
+
+    /** The site's choice to publish document masters, as digitalobject/view honours it. */
+    private static function textMastersArePublic(): bool
+    {
+        try {
+            return \AtomExtensions\Services\AhgSettingsService::getBool('allow_public_text_masters', false);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /** Fails closed: if the restriction check cannot run, the file is withheld. */
