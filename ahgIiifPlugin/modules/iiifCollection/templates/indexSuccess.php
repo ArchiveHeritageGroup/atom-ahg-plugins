@@ -86,7 +86,7 @@
                         <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'manifest', 'slug' => $collection->slug]) ?>" class="btn btn-outline-info" title="<?php echo __('IIIF Manifest') ?>" target="_blank">
                             <i class="fas fa-code"></i>
                         </a>
-                        <?php if (in_array((int) $collection->id, $manageIds, true)): ?>
+                        <?php if (in_array((int) $collection->id, (array) $sf_data->getRaw('manageIds'), true)): ?>
                         <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'edit', 'id' => $collection->id]) ?>" class="btn btn-outline-primary" title="<?php echo __('Edit') ?>">
                             <i class="fas fa-edit"></i>
                         </a>
