@@ -696,6 +696,7 @@ Ubuntu 24.04 ships. On a host running 8.1 or 8.2, use those package names instea
 - **Issues**: [GitHub Issues](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues)
 - **Email**: support@theahg.co.za
 - **Website**: [theahg.co.za](https://theahg.co.za)
+- **How we use AI**: see [docs/AI-STATEMENT.md](docs/AI-STATEMENT.md)
 
 ---
 
