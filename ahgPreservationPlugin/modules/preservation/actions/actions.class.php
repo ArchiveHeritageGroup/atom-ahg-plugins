@@ -134,6 +134,7 @@ class preservationActions extends AhgController
             'pass' => DB::table('preservation_fixity_check')->where('status', 'pass')->count(),
             'fail' => DB::table('preservation_fixity_check')->where('status', 'fail')->count(),
             'error' => DB::table('preservation_fixity_check')->where('status', 'error')->count(),
+            'failures' => $this->service->countCurrentFixityFailures(),
         ];
     }
 

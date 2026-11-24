@@ -42,6 +42,17 @@ class ricExplorerActions extends AhgController
             return $this->renderText(json_encode(['success' => false, 'error' => 'No ID provided']));
         }
         
+        try {
+            require_once dirname(__FILE__).'/../../../lib/Services/KnowledgeGraphService.php';
+            $visible = isset(KnowledgeGraphService::forUser($this->getUser())->visibleRecordIds([(int) $recordId])[(int) $recordId]);
+        } catch (\Throwable $e) {
+            error_log('ricExplorer.graph_filter_failed: '.$e->getMessage());
+            $visible = false;
+        }
+        if (!$visible) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not found']));
+        }
+
         $graphData = $this->buildGraphFromDatabase($recordId);
         
         return $this->renderText(json_encode([

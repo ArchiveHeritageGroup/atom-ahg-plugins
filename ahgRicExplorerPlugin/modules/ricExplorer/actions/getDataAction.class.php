@@ -3,6 +3,8 @@
 use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
+require_once dirname(__FILE__).'/../../../lib/Services/KnowledgeGraphService.php';
+
 class ricExplorerGetDataAction extends AhgController
 {
     protected $fusekiEndpoint;
@@ -63,7 +65,7 @@ class ricExplorerGetDataAction extends AhgController
             // call the museum module was corrected to use on 2026-08-15.
             $resource = \QubitInformationObject::getById($recordId);
 
-            if (null === $resource || !\QubitAcl::check($resource, 'read')) {
+            if (null === $resource || !\QubitAcl::check($resource, 'read') || !$this->mayDescribe((int) $recordId)) {
                 return $this->renderText(json_encode([
                     'success' => false,
                     'error' => 'Not found',
@@ -75,8 +77,50 @@ class ricExplorerGetDataAction extends AhgController
 
         return $this->renderText(json_encode([
             'success' => true,
-            'graphData' => $graphData
+            'graphData' => $this->visibleGraph($graphData)
         ]));
+    }
+
+    /** Classification, donor, embargo, ICIP, ODRL and draft status, for this user. */
+    private function mayDescribe(int $id): bool
+    {
+        try {
+            return isset(KnowledgeGraphService::forUser($this->getUser())->visibleRecordIds([$id])[$id]);
+        } catch (\Throwable $e) {
+            error_log('ricExplorer.graph_filter_failed: '.$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /** Takes out record nodes this user may not see, and the edges that touch them. */
+    private function visibleGraph(array $graph): array
+    {
+        $recordId = static fn ($uri) => preg_match('#/(?:recordset|record)/(\d+)$#', (string) $uri, $m) ? (int) $m[1] : 0;
+        $ids = array_values(array_filter(array_map(static fn ($n) => $recordId($n['id'] ?? ''), $graph['nodes'] ?? [])));
+
+        try {
+            $visible = KnowledgeGraphService::forUser($this->getUser())->visibleRecordIds($ids);
+        } catch (\Throwable $e) {
+            error_log('ricExplorer.graph_filter_failed: '.$e->getMessage());
+
+            return ['nodes' => [], 'edges' => []];
+        }
+
+        $removed = [];
+        $nodes = [];
+        foreach ($graph['nodes'] ?? [] as $node) {
+            $id = $recordId($node['id'] ?? '');
+            if ($id > 0 && !isset($visible[$id])) {
+                $removed[(string) $node['id']] = true;
+
+                continue;
+            }
+            $nodes[] = $node;
+        }
+        $edges = array_values(array_filter($graph['edges'] ?? [], static fn ($e) => !isset($removed[(string) ($e['source'] ?? '')]) && !isset($removed[(string) ($e['target'] ?? '')])));
+
+        return ['nodes' => $nodes, 'edges' => $edges] + $graph;
     }
 
     protected function buildOverviewGraph()

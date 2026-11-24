@@ -9,5 +9,7 @@ autocompleteAccessions:
   is_secure:   true
   credentials: [[ contributor, editor, administrator ]]
 
+# Donor agreements are confidential: staff only, not every signed-in user.
 all:
-  is_secure: true
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

@@ -115,9 +115,9 @@
                         </div>
                         <div class="col-md-8 mb-3">
                             <label for="notify_email" class="form-label">Notification Email</label>
-                            <input type="email" class="form-control" id="notify_email" name="notify_email"
+                            <input type="email" multiple class="form-control" id="notify_email" name="notify_email"
                                    value="<?php echo htmlspecialchars($schedule->notify_email ?? '') ?>"
-                                   placeholder="admin@example.com">
+                                   placeholder="admin@example.com, curator@example.com">
                         </div>
                     </div>
 

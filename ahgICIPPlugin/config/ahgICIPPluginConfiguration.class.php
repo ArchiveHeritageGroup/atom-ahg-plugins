@@ -47,6 +47,14 @@ class ahgICIPPluginConfiguration extends sfPluginConfiguration
 
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 
+        // Required, not autoloaded: these run on every request and a new class is
+        // missing from the autoload cache until the next cache clear.
+        require_once __DIR__.'/../lib/ahgICIPService.class.php';
+        require_once __DIR__.'/../lib/IcipPolicy.class.php';
+        require_once __DIR__.'/../lib/IcipGate.class.php';
+        $this->dispatcher->connect('controller.change_action', ['IcipGate', 'onChangeAction']);
+        $this->dispatcher->connect('response.filter_content', ['IcipGate', 'filterContent']);
+
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'icip';

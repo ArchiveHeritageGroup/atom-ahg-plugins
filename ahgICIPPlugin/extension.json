@@ -38,7 +38,8 @@
         "icip_access_restriction",
         "icip_object_summary",
         "icip_config",
-        "icip_access_log"
+        "icip_access_log",
+        "icip_community_steward"
     ],
     "display_panels": [
         {

@@ -276,6 +276,12 @@ class DonorAgreementService
             // No foreign key on this one, so nothing cascades: remove its links here.
             DB::table('donor_agreement_accession')->where('donor_agreement_id', $id)->delete();
         }
+        // These two have no foreign key either, so their rows would be orphaned.
+        foreach (['donor_agreement_classification', 'donor_agreement_rights'] as $table) {
+            if ($this->tableExists($table)) {
+                DB::table($table)->where('donor_agreement_id', $id)->delete();
+            }
+        }
 
         return DB::table('donor_agreement')->where('id', $id)->delete() > 0;
     }

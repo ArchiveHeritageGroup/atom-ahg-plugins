@@ -116,11 +116,16 @@ final class ContentCredentialsBadge
         if ($ioId <= 0 || !self::hasSignedCredentials($ioId)) {
             return '';
         }
+        // Per-request hook: plugin classes are not autoloaded.
+        require_once dirname(__DIR__) . '/Services/RecordAccess.php';
+        if (!\AhgC2pa\Services\RecordAccess::canRead($ioId)) {
+            return '';
+        }
 
         $href = htmlspecialchars(\url_for('@ahg_c2pa_record?id=' . $ioId), ENT_QUOTES, 'UTF-8');
-        $label = htmlspecialchars((string) __('Content Credentials'), ENT_QUOTES, 'UTF-8');
+        $label = htmlspecialchars((string) __('AHG-signed provenance'), ENT_QUOTES, 'UTF-8');
         $verify = htmlspecialchars((string) __('Verify'), ENT_QUOTES, 'UTF-8');
-        $title = htmlspecialchars((string) __('This record carries signed Content Credentials. Click to verify its authenticity.'), ENT_QUOTES, 'UTF-8');
+        $title = htmlspecialchars((string) __('This record carries AHG-signed provenance. Click to check its signature.'), ENT_QUOTES, 'UTF-8');
 
         return '<a id="' . self::MARKER . '" href="' . $href . '" class="btn btn-sm btn-outline-success ' . self::MARKER . '"'
             . ' title="' . $title . '" data-bs-toggle="tooltip" data-io="' . $ioId . '">'

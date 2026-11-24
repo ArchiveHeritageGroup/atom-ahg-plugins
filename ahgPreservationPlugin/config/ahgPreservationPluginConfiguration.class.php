@@ -5,6 +5,28 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
     public static $summary = 'Digital preservation: checksums, fixity verification, PREMIS events, format registry, TIFF/PDF merge';
     public static $version = '1.0.0';
 
+    /**
+     * Files whose latest check failed. Runs on page render, so it reads the
+     * indexed status on preservation_checksum, once per request.
+     */
+    public static function fixityFailureCount(): int
+    {
+        static $count = null;
+
+        if (null === $count) {
+            try {
+                $count = (int) \Illuminate\Database\Capsule\Manager::table('preservation_checksum')
+                    ->whereIn('verification_status', ['invalid', 'error'])
+                    ->distinct()
+                    ->count('digital_object_id');
+            } catch (\Throwable $e) {
+                $count = 0;
+            }
+        }
+
+        return $count;
+    }
+
     public function contextLoadFactories(sfEvent $event)
     {
         $context = $event->getSubject();
@@ -26,6 +48,15 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
                 'label' => 'Preservation triage',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 61,
+            ]);
+            // The in-app fixity alert: appears only while files are failing.
+            AhgNav::register('manage', 'preservation_fixity_failures', [
+                'url' => '/index.php/admin/preservation/fixity-log?status=failures',
+                'label' => 'Fixity failures',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 59,
+                'visible' => static fn () => self::fixityFailureCount() > 0,
+                'badge' => static fn () => self::fixityFailureCount(),
             ]);
             AhgNav::register('manage', 'preservation', [
                 'url' => '/index.php/admin/preservation/packages/',

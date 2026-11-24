@@ -178,8 +178,13 @@ class PreservationService
                 $errorMessage = 'File not found';
             } else {
                 try {
-                    $actualValue = hash_file($checksum->algorithm, $filePath);
-                    if ($actualValue !== $checksum->checksum_value) {
+                    $actualValue = @hash_file($checksum->algorithm, $filePath);
+                    if (false === $actualValue) {
+                        // Unreadable is not corrupt: do not report it as a changed file.
+                        $actualValue = null;
+                        $status = 'error';
+                        $errorMessage = 'File could not be read';
+                    } elseif ($actualValue !== $checksum->checksum_value) {
                         $status = 'fail';
                         $errorMessage = 'Checksum mismatch';
                     }
@@ -485,11 +490,33 @@ class PreservationService
             ->orderBy('fc.checked_at', 'desc')
             ->limit($limit);
 
-        if ($status) {
+        if ('failures' === $status) {
+            $this->limitToCurrentFailures($query);
+        } elseif ($status) {
             $query->where('fc.status', $status);
         }
 
         return $query->get()->toArray();
+    }
+
+    /**
+     * Failed checks that are each checksum's latest result, so a file since
+     * repaired or restored drops off the failures report.
+     */
+    private function limitToCurrentFailures($query)
+    {
+        return $query
+            ->join('preservation_checksum as pc', function ($join) {
+                $join->on('fc.checksum_id', '=', 'pc.id')
+                    ->on('fc.checked_at', '=', 'pc.verified_at');
+            })
+            ->whereIn('fc.status', ['fail', 'missing', 'error'])
+            ->whereIn('pc.verification_status', ['invalid', 'error']);
+    }
+
+    public function countCurrentFixityFailures(): int
+    {
+        return $this->limitToCurrentFailures(DB::table('preservation_fixity_check as fc'))->count();
     }
 
     // =========================================
@@ -2236,11 +2263,14 @@ class PreservationService
                     break;
 
                 case 'fixity_check':
-                    $batchResult = $this->runBatchFixityCheck($limit);
+                    $batchResult = $this->runBatchFixityCheck($limit, (int) ($options['min_age_days'] ?? 7));
                     $results['processed'] = $batchResult['total'];
                     $results['succeeded'] = $batchResult['passed'];
                     $results['failed'] = $batchResult['failed'] + $batchResult['errors'];
                     $results['summary'] = $batchResult;
+
+                    require_once __DIR__.'/Services/FixityAlertService.php';
+                    $results['summary']['alert'] = (new FixityAlertService())->notify($schedule, $batchResult);
                     break;
 
                 case 'virus_scan':

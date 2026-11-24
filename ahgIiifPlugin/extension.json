@@ -54,6 +54,7 @@
         "iiif_saved_view",
         "media_audio_description",
         "iiif_ai_extract",
+        "iiif_office_preview",
         "object_security_classification"
     ],
     "vendor": {

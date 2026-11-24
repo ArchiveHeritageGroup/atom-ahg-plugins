@@ -65,17 +65,17 @@ $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'
     <div class="card-body">
       <p class="mb-2"><span class="badge <?php echo $overall[0]; ?> fs-5"><i class="fas <?php echo $overall[1]; ?> me-1" aria-hidden="true"></i><?php echo $h($overall[2]); ?></span></p>
       <?php if ($total === 0) { ?>
-        <p class="mb-0"><?php echo __('This record has no digitisation provenance on file yet, so there is nothing to verify. That does not mean it is fake - only that no content credentials have been recorded for it.'); ?></p>
+        <p class="mb-0"><?php echo __('This record has no digitisation provenance on file yet, so there is nothing to verify. That does not mean it is fake - only that no AHG-signed provenance has been recorded for it.'); ?></p>
       <?php } elseif ($verified > 0 && $tampered === 0) { ?>
-        <p class="text-success mb-0"><i class="fas fa-lock me-1" aria-hidden="true"></i><?php echo __("This record's digitisation is cryptographically verified. The signed content credentials below have not been altered since they were created."); ?></p>
+        <p class="text-success mb-0"><i class="fas fa-lock me-1" aria-hidden="true"></i><?php echo __("This record's digitisation is cryptographically verified. The AHG-signed provenance below has not been altered since it was signed."); ?></p>
       <?php } elseif ($tampered > 0) { ?>
-        <p class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i><?php echo __('One or more content credentials for this record could not be verified. The signature does not match the recorded content - treat the affected entries below with caution.'); ?></p>
+        <p class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i><?php echo __('One or more AHG-signed provenance entries for this record could not be verified. The signature does not match the recorded content - treat the affected entries below with caution.'); ?></p>
       <?php } else { ?>
         <p class="text-muted mb-0"><?php echo __('This record has documented digitisation provenance, but it is not cryptographically signed, so authenticity cannot be proven by signature.'); ?></p>
       <?php } ?>
       <?php if ($total > 0) { ?>
         <p class="text-muted small mt-2 mb-0">
-          <?php echo __('%1% provenance record(s)', ['%1%' => $total]); ?><?php if ($signed > 0) { ?> - <?php echo $verified; ?>/<?php echo $signed; ?> <?php echo __('signed credentials verify'); ?><?php } ?>.
+          <?php echo __('%1% provenance record(s)', ['%1%' => $total]); ?><?php if ($signed > 0) { ?> - <?php echo $verified; ?>/<?php echo $signed; ?> <?php echo __('signatures verify'); ?><?php } ?>.
         </p>
       <?php } ?>
     </div>
@@ -118,7 +118,7 @@ $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'
           <?php } ?>
           <?php if (!empty($record->digital_object_id)) { ?>
             <dt class="col-sm-3"><?php echo __('File'); ?></dt>
-            <dd class="col-sm-9"><a href="<?php echo url_for('@ahg_c2pa_object?id=' . (int) $record->digital_object_id); ?>"><?php echo __('View this file\'s content credentials'); ?></a></dd>
+            <dd class="col-sm-9"><a href="<?php echo url_for('@ahg_c2pa_object?id=' . (int) $record->digital_object_id); ?>"><?php echo __('View this file\'s AHG-signed provenance'); ?></a></dd>
           <?php } ?>
         </dl>
         <?php if (!empty($link['inference_steps'])) { ?>
@@ -139,7 +139,7 @@ $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'
 <?php } ?>
 
 <p class="text-muted small">
-  <i class="fas fa-info-circle me-1" aria-hidden="true"></i><?php echo __('Content credentials follow the C2PA open standard. Signatures are Ed25519 and re-checked live on every page load - nothing here is cached.'); ?>
+  <i class="fas fa-info-circle me-1" aria-hidden="true"></i><?php echo __('This is AHG-signed provenance: a JSON manifest with an Ed25519 signature, re-checked live on every page load. It is not a standard C2PA credential, and outside C2PA validators will not accept it.'); ?>
   <a href="<?php echo url_for('@ahg_c2pa_check'); ?>"><?php echo __('Check a file of your own'); ?></a>.
 </p>
 <?php end_slot(); ?>

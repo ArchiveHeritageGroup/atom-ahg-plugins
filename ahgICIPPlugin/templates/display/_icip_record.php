@@ -22,6 +22,12 @@ if ($objectId <= 0) {
 
 $mode = $mode ?? 'panel';
 
+// Notices and TK/BC labels are drawn by IcipGate::filterContent on all five
+// sector pages, honouring display_public/display_staff; not repeated here.
+if ('badge' === $mode) {
+    return;
+}
+
 use Illuminate\Database\Capsule\Manager as DB;
 
 // A record inherits ICIP controls set on any ancestor with
@@ -40,20 +46,6 @@ try {
 }
 $selfAndAncestors = array_merge([$objectId], $ancestorIds);
 
-// --- notices (own, plus inheritable ones on ancestors) ---
-$notices = DB::table('icip_cultural_notice as n')
-    ->leftJoin('icip_cultural_notice_type as t', 't.id', '=', 'n.notice_type_id')
-    ->where(function ($q) use ($objectId, $ancestorIds) {
-        $q->where('n.information_object_id', $objectId)
-            ->orWhere(function ($w) use ($ancestorIds) {
-                if ($ancestorIds) {
-                    $w->whereIn('n.information_object_id', $ancestorIds)->where('n.applies_to_descendants', 1);
-                }
-            });
-    })
-    ->select('t.name', 't.severity', 't.icon', 't.blocks_access', 'n.custom_text', 'n.information_object_id')
-    ->get();
-
 $restrictions = DB::table('icip_access_restriction')
     ->where(function ($q) use ($objectId, $ancestorIds) {
         $q->where('information_object_id', $objectId)
@@ -63,14 +55,20 @@ $restrictions = DB::table('icip_access_restriction')
                 }
             });
     })
+    ->where(function ($q) {
+        $q->whereNull('start_date')->orWhere('start_date', '<=', date('Y-m-d'));
+    })
+    ->where(function ($q) {
+        $q->whereNull('end_date')->orWhere('end_date', '>=', date('Y-m-d'));
+    })
     ->select('restriction_type', 'custom_restriction_text')
     ->get();
 
-$tkLabels = DB::table('icip_tk_label as l')
-    ->leftJoin('icip_tk_label_type as t', 't.id', '=', 'l.label_type_id')
-    ->where('l.information_object_id', $objectId)
-    ->select('t.name', 't.category', 't.icon_path', 't.local_contexts_url', 'l.notes')
-    ->get();
+// What is restricted, and why, is for staff.
+$viewer = $sf_user ?? sfContext::getInstance()->getUser();
+if (!$viewer->hasCredential(['editor', 'administrator'], false)) {
+    $restrictions = [];
+}
 
 $consent = DB::table('icip_consent as c')
     ->leftJoin('icip_community as m', 'm.id', '=', 'c.community_id')
@@ -78,7 +76,7 @@ $consent = DB::table('icip_consent as c')
     ->select('c.consent_status', 'c.consent_scope', 'm.name as community')
     ->get();
 
-$hasAny = count($notices) || count($restrictions) || count($tkLabels) || count($consent);
+$hasAny = count($restrictions) || count($consent);
 if (!$hasAny) {
     return;
 }
@@ -161,36 +159,6 @@ $restrictionLabel = static function ($type) {
     return __($map[$key] ?? ucwords(str_replace('_', ' ', $key)));
 };
 
-// ---------------------------------------------------------------- BADGE mode
-if ('badge' === $mode) {
-    if (!count($notices) && !count($restrictions)) {
-        return;   // badge is only for notices and restrictions
-    }
-    foreach ($notices as $n) {
-        $sev = strtolower((string) $n->severity);
-        $cls = 'blocks_access' === $sev || $n->blocks_access ? 'danger' : ('high' === $sev ? 'warning' : 'info');
-        $inherited = ((int) $n->information_object_id !== $objectId) ? ' <span class="small">(' . __('inherited') . ')</span>' : '';
-        echo '<div class="alert alert-' . $cls . ' d-flex align-items-start mb-2" role="alert">';
-        echo '<i class="fas fa-hands ' . 'me-2 mt-1" aria-hidden="true"></i>';
-        echo '<div><strong>' . $esc($n->name ?: __('Cultural notice')) . '</strong>' . $inherited;
-        if ($n->custom_text) {
-            echo '<div class="small">' . $esc($n->custom_text) . '</div>';
-        }
-        echo '</div></div>';
-    }
-    foreach ($restrictions as $r) {
-        echo '<div class="alert alert-warning d-flex align-items-start mb-2" role="alert">';
-        echo '<i class="fas fa-lock me-2 mt-1" aria-hidden="true"></i>';
-        echo '<div><strong>' . $esc(__('Access restriction')) . ': ' . $esc($restrictionLabel($r->restriction_type)) . '</strong>';
-        if ($r->custom_restriction_text) {
-            echo '<div class="small">' . $esc($r->custom_restriction_text) . '</div>';
-        }
-        echo '</div></div>';
-    }
-
-    return;
-}
-
 // ---------------------------------------------------------------- PANEL mode
 // Rendered to match the "Additional Fields" section: render_b5_section_heading
 // (the same helper the standard ISAD areas use) with NO icon and no card, so the
@@ -208,17 +176,6 @@ $canManage = isset($sf_user) && $sf_user->isAuthenticated();
     <?php endif; ?>
 
     <div>
-        <?php if (count($tkLabels)): ?>
-            <div class="mb-3">
-                <div class="text-muted small text-uppercase mb-1"><?php echo __('Traditional knowledge labels'); ?></div>
-                <?php foreach ($tkLabels as $l): ?>
-                    <span class="badge bg-secondary me-1 mb-1">
-                        <?php echo $esc($l->name ?: $l->category ?: __('TK label')); ?>
-                    </span>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
         <?php if (count($consent)): ?>
             <div class="mb-2">
                 <div class="text-muted small text-uppercase mb-1"><?php echo __('Community consent'); ?></div>

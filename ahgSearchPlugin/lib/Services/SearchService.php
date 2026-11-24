@@ -224,7 +224,8 @@ class SearchService
             'size' => $limit,
             'from' => ($page - 1) * $limit,
             '_source' => ['slug', sprintf('i18n.%s.title', $this->culture), 'identifier', 'levelOfDescriptionId'],
-            'query' => ['bool' => ['must' => $must]],
+            // Descriptions hidden from this user never reach the results. Fails closed.
+            'query' => ['bool' => ['must' => $must, 'must_not' => $this->hiddenDescriptionsClause()]],
         ];
 
         $index = $this->indexPrefix . '_qubitinformationobject';

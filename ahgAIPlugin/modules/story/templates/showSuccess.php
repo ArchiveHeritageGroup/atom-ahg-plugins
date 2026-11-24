@@ -2,11 +2,13 @@
 $story = $sf_data->getRaw('story');
 $records = $sf_data->getRaw('records') ?: [];
 $sources = $sf_data->getRaw('sources') ?: [];
+$withheld = $sf_data->getRaw('withheld') ?: [];
 $e = fn ($v) => esc_entities((string) $v);
 $typeLabel = ['note' => __('Notes'), 'url' => __('Web page'), 'upload' => __('Document'), 'record' => __('Record')];
 ?>
 <div class="container py-4" style="max-width: 820px">
   <?php if ('published' !== $story->status): ?><div class="alert alert-secondary"><?php echo __('Draft: only staff can see this page.') ?></div><?php endif ?>
+  <?php if ($withheld): ?><div class="alert alert-danger"><strong><?php echo __('Hidden from the public: visitors get a page-not-found.') ?></strong><ul class="mb-0"><?php foreach ($withheld as $w): ?><li><?php echo $e($w) ?></li><?php endforeach ?></ul></div><?php endif ?>
   <h1 class="mb-4"><?php echo $e($story->title) ?></h1>
   <div class="fs-5 lh-lg">
     <?php foreach (preg_split('/\n\s*\n/', trim($story->body)) as $para): ?><p><?php echo nl2br($e(trim($para))) ?></p><?php endforeach ?>

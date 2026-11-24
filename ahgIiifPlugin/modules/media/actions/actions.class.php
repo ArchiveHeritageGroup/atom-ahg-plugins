@@ -308,7 +308,7 @@ class mediaActions extends AhgController
     /**
      * Stream file directly with range request support
      */
-    protected function streamDirect(string $filePath, string $mimeType): void
+    protected function streamDirect(string $filePath, string $mimeType, string $cacheControl = 'public, max-age=86400'): void
     {
         $fileSize = filesize($filePath);
 
@@ -332,7 +332,7 @@ class mediaActions extends AhgController
         header('Content-Type: ' . $mimeType);
         header('Content-Length: ' . $length);
         header('Accept-Ranges: bytes');
-        header('Cache-Control: public, max-age=86400');
+        header('Cache-Control: ' . $cacheControl);
 
         // Stream the file
         $handle = fopen($filePath, 'rb');
@@ -917,12 +917,12 @@ PHP;
      *
      * Converts non-viewable formats to browser-friendly formats:
      * - PSD/CR2 -> JPEG (via ImageMagick)
-     * - DOCX/XLSX/XLS/PPT/PPTX/ODT/ODS/ODP/RTF -> PDF (via LibreOffice)
+     * - DOC/DOCX/XLS/XLSX/PPT/PPTX/ODT/ODS/ODP/RTF -> stored PDF display copy (#231)
      * - ZIP/RAR/TGZ/TAR.GZ -> JSON file listing
      * - TXT/CSV/LOG/MD/XML/JSON -> Plain text content
      * - JPS -> Serve as JPEG (stereo JPEG is valid JPEG)
      *
-     * Results are cached in uploads/conversions/
+     * Nothing is written to the public uploads directory.
      */
     public function executeConvert($request)
     {
@@ -937,40 +937,58 @@ PHP;
             $this->forward404('Digital object not found');
         }
 
+        // Office documents have their own access rules and never convert in a web
+        // request (#231). This action is public for them alone; see security.yml.
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/OfficePreviewService.php';
+        if (\AhgIiif\Services\OfficePreviewService::isOfficeFile((string) $digitalObject->name)) {
+            return $this->serveOfficePreview($digitalObject);
+        }
+
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward(sfConfig::get('sf_login_module'), sfConfig::get('sf_login_action'));
+        }
+
+        // Every branch below hands out the master or something made from it.
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/MediaFileServer.php';
+        if (null === \MediaFileServer::authorise($id)) {
+            $this->forward404('Digital object not found');
+        }
+
         $filePath = $this->getFilePath($digitalObject);
         if (!$filePath || !file_exists($filePath)) {
             $this->forward404('File not found');
         }
 
         $ext = strtolower(pathinfo($digitalObject->name, PATHINFO_EXTENSION));
-        $cacheDir = $this->config('sf_web_dir') . '/uploads/conversions';
-
-        if (!is_dir($cacheDir)) {
-            @mkdir($cacheDir, 0755, true);
-        }
 
         // PSD / CR2 -> JPEG via ImageMagick
         if (in_array($ext, ['psd', 'cr2', 'nef', 'arw', 'dng'])) {
-            $cacheFile = $cacheDir . '/' . $id . '_' . $ext . '.jpg';
+            // ponytail: converted on each view, because uploads/conversions is public
+            // and has no access check. If this gets slow, cache outside the web root.
+            $base = tempnam(sys_get_temp_dir(), 'media-convert-');
+            $cacheFile = $base . '.jpg';
 
-            if (!file_exists($cacheFile)) {
+            try {
                 $escaped = escapeshellarg($filePath . ($ext === 'psd' ? '[0]' : ''));
                 $escapedOut = escapeshellarg($cacheFile);
                 $cmd = "convert {$escaped} -resize 2048x2048 -quality 92 {$escapedOut} 2>&1";
-                $output = shell_exec($cmd);
+                shell_exec($cmd);
 
-                if (!file_exists($cacheFile)) {
+                if (!is_file($cacheFile)) {
                     $this->getResponse()->setContentType('application/json');
-                    echo json_encode(['error' => 'Conversion failed', 'detail' => $output]);
+                    echo json_encode(['error' => 'Conversion failed']);
 
                     return sfView::NONE;
                 }
-            }
 
-            header('Content-Type: image/jpeg');
-            header('Content-Length: ' . filesize($cacheFile));
-            header('Cache-Control: public, max-age=86400');
-            readfile($cacheFile);
+                header('Content-Type: image/jpeg');
+                header('Content-Length: ' . filesize($cacheFile));
+                header('Cache-Control: private, no-store');
+                readfile($cacheFile);
+            } finally {
+                @unlink($cacheFile);
+                @unlink($base);
+            }
 
             return sfView::NONE;
         }
@@ -979,7 +997,7 @@ PHP;
         if ($ext === 'jps') {
             header('Content-Type: image/jpeg');
             header('Content-Length: ' . filesize($filePath));
-            header('Cache-Control: public, max-age=86400');
+            header('Cache-Control: private, no-store');
             readfile($filePath);
 
             return sfView::NONE;
@@ -989,49 +1007,8 @@ PHP;
         if ($ext === 'svg') {
             header('Content-Type: image/svg+xml');
             header('Content-Length: ' . filesize($filePath));
-            header('Cache-Control: public, max-age=86400');
+            header('Cache-Control: private, no-store');
             readfile($filePath);
-
-            return sfView::NONE;
-        }
-
-        // Office documents -> PDF via LibreOffice
-        if (in_array($ext, ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf'])) {
-            $cacheFile = $cacheDir . '/' . $id . '_doc.pdf';
-
-            if (!file_exists($cacheFile)) {
-                $escaped = escapeshellarg($filePath);
-                $escapedDir = escapeshellarg($cacheDir);
-                // Convert to PDF in temp dir, then rename to cache path
-                $tmpDir = sys_get_temp_dir() . '/lo_convert_' . $id;
-                @mkdir($tmpDir, 0755, true);
-                $cmd = sprintf(
-                    'timeout 60 libreoffice --headless --norestore --convert-to pdf --outdir %s %s 2>&1',
-                    escapeshellarg($tmpDir),
-                    $escaped
-                );
-                $output = shell_exec($cmd);
-
-                // Find the generated PDF
-                $baseName = pathinfo($digitalObject->name, PATHINFO_FILENAME);
-                $tmpPdf = $tmpDir . '/' . $baseName . '.pdf';
-                if (file_exists($tmpPdf)) {
-                    rename($tmpPdf, $cacheFile);
-                }
-                @rmdir($tmpDir);
-
-                if (!file_exists($cacheFile)) {
-                    $this->getResponse()->setContentType('application/json');
-                    echo json_encode(['error' => 'PDF conversion failed', 'detail' => $output]);
-
-                    return sfView::NONE;
-                }
-            }
-
-            header('Content-Type: application/pdf');
-            header('Content-Length: ' . filesize($cacheFile));
-            header('Cache-Control: public, max-age=86400');
-            readfile($cacheFile);
 
             return sfView::NONE;
         }
@@ -1040,7 +1017,7 @@ PHP;
         if (in_array($ext, ['txt', 'csv', 'log', 'md', 'xml', 'json', 'yml', 'yaml', 'ini', 'cfg', 'conf'])) {
             $content = file_get_contents($filePath, false, null, 0, 512000); // Max 500KB
             header('Content-Type: text/plain; charset=utf-8');
-            header('Cache-Control: public, max-age=86400');
+            header('Cache-Control: private, no-store');
             echo $content;
 
             return sfView::NONE;
@@ -1094,6 +1071,44 @@ PHP;
         // Unsupported format
         $this->getResponse()->setContentType('application/json');
         echo json_encode(['error' => 'Unsupported format: ' . $ext]);
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Serve the PDF display copy of an Office master, or say it is not ready.
+     * The file is produced by the iiif:office-preview background task.
+     */
+    protected function serveOfficePreview($digitalObject)
+    {
+        $service = new \AhgIiif\Services\OfficePreviewService();
+
+        if (!$service::isInstalled() || !$service::canView($digitalObject, $this->getUser())) {
+            $this->forward404('Digital object not found');
+        }
+
+        $master = DB::table('digital_object')->where('id', $digitalObject->id)->first(['id', 'checksum']);
+        $file = $master ? $service->readyFile($master) : null;
+
+        if (null !== $file) {
+            header('Content-Disposition: inline; filename="document-' . (int) $digitalObject->id . '.pdf"');
+            header('X-Content-Type-Options: nosniff');
+            $this->streamDirect($file, 'application/pdf', 'private, no-store');
+
+            return sfView::NONE;
+        }
+
+        $service->enqueue((int) $digitalObject->id);
+        $failed = 'failed' === $service->status((int) $digitalObject->id);
+        $message = $failed
+            ? 'A preview of this document is not available.'
+            : 'A preview of this document is being prepared. This page will refresh.';
+
+        $this->getResponse()->setContentType('text/html; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'no-store');
+        echo '<!doctype html><html><head><meta charset="utf-8"><title>Preview</title>'
+            . ($failed ? '' : '<meta http-equiv="refresh" content="30">')
+            . '</head><body><p>' . htmlspecialchars($this->context->i18n->__($message)) . '</p></body></html>';
 
         return sfView::NONE;
     }

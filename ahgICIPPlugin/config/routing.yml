@@ -24,6 +24,11 @@ icip_community_view:
   param: { module: icip, action: communityView }
   requirements: { id: \d+ }
 
+icip_community_stewards:
+  url: /icip/community/:id/stewards
+  param: { module: icip, action: communityStewards }
+  requirements: { id: \d+ }
+
 icip_community_delete:
   url: /icip/community/:id/delete
   param: { module: icip, action: communityDelete }

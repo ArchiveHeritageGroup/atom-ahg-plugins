@@ -121,41 +121,37 @@ class c2paVerifyActions extends AhgController
     public function executeBadgeJson($request)
     {
         $doId = (int) $request->getParameter('id');
-        $payload = [
-            'status'           => ManifestPresenter::STATE_ABSENT,
-            'signer'           => null,
-            'signed_at'        => null,
-            'assertions_count' => 0,
-            'verify_url'       => $this->absoluteUrl('@ahg_c2pa_object?id=' . $doId),
-        ];
-
         $do = self::loadDigitalObject($doId);
-        if ($do !== null && $do->io_id !== null && RecordAccess::canRead((int) $do->io_id)) {
-            $analysis = $this->analyse($doId);
-            $payload['status'] = $analysis['state'];
-            $payload['signer'] = $analysis['signer'];
-            $payload['signed_at'] = $analysis['signed_at'];
-            $payload['assertions_count'] = $analysis['counts']['assertions'];
+        if ($do === null || $do->io_id === null || !RecordAccess::canRead((int) $do->io_id)) {
+            $this->forward404();
         }
 
+        $analysis = $this->analyse($doId);
         $this->corsHeaders();
 
-        return $this->renderJson($payload);
+        return $this->renderJson([
+            'status'           => $analysis['state'],
+            'signer'           => $analysis['signer'],
+            'signed_at'        => $analysis['signed_at'],
+            'assertions_count' => $analysis['counts']['assertions'],
+            'verify_url'       => $this->absoluteUrl('@ahg_c2pa_object?id=' . $doId),
+        ]);
     }
 
     public function executeBadge($request)
     {
         $doId = (int) $request->getParameter('id');
-        $state = ManifestPresenter::STATE_ABSENT;
         $do = self::loadDigitalObject($doId);
-        if ($do !== null && $do->io_id !== null && RecordAccess::canRead((int) $do->io_id)) {
-            $state = $this->analyse($doId)['state'];
+        if ($do === null || $do->io_id === null || !RecordAccess::canRead((int) $do->io_id)) {
+            $this->forward404();
         }
+        $state = $this->analyse($doId)['state'];
 
         $this->corsHeaders();
         $response = $this->getResponse();
         $response->setContentType('image/svg+xml; charset=utf-8');
-        $response->setHttpHeader('Cache-Control', 'public, max-age=300');
+        // A signed-in user may see a restricted record: never let a shared cache keep that.
+        $response->setHttpHeader('Cache-Control', $this->getUser()->isAuthenticated() ? 'no-store, private' : 'public, max-age=300');
 
         return $this->renderText(self::renderSvg($state));
     }
@@ -635,9 +631,9 @@ class c2paVerifyActions extends AhgController
     private static function renderSvg(string $state): string
     {
         [$colour, $label] = match ($state) {
-            ManifestPresenter::STATE_VERIFIED => ['#1a7f37', "Content Credentials \u{2713}"],
-            ManifestPresenter::STATE_INVALID  => ['#cf222e', "Content Credentials \u{2717}"],
-            default                           => ['#6c757d', 'No Content Credentials'],
+            ManifestPresenter::STATE_VERIFIED => ['#1a7f37', "AHG-signed provenance \u{2713}"],
+            ManifestPresenter::STATE_INVALID  => ['#cf222e', "AHG-signed provenance \u{2717}"],
+            default                           => ['#6c757d', 'No AHG-signed provenance'],
         };
         $leftText = 'Verify';
         $leftW = max(46, 14 + strlen($leftText) * 7);
@@ -651,8 +647,8 @@ class c2paVerifyActions extends AhgController
 
         return <<<SVG
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="{$total}" height="20" role="img" aria-label="Content Credentials: {$eState}">
-  <title>Content Credentials: {$eState}</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="{$total}" height="20" role="img" aria-label="AHG-signed provenance: {$eState}">
+  <title>AHG-signed provenance: {$eState}</title>
   <linearGradient id="s" x2="0" y2="100%">
     <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
     <stop offset="1" stop-opacity=".1"/>

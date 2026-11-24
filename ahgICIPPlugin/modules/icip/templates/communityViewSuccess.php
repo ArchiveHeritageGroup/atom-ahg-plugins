@@ -21,6 +21,9 @@
             <a href="<?php echo url_for('@icip_community_edit?id=' . $id) ?>" class="btn btn-primary">
                 <i class="bi bi-pencil me-1"></i> Edit
             </a>
+            <?php if ($sf_user->hasCredential('administrator')) { ?>
+                <a href="<?php echo url_for('@icip_community_stewards?id=' . $id) ?>" class="btn btn-outline-secondary"><?php echo __('Stewards'); ?></a>
+            <?php } ?>
             <a href="<?php echo url_for('@icip_report_community?id=' . $id) ?>" class="btn btn-outline-secondary">
                 <i class="bi bi-graph-up me-1"></i> Full Report
             </a>

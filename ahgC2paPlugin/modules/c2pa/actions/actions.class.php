@@ -17,6 +17,7 @@
  */
 
 use AhgC2pa\Services\C2paService;
+use AhgC2pa\Services\RecordAccess;
 use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -37,8 +38,9 @@ class c2paActions extends AhgController
     public function executeManifests($request)
     {
         $ioId = (int) $request->getParameter('id');
-        if ($ioId <= 0) {
-            return $this->renderJsonError('invalid information object id', 400);
+        // forward404, not renderJsonError: under Symfony renderJson drops the status.
+        if ($ioId <= 0 || !RecordAccess::canRead($ioId)) {
+            $this->forward404();
         }
 
         if (!$this->tableExists('ahg_c2pa_manifest')) {
@@ -58,6 +60,9 @@ class c2paActions extends AhgController
 
         $manifests = [];
         foreach ($rows as $row) {
+            if (!RecordAccess::canReadManifestFile($row, $ioId)) {
+                continue;
+            }
             $manifests[] = [
                 'id'                => (int) $row->id,
                 'digital_object_id' => isset($row->digital_object_id) ? (int) $row->digital_object_id : null,
@@ -84,16 +89,12 @@ class c2paActions extends AhgController
     public function executeManifest($request)
     {
         $id = (int) $request->getParameter('id');
-        if ($id <= 0) {
-            return $this->renderJsonError('invalid manifest id', 400);
-        }
-        if (!$this->tableExists('ahg_c2pa_manifest')) {
-            return $this->renderJsonError('ahg_c2pa_manifest table not installed', 404);
-        }
-
-        $row = DB::table('ahg_c2pa_manifest')->where('id', $id)->first();
-        if ($row === null) {
-            return $this->renderJsonError('manifest not found', 404);
+        $row = $id > 0 && $this->tableExists('ahg_c2pa_manifest')
+            ? DB::table('ahg_c2pa_manifest')->where('id', $id)->first()
+            : null;
+        $ioId = (int) ($row->information_object_id ?? 0);
+        if ($row === null || $ioId <= 0 || !RecordAccess::canRead($ioId) || !RecordAccess::canReadManifestFile($row, $ioId)) {
+            $this->forward404();
         }
 
         $manifest = json_decode((string) $row->manifest_json, true);
@@ -147,7 +148,8 @@ class c2paActions extends AhgController
         }
 
         return $this->renderJson([
-            'spec'              => 'https://c2pa.org/specifications/specifications/2.1/specs/C2PA_Specification.html',
+            'provenance_format' => 'AHG-signed provenance (JSON manifest, Ed25519 signature)',
+            'c2pa_conformant'   => false,
             'signing_available' => $service->canSign(),
             'active_kid'        => $activeKid,
             'embed_available'   => $service->canEmbed(),

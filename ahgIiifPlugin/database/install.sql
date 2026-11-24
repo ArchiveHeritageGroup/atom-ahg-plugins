@@ -707,3 +707,23 @@ CREATE TABLE IF NOT EXISTS `object_security_classification` (
     UNIQUE KEY `uk_object_classification` (`object_id`),
     INDEX `idx_classification_level` (`classification_level`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: iiif_office_preview (#231) - queue and state of Office PDF display copies
+CREATE TABLE IF NOT EXISTS `iiif_office_preview` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `digital_object_id` INT NOT NULL COMMENT 'Master digital object',
+  `object_id` INT NOT NULL COMMENT 'Information object',
+  `source_checksum` VARCHAR(255) DEFAULT NULL COMMENT 'Master checksum the copy was made from',
+  `status` VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT 'pending, processing, ready, failed',
+  `pdf_path` VARCHAR(1024) DEFAULT NULL COMMENT 'Web-root relative path under uploads/r',
+  `pdf_size` BIGINT UNSIGNED DEFAULT NULL,
+  `attempts` INT NOT NULL DEFAULT 0,
+  `error_message` VARCHAR(500) DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `started_at` DATETIME DEFAULT NULL,
+  `completed_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_office_preview_do` (`digital_object_id`),
+  KEY `idx_office_preview_status` (`status`),
+  KEY `idx_office_preview_object` (`object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

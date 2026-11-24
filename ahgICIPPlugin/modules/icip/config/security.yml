@@ -1,0 +1,15 @@
+# Declared per action. Every other action in this module keeps the default from
+# apps/qubit/config/security.yml, exactly as before this file existed.
+
+# Steward assignment is an administrator task (the action also checks this).
+communityStewards:
+  is_secure:   true
+  credentials: [[ administrator ]]
+
+# Reached by IcipGate when a visitor needs a notice or is refused an image.
+# They must work for signed-out visitors, so they are public on purpose.
+notice:
+  is_secure: false
+
+imageDenied:
+  is_secure: false

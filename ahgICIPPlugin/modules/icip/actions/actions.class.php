@@ -18,7 +18,7 @@ class icipActions extends AhgController
     public function boot(): void
     {
 // Public actions that don't require authentication
-        $publicActions = ['acknowledge', 'apiSummary', 'apiCheckAccess'];
+        $publicActions = ['acknowledge', 'notice', 'imageDenied'];
 
         if (in_array($this->getActionName(), $publicActions)) {
             return;
@@ -1147,35 +1147,141 @@ class icipActions extends AhgController
     }
 
     // ========================================
-    // ACKNOWLEDGEMENT
+    // COMMUNITY STEWARDS
     // ========================================
 
     /**
-     * Record user acknowledgement of a notice
+     * Administrators name the users who steward a community. POST with CSRF
+     * to add (by username) or remove.
+     */
+    public function executeCommunityStewards($request)
+    {
+        if (!$this->getUser()->hasCredential('administrator')) {
+            $this->forward('admin', 'secure');
+        }
+
+        $communityId = (int) $request->getParameter('id');
+        $this->community = DB::table('icip_community')->where('id', $communityId)->first();
+        if (!$this->community) {
+            $this->forward404();
+        }
+
+        $this->tableReady = DB::schema()->hasTable('icip_community_steward');
+        $this->error = null;
+
+        if ($this->tableReady && $request->isMethod('post')) {
+            $token = \AtomFramework\Services\CsrfService::getTokenFromRequest();
+            if (!is_string($token) || !\AtomFramework\Services\CsrfService::validateToken($token)) {
+                $this->getResponse()->setStatusCode(403);
+                $this->error = 'Your session expired. Please try again.';
+            } elseif ('remove' === $request->getParameter('form_action')) {
+                DB::table('icip_community_steward')
+                    ->where('community_id', $communityId)
+                    ->where('id', (int) $request->getParameter('steward_id'))
+                    ->delete();
+                $this->redirect('@icip_community_stewards?id='.$communityId);
+            } else {
+                $userId = DB::table('user')->where('username', trim((string) $request->getParameter('username')))->value('id');
+                if ($userId) {
+                    DB::table('icip_community_steward')->insertOrIgnore([
+                        'community_id' => $communityId,
+                        'user_id' => $userId,
+                        'created_by' => (int) $this->getUser()->getAttribute('user_id'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    $this->redirect('@icip_community_stewards?id='.$communityId);
+                }
+                $this->error = 'No user has that username.';
+            }
+        }
+
+        $this->stewards = !$this->tableReady ? [] : DB::table('icip_community_steward as s')
+            ->leftJoin('user as u', 'u.id', '=', 's.user_id')
+            ->where('s.community_id', $communityId)
+            ->orderBy('u.username')
+            ->get(['s.id', 's.user_id', 's.created_at', 'u.username'])
+            ->all();
+        $this->csrfField = \AtomFramework\Services\CsrfService::FIELD_NAME;
+        $this->csrfToken = \AtomFramework\Services\CsrfService::generateToken();
+    }
+
+    // ========================================
+    // ACKNOWLEDGEMENT
+    // ========================================
+
+    /** The verdict Cantaloupe's delegate reads: always a 200 with JSON. */
+    public function executeImageDenied($request)
+    {
+        return $this->renderJson(['allowed' => false]);
+    }
+
+    /**
+     * The acknowledgement step, reached only by IcipGate's forward. Shows the
+     * notices and a form; no title or other detail of the record.
+     */
+    public function executeNotice($request)
+    {
+        $this->pending = $request->getAttribute('ahg_icip_pending');
+        if (empty($this->pending)) {
+            $this->forward404();
+        }
+
+        $uri = parse_url($request->getUri());
+        $this->returnTo = ($uri['path'] ?? '/').(isset($uri['query']) ? '?'.$uri['query'] : '');
+        $this->csrfField = \AtomFramework\Services\CsrfService::FIELD_NAME;
+        $this->csrfToken = \AtomFramework\Services\CsrfService::generateToken();
+        $this->getResponse()->addMeta('robots', 'noindex,nofollow');
+    }
+
+    /**
+     * Record an acknowledgement. POST with a CSRF token only: signed-in users
+     * in the acknowledgement table, anonymous visitors in their session.
      */
     public function executeAcknowledge($request)
     {
-        $noticeId = $request->getParameter('notice_id');
-        $userId = $this->getUser()->getAttribute('user_id');
+        if (!$request->isMethod('post')) {
+            $this->getResponse()->setHttpHeader('Allow', 'POST');
 
-        if (!$userId) {
-            return $this->renderJson(['success' => false, 'error' => 'Not authenticated']);
+            return $this->renderJson(['success' => false, 'error' => 'Method not allowed'], 405);
         }
 
-        $notice = DB::table('icip_cultural_notice')->where('id', $noticeId)->first();
-        if (!$notice) {
-            return $this->renderJson(['success' => false, 'error' => 'Notice not found']);
+        // Checked here rather than through CsrfService::enforce(), which only logs
+        // while the site's csrf_enforcement setting is in log mode.
+        $token = \AtomFramework\Services\CsrfService::getTokenFromRequest();
+        if (!is_string($token) || !\AtomFramework\Services\CsrfService::validateToken($token)) {
+            return $this->renderJson(['success' => false, 'error' => 'Invalid request'], 403);
         }
 
-        $success = ahgICIPService::recordAcknowledgement($noticeId, $userId);
+        $noticeId = (int) $request->getParameter('notice_id');
+        try {
+            $acknowledgeable = IcipPolicy::isAcknowledgeable($noticeId);
+        } catch (\Throwable $e) {
+            error_log('icip.acknowledge_failed: '.$e->getMessage());
+            $acknowledgeable = false;
+        }
+        if (!$acknowledgeable) {
+            return $this->renderJson(['success' => false, 'error' => 'Not found'], 404);
+        }
+
+        $user = $this->getUser();
+        $userId = (int) $user->getAttribute('user_id');
+        if ($userId > 0) {
+            $success = ahgICIPService::recordAcknowledgement($noticeId, $userId);
+        } else {
+            $acks = array_map('intval', (array) $user->getAttribute(IcipGate::SESSION_ACKS, []));
+            $acks[] = $noticeId;
+            // ponytail: capped so a session cannot grow without limit; the oldest is re-asked.
+            $user->setAttribute(IcipGate::SESSION_ACKS, array_slice(array_values(array_unique($acks)), -200));
+            $success = true;
+        }
 
         if ($request->isXmlHttpRequest()) {
             return $this->renderJson(['success' => $success]);
         }
 
-        // Redirect back
-        $referer = $request->getReferer();
-        $this->redirect($referer ?: '@homepage');
+        // Local paths only: never an open redirect.
+        $return = (string) $request->getParameter('return', '');
+        $this->redirect(preg_match('#^/(?![/\\\\])[^\\s\\\\]*\z#', $return) ? $return : '@homepage');
     }
 
     // ========================================

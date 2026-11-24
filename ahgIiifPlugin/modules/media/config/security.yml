@@ -29,3 +29,9 @@ download:
 
 stream:
   is_secure: false
+
+# Open at this level for Office display copies only (#231). executeConvert applies
+# OfficePreviewService::canView() to them, and sends anonymous visitors to the login
+# page for every other format, which is what is_secure did.
+convert:
+  is_secure: false

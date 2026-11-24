@@ -9,9 +9,11 @@ use Illuminate\Database\Capsule\Manager as DB;
  * saved as a draft or published at /stories/<slug>. Table ahg_story is
  * Heratio's own.
  *
- * Only published records are ever used, so a public story cannot quote a
- * draft. A published story's record links are filtered again on display, in
- * case a record is unpublished later.
+ * Only records an anonymous visitor may see are ever used: published, and not
+ * on SearchAccessFilterService's list (classification, donor, full embargo,
+ * ICIP, ODRL). If that check fails, nothing is used. A record that stops being
+ * public later withdraws the whole story from the public at render, because
+ * its text may quote the record; the stored text is never changed.
  */
 class StorytellingService
 {
@@ -19,16 +21,35 @@ class StorytellingService
     private const STATUS_TYPE_PUBLICATION = 158;
     private const STATUS_PUBLISHED = 160;
     private const SOURCE_TYPES = ['note', 'url', 'upload', 'record'];
+    private const HOURS_ERROR = 'Stories can only be written between 06:00 and 18:00 South African time, when the AI servers are on. Please try again then.';
+    private const CHECK_ERROR = 'The access check on records could not be completed, so nothing was used. Try again, and report it if this continues.';
+
+    /** @param ?\DateTimeInterface $now fixed clock for the hours guard; null = the real time */
+    public function __construct(private ?\DateTimeInterface $now = null)
+    {
+    }
 
     /** @return array{ok: bool, theme: string, story: string, objects: array, error: string} */
     public function generate(string $theme, array $recordIds = [], string $context = '', int $max = 10): array
     {
         $theme = trim($theme);
         $out = ['ok' => false, 'theme' => $theme, 'story' => '', 'objects' => [], 'error' => ''];
-        $picked = $this->records(array_values(array_unique(array_filter(array_map('intval', $recordIds)))));
-        $seen = array_column($picked, 'id');
-        $matched = '' !== $theme ? array_filter($this->candidates($theme, $max), fn ($o) => !in_array($o['id'], $seen, true)) : [];
-        $out['objects'] = array_slice(array_merge($picked, $matched), 0, max($max, count($picked)));
+        if (!$this->inAiHours()) {
+            return ['error' => self::HOURS_ERROR] + $out;
+        }
+
+        try {
+            $picked = $this->records(array_values(array_unique(array_filter(array_map('intval', $recordIds)))));
+            $seen = array_column($picked, 'id');
+            $matched = '' !== $theme ? array_filter($this->candidates($theme, $max), fn ($o) => !in_array($o['id'], $seen, true)) : [];
+            $out['objects'] = array_slice(array_merge($picked, $matched), 0, max($max, count($picked)));
+            // Background-only stories never reach a record query, so check the filter itself.
+            $this->restrictedIds();
+        } catch (\Throwable $e) {
+            error_log('[ahgAI] storytelling access check: '.$e->getMessage());
+
+            return ['error' => self::CHECK_ERROR, 'objects' => []] + $out;
+        }
         if (!$out['objects'] && '' === trim($context)) {
             return ['error' => 'No published records match that theme. Pick records or add background.'] + $out;
         }
@@ -44,13 +65,23 @@ class StorytellingService
     /** Records dated today (any year), else this month. */
     public function onThisDay(int $max = 10): array
     {
+        if (!$this->inAiHours()) {
+            return ['ok' => false, 'theme' => '', 'story' => '', 'objects' => [], 'error' => self::HOURS_ERROR];
+        }
         $month = (int) date('n');
         $day = (int) date('j');
-        $objects = $this->dated($month, $day, $max);
-        $scope = 'day';
-        if (!$objects) {
-            $objects = $this->dated($month, null, $max);
-            $scope = 'month';
+
+        try {
+            $objects = $this->dated($month, $day, $max);
+            $scope = 'day';
+            if (!$objects) {
+                $objects = $this->dated($month, null, $max);
+                $scope = 'month';
+            }
+        } catch (\Throwable $e) {
+            error_log('[ahgAI] storytelling access check: '.$e->getMessage());
+
+            return ['ok' => false, 'theme' => '', 'story' => '', 'objects' => [], 'error' => self::CHECK_ERROR];
         }
         $label = 'day' === $scope ? 'On this day, the '.date('jS \o\f F').', in our collection' : 'This month, '.date('F').', in our collection';
         $out = ['ok' => false, 'theme' => $label, 'story' => '', 'objects' => $objects, 'error' => ''];
@@ -73,9 +104,15 @@ class StorytellingService
             return [];
         }
 
-        return $this->published()->where('i.title', 'like', '%'.addcslashes($q, '%_\\').'%')
-            ->orderBy('i.title')->limit($limit)->get(['io.id', 'i.title'])
-            ->map(fn ($r) => ['id' => (int) $r->id, 'title' => (string) $r->title])->all();
+        try {
+            return $this->published()->where('i.title', 'like', '%'.addcslashes($q, '%_\\').'%')
+                ->orderBy('i.title')->limit($limit)->get(['io.id', 'i.title'])
+                ->map(fn ($r) => ['id' => (int) $r->id, 'title' => (string) $r->title])->all();
+        } catch (\Throwable $e) {
+            error_log('[ahgAI] storytelling access check: '.$e->getMessage());
+
+            return [];
+        }
     }
 
     /**
@@ -92,8 +129,29 @@ class StorytellingService
             return ['ok' => false, 'id' => 0, 'slug' => '', 'status' => 'draft', 'error' => 'A story needs a title and text.'];
         }
         $status = 'published' === ($d['status'] ?? '') ? 'published' : 'draft';
-        // Only published records are kept, checked again at save time.
-        $ids = array_column($this->records(array_values(array_unique(array_filter(array_map('intval', (array) ($d['object_ids'] ?? [])))))), 'id');
+        $id = (int) ($d['id'] ?? 0);
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array) ($d['object_ids'] ?? [])))));
+        $refuse = fn (string $error) => ['ok' => false, 'id' => $id, 'slug' => '', 'status' => $status, 'error' => $error];
+
+        // Refused, not silently dropped: the text may quote a record that has
+        // stopped being public, and dropping its link would hide that from the
+        // render check. The links already stored count for the same reason.
+        try {
+            $this->restrictedIds();
+            $old = $id > 0 ? $this->find($id) : null;
+            $stored = $old ? self::linkedIds($old) : [];
+            if (null === $stored) {
+                return $refuse(self::CHECK_ERROR);
+            }
+            if ($blocked = $this->blocked(array_values(array_unique(array_merge($ids, $stored))))) {
+                return $refuse('Not saved. These records are not public: '.implode('; ', $blocked).'. Write the story again without them, or have the restriction lifted.');
+            }
+            $titles = array_map(fn ($o) => mb_substr($o['title'], 0, 200), $this->records($ids));
+        } catch (\Throwable $e) {
+            error_log('[ahgAI] storytelling access check: '.$e->getMessage());
+
+            return $refuse(self::CHECK_ERROR);
+        }
         $sources = [];
         foreach ((array) ($d['sources'] ?? []) as $s) {
             $label = is_array($s) ? mb_substr(trim((string) ($s['label'] ?? '')), 0, 200) : '';
@@ -101,6 +159,9 @@ class StorytellingService
                 continue;
             }
             $type = in_array($s['type'] ?? '', self::SOURCE_TYPES, true) ? $s['type'] : 'note';
+            if ('record' === $type && !in_array($label, $titles, true)) {
+                continue; // A record credit must name a record still linked.
+            }
             $entry = ['type' => $type, 'label' => $label];
             if ('url' === $type && preg_match('#^https?://#i', (string) ($s['url'] ?? ''))) {
                 $entry['url'] = mb_substr((string) $s['url'], 0, 500);
@@ -110,7 +171,6 @@ class StorytellingService
         $row = ['title' => $title, 'theme' => mb_substr(trim((string) ($d['theme'] ?? '')), 0, 200), 'body' => $body,
             'object_ids' => json_encode($ids), 'sources_json' => json_encode($sources), 'status' => $status, 'updated_at' => date('Y-m-d H:i:s')];
 
-        $id = (int) ($d['id'] ?? 0);
         if ($id > 0 && $slug = DB::table(self::TABLE)->where('id', $id)->value('slug')) {
             DB::table(self::TABLE)->where('id', $id)->update($row);
 
@@ -140,8 +200,13 @@ class StorytellingService
     /** A story's records that are still published, in the saved order, with slugs. */
     public function storyRecords(object $story): array
     {
-        $ids = json_decode((string) $story->object_ids, true);
-        $recs = is_array($ids) ? $this->records(array_map('intval', $ids)) : [];
+        try {
+            $recs = $this->records(self::linkedIds($story) ?? []);
+        } catch (\Throwable $e) {
+            error_log('[ahgAI] storytelling access check: '.$e->getMessage());
+
+            return [];
+        }
         $slugs = $recs ? DB::table('slug')->whereIn('object_id', array_column($recs, 'id'))->pluck('slug', 'object_id')->all() : [];
         foreach ($recs as &$r) {
             $r['slug'] = $slugs[$r['id']] ?? null;
@@ -150,11 +215,74 @@ class StorytellingService
         return $recs;
     }
 
+    /**
+     * Why this story may not be shown to the public; empty = it may. Staff see
+     * these reasons. Any failure to check counts as a reason.
+     *
+     * @return string[]
+     */
+    public function withheldReasons(object $story): array
+    {
+        try {
+            $this->restrictedIds();
+            $ids = self::linkedIds($story);
+
+            return null === $ids ? ['The list of linked records cannot be read.'] : $this->blocked($ids);
+        } catch (\Throwable $e) {
+            error_log('[ahgAI] storytelling access check: '.$e->getMessage());
+
+            return ['The access check on linked records could not be completed.'];
+        }
+    }
+
     public function storySources(object $story): array
     {
         $s = json_decode((string) $story->sources_json, true);
 
         return is_array($s) ? $s : [];
+    }
+
+    private function inAiHours(): bool
+    {
+        require_once __DIR__.'/PageClassifier.php';
+
+        return \AhgAIPlugin\Services\PageClassifier::gpuHours($this->now);
+    }
+
+    /** The anonymous list filter (includes ICIP). Throws on failure, so callers fail closed. */
+    private function restrictedIds(): array
+    {
+        return array_map('intval', \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()->getRestrictedObjectIds(null, true));
+    }
+
+    /** @return ?int[] the story's record ids; null when the stored list is unreadable */
+    private static function linkedIds(object $story): ?array
+    {
+        $raw = trim((string) ($story->object_ids ?? ''));
+        if ('' === $raw) {
+            return [];
+        }
+        $ids = json_decode($raw, true);
+
+        return is_array($ids) ? array_values(array_unique(array_map(fn ($v) => is_scalar($v) ? (int) $v : -1, $ids))) : null;
+    }
+
+    /**
+     * One reason per id that is not public now. Throws if the check fails.
+     *
+     * @return string[]
+     */
+    private function blocked(array $ids): array
+    {
+        $missing = $ids ? array_values(array_diff($ids, array_column($this->records($ids), 'id'))) : [];
+        if (!$missing) {
+            return [];
+        }
+        $restricted = $this->restrictedIds();
+        $titles = DB::table('information_object_i18n')->whereIn('id', $missing)->where('title', '!=', '')->pluck('title', 'id')->all();
+
+        return array_map(fn ($id) => 'record '.$id.(isset($titles[$id]) ? ' ('.trim(strip_tags((string) $titles[$id])).')' : '')
+            .(in_array($id, $restricted, true) ? ' is restricted from public view' : ' is not published or no longer exists'), $missing);
     }
 
     private function write(string $theme, array $objects, string $context): string
@@ -192,12 +320,14 @@ class StorytellingService
         }
     }
 
+    /** Every record query starts here: published and not restricted. Throws if the filter fails. */
     private function published()
     {
         return DB::table('information_object as io')
             ->join('status as st', fn ($j) => $j->on('st.object_id', '=', 'io.id')->where('st.type_id', self::STATUS_TYPE_PUBLICATION))
             ->join('information_object_i18n as i', fn ($j) => $j->on('i.id', '=', 'io.id')->on('i.culture', '=', 'io.source_culture'))
-            ->where('st.status_id', self::STATUS_PUBLISHED)->where('io.id', '>', 1)->where('i.title', '!=', '');
+            ->where('st.status_id', self::STATUS_PUBLISHED)->where('io.id', '>', 1)->where('i.title', '!=', '')
+            ->whereIntegerNotInRaw('io.id', $this->restrictedIds());
     }
 
     /** Published records by id, in the order given. */

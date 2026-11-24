@@ -24,6 +24,10 @@
            class="btn btn-<?php echo $currentStatus === 'error' ? 'warning' : 'outline-warning'; ?>">
             Error (<?php echo $statusCounts['error']; ?>)
         </a>
+        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog', 'status' => 'failures']); ?>"
+           class="btn btn-<?php echo $currentStatus === 'failures' ? 'danger' : 'outline-danger'; ?>">
+            <?php echo __('Current failures'); ?> (<?php echo $statusCounts['failures']; ?>)
+        </a>
     </div>
 </div>
 

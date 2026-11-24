@@ -14,7 +14,7 @@ $errorMsg = $sf_data->getRaw('errorMsg');
 $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 ?>
 <?php slot('title'); ?>
-<h1><i class="fas fa-shield-alt me-2" aria-hidden="true"></i><?php echo __('Check content credentials'); ?></h1>
+<h1><i class="fas fa-shield-alt me-2" aria-hidden="true"></i><?php echo __('Check AHG-signed provenance'); ?></h1>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
@@ -23,7 +23,7 @@ $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'
   #c2pa-file { max-width: 24rem; margin: 0 auto; }
 </style>
 
-<p class="text-muted"><?php echo __('Drop in any image, PDF or C2PA sidecar manifest to check whether it carries signed content credentials, and what they say. Authenticity is checked against the file\'s own cryptographic signature using the open C2PA standard. This works for files from anywhere - not only material held here.'); ?></p>
+<p class="text-muted"><?php echo __('Drop in any image, PDF or .c2pa.json sidecar manifest to check whether it carries AHG-signed provenance, and what it says. The Ed25519 signature is checked against the keys this site holds. This does not validate standard C2PA credentials from other issuers.'); ?></p>
 
 <?php if (!empty($errorMsg)) { ?>
   <div class="alert alert-warning" role="alert"><i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i><?php echo $h($errorMsg); ?></div>
@@ -51,9 +51,9 @@ $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'
 <?php if (!empty($state)) { ?>
   <?php
     $stateBadge = match ($state) {
-        'verified' => ['bg-success', 'fa-check-circle', __('Content credentials verified')],
+        'verified' => ['bg-success', 'fa-check-circle', __('AHG-signed provenance verified')],
         'invalid'  => ['bg-danger', 'fa-times-circle', __('Could not be verified')],
-        default    => ['bg-secondary', 'fa-minus-circle', __('No content credentials')],
+        default    => ['bg-secondary', 'fa-minus-circle', __('No AHG-signed provenance')],
     };
     $assertions = $result['assertions'] ?? [];
     $resultErrors = $result['errors'] ?? [];
@@ -66,26 +66,26 @@ $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'
       <?php } ?>
       <p class="mb-2"><span class="badge <?php echo $stateBadge[0]; ?> fs-5"><i class="fas <?php echo $stateBadge[1]; ?> me-1" aria-hidden="true"></i><?php echo $h($stateBadge[2]); ?></span></p>
       <?php if ($state === 'verified') { ?>
-        <p class="text-success mb-0"><i class="fas fa-lock me-1" aria-hidden="true"></i><?php echo __('This file carries signed content credentials, and they have not been altered since they were created. Every step below re-computes to the value pinned in the signed claim, and the Ed25519 signature checks out.'); ?></p>
+        <p class="text-success mb-0"><i class="fas fa-lock me-1" aria-hidden="true"></i><?php echo __('This file carries AHG-signed provenance, and it has not been altered since it was signed. Every step below re-computes to the value pinned in the signed claim, and the Ed25519 signature checks out.'); ?></p>
         <?php if (!empty($result['signer'])) { ?>
           <p class="text-muted small mt-2 mb-0"><?php echo __('Signed under key'); ?> <code><?php echo $h($result['signer']); ?></code>.</p>
         <?php } ?>
       <?php } elseif ($state === 'invalid') { ?>
-        <p class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i><?php echo __('This file has content credentials, but they could not be verified. The signature does not match the recorded content, or it was signed by a key this service does not recognise. Treat the steps below with caution - the credentials may have been tampered with.'); ?></p>
+        <p class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i><?php echo __('This file has a provenance manifest, but it could not be verified. The signature does not match the recorded content, or it was signed by a key this service does not recognise. Treat the steps below with caution - the manifest may have been tampered with.'); ?></p>
         <?php if (!empty($resultErrors)) { ?>
           <ul class="text-danger small mt-2 mb-0">
             <?php foreach ($resultErrors as $err) { ?><li><?php echo $h($err); ?></li><?php } ?>
           </ul>
         <?php } ?>
       <?php } else { ?>
-        <p class="text-muted mb-0"><?php echo __('This file has no content credentials we can read. That does not mean it is fake - only that it carries no signed provenance that this checker can verify. Some files embed credentials in a form that needs the native C2PA tool to read; if you have a sidecar manifest for this file, upload that instead.'); ?></p>
+        <p class="text-muted mb-0"><?php echo __('This file has no AHG-signed provenance we can read. That does not mean it is fake - only that it carries no signed provenance that this checker can verify. Standard C2PA credentials from other issuers are not read here. If you have an AHG sidecar manifest for this file, upload that instead.'); ?></p>
       <?php } ?>
     </div>
   </div>
 
   <?php if (!empty($assertions)) { ?>
     <div class="card mb-3">
-      <div class="card-header"><i class="fas fa-list-ol me-2" aria-hidden="true"></i><?php echo __('What the credentials say'); ?></div>
+      <div class="card-header"><i class="fas fa-list-ol me-2" aria-hidden="true"></i><?php echo __('What the manifest says'); ?></div>
       <div class="card-body">
         <p class="text-muted small"><?php echo __('The actions and declarations recorded in the signed manifest, in order.'); ?></p>
         <?php include_partial('c2paVerify/steps', ['steps' => $assertions]); ?>
@@ -96,7 +96,7 @@ $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'
   <p class="mb-3"><a href="<?php echo url_for('@ahg_c2pa_check'); ?>" class="btn btn-outline-secondary btn-sm"><i class="fas fa-redo me-1" aria-hidden="true"></i><?php echo __('Check another file'); ?></a></p>
 <?php } ?>
 
-<p class="text-muted small"><i class="fas fa-info-circle me-1" aria-hidden="true"></i><?php echo __('Content credentials follow the C2PA open standard. Signatures are Ed25519 and checked live, every time - nothing here is cached or stored.'); ?></p>
+<p class="text-muted small"><i class="fas fa-info-circle me-1" aria-hidden="true"></i><?php echo __('This is AHG-signed provenance: a JSON manifest with an Ed25519 signature, checked live every time and never stored. It is not a standard C2PA credential, and outside C2PA validators will not accept it.'); ?></p>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   (function () {

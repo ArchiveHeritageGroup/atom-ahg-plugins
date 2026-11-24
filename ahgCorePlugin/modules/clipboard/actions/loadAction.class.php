@@ -60,9 +60,24 @@ class ClipboardLoadAction extends DefaultEditAction
         ];
         $addedCount = 0;
 
+        // A saved clipboard never restores a description hidden from this user.
+        try {
+            $userId = $this->getUser()->isAuthenticated() ? (int) $this->getUser()->getAttribute('user_id') : null;
+            $hiddenIds = array_flip(\AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ?: null));
+        } catch (\Throwable $e) {
+            error_log('clipboard.visibility_failed: '.$e->getMessage());
+            $hiddenIds = null;
+        }
+
         foreach ($items as $item) {
             // Add slug to clipboard if the object exists and the user can read it
             $object = QubitObject::getBySlug($item->slug);
+
+            if ($object instanceof QubitInformationObject
+                && (null === $hiddenIds || isset($hiddenIds[(int) $object->id]))) {
+                continue;
+            }
 
             if (isset($object) && QubitAcl::check($object, 'read')) {
                 $type = lcfirst(str_replace('Qubit', '', $item->itemClassName));

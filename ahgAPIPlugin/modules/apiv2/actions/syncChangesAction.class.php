@@ -1,6 +1,9 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgApiController;
+
+require_once sfConfig::get('sf_plugins_dir').'/ahgAPIPlugin/lib/ApiVisibility.php';
+
 class apiv2SyncChangesAction extends AhgApiController
 {
     public function GET($request)
@@ -44,21 +47,31 @@ class apiv2SyncChangesAction extends AhgApiController
 
     protected function getChangedDescriptions($since, $limit)
     {
-        return \Illuminate\Database\Capsule\Manager::table('information_object as io')
+        // updated_at lives on object, not information_object.
+        $query = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->join('object as o', 'io.id', '=', 'o.id')
             ->join('slug', 'io.id', '=', 'slug.object_id')
-            ->where('io.updated_at', '>=', $since)
-            ->where('io.id', '!=', 1)
-            ->limit($limit)
-            ->select(['io.id', 'slug.slug', 'io.updated_at'])
+            ->where('o.updated_at', '>=', $since)
+            ->where('io.id', '!=', 1);
+        ApiVisibility::applyToQuery($query, $this->getUser());
+
+        return $query->limit($limit)
+            ->select(['io.id', 'slug.slug', 'o.updated_at'])
             ->get()
             ->toArray();
     }
 
     protected function getChangedConditions($since, $limit)
     {
-        return \Illuminate\Database\Capsule\Manager::table('spectrum_condition_check')
-            ->where('check_date', '>=', $since)
-            ->limit($limit)
+        // Each type belongs to an optional plugin: no table means no changes.
+        if (!\Illuminate\Database\Capsule\Manager::schema()->hasTable('spectrum_condition_check')) {
+            return [];
+        }
+        $query = \Illuminate\Database\Capsule\Manager::table('spectrum_condition_check')
+            ->where('check_date', '>=', $since);
+        ApiVisibility::applyToQuery($query, $this->getUser(), 'spectrum_condition_check.object_id');
+
+        return $query->limit($limit)
             ->select(['id', 'object_id', 'check_date as updated_at'])
             ->get()
             ->toArray();
@@ -66,9 +79,14 @@ class apiv2SyncChangesAction extends AhgApiController
 
     protected function getChangedAssets($since, $limit)
     {
-        return \Illuminate\Database\Capsule\Manager::table('heritage_asset')
-            ->where('updated_at', '>=', $since)
-            ->limit($limit)
+        if (!\Illuminate\Database\Capsule\Manager::schema()->hasTable('heritage_asset')) {
+            return [];
+        }
+        $query = \Illuminate\Database\Capsule\Manager::table('heritage_asset')
+            ->where('updated_at', '>=', $since);
+        ApiVisibility::applyToQuery($query, $this->getUser(), 'heritage_asset.object_id');
+
+        return $query->limit($limit)
             ->select(['id', 'object_id', 'updated_at'])
             ->get()
             ->toArray();

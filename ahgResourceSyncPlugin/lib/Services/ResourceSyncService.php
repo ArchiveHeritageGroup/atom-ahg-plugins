@@ -321,7 +321,7 @@ class ResourceSyncService
             $select[] = 'io.oai_local_identifier';
         }
 
-        return DB::table('information_object as io')
+        $query = DB::table('information_object as io')
             ->join('object as o', 'io.id', '=', 'o.id')
             ->join('status as st', function ($join) {
                 $join->on('io.id', '=', 'st.object_id')
@@ -333,6 +333,22 @@ class ResourceSyncService
             ->where('io.parent_id', '!=', 0)
             ->select($select)
             ->orderBy('io.id');
+
+        // These lists are public: leave out whatever an anonymous visitor may not
+        // see (classification, donor restriction, embargo, ICIP, ODRL). If that
+        // cannot be worked out, list nothing.
+        try {
+            $hidden = array_map('intval', \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds(null));
+            if ([] !== $hidden) {
+                $query->whereIntegerNotInRaw('io.id', $hidden);
+            }
+        } catch (\Throwable $e) {
+            error_log('resourcesync.visibility_failed: '.$e->getMessage());
+            $query->whereRaw('1 = 0');
+        }
+
+        return $query;
     }
 
     /**

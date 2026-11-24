@@ -10,6 +10,15 @@
 
 <?php slot('content') ?>
 
+<?php // The theme's admin menu is hidden from editors, so they get the fixity alert here. ?>
+<?php $fixityFailures = ahgPreservationPluginConfiguration::fixityFailureCount(); ?>
+<?php if ($fixityFailures > 0): ?>
+<div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+    <span><i class="fas fa-triangle-exclamation me-2" aria-hidden="true"></i><?php echo __('%1% file(s) failed their latest fixity check.', ['%1%' => number_format($fixityFailures)]); ?></span>
+    <a class="btn btn-sm btn-danger" href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog', 'status' => 'failures']); ?>"><?php echo __('View failures'); ?></a>
+</div>
+<?php endif; ?>
+
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-md-3">

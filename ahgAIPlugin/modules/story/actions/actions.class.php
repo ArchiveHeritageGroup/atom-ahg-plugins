@@ -35,8 +35,16 @@ class storyActions extends AhgController
                     $this->getUser()->setFlash('notice', 'published' === $r['status'] ? __('Story published.') : __('Story saved as a draft.'));
                     $this->redirect('/admin/stories?id='.$r['id']);
                 }
-                $this->getUser()->setFlash('error', __($r['error']));
-                $this->redirect('/admin/stories');
+                // Stay on the form so a refused save does not lose the text.
+                $posted = array_values(array_filter(array_map('intval', (array) $request->getParameter('object_ids', []))));
+                $this->story = $svc->find((int) $request->getParameter('id'));
+                $this->result = ['ok' => true, 'theme' => (string) $request->getParameter('theme', ''), 'title' => (string) $request->getParameter('title', ''),
+                    'story' => (string) $request->getParameter('body', ''), 'objects' => $svc->storyRecords((object) ['object_ids' => json_encode($posted)]),
+                    'sources' => array_values(array_filter(is_array($sources) ? $sources : [], fn ($s) => is_array($s) && is_string($s['type'] ?? null) && is_string($s['label'] ?? null))), 'error' => ''];
+                $this->problems = [$r['error']];
+                $this->saved = $svc->listSaved();
+
+                return;
             }
 
             $this->form = ['theme' => (string) $request->getParameter('theme', ''), 'notes' => (string) $request->getParameter('notes', ''),
@@ -62,6 +70,7 @@ class storyActions extends AhgController
             }
             $this->result = ['ok' => true, 'theme' => $this->story->theme, 'story' => $this->story->body,
                 'objects' => $svc->storyRecords($this->story), 'sources' => $svc->storySources($this->story), 'error' => ''];
+            $this->problems = $svc->withheldReasons($this->story);
         }
         $this->saved = $svc->listSaved();
     }
@@ -75,14 +84,18 @@ class storyActions extends AhgController
         return $this->renderText(json_encode($this->service()->search((string) $request->getParameter('q', ''))));
     }
 
-    /** The public story page. A draft is shown to staff only. */
+    /** The public story page. A draft, or a story with a record no longer public, is shown to staff only. */
     public function executeShow($request)
     {
         $svc = $this->service();
         $this->story = $svc->findBySlug((string) $request->getParameter('slug'));
         $staff = $this->getUser()->isAuthenticated()
             && ($this->getUser()->hasCredential('editor') || $this->getUser()->hasCredential('administrator'));
-        if (!$this->story || ('published' !== $this->story->status && !$staff)) {
+        if (!$this->story) {
+            $this->forward404();
+        }
+        $this->withheld = $svc->withheldReasons($this->story);
+        if (!$staff && ('published' !== $this->story->status || $this->withheld)) {
             $this->forward404();
         }
         $this->records = $svc->storyRecords($this->story);

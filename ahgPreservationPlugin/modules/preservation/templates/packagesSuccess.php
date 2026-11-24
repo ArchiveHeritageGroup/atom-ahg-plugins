@@ -5,6 +5,15 @@
 
 <?php slot('content') ?>
 
+<?php // The preservation index redirects here, so this is the page staff land on. ?>
+<?php $fixityFailures = ahgPreservationPluginConfiguration::fixityFailureCount(); ?>
+<?php if ($fixityFailures > 0): ?>
+<div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+    <span><i class="fas fa-triangle-exclamation me-2" aria-hidden="true"></i><?php echo __('%1% file(s) failed their latest fixity check.', ['%1%' => number_format($fixityFailures)]); ?></span>
+    <a class="btn btn-sm btn-danger" href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog', 'status' => 'failures']); ?>"><?php echo __('View failures'); ?></a>
+</div>
+<?php endif; ?>
+
 <?php if (!empty($currentObjectId) && !empty($filterObjectSlug)): ?>
 <div class="mb-3">
     <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $filterObjectSlug]); ?>" class="btn btn-outline-secondary btn-sm">

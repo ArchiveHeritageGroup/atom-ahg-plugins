@@ -59,7 +59,7 @@ $typeLabel = ['note' => __('Notes'), 'url' => __('Web page'), 'upload' => __('Do
             <?php if ($story): ?><span class="badge <?php echo 'published' === $story->status ? 'bg-success' : 'bg-secondary' ?>"><?php echo 'published' === $story->status ? __('Published') : __('Draft') ?></span><?php endif ?></div>
           <div class="card-body">
             <div class="mb-3"><label class="form-label" for="st-title"><?php echo __('Title') ?></label>
-              <input class="form-control" id="st-title" name="title" maxlength="200" required value="<?php echo $e($story->title ?? $result['theme']) ?>"></div>
+              <input class="form-control" id="st-title" name="title" maxlength="200" required value="<?php echo $e($result['title'] ?? $story->title ?? $result['theme']) ?>"></div>
             <div class="mb-3"><label class="form-label" for="st-body"><?php echo __('Text') ?></label>
               <textarea class="form-control" id="st-body" name="body" rows="12" required><?php echo $e($result['story']) ?></textarea></div>
             <fieldset class="mb-3"><legend class="form-label fs-6"><?php echo __('Records linked from the story') ?></legend>

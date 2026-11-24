@@ -358,4 +358,20 @@ CREATE TABLE IF NOT EXISTS icip_access_log (
     INDEX idx_icip_access_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- 10. COMMUNITY STEWARDS
+-- ============================================
+-- Users who may open records restricted by their community. This link, not any
+-- recorded gender or initiated status, is how those restriction types are opened.
+CREATE TABLE IF NOT EXISTS icip_community_steward (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    community_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_by INT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_steward (community_id, user_id),
+    INDEX idx_cs_community (community_id),
+    INDEX idx_cs_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

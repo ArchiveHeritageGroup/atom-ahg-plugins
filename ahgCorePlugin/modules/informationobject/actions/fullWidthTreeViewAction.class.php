@@ -24,6 +24,9 @@
  */
 class InformationObjectFullWidthTreeViewAction extends DefaultFullTreeViewAction
 {
+    /** @var int[] descriptions hidden from this user */
+    private $hiddenIds = [];
+
     public function execute($request)
     {
         parent::execute($request);
@@ -43,6 +46,11 @@ class InformationObjectFullWidthTreeViewAction extends DefaultFullTreeViewAction
 
         // Check that this isn't the root
         if (!isset($this->resource->parent)) {
+            $this->forward404();
+        }
+
+        // A hidden record, or one under a hidden record, answers like a missing page.
+        if ($this->isHiddenFromUser()) {
             $this->forward404();
         }
 
@@ -118,6 +126,48 @@ class InformationObjectFullWidthTreeViewAction extends DefaultFullTreeViewAction
             ->getIndex('QubitInformationObject')
             ->search($query->getQuery(false, false))
             ->getTotalHits();
+    }
+
+    /**
+     * Same as the parent, but leaves out descriptions hidden from this user, so
+     * node lists, totals and child counts all agree.
+     */
+    protected function getElasticSearchQuery($term, $options = [])
+    {
+        $query = parent::getElasticSearchQuery($term, $options);
+        if (!empty($this->hiddenIds)) {
+            $query->queryBool->addMustNot(
+                new \Elastica\Query\Terms('_id', array_map('strval', $this->hiddenIds))
+            );
+        }
+
+        return $query;
+    }
+
+    /** Loads the hidden ids for this request. Fails closed. */
+    private function isHiddenFromUser(): bool
+    {
+        try {
+            $userId = $this->getUser()->isAuthenticated() ? (int) $this->getUser()->getAttribute('user_id') : null;
+            $this->hiddenIds = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ?: null);
+            if ([] === $this->hiddenIds) {
+                return false;
+            }
+            if (in_array((int) $this->resource->id, $this->hiddenIds, true)) {
+                return true;
+            }
+
+            return \Illuminate\Database\Capsule\Manager::table('information_object')
+                ->where('lft', '<', $this->resource->lft)
+                ->where('rgt', '>', $this->resource->rgt)
+                ->whereIn('id', $this->hiddenIds)
+                ->exists();
+        } catch (\Throwable $e) {
+            error_log('fullWidthTreeView.visibility_failed: '.$e->getMessage());
+
+            return true;
+        }
     }
 
     /**

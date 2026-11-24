@@ -17,6 +17,11 @@ $statusInfo = $statuses[$agreement->status] ?? ['label' => ucfirst($agreement->s
           <a href="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'edit', 'id' => $agreement->id]) ?>" class="btn btn-primary">
             <i class="fas fa-edit me-1"></i><?php echo __('Edit') ?>
           </a>
+          <?php if ($sf_user->hasCredential(['editor', 'administrator'], false)): ?>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAgreementModal">
+              <i class="fas fa-trash me-1" aria-hidden="true"></i><?php echo __('Delete') ?>
+            </button>
+          <?php endif ?>
           <a href="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'browse']) ?>" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-1"></i><?php echo __('Back') ?>
           </a>
@@ -24,6 +29,28 @@ $statusInfo = $statuses[$agreement->status] ?? ['label' => ucfirst($agreement->s
       </div>
     </div>
   </div>
+
+  <?php if ($sf_user->hasCredential(['editor', 'administrator'], false)): ?>
+    <div class="modal fade" id="deleteAgreementModal" tabindex="-1" aria-labelledby="deleteAgreementTitle" aria-hidden="true">
+      <div class="modal-dialog">
+        <form class="modal-content" method="post" action="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'delete', 'id' => $agreement->id]) ?>">
+          <?php echo \AtomFramework\Services\CsrfService::renderHiddenField() ?>
+          <div class="modal-header">
+            <h2 class="modal-title h5" id="deleteAgreementTitle"><?php echo __('Delete this agreement?') ?></h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php echo __('Close') ?>"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-1"><strong><?php echo esc_entities($agreement->title ?: $agreement->agreement_number) ?></strong></p>
+            <p class="mb-0"><?php echo __('This permanently removes the agreement with its rights, restrictions, documents, reminders and links. This cannot be undone.') ?></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
+            <button type="submit" class="btn btn-danger"><?php echo __('Delete agreement') ?></button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <?php endif ?>
 
   <div class="row">
     <div class="col-lg-8">

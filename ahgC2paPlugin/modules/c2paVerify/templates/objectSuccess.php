@@ -14,21 +14,21 @@ $downloadable = (bool) $sf_data->getRaw('downloadable');
 $h = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 
 $stateBadge = match ($state) {
-    'verified' => ['bg-success', 'fa-check-circle', __('Content credentials verified')],
+    'verified' => ['bg-success', 'fa-check-circle', __('AHG-signed provenance verified')],
     'invalid'  => ['bg-danger', 'fa-times-circle', __('Could not be verified')],
-    default    => ['bg-secondary', 'fa-minus-circle', __('No content credentials')],
+    default    => ['bg-secondary', 'fa-minus-circle', __('No AHG-signed provenance')],
 };
 $verifyUrl = url_for('@ahg_c2pa_object?id=' . (int) $object->id, true);
 $badgeSvg = url_for('@ahg_c2pa_object_badge?id=' . (int) $object->id, true);
 $badgeJson = url_for('@ahg_c2pa_object_badge_json?id=' . (int) $object->id, true);
-$imgTag = '<a href="' . $h($verifyUrl) . '"><img src="' . $h($badgeSvg) . '" alt="' . $h(__('Content Credentials')) . '"></a>';
+$imgTag = '<a href="' . $h($verifyUrl) . '"><img src="' . $h($badgeSvg) . '" alt="' . $h(__('AHG-signed provenance')) . '"></a>';
 ?>
 <?php slot('title'); ?>
-<h1><i class="fas fa-shield-alt me-2" aria-hidden="true"></i><?php echo __('Content credentials'); ?></h1>
+<h1><i class="fas fa-shield-alt me-2" aria-hidden="true"></i><?php echo __('AHG-signed provenance'); ?></h1>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
-<p class="text-muted"><?php echo __('This page checks one file\'s content credentials against its cryptographic signature, live, every time you load it. It follows the C2PA open standard so the result is independently verifiable.'); ?></p>
+<p class="text-muted"><?php echo __('This page checks one file\'s AHG-signed provenance against its Ed25519 signature, live, every time you load it. This is not a standard C2PA validation.'); ?></p>
 
 <div class="card mb-3">
   <div class="card-header"><i class="fas fa-file-alt me-2" aria-hidden="true"></i><?php echo __('File'); ?></div>
@@ -57,14 +57,14 @@ $imgTag = '<a href="' . $h($verifyUrl) . '"><img src="' . $h($badgeSvg) . '" alt
   <div class="card-body">
     <p class="mb-2"><span class="badge <?php echo $stateBadge[0]; ?> fs-5"><i class="fas <?php echo $stateBadge[1]; ?> me-1" aria-hidden="true"></i><?php echo $h($stateBadge[2]); ?></span></p>
     <?php if ($state === 'verified') { ?>
-      <p class="text-success mb-0"><i class="fas fa-lock me-1" aria-hidden="true"></i><?php echo __('This file carries signed content credentials, and they have not been altered since they were created. Every step below re-computes to the value pinned in the signed claim, and the Ed25519 signature checks out.'); ?></p>
+      <p class="text-success mb-0"><i class="fas fa-lock me-1" aria-hidden="true"></i><?php echo __('This file carries AHG-signed provenance, and it has not been altered since it was signed. Every step below re-computes to the value pinned in the signed claim, and the Ed25519 signature checks out.'); ?></p>
       <?php if (!empty($signer)) { ?>
         <p class="text-muted small mt-2 mb-0"><?php echo __('Signed under key'); ?> <code><?php echo $h($signer); ?></code><?php if (!empty($signedAt)) { ?> - <?php echo __('most recently on'); ?> <?php echo $h($signedAt); ?><?php } ?>.</p>
       <?php } ?>
     <?php } elseif ($state === 'invalid') { ?>
-      <p class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i><?php echo __('This file has content credentials, but one or more of them could not be verified. The signature does not match the recorded content - treat the affected steps below with caution.'); ?></p>
+      <p class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i><?php echo __('This file has AHG-signed provenance, but one or more entries could not be verified. The signature does not match the recorded content - treat the affected steps below with caution.'); ?></p>
     <?php } else { ?>
-      <p class="text-muted mb-0"><?php echo __('This file has no content credentials on record. That does not mean it is fake - only that no signed provenance has been recorded for it yet.'); ?></p>
+      <p class="text-muted mb-0"><?php echo __('This file has no AHG-signed provenance on record. That does not mean it is fake - only that no signed provenance has been recorded for it yet.'); ?></p>
     <?php } ?>
     <?php if (($counts['records'] ?? 0) > 0) { ?>
       <p class="text-muted small mt-2 mb-0">
@@ -76,10 +76,10 @@ $imgTag = '<a href="' . $h($verifyUrl) . '"><img src="' . $h($badgeSvg) . '" alt
 
 <?php if ($downloadable) { ?>
   <div class="card mb-3">
-    <div class="card-header"><i class="fas fa-download me-2" aria-hidden="true"></i><?php echo __('Take the credentials with you'); ?></div>
+    <div class="card-header"><i class="fas fa-download me-2" aria-hidden="true"></i><?php echo __('Take the provenance with you'); ?></div>
     <div class="card-body">
-      <p class="text-muted small mb-2"><?php echo __('Download a copy of this file with its content credentials attached, so its provenance can be verified anywhere - not just here. Where the file format supports it, the credentials are embedded into the file itself; otherwise they travel alongside it as a signed manifest.'); ?></p>
-      <a href="<?php echo url_for('@ahg_c2pa_object_download?id=' . (int) $object->id); ?>" class="btn btn-primary btn-sm" rel="nofollow"><i class="fas fa-shield-alt me-1" aria-hidden="true"></i><?php echo __('Download with content credentials'); ?></a>
+      <p class="text-muted small mb-2"><?php echo __('Download a copy of this file with its AHG-signed provenance attached. Where the file format supports it, the manifest is embedded in the file; otherwise it travels alongside it. Check it with the tool on this site, because outside C2PA validators will not accept it.'); ?></p>
+      <a href="<?php echo url_for('@ahg_c2pa_object_download?id=' . (int) $object->id); ?>" class="btn btn-primary btn-sm" rel="nofollow"><i class="fas fa-shield-alt me-1" aria-hidden="true"></i><?php echo __('Download with AHG-signed provenance'); ?></a>
       <a href="<?php echo url_for('@ahg_c2pa_object_credentials?id=' . (int) $object->id); ?>" class="btn btn-outline-secondary btn-sm" rel="nofollow"><i class="fas fa-file-code me-1" aria-hidden="true"></i><?php echo __('Signed manifest only'); ?></a>
     </div>
   </div>
@@ -136,7 +136,7 @@ $imgTag = '<a href="' . $h($verifyUrl) . '"><img src="' . $h($badgeSvg) . '" alt
 <div class="card mb-3">
   <div class="card-header"><i class="fas fa-code me-2" aria-hidden="true"></i><?php echo __('Embed this badge'); ?></div>
   <div class="card-body">
-    <p class="text-muted small"><?php echo __('Add this badge to any page so the authenticity of this file can be checked from there. The badge reflects the live status and links back here.'); ?></p>
+    <p class="text-muted small"><?php echo __('Add this badge to any page so the AHG signature on this file can be checked from there. The badge reflects the live status and links back here.'); ?></p>
     <p class="mb-2"><?php echo $imgTag; ?></p>
     <label class="form-label small mb-1" for="c2pa-embed-html"><?php echo __('HTML'); ?></label>
     <textarea id="c2pa-embed-html" class="form-control form-control-sm font-monospace mb-3" rows="2" readonly><?php echo $h($imgTag); ?></textarea>
@@ -149,5 +149,5 @@ $imgTag = '<a href="' . $h($verifyUrl) . '"><img src="' . $h($badgeSvg) . '" alt
   </div>
 </div>
 
-<p class="text-muted small"><i class="fas fa-info-circle me-1" aria-hidden="true"></i><?php echo __('Content credentials follow the C2PA open standard. Signatures are Ed25519 and re-checked live on every page load - nothing here is cached.'); ?></p>
+<p class="text-muted small"><i class="fas fa-info-circle me-1" aria-hidden="true"></i><?php echo __('This is AHG-signed provenance: a JSON manifest with an Ed25519 signature, re-checked live on every page load. It is not a standard C2PA credential, and outside C2PA validators will not accept it.'); ?></p>
 <?php end_slot(); ?>
