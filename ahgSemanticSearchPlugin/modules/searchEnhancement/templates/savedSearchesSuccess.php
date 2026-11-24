@@ -33,9 +33,10 @@
       <td><?php echo (int)$search->usage_count; ?></td>
       <td><?php echo $search->last_used_at ?: '-'; ?></td>
       <td>
-        <?php 
-          $params = json_decode($search->search_params, true) ?: [];
-          $runUrl = url_for('@glam_browse') . '?' . http_build_query($params);
+        <?php
+          // Run through the action: with output escaping on, search_params reaches
+          // the template HTML-escaped, json_decode failed and Run opened an empty browse.
+          $runUrl = url_for(['module' => 'searchEnhancement', 'action' => 'runSavedSearch', 'id' => (int) $search->id]);
         ?>
         <a href="<?php echo $runUrl; ?>" class="btn btn-primary btn-sm">
           <i class="fa fa-play"></i> <?php echo __('Run'); ?>

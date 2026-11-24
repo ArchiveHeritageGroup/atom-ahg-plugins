@@ -181,6 +181,15 @@ class IiifViewerService
     public function setCachedManifest(int $objectId, string $culture, string $json, ?int $pageCount = null, string $version = 'v2'): void
     {
         $cultureKey = $version === 'v2' ? $culture : "{$culture}:{$version}";
+
+        // A manifest built while the image server was missing or unreachable has
+        // no image service. Caching it left the record showing "No images" for
+        // 24 hours after the server was back. Such a manifest is served, not kept.
+        if (false === strpos($json, '"service"')
+            && DB::table('digital_object')->where('object_id', $objectId)->where('media_type_id', 136)->exists()) {
+            return;
+        }
+
         $signature = $this->buildCacheSignature($objectId, $cultureKey);
 
         DB::table('iiif_manifest_cache')->updateOrInsert(

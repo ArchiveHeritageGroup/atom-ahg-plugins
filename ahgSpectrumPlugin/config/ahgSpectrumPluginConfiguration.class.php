@@ -8,6 +8,9 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Remove this plugin's rows for a deleted description.
+        $this->dispatcher->connect('ahg.information_object.deleted', [$this, 'onDescriptionDeleted']);
+
 
         // Show where a record physically is, on the record itself.
         //
@@ -163,5 +166,29 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         $spectrumReports->any('spectrum_reports_conservation', '/spectrumReports/conservation', 'conservation');
         $spectrumReports->any('spectrum_reports_object_entry', '/spectrumReports/objectEntry', 'objectEntry');
         $spectrumReports->register($routing);
+    }
+
+    /**
+     * A description was deleted. Its procedure workflow state and notifications. Workflow history stays.
+     */
+    public function onDescriptionDeleted(sfEvent $event)
+    {
+        $id = (int) ($event['id'] ?? 0);
+        if ($id <= 0) {
+            return;
+        }
+        try {
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('spectrum_workflow_state')) {
+                \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')->where('record_id', $id)->delete();
+            }
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('spectrum_workflow_step_state')) {
+                \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_step_state')->where('record_id', $id)->delete();
+            }
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('spectrum_workflow_notification')) {
+                \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_notification')->where('record_id', $id)->delete();
+            }
+        } catch (\Throwable $e) {
+            error_log('ahgSpectrumPlugin.delete_cleanup_failed: '.$id.': '.$e->getMessage());
+        }
     }
 }

@@ -27,6 +27,7 @@
         </div>
         <div class="card-body">
             <form method="post">
+                <?php echo \AtomFramework\Services\CsrfService::renderHiddenField() ?>
                 <div class="mb-3">
                     <label class="form-label"><?php echo __('Manifest URI') ?></label>
                     <input type="url" class="form-control form-control-sm" name="manifest_uri" placeholder="https://...">
@@ -57,6 +58,7 @@
         </div>
         <div class="card-body">
             <form method="post" id="addItemsForm">
+                <?php echo \AtomFramework\Services\CsrfService::renderHiddenField() ?>
                 <div class="mb-3">
                     <label class="form-label"><?php echo __('Search for objects') ?></label>
                     <input type="text" class="form-control" id="objectSearchInput" 

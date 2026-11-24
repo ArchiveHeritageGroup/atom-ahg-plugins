@@ -229,6 +229,13 @@ $hasCataloging = !empty($museumData['cataloger_name']) || !empty($museumData['ca
 <?php slot('context-menu'); ?>
   <nav>
     <?php echo get_partial('informationobject/actionIcons', ['resource' => $resource]); ?>
+    <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin') && $sf_user->hasCredential(['editor', 'administrator'], false) && !empty($resource->slug)): ?>
+      <section class="card mb-3">
+        <div class="card-body py-2">
+          <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'objectEntry', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-import me-1" aria-hidden="true"></i><?php echo __('Object entry'); ?></a>
+        </div>
+      </section>
+    <?php endif; ?>
     <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
     <?php $sidebar = true; include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php'); ?>
     <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>

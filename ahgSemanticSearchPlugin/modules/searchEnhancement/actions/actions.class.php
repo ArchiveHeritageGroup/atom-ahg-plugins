@@ -97,11 +97,13 @@ class searchEnhancementActions extends AhgController
     {
         $id = (int)$request->getParameter('id');
         $search = \Illuminate\Database\Capsule\Manager::table('saved_search')->where('id', $id)->first();
-        
-        if (!$search) {
+
+        // A saved search is its owner's, unless it was shared.
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        if (!$search || ((int) $search->user_id !== $userId && empty($search->is_public) && empty($search->is_global))) {
             $this->forward404();
         }
-        
+
         // Update usage count
         \Illuminate\Database\Capsule\Manager::table('saved_search')
             ->where('id', $id)

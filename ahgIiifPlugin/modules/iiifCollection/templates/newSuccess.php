@@ -21,6 +21,7 @@
 <?php slot('content') ?>
 <div class="iiif-collection-form">
     <form method="post" action="<?php echo url_for('@iiif_collection_create') ?>">
+        <?php echo \AtomFramework\Services\CsrfService::renderHiddenField() ?>
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i><?php echo __('Collection Details') ?></h5>

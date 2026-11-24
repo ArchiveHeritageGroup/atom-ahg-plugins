@@ -220,12 +220,15 @@ class ricManageActions extends AhgController
         }
 
         if (!$this->canRead($objectId)) {
+            // A real 404, not a 200 with "404" in the body.
+            $this->getResponse()->setStatusCode(404);
+
             return $this->json(['success' => false, 'error' => 'Not found'], 404);
         }
 
         $culture = $this->getUser()->getCulture() ?: 'en';
         $svc = new \AhgRicManage\Services\RicManageService();
-        $doc = $svc->exportRicO($objectId, $culture);
+        $doc = $svc->exportRicO($objectId, $culture, fn (int $id) => $this->canRead($id));
 
         $this->getResponse()->setContentType('application/ld+json; charset=utf-8');
 

@@ -441,6 +441,8 @@ class ahgCCOVocabularyService
         try {
             $context = stream_context_create([
                 'http' => [
+                    // Getty answers 403 to requests with no User-Agent.
+                    'user_agent' => 'AHG-Extensions-for-AtoM (+https://www.atom-extensions.com)',
                     'timeout' => 10,
                     'header' => 'Accept: application/sparql-results+json',
                 ],

@@ -33,6 +33,101 @@ class iiifCollectionActions extends AhgController
         $this->collectionService = new \AtoM\Framework\Services\IiifCollectionService();
     }
 
+    /** Editors and administrators may create collections and see private ones. */
+    protected function isManager(): bool
+    {
+        $user = $this->getUser();
+
+        return $user->isAuthenticated() && $user->hasCredential(['editor', 'administrator'], false);
+    }
+
+    /** Administrators manage every collection; editors only the ones they created. */
+    protected function canManage($collection): bool
+    {
+        $user = $this->getUser();
+        if (!$collection || !$user->isAuthenticated()) {
+            return false;
+        }
+        if ($user->hasCredential('administrator')) {
+            return true;
+        }
+
+        return $user->hasCredential('editor')
+            && null !== $collection->created_by
+            && (int) $collection->created_by === (int) $user->getAttribute('user_id');
+    }
+
+    /** Signed-out users go to the login page; everyone else not allowed is refused. */
+    protected function requireManage($allowed): void
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+        if (!$allowed) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    /**
+     * Descriptions among these ids that this user may not see: restricted ones,
+     * and drafts for anyone who is not staff. Null when it cannot be worked out,
+     * so callers hide every description rather than guess.
+     *
+     * @return array<int,bool>|null
+     */
+    protected function hiddenObjectIds(array $ids): ?array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ([] === $ids) {
+            return [];
+        }
+        try {
+            $user = $this->getUser();
+            $userId = $user->isAuthenticated() ? (int) $user->getAttribute('user_id') : null;
+            $hidden = array_flip(array_map('intval', \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($userId ?: null)));
+            if (!$this->isManager()) {
+                $drafts = \Illuminate\Database\Capsule\Manager::table('status')
+                    ->whereIn('object_id', $ids)->where('type_id', 158)->where('status_id', '<>', 160)
+                    ->pluck('object_id');
+                foreach ($drafts as $d) {
+                    $hidden[(int) $d] = true;
+                }
+            }
+
+            return $hidden;
+        } catch (\Throwable $e) {
+            error_log('iiifCollection.visibility_failed: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    /** Leaves out items and private subcollections this user may not see. */
+    protected function visibleCollection($collection): void
+    {
+        $items = (array) ($collection->items ?? []);
+        $hidden = $this->hiddenObjectIds(array_map(static fn ($i) => $i->object_id ?? 0, $items));
+        $collection->items = array_values(array_filter($items, static function ($i) use ($hidden) {
+            return empty($i->object_id) || (null !== $hidden && !isset($hidden[(int) $i->object_id]));
+        }));
+        if (isset($collection->subcollections) && !$this->isManager()) {
+            $collection->subcollections = array_values(array_filter((array) $collection->subcollections, static fn ($c) => !empty($c->is_public)));
+        }
+    }
+
+    /** Changes only arrive as a POST carrying this site's token. */
+    protected function requirePostToken($request): void
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+        $token = \AtomFramework\Services\CsrfService::getTokenFromRequest();
+        if (null === $token || !\AtomFramework\Services\CsrfService::validateToken($token)) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
     /**
      * List all collections
      */
@@ -42,10 +137,21 @@ class iiifCollectionActions extends AhgController
         
         $parentId = $request->getParameter('parent_id');
         $this->parentId = $parentId ? (int)$parentId : null;
-        $this->collections = $this->collectionService->getAllCollections($this->parentId);
-        
+        // Private collections are listed for editors and administrators only.
+        $this->isManager = $this->isManager();
+        $this->collections = $this->collectionService->getAllCollections($this->parentId, !$this->isManager);
+        $this->manageIds = [];
+        foreach ($this->collections as $c) {
+            if ($this->canManage($c)) {
+                $this->manageIds[] = (int) $c->id;
+            }
+        }
+
         if ($this->parentId) {
             $this->parentCollection = $this->collectionService->getCollection($this->parentId);
+            if ($this->parentCollection && !$this->parentCollection->is_public && !$this->isManager) {
+                $this->forward404();
+            }
         }
         
         $this->response->setTitle($this->context->i18n->__('IIIF Collections'));
@@ -60,11 +166,15 @@ class iiifCollectionActions extends AhgController
         
         $identifier = $request->getParameter('slug') ?: $request->getParameter('id');
         $this->collection = $this->collectionService->getCollection($identifier);
-        
-        if (!$this->collection) {
+
+        // A private collection answers like a missing one, except to staff.
+        if (!$this->collection || (!$this->collection->is_public && !$this->isManager())) {
             $this->forward404();
         }
-        
+        $this->canManage = $this->canManage($this->collection);
+        $this->isManager = $this->isManager();
+        $this->visibleCollection($this->collection);
+
         // Get breadcrumb trail
         $this->breadcrumbs = $this->getBreadcrumbs($this->collection);
         
@@ -76,9 +186,7 @@ class iiifCollectionActions extends AhgController
      */
     public function executeNew($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect(['module' => 'user', 'action' => 'login']);
-        }
+        $this->requireManage($this->isManager());
         
         $this->initService();
         $this->parentId = $request->getParameter('parent_id');
@@ -92,15 +200,16 @@ class iiifCollectionActions extends AhgController
      */
     public function executeCreate($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect(['module' => 'user', 'action' => 'login']);
-        }
-        
-        if (!$request->isMethod('post')) {
-            $this->redirect('@iiif_collection_new');
-        }
+        $this->requireManage($this->isManager());
+        $this->requirePostToken($request);
 
         $this->initService();
+
+        // A subcollection goes only under a collection this user manages.
+        $parent = $request->getParameter('parent_id');
+        if ($parent && !$this->canManage($this->collectionService->getCollection((int) $parent))) {
+            $this->forward('admin', 'secure');
+        }
 
         $data = [
             'name' => $request->getParameter('name'),
@@ -122,18 +231,15 @@ class iiifCollectionActions extends AhgController
      */
     public function executeEdit($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect(['module' => 'user', 'action' => 'login']);
-        }
-        
         $this->initService();
-        
+
         $id = $request->getParameter('id');
         $this->collection = $this->collectionService->getCollection($id);
-        
+
         if (!$this->collection) {
             $this->forward404();
         }
+        $this->requireManage($this->canManage($this->collection));
         
         $this->allCollections = $this->collectionService->getAllCollections();
         
@@ -145,17 +251,21 @@ class iiifCollectionActions extends AhgController
      */
     public function executeUpdate($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect(['module' => 'user', 'action' => 'login']);
-        }
-        
-        if (!$request->isMethod('post')) {
-            $this->redirect('@iiif_collection_index');
-        }
-        
         $this->initService();
-        
-        $id = $request->getParameter('id');
+
+        $id = (int) $request->getParameter('id');
+        $collection = $this->collectionService->getCollection($id);
+        if (!$collection) {
+            $this->forward404();
+        }
+        $this->requireManage($this->canManage($collection));
+        $this->requirePostToken($request);
+
+        $parent = $request->getParameter('parent_id');
+        if ($parent && (int) $parent !== (int) $collection->parent_id
+            && !$this->canManage($this->collectionService->getCollection((int) $parent))) {
+            $this->forward('admin', 'secure');
+        }
         
         $data = [
             'name' => $request->getParameter('name'),
@@ -176,15 +286,16 @@ class iiifCollectionActions extends AhgController
      */
     public function executeDelete($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect(['module' => 'user', 'action' => 'login']);
-        }
-        
         $this->initService();
-        
-        $id = $request->getParameter('id');
+
+        $id = (int) $request->getParameter('id');
         $collection = $this->collectionService->getCollection($id);
-        $parentId = $collection ? $collection->parent_id : null;
+        if (!$collection) {
+            $this->forward404();
+        }
+        $this->requireManage($this->canManage($collection));
+        $this->requirePostToken($request);
+        $parentId = $collection->parent_id;
         
         $this->collectionService->deleteCollection($id);
         
@@ -199,20 +310,18 @@ class iiifCollectionActions extends AhgController
      */
     public function executeAddItems($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect(['module' => 'user', 'action' => 'login']);
-        }
-        
         $this->initService();
-        
-        $id = $request->getParameter('id');
+
+        $id = (int) $request->getParameter('id');
         $this->collection = $this->collectionService->getCollection($id);
-        
+
         if (!$this->collection) {
             $this->forward404();
         }
-        
+        $this->requireManage($this->canManage($this->collection));
+
         if ($request->isMethod('post')) {
+            $this->requirePostToken($request);
             $objectIds = $request->getParameter('object_ids', []);
             $includeChildren = $request->getParameter('include_children', []);
             $manifestUri = $request->getParameter('manifest_uri');
@@ -260,15 +369,24 @@ class iiifCollectionActions extends AhgController
      */
     public function executeRemoveItem($request)
     {
-        if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect(['module' => 'user', 'action' => 'login']);
-        }
-        
         $this->initService();
-        
-        $itemId = $request->getParameter('item_id');
-        $collectionId = $request->getParameter('collection_id');
-        
+
+        $itemId = (int) $request->getParameter('item_id');
+        $collectionId = (int) $request->getParameter('collection_id');
+        $collection = $this->collectionService->getCollection($collectionId);
+        if (!$collection) {
+            $this->forward404();
+        }
+        $this->requireManage($this->canManage($collection));
+        $this->requirePostToken($request);
+
+        // The item must belong to the collection the user may manage.
+        $belongs = \Illuminate\Database\Capsule\Manager::table('iiif_collection_item')
+            ->where('id', $itemId)->where('collection_id', $collectionId)->exists();
+        if (!$belongs) {
+            $this->forward404();
+        }
+
         $this->collectionService->removeItem($itemId);
         
         $this->redirect('@iiif_collection_view?id=' . $collectionId);
@@ -280,13 +398,19 @@ class iiifCollectionActions extends AhgController
     public function executeReorder($request)
     {
         $this->initService();
-        
-        if (!$request->isMethod('post')) {
-            return $this->renderText(json_encode(['error' => 'POST required']));
+        $this->getResponse()->setContentType('application/json');
+
+        $collectionId = (int) $request->getParameter('collection_id');
+        $token = \AtomFramework\Services\CsrfService::getTokenFromRequest();
+        if (!$request->isMethod('post')
+            || null === $token || !\AtomFramework\Services\CsrfService::validateToken($token)
+            || !$this->canManage($this->collectionService->getCollection($collectionId))) {
+            $this->getResponse()->setStatusCode(403);
+
+            return $this->renderText(json_encode(['error' => 'Forbidden']));
         }
-        
-        $collectionId = $request->getParameter('collection_id');
-        $itemIds = $request->getParameter('item_ids', []);
+
+        $itemIds = array_map('intval', (array) $request->getParameter('item_ids', []));
         
         $this->collectionService->reorderItems($collectionId, $itemIds);
         
@@ -306,12 +430,18 @@ class iiifCollectionActions extends AhgController
         try {
             $collection = $this->collectionService->getCollection($identifier);
             
-            if (!$collection || (!$collection->is_public && !$this->getUser()->isAuthenticated())) {
+            if (!$collection || (!$collection->is_public && !$this->isManager())) {
                 $this->getResponse()->setStatusCode(404);
                 return $this->renderText(json_encode(['error' => 'Collection not found']));
             }
             
-            $json = $this->collectionService->generateCollectionJson($collection->id);
+            $hidden = $this->hiddenObjectIds(array_map(static fn ($i) => $i->object_id ?? 0, (array) ($collection->items ?? [])));
+            $manager = $this->isManager();
+            $json = $this->collectionService->generateCollectionJson(
+                $collection->id,
+                static fn ($i) => empty($i->object_id) || (null !== $hidden && !isset($hidden[(int) $i->object_id])),
+                static fn ($c) => $manager || !empty($c->is_public)
+            );
             
             $this->getResponse()->setContentType('application/ld+json');
             $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
@@ -402,6 +532,15 @@ class iiifCollectionActions extends AhgController
      */
     public function executeAutocomplete($request)
     {
+        // It searches every description, drafts and restricted ones included,
+        // so it serves only the staff who build collections.
+        if (!$this->isManager()) {
+            $this->getResponse()->setStatusCode(403);
+            $this->getResponse()->setContentType('application/json');
+
+            return $this->renderText(json_encode(['results' => []]));
+        }
+
         $this->initService();
 
         $query = $request->getParameter('q', '');

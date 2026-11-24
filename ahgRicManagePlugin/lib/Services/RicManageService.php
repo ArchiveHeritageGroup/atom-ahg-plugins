@@ -304,89 +304,149 @@ class RicManageService
     /**
      * Serialise a record to RiC-O JSON-LD from MySQL (record + meta + relations).
      *
+     * Valid JSON-LD with an inline context, so any RDF reader gets triples. The
+     * record and every entity it points to are nodes in one @graph: the holder
+     * as a rico:CorporateBody, name access points as agents, places, subjects
+     * and documentary form types, and typed relations as real RiC-O predicates.
+     *
+     * @param callable|null $canSee given a related description id, false leaves the relation out
+     *
      * @return array<string,mixed>
      */
-    public function exportRicO(int $objectId, string $culture = 'en'): array
+    public function exportRicO(int $objectId, string $culture = 'en', ?callable $canSee = null): array
     {
         $meta = $this->getRecordMeta($objectId);
         $baseUrl = rtrim((string) \sfConfig::get('app_siteBaseUrl', ''), '/');
-        $slug = $this->ioSlug($objectId);
-        $id = $slug ? "{$baseUrl}/{$slug}" : "{$baseUrl}/informationobject/{$objectId}";
+        $uri = function (int $id, string $kind = 'informationobject') use ($baseUrl): string {
+            $slug = $this->ioSlug($id);
 
-        $doc = [
-            '@context' => 'https://www.ica.org/standards/RiC/ontology',
-            '@id' => $id,
-            '@type' => 'rico:' . $meta['entity_type'],
-            'rico:name' => $this->ioTitle($objectId, $culture),
+            return $slug ? "{$baseUrl}/{$slug}" : "{$baseUrl}/{$kind}/{$id}";
+        };
+
+        $record = [
+            '@id' => $uri($objectId),
+            '@type' => 'rico:'.$meta['entity_type'],
+            'rico:title' => $this->ioTitle($objectId, $culture),
         ];
+        $nodes = [];
+        $add = function (array $node) use (&$nodes): array {
+            $nodes[$node['@id']] = $node;
+
+            return ['@id' => $node['@id']];
+        };
 
         foreach (self::PROPERTY_PREDICATES as $key => $predicate) {
             if (!empty($meta['properties'][$key])) {
-                $doc[$predicate] = $meta['properties'][$key];
+                $record[$predicate] = $meta['properties'][$key];
             }
         }
 
-        // Identifier / scope / provenance are expressed in RiC-O from the record's
-        // own ISAD(G) fields (Identifier, Scope and content, Archival history)
-        // rather than from a duplicate RiC field. Same for the other archival
-        // fields that map to entity-mediated RiC-O constructs below.
+        // Identifier, scope and history come from the record's own ISAD(G) fields.
         $io = DB::table('information_object as io')
             ->leftJoin('information_object_i18n as i', function ($j) use ($culture) {
                 $j->on('i.id', '=', 'io.id')->where('i.culture', '=', $culture);
             })
             ->where('io.id', $objectId)
-            ->select('io.identifier', 'i.scope_and_content', 'i.archival_history')
+            ->select('io.identifier', 'io.repository_id', 'i.scope_and_content', 'i.archival_history')
             ->first();
         if ($io) {
             if (!empty($io->identifier)) {
-                $doc['rico:hasOrHadIdentifier'] = $io->identifier;
+                $record['rico:identifier'] = $io->identifier;
             }
             if (!empty($io->scope_and_content)) {
-                $doc['rico:scope'] = $io->scope_and_content;
+                $record['rico:scopeAndContent'] = $io->scope_and_content;
             }
             if (!empty($io->archival_history)) {
-                $doc['rico:history'] = $io->archival_history;
+                $record['rico:history'] = $io->archival_history;
+            }
+            $holder = $this->getRepositoryName($objectId, $culture);
+            if (!empty($io->repository_id) && null !== $holder) {
+                $record['rico:hasOrHadHolder'] = $add([
+                    '@id' => $uri((int) $io->repository_id, 'repository'),
+                    '@type' => 'rico:CorporateBody',
+                    'rico:name' => $holder,
+                ]);
             }
         }
 
-        // Subjects -> rico:hasOrHadSubject, repository -> rico:hasOrHadHolder,
-        // places -> rico:hasOrHadSpatialCoverage. Derived from the record's
-        // existing access points / repository so the RiC-O output is complete.
-        $subjects = $this->getAccessPointNames($objectId, self::TAXONOMY_SUBJECT, $culture);
-        if (!empty($subjects)) {
-            $doc['rico:hasOrHadSubject'] = $subjects;
+        // Access points become linked entities, not text.
+        $terms = [
+            self::TAXONOMY_SUBJECT => ['rico:hasOrHadSubject', 'skos:Concept', 'skos:prefLabel'],
+            self::TAXONOMY_PLACE => ['rico:hasOrHadSpatialCoverage', 'rico:Place', 'rico:name'],
+            self::TAXONOMY_GENRE => ['rico:hasDocumentaryFormType', 'rico:DocumentaryFormType', 'rico:name'],
+        ];
+        foreach ($terms as $taxonomyId => [$predicate, $type, $label]) {
+            foreach ($this->getAccessPointTerms($objectId, $taxonomyId, $culture) as $t) {
+                $record[$predicate][] = $add(['@id' => $uri((int) $t->id, 'term'), '@type' => $type, $label => (string) $t->name]);
+            }
         }
-        $places = $this->getAccessPointNames($objectId, self::TAXONOMY_PLACE, $culture);
-        if (!empty($places)) {
-            $doc['rico:hasOrHadSpatialCoverage'] = $places;
-        }
-        $genres = $this->getAccessPointNames($objectId, self::TAXONOMY_GENRE, $culture);
-        if (!empty($genres)) {
-            $doc['rico:hasDocumentaryFormType'] = $genres;
-        }
-        $names = $this->getNameAccessPointNames($objectId, $culture);
-        if (!empty($names)) {
-            $doc['rico:isAssociatedWith'] = $names;
-        }
-        $holder = $this->getRepositoryName($objectId, $culture);
-        if (null !== $holder) {
-            $doc['rico:hasOrHadHolder'] = $holder;
+        $agentTypes = [131 => 'rico:CorporateBody', 132 => 'rico:Person', 133 => 'rico:Family'];
+        foreach ($this->getNameAccessPointAgents($objectId, $culture) as $a) {
+            $record['rico:isAssociatedWith'][] = $add([
+                '@id' => $uri((int) $a->id, 'actor'),
+                '@type' => $agentTypes[(int) $a->entity_type_id] ?? 'rico:Agent',
+                'rico:name' => (string) $a->name,
+            ]);
         }
 
-        $relations = [];
-        foreach ($this->getTypedRelations($objectId, $culture) as $rel) {
-            $targetSlug = $rel['target_slug'];
-            $relations[] = [
-                'predicate' => $rel['predicate'],
-                'target' => $targetSlug ? "{$baseUrl}/{$targetSlug}" : "{$baseUrl}/informationobject/{$rel['target_id']}",
-                'targetName' => $rel['target_title'],
-            ];
-        }
-        if (!empty($relations)) {
-            $doc['rico:relations'] = $relations;
+        // Typed relations, as the RiC-O predicates they are. A related
+        // description the caller may not see is left out entirely.
+        $typed = DB::schema()->hasTable('ric_relation_meta') ? $this->getTypedRelations($objectId, $culture) : [];
+        foreach ($typed as $rel) {
+            $targetId = (int) $rel['target_id'];
+            if ($canSee && !$canSee($targetId)) {
+                continue;
+            }
+            $predicate = (string) $rel['predicate'];
+            if ('' === $predicate || 0 !== strpos($predicate, 'rico:')) {
+                continue;
+            }
+            $targetType = DB::table('ric_record_meta')->where('object_id', $targetId)->value('entity_type');
+            $record[$predicate][] = $add([
+                '@id' => $uri($targetId),
+                '@type' => 'rico:'.($targetType ?: 'RecordResource'),
+                'rdfs:label' => (string) $rel['target_title'],
+            ]);
         }
 
-        return $doc;
+        return [
+            '@context' => [
+                'rico' => 'https://www.ica.org/standards/RiC/ontology#',
+                'rdfs' => 'http://www.w3.org/2000/01/rdf-schema#',
+                'skos' => 'http://www.w3.org/2004/02/skos/core#',
+            ],
+            '@graph' => array_values(array_merge([$record['@id'] => $record], $nodes)),
+        ];
+    }
+
+    /** Access-point terms (id and name) for a record in a taxonomy. @return array<int,object> */
+    public function getAccessPointTerms(int $objectId, int $taxonomyId, string $culture = 'en'): array
+    {
+        return DB::table('object_term_relation as otr')
+            ->join('term as t', 't.id', '=', 'otr.term_id')
+            ->leftJoin('term_i18n as ti', function ($j) use ($culture) {
+                $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', $culture);
+            })
+            ->where('otr.object_id', $objectId)
+            ->where('t.taxonomy_id', $taxonomyId)
+            ->whereNotNull('ti.name')
+            ->get(['t.id', 'ti.name'])
+            ->all();
+    }
+
+    /** Name access points (id, name, entity type). @return array<int,object> */
+    public function getNameAccessPointAgents(int $objectId, string $culture = 'en'): array
+    {
+        return DB::table('relation as r')
+            ->join('actor as a', 'a.id', '=', 'r.object_id')
+            ->leftJoin('actor_i18n as ai', function ($j) use ($culture) {
+                $j->on('ai.id', '=', 'r.object_id')->where('ai.culture', '=', $culture);
+            })
+            ->where('r.subject_id', $objectId)
+            ->where('r.type_id', self::RELATION_NAME_ACCESS_POINT)
+            ->whereNotNull('ai.authorized_form_of_name')
+            ->get(['a.id', 'a.entity_type_id', 'ai.authorized_form_of_name as name'])
+            ->all();
     }
 
     /** Access-point taxonomies + the name-access-point relation type. */

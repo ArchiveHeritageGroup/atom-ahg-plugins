@@ -28,6 +28,9 @@ class ahgExhibitionPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Remove this plugin's rows for a deleted description.
+        $this->dispatcher->connect('ahg.information_object.deleted', [$this, 'onDescriptionDeleted']);
+
         // Contribute this plugin's navigation entry.
         //
         // Registered here rather than named by a theme, so the entry exists
@@ -102,5 +105,23 @@ class ahgExhibitionPluginConfiguration extends sfPluginConfiguration
         $router->any('exhibition_dashboard', '/exhibition/dashboard', 'dashboard');
 
         $router->register($event->getSubject());
+    }
+
+    /**
+     * A description was deleted. Its exhibition links. Visit events stay as history.
+     */
+    public function onDescriptionDeleted(sfEvent $event)
+    {
+        $id = (int) ($event['id'] ?? 0);
+        if ($id <= 0) {
+            return;
+        }
+        try {
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('exhibition_object')) {
+                \Illuminate\Database\Capsule\Manager::table('exhibition_object')->where('information_object_id', $id)->delete();
+            }
+        } catch (\Throwable $e) {
+            error_log('ahgExhibitionPlugin.delete_cleanup_failed: '.$id.': '.$e->getMessage());
+        }
     }
 }

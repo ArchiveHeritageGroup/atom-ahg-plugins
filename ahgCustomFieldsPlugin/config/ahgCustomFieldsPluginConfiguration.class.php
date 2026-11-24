@@ -7,6 +7,9 @@ class ahgCustomFieldsPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Remove this plugin's rows for a deleted description.
+        $this->dispatcher->connect('ahg.information_object.deleted', [$this, 'onDescriptionDeleted']);
+
         // Contribute this plugin's navigation entry.
         //
         // Registered here rather than named by a theme, so the entry exists
@@ -89,5 +92,23 @@ class ahgCustomFieldsPluginConfiguration extends sfPluginConfiguration
 
             return false;
         });
+    }
+
+    /**
+     * A description was deleted. Its custom field values.
+     */
+    public function onDescriptionDeleted(sfEvent $event)
+    {
+        $id = (int) ($event['id'] ?? 0);
+        if ($id <= 0) {
+            return;
+        }
+        try {
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('custom_field_value')) {
+                \Illuminate\Database\Capsule\Manager::table('custom_field_value')->where('object_id', $id)->delete();
+            }
+        } catch (\Throwable $e) {
+            error_log('ahgCustomFieldsPlugin.delete_cleanup_failed: '.$id.': '.$e->getMessage());
+        }
     }
 }

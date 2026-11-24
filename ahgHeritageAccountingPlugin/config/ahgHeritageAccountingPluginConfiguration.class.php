@@ -6,6 +6,9 @@ class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
 
     public function initialize(): void
     {
+        // Remove this plugin's rows for a deleted description.
+        $this->dispatcher->connect('ahg.information_object.deleted', [$this, 'onDescriptionDeleted']);
+
         // Menu entry, registered here so it exists exactly while this plugin is
         // enabled and appears on any theme (catalog #292).
         if (class_exists('AhgNav')) {
@@ -126,5 +129,26 @@ class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
         $api->any('heritage_api_summary', '/api/heritage/summary', 'summary');
 
         $api->register($routing);
+    }
+
+    /**
+     * A description was deleted. The asset stays in the asset register for its financial history; only its link to the deleted description is cleared.
+     */
+    public function onDescriptionDeleted(sfEvent $event)
+    {
+        $id = (int) ($event['id'] ?? 0);
+        if ($id <= 0) {
+            return;
+        }
+        try {
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('heritage_asset')) {
+                \Illuminate\Database\Capsule\Manager::table('heritage_asset')->where('information_object_id', $id)->update(['information_object_id' => null]);
+            }
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('heritage_asset')) {
+                \Illuminate\Database\Capsule\Manager::table('heritage_asset')->where('object_id', $id)->update(['object_id' => null]);
+            }
+        } catch (\Throwable $e) {
+            error_log('ahgHeritageAccountingPlugin.delete_cleanup_failed: '.$id.': '.$e->getMessage());
+        }
     }
 }

@@ -41,6 +41,9 @@ class ahgLoanPluginConfiguration extends sfPluginConfiguration
      */
     public function initialize()
     {
+        // Remove this plugin's rows for a deleted description.
+        $this->dispatcher->connect('ahg.information_object.deleted', [$this, 'onDescriptionDeleted']);
+
         // Menu entry, registered here so it exists exactly while this plugin is
         // enabled and appears on any theme (catalog #292).
         if (class_exists('AhgNav')) {
@@ -142,5 +145,26 @@ class ahgLoanPluginConfiguration extends sfPluginConfiguration
     public static function isSectorSupported(string $sector): bool
     {
         return isset(self::SECTORS[$sector]);
+    }
+
+    /**
+     * A description was deleted. Its loan links. Condition reports stay: they are records in their own right.
+     */
+    public function onDescriptionDeleted(sfEvent $event)
+    {
+        $id = (int) ($event['id'] ?? 0);
+        if ($id <= 0) {
+            return;
+        }
+        try {
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_loan_object')) {
+                \Illuminate\Database\Capsule\Manager::table('ahg_loan_object')->where('information_object_id', $id)->delete();
+            }
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('loan_object')) {
+                \Illuminate\Database\Capsule\Manager::table('loan_object')->where('information_object_id', $id)->delete();
+            }
+        } catch (\Throwable $e) {
+            error_log('ahgLoanPlugin.delete_cleanup_failed: '.$id.': '.$e->getMessage());
+        }
     }
 }

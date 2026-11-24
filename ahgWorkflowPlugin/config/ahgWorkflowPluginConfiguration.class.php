@@ -13,6 +13,9 @@ class ahgWorkflowPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Remove this plugin's rows for a deleted description.
+        $this->dispatcher->connect('ahg.information_object.deleted', [$this, 'onDescriptionDeleted']);
+
 
         // Navigation entry, contributed by the plugin rather than named by the
         // theme.
@@ -135,5 +138,23 @@ class ahgWorkflowPluginConfiguration extends sfPluginConfiguration
         $router->any('workflow_api_sla', '/workflow/api/sla', 'apiSlaStatus');
 
         $router->register($event->getSubject());
+    }
+
+    /**
+     * A description was deleted. Its open workflow tasks. Workflow history stays.
+     */
+    public function onDescriptionDeleted(sfEvent $event)
+    {
+        $id = (int) ($event['id'] ?? 0);
+        if ($id <= 0) {
+            return;
+        }
+        try {
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_workflow_task')) {
+                \Illuminate\Database\Capsule\Manager::table('ahg_workflow_task')->where('object_id', $id)->delete();
+            }
+        } catch (\Throwable $e) {
+            error_log('ahgWorkflowPlugin.delete_cleanup_failed: '.$id.': '.$e->getMessage());
+        }
     }
 }

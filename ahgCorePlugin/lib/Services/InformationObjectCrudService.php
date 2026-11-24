@@ -679,7 +679,25 @@ class InformationObjectCrudService
 
             // 10. Delete slug + object
             ObjectService::deleteObject($id);
+
+            // 11. Its physical location rows (framework table, no foreign key).
+            if (DB::schema()->hasTable('information_object_physical_location')) {
+                DB::table('information_object_physical_location')->where('information_object_id', $id)->delete();
+            }
         });
+
+        // Plugins keep their own rows about a description (loans, exhibitions,
+        // workflow, watermarks, custom fields). None has a foreign key, so each
+        // listens for this and removes its own: no plugin touches another's data.
+        try {
+            if (\sfContext::hasInstance()) {
+                \sfContext::getInstance()->getEventDispatcher()->notify(
+                    new \sfEvent(null, 'ahg.information_object.deleted', ['id' => $id])
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('io.delete_cleanup_failed: '.$id.': '.$e->getMessage());
+        }
     }
 
     // ─── Dropdown helpers ──────────────────────────────────────────────

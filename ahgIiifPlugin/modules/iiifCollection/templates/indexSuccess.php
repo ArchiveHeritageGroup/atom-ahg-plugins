@@ -16,7 +16,7 @@
         </div>
         <div class="card-body">
             <p class="text-muted"><?php echo __('Organize and group related IIIF manifests into collections for easy browsing and discovery.') ?></p>
-            <?php if ($sf_user->isAuthenticated()): ?>
+            <?php if ($isManager): ?>
             <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'new', 'parent_id' => $parentId]) ?>" class="btn btn-success w-100">
                 <i class="fas fa-plus me-2"></i><?php echo __('Create Collection') ?>
             </a>
@@ -52,7 +52,7 @@
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
         <?php echo __('No collections found.') ?>
-        <?php if ($sf_user->isAuthenticated()): ?>
+        <?php if ($isManager): ?>
         <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'new']) ?>"><?php echo __('Create your first collection') ?></a>
         <?php endif ?>
     </div>
@@ -86,7 +86,7 @@
                         <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'manifest', 'slug' => $collection->slug]) ?>" class="btn btn-outline-info" title="<?php echo __('IIIF Manifest') ?>" target="_blank">
                             <i class="fas fa-code"></i>
                         </a>
-                        <?php if ($sf_user->isAuthenticated()): ?>
+                        <?php if (in_array((int) $collection->id, $manageIds, true)): ?>
                         <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'edit', 'id' => $collection->id]) ?>" class="btn btn-outline-primary" title="<?php echo __('Edit') ?>">
                             <i class="fas fa-edit"></i>
                         </a>

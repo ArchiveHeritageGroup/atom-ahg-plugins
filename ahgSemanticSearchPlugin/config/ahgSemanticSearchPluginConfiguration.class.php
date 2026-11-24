@@ -39,6 +39,48 @@ class ahgSemanticSearchPluginConfiguration extends sfPluginConfiguration
 
         // Register routes
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
+
+        // Search history: nothing called AdvancedSearchService::recordSearch(),
+        // so the history page was always empty.
+        $this->dispatcher->connect('controller.change_action', [$this, 'recordSearchHistory']);
+    }
+
+    /**
+     * Records a signed-in user's search on the main browse pages. Visitors are
+     * not recorded, so crawlers cannot fill the table, and no IP address or
+     * browser details are stored. A failure here never affects the search.
+     */
+    public function recordSearchHistory(sfEvent $event)
+    {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $route = $event['module'].'/'.$event['action'];
+        if (!in_array($route, ['display/browse', 'informationobject/browse'], true)) {
+            return;
+        }
+        try {
+            $context = sfContext::getInstance();
+            $user = $context->getUser();
+            $request = $context->getRequest();
+            $query = trim((string) $request->getGetParameter('query', ''));
+            if (!$user->isAuthenticated() || '' === $query || !$request->isMethod('get')) {
+                return;
+            }
+            $done = true;
+            $params = array_filter((array) $request->getGetParameters(), static fn ($v) => is_scalar($v) && '' !== (string) $v);
+            unset($params['page'], $params['_csrf_token']);
+            (new \AtomFramework\Services\AdvancedSearchService())->recordSearch([
+                'user_id' => (int) $user->getAttribute('user_id'),
+                'session_id' => session_id() ?: null,
+                'search_query' => mb_substr($query, 0, 500),
+                'search_params' => $params,
+                'entity_type' => 'informationobject',
+            ]);
+        } catch (\Throwable $e) {
+            error_log('search_history.record_failed: '.$e->getMessage());
+        }
     }
 
     /**

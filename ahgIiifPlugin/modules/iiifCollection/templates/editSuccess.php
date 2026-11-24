@@ -27,6 +27,7 @@
 <div class="iiif-collection-form">
     <form method="post" action="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'update', 'id' => $collection->id]) ?>">
         <input type="hidden" name="id" value="<?php echo $collection->id ?>">
+        <?php echo \AtomFramework\Services\CsrfService::renderHiddenField() ?>
         
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">

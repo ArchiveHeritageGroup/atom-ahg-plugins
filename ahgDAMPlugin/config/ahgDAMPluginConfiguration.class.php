@@ -5,6 +5,9 @@ class ahgDAMPluginConfiguration extends sfPluginConfiguration
     public static $version = '1.2.0';
     public function initialize()
     {
+        // Remove this plugin's rows for a deleted description.
+        $this->dispatcher->connect('ahg.information_object.deleted', [$this, 'onDescriptionDeleted']);
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'dam';
@@ -38,5 +41,26 @@ class ahgDAMPluginConfiguration extends sfPluginConfiguration
         $reports = new \AtomFramework\Routing\RouteLoader('damReports');
         $reports->any('dam_reports', '/dam/reports', 'index');
         $reports->register($event->getSubject());
+    }
+
+    /**
+     * A description was deleted. Its watermark settings. The watermark log stays.
+     */
+    public function onDescriptionDeleted(sfEvent $event)
+    {
+        $id = (int) ($event['id'] ?? 0);
+        if ($id <= 0) {
+            return;
+        }
+        try {
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('object_watermark_setting')) {
+                \Illuminate\Database\Capsule\Manager::table('object_watermark_setting')->where('object_id', $id)->delete();
+            }
+            if (\Illuminate\Database\Capsule\Manager::schema()->hasTable('custom_watermark')) {
+                \Illuminate\Database\Capsule\Manager::table('custom_watermark')->where('object_id', $id)->delete();
+            }
+        } catch (\Throwable $e) {
+            error_log('ahgDAMPlugin.delete_cleanup_failed: '.$id.': '.$e->getMessage());
+        }
     }
 }

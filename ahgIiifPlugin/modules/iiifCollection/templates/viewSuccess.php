@@ -158,7 +158,7 @@ foreach ($collection->items as $item) {
             <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'manifest', 'slug' => $collection->slug]) ?>" class="btn btn-info w-100 mb-2" target="_blank">
                 <i class="fas fa-code me-2"></i><?php echo __('View IIIF JSON') ?>
             </a>
-            <?php if ($sf_user->isAuthenticated()): ?>
+            <?php if ($canManage): ?>
             <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'addItems', 'id' => $collection->id]) ?>" class="btn btn-success w-100 mb-2">
                 <i class="fas fa-plus me-2"></i><?php echo __('Add Items') ?>
             </a>
@@ -169,9 +169,10 @@ foreach ($collection->items as $item) {
                 <i class="fas fa-folder-plus me-2"></i><?php echo __('Create Subcollection') ?>
             </a>
             <hr>
-            <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'delete', 'id' => $collection->id]) ?>" class="btn btn-danger w-100" data-ahg-confirm="<?php echo __('Are you sure you want to delete this collection?') ?>">
-                <i class="fas fa-trash me-2"></i><?php echo __('Delete Collection') ?>
-            </a>
+            <form method="post" action="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'delete', 'id' => $collection->id]) ?>" data-ahg-confirm="<?php echo __('Are you sure you want to delete this collection?') ?>">
+              <?php echo \AtomFramework\Services\CsrfService::renderHiddenField() ?>
+              <button type="submit" class="btn btn-danger w-100"><i class="fas fa-trash me-2"></i><?php echo __('Delete Collection') ?></button>
+            </form>
             <?php endif ?>
         </div>
     </div>
@@ -283,7 +284,7 @@ foreach ($collection->items as $item) {
     <div class="card">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fas fa-images me-2"></i><?php echo __('Items') ?> (<?php echo count($collection->items) ?>)</h5>
-            <?php if ($sf_user->isAuthenticated() && $warningCount > 0): ?>
+            <?php if ($canManage && $warningCount > 0): ?>
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="hideProblematic" data-ahg-call="toggleProblematicItems" data-ahg-on="change" data-ahg-arg="this.checked">
                 <label class="form-check-label" for="hideProblematic"><?php echo __('Hide non-displayable') ?></label>
@@ -295,7 +296,7 @@ foreach ($collection->items as $item) {
             <div class="alert alert-info mb-0">
                 <i class="fas fa-info-circle me-2"></i>
                 <?php echo __('No items in this collection yet.') ?>
-                <?php if ($sf_user->isAuthenticated()): ?>
+                <?php if ($canManage): ?>
                 <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'addItems', 'id' => $collection->id]) ?>"><?php echo __('Add items') ?></a>
                 <?php endif ?>
             </div>
@@ -388,13 +389,11 @@ foreach ($collection->items as $item) {
                                     <i class="fas fa-code"></i>
                                 </a>
                                 <?php endif ?>
-                                <?php if ($sf_user->isAuthenticated()): ?>
-                                <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'removeItem', 'item_id' => $item->id, 'collection_id' => $collection->id]) ?>"
-                                   class="btn btn-sm btn-outline-danger"
-                                   data-ahg-confirm="<?php echo __('Remove this item from the collection?') ?>"
-                                   title="<?php echo __('Remove') ?>">
-                                    <i class="fas fa-times"></i>
-                                </a>
+                                <?php if ($canManage): ?>
+                                <form method="post" class="d-inline" action="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'removeItem', 'item_id' => $item->id, 'collection_id' => $collection->id]) ?>" data-ahg-confirm="<?php echo __('Remove this item from the collection?') ?>">
+                                    <?php echo \AtomFramework\Services\CsrfService::renderHiddenField() ?>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove') ?>"><i class="fas fa-times"></i></button>
+                                </form>
                                 <?php endif ?>
                             </td>
                         </tr>
@@ -407,10 +406,18 @@ foreach ($collection->items as $item) {
     </div>
 </div>
 
-<?php if ($sf_user->isAuthenticated()): ?>
+<?php if ($canManage): ?>
 <script src="/plugins/ahgCorePlugin/web/js/vendor/Sortable.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+    // Delete and remove are forms now; ask before they submit.
+    document.querySelectorAll('form[data-ahg-confirm]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (!window.confirm(form.dataset.ahgConfirm)) {
+                e.preventDefault();
+            }
+        });
+    });
     var tbody = document.querySelector('.sortable-items');
     if (tbody) {
         new Sortable(tbody, {
@@ -423,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 fetch('<?php echo url_for(['module' => 'iiifCollection', 'action' => 'reorder']) ?>', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': <?php echo json_encode(\AtomFramework\Services\CsrfService::generateToken()) ?>},
                     body: 'collection_id=<?php echo $collection->id ?>&item_ids[]=' + itemIds.join('&item_ids[]=')
                 });
             }

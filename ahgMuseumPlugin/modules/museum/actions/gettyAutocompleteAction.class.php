@@ -151,6 +151,8 @@ class museumGettyAutocompleteAction extends AhgController
 
         $context = stream_context_create([
             'http' => [
+                // Getty answers 403 to requests with no User-Agent.
+                'user_agent' => 'AHG-Extensions-for-AtoM (+https://www.atom-extensions.com)',
                 'method' => 'GET',
                 'timeout' => 15,
                 'header' => "Accept: application/sparql-results+json\r\n",
