@@ -323,9 +323,14 @@ class RicManageService
             return $slug ? "{$baseUrl}/{$slug}" : "{$baseUrl}/{$kind}/{$id}";
         };
 
+        // The level of description decides the RiC class, unless a RiC entity
+        // type was chosen for this record explicitly.
+        $explicit = DB::table('ric_record_meta')->where('object_id', $objectId)->exists();
+        $level = $this->levelInfo($objectId);
+        $class = $explicit ? 'rico:'.$meta['entity_type'] : $level['class'];
         $record = [
             '@id' => $uri($objectId),
-            '@type' => 'rico:'.$meta['entity_type'],
+            '@type' => $class,
             'rico:title' => $this->ioTitle($objectId, $culture),
         ];
         $nodes = [];
@@ -347,7 +352,8 @@ class RicManageService
                 $j->on('i.id', '=', 'io.id')->where('i.culture', '=', $culture);
             })
             ->where('io.id', $objectId)
-            ->select('io.identifier', 'io.repository_id', 'i.scope_and_content', 'i.archival_history')
+            ->select('io.identifier', 'io.repository_id', 'io.parent_id', 'io.lft', 'io.rgt',
+                'i.scope_and_content', 'i.archival_history', 'i.extent_and_medium')
             ->first();
         if ($io) {
             if (!empty($io->identifier)) {
@@ -359,22 +365,105 @@ class RicManageService
             if (!empty($io->archival_history)) {
                 $record['rico:history'] = $io->archival_history;
             }
-            $holder = $this->getRepositoryName($objectId, $culture);
-            if (!empty($io->repository_id) && null !== $holder) {
+            if (!empty($io->extent_and_medium)) {
+                $record['rico:hasExtent'] = $add([
+                    '@id' => $uri($objectId).'#extent',
+                    '@type' => 'rico:RecordResourceExtent',
+                    'rico:textualValue' => $io->extent_and_medium,
+                ]);
+            }
+
+            // The holder, inherited from the nearest ancestor that names one, as
+            // AtoM shows it on the record page.
+            $repoId = (int) $io->repository_id;
+            if (!$repoId && $io->lft) {
+                $repoId = (int) DB::table('information_object')
+                    ->where('lft', '<', $io->lft)->where('rgt', '>', $io->rgt)->whereNotNull('repository_id')
+                    ->orderByDesc('lft')->value('repository_id');
+            }
+            $holder = $repoId ? $this->actorName($repoId, $culture) : null;
+            if ($repoId && null !== $holder) {
                 $record['rico:hasOrHadHolder'] = $add([
-                    '@id' => $uri((int) $io->repository_id, 'repository'),
+                    '@id' => $uri($repoId, 'repository'),
                     '@type' => 'rico:CorporateBody',
                     'rico:name' => $holder,
                 ]);
+            }
+
+            // The parent description, when this caller may see it.
+            $parentId = (int) $io->parent_id;
+            if ($parentId && \QubitInformationObject::ROOT_ID !== $parentId && (!$canSee || $canSee($parentId))) {
+                $parentClass = $this->levelInfo($parentId)['class'];
+                $parent = $add([
+                    '@id' => $uri($parentId),
+                    '@type' => $parentClass,
+                    'rico:title' => $this->ioTitle($parentId, $culture),
+                ]);
+                if ('rico:RecordSet' === $parentClass) {
+                    $record['rico:isOrWasIncludedIn'] = $parent;
+                } elseif (!$explicit) {
+                    // Inside a single record (an item under an item) this is a
+                    // part of that record, not a member of a record set.
+                    $record['@type'] = 'rico:RecordPart';
+                    $record['rico:isOrWasConstituentOf'] = $parent;
+                }
+            }
+        }
+
+        if (isset($level['setType']) && 'rico:RecordSet' === $class) {
+            $record['rico:hasRecordSetType'] = $add([
+                '@id' => 'https://www.ica.org/standards/RiC/vocabularies/recordSetTypes#'.$level['setType'],
+                '@type' => 'rico:RecordSetType',
+                'rico:name' => $level['setType'],
+            ]);
+        }
+
+        // Creation dates and creators, from the record's creation events.
+        foreach (DB::table('event as e')
+            ->leftJoin('event_i18n as ei', function ($j) use ($culture) {
+                $j->on('ei.id', '=', 'e.id')->where('ei.culture', '=', $culture);
+            })
+            ->where('e.object_id', $objectId)->where('e.type_id', self::EVENT_CREATION)
+            ->get(['e.id', 'e.actor_id', 'e.start_date', 'e.end_date', 'ei.date']) as $ev) {
+            $expressed = trim((string) $ev->date);
+            if ('' !== $expressed || $ev->start_date) {
+                $date = ['@id' => "{$baseUrl}/event/{$ev->id}#date", '@type' => 'rico:Date'];
+                if ('' !== $expressed) {
+                    $date['rico:expressedDate'] = $expressed;
+                }
+                // The normalised value only when it agrees with what the page shows:
+                // some records carry placeholder start dates for display-only dates.
+                $start = $ev->start_date ? substr((string) $ev->start_date, 0, 4) : '';
+                if ('' !== $start && ('' === $expressed || false !== strpos($expressed, ltrim($start, '0')))) {
+                    $end = $ev->end_date ? substr((string) $ev->end_date, 0, 4) : $start;
+                    $date['rico:normalizedDateValue'] = $start === $end ? $start : "{$start}/{$end}";
+                }
+                $record['rico:hasCreationDate'][] = $add($date);
+            }
+            if ($ev->actor_id) {
+                $name = $this->actorName((int) $ev->actor_id, $culture);
+                if (null !== $name) {
+                    $etype = (int) DB::table('actor')->where('id', $ev->actor_id)->value('entity_type_id');
+                    $record['rico:hasCreator'][] = $add([
+                        '@id' => $uri((int) $ev->actor_id, 'actor'),
+                        '@type' => [131 => 'rico:CorporateBody', 132 => 'rico:Person', 133 => 'rico:Family'][$etype] ?? 'rico:Agent',
+                        'rico:name' => $name,
+                    ]);
+                }
             }
         }
 
         // Access points become linked entities, not text.
         $terms = [
             self::TAXONOMY_SUBJECT => ['rico:hasOrHadSubject', 'skos:Concept', 'skos:prefLabel'],
-            self::TAXONOMY_PLACE => ['rico:hasOrHadSpatialCoverage', 'rico:Place', 'rico:name'],
+            // Place access points are subjects in the mapping (hasOrHadSpatialCoverage is not RiC-O).
+            self::TAXONOMY_PLACE => ['rico:hasOrHadSubject', 'rico:Place', 'rico:name'],
             self::TAXONOMY_GENRE => ['rico:hasDocumentaryFormType', 'rico:DocumentaryFormType', 'rico:name'],
         ];
+        // A documentary form type applies to a Record or RecordPart, not a RecordSet.
+        if ('rico:RecordSet' === $class) {
+            unset($terms[self::TAXONOMY_GENRE]);
+        }
         foreach ($terms as $taxonomyId => [$predicate, $type, $label]) {
             foreach ($this->getAccessPointTerms($objectId, $taxonomyId, $culture) as $t) {
                 $record[$predicate][] = $add(['@id' => $uri((int) $t->id, 'term'), '@type' => $type, $label => (string) $t->name]);
@@ -417,6 +506,36 @@ class RicManageService
             ],
             '@graph' => array_values(array_merge([$record['@id'] => $record], $nodes)),
         ];
+    }
+
+    public const EVENT_CREATION = 111;
+
+    /** Levels that describe a group of records, and their RiC record set type. */
+    private const SET_LEVELS = [
+        'fonds' => 'Fonds', 'subfonds' => null, 'sub-fonds' => null, 'collection' => 'Collection',
+        'series' => 'Series', 'subseries' => null, 'sub-series' => null, 'file' => 'File', 'record group' => null,
+    ];
+
+    /** RiC class (and record set type) for a description's level. @return array{class:string, setType?:string} */
+    public function levelInfo(int $objectId): array
+    {
+        $name = strtolower((string) DB::table('information_object as io')
+            ->join('term_i18n as t', 't.id', '=', 'io.level_of_description_id')
+            ->where('io.id', $objectId)->where('t.culture', 'en')->value('t.name'));
+        if (array_key_exists($name, self::SET_LEVELS)) {
+            return null === self::SET_LEVELS[$name] ? ['class' => 'rico:RecordSet'] : ['class' => 'rico:RecordSet', 'setType' => self::SET_LEVELS[$name]];
+        }
+
+        return ['class' => 'part' === $name ? 'rico:RecordPart' : 'rico:Record'];
+    }
+
+    /** An actor's authorised name in this culture, or in any culture. */
+    public function actorName(int $actorId, string $culture = 'en'): ?string
+    {
+        $name = DB::table('actor_i18n')->where('id', $actorId)->where('culture', $culture)->value('authorized_form_of_name')
+            ?: DB::table('actor_i18n')->where('id', $actorId)->value('authorized_form_of_name');
+
+        return $name ? (string) $name : null;
     }
 
     /** Access-point terms (id and name) for a record in a taxonomy. @return array<int,object> */
