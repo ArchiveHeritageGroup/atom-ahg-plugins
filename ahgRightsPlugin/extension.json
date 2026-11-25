@@ -47,7 +47,6 @@
     ],
     "display_badges": [],
     "tables": [
-        "object_creative_commons",
         "rights_cc_license",
         "rights_cc_license_i18n",
         "rights_derivative_log",

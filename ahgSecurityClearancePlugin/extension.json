@@ -36,7 +36,6 @@
         "object_classification_history",
         "object_compartment",
         "object_declassification_schedule",
-        "security_classification_object",
         "user_compartment_access",
         "ahg_webauthn_credential"
     ]

@@ -25,10 +25,7 @@
         "atom_landing_page",
         "atom_landing_page_block",
         "atom_landing_page_version",
-        "atom_landing_page_audit_log",
-        "atom_landing_block_type",
-        "atom_landing_block",
-        "atom_landing_page_audit"
+        "atom_landing_page_audit_log"
     ],
     "shared_tables": [],
     "helpers": [],

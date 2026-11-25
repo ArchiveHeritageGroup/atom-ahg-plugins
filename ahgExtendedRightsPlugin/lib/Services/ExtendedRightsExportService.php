@@ -102,15 +102,17 @@ class ExtendedRightsExportService
     {
         try {
             return DB::table('rights_object_tk_label')
-                ->join('rights_tk_label', DB::raw('rights_tk_label.id'), '=', DB::raw('rights_object_rights_tk_label.tk_label_id'))
-                ->leftJoin('tk_label_i18n', function ($join) {
-                    $join->on(DB::raw('tk_label_i18n.tk_label_id'), '=', DB::raw('rights_tk_label.id'))
-                         ->where(DB::raw('tk_label_i18n.culture'), '=', $this->culture);
+                // Joined on the real table and key names; the old names made this
+                // fail silently, so the export always showed no TK labels.
+                ->join('rights_tk_label', DB::raw('rights_tk_label.id'), '=', DB::raw('rights_object_tk_label.tk_label_id'))
+                ->leftJoin('rights_tk_label_i18n', function ($join) {
+                    $join->on(DB::raw('rights_tk_label_i18n.id'), '=', DB::raw('rights_tk_label.id'))
+                         ->where(DB::raw('rights_tk_label_i18n.culture'), '=', $this->culture);
                 })
-                ->groupBy(DB::raw('rights_tk_label.id'), DB::raw('rights_tk_label.code'), DB::raw('tk_label_i18n.name'))
+                ->groupBy(DB::raw('rights_tk_label.id'), DB::raw('rights_tk_label.code'), DB::raw('rights_tk_label_i18n.name'))
                 ->select([
                     DB::raw('rights_tk_label.code'),
-                    DB::raw('tk_label_i18n.name'),
+                    DB::raw('rights_tk_label_i18n.name'),
                     DB::raw('COUNT(*) as count')
                 ])
                 ->get()

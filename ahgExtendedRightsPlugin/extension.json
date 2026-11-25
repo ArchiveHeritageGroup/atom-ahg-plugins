@@ -34,10 +34,6 @@
     "tables": [
         "object_rights_holder",
         "object_rights_statement",
-        "tk_label_category",
-        "tk_label",
-        "tk_label_category_i18n",
-        "tk_label_i18n",
         "extended_rights",
         "extended_rights_batch_log",
         "extended_rights_i18n",

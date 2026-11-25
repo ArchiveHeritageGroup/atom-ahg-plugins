@@ -26,7 +26,6 @@
         "ahgCorePlugin"
     ],
     "tables": [
-        "object_tk_label",
         "icip_community",
         "icip_consent",
         "icip_cultural_notice_type",

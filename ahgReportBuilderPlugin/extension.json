@@ -18,7 +18,6 @@
     ],
     "tables": [
         "access_audit_log",
-        "gallery_exhibition",
         "object_provenance",
         "custom_report",
         "report_schedule",

@@ -21,8 +21,6 @@
         ]
     },
     "tables": [
-        "gallery_exhibition_checklist",
-        "gallery_exhibition_object",
         "gallery_venue",
         "gallery_artist",
         "gallery_artist_bibliography",
