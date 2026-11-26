@@ -98,7 +98,7 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
 
         <?php if (!empty($ricPlaces)): ?>
             <div class="row mb-2">
-                <div class="col-md-3 fw-bold"><?php echo $esc(__('Places')); ?> <span class="badge bg-light text-dark">rico:hasOrHadSpatialCoverage</span></div>
+                <div class="col-md-3 fw-bold"><?php echo $esc(__('Places')); ?> <span class="badge bg-light text-dark">rico:hasOrHadSubject</span></div>
                 <div class="col-md-9"><?php echo $esc(implode(', ', $ricPlaces)); ?></div>
             </div>
         <?php endif; ?>
@@ -112,7 +112,7 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
 
         <?php if (!empty($ricNames)): ?>
             <div class="row mb-2">
-                <div class="col-md-3 fw-bold"><?php echo $esc(__('Name access points')); ?> <span class="badge bg-light text-dark">rico:isAssociatedWith</span></div>
+                <div class="col-md-3 fw-bold"><?php echo $esc(__('Name access points')); ?> <span class="badge bg-light text-dark">rico:hasOrHadSubject</span></div>
                 <div class="col-md-9"><?php echo $esc(implode(', ', $ricNames)); ?></div>
             </div>
         <?php endif; ?>

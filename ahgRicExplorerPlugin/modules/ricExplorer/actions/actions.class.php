@@ -154,7 +154,8 @@ class ricExplorerActions extends AhgController
                 ->where('io.id', $record->parent_id)
                 ->select('io.id', 'ioi.title')
                 ->first();
-            if ($parent) {
+            // The parent may be a draft or restricted: name it only if this user may see it.
+            if ($parent && isset(KnowledgeGraphService::forUser($this->getUser())->visibleRecordIds([(int) $parent->id])[(int) $parent->id])) {
                 $parentUri = 'record-' . $parent->id;
                 if (!isset($nodeIndex[$parentUri])) {
                     $nodeIndex[$parentUri] = true;

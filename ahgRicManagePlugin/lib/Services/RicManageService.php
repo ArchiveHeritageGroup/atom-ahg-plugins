@@ -410,7 +410,11 @@ class RicManageService
             }
         }
 
-        if (isset($level['setType']) && 'rico:RecordSet' === $class) {
+        $record = $this->addRegulation($record, $objectId, $culture, $uri($objectId));
+
+        // On the node's final type: a level-Fonds description inside a single record
+        // goes out as a RecordPart, and a record set type does not apply to one.
+        if (isset($level['setType']) && 'rico:RecordSet' === $record['@type']) {
             $record['rico:hasRecordSetType'] = $add([
                 '@id' => 'https://www.ica.org/standards/RiC/vocabularies/recordSetTypes#'.$level['setType'],
                 '@type' => 'rico:RecordSetType',
@@ -461,7 +465,7 @@ class RicManageService
             self::TAXONOMY_GENRE => ['rico:hasDocumentaryFormType', 'rico:DocumentaryFormType', 'rico:name'],
         ];
         // A documentary form type applies to a Record or RecordPart, not a RecordSet.
-        if ('rico:RecordSet' === $class) {
+        if ('rico:RecordSet' === $record['@type']) {
             unset($terms[self::TAXONOMY_GENRE]);
         }
         foreach ($terms as $taxonomyId => [$predicate, $type, $label]) {
@@ -471,7 +475,8 @@ class RicManageService
         }
         $agentTypes = [131 => 'rico:CorporateBody', 132 => 'rico:Person', 133 => 'rico:Family'];
         foreach ($this->getNameAccessPointAgents($objectId, $culture) as $a) {
-            $record['rico:isAssociatedWith'][] = $add([
+            // A name access point is a subject of the record (rico:isAssociatedWith is not RiC-O 1.1).
+            $record['rico:hasOrHadSubject'][] = $add([
                 '@id' => $uri((int) $a->id, 'actor'),
                 '@type' => $agentTypes[(int) $a->entity_type_id] ?? 'rico:Agent',
                 'rico:name' => (string) $a->name,
@@ -503,9 +508,81 @@ class RicManageService
                 'rico' => 'https://www.ica.org/standards/RiC/ontology#',
                 'rdfs' => 'http://www.w3.org/2000/01/rdf-schema#',
                 'skos' => 'http://www.w3.org/2004/02/skos/core#',
+                'openricx' => 'https://openric.org/ns/ext/v1#',
             ],
             '@graph' => array_values(array_merge([$record['@id'] => $record], $nodes)),
         ];
+    }
+
+    /**
+     * The rules a record is under, as OpenRiC exports them: access and reproduction
+     * conditions as text, the security classification and ICIP access restrictions
+     * as rico:Rule nodes, and a flag when the record holds personal data. Each
+     * source table is optional, so an instance without its plugin is unaffected.
+     * The export is only served to a caller allowed to read the record.
+     */
+    private function addRegulation(array $record, int $objectId, string $culture, string $recordUri): array
+    {
+        $schema = DB::schema();
+        $notes = DB::table('information_object_i18n')->where('id', $objectId)->where('culture', $culture)
+            ->first(['access_conditions', 'reproduction_conditions']);
+        if (!empty($notes->access_conditions)) {
+            $record['rico:conditionsOfAccess'] = $notes->access_conditions;
+        }
+        if (!empty($notes->reproduction_conditions)) {
+            $record['rico:conditionsOfUse'] = $notes->reproduction_conditions;
+        }
+
+        $rules = [];
+        if ($schema->hasTable('object_security_classification') && $schema->hasTable('security_classification')) {
+            $sc = DB::table('object_security_classification as o')
+                ->join('security_classification as c', 'c.id', '=', 'o.classification_id')
+                ->where('o.object_id', $objectId)->where('o.active', 1)
+                ->first(['c.code', 'c.name']);
+            if ($sc) {
+                $rules[] = [
+                    '@id' => $recordUri.'#security-classification',
+                    '@type' => 'rico:Rule',
+                    'rico:hasOrHadRuleType' => ['@id' => 'https://openric.org/vocab/rule-type/security-classification'],
+                    'openricx:securityLevel' => (string) $sc->name,
+                    'openricx:securityLevelCode' => (string) $sc->code,
+                ];
+            }
+        }
+        if ($schema->hasTable('icip_access_restriction')) {
+            foreach (DB::table('icip_access_restriction')->where('information_object_id', $objectId)->orderBy('id')->get() as $r) {
+                $rule = [
+                    '@id' => $recordUri.'#access-restriction-'.$r->id,
+                    '@type' => 'rico:Rule',
+                    'rico:hasOrHadRuleType' => ['@id' => 'https://openric.org/vocab/rule-type/access-restriction'],
+                    'openricx:restrictionType' => (string) $r->restriction_type,
+                    'openricx:appliesToDescendants' => (bool) $r->applies_to_descendants,
+                ];
+                if (!empty($r->custom_restriction_text)) {
+                    $rule['openricx:customText'] = $r->custom_restriction_text;
+                }
+                if (!empty($r->start_date)) {
+                    $rule['rico:beginningDate'] = (string) $r->start_date;
+                }
+                if (!empty($r->end_date)) {
+                    $rule['rico:endDate'] = (string) $r->end_date;
+                }
+                $rules[] = $rule;
+            }
+        }
+        if ($rules) {
+            $record['rico:isOrWasRegulatedBy'] = $rules;
+        }
+
+        // PSIS has no personal-data register; a redaction or a PII scan hit on the
+        // record is what marks it as holding personal data.
+        $personal = ($schema->hasTable('privacy_visual_redaction') && DB::table('privacy_visual_redaction')->where('object_id', $objectId)->exists())
+            || ($schema->hasTable('ahg_pii_scan_report') && DB::table('ahg_pii_scan_report')->where('information_object_id', $objectId)->where('hits_total', '>', 0)->exists());
+        if ($personal) {
+            $record['openricx:containsPersonalData'] = true;
+        }
+
+        return $record;
     }
 
     public const EVENT_CREATION = 111;

@@ -1263,21 +1263,21 @@
   // badge carries a "via ..." note rather than pretending it is a flat property.
   (function () {
     var byFor = {
-      identifier: 'rico:hasOrHadIdentifier',
-      title: 'rico:name',
-      levelOfDescriptionId: 'rico:hasRecordSetType',
-      extentAndMedium: 'rico:hasExtent | via Instantiation',
+      identifier: 'rico:identifier',
+      title: 'rico:title',
+      levelOfDescriptionId: 'RiC class | rico:hasRecordSetType for a record set',
+      extentAndMedium: 'rico:hasExtent | RecordResourceExtent',
       repositoryName: 'rico:hasOrHadHolder',
       archivalHistory: 'rico:history',
       acquisition: 'rico:hasOrHadAcquisitionActivity',
-      scopeAndContent: 'rico:scope',
+      scopeAndContent: 'rico:scopeAndContent',
       appraisal: 'rico:hasOrHadAppraisalActivity',
       accruals: 'rico:accrualStatus',
       arrangement: 'rico:structure',
       accessConditions: 'rico:conditionsOfAccess',
       reproductionConditions: 'rico:conditionsOfUse',
       languageNotes: 'rico:descriptiveNote',
-      physicalCharacteristics: 'rico:physicalCharacteristics | via Instantiation',
+      physicalCharacteristics: 'rico:physicalCharacteristicsNote',
       findingAids: 'rico:hasInstantiation | finding aid',
       locationOfOriginals: 'rico:hasOrHadInstantiation',
       locationOfCopies: 'rico:hasDerivedInstantiation',
@@ -1285,7 +1285,7 @@
     };
     var byText = {
       'Alternative identifier(s)': 'rico:hasOrHadIdentifier',
-      'Date(s)': 'rico:hasBeginningDate / rico:hasEndDate | via Activity',
+      'Date(s)': 'rico:hasCreationDate | rico:Date',
       'Name of creator(s)': 'rico:hasCreator',
       'Language(s) of material': 'rico:hasOrHadLanguage',
       'Script(s) of material': 'rico:hasOrHadScript | via Instantiation'

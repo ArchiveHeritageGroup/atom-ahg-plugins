@@ -96,7 +96,8 @@ class ricExplorerGetDataAction extends AhgController
     /** Takes out record nodes this user may not see, and the edges that touch them. */
     private function visibleGraph(array $graph): array
     {
-        $recordId = static fn ($uri) => preg_match('#/(?:recordset|record)/(\d+)$#', (string) $uri, $m) ? (int) $m[1] : 0;
+        // Every record class the extractor mints: recordset, record and recordpart.
+        $recordId = static fn ($uri) => preg_match('#/(?:recordset|recordpart|record)/(\d+)$#', (string) $uri, $m) ? (int) $m[1] : 0;
         $ids = array_values(array_filter(array_map(static fn ($n) => $recordId($n['id'] ?? ''), $graph['nodes'] ?? [])));
 
         try {
@@ -119,6 +120,19 @@ class ricExplorerGetDataAction extends AhgController
             $nodes[] = $node;
         }
         $edges = array_values(array_filter($graph['edges'] ?? [], static fn ($e) => !isset($removed[(string) ($e['source'] ?? '')]) && !isset($removed[(string) ($e['target'] ?? '')])));
+
+        // A node that was linked only to removed records (a hidden record's file,
+        // say) would still show its label on its own; drop it too.
+        $linkedBefore = $linkedAfter = [];
+        foreach ($graph['edges'] ?? [] as $e) {
+            $linkedBefore[(string) ($e['source'] ?? '')] = $linkedBefore[(string) ($e['target'] ?? '')] = true;
+        }
+        foreach ($edges as $e) {
+            $linkedAfter[(string) ($e['source'] ?? '')] = $linkedAfter[(string) ($e['target'] ?? '')] = true;
+        }
+        if ($removed) {
+            $nodes = array_values(array_filter($nodes, static fn ($n) => !isset($linkedBefore[(string) ($n['id'] ?? '')]) || isset($linkedAfter[(string) ($n['id'] ?? '')])));
+        }
 
         return ['nodes' => $nodes, 'edges' => $edges] + $graph;
     }

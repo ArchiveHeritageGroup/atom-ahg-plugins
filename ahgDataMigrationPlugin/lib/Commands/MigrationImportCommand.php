@@ -479,7 +479,10 @@ class MigrationImportCommand extends BaseCommand
     protected function exportToCsv(array $transformed, ?string $outputFile, string $targetType): int
     {
         if (empty($outputFile)) {
-            $outputFile = '/tmp/atom_export_' . date('Ymd_His') . '.csv';
+            // A unique file only this user can read, not a guessable name in /tmp.
+            $tmp = tempnam(sys_get_temp_dir(), 'atom_export_');
+            $outputFile = $tmp . '.csv';
+            rename($tmp, $outputFile);
         }
 
         $allFields = [];

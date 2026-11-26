@@ -46,8 +46,12 @@ class PaxParser
         }
 
         // Create temp directory
-        $this->extractPath = sys_get_temp_dir() . '/pax_' . uniqid();
-        mkdir($this->extractPath, 0755, true);
+        // An unguessable folder only this user can read; mkdir fails rather than
+        // reuse a path someone else created.
+        $this->extractPath = sys_get_temp_dir() . '/pax_' . bin2hex(random_bytes(12));
+        if (!mkdir($this->extractPath, 0700)) {
+            throw new \RuntimeException('Cannot create a private extraction folder');
+        }
 
         $zip->extractTo($this->extractPath);
         $zip->close();

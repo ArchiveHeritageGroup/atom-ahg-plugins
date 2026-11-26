@@ -45,7 +45,6 @@ class ahgMuseumPluginConfiguration extends sfPluginConfiguration
         ));
 
         $museum = new \AtomFramework\Routing\RouteLoader('museum');
-        $museum->any('museum_browse', '/museum/browse', 'browse');
         $museum->any('museum_add', '/museum/add', 'add');
         $museum->any('museum_edit', '/museum/edit/:slug', 'edit', ['slug' => '[a-zA-Z0-9_-]+']);
         $museum->any('museum_vocabulary', '/museum/vocabulary', 'vocabulary');

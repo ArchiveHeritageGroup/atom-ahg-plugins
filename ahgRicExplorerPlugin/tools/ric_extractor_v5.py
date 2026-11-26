@@ -237,13 +237,16 @@ class RiCExtractor:
                 h.id, h.parent_id, h.identifier, h.repository_id, h.lft, h.rgt,
                 ioi.title, ioi.scope_and_content, ioi.arrangement,
                 ioi.extent_and_medium, ioi.archival_history, ioi.acquisition,
-                ioi.appraisal, ioi.accruals, ioi.physical_characteristics,
+                ioi.appraisal, ioi.accruals, ioi.physical_characteristics, ioi.access_conditions,
                 ioi.finding_aids, ioi.location_of_originals, ioi.location_of_copies,
                 ioi.related_units_of_description, ioi.rules,
                 ti.name as level_of_description, h.source_culture
             FROM hierarchy h
             JOIN information_object_i18n ioi ON h.id = ioi.id 
                 AND ioi.culture = COALESCE(h.source_culture, 'en')
+            -- Published descriptions only (publication status type 158, published 160):
+            -- drafts must not reach the triplestore.
+            JOIN status st ON st.object_id = h.id AND st.type_id = 158 AND st.status_id = 160
             LEFT JOIN term_i18n ti ON h.level_of_description_id = ti.id AND ti.culture = 'en'
         """
         self.cursor.execute(query, (fonds_id,))
@@ -261,7 +264,8 @@ class RiCExtractor:
                 'rico:arrangement': row['arrangement'],
                 'rico:extentAndMedium': row['extent_and_medium'],
                 'rico:history': row['archival_history'],
-                'rico:conditionsOfAccess': row['physical_characteristics'],
+                'rico:conditionsOfAccess': row['access_conditions'],
+                'rico:physicalCharacteristicsNote': row['physical_characteristics'],
                 'rico:findingAids': row['finding_aids'],
                 '_parent_id': row['parent_id'],
                 '_repository_id': row['repository_id'],
@@ -675,7 +679,12 @@ class RiCExtractor:
                 if row['description']:
                     function['rico:descriptiveNote'] = row['description']
                 if row['classification']:
-                    function['rico:classification'] = row['classification']
+                    # RiC-O 1.1: a function's classification is its activity type
+                    # (rico:classification belongs to record resources).
+                    function['rico:hasActivityType'] = {
+                        '@type': 'rico:ActivityType',
+                        'rico:name': row['classification'],
+                    }
                 if row['history']:
                     function['rico:history'] = row['history']
                 if row['legislation']:
@@ -716,7 +725,7 @@ class RiCExtractor:
                 self.relations.append({
                     'from': agent['@id'],
                     'to': mandate['@id'],
-                    'predicate': 'rico:isOrWasRegulatedBy',
+                    'predicate': 'rico:authorizedBy',
                 })
     
     def _extract_repository(self, fonds_id: int):
