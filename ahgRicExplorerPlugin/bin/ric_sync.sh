@@ -37,7 +37,7 @@ LOG_FILE="${LOG_FILE:-/var/log/ric_sync.log}"
 
 export ATOM_DB_HOST="${ATOM_DB_HOST:-localhost}"
 export ATOM_DB_USER="${ATOM_DB_USER:-root}"
-export ATOM_DB_PASSWORD="${ATOM_DB_PASSWORD:-Merlot@123}"
+export ATOM_DB_PASSWORD="${ATOM_DB_PASSWORD:?set ATOM_DB_PASSWORD (the AtoM database password)}"
 export ATOM_DB_NAME="${ATOM_DB_NAME:-archive}"
 export RIC_BASE_URI="${RIC_BASE_URI:-https://archives.theahg.co.za/ric}"
 export ATOM_INSTANCE_ID="${ATOM_INSTANCE_ID:-atom-psis}"

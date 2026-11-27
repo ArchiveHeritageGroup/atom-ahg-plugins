@@ -6,7 +6,7 @@ import { test, expect, type Page } from '@playwright/test';
  * ChainedAuditWriter and from the CLI (`php symfony audit:chain`).
  */
 const ADMIN_EMAIL = process.env.PSIS_USER || 'johan@theahg.co.za';
-const ADMIN_PASSWORD = process.env.PSIS_PASS || 'Merlot@123';
+const ADMIN_PASSWORD = process.env.PSIS_PASS ?? '';
 
 async function loginAsAdmin(page: Page) {
   await page.goto('/user/login', { waitUntil: 'domcontentloaded' });

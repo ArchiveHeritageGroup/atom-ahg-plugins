@@ -21,7 +21,7 @@ const SHOTS = join(process.cwd(), 'screenshots');
 mkdirSync(SHOTS, { recursive: true });
 
 const ADMIN_EMAIL = 'johan@theahg.co.za';
-const ADMIN_PASSWORD = 'Merlot@123';
+const ADMIN_PASSWORD = process.env.PSIS_PASS ?? '';
 
 /** Slug of a known-publicly-accessible IO for record-level tests. */
 const DEMO_IO_SLUG = 'mobrey-family-archive';

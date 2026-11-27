@@ -145,7 +145,7 @@ test('Admin page — WCAG AA audit (authenticated)', async ({ page }) => {
   await page.goto('/user/login', { waitUntil: 'domcontentloaded' });
 
   await page.locator('input[type="email"][name="email"]').fill('johan@theahg.co.za');
-  await page.locator('input[type="password"][required]').fill('Merlot@123');
+  await page.locator('input[type="password"][required]').fill(process.env.PSIS_PASS ?? '');
   await page.locator('button[type="submit"].atom-btn-outline-success, button[type="submit"]').last().click();
   await page.waitForLoadState('domcontentloaded');
 

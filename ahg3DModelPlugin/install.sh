@@ -16,7 +16,7 @@ FRAMEWORK_DIR="$ATOM_DIR/atom-framework"
 UPLOAD_DIR="$ATOM_DIR/uploads/3d"
 WEB_USER="www-data"
 MYSQL_USER="root"
-MYSQL_PASS="Merlot@123"
+MYSQL_PASS="${MYSQL_PASS:-$(php -r '$c=include "'"$ATOM_DIR"'/config/config.php"; echo $c["all"]["propel"]["param"]["password"] ?? "";' 2>/dev/null)}"
 MYSQL_DB="archive"
 
 echo "=============================================="

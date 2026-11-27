@@ -22,7 +22,7 @@ import { test, expect, type Page } from '@playwright/test';
 // run survives credential rotation:
 //   PSIS_USER='johan@theahg.co.za' PSIS_PASS='…' npx playwright test tests/webauthn-mfa.spec.ts
 const ADMIN_EMAIL = process.env.PSIS_USER || 'johan@theahg.co.za';
-const ADMIN_PASSWORD = process.env.PSIS_PASS || 'Merlot@123';
+const ADMIN_PASSWORD = process.env.PSIS_PASS ?? '';
 const MANAGE_URL = '/security/2fa/webauthn';
 
 async function loginAsAdmin(page: Page) {

@@ -1687,7 +1687,7 @@ def main():
     db_config = {
         'host': os.environ.get('ATOM_DB_HOST', 'localhost'),
         'user': os.environ.get('ATOM_DB_USER', 'root'),
-        'password': os.environ.get('ATOM_DB_PASSWORD', 'Merlot@123'),
+        'password': os.environ['ATOM_DB_PASSWORD'],
         'database': os.environ.get('ATOM_DB_NAME', 'archive'),
     }
     
