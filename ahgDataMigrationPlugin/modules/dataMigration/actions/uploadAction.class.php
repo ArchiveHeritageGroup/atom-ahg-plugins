@@ -49,6 +49,15 @@ class dataMigrationUploadAction extends AhgController
 
         $filename = $file['name'];
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+        // Only the formats the importer reads (the form's accept list, plus the
+        // text and MARC variants it parses). Anything else is refused before it is saved.
+        $allowed = ['csv', 'tsv', 'txt', 'xls', 'xlsx', 'xml', 'json', 'jsonl', 'opex', 'pax', 'zip', 'mrc', 'marc'];
+        if (!in_array($ext, $allowed, true)) {
+            $this->getUser()->setFlash('error', 'This file type cannot be imported. Use CSV, Excel, XML, JSON, OPEX, PAX, MARC or ZIP.');
+            $this->redirect(['module' => 'dataMigration', 'action' => 'index']);
+        }
+
         $tempFile = $uploadDir . '/' . uniqid('import_') . '.' . $ext;
 
         if (!move_uploaded_file($file['tmp_name'], $tempFile)) {
